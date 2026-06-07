@@ -30,7 +30,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { daysBetween } from './dateUtils.js';
-import { productByKey } from '../data/brands.js';
+import { productByKey, PCV_MIN_AGE_M } from '../data/brands.js';
 
 const Y18_MONTHS = 216;
 
@@ -56,6 +56,11 @@ function fmtMinAge(minAgeM) {
   if (minAgeM >= 12) {
     const y = minAgeM / 12;
     return `${y} year${y === 1 ? '' : 's'}`;
+  }
+  // Sub-2-month minimums (e.g. the 6-week PCV floor) read better in weeks.
+  if (minAgeM < 2) {
+    const w = Math.round((minAgeM * 30.4375) / 7);
+    return `${w} week${w === 1 ? '' : 's'}`;
   }
   return `${minAgeM} month${minAgeM === 1 ? '' : 's'}`;
 }
@@ -91,7 +96,7 @@ function validateOnePCV(dose, ageMonths, today) {
   }
 
   // Min-age check.
-  const minAgeM = prod?.minAgeM ?? 2; // unknown product → permissive (≥6wk ~ 2mo)
+  const minAgeM = prod?.minAgeM ?? PCV_MIN_AGE_M; // unknown product → permissive (ACIP 6wk)
   if (!dose.date) {
     // Dateless: current age is an upper bound on age at administration.
     if (ageMonths < minAgeM) {

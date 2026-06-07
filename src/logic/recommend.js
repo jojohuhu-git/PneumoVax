@@ -68,7 +68,10 @@ function collectRefs(riskIds, defaults) {
 
 // ── PCV history summary helpers ───────────────────────────────────────────
 // `pcvDoses` here is the EFFECTIVE list (PCV7 already excluded by validate.js).
-function summarizePcv(pcvDoses) {
+// `am`/`today` let us bucket each dated dose by the age it was given — matching
+// the age-band model CDC PneumoRecs uses (before 12mo / 12–23mo / 24–71mo / ≥6y).
+// Undated doses can't be banded; they're counted in `undated` and the total only.
+function summarizePcv(pcvDoses, am = 0, today = null) {
   const products = pcvDoses.map((d) => d.product).filter(Boolean);
   const has = (k) => products.includes(k);
   const hasPCV20 = has('PCV20');
@@ -79,12 +82,40 @@ function summarizePcv(pcvDoses) {
   const includesCompleting = hasPCV20 || hasPCV21;
   // The most recent dose's date (for interval anchoring).
   const lastDated = [...pcvDoses].reverse().find((d) => d.date) || null;
+
+  // Age-banded counts (months at administration), from dated doses only.
+  const band = { before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
+  for (const d of pcvDoses) {
+    if (!d.date || !today) { band.undated += 1; continue; }
+    const ageAtDose = am - daysBetween(d.date, today) / 30.4375;
+    if (ageAtDose < M.m12) band.before12 += 1;
+    else if (ageAtDose < M.m24) band.m12to23 += 1;
+    else if (ageAtDose < M.m72) band.m24to71 += 1;
+    else band.ge72 += 1;
+  }
+  // Doses "by 24 months" (p2016 Table 4 rows 1/2 split). Undated doses are folded
+  // in here — an undated historical dose is assumed to be an infant dose.
+  band.before24 = band.before12 + band.m12to23 + band.undated;
+  // Doses given at/after 24 months (progress toward the at-risk 2-dose catch-up).
+  // Dated only — we never ASSUME an undated dose was a ≥24mo catch-up dose.
+  band.ge24 = band.m24to71 + band.ge72;
+
+  // A completing dose (PCV20/PCV21) that we CANNOT prove was given before 24mo —
+  // i.e. undated, or dated at ≥24mo. Used by the healthy-child completeness check:
+  // a single PCV20 dated in infancy does NOT complete (case P09), but an undated
+  // one gets the benefit of the doubt (preserves prior behavior).
+  const hasUndatedCompleting = pcvDoses.some(
+    (d) => (d.product === 'PCV20' || d.product === 'PCV21') && !d.date,
+  );
+
   return {
     count: pcvDoses.length,
     products,
     hasPCV20, hasPCV21, hasPCV15, hasPCV13,
     includesCompleting,
+    hasUndatedCompleting,
     lastDate: lastDated?.date || null,
+    band,
   };
 }
 
@@ -173,29 +204,24 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   const refs = ['cdcChildPneumo', 'p2016', 'cdcCatchupJobAid'];
   const prior = pcv.count;
   const anchor = pcv.lastDate;
+  const b = pcv.band;
 
-  // A completed schedule (incl. all-PCV13) by 24mo → complete (no additional).
-  // We approximate "completed any PCV schedule by 24mo" as ≥4 PCV doses, OR a
-  // dose given at ≥12mo with ≥3 prior (the routine booster). Conservatively, if
-  // the child already has ≥1 PCV20, complete.
-  if (pcv.includesCompleting) {
-    return [rec({
-      vaccine: 'PCV', status: 'complete',
-      doseLabel: 'PCV series complete (includes PCV20)',
-      note: 'A pneumococcal series that includes PCV20 is complete — no PPSV23 is needed.',
-      refs,
-    })];
-  }
+  // Completeness for a HEALTHY child is age-band driven, NOT "has any PCV20."
+  // A single PCV20 given in infancy does NOT complete the series (that shortcut
+  // is an ADULT rule — verified against CDC PneumoRecs, case P09). A healthy
+  // 24–59mo child is complete only when EITHER:
+  //   • the full infant series was finished (≥4 counting doses incl. a ≥12mo booster), OR
+  //   • a catch-up dose was given at ≥24mo (the single 24–59mo catch-up dose suffices).
+  const completedInfantSeries = prior >= 4 && (b.m12to23 >= 1 || b.undated >= 1);
+  const caughtUpAt24mo = b.ge24 >= 1;
 
   // 24–59 months
   if (am < M.m60) {
-    // "Completed any PCV schedule by 24mo" → no additional doses. Modeled as
-    // ≥4 counting doses (full infant series). Otherwise 1 catch-up dose.
-    if (prior >= 4) {
+    if (completedInfantSeries || caughtUpAt24mo || pcv.hasUndatedCompleting) {
       return [rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: 'PCV series complete',
-        note: 'Healthy child 24–59 months who completed a PCV schedule by 24 months — no additional doses needed.',
+        note: 'Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed. (A series that includes PCV20 also needs no PPSV23.)',
         refs,
       })];
     }
@@ -243,32 +269,35 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     return out;
   }
 
-  // Rows 1 & 2: 24–71 months catch-up.
+  // Rows 1 & 2: 24–71 months catch-up. The at-risk catch-up doses are given at
+  // ≥24 months; prior INFANT doses do NOT reduce them. CDC: "<3 prior PCV by 24mo
+  // → 2 doses, regardless of 0/1/2 before 24mo"; "3 doses before 24mo → 1 dose."
+  // Progress toward the catch-up = doses already given at ≥24mo (band.ge24).
+  // Verified vs PneumoRecs (P11 → 2, P12 → 1, P20 → 2).
   if (am < M.m72) {
-    if (pcv.count >= 3) {
-      // 3 PCV all before 12mo → 1 dose PCV20/PCV15.
-      const { dueToday, earliestNextDate } = dueState(anchorPcv, WK8, today);
+    const target = pcv.band.before24 >= 3 ? 1 : 2; // row 2 (1) vs row 1 (2)
+    const remaining = Math.max(0, target - pcv.band.ge24);
+    if (remaining === 0) {
       out.push(rec({
-        vaccine: 'PCV', status: 'risk-based',
-        doseLabel: '1 dose PCV (at-risk catch-up)',
-        dueToday, earliestNextDate, minIntervalDays: WK8,
-        brands: pcvRecBrands({ adult: false }),
-        note: 'At-risk child 24–71 months with 3 PCV doses all before 12 months: 1 dose of PCV20 or PCV15 (≥8 weeks after the most recent PCV). If PCV15 is used, add PPSV23 ≥8 weeks later.',
+        vaccine: 'PCV', status: 'complete',
+        doseLabel: 'PCV complete (at-risk catch-up done)',
+        note: 'At-risk child 24–71 months who has already received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months — complete. If PCV15 was used, ensure a PPSV23 follow-up.',
         refs,
       }));
-    } else {
-      // 0–2 PCV by 24mo (incomplete) → 2 doses PCV20/PCV15 ≥8wk apart.
-      const remaining = pcv.count >= 1 ? 1 : 2; // snapshot: doses still owed (2 total)
-      const { dueToday, earliestNextDate } = dueState(anchorPcv, WK8, today);
-      out.push(rec({
-        vaccine: 'PCV', status: 'risk-based',
-        doseLabel: `PCV dose (${remaining === 2 ? '1 of 2' : '2 of 2'}, at-risk catch-up)`,
-        dueToday, earliestNextDate, minIntervalDays: WK8,
-        brands: pcvRecBrands({ adult: false }),
-        note: 'At-risk child 24–71 months with an incomplete schedule (0–2 PCV by 24 months): 2 doses of PCV20 or PCV15, ≥8 weeks apart. If PCV15 is used to complete, add PPSV23 ≥8 weeks after the last PCV.',
-        refs,
-      }));
+      return out;
     }
+    const { dueToday, earliestNextDate } = dueState(anchorPcv, WK8, today);
+    const doseNum = target - remaining + 1;
+    out.push(rec({
+      vaccine: 'PCV', status: 'risk-based',
+      doseLabel: target === 1 ? '1 dose PCV (at-risk catch-up)' : `PCV dose ${doseNum} of 2 (at-risk catch-up)`,
+      dueToday, earliestNextDate, minIntervalDays: WK8,
+      brands: pcvRecBrands({ adult: false }),
+      note: target === 1
+        ? 'At-risk child 24–71 months with 3 PCV doses before 24 months: 1 dose of PCV20 or PCV15 (≥8 weeks after the most recent PCV). If PCV15 is used, add PPSV23 ≥8 weeks later.'
+        : 'At-risk child 24–71 months with an incomplete schedule (fewer than 3 PCV by 24 months): 2 doses of PCV20 or PCV15, ≥8 weeks apart — these are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥8 weeks after the last PCV.',
+      refs,
+    }));
     return out;
   }
 
@@ -333,6 +362,41 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
 
   // 6–18y with no prior counting PCV (rows 6/7) OR PCV13-only at/after 6y (rows 8/9).
   const noPriorPcv = pcv.count === 0;
+
+  // Rows 8/9 (PCV13-only at/after 6y) where PPSV23 has ALREADY been given:
+  //   • non-IC → Option B (the single PPSV23) is satisfied → COMPLETE.
+  //   • IC     → still owes the recurring step: 1 PCV20 ≥8wk OR a 2nd PPSV23 ≥5y
+  //              after the first (p2016 Table 4 row 9).
+  // Verified vs CDC child notes + PneumoRecs (P19 non-IC → complete).
+  if (!noPriorPcv && ppsvGiven) {
+    if (!isIC) {
+      out.push(rec({
+        vaccine: 'PCV', status: 'complete',
+        doseLabel: 'Complete (PCV13 + PPSV23 at/after age 6)',
+        note: 'Non-immunocompromising at-risk child with PCV13 at/after age 6 who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated.',
+        refs,
+      }));
+      return out;
+    }
+    const icState = dueState(anchorPneumo, WK8, today);
+    out.push(rec({
+      vaccine: 'PCV', status: 'risk-based', doseLabel: '1 dose PCV20 (immunocompromising)',
+      dueToday: icState.dueToday, earliestNextDate: icState.earliestNextDate, minIntervalDays: WK8,
+      brands: ['PCV20 (Prevnar 20)'],
+      note: 'Immunocompromising at-risk child (PCV13 at/after age 6) who already received PPSV23: give 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine — OR a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option.',
+      refs,
+    }));
+    const ppsv2 = dueState(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, Y5, today);
+    out.push(rec({
+      vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
+      dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalDays: Y5,
+      brands: ['PPSV23 (Pneumovax 23)'],
+      note: 'Alternative to the PCV20 above: a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option (PCV20 or 2nd PPSV23), not both.',
+      refs,
+    }));
+    return out;
+  }
+
   const anchorForA = noPriorPcv ? anchorPneumo : anchorPcv;
   const aState = dueState(anchorForA, WK8, today);
 
@@ -474,8 +538,20 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
   if (pcv.hasPCV13 && ppsvGiven) {
     const anchor = lastDoseDate(pcv, ppsv);
     const { dueToday, earliestNextDate } = dueState(anchor, Y5, today);
-    // PCV13+PPSV23 with PPSV23 at ≥65 (proxy: current age ≥65) → shared decision.
-    const sharedDecision = isOlderAdult && am >= M.y65;
+    // PCV13+PPSV23 → shared decision ONLY when the PPSV23 dose was given at age
+    // ≥65 (CDC adult notes) — NOT when the patient is merely ≥65 now. PneumoVax
+    // captures both the patient's age and the PPSV23 date, so compute age-at-PPSV23
+    // directly when the dose is dated; fall back to the current-age proxy only when
+    // the PPSV23 dose is undated. (Verified against CDC PneumoRecs VaxAdvisor 2026-06-07.)
+    const ppsvDateForAge = ppsv.effective.find((d) => d.date)?.date || null;
+    let ppsvAtOrAfter65;
+    if (ppsvDateForAge) {
+      const ageAtPpsvMonths = am - Math.round(daysBetween(ppsvDateForAge, today) / 30.4375);
+      ppsvAtOrAfter65 = ageAtPpsvMonths >= M.y65;
+    } else {
+      ppsvAtOrAfter65 = am >= M.y65; // proxy when PPSV23 is undated
+    }
+    const sharedDecision = isOlderAdult && ppsvAtOrAfter65;
     if (sharedDecision) {
       return [rec({
         vaccine: 'PCV', status: 'shared-decision',
@@ -600,7 +676,7 @@ export function recommend(input) {
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
-  const pcv = summarizePcv(effectivePcv);
+  const pcv = summarizePcv(effectivePcv, am, today);
   const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
 
   // ── Standard (age/history/risk) recommendations ──────────────────────

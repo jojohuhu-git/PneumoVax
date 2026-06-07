@@ -67,10 +67,20 @@ describe('§B Healthy children 24mo–18y', () => {
     expect(pcv(r).status).toBe('complete');
   });
 
-  it('30mo with a PCV20 → complete (includes PCV20)', () => {
+  it('30mo with an undated PCV20 → complete (benefit of the doubt)', () => {
+    // Undated PCV20 can't be proven to be a sub-24mo dose, so it completes.
+    // (Contrast: a PCV20 DATED in infancy does not complete — see the P09 test.)
     const r = run({ ageMonths: 30, riskIds: [], pcvDoses: [{ product: 'PCV20' }] });
     expect(pcv(r).status).toBe('complete');
-    expect(pcv(r).doseLabel).toMatch(/includes PCV20/i);
+    expect(pcv(r).note).toMatch(/PCV20|PPSV23/i);
+  });
+
+  it('30mo with a PCV20 DATED at 12mo → NOT complete, 1 more dose due (P09)', () => {
+    // Healthy child, single PCV20 given in infancy → still owes the 24-59mo catch-up
+    // dose. Verified against CDC PneumoRecs (case P09).
+    const r = run({ ageMonths: 30, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '2025-04-06' }] });
+    expect(pcv(r).status).toBe('catchup');
+    expect(pcv(r).doseLabel).toMatch(/catch-up/i);
   });
 
   it('8yo healthy, incomplete → not indicated (older healthy children not caught up)', () => {
@@ -332,10 +342,28 @@ describe('§H Adults ≥50 routine', () => {
     expect(pcv(r).minIntervalDays).toBe(1826);
   });
 
-  it('70yo PCV13 + PPSV23 (≥65 proxy) → shared clinical decision', () => {
+  // PCV13 + PPSV23: shared-decision keys on PPSV23-given-at-≥65 (CDC adult notes),
+  // computed from the dose date — NOT the patient's current age. Verified against
+  // CDC PneumoRecs VaxAdvisor 2026-06-07.
+  it('70yo PCV13 + PPSV23 given at ~60 (<65) → firm recommendation (due), NOT shared', () => {
     const r = run({ ageMonths: 840, riskIds: [],
-      pcvDoses: [{ product: 'PCV13', date: '2010-01-01' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2012-01-01' }] });
+      pcvDoses: [{ product: 'PCV13', date: '2014-01-01' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2016-06-06' }] }); // age ~60 at PPSV23
+    expect(pcv(r).status).toBe('due');
+    expect(pcv(r).minIntervalDays).toBe(1826);
+  });
+
+  it('70yo PCV13 + PPSV23 given at ~67 (≥65) → shared clinical decision', () => {
+    const r = run({ ageMonths: 840, riskIds: [],
+      pcvDoses: [{ product: 'PCV13', date: '2019-01-01' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2023-06-06' }] }); // age ~67 at PPSV23
+    expect(pcv(r).status).toBe('shared-decision');
+  });
+
+  it('70yo PCV13 + UNDATED PPSV23 → proxy (current age ≥65) → shared decision', () => {
+    const r = run({ ageMonths: 840, riskIds: [],
+      pcvDoses: [{ product: 'PCV13', date: '2014-01-01' }],
+      ppsv23Doses: [{ product: 'PPSV23' }] });
     expect(pcv(r).status).toBe('shared-decision');
   });
 

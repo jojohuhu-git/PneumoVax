@@ -24,6 +24,12 @@ export const VAX = {
   PPSV23: 'PPSV23',
 };
 
+// ACIP minimum age for all conjugate PCVs is 6 weeks (42 days), NOT the 2-month
+// routine start. Expressed in months for the validator's float-month comparison.
+// (42 / 30.4375 ≈ 1.38mo.) Using the routine 2-month start as the minimum wrongly
+// rejects a dose given at the recommended 2-month visit (56–62 days < 60.9 days).
+export const PCV_MIN_AGE_M = 42 / 30.4375;
+
 // PCV product catalog. `key` matches the value stored in history doses.
 export const PCV_PRODUCTS = [
   {
@@ -34,7 +40,7 @@ export const PCV_PRODUCTS = [
     counts: false,          // NEVER counts — immunize.org / CDC adult notes
     requiresPPSV23: false,
     completesSeries: false,
-    minAgeM: 2,
+    minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks
     maxAgeM: 999,
     historyOnly: true,
     childOk: true,
@@ -49,7 +55,7 @@ export const PCV_PRODUCTS = [
     counts: true,           // counts as prior PCV
     requiresPPSV23: false,  // alone does NOT complete; residual dose handled by matrix
     completesSeries: false,
-    minAgeM: 2,
+    minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks
     maxAgeM: 999,
     historyOnly: true,      // phased out of new series; record-only
     childOk: true,
@@ -64,7 +70,7 @@ export const PCV_PRODUCTS = [
     counts: true,
     requiresPPSV23: true,   // a series ending in PCV15 needs a PPSV23 follow-up
     completesSeries: false,
-    minAgeM: 2,             // ≥6 weeks per peds schedule; engine uses 2mo routine start
+    minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks (was 2mo routine start — rejected valid 2mo doses)
     maxAgeM: 999,
     historyOnly: false,
     childOk: true,
@@ -79,7 +85,7 @@ export const PCV_PRODUCTS = [
     counts: true,
     requiresPPSV23: false,
     completesSeries: true,  // a series including PCV20 = complete (no PPSV23)
-    minAgeM: 2,
+    minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks
     maxAgeM: 999,
     historyOnly: false,
     childOk: true,

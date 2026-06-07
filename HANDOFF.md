@@ -55,14 +55,16 @@ CDC confirms the same numbers. **If a future CDC-notes update diverges, CDC wins
    the precise "1 vs 2 doses before 7 months" branch differences) — it gives the
    correct next action and interval, which is the app's scope.
 
-2. **Adult `PCV13 + PPSV23` shared-decision-by-PPSV23-age (CDC adult notes).** The
-   app stores product dose-counts, not the age at which each historical dose was
-   given. The "PPSV23 received at ≥65" shared-decision branch is modeled using the
-   patient's **current age ≥65** as a proxy. If current age ≥65 → `shared-decision`;
-   if <65 → `due` with the ≥5-year interval. A patient who got PPSV23 at ≥65 but is
-   now older is handled correctly; the rare case of a <65 patient whose PPSV23 was
-   somehow at ≥65 cannot arise. **Confirm the proxy is acceptable**, or add an
-   "age at PPSV23" input to make it exact.
+2. **Adult `PCV13 + PPSV23` shared-decision-by-PPSV23-age — RESOLVED 2026-06-07.**
+   Previously modeled using the patient's **current age ≥65** as a proxy for "PPSV23
+   given at ≥65." Comparison against CDC PneumoRecs VaxAdvisor found a true divergence:
+   a 70yo whose PPSV23 was given at 60 was wrongly labeled `shared-decision` (the proxy
+   fired on current age) when CDC's tool firmly recommends the additional PCV20/21.
+   **Fixed in `recommend.js`** (`pcv.hasPCV13 && ppsvGiven` branch): age-at-PPSV23 is now
+   computed directly from the patient's age + the PPSV23 dose date — **no new input was
+   needed**, since the app already captures both. The current-age proxy remains only as a
+   fallback when the PPSV23 dose is undated. Tests updated (recommend.test.js: the old
+   proxy test split into three — <65→due, ≥65→shared, undated→proxy). 80 tests pass.
 
 3. **Peds at-risk rows 4/5 vs 8/9 disambiguation.** The app can't see the age at
    which historical PCV doses were given, so it infers:
@@ -129,3 +131,50 @@ First push to `https://github.com/jojohuhu-git/PneumoVax`. GitHub Actions workfl
 (`.github/workflows/deploy.yml`) uses `actions/checkout@v6`, `actions/setup-node@v6`
 (Node 22), `actions/configure-pages@v6`, `actions/upload-pages-artifact@v5`,
 `actions/deploy-pages@v5` — the same set that deploys successfully on MeningoVax.
+
+---
+
+## Session 3 (2026-06-07) — CDC PneumoRecs cross-check + bug fixes (NOT committed)
+
+Validated PneumoVax against the CDC PneumoRecs VaxAdvisor web tool as an
+independent oracle. User drove PneumoRecs manually; PneumoVax run via
+`scratch/adultCases.mjs` (A01–A20) and `scratch/pedsCases.mjs` (P01–P20).
+
+**Result: all enterable adult + peds cases now align with PneumoRecs.**
+
+Bugs found and fixed (5 surfaces / engine each verified, 82 tests pass):
+
+1. **A15 — PCV13+PPSV23 shared-decision proxy.** Used current-age≥65 as a proxy
+   for "PPSV23 given at ≥65" → mislabeled a firm recommendation as shared-decision
+   for a 70yo whose PPSV23 was at 60. Fixed: compute age-at-PPSV23 from the dose
+   date (no new input needed); proxy only when the dose is undated. (`recommend.js`)
+2. **PCV min age — rejected the routine 2-month dose.** `minAgeM:2` (routine start)
+   vs ACIP's 6-week minimum; a 2-month-visit dose (56–62d) computed as <2mo and was
+   dropped, undercounting every infant series. Fixed: `PCV_MIN_AGE_M = 42/30.4375`
+   in brands.js for PCV7/13/15/20; `fmtMinAge` renders sub-2mo minimums as weeks.
+3. **P09 — single PCV20 in infancy wrongly "complete" (healthy path).** The
+   "any PCV20 → complete" shortcut is an adult rule; a healthy child needs the
+   age-appropriate count. Fixed via age-banded completeness. (at-risk Row 3 keeps
+   "≥1 PCV20 → complete" — confirmed correct by PneumoRecs P17.)
+4. **P19 — rows 8/9 ignored prior PPSV23.** non-IC PCV13(≥6y)+PPSV23 should be
+   complete; was re-recommending. Fixed (IC still gets the ≥5y recurring step).
+5. **P20 — at-risk 24–71mo catch-up reduced by infant doses.** CDC: "<3 PCV by
+   24mo → 2 doses regardless." Fixed via age bands (`band.before24`/`band.ge24`).
+
+**Refactor:** `summarizePcv` now computes age-banded dose counts (before12 /
+12–23 / 24–71 / ≥72mo, plus before24/ge24) from the dose dates PneumoVax already
+stores — replacing total-count heuristics in the peds branches. Undated doses fold
+into `before24` (assumed infant) and an undated PCV20 keeps "benefit of the doubt"
+completeness. This is the model CDC PneumoRecs uses (age-band buckets).
+
+**P18 confirmed CORRECT (no change):** IC child, PCV13 at/after 6y → PneumoVax
+keeps the ≥5y recurring 2nd-PPSV23 step (p2016 Table 4 row 9); PneumoRecs omits it.
+PneumoVax is the more complete of the two here.
+
+**Structural notes on PneumoRecs (for future comparison):** adults are bucketed
+(<19 / 19–49 / ≥50, no exact age); adult risk is one yes/no (no IC sub-class; risk
+question suppressed for ≥50); peds uses age-banded dose counts + two risk buckets
+(chronic vs immunocompromising, with cochlear/CSF under chronic — matches PneumoVax);
+PneumoRecs cannot represent an unknown-product PCV (A19) and does not list PCV7.
+
+Scratch harnesses (`scratch/*.mjs`) are uncommitted and not part of the build.

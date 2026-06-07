@@ -44,6 +44,16 @@ describe('Min-age validation', () => {
     expect(perDose[0].status).toBe('invalid');
   });
 
+  it('PCV at the routine 2-month visit (59-day, Feb-spanning) → valid, counts', () => {
+    // Regression: ACIP min age is 6 weeks, not the 2-month routine start. A dose at
+    // the recommended 2-month visit is only ~56–62 days old and must NOT be rejected.
+    // Child currently 5mo (born ~2026-01-06); dose 2026-03-06 = age ~2mo (59 days).
+    const { perDose, effective } = analyzeHistory('PCV',
+      [{ product: 'PCV15', date: '2026-03-06' }], 5, TODAY);
+    expect(perDose[0].status).toBe('valid');
+    expect(effective.length).toBe(1);
+  });
+
   it('PPSV23 below 2 years → invalid', () => {
     const { perDose } = analyzeHistory('PPSV23',
       [{ product: 'PPSV23', date: '2025-06-06' }], 18, TODAY);
