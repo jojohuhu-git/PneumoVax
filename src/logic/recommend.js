@@ -274,7 +274,14 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // → 2 doses, regardless of 0/1/2 before 24mo"; "3 doses before 24mo → 1 dose."
   // Progress toward the catch-up = doses already given at ≥24mo (band.ge24).
   // Verified vs PneumoRecs (P11 → 2, P12 → 1, P20 → 2).
-  if (am < M.m72) {
+  //
+  // A COMPLETED infant series (≥4 counting PCV doses) is NOT a catch-up case —
+  // per CDC child notes a child who "completed the recommended PCV series but has
+  // not received PPSV23" gets 1 PCV20 OR 1 PPSV23, not another plain PCV dose.
+  // Such children fall through to the rows-4/5 "completed before age 6" block below.
+  // Source: cdc.gov/.../child-adolescent-notes.html#note-pneumo ("Completed
+  // recommended PCV series but have not received PPSV23").
+  if (am < M.m72 && pcv.count < 4) {
     const target = pcv.band.before24 >= 3 ? 1 : 2; // row 2 (1) vs row 1 (2)
     const remaining = Math.max(0, target - pcv.band.ge24);
     if (remaining === 0) {

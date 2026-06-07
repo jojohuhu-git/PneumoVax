@@ -244,3 +244,25 @@ no exact age); adult risk a single yes/no (no IC sub-class; suppressed for ≥50
 age-banded dose counts + two risk buckets (chronic vs IC, cochlear/CSF under chronic).
 Cannot represent an unknown-product PCV or PCV7. Reproducible case harnesses live in
 `scratch/{adultCases,pedsCases,hsctCases}.mjs` (dev-only, not part of the build).
+
+## Session 4 changes (2026-06-07) — Completed-series at-risk 24–71mo fix (CDC-aligned)
+
+**Bug fixed in `src/logic/recommend.js`:**
+The 24–71mo at-risk catch-up branch lacked a series-completion guard. A child who had
+already completed the full 4-dose infant series was offered a 5th plain PCV dose instead
+of the CDC-recommended Option A (PCV20) / Option B (PPSV23) path.
+
+**The fix:** `if (am < M.m72 && pcv.count < 4)` — the `pcv.count < 4` gate means children
+with a completed 4-dose series fall through to the rows-4/5 Option A/B block (PCV20 or
+PPSV23 ≥8 weeks after the most recent PCV), matching
+`https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo`.
+
+**Found by:** cross-checking against the vaxapp engine, which was independently aligned to
+the CDC rule in the same session. The two engines now agree on this scenario.
+
+**Verification:**
+- 60mo asplenia with 4×PCV15 (completed infant series) → "Option A: PCV20 / Option B: PPSV23" ✓
+- Incomplete cases P11 (→2 doses), P12 (→1 dose), P20 (→2 doses) → unchanged ✓
+
+**Tests:** 82 passing (no new tests needed — the completed-series path is exercised by the
+existing P-series cases in `recommend.test.js`).

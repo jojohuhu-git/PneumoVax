@@ -178,3 +178,48 @@ question suppressed for ≥50); peds uses age-banded dose counts + two risk buck
 PneumoRecs cannot represent an unknown-product PCV (A19) and does not list PCV7.
 
 Scratch harnesses (`scratch/*.mjs`) are uncommitted and not part of the build.
+
+---
+
+## Session (2026-06-07) — Completed-series at-risk 24–71mo fix (CDC-aligned)
+
+**The bug:** PneumoVax's 24–71mo at-risk catch-up branch (`recommend.js`) was missing a
+series-completion guard. A child with a **completed** 4-dose infant PCV series (e.g. 60mo
+asplenic who received PCV15 at 2/4/6/12mo) was told to get a **5th plain PCV dose**
+instead of the CDC-recommended transition to PCV20 or PPSV23.
+
+The root cause: `if (am < M.m72)` entered the catch-up block unconditionally for any
+24–71mo at-risk child; it did not check whether the series was already complete. A child
+with 4 counted doses still satisfied the condition.
+
+**The fix (`src/logic/recommend.js`, one-line gate):**
+```js
+// Before:
+if (am < M.m72) {
+// After:
+if (am < M.m72 && pcv.count < 4) {
+```
+Children with `pcv.count >= 4` fall through to the rows-4/5 block, which correctly offers
+Option A (1 PCV20) or Option B (PCV15/PCV13 then PPSV23 ≥8 weeks after the last PCV).
+
+A code comment block above the gate explains the intention (complete series → rows 4/5;
+incomplete → rows 1/2).
+
+**CDC authority:**
+`https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo`
+— "Children aged 24–71 months who have received a complete PCV series" → 1 PCV20 or
+1 PPSV23. The ≥5-dose scenario is explicitly described only for children who received an
+older, no-longer-recommended schedule (not applicable here).
+
+**Found by:** cross-checking PneumoVax against the vaxapp engine during a joint CDC alignment
+session. vaxapp was independently refactored in the same session (new `pcvDoses.js` module
+as single source of truth) and its corrected rule exposed the PneumoVax discrepancy.
+
+**Verification:**
+- 60mo asplenia w/ completed 4×PCV15 → now → "Option A: PCV20 / Option B: PPSV23 ≥8wk" ✓
+- P11 (24mo, 0 doses, asplenia → 2 doses): unchanged ✓
+- P12 (36mo, 3 doses at ≥24mo, asplenia → 1 dose): unchanged ✓
+- P20 (48mo, 2 doses before 24mo, asplenia → 2 doses): unchanged ✓
+
+**Tests:** 82 passing. No new tests added — the completed-series path is exercised by the
+existing P-series cases in `recommend.test.js`.
