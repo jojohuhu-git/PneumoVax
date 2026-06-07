@@ -1,0 +1,634 @@
+// ─────────────────────────────────────────────────────────────────────────
+// recommend.js — the PneumoVax recommendation engine.
+//
+// Pure function. Given a patient (age, risks, PCV history, PPSV23 history),
+// returns the current pneumococcal recommendations (PCV and PPSV23 streams),
+// plus an HSCT advisory block when the HSCT risk factor is selected.
+//
+// Every clinical rule is traceable to a citation key in src/data/refs.js and to
+// a section of CLINICAL_SPEC.md. Verified live 2026-06-06 against CDC child &
+// adult schedule notes, immunize.org p2016 (Tables 1–5), the PCV7-not-counted
+// article, mm7401a1 (≥50 expansion), mm7336a3 (PCV21), and the Fred Hutch LTFU
+// guideline (adult HSCT, SOLE source).
+//
+// Design rule (ported from vaxapp/MeningoVax): all clinical logic and product
+// validity live HERE; the UI consumes pre-built recs. No clinical logic in
+// components.
+// ─────────────────────────────────────────────────────────────────────────
+
+import { resolveRefs } from '../data/refs.js';
+import {
+  RISK_BY_ID,
+  hasHSCT,
+  hasIC,
+  hasAnyRisk,
+  adultPpsvIntervalClass,
+  pedsRiskRowClass,
+} from '../data/riskFactors.js';
+import { productByKey, pcvRecBrands } from '../data/brands.js';
+import { todayISO, addDays, daysBetween, intervalElapsed, DAYS } from './dateUtils.js';
+import { analyzeHistory } from './validate.js';
+
+// Age bands (months)
+const M = {
+  m2: 2, m7: 7, m12: 12, m16: 16, m24: 24, m60: 60, m72: 72,
+  y2: 24, y5: 60, y6: 72, y18: 216, y50: 600, y65: 780,
+};
+
+const WK8 = DAYS.weeks(8);   // 56
+const WK4 = DAYS.weeks(4);   // 28
+const Y1  = DAYS.years(1);   // 365
+const Y5  = DAYS.years(5);   // 1826
+
+// ── rec() helper ──────────────────────────────────────────────────────────
+function rec(o) {
+  return {
+    vaccine: o.vaccine,                 // 'PCV' | 'PPSV23'
+    status: o.status,                   // due | catchup | risk-based | shared-decision | complete | not-indicated | deferred
+    doseLabel: o.doseLabel,
+    dueToday: !!o.dueToday,
+    earliestNextDate: o.earliestNextDate ?? null,
+    minIntervalDays: o.minIntervalDays ?? null,
+    brands: o.brands ?? [],
+    note: o.note,
+    advisory: !!o.advisory,             // HSCT relative-to-transplant block
+    citations: resolveRefs(o.refs ?? []),
+  };
+}
+
+// Merge risk-driven ref keys with defaults, de-duplicated, preserving order.
+function collectRefs(riskIds, defaults) {
+  const out = [];
+  for (const id of riskIds) {
+    for (const k of RISK_BY_ID[id]?.refs ?? []) if (!out.includes(k)) out.push(k);
+  }
+  for (const k of defaults) if (!out.includes(k)) out.push(k);
+  return out;
+}
+
+// ── PCV history summary helpers ───────────────────────────────────────────
+// `pcvDoses` here is the EFFECTIVE list (PCV7 already excluded by validate.js).
+function summarizePcv(pcvDoses) {
+  const products = pcvDoses.map((d) => d.product).filter(Boolean);
+  const has = (k) => products.includes(k);
+  const hasPCV20 = has('PCV20');
+  const hasPCV21 = has('PCV21');
+  const hasPCV15 = has('PCV15');
+  const hasPCV13 = has('PCV13');
+  // A series is "complete-by-product" if it includes a PCV20 (any age) or PCV21 (adult).
+  const includesCompleting = hasPCV20 || hasPCV21;
+  // The most recent dose's date (for interval anchoring).
+  const lastDated = [...pcvDoses].reverse().find((d) => d.date) || null;
+  return {
+    count: pcvDoses.length,
+    products,
+    hasPCV20, hasPCV21, hasPCV15, hasPCV13,
+    includesCompleting,
+    lastDate: lastDated?.date || null,
+  };
+}
+
+// Most recent of two ISO date strings (either may be null).
+function mostRecent(a, b) {
+  const dates = [a, b].filter(Boolean).sort();
+  return dates.length ? dates[dates.length - 1] : null;
+}
+
+// Build a "due now or eligible later" pair from an anchor date + interval.
+function dueState(anchorDate, intervalDays, today) {
+  if (!anchorDate) return { dueToday: true, earliestNextDate: null };
+  const elapsed = intervalElapsed(anchorDate, intervalDays, today);
+  return {
+    dueToday: elapsed,
+    earliestNextDate: elapsed ? null : addDays(anchorDate, intervalDays),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CHILDREN 2–23 months — p2016 Table 1 (routine + catch-up; all children)
+// ═══════════════════════════════════════════════════════════════════════════
+// Snapshot model: compute doses still needed + the next dose's min interval.
+function pcvInfant(am, pcv, today) {
+  const prior = pcv.count;
+  const refs = ['cdcChildPneumo', 'p2016'];
+  const brands = pcvRecBrands({ adult: false });
+  const anchor = pcv.lastDate;
+
+  // Determine total target doses + whether the booster (≥12mo) is the next due.
+  // Reduced from p2016 Table 1 to: remaining count + next interval + 12mo floor.
+  // Healthy and at-risk infants follow Table 1 alike.
+  // Min interval: <12mo → 4 weeks; ≥12mo → 8 weeks.
+  const minInterval = am < M.m12 ? WK4 : WK8;
+
+  // If the child already has ≥4 counting PCV doses with last at ≥12mo, done.
+  // (Booster dose is the dose given at ≥12 months.)
+  // We approximate "complete" as: ≥1 dose given at ≥12 months AND total ≥ target.
+  // Target by start age band per Table 1.
+  let target;
+  if (prior === 0) {
+    target = am < M.m7 ? 4 : am < M.m12 ? 3 : 2;
+  } else {
+    // With prior doses, the catch-up generally lands at 2–4 total; we use the
+    // routine 4-dose target capped by remaining-needed from Table 1.
+    target = am < M.m7 ? 4 : am < M.m12 ? 3 : Math.max(2, Math.min(4, prior + 1));
+  }
+
+  // Has a dose at ≥12mo been given? (booster satisfied)
+  const boosterGiven = pcv.products.length > 0 && am >= M.m12 && prior >= target;
+
+  if (prior >= target && boosterGiven) {
+    return [rec({
+      vaccine: 'PCV', status: 'complete',
+      doseLabel: `PCV series complete (${prior} dose${prior === 1 ? '' : 's'})`,
+      note: 'The age-appropriate PCV series appears complete. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).',
+      refs,
+    })];
+  }
+
+  const remaining = Math.max(1, target - prior);
+  const doseNum = prior + 1;
+  const { dueToday, earliestNextDate } = dueState(anchor, minInterval, today);
+  // The final dose must be at ≥12 months — if this is the last dose and the
+  // child is <12mo, it is not due until 12 months.
+  const isFinal = remaining === 1;
+  const needs12moFloor = isFinal && am < M.m12;
+  const due = needs12moFloor ? false : dueToday;
+
+  return [rec({
+    vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
+    doseLabel: `PCV dose ${doseNum} of ${target}`,
+    dueToday: due,
+    earliestNextDate: needs12moFloor ? null : earliestNextDate,
+    minIntervalDays: minInterval,
+    brands,
+    note: `Routine infant PCV (PCV15 or PCV20), 4-dose series at 2, 4, 6, and 12–15 months. Minimum interval ${am < M.m12 ? '4 weeks (under 12 months)' : '8 weeks (12 months or older)'}; the final/booster dose is given at ≥12 months.${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''} If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
+    refs,
+  })];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
+// ═══════════════════════════════════════════════════════════════════════════
+function pcvHealthyChild(am, pcv, ppsv, today) {
+  const refs = ['cdcChildPneumo', 'p2016', 'cdcCatchupJobAid'];
+  const prior = pcv.count;
+  const anchor = pcv.lastDate;
+
+  // A completed schedule (incl. all-PCV13) by 24mo → complete (no additional).
+  // We approximate "completed any PCV schedule by 24mo" as ≥4 PCV doses, OR a
+  // dose given at ≥12mo with ≥3 prior (the routine booster). Conservatively, if
+  // the child already has ≥1 PCV20, complete.
+  if (pcv.includesCompleting) {
+    return [rec({
+      vaccine: 'PCV', status: 'complete',
+      doseLabel: 'PCV series complete (includes PCV20)',
+      note: 'A pneumococcal series that includes PCV20 is complete — no PPSV23 is needed.',
+      refs,
+    })];
+  }
+
+  // 24–59 months
+  if (am < M.m60) {
+    // "Completed any PCV schedule by 24mo" → no additional doses. Modeled as
+    // ≥4 counting doses (full infant series). Otherwise 1 catch-up dose.
+    if (prior >= 4) {
+      return [rec({
+        vaccine: 'PCV', status: 'complete',
+        doseLabel: 'PCV series complete',
+        note: 'Healthy child 24–59 months who completed a PCV schedule by 24 months — no additional doses needed.',
+        refs,
+      })];
+    }
+    const { dueToday, earliestNextDate } = dueState(anchor, WK8, today);
+    return [rec({
+      vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
+      doseLabel: '1 dose PCV (catch-up)',
+      dueToday, earliestNextDate, minIntervalDays: WK8,
+      brands: pcvRecBrands({ adult: false }),
+      note: 'Healthy child 24–59 months with no or an incomplete PCV schedule by 24 months: 1 dose of PCV15 or PCV20, ≥8 weeks after the most recent PCV. If PCV15 is used, a PPSV23 follow-up is not routine for a healthy child (PPSV23 is risk-based).',
+      refs,
+    })];
+  }
+
+  // 5–18 years healthy — no additional doses (healthy older children not caught up).
+  return [rec({
+    vaccine: 'PCV', status: 'not-indicated',
+    doseLabel: 'Not indicated (healthy 5–18y)',
+    note: 'Healthy children 5–18 years with no or incomplete PCV schedule are not routinely caught up. PCV is recommended only if a risk condition is present.',
+    refs,
+  })];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  AT-RISK CHILDREN 24 months – 18 years — p2016 Table 4
+// ═══════════════════════════════════════════════════════════════════════════
+function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
+  const rowClass = pedsRiskRowClass(riskIds); // 'IC' | 'nonIC'
+  const isIC = rowClass === 'IC';
+  const refs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016']);
+  const anchorPcv = pcv.lastDate;
+  // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
+  const anchorPneumo = mostRecent(pcv.lastDate, ppsv.effective.find((d) => d.date)?.date || null);
+  const ppsvGiven = ppsv.count > 0;
+  const out = [];
+
+  // Row 3: completed series before 6y including ≥1 PCV20 → no additional doses.
+  if (pcv.includesCompleting) {
+    out.push(rec({
+      vaccine: 'PCV', status: 'complete',
+      doseLabel: 'PCV complete (includes PCV20)',
+      note: 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed.',
+      refs,
+    }));
+    return out;
+  }
+
+  // Rows 1 & 2: 24–71 months catch-up.
+  if (am < M.m72) {
+    if (pcv.count >= 3) {
+      // 3 PCV all before 12mo → 1 dose PCV20/PCV15.
+      const { dueToday, earliestNextDate } = dueState(anchorPcv, WK8, today);
+      out.push(rec({
+        vaccine: 'PCV', status: 'risk-based',
+        doseLabel: '1 dose PCV (at-risk catch-up)',
+        dueToday, earliestNextDate, minIntervalDays: WK8,
+        brands: pcvRecBrands({ adult: false }),
+        note: 'At-risk child 24–71 months with 3 PCV doses all before 12 months: 1 dose of PCV20 or PCV15 (≥8 weeks after the most recent PCV). If PCV15 is used, add PPSV23 ≥8 weeks later.',
+        refs,
+      }));
+    } else {
+      // 0–2 PCV by 24mo (incomplete) → 2 doses PCV20/PCV15 ≥8wk apart.
+      const remaining = pcv.count >= 1 ? 1 : 2; // snapshot: doses still owed (2 total)
+      const { dueToday, earliestNextDate } = dueState(anchorPcv, WK8, today);
+      out.push(rec({
+        vaccine: 'PCV', status: 'risk-based',
+        doseLabel: `PCV dose (${remaining === 2 ? '1 of 2' : '2 of 2'}, at-risk catch-up)`,
+        dueToday, earliestNextDate, minIntervalDays: WK8,
+        brands: pcvRecBrands({ adult: false }),
+        note: 'At-risk child 24–71 months with an incomplete schedule (0–2 PCV by 24 months): 2 doses of PCV20 or PCV15, ≥8 weeks apart. If PCV15 is used to complete, add PPSV23 ≥8 weeks after the last PCV.',
+        refs,
+      }));
+    }
+    return out;
+  }
+
+  // Rows 4–9: 2–18y (here ≥6y by age, but rows 4/5 say "2–18y completed before 6y").
+  // Branch on whether a PCV13/15 series was completed before age 6 vs no prior PCV
+  // vs PCV13-only at/after age 6. We can't see exact ages of historical doses, so:
+  //   • prior counting PCV ≥3  → treat as "completed series before 6y with PCV13/15"
+  //   • prior counting PCV 0   → "no prior PCV13/15/20"
+  //   • prior counting PCV 1–2 (e.g. a single PCV13 at/after 6y) → "PCV13 only at/after 6y"
+
+  if (pcv.count >= 3) {
+    // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
+    if (ppsvGiven) {
+      // non-IC: PPSV23 already given → complete.
+      if (!isIC) {
+        out.push(rec({
+          vaccine: 'PCV', status: 'complete', doseLabel: 'Complete (PCV series + PPSV23)',
+          note: 'At-risk (non-immunocompromising) child who completed the PCV series and has received PPSV23 — complete. Alternatively a single PCV20 ≥8 weeks after the last PCV also completes.',
+          refs,
+        }));
+        return out;
+      }
+      // IC + PPSV23 already given: A) PCV20 ≥8wk, or B) 2nd PPSV23 ≥5y after first.
+      const { dueToday, earliestNextDate } = dueState(anchorPneumo, WK8, today);
+      out.push(rec({
+        vaccine: 'PCV', status: 'risk-based', doseLabel: '1 dose PCV20 (immunocompromising)',
+        dueToday, earliestNextDate, minIntervalDays: WK8,
+        brands: ['PCV20 (Prevnar 20)'],
+        note: 'Immunocompromising at-risk child who completed PCV13/15 and already received PPSV23: give 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine — OR a 2nd PPSV23 ≥5 years after the first PPSV23.',
+        refs,
+      }));
+      const ppsv2 = dueState(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, Y5, today);
+      out.push(rec({
+        vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
+        dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalDays: Y5,
+        brands: ['PPSV23 (Pneumovax 23)'],
+        note: 'Alternative to the PCV20 above: a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option (PCV20 or 2nd PPSV23), not both.',
+        refs,
+      }));
+      return out;
+    }
+    // No PPSV23 yet. A) PCV20 ≥8wk; or B) PPSV23 ≥8wk (IC: then ≥5y → PCV20 or 2nd PPSV23).
+    const { dueToday, earliestNextDate } = dueState(anchorPneumo, WK8, today);
+    out.push(rec({
+      vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
+      dueToday, earliestNextDate, minIntervalDays: WK8,
+      brands: ['PCV20 (Prevnar 20)'],
+      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed PCV13/15 before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥8 weeks after the most recent PCV (completes the series).`,
+      refs,
+    }));
+    out.push(rec({
+      vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks)',
+      dueToday, earliestNextDate, minIntervalDays: WK8,
+      brands: ['PPSV23 (Pneumovax 23)'],
+      note: isIC
+        ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23. Choose Option A or B, not both.'
+        : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV. Choose Option A or B, not both.',
+      refs,
+    }));
+    return out;
+  }
+
+  // 6–18y with no prior counting PCV (rows 6/7) OR PCV13-only at/after 6y (rows 8/9).
+  const noPriorPcv = pcv.count === 0;
+  const anchorForA = noPriorPcv ? anchorPneumo : anchorPcv;
+  const aState = dueState(anchorForA, WK8, today);
+
+  out.push(rec({
+    vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
+    dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
+    brands: ['PCV20 (Prevnar 20)'],
+    note: noPriorPcv
+      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine.`
+      : `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with PCV13 only (at/after age 6): Option A — 1 dose of PCV20 ≥8 weeks after the most recent PCV13.`,
+    refs,
+  }));
+
+  if (noPriorPcv) {
+    // Option B: PCV15 then PPSV23 ≥8wk later (rows 6/7).
+    out.push(rec({
+      vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option B-1: 1 dose PCV15 (≥8 weeks)',
+      dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
+      brands: ['PCV15 (Vaxneuvance)'],
+      note: 'Option B — 1 dose of PCV15 ≥8 weeks after the most recent pneumococcal vaccine, then ≥8 weeks later give 1 dose of PPSV23 (if PPSV23 not previously given). Choose Option A or B, not both.',
+      refs,
+    }));
+    if (!ppsvGiven) {
+      out.push(rec({
+        vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B-2: PPSV23 (≥8 weeks after PCV15)',
+        dueToday: false, earliestNextDate: null, minIntervalDays: WK8,
+        brands: ['PPSV23 (Pneumovax 23)'],
+        note: 'Second step of Option B: PPSV23 ≥8 weeks after the PCV15 dose. Only if PPSV23 was not previously given.',
+        refs,
+      }));
+    }
+  } else {
+    // PCV13-only at/after 6y. Option B: PPSV23 ≥8wk (IC: then ≥5y → PCV20 or 2nd PPSV23).
+    out.push(rec({
+      vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks after PCV13)',
+      dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
+      brands: ['PPSV23 (Pneumovax 23)'],
+      note: isIC
+        ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV13; then ≥5 years after the first PPSV23 give 1 dose of PCV20 or a 2nd PPSV23. Choose Option A or B, not both.'
+        : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV13. Choose Option A or B, not both.',
+      refs,
+    }));
+  }
+
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ADULTS 19–49y (risk-only) and ≥50y (routine) — CDC adult notes
+// ═══════════════════════════════════════════════════════════════════════════
+function pcvAdult(am, riskIds, pcv, ppsv, today) {
+  const isOlderAdult = am >= M.y50;
+  const anyRisk = hasAnyRisk(riskIds);
+  const intervalClass = adultPpsvIntervalClass(riskIds); // 'short'(8wk) | 'long'(1y)
+  const ppsvIntervalDays = intervalClass === 'short' ? WK8 : Y1;
+  const ppsvIntervalLabel = intervalClass === 'short' ? '8 weeks' : '1 year';
+  const refs = collectRefs(riskIds, [
+    'cdcAdultPneumo', 'cdcAdultTimingJobAid', isOlderAdult ? 'mmwr7401a1' : 'mmwr7203a1',
+  ]);
+  const adultBrands = pcvRecBrands({ adult: true });
+
+  // 19–49 with NO risk → not indicated (routine starts at 50).
+  if (!isOlderAdult && !anyRisk) {
+    return [rec({
+      vaccine: 'PCV', status: 'not-indicated',
+      doseLabel: 'Not indicated (no risk, <50y)',
+      note: 'Routine pneumococcal vaccination begins at age 50. Adults 19–49 years are recommended a pneumococcal vaccine only with a qualifying risk condition.',
+      refs,
+    })];
+  }
+
+  const ppsvGiven = ppsv.count > 0;
+
+  // ── Already complete by product ──────────────────────────────────────
+  // PCV20 or PCV21 in history → complete.
+  if (pcv.hasPCV20 || pcv.hasPCV21) {
+    return [rec({
+      vaccine: 'PCV', status: 'complete',
+      doseLabel: `Complete (history includes ${pcv.hasPCV21 ? 'PCV21' : 'PCV20'})`,
+      note: 'A pneumococcal series that includes PCV20 or PCV21 is complete — no PPSV23 and no further PCV needed.',
+      refs,
+    })];
+  }
+  // PCV15 + PPSV23 → complete.
+  if (pcv.hasPCV15 && ppsvGiven) {
+    return [rec({
+      vaccine: 'PCV', status: 'complete',
+      doseLabel: 'Complete (PCV15 + PPSV23)',
+      note: 'PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed.',
+      refs,
+    })];
+  }
+
+  // ── PCV15 only, no PPSV23 → INCOMPLETE: give PPSV23 ─────────────────
+  if (pcv.hasPCV15 && !ppsvGiven) {
+    const { dueToday, earliestNextDate } = dueState(pcv.lastDate, ppsvIntervalDays, today);
+    return [rec({
+      vaccine: 'PPSV23', status: anyRisk ? 'risk-based' : 'due',
+      doseLabel: `PPSV23 (≥${ppsvIntervalLabel} after PCV15) — completes the series`,
+      dueToday, earliestNextDate, minIntervalDays: ppsvIntervalDays,
+      brands: ['PPSV23 (Pneumovax 23)'],
+      note: `PCV15 was given but PPSV23 is still pending — the series is INCOMPLETE. Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose (${intervalClass === 'short' ? 'immunocompromising condition, cochlear implant, or CSF leak → ≥8 weeks' : 'chronic condition → ≥1 year'}). If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.`,
+      refs,
+    })];
+  }
+
+  // ── PPSV23 given, no PCV15/PCV13 (no prior PCV OR unknown-product PCV) →
+  //    give a PCV (≥1y after PPSV23) ─────────────────────────────────────
+  // Fires for both "0 PCV + PPSV23" and "unknown-product PCV + PPSV23"
+  // (pcv.count>0 but neither PCV13 nor PCV15 identified). Both resolve the same
+  // way per ACIP: a PCV15/20/21 ≥1y after PPSV23 completes the series.
+  if (ppsvGiven && !pcv.hasPCV13 && !pcv.hasPCV15) {
+    const ppsvDate = ppsv.effective.find((d) => d.date)?.date || null;
+    const { dueToday, earliestNextDate } = dueState(ppsvDate, Y1, today);
+    return [rec({
+      vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
+      doseLabel: 'PCV (PCV15, PCV20, or PCV21) ≥1 year after PPSV23',
+      dueToday, earliestNextDate, minIntervalDays: Y1,
+      brands: adultBrands,
+      note: 'PPSV23 was given previously (with no prior PCV, or a PCV of unknown product): give 1 dose of PCV15, PCV20, or PCV21 ≥1 year after the PPSV23 dose. If PCV15 is chosen, no further PPSV23 is needed (the PPSV23 requirement is already met).',
+      refs,
+    })];
+  }
+
+  // ── PCV13 only (no PPSV23) → PCV20 or PCV21 ≥1y → complete ───────────
+  if (pcv.hasPCV13 && !ppsvGiven) {
+    const { dueToday, earliestNextDate } = dueState(pcv.lastDate, Y1, today);
+    return [rec({
+      vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
+      doseLabel: 'PCV20 or PCV21 ≥1 year after PCV13 — completes the series',
+      dueToday, earliestNextDate, minIntervalDays: Y1,
+      brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
+      note: 'PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥1 year after the last PCV13 dose. This completes the series — no PPSV23 needed.',
+      refs,
+    })];
+  }
+
+  // ── PCV13 + PPSV23 → PCV20/PCV21 ≥5y (SCDM nuance by PPSV23 age) ─────
+  if (pcv.hasPCV13 && ppsvGiven) {
+    const anchor = lastDoseDate(pcv, ppsv);
+    const { dueToday, earliestNextDate } = dueState(anchor, Y5, today);
+    // PCV13+PPSV23 with PPSV23 at ≥65 (proxy: current age ≥65) → shared decision.
+    const sharedDecision = isOlderAdult && am >= M.y65;
+    if (sharedDecision) {
+      return [rec({
+        vaccine: 'PCV', status: 'shared-decision',
+        doseLabel: 'PCV20 or PCV21 ≥5 years (shared clinical decision-making)',
+        dueToday, earliestNextDate, minIntervalDays: Y5,
+        brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
+        note: 'PCV13 and PPSV23 already given. For adults whose PPSV23 was received at ≥65 years, an additional PCV20 or PCV21 (≥5 years after the last pneumococcal dose) is a shared clinical decision — it may be given or omitted.',
+        refs,
+      })];
+    }
+    // chronic-only adult <50: nothing now, review at 50.
+    if (!isOlderAdult && !hasIC(riskIds) && !require8wk(riskIds)) {
+      return [rec({
+        vaccine: 'PCV', status: 'complete',
+        doseLabel: 'No dose now — review at age 50',
+        note: 'Adult 19–49 with a chronic (non-immunocompromising) condition who already received PCV13 + PPSV23: no additional pneumococcal dose now. Re-evaluate at age 50, when a dose of PCV20 or PCV21 (≥5 years after the last pneumococcal dose) is recommended.',
+        refs,
+      })];
+    }
+    return [rec({
+      vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
+      doseLabel: 'PCV20 or PCV21 ≥5 years after last pneumococcal dose — completes the series',
+      dueToday, earliestNextDate, minIntervalDays: Y5,
+      brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
+      note: 'PCV13 and PPSV23 already given: give 1 dose of PCV20 or PCV21 ≥5 years after the last pneumococcal dose. This completes the series.',
+      refs,
+    })];
+  }
+
+  // ── None / unknown / PCV7-only → start a PCV ────────────────────────
+  // (PCV7-only is handled by validate.js dropping PCV7 → pcv.count===0 here.)
+  return [rec({
+    vaccine: 'PCV', status: anyRisk && !isOlderAdult ? 'risk-based' : 'due',
+    doseLabel: '1 dose PCV (PCV20, PCV15, or PCV21)',
+    dueToday: true, earliestNextDate: null,
+    brands: adultBrands,
+    note: isOlderAdult
+      ? 'Routine pneumococcal vaccination for adults ≥50 with no (or unknown, or PCV7-only) history: 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥1 year later. PCV20 and PCV21 each complete the series alone.'
+      : `Adult 19–49 with a qualifying risk condition and no (or unknown, or PCV7-only) pneumococcal history: 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later (${intervalClass === 'short' ? 'immunocompromising / cochlear implant / CSF leak' : 'chronic condition'}). PCV20 and PCV21 each complete the series alone.`,
+    refs,
+  })];
+}
+
+// Whether the patient needs the ≥8wk (IC) interval (IC or cochlear/CSF).
+function require8wk(riskIds) {
+  return adultPpsvIntervalClass(riskIds) === 'short';
+}
+
+// Most recent dose date across PCV + PPSV23 effective lists.
+function lastDoseDate(pcv, ppsv) {
+  const dates = [];
+  if (pcv.lastDate) dates.push(pcv.lastDate);
+  for (const d of ppsv.effective) if (d.date) dates.push(d.date);
+  dates.sort();
+  return dates.length ? dates[dates.length - 1] : null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  HSCT advisory block (peds <19y = p2016 Table 5; adults ≥19y = Fred Hutch)
+// ═══════════════════════════════════════════════════════════════════════════
+function hsctAdvisory(am) {
+  const adult = am >= M.y18;
+  if (adult) {
+    return {
+      title: 'Post-HSCT pneumococcal series (adult) — advisory',
+      coordinateFlag: 'Coordinate with the transplant/ID team — your center may use its own post-HSCT protocol. The schedule below is the Fred Hutch Long-Term Follow-Up guideline (institution-specific, titer-guided, not ACIP).',
+      recs: [
+        rec({
+          vaccine: 'PCV', status: 'risk-based', advisory: true,
+          doseLabel: 'PCV20 ×3: at ≥6 months, ≥8 months, and ≥10 months after HSCT (no PPSV23)',
+          dueToday: false, earliestNextDate: null,
+          brands: ['PCV20 (Prevnar 20)'],
+          note: 'Adult post-HSCT: 3 doses of PCV20 at approximately ≥6, ≥8, and ≥10 months after transplant. NO PPSV23 in the adult post-HSCT row. Titer-guided: check baseline S. pneumoniae IgG (23 serotypes) before the first PCV20, and recheck 1–2 months after EACH dose. A seroprotective IgG response to ≥15 of the 20 PCV20 serotypes means no further PCV20 is needed.',
+          refs: ['fredHutchLTFU'],
+        }),
+      ],
+    };
+  }
+  return {
+    title: 'Post-HSCT pneumococcal series (child <19y) — advisory',
+    coordinateFlag: 'Coordinate with the transplant/ID team — your center may use its own post-HSCT protocol. Timing below is relative to transplant (no calendar due-dates).',
+    recs: [
+      rec({
+        vaccine: 'PCV', status: 'risk-based', advisory: true,
+        doseLabel: '4 doses of PCV20, beginning 3–6 months after HSCT: give 3 doses 4 weeks apart, then a 4th dose at least 6 months after dose 3 and at least 12 months after HSCT',
+        dueToday: false, earliestNextDate: null,
+        brands: ['PCV20 (Prevnar 20)'],
+        note: 'Child post-HSCT (prior pneumococcal history is nullified — full re-vaccination): 4 doses of PCV20 beginning 3–6 months after HSCT. Give 3 doses 4 weeks apart, then a 4th dose ≥6 months after dose 3 AND ≥12 months after HSCT. If PCV20 is unavailable: 3 doses of PCV15 (4 weeks apart) starting 3–6 months post-HSCT, then PPSV23 ≥12 months after HSCT — OR, with chronic GVHD, a 4th PCV15 ≥12 months after HSCT instead of PPSV23.',
+        refs: ['p2016Table5'],
+      }),
+    ],
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PCV21 geographic advisory (adults only)
+// ═══════════════════════════════════════════════════════════════════════════
+function pcv21GeoNote(am, recs) {
+  const adult = am >= M.y18;
+  if (!adult) return null;
+  const offersPcv21 = recs.some((r) => (r.brands || []).some((b) => b.includes('PCV21')));
+  if (!offersPcv21) return null;
+  return {
+    note: 'PCV21 (Capvaxive) does not contain serotype 4. In regions where serotype 4 causes a high share of pneumococcal disease (e.g., Alaska, Colorado, the Navajo Nation, New Mexico, Oregon), PCV20 — or PCV15 followed by PPSV23 — may provide broader coverage. This is an advisory note, not a hard rule.',
+    citations: resolveRefs(['mmwr7336a3']),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PUBLIC API
+// ═══════════════════════════════════════════════════════════════════════════
+export function recommend(input) {
+  const am = input.ageMonths ?? 0;
+  const riskIds = input.riskIds ?? [];
+  const today = todayISO(input.today);
+  const rawPcv = (input.pcvDoses ?? []).filter(Boolean);
+  const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
+
+  // Validate + filter to effective lists (PCV7 dropped; invalid doses dropped).
+  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today);
+  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today);
+  const effectivePcv = pcvAnalysis.effective;
+  const effectivePpsv = ppsvAnalysis.effective;
+
+  const pcv = summarizePcv(effectivePcv);
+  const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
+
+  // ── Standard (age/history/risk) recommendations ──────────────────────
+  let recs;
+  if (am < M.m24) {
+    recs = pcvInfant(am, pcv, today);
+  } else if (am < M.y18) {
+    // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
+    if (pedsRiskRowClass(riskIds)) {
+      recs = pcvRiskChild(am, riskIds, pcv, ppsv, today);
+    } else {
+      recs = pcvHealthyChild(am, pcv, ppsv, today);
+    }
+  } else {
+    recs = pcvAdult(am, riskIds, pcv, ppsv, today);
+  }
+
+  // ── HSCT advisory block (prominent at top; standard recs still shown) ──
+  const hsct = hasHSCT(riskIds) ? hsctAdvisory(am) : null;
+
+  // ── PCV21 geographic advisory ─────────────────────────────────────────
+  const pcv21Geo = pcv21GeoNote(am, recs);
+
+  return {
+    recs,
+    hsct,
+    pcv21Geo,
+    perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
+    meta: { ageMonths: am, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
+  };
+}

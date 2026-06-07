@@ -1,0 +1,18 @@
+{
+  "name": "PneumoVax",
+  "short_name": "PneumoVax",
+  "description": "ACIP/CDC-cited pneumococcal vaccine decision support, infants through adults",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "theme_color": "#3a5a40",
+  "background_color": "#f4f6f4",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
