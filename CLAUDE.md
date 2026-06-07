@@ -198,3 +198,49 @@ Decision support only. Verify against current ACIP/CDC guidance before administe
 
 Tests: **78 passing**. Actions versions left at `@v6` (checkout/setup-node/configure-pages),
 `upload-pages-artifact@v5`, `deploy-pages@v5` — verified working on the sibling MeningoVax repo.
+
+## Session 3 changes (2026-06-07) — CDC PneumoRecs cross-check + age-band model
+
+Validated the engine against the CDC PneumoRecs VaxAdvisor web tool (independent
+oracle). All enterable adult + peds cases now align. Five fixes; **82 tests pass**.
+
+1. **Adult PCV13+PPSV23 shared-decision is date-driven, not current-age.**
+   `recommend.js` (`pcv.hasPCV13 && ppsvGiven` branch) computes age-at-PPSV23 from the
+   PPSV23 dose date; shared-decision applies only when PPSV23 was given at age ≥65
+   (CDC adult notes). The old current-age≥65 proxy remains ONLY as a fallback when the
+   PPSV23 dose is undated. Fixes the case "70yo, PPSV23 at 60 → firm recommendation."
+
+2. **PCV minimum age = ACIP 6 weeks, not the 2-month routine start.** `brands.js`
+   exports `PCV_MIN_AGE_M = 42 / 30.4375` used by PCV7/13/15/20. Previously `minAgeM:2`
+   rejected a dose given at the routine 2-month visit (56–62 days < 60.9), dropping the
+   first dose of every infant series. `validate.js` `fmtMinAge` renders sub-2-month
+   minimums in weeks.
+
+3. **Age-banded dose counts (`summarizePcv`).** The PCV summary now computes
+   `band = { before12, m12to23, m24to71, ge72, undated, before24, ge24 }` from the dose
+   dates the app already stores — the same age-band model CDC PneumoRecs uses. Replaces
+   total-count heuristics in the peds branches. **Undated-dose policy:** undated doses
+   fold into `before24` (assumed infant) but never into `ge24` (never ASSUME a ≥24mo
+   catch-up); an undated PCV20 keeps "benefit-of-the-doubt" completeness, while a PCV20
+   DATED in infancy does not complete a healthy series.
+
+4. **Healthy-child completeness is age-appropriate, not "has any PCV20."** A single
+   PCV20 given in infancy no longer marks a healthy 24–59mo child complete (that shortcut
+   is an adult rule). Complete iff full infant series (≥4 incl. a ≥12mo booster), OR a
+   dose at ≥24mo, OR an undated completing dose. NOTE: at-risk Row 3 intentionally keeps
+   "≥1 PCV20 at any age → complete" (confirmed correct vs PneumoRecs).
+
+5. **At-risk peds fixes.** (a) 24–71mo catch-up is 2 doses regardless of prior infant
+   doses (CDC: "<3 PCV by 24mo → 2 doses"); progress counts only doses at ≥24mo
+   (`band.ge24`). (b) Rows 8/9 now honor a prior PPSV23: non-IC PCV13(≥6y)+PPSV23 →
+   complete; IC keeps the ≥5-year recurring PCV20-or-2nd-PPSV23 step (p2016 Table 4 row 9).
+
+**HSCT:** confirmed PneumoRecs has NO HSCT pathway (CDC schedule notes give no HSCT
+pneumococcal schedule; HSCT absent from the tool's condition list). PneumoVax's HSCT
+advisory (peds = p2016 Table 5; adult = Fred Hutch LTFU) is intentional additive guidance.
+
+**PneumoRecs input model (for future comparison):** adults bucketed (<19 / 19–49 / ≥50,
+no exact age); adult risk a single yes/no (no IC sub-class; suppressed for ≥50); peds use
+age-banded dose counts + two risk buckets (chronic vs IC, cochlear/CSF under chronic).
+Cannot represent an unknown-product PCV or PCV7. Reproducible case harnesses live in
+`scratch/{adultCases,pedsCases,hsctCases}.mjs` (dev-only, not part of the build).
