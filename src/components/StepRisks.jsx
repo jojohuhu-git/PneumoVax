@@ -1,5 +1,6 @@
 import React from 'react';
 import { RISK_FACTORS } from '../data/riskFactors.js';
+import { ADULT_SCHED_MIN_M } from '../logic/scheduleConstants.js';
 
 const GROUP_LABELS = {
   IC: 'Immunocompromising conditions',
@@ -11,7 +12,8 @@ const GROUP_ORDER = ['IC', 'special', 'nonIC', 'hsct'];
 
 export default function StepRisks({ ageMonths, riskIds, onChange }) {
   const noneSelected = riskIds.length === 0;
-  const isAdult = (ageMonths ?? 0) >= 228;
+  // adultOnly risks (smoking, alcohol) shown only when patient is on adult rulebook (≥19y).
+  const isAdult = (ageMonths ?? 0) >= ADULT_SCHED_MIN_M;
 
   function toggle(id) {
     if (riskIds.includes(id)) onChange(riskIds.filter(r => r !== id));

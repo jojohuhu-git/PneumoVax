@@ -31,11 +31,17 @@ export function fmtDate(iso) {
   return `${months[m - 1]} ${d}, ${y}`;
 }
 
-/** Derive age group label from ageMonths. */
+/** Derive age group label from ageMonths.
+ *
+ * FIX L1: the old boundary `am < 120` for "Child" excluded ages 120–131mo
+ * (the 10th year) which should still be "Child". A 10-year-old is 120–131.9mo.
+ * Fixed to `am < 132` so "Child (2–10y)" covers the full 2–10y range inclusive.
+ * StepAge chips are aligned to the same boundary (see AGE_GROUP_CHIPS).
+ */
 export function ageGroup(am) {
   if (am == null) return null;
   if (am < 24) return 'Infant (<2y)';
-  if (am < 120) return 'Child (2–10y)';
+  if (am < 132) return 'Child (2–10y)';
   if (am < 228) return 'Adolescent (11–18y)';
   if (am < 600) return 'Adult (19–49y)';
   return 'Older adult (≥50y)';

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { ageGroup as deriveGroup, dobToAgeMonths, fmtAgeMonths } from '../logic/format.js';
 
+// FIX L1: Child chip maxM was 119 (leaving 120–131mo uncovered); Adolescent
+// chip minM was 132 (starting at 11y). Both corrected to close the gap.
+// Child: 2–10y inclusive → 24–131mo. Adolescent: 11–18y → 132–227mo.
 const AGE_GROUP_CHIPS = [
   { label: 'Infant (<2y)',        minM: 0,   maxM: 23,  defaultM: 6 },
-  { label: 'Child (2–10y)',       minM: 24,  maxM: 119, defaultM: 72 },
-  { label: 'Adolescent (11–18y)', minM: 132, maxM: 215, defaultM: 168 },
+  { label: 'Child (2–10y)',       minM: 24,  maxM: 131, defaultM: 72 },
+  { label: 'Adolescent (11–18y)', minM: 132, maxM: 227, defaultM: 168 },
   { label: 'Adult (19–49y)',      minM: 228, maxM: 599, defaultM: 360 },
   { label: 'Older adult (≥50y)',  minM: 600, maxM: null, defaultM: 660 },
 ];

@@ -223,3 +223,38 @@ as single source of truth) and its corrected rule exposed the PneumoVax discrepa
 
 **Tests:** 82 passing. No new tests added — the completed-series path is exercised by the
 existing P-series cases in `recommend.test.js`.
+
+---
+
+## Session — 2026-06-12 — REVIEW_FINDINGS.md boundary cluster + engine fixes
+
+Cleared all 10 items from the external audit `REVIEW_FINDINGS.md` (PR #2). Mirrored the
+pneumococcal logic into vaxapp. **PneumoVax 108 tests passing (was 82); vaxapp 2574 passing.**
+Nothing committed by the implementing agent — shipped in a follow-up.
+
+**Clinician decisions driving the work:**
+- Adult schedule rulebook begins at the **19th birthday (228mo)** — an 18yo stays on the
+  child/adolescent schedule (keeps the IC ≥5-year 2nd-PPSV23 step; HSCT 4-dose peds series).
+- PCV21 (Capvaxive) product is usable from **18y (216mo)** — kept as a separate gate.
+
+**What changed:**
+- New `src/logic/scheduleConstants.js`: `ADULT_SCHED_MIN_M = 228` (schedule boundary) and
+  `PCV21_MIN_AGE_M = 216` (product gate). These were one overloaded `216` before — the
+  source of the 216-vs-228 drift across engine/validator/UI. **Never recombine them.**
+- `recommend.js` (`M.y18` → 228, hsctAdvisory + dispatch), `validate.js`, `brands.js`,
+  `StepRisks.jsx` (now imports the shared constant), `format.js` + `StepAge.jsx` (L1 age
+  label), `CLINICAL_SPEC.md` §I/Products (PCV21 ≥18 reconciled with the two-concept note).
+- H5: infant series no longer "complete" without a real ≥12mo dose (uses band counts).
+- M1/M3: catch-up target keyed on age band; no more impossible "dose 4 of 3" label.
+- M2: at-risk 24–71mo child with one PCV20 → "dose 2 of 2" (was wrongly "complete").
+- New `src/logic/__tests__/regression-boundary-and-fixes.test.js` (26 tests, 18y0m/18y6m/19y0m).
+
+**Verified scenarios:** 18y6m asplenia → peds Table 4; 18y6m HSCT → peds Table 5 (4×PCV20);
+19y0m asplenia → adult; PCV21 offered at 18y but adult matrix not used until 19y; am=13mo with
+4 sub-12mo doses → booster still owed; 30mo asplenia + one PCV20 → dose 2 of 2; 10y → "Child".
+
+**Open follow-ups:**
+- **L2 (structural):** `dateUtils.js` / `Stepper.jsx` are byte-identical across
+  PneumoVax/MeningoVax/vaxapp and only annotated with sync comments this session. Extract to
+  a shared package to prevent the next drift.
+- **MeningoVax** has the same L1 age-label bug (10y labeled "Adolescent") — out of scope here.

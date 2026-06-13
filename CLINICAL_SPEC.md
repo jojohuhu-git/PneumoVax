@@ -43,10 +43,10 @@ SOLE source; HSCT adult = Fred Hutch LTFU SOLE source.**
 | PCV13 | Prevnar 13 | history only | counts as prior PCV; "if only PCV13 available, may be given" (`p2016` Table footnotes) |
 | PCV15 | Vaxneuvance | children + adults | counts; **requires a PPSV23 follow-up** (`cdcChildPneumo`, `cdcAdultPneumo`) |
 | PCV20 | Prevnar 20 | children + adults | counts; **no PPSV23 needed**, a series incl. PCV20 = complete (`cdcAdultPneumo`, `p2016`) |
-| PCV21 | Capvaxive | **adults ≥19 only** | counts (adults); no PPSV23 needed; lacks serotype 4 (`mmwr7336a3`) |
+| PCV21 | Capvaxive | **adults ≥18 only** | counts (adults ≥18y); no PPSV23 needed; lacks serotype 4 (`mmwr7336a3`) |
 | PPSV23 | Pneumovax 23 | risk-based, ≥2y | polysaccharide |
 
-**Counting policy:** count PCV13/PCV15/PCV20 (+ PCV21 in adults). PCV7 never counts.
+**Counting policy:** count PCV13/PCV15/PCV20 (+ PCV21 for patients ≥18y). PCV7 never counts.
 Unknown/undocumented history → treat as unvaccinated (`cdcAdultPneumo`, CDC general).
 
 ---
@@ -205,7 +205,19 @@ Routine for ALL adults ≥50 regardless of risk.
 
 ## §I — PCV21 specifics (`mmwr7336a3`)
 
-- Option for **any adult ≥19** who qualifies for a PCV. **Not for children** (<19y).
+> **Two-concept distinction (important for implementation):**
+> - **PCV21 product minimum age = 18 years (216 months)** — Capvaxive is FDA-approved
+>   and ACIP-recommended from age 18. A patient aged 18y may receive PCV21.
+> - **Adult schedule routing boundary = 19 years (228 months)** — the adult prior-vaccine
+>   matrix (§G/§H), HSCT adult pathway (§F), and adult-only risk gate in StepRisks all
+>   apply from 19y. Patients aged 18 use the child/adolescent rulebook (§B–§E) for
+>   schedule routing even though PCV21 is a valid product choice for them.
+>
+> These two thresholds are kept as separate named constants (`PCV21_MIN_AGE_M = 216` and
+> `ADULT_SCHED_MIN_M = 228`) in `src/logic/scheduleConstants.js`. Never collapse them
+> into a single value — they govern different gates.
+
+- Option for **any patient ≥18y** who qualifies for a PCV. **Not for children** (<18y).
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.

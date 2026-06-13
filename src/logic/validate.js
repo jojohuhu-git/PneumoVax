@@ -31,8 +31,12 @@
 
 import { daysBetween } from './dateUtils.js';
 import { productByKey, PCV_MIN_AGE_M } from '../data/brands.js';
+import { PCV21_MIN_AGE_M } from './scheduleConstants.js';
 
-const Y18_MONTHS = 216;
+// PCV21 product gate is 18y (216mo) — the PRODUCT minimum age per mm7336a3.
+// This is intentionally distinct from the ADULT_SCHED_MIN_M (228mo / 19y);
+// see scheduleConstants.js for the reasoning.
+const Y18_MONTHS = PCV21_MIN_AGE_M;  // 216 — PCV21 product age, NOT schedule boundary
 
 // Age in months at a past dose, from date + current age + today. null if no date.
 function ageAtDoseFromDate(dose, ageMonths, today) {

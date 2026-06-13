@@ -266,3 +266,46 @@ the CDC rule in the same session. The two engines now agree on this scenario.
 
 **Tests:** 82 passing (no new tests needed — the completed-series path is exercised by the
 existing P-series cases in `recommend.test.js`).
+
+## Session 5 changes (2026-06-12) — Boundary cluster + infant/at-risk engine fixes (REVIEW_FINDINGS.md)
+
+Addressed all 10 items from the external audit `REVIEW_FINDINGS.md` (PR #2). Fixes mirrored
+into vaxapp (the pneumococcal logic consumer). **108 tests passing** (was 82).
+
+### Two-concept boundary separation (H1–H4) — the central fix
+The engine had a single `216` constant overloaded for two unrelated gates. Split into a new
+`src/logic/scheduleConstants.js` with **two named constants — never collapse them**:
+- **`ADULT_SCHED_MIN_M = 228` (19y)** — the adult-vs-peds SCHEDULE routing boundary. Governs
+  the adult prior-vaccine matrix, `hsctAdvisory` (peds 4-dose PCV20 Table 5 vs adult 3-dose
+  Fred Hutch protocol), `recommend()` dispatch, `format.js` ageGroup, StepAge "Adult" chip,
+  and the StepRisks `adultOnly` risk gate. Patients aged 18 now correctly use the
+  child/adolescent rulebook (incl. the IC ≥5-year 2nd-PPSV23 step).
+- **`PCV21_MIN_AGE_M = 216` (18y)** — the PCV21 (Capvaxive) PRODUCT min-age only. PCV21 may
+  be offered/validated from 18y per FDA label / mm7336a3, independent of the schedule
+  boundary. Used by `validate.js` and `data/brands.js`.
+
+`recommend.js` `M.y18` now imports `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js`
+use `PCV21_MIN_AGE_M` for the PCV21 gate. StepRisks imports the shared constant (was a
+hardcoded 228 that disagreed with the engine's 216 — the original drift). `CLINICAL_SPEC.md`
+§I + Products table reconciled to PCV21 ≥18 with the two-concept distinction documented.
+
+### Infant / at-risk engine fixes
+- **H5** — `boosterGiven` keyed off the patient's *current* age (`am >= M.m12`), so an infant
+  with 4 doses all given <12mo was wrongly "complete". Now uses band counts
+  (`band.m12to23 + band.ge72 + band.undated >= 1`), matching `completedInfantSeries`.
+- **M1/M3** — infant catch-up `target` recomputed by current-age band so the impossible
+  "PCV dose 4 of 3" label is gone and an infant with one early dose shows the correct
+  remaining count.
+- **M2** — at-risk 24–71mo child with a single PCV20 was returned "complete" by the Row-3
+  `includesCompleting` shortcut. Now requires an age-appropriate count (`enoughAt24mo`)
+  before declaring complete; a lone PCV20 yields "dose 2 of 2". Mirrored into vaxapp.
+- **L1** — `format.js` age-group threshold raised `am < 120` → `am < 132` so a 10-year-old is
+  "Child", not "Adolescent"; StepAge chip bounds updated to close the 120–131mo gap.
+- **L2** — duplicated `dateUtils.js` / `Stepper.jsx` (byte-identical across
+  PneumoVax/MeningoVax/vaxapp — root cause of the 216/228 drift) annotated with
+  cross-reference sync comments. **Open follow-up:** extract to a shared package.
+
+### Tests
+New `src/logic/__tests__/regression-boundary-and-fixes.test.js` (26 tests) covering all 9
+required scenarios, incl. 18y0m / 18y6m / 19y0m boundaries across engine, validator, and the
+StepRisks adult-only gate. Total 108 passing.

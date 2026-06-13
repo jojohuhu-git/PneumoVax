@@ -15,9 +15,19 @@
 //
 // `minAgeM` are ACIP-usable minimums in months. 999 = no hard upper limit.
 //
+// PCV21 product min age = 18y (216mo) per FDA label + ACIP mm7336a3. This is
+// DISTINCT from the ADULT SCHEDULE boundary (19y / 228mo). See
+// src/logic/scheduleConstants.js for the authoritative constants and the
+// rationale for keeping them separate.
+//
 // Sources: CDC child/adult schedule notes, p2016, mm7336a3 (PCV21),
 //   mm7239a5 (PCV20 peds), immunize.org PCV7 rule. See src/data/refs.js.
 // ─────────────────────────────────────────────────────────────────────────
+
+// Import PCV21 product min age constant — see scheduleConstants.js.
+import { PCV21_MIN_AGE_M } from '../logic/scheduleConstants.js';
+
+export { PCV21_MIN_AGE_M };
 
 export const VAX = {
   PCV: 'PCV',
@@ -100,7 +110,7 @@ export const PCV_PRODUCTS = [
     counts: true,
     requiresPPSV23: false,
     completesSeries: true,
-    minAgeM: 216,           // ACIP mm7336a3: ≥18y; mm7336a3 says 18+ per ACIP vote
+    minAgeM: PCV21_MIN_AGE_M,  // 216 (≥18y) — FDA label + ACIP mm7336a3; schedule boundary is 228 (19y)
     maxAgeM: 999,
     historyOnly: false,
     childOk: false,         // not licensed/recommended for children

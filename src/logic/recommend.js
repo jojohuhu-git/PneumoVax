@@ -28,11 +28,14 @@ import {
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, DAYS } from './dateUtils.js';
 import { analyzeHistory } from './validate.js';
+import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
+// y18 is the ADULT SCHEDULE boundary (228 = 19y), not the PCV21 product gate (216 = 18y).
+// See scheduleConstants.js for the authoritative values and distinction.
 const M = {
   m2: 2, m7: 7, m12: 12, m16: 16, m24: 24, m60: 60, m72: 72,
-  y2: 24, y5: 60, y6: 72, y18: 216, y50: 600, y65: 780,
+  y2: 24, y5: 60, y6: 72, y18: ADULT_SCHED_MIN_M, y50: 600, y65: 780,
 };
 
 const WK8 = DAYS.weeks(8);   // 56
@@ -151,21 +154,59 @@ function pcvInfant(am, pcv, today) {
   // Min interval: <12mo → 4 weeks; ≥12mo → 8 weeks.
   const minInterval = am < M.m12 ? WK4 : WK8;
 
-  // If the child already has ≥4 counting PCV doses with last at ≥12mo, done.
-  // (Booster dose is the dose given at ≥12 months.)
-  // We approximate "complete" as: ≥1 dose given at ≥12 months AND total ≥ target.
-  // Target by start age band per Table 1.
+  // Target total doses per CDC Table 1, computed from age band + prior doses.
+  //
+  // FIX M1 + M3: the old `Math.max(2, Math.min(4, prior + 1))` formula for
+  // am≥12mo caused two bugs:
+  //   • M1: 1 dose at 2mo → prior=1 → target=2, says "dose 2 of 2" → clinically
+  //         only 1 of the 2 remaining at-this-age doses, ignoring the 12–15mo
+  //         booster that is ALSO still needed.
+  //   • M3: 3 doses before 12mo → prior=3 → target=4, but the booster is a
+  //         separate dose, so label "dose 4 of 3" was impossible.
+  //
+  // Corrected logic per CDC Table 1:
+  //   <7mo  → target=4 (3 primary + 1 booster), regardless of prior
+  //   7–11mo → target = prior<1 ? 3 : 4  (0 before 7mo → 2+booster; ≥1 → 1+booster)
+  //   ≥12mo  → target = prior<3 ? (prior<1 ? 2 : prior + 1) : 4
+  //             — with ≥3 infant doses the booster is still needed (→ 4 total)
+  //             — with <3 infant doses, target climbs with prior but ≥2
+  //
+  // Practically for a 12–23mo child: the booster IS the remaining dose, so the
+  // series total must reach 4 if 3 primary doses were given <12mo.  For partial
+  // histories (<3 primary), the count of "doses still needed" drives the label.
   let target;
-  if (prior === 0) {
-    target = am < M.m7 ? 4 : am < M.m12 ? 3 : 2;
+  if (am < M.m7) {
+    // Start at 0–6mo: full 4-dose series (3 primary + booster) regardless of prior.
+    target = 4;
+  } else if (am < M.m12) {
+    // Start at 7–11mo: 0 prior → 3 total (2 primary + booster); ≥1 prior → 4 total.
+    // (CDC Table 1: "7–11 months, 1 dose → 2 more doses"; "0 doses → 2 primary + 1 booster")
+    const before7 = pcv.band.before12 - (pcv.band.m12to23); // doses given <7mo (approx)
+    target = prior < 1 ? 3 : 4;
   } else {
-    // With prior doses, the catch-up generally lands at 2–4 total; we use the
-    // routine 4-dose target capped by remaining-needed from Table 1.
-    target = am < M.m7 ? 4 : am < M.m12 ? 3 : Math.max(2, Math.min(4, prior + 1));
+    // Start at ≥12mo: child needs the booster, plus any missing primary doses.
+    // With ≥3 prior infant doses: need 1 booster → total = 4.
+    // With 1–2 prior doses:       need remaining primaries + booster → prior + 2, max 4.
+    // With 0 prior:                2-dose catch-up at this age → total = 2.
+    if (prior === 0) {
+      target = 2;
+    } else if (pcv.band.before12 >= 3) {
+      // 3 primary doses before 12mo — booster is the only thing left → total = 4.
+      target = 4;
+    } else {
+      // 1–2 primary doses; need remaining primaries + booster — max 4 total.
+      target = Math.min(4, prior + 2);
+    }
   }
 
   // Has a dose at ≥12mo been given? (booster satisfied)
-  const boosterGiven = pcv.products.length > 0 && am >= M.m12 && prior >= target;
+  // FIX H5: Must check whether ≥1 dose was ADMINISTERED at ≥12mo, not just
+  // whether the patient's CURRENT age is ≥12mo.  A 13-month-old with 4 doses
+  // all given at <12mo still needs the ≥12mo booster — prior >= target alone
+  // does not prove the series is complete.
+  // Undated doses get benefit-of-the-doubt (matching completedInfantSeries logic
+  // in pcvHealthyChild) — consistent with validate.js counting policy.
+  const boosterGiven = (pcv.band.m12to23 + pcv.band.ge72 + pcv.band.undated) >= 1 && prior >= target;
 
   if (prior >= target && boosterGiven) {
     return [rec({
@@ -259,7 +300,19 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   const out = [];
 
   // Row 3: completed series before 6y including ≥1 PCV20 → no additional doses.
-  if (pcv.includesCompleting) {
+  // FIX M2: The shortcut "includes PCV20 → complete" is an ADULT and older-child
+  // rule (CDC adult notes / p2016 Table 2 for healthy children), NOT a universal
+  // rule for at-risk 24–71mo children.  Per CDC Table 4, an at-risk child <6y
+  // with only 1 PCV20 still needs 1 more dose (Row 1: <3 doses before 24mo → 2
+  // doses at ≥24mo).  The Row-3 shortcut only applies once the child has
+  // COMPLETED the age-appropriate series (i.e. the Table 4 rows-1/2 requirement
+  // is fully met AND the history includes a completing dose).
+  //
+  // Gate: child <6y AND insufficient doses at ≥24mo → fall through to rows 1/2.
+  // For child ≥6y the catch-up is a single dose regardless, so the shortcut is
+  // safe once a PCV20 is present (they've had their 1 at-risk dose).
+  const enoughAt24mo = am >= M.m72 || pcv.band.ge24 >= (pcv.band.before24 >= 3 ? 1 : 2);
+  if (pcv.includesCompleting && (am >= M.m72 || enoughAt24mo)) {
     out.push(rec({
       vaccine: 'PCV', status: 'complete',
       doseLabel: 'PCV complete (includes PCV20)',
