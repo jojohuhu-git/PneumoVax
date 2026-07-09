@@ -42,6 +42,11 @@ export const REFS = {
     label: 'CDC — Pneumococcal Vaccine Recommendations (HCP)',
     short: 'CDC Pneumococcal Recommendations',
   },
+  cdcRiskIndications: {
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations (incl. "received PCV only before age 6 years")',
+    short: 'CDC Risk-based Pneumococcal',
+  },
 
   // ACIP MMWRs ------------------------------------------------------------
   mmwr7401a1: {
