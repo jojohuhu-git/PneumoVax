@@ -368,6 +368,27 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   //   • prior counting PCV 0   → "no prior PCV13/15/20"
   //   • prior counting PCV 1–2 (e.g. a single PCV13 at/after 6y) → "PCV13 only at/after 6y"
 
+  // ── PCV given ONLY before age 72 months (before age 6) + PPSV23 already given → complete ──
+  // Verified against CDC PneumoRecs VaxAdvisor (2026-07-09). A high-risk patient (IC or
+  // non-IC) who is now ≥6 years old, whose ONLY conjugate doses (PCV7 excluded) were all
+  // given before age 72 months, who has received PPSV23 and never PCV20/PCV21, has COMPLETED
+  // the pediatric PCV + PPSV23 series — no adult/older-child PCV20 catch-up. The decisive
+  // gate is PneumoRecs' question "did the patient only receive PCV before age 72 months?".
+  // Requires all counting PCV doses to be DATED and before 72mo: an undated dose cannot be
+  // confirmed pre-72mo, so it falls through to the standard rows (matches "PPSV23 already
+  // given → PCV20/2nd-PPSV23" for undated-history IC cases).
+  const allCountingPcvBefore72mo =
+    pcv.count >= 1 && pcv.band.ge72 === 0 && pcv.band.undated === 0;
+  if (am >= M.m72 && allCountingPcvBefore72mo && ppsvGiven && !pcv.includesCompleting) {
+    out.push(rec({
+      vaccine: 'PCV', status: 'complete',
+      doseLabel: 'PCV series complete (PCV before age 6 + PPSV23)',
+      note: 'The patient received their conjugate pneumococcal dose(s) only before age 6 (72 months) and has received PPSV23 — the pediatric high-risk pneumococcal series is complete. No further PCV or PPSV23 is needed. Verified against CDC PneumoRecs VaxAdvisor: "only received PCV before age 72 months" + PPSV23 received → complete. (PCV7 doses are never counted toward the series.)',
+      refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', 'p2016']),
+    }));
+    return out;
+  }
+
   if (pcv.count >= 3) {
     // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
     if (ppsvGiven) {
