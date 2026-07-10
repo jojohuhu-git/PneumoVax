@@ -1,4 +1,4 @@
-// HSCT comparison cases. node scratch/hsctCases.mjs
+// HSCT comparison cases. node scripts/hsctCases.mjs
 // PneumoVax HSCT = advisory (peds <19y: p2016 Table 5; adult ≥19y: Fred Hutch LTFU).
 // These intentionally diverge from ACIP/PneumoRecs — this prints PneumoVax's advisory
 // + any standard recs so we can diff against whatever PneumoRecs returns.
