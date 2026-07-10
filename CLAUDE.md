@@ -17,6 +17,8 @@ Dev server config: `.claude/launch.json` ("PneumoVax dev server").
 
 All public asset paths MUST use `import.meta.env.BASE_URL` (Vite sets `base: '/PneumoVax/'`).
 
+The save-time guardrail (flags stray top-level notes — see Root Directory Hygiene) turns on automatically during `npm install`. If a session finds it off (e.g. a freshly re-downloaded copy), re-run `npm install` or `npm run prepare` to switch it back on, and remind the owner.
+
 Also read before changing any rule: `CLINICAL_SPEC.md` (every rule with source citations).
 
 ## Source of Truth Files
