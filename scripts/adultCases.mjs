@@ -1,5 +1,5 @@
 // Adult comparison case matrix: PneumoVax vs CDC PneumoRecs VaxAdvisor.
-// NOT part of the app build. Run: node scratch/adultCases.mjs
+// NOT part of the app build. Run: node scripts/adultCases.mjs
 // Fixed `today` for determinism. Dates are expressed as "years ago" helpers.
 import { recommend } from '../src/logic/recommend.js';
 

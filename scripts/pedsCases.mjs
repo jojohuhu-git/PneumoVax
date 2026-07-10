@@ -1,5 +1,5 @@
 // Peds comparison case matrix: PneumoVax vs CDC PneumoRecs VaxAdvisor.
-// node scratch/pedsCases.mjs  — fixed `today` for determinism.
+// node scripts/pedsCases.mjs  — fixed `today` for determinism.
 // Peds doses are built from DOB + age-at-dose so PneumoRecs (which captures the
 // birthdate + dose dates) gets the same history we feed PneumoVax.
 import { recommend } from '../src/logic/recommend.js';

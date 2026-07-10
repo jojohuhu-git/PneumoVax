@@ -23,12 +23,17 @@ Also read before changing any rule: `CLINICAL_SPEC.md` (every rule with source c
 
 | What | Where |
 |---|---|
+| Plain-English folder guide (owner is a non-coder) | [MAP.md](MAP.md) |
 | Architecture, file map, engine API, schedule constants | [docs/agent/architecture.md](docs/agent/architecture.md) |
 | Pneumococcal clinical rules, product semantics, HSCT | [docs/agent/clinical-rules.md](docs/agent/clinical-rules.md) |
 | Test files and coverage requirements | [docs/agent/testing.md](docs/agent/testing.md) |
+| PneumoRecs comparison harnesses (dev-only) | `scripts/{adult,peds,hsct}Cases.mjs` |
 | Session history (2026-06-07 through 2026-06-12) | [docs/archive/agent-session-log.md](docs/archive/agent-session-log.md) |
 
 ## Non-Negotiable Rules
+
+### Root Directory Hygiene
+Only `CLAUDE.md`, `MAP.md`, `README.md`, and `CLINICAL_SPEC.md` live at the repo root (`CLINICAL_SPEC.md` stays — code/test comments cite it by that path). Never create new root-level `.md` files. Session notes/handoffs/reviews go to `docs/archive/`; comparison scripts go to `scripts/`. Keep `MAP.md` current when folders change.
 
 ### Clinical Authority
 ACIP/CDC/immunize.org over FDA package inserts. Sources per topic are in `CLINICAL_SPEC.md`. Always update `CLINICAL_SPEC.md` when changing a rule.
@@ -75,5 +80,8 @@ Single source: `adultPpsvIntervalClass()` in `riskFactors.js`. IC/cochlear/CSF =
 | Pneumococcal clinical rules with source citations | `docs/agent/clinical-rules.md` + `CLINICAL_SPEC.md` |
 | Test files, coverage requirements, key invariants | `docs/agent/testing.md` |
 | Dated "session changes" / "changes shipped" history | `docs/archive/agent-session-log.md` |
+| Handoffs, reviews, finished plans | `docs/archive/` |
+| Comparison/verification harnesses | `scripts/` |
+| Plain-English folder explanations for the owner | `MAP.md` |
 
 Do not add dated session logs, implementation narratives, or stale local paths to this file.
