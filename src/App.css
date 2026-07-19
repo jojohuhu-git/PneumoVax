@@ -252,9 +252,12 @@ body {
 }
 
 /* ── Results ───────────────────────────────────────────────────── */
+/* PD2/D1: answer-first summary line, above the results header. */
+.results-summary-line { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); margin-bottom: var(--sp-12); }
 .results-header { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-24); margin-bottom: var(--sp-16); }
 .results-title { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); margin-bottom: var(--sp-8); }
-.results-meta { display: flex; flex-wrap: wrap; gap: var(--sp-8); align-items: center; }
+.results-meta { display: flex; flex-direction: column; gap: var(--sp-8); }
+.meta-chips, .meta-actions { display: flex; flex-wrap: wrap; gap: var(--sp-8); align-items: center; }
 .meta-chip { display: inline-flex; align-items: center; padding: 3px var(--sp-12); border-radius: var(--rads); font-size: var(--fs-sm); font-weight: 500; }
 .meta-age { background: var(--clt); color: var(--c); }
 .meta-group { background: var(--gy6); color: var(--gy2); }
@@ -267,6 +270,26 @@ body {
 .age-edit-btn:hover { background: var(--c-hover); }
 .age-edit-row { display: flex; align-items: flex-end; gap: var(--sp-12); margin-top: var(--sp-12); flex-wrap: wrap; }
 .age-edit-hint { font-size: var(--fs-sm); color: var(--gy3); align-self: center; }
+/* PD2/D13b: recorded-doses editor and color-key panels stack their sections
+   full-width instead of the base row layout above. */
+.dose-history-panel { flex-direction: column; align-items: flex-start; }
+.dose-history-block { width: 100%; }
+.dose-history-empty { font-size: var(--fs-base); color: var(--gy4); margin-bottom: var(--sp-4); }
+
+/* ── PD2/E6: color legend ─────────────────────────────────────────── */
+.legend-row {
+  display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base);
+  color: var(--gy2); padding: var(--sp-4) 0;
+}
+.legend-swatch { width: 14px; height: 14px; border-radius: var(--rads); flex-shrink: 0; border: 1px solid var(--gy5); }
+.legend-swatch-due        { background: var(--glt); border-color: var(--gmd); }
+.legend-swatch-catchup    { background: var(--alt); border-color: var(--amd); }
+.legend-swatch-shared     { background: var(--blt); border-color: var(--bmd); }
+.legend-swatch-neutral    { background: var(--gy6); border-color: var(--gy5); }
+.legend-swatch-valid      { background: var(--glt); border-color: var(--gmd); }
+.legend-swatch-noncounting{ background: var(--alt); border-color: var(--amd); }
+.legend-swatch-invalid    { background: var(--rlt); border-color: var(--rmd); }
+.legend-swatch-unknown    { background: var(--gy6); border-color: var(--gy5); }
 
 /* ── Rec cards ─────────────────────────────────────────────────── */
 .rec-section { margin-bottom: var(--sp-16); }
@@ -275,27 +298,42 @@ body {
   letter-spacing: 0.06em; color: var(--gy3); margin-bottom: var(--sp-8); padding: 0 var(--sp-4);
 }
 .rec-card { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); border: 1px solid var(--gy5); overflow: hidden; margin-bottom: var(--sp-12); }
-.rec-card.status-due             { background: var(--glt); border-color: var(--gmd); }
-.rec-card.status-catchup         { background: var(--alt); border-color: var(--amd); }
-.rec-card.status-risk-based      { background: var(--rlt); border-color: var(--rmd); }
-.rec-card.status-shared-decision { background: var(--blt); border-color: var(--bmd); }
-.rec-card.status-complete        { background: var(--gy6); border-color: var(--gy5); }
-.rec-card.status-not-indicated   { background: var(--wh); border-color: var(--gy5); }
-.rec-card.status-deferred        { background: var(--alt); border-color: var(--amd); }
-.rec-card-inner { padding: var(--sp-16) 18px; }
-.rec-card-head { display: flex; align-items: center; gap: var(--sp-12); flex-wrap: wrap; margin-bottom: var(--sp-8); }
-.rec-vaccine-name { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); }
-.status-badge {
-  display: inline-flex; align-items: center; padding: 2px 9px; border-radius: var(--rads);
-  font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.03em;
+/* PD2/D9: the card head is a full-width bar tinted by TIMING only — is this
+   due today, does it need catch-up, or is it a shared (optional) decision, or
+   neither urgent right now. The body below stays plain white. The clinical
+   REASON (routine, risk-based, shared-decision, etc.) is a small colored text
+   label in the bar instead (see .status-badge below) — no pill background, no
+   card fill of its own. Mirrors MeningoVax's rec-card-head pattern (D9/B4). */
+.rec-card-head {
+  display: flex; align-items: center; gap: var(--sp-12); flex-wrap: wrap;
+  padding: var(--sp-12) var(--sp-16); border-bottom: 1px solid var(--gy5); background: var(--gy6);
 }
-.status-badge.due              { background: var(--glt); color: var(--g); }
-.status-badge.catchup          { background: var(--alt); color: var(--a); }
-.status-badge.risk-based       { background: var(--rlt); color: var(--r); }
-.status-badge.shared-decision  { background: var(--blt); color: var(--b); }
-.status-badge.complete         { background: var(--gy6); color: var(--gy3); }
-.status-badge.not-indicated    { background: var(--gy6); color: var(--gy4); }
-.status-badge.deferred         { background: var(--alt); color: var(--a); }
+.rec-card.timing-due     .rec-card-head { background: var(--glt); }
+.rec-card.timing-catchup .rec-card-head { background: var(--alt); }
+.rec-card.timing-shared  .rec-card-head { background: var(--blt); }
+.rec-card.timing-neutral .rec-card-head { background: var(--gy6); }
+.rec-card-inner { padding: var(--sp-16) 18px; }
+.rec-vaccine-name { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); }
+.rec-card-head-trailing { margin-left: auto; display: flex; align-items: center; gap: var(--sp-8); }
+/* PD2/D9: reason label is plain colored text, no pill — the header bar's
+   tint already carries the timing color, so a second colored background here
+   would compete with it. */
+.status-badge { font-size: var(--fs-sm); font-weight: 700; letter-spacing: 0.02em; }
+.status-badge.due              { color: var(--g); }
+.status-badge.catchup          { color: var(--a); }
+.status-badge.risk-based       { color: var(--r); }
+.status-badge.shared-decision  { color: var(--b); }
+.status-badge.complete         { color: var(--gy3); }
+.status-badge.not-indicated    { color: var(--gy4); }
+.status-badge.deferred         { color: var(--a); }
+/* PD2/D5: neutral cards (complete/not-indicated/deferred) collapse to this
+   compact clickable row so due items visually dominate the screen. */
+.rec-card-head-toggle {
+  width: 100%; background: none; border: none; font: inherit; text-align: left;
+  cursor: pointer; color: inherit;
+}
+.rec-card-collapsed .rec-card-head { border-bottom: none; }
+.rec-card-collapsed-reason { font-size: var(--fs-base); color: var(--gy3); margin-left: var(--sp-8); }
 .due-pill { display: inline-flex; align-items: center; padding: 3px var(--sp-12); border-radius: var(--rads); background: var(--g); color: var(--wh); font-size: var(--fs-sm); font-weight: 700; }
 .due-pill.due-pill-optional { background: var(--blt); color: var(--b); border: 1px solid var(--bmd); }
 .due-pill.due-pill-advisory { background: var(--hscthdr); color: var(--hsct); border: 1px solid var(--hsctmd); }
