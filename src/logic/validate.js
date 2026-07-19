@@ -39,7 +39,7 @@ import { PCV21_MIN_AGE_M } from './scheduleConstants.js';
 const Y18_MONTHS = PCV21_MIN_AGE_M;  // 216 — PCV21 product age, NOT schedule boundary
 
 // Age in months at a past dose, from date + current age + today. null if no date.
-function ageAtDoseFromDate(dose, ageMonths, today) {
+export function ageAtDoseFromDate(dose, ageMonths, today) {
   if (!dose?.date) return null;
   return ageMonths - daysBetween(dose.date, today) / 30.4375;
 }
