@@ -38,7 +38,7 @@ export default function StepHistory({
     <div className="step-card">
       <div className="step-title">Vaccination History</div>
       <div className="step-sub">
-        Record prior pneumococcal doses (optional — leave empty if none).
+        Record prior pneumococcal doses (optional, leave empty if none).
         Date is optional (counting works without it). PCV7 is recorded but never
         counts toward the series.
       </div>

@@ -259,7 +259,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
             marginBottom: 16,
           }}>
           <div className="advisory-banner-title" style={{ color: 'var(--hsct)' }}>
-            ⚠ Advisory — {hsct.title}
+            Advisory: {hsct.title}
           </div>
           <div className="advisory-banner-flag">{hsct.coordinateFlag}</div>
           {hsct.recs.map((r, i) => (
@@ -291,7 +291,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
             marginBottom: 16,
           }}>
           <div className="advisory-banner-title" style={{ color: 'var(--b)' }}>
-            ℹ PCV21 geographic note:
+            PCV21 geographic note:
           </div>
           <div className="advisory-note">{pcv21Geo.note}</div>
           {pcv21Geo.citations && pcv21Geo.citations.length > 0 && (
@@ -309,7 +309,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
       {hsct ? (
         <details className="rec-section">
           <summary className="history-edit-summary">
-            Standard age/history schedule (reference — applies after completing the HSCT series above)
+            Standard age/history schedule (reference, applies after completing the HSCT series above)
           </summary>
           {buildCards(recs)}
         </details>
@@ -324,7 +324,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
       <div className="results-actions">
         {onBack && (
-          <button className="btn btn-outline" onClick={onBack}>← Edit history</button>
+          <button className="btn btn-outline" onClick={onBack}>Edit history</button>
         )}
         <button className="btn btn-outline" onClick={onReset}>Start Over</button>
       </div>

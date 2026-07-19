@@ -82,7 +82,7 @@ export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
         ))}
       </div>
 
-      <div className="dob-divider">— or enter precise age —</div>
+      <div className="dob-divider">or enter precise age</div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <button
@@ -103,7 +103,7 @@ export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
 
       {mode === 'precise' && (
         <>
-        <div className="age-precise-hint">Age used for recommendations — refine if needed</div>
+        <div className="age-precise-hint">Age used for recommendations, refine if needed</div>
         <div className="age-row">
           <div className="age-field">
             <label htmlFor="age-years">Years</label>

@@ -10,7 +10,7 @@ export default function Disclaimer() {
       </a>{' '}
       before administering vaccines. Each recommendation includes a citation link to its source
       (CDC schedule notes, ACIP MMWR, or immunize.org). Post-HSCT guidance is advisory and
-      relative to transplant — coordinate with the transplant/ID team, as your center may use
+      relative to transplant. Coordinate with the transplant/ID team, as your center may use
       its own protocol. Age eligibility and dose intervals reflect ACIP guidance, which may
       differ from FDA package insert labeling.
     </div>

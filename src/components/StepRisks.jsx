@@ -25,7 +25,7 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
     <div className="step-card">
       <div className="step-title">Risk Factors</div>
       <div className="step-sub">
-        Select all that apply — these drive the pneumococcal pathway, the PCV15→PPSV23 interval,
+        Select all that apply. These drive the pneumococcal pathway, the PCV15→PPSV23 interval,
         and (for HSCT) the advisory series.
       </div>
 
@@ -57,7 +57,6 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
       <label className={`risk-none${noneSelected ? ' selected' : ''}`}
         onClick={clearAll} role="button" tabIndex={0}
         onKeyDown={e => e.key === 'Enter' && clearAll()}>
-        <span style={{ fontSize: '1.1rem' }}>○</span>
         <span>No risk factors apply</span>
       </label>
     </div>

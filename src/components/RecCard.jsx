@@ -150,7 +150,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
         {brands && brands.length > 0 && !isNeutral && (
           <div className="rec-brands">
             <div className="rec-brands-title">
-              {brands.length > 1 ? 'Product options — choose one' : 'Product'}
+              {brands.length > 1 ? 'Product options (choose one)' : 'Product'}
             </div>
             {brands.map((b, i) => (
               <div key={i} className="rec-brand-item">
