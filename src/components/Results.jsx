@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { recommend } from '../logic/recommend.js';
+import { analyzeHistory } from '../logic/validate.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
@@ -19,6 +20,43 @@ export default function Results({ state, onReset, onChange, onBack }) {
   });
 
   const { recs, hsct, pcv21Geo } = result;
+
+  // PC1: recorded-dose validity chips, reusing validate.js's analyzeHistory
+  // (never recomputed here). A scenario can produce more than one PCV- or
+  // PPSV23-tagged card (e.g. "Option A" / "Option B" alternatives) — the
+  // full recorded history is attached to only the FIRST card of each vaccine
+  // type so it isn't duplicated across alternative-option cards.
+  //
+  // The engine only emits a card for a vaccine when there's something
+  // actionable to say about it (e.g. a completed PCV series with PPSV23
+  // still pending renders ONLY a PPSV23 card). When that leaves a vaccine
+  // with recorded doses but no card of its own, its history is attached as
+  // a labeled secondary block on the first card that DOES render, so a
+  // clinician can still see it (and, critically, the "PCV7 does not count"
+  // note) rather than it silently disappearing.
+  const histories = {
+    PCV: { label: 'PCV', doses: pcvDoses, doseValidations: analyzeHistory('PCV', pcvDoses, ageMonths ?? 0).perDose },
+    PPSV23: { label: 'PPSV23', doses: ppsv23Doses, doseValidations: analyzeHistory('PPSV23', ppsv23Doses, ageMonths ?? 0).perDose },
+  };
+  const seenVaccine = {};
+  function historyPropsFor(vaccine) {
+    if (seenVaccine[vaccine]) return {};
+    seenVaccine[vaccine] = true;
+    const h = histories[vaccine];
+    return h ? { doses: h.doses, doseValidations: h.doseValidations } : {};
+  }
+  function buildCards(recList) {
+    const cards = recList.map((r, i) => (
+      <RecCard key={i} rec={r} ageMonths={ageMonths ?? 0} {...historyPropsFor(r.vaccine)} />
+    ));
+    const orphan = Object.values(histories).find(
+      h => h.doses.length > 0 && !seenVaccine[h.label]
+    );
+    if (orphan && cards.length > 0) {
+      cards[0] = React.cloneElement(cards[0], { otherHistory: orphan });
+    }
+    return cards;
+  }
   const group = ageGroup(ageMonths);
   const riskLabels = riskIds.map(id => RISK_FACTORS.find(r => r.id === id)?.label).filter(Boolean);
 
@@ -226,12 +264,12 @@ export default function Results({ state, onReset, onChange, onBack }) {
           <summary className="history-edit-summary">
             Standard age/history schedule (reference — applies after completing the HSCT series above)
           </summary>
-          {recs.map((r, i) => <RecCard key={i} rec={r} />)}
+          {buildCards(recs)}
         </details>
       ) : (
         <div className="rec-section">
           <div className="rec-section-title">Recommendation</div>
-          {recs.map((r, i) => <RecCard key={i} rec={r} />)}
+          {buildCards(recs)}
         </div>
       )}
 

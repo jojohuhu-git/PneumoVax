@@ -86,4 +86,30 @@ describe('App wizard', () => {
     const texts = cards.map(c => c.textContent).join(' ');
     expect(texts).toMatch(/not indicated/i);
   });
+
+  // PC1: when the engine emits only a PPSV23 card (PCV series already
+  // complete), the recorded PCV history — including the PCV7-does-not-count
+  // note — must still surface somewhere, not disappear silently.
+  it('shows PCV history (with PCV7 does-not-count note) under the PPSV23 card when no PCV card renders', () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Adult (19–49y)'));
+    fireEvent.click(getNextBtn());           // → Risks
+    fireEvent.click(screen.getByLabelText(/chronic lung disease/i, { exact: false }));
+    fireEvent.click(getNextBtn());           // → History
+    fireEvent.click(screen.getByRole('button', { name: /\+ add pcv dose/i }));
+    fireEvent.click(screen.getByRole('button', { name: /\+ add pcv dose/i }));
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    fireEvent.change(dateInputs[0], { target: { value: '2005-06-01' } });
+    fireEvent.change(dateInputs[1], { target: { value: '2026-05-01' } });
+    const productSelects = document.querySelectorAll('select');
+    fireEvent.change(productSelects[0], { target: { value: 'PCV7' } });
+    fireEvent.change(productSelects[1], { target: { value: 'PCV15' } });
+    fireEvent.click(screen.getByRole('button', { name: /view results/i }));
+
+    const cards = screen.getAllByTestId('rec-card');
+    expect(cards.map(c => c.querySelector('.rec-vaccine-name')?.textContent)).toEqual(['PPSV23']);
+    expect(screen.getByText('PCV history:')).toBeTruthy();
+    expect(screen.getByText('Recorded (does not count)')).toBeTruthy();
+    expect(screen.getByText(/PCV7 \(Prevnar 7\) is not counted/)).toBeTruthy();
+  });
 });

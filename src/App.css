@@ -13,8 +13,10 @@
   --gmd:  #a5d6a7;
   --a:    #b06a00;   /* amber/catch-up */
   --alt:  #fff3e0;
+  --amd:  #ffcc80;   /* amber medium border */
   --r:    #b71c1c;   /* risk-based red — errors/invalid only */
   --rlt:  #ffebee;
+  --rmd:  #ef9a9a;   /* red medium border */
   --b:    #1565c0;   /* shared-decision blue */
   --blt:  #e3f2fd;
   --bmd:  #90caf9;
@@ -292,6 +294,37 @@ body {
   text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; transition: background 0.1s;
 }
 .citation-chip:hover { background: var(--clt); border-color: var(--cmd); }
+
+/* ── Per-dose validation chips (Recorded: block) ──────────────────
+   PC1: each recorded dose row shows the dose descriptor (left) and a
+   validity chip (right); reasons/detail wrap to full width below. Mirrors
+   MeningoVax's dose-val-* pattern, plus dose-val-noncounting for PCV7. */
+.rec-progress { margin-bottom: 10px; }
+.rec-progress-label { font-size: 0.78rem; font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; }
+.rec-progress-list { list-style: none; margin-top: 4px; }
+.rec-progress-dose-row {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  column-gap: 10px; row-gap: 4px; padding: 4px 0; border-bottom: 1px solid var(--gy6);
+}
+.rec-progress-dose-row:last-child { border-bottom: none; }
+.rec-progress-dose-text { font-size: 0.85rem; color: var(--gy2); flex: 1 1 auto; min-width: 0; }
+.dose-val { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dose-val-chip {
+  display: inline-flex; align-items: center; padding: 1px 8px; border-radius: var(--rads);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
+}
+.dose-val-valid       { background: var(--glt); color: var(--g); border: 1px solid var(--gmd); }
+.dose-val-noncounting { background: var(--alt); color: var(--a); border: 1px solid var(--amd); }
+.dose-val-invalid     { background: var(--rlt); color: var(--r); border: 1px solid var(--rmd); }
+.dose-val-unknown     { background: var(--gy6); color: var(--gy3); border: 1px solid var(--gy5); }
+.dose-val-reasons { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.dose-val-reason { font-size: 0.78rem; color: var(--gy2); line-height: 1.4; }
+.dose-val-detail { font-size: 0.72rem; color: var(--gy3); line-height: 1.4; }
+.dose-val-dropped .rec-progress-dose-text { opacity: 0.55; text-decoration: line-through; }
+.dose-val-effective {
+  display: inline-flex; align-items: center; padding: 1px 8px; border-radius: var(--rads);
+  font-size: 0.72rem; color: var(--gy3); background: var(--gy6);
+}
 
 /* ── HSCT advisory card ─────────────────────────────────────────── */
 .hsct-card { background: var(--hsctlt); border-radius: var(--rad); box-shadow: var(--sh2); border: 2px solid var(--hsctmd); margin-bottom: 16px; overflow: hidden; }
