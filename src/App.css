@@ -250,6 +250,16 @@ body {
   margin-top: var(--sp-12); padding: var(--sp-8) var(--sp-12); border-radius: var(--rads);
   background: var(--blt); border-left: 3px solid var(--b); font-size: var(--fs-base); color: var(--b); line-height: 1.5;
 }
+.family-note-neutral { background: var(--gy6); border-left-color: var(--gy4); color: var(--gy3); }
+.history-section-title-spaced { margin-top: 18px; }
+.history-clear-link {
+  margin-top: var(--sp-12); background: none; border: none; color: var(--gy3);
+  text-decoration: underline; cursor: pointer; font-size: var(--fs-base); padding: 0;
+}
+.step-toggle-row { display: flex; gap: var(--sp-8); margin-bottom: 14px; }
+.step-toggle-btn { flex: none; min-height: 36px; padding: 0 14px; font-size: var(--fs-base); }
+.dob-field-narrow { width: auto; }
+.age-badge-row { margin-top: var(--sp-12); }
 
 /* ── Results ───────────────────────────────────────────────────── */
 /* PD2/D1: answer-first summary line, above the results header. */
@@ -274,7 +284,6 @@ body {
    full-width instead of the base row layout above. */
 .dose-history-panel { flex-direction: column; align-items: flex-start; }
 .dose-history-block { width: 100%; }
-.dose-history-empty { font-size: var(--fs-base); color: var(--gy4); margin-bottom: var(--sp-4); }
 
 /* ── PD2/E6: color legend ─────────────────────────────────────────── */
 .legend-row {
@@ -387,22 +396,10 @@ body {
   font-size: var(--fs-xs); color: var(--gy3); background: var(--gy6);
 }
 
-/* ── HSCT advisory card ─────────────────────────────────────────── */
-.hsct-card { background: var(--hsctlt); border-radius: var(--rad); box-shadow: var(--sh2); border: 2px solid var(--hsctmd); margin-bottom: var(--sp-16); overflow: hidden; }
-.hsct-header { background: var(--hscthdr); border-bottom: 1px solid var(--hsctmd); padding: var(--sp-8) 18px; font-weight: 700; font-size: var(--fs-md); color: var(--hsct); }
-.hsct-body { padding: var(--sp-16) var(--sp-16); }
-.hsct-flag { font-size: var(--fs-base); color: var(--hsct); font-weight: 600; line-height: 1.5; margin-bottom: var(--sp-12); background: var(--hscthdr); padding: var(--sp-8) var(--sp-12); border-radius: var(--rads); }
-
-/* ── PCV21 geographic advisory note ─────────────────────────────── */
-.geo-note {
-  background: var(--alt); border: 1px solid var(--amd); border-radius: var(--rad);
-  padding: var(--sp-12) var(--sp-16); font-size: var(--fs-base); color: var(--gy2); line-height: 1.55; margin-bottom: var(--sp-16);
-}
-.geo-note strong { color: var(--a); }
-
 /* ── Disclaimer ────────────────────────────────────────────────── */
 .disclaimer { background: var(--gy6); border-radius: var(--rads); padding: var(--sp-16); margin-top: var(--sp-24); font-size: var(--fs-sm); color: var(--gy3); line-height: 1.5; border-left: 3px solid var(--gy5); }
 .disclaimer strong { color: var(--gy2); }
+.disclaimer a { color: inherit; }
 
 /* ── Reset button area ─────────────────────────────────────────── */
 .results-actions { margin-top: var(--sp-24); display: flex; justify-content: center; }
@@ -423,6 +420,19 @@ body {
   padding: var(--sp-16);
   margin-bottom: var(--sp-16);
 }
+.advisory-banner-hsct {
+  background: var(--hsctlt);
+  border: 1.5px solid var(--hsctmd);
+  border-left: 4px solid var(--hsct);
+}
+.advisory-banner-hsct .advisory-banner-title { color: var(--hsct); }
+.advisory-banner-info {
+  background: var(--blt);
+  border: 1.5px solid var(--bmd);
+  border-left: 4px solid var(--b);
+  padding: var(--sp-12);
+}
+.advisory-banner-info .advisory-banner-title { color: var(--b); }
 .advisory-banner-title {
   font-size: var(--fs-md);
   font-weight: 700;
@@ -446,6 +456,9 @@ body {
   margin-bottom: var(--sp-8);
 }
 /* Dose history edit panel */
+.dose-edit-empty { font-size: 0.82rem; color: var(--gy4); margin-bottom: var(--sp-4); }
+.dose-row-compact { margin-bottom: var(--sp-4); }
+.dose-field-disabled { background: var(--gy6); color: var(--gy3); }
 .history-edit-summary {
   cursor: pointer;
   font-size: var(--fs-base);

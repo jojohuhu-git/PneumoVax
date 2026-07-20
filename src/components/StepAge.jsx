@@ -84,17 +84,15 @@ export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
 
       <div className="dob-divider">or enter precise age</div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      <div className="step-toggle-row">
         <button
-          className={`history-toggle-btn${mode === 'precise' ? ' selected' : ''}`}
-          style={{ flex: 'none', minHeight: 36, padding: '0 14px', fontSize: '0.85rem' }}
+          className={`history-toggle-btn step-toggle-btn${mode === 'precise' ? ' selected' : ''}`}
           onClick={() => { setMode('precise'); setDob(''); onChange({ ageMonths: null, ageGroup: null }); }}
         >
           Years / Months
         </button>
         <button
-          className={`history-toggle-btn${mode === 'dob' ? ' selected' : ''}`}
-          style={{ flex: 'none', minHeight: 36, padding: '0 14px', fontSize: '0.85rem' }}
+          className={`history-toggle-btn step-toggle-btn${mode === 'dob' ? ' selected' : ''}`}
           onClick={() => { setMode('dob'); setYears(''); setMonths(''); onChange({ ageMonths: null, ageGroup: null }); }}
         >
           Date of Birth
@@ -125,12 +123,12 @@ export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
           <input id="dob-input" type="date" value={dob}
             max={new Date().toISOString().slice(0, 10)}
             onChange={e => handleDobChange(e.target.value)}
-            style={{ width: 'auto' }} />
+            className="dob-field-narrow" />
         </div>
       )}
 
       {derivedGroup && (
-        <div style={{ marginTop: 12 }}>
+        <div className="age-badge-row">
           <span className="age-badge">
             {ageMonths != null ? fmtAgeMonths(ageMonths) : ''} · {derivedGroup}
           </span>

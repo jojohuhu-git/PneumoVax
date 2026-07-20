@@ -71,7 +71,7 @@ export default function StepHistory({
       <button className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
 
       {/* ── PPSV23 stream ── */}
-      <div className="history-section-title" style={{ marginTop: 18 }}>PPSV23 (Pneumovax 23) doses</div>
+      <div className="history-section-title history-section-title-spaced">PPSV23 (Pneumovax 23) doses</div>
       <div className="dose-list">
         {ppsv23Doses.map((dose, i) => (
           <div key={i} className="dose-row">
@@ -84,7 +84,7 @@ export default function StepHistory({
             <div className="dose-field">
               <label>Product</label>
               <input type="text" value="PPSV23 (Pneumovax 23)" disabled
-                style={{ background: 'var(--gy6)', color: 'var(--gy3)' }} />
+                className="dose-field-disabled" />
             </div>
             <button className="dose-remove" onClick={() => removePpsv(i)}
               aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
@@ -93,14 +93,13 @@ export default function StepHistory({
       </div>
       <button className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
 
-      <div className="family-note" style={{ borderLeftColor: 'var(--gy4)', background: 'var(--gy6)', color: 'var(--gy3)' }}>
+      <div className="family-note family-note-neutral">
         Unknown / undocumented history is treated as unvaccinated. PCV7 doses are recorded for
         completeness but ignored when calculating current needs (per ACIP/immunize.org).
       </div>
 
       {(pcvDoses.length > 0 || ppsv23Doses.length > 0) && (
-        <button type="button" className="history-clear-link" onClick={clearAll}
-          style={{ marginTop: 12, background: 'none', border: 'none', color: 'var(--gy3)', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.85rem', padding: 0 }}>
+        <button type="button" className="history-clear-link" onClick={clearAll}>
           No previous doses (clear all)
         </button>
       )}

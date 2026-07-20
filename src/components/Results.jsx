@@ -160,19 +160,18 @@ export default function Results({ state, onReset, onChange, onBack }) {
           </div>
         )}
         {editingDoses && (
-          <div className="age-edit-row" data-testid="recorded-doses-panel"
-            style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
+          <div className="age-edit-row dose-history-panel" data-testid="recorded-doses-panel">
 
             {/* PCV doses */}
-            <div style={{ width: '100%' }}>
+            <div className="dose-history-block">
               <div className="history-edit-section-title">PCV (conjugate) doses</div>
               {pcvDoses.length === 0 && (
-                <div style={{ fontSize: '0.82rem', color: 'var(--gy4)', marginBottom: 4 }}>
+                <div className="dose-edit-empty">
                   No PCV doses recorded.
                 </div>
               )}
               {pcvDoses.map((dose, i) => (
-                <div key={i} className="dose-row" style={{ marginBottom: 4 }}>
+                <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
                     <label>Product</label>
                     <select value={dose.product || ''}
@@ -196,19 +195,19 @@ export default function Results({ state, onReset, onChange, onBack }) {
             </div>
 
             {/* PPSV23 doses */}
-            <div style={{ width: '100%' }}>
+            <div className="dose-history-block">
               <div className="history-edit-section-title">PPSV23 (Pneumovax 23) doses</div>
               {ppsv23Doses.length === 0 && (
-                <div style={{ fontSize: '0.82rem', color: 'var(--gy4)', marginBottom: 4 }}>
+                <div className="dose-edit-empty">
                   No PPSV23 doses recorded.
                 </div>
               )}
               {ppsv23Doses.map((dose, i) => (
-                <div key={i} className="dose-row" style={{ marginBottom: 4 }}>
+                <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
                     <label>Product</label>
                     <input type="text" value="PPSV23 (Pneumovax 23)" disabled
-                      style={{ background: 'var(--gy6)', color: 'var(--gy3)' }} />
+                      className="dose-field-disabled" />
                   </div>
                   <div className="dose-field">
                     <label>Date (optional)</label>
@@ -249,16 +248,8 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
       {/* HSCT advisory block — alert banner, prominent at top */}
       {hsct && (
-        <div className="advisory-banner" data-testid="hsct-card"
-          style={{
-            background: 'var(--hsctlt)',
-            border: '1.5px solid var(--hsctmd)',
-            borderLeft: '4px solid var(--hsct)',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 16,
-          }}>
-          <div className="advisory-banner-title" style={{ color: 'var(--hsct)' }}>
+        <div className="advisory-banner advisory-banner-hsct" data-testid="hsct-card">
+          <div className="advisory-banner-title">
             Advisory: {hsct.title}
           </div>
           <div className="advisory-banner-flag">{hsct.coordinateFlag}</div>
@@ -281,16 +272,8 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
       {/* PCV21 geographic advisory — blue info banner */}
       {pcv21Geo && (
-        <div className="advisory-banner" data-testid="pcv21-geo-note"
-          style={{
-            background: 'var(--blt)',
-            border: '1.5px solid var(--bmd)',
-            borderLeft: '4px solid var(--b)',
-            borderRadius: 8,
-            padding: 12,
-            marginBottom: 16,
-          }}>
-          <div className="advisory-banner-title" style={{ color: 'var(--b)' }}>
+        <div className="advisory-banner advisory-banner-info" data-testid="pcv21-geo-note">
+          <div className="advisory-banner-title">
             PCV21 geographic note:
           </div>
           <div className="advisory-note">{pcv21Geo.note}</div>
