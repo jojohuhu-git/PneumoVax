@@ -1,5 +1,10 @@
 # PneumoVax — Handoff after PC1 compliance-audit chips (2026-07-19)
 
+> **SUPERSEDED** for the "what's next" question by
+> `docs/archive/handoff-2026-07-19-session2-design-parity-partial.md`. This file's PC1
+> record is still accurate (PC1 is merged and done); go to the newer file for the current
+> queue — Session 2 (design parity) is now in progress on its own branch, not unstarted.
+
 Branch: `main`. Clean, up to date with `origin/main` at commit `9868d93` (PR #7,
 squash-merged). Baseline was 126 passing tests (6 files); now **133 passing (7 files)**,
 all green, confirmed by running `npm test` on `main` at this commit. Deploy to GitHub
