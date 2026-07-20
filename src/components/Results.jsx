@@ -6,11 +6,13 @@ import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
+import { Chevron } from './icons.jsx';
 
 export default function Results({ state, onReset, onChange, onBack }) {
   const { ageMonths, riskIds, pcvDoses, ppsv23Doses } = state;
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
 
   const result = recommend({
     ageMonths: ageMonths ?? 0,
@@ -20,6 +22,18 @@ export default function Results({ state, onReset, onChange, onBack }) {
   });
 
   const { recs, hsct, pcv21Geo } = result;
+
+  // PD2/D1: answer-first summary line, composed from the same dueToday flags
+  // that already drive the recommendation cards below — no new logic.
+  let summaryLine;
+  if (hsct) {
+    summaryLine = 'HSCT advisory series applies. See details below.';
+  } else {
+    const dueVaccines = [...new Set(recs.filter(r => r.dueToday && !r.advisory).map(r => r.vaccine))];
+    summaryLine = dueVaccines.length > 0
+      ? `Due today: ${dueVaccines.join(' and ')}.`
+      : 'No pneumococcal doses due today.';
+  }
 
   // PC1: recorded-dose validity chips, reusing validate.js's analyzeHistory
   // (never recomputed here). A scenario can produce more than one PCV- or
@@ -91,30 +105,44 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
   return (
     <div>
+      {/* PD2/D1: answer-first verdict, before any detail. */}
+      <div className="results-summary-line" data-testid="results-summary-line">
+        {summaryLine}
+      </div>
+
       {/* Summary header */}
       <div className="results-header">
         <div className="results-title">Pneumococcal Recommendation</div>
         <div className="results-meta">
-          <span className="meta-chip meta-age">{fmtAgeMonths(ageMonths)}</span>
-          {group && <span className="meta-chip meta-group">{group}</span>}
-          {onChange && (
+          <div className="meta-chips">
+            <span className="meta-chip meta-age">{fmtAgeMonths(ageMonths)}</span>
+            {group && <span className="meta-chip meta-group">{group}</span>}
+            {riskLabels.length > 0
+              ? riskLabels.map((l, i) => <span key={i} className="meta-chip meta-risk">{l}</span>)
+              : <span className="meta-chip meta-norisk">No risk factors</span>}
+          </div>
+          <div className="meta-actions">
+            {onChange && (
+              <button type="button" className="age-edit-btn"
+                onClick={() => { setEditingAge(v => !v); setEditingDoses(false); setShowLegend(false); }}
+                aria-expanded={editingAge}>
+                {editingAge ? 'Done' : <>Adjust age<Chevron open={editingAge} /></>}
+              </button>
+            )}
+            {onChange && (
+              <button type="button" className="age-edit-btn"
+                onClick={() => { setEditingDoses(v => !v); setEditingAge(false); setShowLegend(false); }}
+                aria-expanded={editingDoses}>
+                {editingDoses ? 'Done'
+                  : <>{`Recorded doses${(pcvDoses.length + ppsv23Doses.length) > 0 ? ` (${pcvDoses.length + ppsv23Doses.length})` : ''}`}<Chevron open={editingDoses} /></>}
+              </button>
+            )}
             <button type="button" className="age-edit-btn"
-              onClick={() => { setEditingAge(v => !v); setEditingDoses(false); }}
-              aria-expanded={editingAge}>
-              {editingAge ? 'Done' : 'Adjust age ▾'}
+              onClick={() => { setShowLegend(v => !v); setEditingAge(false); setEditingDoses(false); }}
+              aria-expanded={showLegend}>
+              Color key<Chevron open={showLegend} />
             </button>
-          )}
-          {onChange && (
-            <button type="button" className="age-edit-btn"
-              onClick={() => { setEditingDoses(v => !v); setEditingAge(false); }}
-              aria-expanded={editingDoses}>
-              {editingDoses ? 'Done'
-                : `Recorded doses${(pcvDoses.length + ppsv23Doses.length) > 0 ? ` (${pcvDoses.length + ppsv23Doses.length})` : ''} ▾`}
-            </button>
-          )}
-          {riskLabels.length > 0
-            ? riskLabels.map((l, i) => <span key={i} className="meta-chip meta-risk">{l}</span>)
-            : <span className="meta-chip meta-norisk">No risk factors</span>}
+          </div>
         </div>
         {editingAge && (
           <div className="age-edit-row" data-testid="age-edit-row">
@@ -132,19 +160,18 @@ export default function Results({ state, onReset, onChange, onBack }) {
           </div>
         )}
         {editingDoses && (
-          <div className="age-edit-row" data-testid="recorded-doses-panel"
-            style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
+          <div className="age-edit-row dose-history-panel" data-testid="recorded-doses-panel">
 
             {/* PCV doses */}
-            <div style={{ width: '100%' }}>
+            <div className="dose-history-block">
               <div className="history-edit-section-title">PCV (conjugate) doses</div>
               {pcvDoses.length === 0 && (
-                <div style={{ fontSize: '0.82rem', color: 'var(--gy4)', marginBottom: 4 }}>
+                <div className="dose-edit-empty">
                   No PCV doses recorded.
                 </div>
               )}
               {pcvDoses.map((dose, i) => (
-                <div key={i} className="dose-row" style={{ marginBottom: 4 }}>
+                <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
                     <label>Product</label>
                     <select value={dose.product || ''}
@@ -168,19 +195,19 @@ export default function Results({ state, onReset, onChange, onBack }) {
             </div>
 
             {/* PPSV23 doses */}
-            <div style={{ width: '100%' }}>
+            <div className="dose-history-block">
               <div className="history-edit-section-title">PPSV23 (Pneumovax 23) doses</div>
               {ppsv23Doses.length === 0 && (
-                <div style={{ fontSize: '0.82rem', color: 'var(--gy4)', marginBottom: 4 }}>
+                <div className="dose-edit-empty">
                   No PPSV23 doses recorded.
                 </div>
               )}
               {ppsv23Doses.map((dose, i) => (
-                <div key={i} className="dose-row" style={{ marginBottom: 4 }}>
+                <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
                     <label>Product</label>
                     <input type="text" value="PPSV23 (Pneumovax 23)" disabled
-                      style={{ background: 'var(--gy6)', color: 'var(--gy3)' }} />
+                      className="dose-field-disabled" />
                   </div>
                   <div className="dose-field">
                     <label>Date (optional)</label>
@@ -198,21 +225,32 @@ export default function Results({ state, onReset, onChange, onBack }) {
             <span className="age-edit-hint">Changes update recommendations immediately.</span>
           </div>
         )}
+        {/* PD2/E6/D6: what the colors used throughout this page mean. */}
+        {showLegend && (
+          <div className="age-edit-row legend-panel dose-history-panel" data-testid="legend-panel">
+            <div className="dose-history-block">
+              <div className="history-edit-section-title">Vaccine box colors</div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-due" /><span>Due today: on schedule, expected now</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-catchup" /><span>Catch-up: behind the routine schedule, needed now to catch up</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-shared" /><span>Shared decision: optional, patient and provider decide together</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-neutral" /><span>Not currently due (complete, not indicated, or deferred)</span></div>
+            </div>
+            <div className="dose-history-block">
+              <div className="history-edit-section-title">Recorded-dose validity colors</div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-valid" /><span>On time</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-noncounting" /><span>Recorded (does not count): valid dose, doesn't count toward the series (e.g. PCV7)</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-invalid" /><span>Invalid (does not count)</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-unknown" /><span>Unknown (no date recorded)</span></div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* HSCT advisory block — alert banner, prominent at top */}
       {hsct && (
-        <div className="advisory-banner" data-testid="hsct-card"
-          style={{
-            background: 'var(--hsctlt)',
-            border: '1.5px solid var(--hsctmd)',
-            borderLeft: '4px solid var(--hsct)',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 16,
-          }}>
-          <div className="advisory-banner-title" style={{ color: 'var(--hsct)' }}>
-            ⚠ Advisory — {hsct.title}
+        <div className="advisory-banner advisory-banner-hsct" data-testid="hsct-card">
+          <div className="advisory-banner-title">
+            Advisory: {hsct.title}
           </div>
           <div className="advisory-banner-flag">{hsct.coordinateFlag}</div>
           {hsct.recs.map((r, i) => (
@@ -234,17 +272,9 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
       {/* PCV21 geographic advisory — blue info banner */}
       {pcv21Geo && (
-        <div className="advisory-banner" data-testid="pcv21-geo-note"
-          style={{
-            background: 'var(--blt)',
-            border: '1.5px solid var(--bmd)',
-            borderLeft: '4px solid var(--b)',
-            borderRadius: 8,
-            padding: 12,
-            marginBottom: 16,
-          }}>
-          <div className="advisory-banner-title" style={{ color: 'var(--b)' }}>
-            ℹ PCV21 geographic note:
+        <div className="advisory-banner advisory-banner-info" data-testid="pcv21-geo-note">
+          <div className="advisory-banner-title">
+            PCV21 geographic note:
           </div>
           <div className="advisory-note">{pcv21Geo.note}</div>
           {pcv21Geo.citations && pcv21Geo.citations.length > 0 && (
@@ -262,7 +292,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
       {hsct ? (
         <details className="rec-section">
           <summary className="history-edit-summary">
-            Standard age/history schedule (reference — applies after completing the HSCT series above)
+            Standard age/history schedule (reference, applies after completing the HSCT series above)
           </summary>
           {buildCards(recs)}
         </details>
@@ -277,7 +307,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
       <div className="results-actions">
         {onBack && (
-          <button className="btn btn-outline" onClick={onBack}>← Edit history</button>
+          <button className="btn btn-outline" onClick={onBack}>Edit history</button>
         )}
         <button className="btn btn-outline" onClick={onReset}>Start Over</button>
       </div>

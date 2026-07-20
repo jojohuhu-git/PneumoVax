@@ -57,7 +57,7 @@ export const RISK_FACTORS = [
   },
   {
     id: 'ckd_advanced',
-    label: 'Chronic kidney disease — dialysis or nephrotic syndrome',
+    label: 'Chronic kidney disease (dialysis or nephrotic syndrome)',
     sublabel: 'kidney disease on maintenance dialysis, or with nephrotic syndrome; chronic renal failure',
     class: 'IC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
@@ -132,7 +132,7 @@ export const RISK_FACTORS = [
   {
     id: 'hsct',
     label: 'Hematopoietic stem cell transplant (HSCT)',
-    sublabel: 'full re-vaccination; advisory — coordinate with the transplant/ID team',
+    sublabel: 'full re-vaccination; advisory, coordinate with the transplant/ID team',
     class: 'hsct',
     refs: ['p2016Table5', 'fredHutchLTFU'],
   },

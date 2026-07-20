@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { fmtDate, fmtAgeMonths } from '../logic/format.js';
 import { ageAtDoseFromDate } from '../logic/validate.js';
 import { productLabel } from '../data/brands.js';
 import { todayISO } from '../logic/dateUtils.js';
+import { Chevron } from './icons.jsx';
 
 const STATUS_LABELS = {
   'due':              'Due',
@@ -83,25 +84,63 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths }) {
   );
 }
 
+// PD2/D9: the card head is a full-width bar tinted by TIMING only — is this
+// due today, does it need catch-up, or is it a shared (optional) decision, or
+// neither urgent right now. The body below stays plain white. The clinical
+// REASON (routine, risk-based, shared-decision, etc.) is a small colored text
+// label in the bar (status-badge) — no pill background, no card fill of its
+// own. Mirrors MeningoVax's rec-card-head pattern.
+function timingClass(status, dueToday) {
+  if (status === 'shared-decision') return 'timing-shared';
+  if (status === 'catchup') return 'timing-catchup';
+  if (dueToday) return 'timing-due';
+  return 'timing-neutral';
+}
+
 export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, otherHistory = null }) {
   const { vaccine, status, doseLabel, dueToday, earliestNextDate, brands, note, citations, advisory } = rec;
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
+  // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due
+  // items visually dominate the screen.
+  const [expanded, setExpanded] = useState(!isNeutral);
 
   return (
-    <div className={`rec-card status-${status}`} data-testid="rec-card">
-      <div className="rec-card-inner">
+    <div
+      className={`rec-card ${timingClass(status, dueToday)}${isNeutral && !expanded ? ' rec-card-collapsed' : ''}`}
+      data-testid="rec-card"
+    >
+      {isNeutral ? (
+        <button
+          type="button"
+          className="rec-card-head rec-card-head-toggle"
+          onClick={() => setExpanded(e => !e)}
+          aria-expanded={expanded}
+        >
+          <span className="rec-vaccine-name">{vaccine}</span>
+          {!expanded && <span className="rec-card-collapsed-reason">{doseLabel}</span>}
+          <span className="rec-card-head-trailing">
+            <span className={`status-badge ${status}`}>{STATUS_LABELS[status] || status}</span>
+            <Chevron open={expanded} />
+          </span>
+        </button>
+      ) : (
         <div className="rec-card-head">
           <span className="rec-vaccine-name">{vaccine}</span>
-          <span className={`status-badge ${status}`}>{STATUS_LABELS[status] || status}</span>
-          {dueToday && !isNeutral && !advisory && (
-            <span className={`due-pill${isShared ? ' due-pill-optional' : ''}`}>
-              {isShared ? 'Optional today' : 'Today'}
-            </span>
-          )}
-          {advisory && <span className="due-pill due-pill-advisory">Advisory</span>}
+          <span className="rec-card-head-trailing">
+            <span className={`status-badge ${status}`}>{STATUS_LABELS[status] || status}</span>
+            {dueToday && !advisory && (
+              <span className={`due-pill${isShared ? ' due-pill-optional' : ''}`}>
+                {isShared ? 'Optional today' : 'Today'}
+              </span>
+            )}
+            {advisory && <span className="due-pill due-pill-advisory">Advisory</span>}
+          </span>
         </div>
+      )}
 
+      {expanded && (
+      <div className="rec-card-inner">
         <div className="rec-dose-label">{doseLabel}</div>
 
         {!dueToday && earliestNextDate && !advisory && (
@@ -111,7 +150,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
         {brands && brands.length > 0 && !isNeutral && (
           <div className="rec-brands">
             <div className="rec-brands-title">
-              {brands.length > 1 ? 'Product options — choose one' : 'Product'}
+              {brands.length > 1 ? 'Product options (choose one)' : 'Product'}
             </div>
             {brands.map((b, i) => (
               <div key={i} className="rec-brand-item">
@@ -145,6 +184,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

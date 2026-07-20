@@ -7,6 +7,13 @@ import App from '../../App.jsx';
 function getNextBtn() { return screen.getByRole('button', { name: /next/i }); }
 function getBackBtn() { return screen.queryByRole('button', { name: /back/i }); }
 
+// DOB is the default entry mode; tests that just need a round age use the
+// Years/Months fallback instead of picking a date.
+function setAgeYears(years) {
+  fireEvent.click(screen.getByText(/years \/ months/i));
+  fireEvent.change(screen.getByLabelText('Years'), { target: { value: String(years) } });
+}
+
 describe('App wizard', () => {
   it('renders the Age step on load', () => {
     render(<App />);
@@ -32,16 +39,16 @@ describe('App wizard', () => {
     expect(getBackBtn()).toBeNull();
   });
 
-  it('advances Age → Risks after picking an age chip', () => {
+  it('advances Age → Risks after entering an age', () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Older adult (≥50y)'));
+    setAgeYears(55);
     fireEvent.click(getNextBtn());
     expect(screen.getByText('Risk Factors')).toBeDefined();
   });
 
   it('drives the full wizard and renders a rec card at Results (≥50 naive)', () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Older adult (≥50y)'));
+    setAgeYears(55);
     fireEvent.click(getNextBtn());           // → Risks
     expect(screen.getByText('Risk Factors')).toBeDefined();
     fireEvent.click(getNextBtn());           // → History (no risks)
@@ -56,7 +63,7 @@ describe('App wizard', () => {
 
   it('shows HSCT advisory card when HSCT selected (adult)', () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Adult (19–49y)'));
+    setAgeYears(30);
     fireEvent.click(getNextBtn());           // → Risks
     const hsct = screen.getByLabelText(/hematopoietic stem cell transplant/i, { exact: false });
     fireEvent.click(hsct);
@@ -67,7 +74,7 @@ describe('App wizard', () => {
 
   it('Start Over resets to Age step', () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Older adult (≥50y)'));
+    setAgeYears(55);
     fireEvent.click(getNextBtn());
     fireEvent.click(getNextBtn());
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
@@ -78,7 +85,7 @@ describe('App wizard', () => {
 
   it('healthy child shows not-indicated PCV', () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Child (2–10y)'));
+    setAgeYears(6);
     fireEvent.click(getNextBtn());
     fireEvent.click(getNextBtn());           // no risks → History
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
@@ -92,7 +99,7 @@ describe('App wizard', () => {
   // note — must still surface somewhere, not disappear silently.
   it('shows PCV history (with PCV7 does-not-count note) under the PPSV23 card when no PCV card renders', () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Adult (19–49y)'));
+    setAgeYears(30);
     fireEvent.click(getNextBtn());           // → Risks
     fireEvent.click(screen.getByLabelText(/chronic lung disease/i, { exact: false }));
     fireEvent.click(getNextBtn());           // → History

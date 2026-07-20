@@ -6,6 +6,7 @@
   --c3:   #5a8a63;   /* bright green */
   --clt:  #eaf2ec;   /* green light bg */
   --cmd:  #aecbb4;   /* green medium border */
+  --c-hover: #dcebe0; /* green hover bg (age-edit button) */
 
   /* Status colors */
   --g:    #2e7d32;   /* due/complete green */
@@ -35,12 +36,34 @@
   --wh:   #ffffff;
   --bg:   #f4f6f4;
 
+  /* Shape */
   --rad:  8px;
   --rads: 4px;
   --radp: 6px;
 
+  /* Shadow */
   --sh: 0 2px 8px rgba(0,0,0,0.10);
   --sh2: 0 4px 16px rgba(0,0,0,0.13);
+
+  /* Type scale — ported from MeningoVax (PD1), consolidates ~18 ad-hoc font
+     sizes to these 7 steps. */
+  --fs-2xs:  0.65rem;
+  --fs-xs:   0.72rem;
+  --fs-sm:   0.78rem;
+  --fs-base: 0.85rem;
+  --fs-md:   0.92rem;
+  --fs-lg:   1.05rem;
+  --fs-xl:   1.2rem;
+
+  /* Spacing scale — ported from MeningoVax (PD1), 4px-base grid. Sub-4px
+     optical paddings on tiny chips/badges (dose-val-chip, dose-val-effective,
+     age-edit-btn, status-badge, meta-chip, due-pill) are intentionally left
+     off this scale — they're height-matching values, not rhythm spacing. */
+  --sp-4:  4px;
+  --sp-8:  8px;
+  --sp-12: 12px;
+  --sp-16: 16px;
+  --sp-24: 24px;
 }
 
 /* ── Reset / Base ──────────────────────────────────────────────── */
@@ -65,17 +88,17 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.07);
 }
 .app-header-inner {
-  max-width: 700px; margin: 0 auto; padding: 12px 16px;
-  display: flex; align-items: center; gap: 16px;
+  max-width: 700px; margin: 0 auto; padding: var(--sp-12) var(--sp-16);
+  display: flex; align-items: center; gap: var(--sp-16);
 }
-.app-logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.app-logo { display: flex; align-items: center; gap: var(--sp-12); flex-shrink: 0; }
 .app-logo-icon { width: 36px; height: 36px; }
-.app-logo-title { font-size: 1.1rem; font-weight: 700; color: var(--c); line-height: 1.2; }
-.app-logo-sub { font-size: 0.7rem; color: var(--gy3); line-height: 1.2; }
+.app-logo-title { font-size: var(--fs-lg); font-weight: 700; color: var(--c); line-height: 1.2; }
+.app-logo-sub { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.2; }
 
 /* ── Stepper ───────────────────────────────────────────────────── */
 .stepper { display: flex; align-items: center; gap: 0; flex: 1; justify-content: flex-end; overflow: hidden; }
-.stepper-item { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; position: relative; min-width: 0; }
+.stepper-item { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); flex: 1; position: relative; min-width: 0; }
 .stepper-item:not(:last-child)::after {
   content: ''; position: absolute; top: 11px;
   left: calc(50% + 11px); right: calc(-50% + 11px);
@@ -87,19 +110,19 @@ body {
   width: 22px; height: 22px; border-radius: 50%;
   border: 2px solid var(--gy5); background: var(--wh);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.65rem; font-weight: 700; color: var(--gy4); z-index: 1; transition: all 0.2s;
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--gy4); z-index: 1; transition: all 0.2s;
 }
 .stepper-item.active .stepper-dot { background: var(--c); border-color: var(--c); color: var(--wh); }
 .stepper-item.done .stepper-dot { background: var(--clt); border-color: var(--cmd); color: var(--c); }
 .stepper-label {
-  font-size: 0.6rem; color: var(--gy4); white-space: nowrap; overflow: hidden;
+  font-size: var(--fs-2xs); color: var(--gy4); white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; max-width: 60px; text-align: center;
 }
 .stepper-item.active .stepper-label { color: var(--c); font-weight: 600; }
 .stepper-item.done .stepper-label { color: var(--gy3); }
 
 /* ── Main content ──────────────────────────────────────────────── */
-.app-main { flex: 1; max-width: 660px; margin: 0 auto; width: 100%; padding: 24px 16px 100px; }
+.app-main { flex: 1; max-width: 660px; margin: 0 auto; width: 100%; padding: var(--sp-24) var(--sp-16) 100px; }
 
 /* ── Bottom nav ────────────────────────────────────────────────── */
 .app-nav {
@@ -108,7 +131,7 @@ body {
   z-index: 90; padding: env(safe-area-inset-bottom, 0) 0 0;
 }
 .app-nav-inner {
-  max-width: 660px; margin: 0 auto; padding: 12px 16px;
+  max-width: 660px; margin: 0 auto; padding: var(--sp-12) var(--sp-16);
   display: flex; justify-content: space-between; align-items: center;
 }
 
@@ -116,7 +139,7 @@ body {
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 44px; padding: 0 22px; border-radius: var(--rad);
-  font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none;
+  font-size: var(--fs-md); font-weight: 600; cursor: pointer; border: none;
   transition: background 0.15s, box-shadow 0.15s;
 }
 .btn-next { background: var(--c); color: var(--wh); box-shadow: 0 2px 6px rgba(58,90,64,0.25); }
@@ -127,169 +150,207 @@ body {
 .btn-outline:hover { background: var(--clt); }
 
 /* ── Step cards ────────────────────────────────────────────────── */
-.step-card { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: 24px; margin-bottom: 16px; }
-.step-title { font-size: 1.2rem; font-weight: 700; color: var(--gy); margin-bottom: 4px; }
-.step-sub { font-size: 0.88rem; color: var(--gy3); margin-bottom: 20px; line-height: 1.5; }
+.step-card { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-24); margin-bottom: var(--sp-16); }
+.step-title { font-size: var(--fs-xl); font-weight: 700; color: var(--gy); margin-bottom: var(--sp-4); }
+.step-sub { font-size: var(--fs-base); color: var(--gy3); margin-bottom: var(--sp-24); line-height: 1.5; }
 
 /* ── Age step ──────────────────────────────────────────────────── */
-.age-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-.age-chip {
-  min-height: 44px; padding: 0 16px; border-radius: var(--radp);
-  border: 1.5px solid var(--gy5); background: var(--wh); color: var(--gy2);
-  font-size: 0.9rem; cursor: pointer; transition: all 0.15s;
-}
-.age-chip:hover { border-color: var(--cmd); color: var(--c); }
-.age-chip.selected { background: var(--clt); border-color: var(--c); color: var(--c); font-weight: 600; }
-.age-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-.age-field { display: flex; flex-direction: column; gap: 4px; }
-.age-field label { font-size: 0.82rem; color: var(--gy3); font-weight: 500; }
+.age-row { display: flex; gap: var(--sp-12); align-items: flex-end; flex-wrap: wrap; }
+.age-field { display: flex; flex-direction: column; gap: var(--sp-4); }
+.age-field label { font-size: var(--fs-base); color: var(--gy3); font-weight: 500; }
 .age-field input[type="number"],
 .age-field input[type="date"] {
-  height: 44px; padding: 0 12px; border: 1.5px solid var(--gy5);
-  border-radius: var(--rads); font-size: 0.95rem; color: var(--gy);
+  height: 44px; padding: 0 var(--sp-12); border: 1.5px solid var(--gy5);
+  border-radius: var(--rads); font-size: var(--fs-md); color: var(--gy);
   background: var(--wh); width: 110px;
 }
 .age-field input:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px var(--clt); }
 .age-badge {
-  display: inline-flex; align-items: center; padding: 4px 12px;
+  display: inline-flex; align-items: center; padding: var(--sp-4) var(--sp-12);
   border-radius: var(--rads); background: var(--clt); color: var(--c);
-  font-size: 0.82rem; font-weight: 600; margin-top: 4px;
+  font-size: var(--fs-base); font-weight: 600; margin-top: var(--sp-4);
 }
-.age-error { color: var(--r); font-size: 0.85rem; margin-top: 8px; }
-.dob-divider { text-align: center; color: var(--gy4); font-size: 0.82rem; margin: 8px 0; }
-.age-precise-hint { font-size: 0.78rem; font-weight: 600; color: var(--gy3); margin-bottom: 6px; }
+.age-error { color: var(--r); font-size: var(--fs-base); margin-top: var(--sp-8); }
+.age-precise-hint { font-size: var(--fs-sm); font-weight: 600; color: var(--gy3); margin-bottom: var(--sp-8); }
 
 /* ── Risk factors ──────────────────────────────────────────────── */
-.risk-list { display: flex; flex-direction: column; gap: 6px; }
-.risk-group { margin-bottom: 6px; }
+.risk-list { display: flex; flex-direction: column; gap: var(--sp-8); }
+.risk-group { margin-bottom: var(--sp-8); }
 .risk-group-title {
-  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--gy3); margin: 8px 0 4px; padding: 0 2px;
+  font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--gy3); margin: var(--sp-8) 0 var(--sp-4); padding: 0 2px;
 }
 .risk-item {
-  display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
+  display: flex; align-items: flex-start; gap: var(--sp-12); padding: var(--sp-12);
   border-radius: var(--rads); border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
 }
 .risk-item:hover { background: var(--gy6); }
 .risk-item.selected { background: var(--clt); border-color: var(--cmd); }
 .risk-checkbox { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; accent-color: var(--c); cursor: pointer; }
 .risk-text { flex: 1; min-width: 0; }
-.risk-label { font-size: 0.93rem; font-weight: 500; color: var(--gy); overflow-wrap: anywhere; }
-.risk-sublabel { font-size: 0.78rem; color: var(--gy3); margin-top: 2px; overflow-wrap: anywhere; }
+.risk-label { font-size: var(--fs-md); font-weight: 500; color: var(--gy); overflow-wrap: anywhere; }
+.risk-sublabel { font-size: var(--fs-sm); color: var(--gy3); margin-top: 2px; overflow-wrap: anywhere; }
 .risk-none {
-  display: flex; align-items: center; gap: 12px; padding: 12px; margin-top: 8px;
+  display: flex; align-items: center; gap: var(--sp-12); padding: var(--sp-12); margin-top: var(--sp-8);
   border-radius: var(--rads); border: 1.5px dashed var(--gy5); cursor: pointer;
-  color: var(--gy3); font-size: 0.9rem;
+  color: var(--gy3); font-size: var(--fs-md);
 }
 .risk-none:hover { background: var(--gy6); }
 .risk-none.selected { border-color: var(--cmd); background: var(--clt); color: var(--c); }
 
 /* ── History step ──────────────────────────────────────────────── */
-.history-toggle { display: flex; gap: 12px; margin-bottom: 16px; }
+.history-toggle { display: flex; gap: var(--sp-12); margin-bottom: var(--sp-16); }
 .history-toggle-btn {
   flex: 1; min-height: 44px; border-radius: var(--rads); border: 1.5px solid var(--gy5);
-  background: var(--wh); font-size: 0.95rem; cursor: pointer; transition: all 0.15s; color: var(--gy2);
+  background: var(--wh); font-size: var(--fs-md); cursor: pointer; transition: all 0.15s; color: var(--gy2);
 }
 .history-toggle-btn.selected { background: var(--clt); border-color: var(--c); color: var(--c); font-weight: 600; }
 .history-section-title {
-  font-size: 0.8rem; font-weight: 700; color: var(--gy2); margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--gy2); margin-bottom: var(--sp-8);
   text-transform: uppercase; letter-spacing: 0.04em;
 }
-.dose-list { display: flex; flex-direction: column; gap: 10px; }
+.dose-list { display: flex; flex-direction: column; gap: var(--sp-12); }
 .dose-row {
-  display: flex; gap: 10px; align-items: flex-end; padding: 12px;
+  display: flex; gap: var(--sp-12); align-items: flex-end; padding: var(--sp-12);
   background: var(--gy6); border-radius: var(--rads); flex-wrap: wrap;
 }
-.dose-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 130px; }
-.dose-field label { font-size: 0.78rem; color: var(--gy3); font-weight: 500; }
+.dose-field { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 130px; }
+.dose-field label { font-size: var(--fs-sm); color: var(--gy3); font-weight: 500; }
 .dose-field input[type="date"],
 .dose-field input[type="text"],
 .dose-field select {
-  height: 40px; padding: 0 10px; border: 1.5px solid var(--gy5);
-  border-radius: var(--rads); font-size: 0.88rem; color: var(--gy);
+  height: 40px; padding: 0 var(--sp-12); border: 1.5px solid var(--gy5);
+  border-radius: var(--rads); font-size: var(--fs-base); color: var(--gy);
   background: var(--wh); width: 100%;
 }
 .dose-field input:focus, .dose-field select:focus { outline: none; border-color: var(--c); }
 .dose-remove {
   min-height: 40px; width: 36px; border: none; border-radius: var(--rads);
-  background: transparent; color: var(--gy4); font-size: 1.2rem; cursor: pointer;
+  background: transparent; color: var(--gy4); font-size: var(--fs-xl); cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .dose-remove:hover { background: var(--rlt); color: var(--r); }
 .add-dose-btn {
-  margin-top: 8px; display: inline-flex; align-items: center; gap: 6px;
-  min-height: 40px; padding: 0 16px; border-radius: var(--rads);
+  margin-top: var(--sp-8); display: inline-flex; align-items: center; gap: var(--sp-8);
+  min-height: 40px; padding: 0 var(--sp-16); border-radius: var(--rads);
   border: 1.5px dashed var(--gy5); background: var(--wh); color: var(--gy3);
-  font-size: 0.88rem; cursor: pointer;
+  font-size: var(--fs-base); cursor: pointer;
 }
 .add-dose-btn:hover { border-color: var(--c); color: var(--c); background: var(--clt); }
 .family-note {
-  margin-top: 14px; padding: 8px 12px; border-radius: var(--rads);
-  background: var(--blt); border-left: 3px solid var(--b); font-size: 0.82rem; color: var(--b); line-height: 1.5;
+  margin-top: var(--sp-12); padding: var(--sp-8) var(--sp-12); border-radius: var(--rads);
+  background: var(--blt); border-left: 3px solid var(--b); font-size: var(--fs-base); color: var(--b); line-height: 1.5;
 }
+.family-note-neutral { background: var(--gy6); border-left-color: var(--gy4); color: var(--gy3); }
+.history-section-title-spaced { margin-top: 18px; }
+.history-clear-link {
+  margin-top: var(--sp-12); background: none; border: none; color: var(--gy3);
+  text-decoration: underline; cursor: pointer; font-size: var(--fs-base); padding: 0;
+}
+.step-toggle-row { display: flex; gap: var(--sp-8); margin-bottom: 14px; }
+.step-toggle-btn { flex: none; min-height: 36px; padding: 0 14px; font-size: var(--fs-base); }
+#dob-input { width: auto; }
+.age-badge-row { margin-top: var(--sp-12); }
 
 /* ── Results ───────────────────────────────────────────────────── */
-.results-header { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: 20px 24px; margin-bottom: 16px; }
-.results-title { font-size: 1.1rem; font-weight: 700; color: var(--gy); margin-bottom: 8px; }
-.results-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.meta-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--rads); font-size: 0.8rem; font-weight: 500; }
+/* PD2/D1: answer-first summary line, above the results header. */
+.results-summary-line { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); margin-bottom: var(--sp-12); }
+.results-header { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-24); margin-bottom: var(--sp-16); }
+.results-title { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); margin-bottom: var(--sp-8); }
+.results-meta { display: flex; flex-direction: column; gap: var(--sp-8); }
+.meta-chips, .meta-actions { display: flex; flex-wrap: wrap; gap: var(--sp-8); align-items: center; }
+.meta-chip { display: inline-flex; align-items: center; padding: 3px var(--sp-12); border-radius: var(--rads); font-size: var(--fs-sm); font-weight: 500; }
 .meta-age { background: var(--clt); color: var(--c); }
 .meta-group { background: var(--gy6); color: var(--gy2); }
 .meta-risk { background: var(--rlt); color: var(--r); }
 .meta-norisk { background: var(--gy6); color: var(--gy3); }
 .age-edit-btn {
   background: var(--clt); color: var(--c); border: 1px solid var(--cmd);
-  border-radius: var(--rads); padding: 3px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  border-radius: var(--rads); padding: 3px var(--sp-12); font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
 }
-.age-edit-btn:hover { background: #dcebe0; }
-.age-edit-row { display: flex; align-items: flex-end; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
-.age-edit-hint { font-size: 0.78rem; color: var(--gy3); align-self: center; }
+.age-edit-btn:hover { background: var(--c-hover); }
+.age-edit-row { display: flex; align-items: flex-end; gap: var(--sp-12); margin-top: var(--sp-12); flex-wrap: wrap; }
+.age-edit-hint { font-size: var(--fs-sm); color: var(--gy3); align-self: center; }
+/* PD2/D13b: recorded-doses editor and color-key panels stack their sections
+   full-width instead of the base row layout above. */
+.dose-history-panel { flex-direction: column; align-items: flex-start; }
+.dose-history-block { width: 100%; }
+
+/* ── PD2/E6: color legend ─────────────────────────────────────────── */
+.legend-row {
+  display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base);
+  color: var(--gy2); padding: var(--sp-4) 0;
+}
+.legend-swatch { width: 14px; height: 14px; border-radius: var(--rads); flex-shrink: 0; border: 1px solid var(--gy5); }
+.legend-swatch-due        { background: var(--glt); border-color: var(--gmd); }
+.legend-swatch-catchup    { background: var(--alt); border-color: var(--amd); }
+.legend-swatch-shared     { background: var(--blt); border-color: var(--bmd); }
+.legend-swatch-neutral    { background: var(--gy6); border-color: var(--gy5); }
+.legend-swatch-valid      { background: var(--glt); border-color: var(--gmd); }
+.legend-swatch-noncounting{ background: var(--alt); border-color: var(--amd); }
+.legend-swatch-invalid    { background: var(--rlt); border-color: var(--rmd); }
+.legend-swatch-unknown    { background: var(--gy6); border-color: var(--gy5); }
 
 /* ── Rec cards ─────────────────────────────────────────────────── */
-.rec-section { margin-bottom: 16px; }
+.rec-section { margin-bottom: var(--sp-16); }
 .rec-section-title {
-  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--gy3); margin-bottom: 8px; padding: 0 4px;
+  font-size: var(--fs-sm); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--gy3); margin-bottom: var(--sp-8); padding: 0 var(--sp-4);
 }
-.rec-card { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); border: 1px solid var(--gy5); overflow: hidden; margin-bottom: 10px; }
-.rec-card.status-due             { background: var(--glt); border-color: var(--gmd); }
-.rec-card.status-catchup         { background: var(--alt); border-color: #f0c79a; }
-.rec-card.status-risk-based      { background: var(--rlt); border-color: #f0b0b0; }
-.rec-card.status-shared-decision { background: var(--blt); border-color: #a8cbef; }
-.rec-card.status-complete        { background: var(--gy6); border-color: var(--gy5); }
-.rec-card.status-not-indicated   { background: var(--wh); border-color: var(--gy5); }
-.rec-card.status-deferred        { background: var(--alt); border-color: #f0c79a; }
-.rec-card-inner { padding: 16px 18px; }
-.rec-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.rec-vaccine-name { font-size: 1rem; font-weight: 700; color: var(--gy); }
-.status-badge {
-  display: inline-flex; align-items: center; padding: 2px 9px; border-radius: var(--rads);
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em;
+.rec-card { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); border: 1px solid var(--gy5); overflow: hidden; margin-bottom: var(--sp-12); }
+/* PD2/D9: the card head is a full-width bar tinted by TIMING only — is this
+   due today, does it need catch-up, or is it a shared (optional) decision, or
+   neither urgent right now. The body below stays plain white. The clinical
+   REASON (routine, risk-based, shared-decision, etc.) is a small colored text
+   label in the bar instead (see .status-badge below) — no pill background, no
+   card fill of its own. Mirrors MeningoVax's rec-card-head pattern (D9/B4). */
+.rec-card-head {
+  display: flex; align-items: center; gap: var(--sp-12); flex-wrap: wrap;
+  padding: var(--sp-12) var(--sp-16); border-bottom: 1px solid var(--gy5); background: var(--gy6);
 }
-.status-badge.due              { background: var(--glt); color: var(--g); }
-.status-badge.catchup          { background: var(--alt); color: var(--a); }
-.status-badge.risk-based       { background: var(--rlt); color: var(--r); }
-.status-badge.shared-decision  { background: var(--blt); color: var(--b); }
-.status-badge.complete         { background: var(--gy6); color: var(--gy3); }
-.status-badge.not-indicated    { background: var(--gy6); color: var(--gy4); }
-.status-badge.deferred         { background: var(--alt); color: var(--a); }
-.due-pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--rads); background: var(--g); color: var(--wh); font-size: 0.78rem; font-weight: 700; }
-.due-pill.due-pill-optional { background: var(--blt); color: var(--b); border: 1px solid #a8cbef; }
+.rec-card.timing-due     .rec-card-head { background: var(--glt); }
+.rec-card.timing-catchup .rec-card-head { background: var(--alt); }
+.rec-card.timing-shared  .rec-card-head { background: var(--blt); }
+.rec-card.timing-neutral .rec-card-head { background: var(--gy6); }
+.rec-card-inner { padding: var(--sp-16) 18px; }
+.rec-vaccine-name { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); }
+.rec-card-head-trailing { margin-left: auto; display: flex; align-items: center; gap: var(--sp-8); }
+/* PD2/D9: reason label is plain colored text, no pill — the header bar's
+   tint already carries the timing color, so a second colored background here
+   would compete with it. */
+.status-badge { font-size: var(--fs-sm); font-weight: 700; letter-spacing: 0.02em; }
+.status-badge.due              { color: var(--g); }
+.status-badge.catchup          { color: var(--a); }
+.status-badge.risk-based       { color: var(--r); }
+.status-badge.shared-decision  { color: var(--b); }
+.status-badge.complete         { color: var(--gy3); }
+.status-badge.not-indicated    { color: var(--gy4); }
+.status-badge.deferred         { color: var(--a); }
+/* PD2/D5: neutral cards (complete/not-indicated/deferred) collapse to this
+   compact clickable row so due items visually dominate the screen. */
+.rec-card-head-toggle {
+  width: 100%; background: none; border: none; font: inherit; text-align: left;
+  cursor: pointer; color: inherit;
+}
+.rec-card-collapsed .rec-card-head { border-bottom: none; }
+.rec-card-collapsed-reason { font-size: var(--fs-base); color: var(--gy3); margin-left: var(--sp-8); }
+.due-pill { display: inline-flex; align-items: center; padding: 3px var(--sp-12); border-radius: var(--rads); background: var(--g); color: var(--wh); font-size: var(--fs-sm); font-weight: 700; }
+.due-pill.due-pill-optional { background: var(--blt); color: var(--b); border: 1px solid var(--bmd); }
 .due-pill.due-pill-advisory { background: var(--hscthdr); color: var(--hsct); border: 1px solid var(--hsctmd); }
-.next-date { font-size: 0.82rem; color: var(--gy3); margin-bottom: 6px; }
-.rec-dose-label { font-size: 0.9rem; font-weight: 600; color: var(--gy2); margin-bottom: 8px; line-height: 1.4; }
-.rec-brands { margin-bottom: 10px; }
-.rec-brands-title { font-size: 0.78rem; font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
-.rec-brand-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--gy); padding: 2px 0; }
+.next-date { font-size: var(--fs-base); color: var(--gy3); margin-bottom: var(--sp-8); }
+.rec-dose-label { font-size: var(--fs-md); font-weight: 600; color: var(--gy2); margin-bottom: var(--sp-8); line-height: 1.4; }
+.rec-brands { margin-bottom: var(--sp-12); }
+.rec-brands-title { font-size: var(--fs-sm); font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+.rec-brand-item { display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base); color: var(--gy); padding: 2px 0; }
 .rec-brand-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gy4); flex-shrink: 0; }
-.rec-note { font-size: 0.85rem; color: var(--gy2); line-height: 1.55; margin-bottom: 10px; }
+.rec-note { font-size: var(--fs-base); color: var(--gy2); line-height: 1.55; margin-bottom: var(--sp-12); }
 .rec-citations {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding-top: 10px;
+  display: flex; flex-wrap: wrap; gap: var(--sp-8); margin-top: var(--sp-8); padding-top: var(--sp-12);
   border-top: 1px solid var(--gy6); min-width: 0; overflow: hidden;
 }
 .citation-chip {
-  display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--rads);
-  background: var(--gy6); border: 1px solid var(--gy5); color: var(--c); font-size: 0.75rem;
+  display: inline-flex; align-items: center; padding: 3px var(--sp-12); border-radius: var(--rads);
+  background: var(--gy6); border: 1px solid var(--gy5); color: var(--c); font-size: var(--fs-xs);
   text-decoration: none; min-width: 0; max-width: 100%; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; transition: background 0.1s;
 }
@@ -299,103 +360,107 @@ body {
    PC1: each recorded dose row shows the dose descriptor (left) and a
    validity chip (right); reasons/detail wrap to full width below. Mirrors
    MeningoVax's dose-val-* pattern, plus dose-val-noncounting for PCV7. */
-.rec-progress { margin-bottom: 10px; }
-.rec-progress-label { font-size: 0.78rem; font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; }
-.rec-progress-list { list-style: none; margin-top: 4px; }
+.rec-progress { margin-bottom: var(--sp-12); }
+.rec-progress-label { font-size: var(--fs-sm); font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; }
+.rec-progress-list { list-style: none; margin-top: var(--sp-4); }
 .rec-progress-dose-row {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  column-gap: 10px; row-gap: 4px; padding: 4px 0; border-bottom: 1px solid var(--gy6);
+  column-gap: var(--sp-12); row-gap: var(--sp-4); padding: var(--sp-4) 0; border-bottom: 1px solid var(--gy6);
 }
 .rec-progress-dose-row:last-child { border-bottom: none; }
-.rec-progress-dose-text { font-size: 0.85rem; color: var(--gy2); flex: 1 1 auto; min-width: 0; }
-.dose-val { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rec-progress-dose-text { font-size: var(--fs-base); color: var(--gy2); flex: 1 1 auto; min-width: 0; }
+.dose-val { display: flex; align-items: center; gap: var(--sp-8); flex-wrap: wrap; }
 .dose-val-chip {
-  display: inline-flex; align-items: center; padding: 1px 8px; border-radius: var(--rads);
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
+  display: inline-flex; align-items: center; padding: 1px var(--sp-8); border-radius: var(--rads);
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
 }
 .dose-val-valid       { background: var(--glt); color: var(--g); border: 1px solid var(--gmd); }
 .dose-val-noncounting { background: var(--alt); color: var(--a); border: 1px solid var(--amd); }
 .dose-val-invalid     { background: var(--rlt); color: var(--r); border: 1px solid var(--rmd); }
 .dose-val-unknown     { background: var(--gy6); color: var(--gy3); border: 1px solid var(--gy5); }
-.dose-val-reasons { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
-.dose-val-reason { font-size: 0.78rem; color: var(--gy2); line-height: 1.4; }
-.dose-val-detail { font-size: 0.72rem; color: var(--gy3); line-height: 1.4; }
+.dose-val-reasons { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 0; }
+.dose-val-reason { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.4; }
+.dose-val-detail { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.4; }
 .dose-val-dropped .rec-progress-dose-text { opacity: 0.55; text-decoration: line-through; }
 .dose-val-effective {
-  display: inline-flex; align-items: center; padding: 1px 8px; border-radius: var(--rads);
-  font-size: 0.72rem; color: var(--gy3); background: var(--gy6);
+  display: inline-flex; align-items: center; padding: 1px var(--sp-8); border-radius: var(--rads);
+  font-size: var(--fs-xs); color: var(--gy3); background: var(--gy6);
 }
-
-/* ── HSCT advisory card ─────────────────────────────────────────── */
-.hsct-card { background: var(--hsctlt); border-radius: var(--rad); box-shadow: var(--sh2); border: 2px solid var(--hsctmd); margin-bottom: 16px; overflow: hidden; }
-.hsct-header { background: var(--hscthdr); border-bottom: 1px solid var(--hsctmd); padding: 10px 18px; font-weight: 700; font-size: 0.95rem; color: var(--hsct); }
-.hsct-body { padding: 14px 16px; }
-.hsct-flag { font-size: 0.85rem; color: var(--hsct); font-weight: 600; line-height: 1.5; margin-bottom: 12px; background: var(--hscthdr); padding: 10px 12px; border-radius: var(--rads); }
-
-/* ── PCV21 geographic advisory note ─────────────────────────────── */
-.geo-note {
-  background: var(--alt); border: 1px solid #f0c79a; border-radius: var(--rad);
-  padding: 12px 16px; font-size: 0.83rem; color: var(--gy2); line-height: 1.55; margin-bottom: 16px;
-}
-.geo-note strong { color: var(--a); }
 
 /* ── Disclaimer ────────────────────────────────────────────────── */
-.disclaimer { background: var(--gy6); border-radius: var(--rads); padding: 14px 16px; margin-top: 20px; font-size: 0.78rem; color: var(--gy3); line-height: 1.5; border-left: 3px solid var(--gy5); }
+.disclaimer { background: var(--gy6); border-radius: var(--rads); padding: var(--sp-16); margin-top: var(--sp-24); font-size: var(--fs-sm); color: var(--gy3); line-height: 1.5; border-left: 3px solid var(--gy5); }
 .disclaimer strong { color: var(--gy2); }
+.disclaimer a { color: inherit; }
 
 /* ── Reset button area ─────────────────────────────────────────── */
-.results-actions { margin-top: 20px; display: flex; justify-content: center; }
+.results-actions { margin-top: var(--sp-24); display: flex; justify-content: center; }
 
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .app-header-inner { gap: 10px; }
+  .app-header-inner { gap: var(--sp-12); }
   .app-logo-sub { display: none; }
   .stepper-label { display: none; }
-  .app-main { padding: 16px 12px 100px; }
-  .step-card { padding: 16px; }
+  .app-main { padding: var(--sp-16) var(--sp-12) 100px; }
+  .step-card { padding: var(--sp-16); }
   .age-field input[type="number"] { width: 90px; }
 }
 
 /* Advisory alert banners */
 .advisory-banner {
   border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
+  padding: var(--sp-16);
+  margin-bottom: var(--sp-16);
 }
+.advisory-banner-hsct {
+  background: var(--hsctlt);
+  border: 1.5px solid var(--hsctmd);
+  border-left: 4px solid var(--hsct);
+}
+.advisory-banner-hsct .advisory-banner-title { color: var(--hsct); }
+.advisory-banner-info {
+  background: var(--blt);
+  border: 1.5px solid var(--bmd);
+  border-left: 4px solid var(--b);
+  padding: var(--sp-12);
+}
+.advisory-banner-info .advisory-banner-title { color: var(--b); }
 .advisory-banner-title {
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: var(--sp-8);
 }
 .advisory-banner-flag {
-  font-size: 0.82rem;
+  font-size: var(--fs-base);
   color: var(--gy2);
-  margin-bottom: 10px;
+  margin-bottom: var(--sp-12);
   font-style: italic;
 }
 .advisory-dose-line {
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: var(--sp-4);
 }
 .advisory-note {
-  font-size: 0.82rem;
+  font-size: var(--fs-base);
   color: var(--gy2);
   line-height: 1.5;
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-8);
 }
 /* Dose history edit panel */
+.dose-edit-empty { font-size: 0.82rem; color: var(--gy4); margin-bottom: var(--sp-4); }
+.dose-row-compact { margin-bottom: var(--sp-4); }
+.dose-field-disabled { background: var(--gy6); color: var(--gy3); }
 .history-edit-summary {
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: var(--gy2);
-  padding: 6px 0;
+  padding: var(--sp-8) 0;
   user-select: none;
 }
 .history-edit-section-title {
-  font-size: 0.82rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: var(--gy2);
-  margin: 10px 0 4px;
+  margin: var(--sp-12) 0 var(--sp-4);
 }

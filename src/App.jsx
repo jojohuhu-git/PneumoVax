@@ -99,12 +99,12 @@ export default function App() {
         <div className="app-nav">
           <div className="app-nav-inner">
             {state.step > 0 ? (
-              <button className="btn btn-back" onClick={goBack}>← Back</button>
+              <button className="btn btn-back" onClick={goBack}>Back</button>
             ) : (
               <span />
             )}
             <button className="btn btn-next" onClick={goNext}>
-              {state.step === 2 ? 'View Results →' : 'Next →'}
+              {state.step === 2 ? 'View Results' : 'Next'}
             </button>
           </div>
         </div>
