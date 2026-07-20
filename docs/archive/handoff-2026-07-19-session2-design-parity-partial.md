@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-07-19** — Session 2 is now fully done (PD4, PD5, and PR #8 landed). See
+> `handoff-2026-07-19-session2-design-parity-done.md` for the current state. This file is kept
+> for historical detail on PD1–PD3 only.
+
 # PneumoVax — Handoff after Session 2 design parity, partial (2026-07-19)
 
 Branch: `design/pd1-tokens`, off `main` at `a02a05e` (which is `main`'s tip, `9868d93`, plus
