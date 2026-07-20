@@ -155,14 +155,6 @@ body {
 .step-sub { font-size: var(--fs-base); color: var(--gy3); margin-bottom: var(--sp-24); line-height: 1.5; }
 
 /* ── Age step ──────────────────────────────────────────────────── */
-.age-chips { display: flex; flex-wrap: wrap; gap: var(--sp-8); margin-bottom: var(--sp-24); }
-.age-chip {
-  min-height: 44px; padding: 0 var(--sp-16); border-radius: var(--radp);
-  border: 1.5px solid var(--gy5); background: var(--wh); color: var(--gy2);
-  font-size: var(--fs-md); cursor: pointer; transition: all 0.15s;
-}
-.age-chip:hover { border-color: var(--cmd); color: var(--c); }
-.age-chip.selected { background: var(--clt); border-color: var(--c); color: var(--c); font-weight: 600; }
 .age-row { display: flex; gap: var(--sp-12); align-items: flex-end; flex-wrap: wrap; }
 .age-field { display: flex; flex-direction: column; gap: var(--sp-4); }
 .age-field label { font-size: var(--fs-base); color: var(--gy3); font-weight: 500; }
@@ -179,7 +171,6 @@ body {
   font-size: var(--fs-base); font-weight: 600; margin-top: var(--sp-4);
 }
 .age-error { color: var(--r); font-size: var(--fs-base); margin-top: var(--sp-8); }
-.dob-divider { text-align: center; color: var(--gy4); font-size: var(--fs-base); margin: var(--sp-8) 0; }
 .age-precise-hint { font-size: var(--fs-sm); font-weight: 600; color: var(--gy3); margin-bottom: var(--sp-8); }
 
 /* ── Risk factors ──────────────────────────────────────────────── */
@@ -258,7 +249,7 @@ body {
 }
 .step-toggle-row { display: flex; gap: var(--sp-8); margin-bottom: 14px; }
 .step-toggle-btn { flex: none; min-height: 36px; padding: 0 14px; font-size: var(--fs-base); }
-.dob-field-narrow { width: auto; }
+#dob-input { width: auto; }
 .age-badge-row { margin-top: var(--sp-12); }
 
 /* ── Results ───────────────────────────────────────────────────── */

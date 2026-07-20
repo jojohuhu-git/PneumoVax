@@ -1,31 +1,18 @@
 import React, { useState } from 'react';
 import { ageGroup as deriveGroup, dobToAgeMonths, fmtAgeMonths } from '../logic/format.js';
 
-// FIX L1: Child chip maxM was 119 (leaving 120–131mo uncovered); Adolescent
-// chip minM was 132 (starting at 11y). Both corrected to close the gap.
-// Child: 2–10y inclusive → 24–131mo. Adolescent: 11–18y → 132–227mo.
-const AGE_GROUP_CHIPS = [
-  { label: 'Infant (<2y)',        minM: 0,   maxM: 23,  defaultM: 6 },
-  { label: 'Child (2–10y)',       minM: 24,  maxM: 131, defaultM: 72 },
-  { label: 'Adolescent (11–18y)', minM: 132, maxM: 227, defaultM: 168 },
-  { label: 'Adult (19–49y)',      minM: 228, maxM: 599, defaultM: 360 },
-  { label: 'Older adult (≥50y)',  minM: 600, maxM: null, defaultM: 660 },
-];
-
-export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
-  const [mode, setMode] = useState('chip');
+// Date of birth is the primary, recommended entry — it lets the engine compute
+// a dose's age precisely (e.g. was PPSV23 given on/after the 65th birthday, or
+// is this patient past the 19th-birthday adult-schedule boundary). A coarse
+// age-band guess can silently contradict a dose date entered later, so there
+// is no separate age-band question; the band shown below is always derived
+// from the entered age.
+export default function StepAge({ ageMonths, error, onChange }) {
+  // Mode: 'dob' | 'precise'
+  const [mode, setMode] = useState('dob');
   const [years, setYears] = useState('');
   const [months, setMonths] = useState('');
   const [dob, setDob] = useState('');
-
-  function selectChip(chip) {
-    const am = chip.defaultM;
-    setMode('precise');
-    setDob('');
-    setYears(String(Math.floor(am / 12)));
-    setMonths(String(Math.round(am % 12)));
-    onChange({ ageMonths: am, ageGroup: deriveGroup(am) });
-  }
 
   function handleYearsChange(v) {
     setYears(v);
@@ -68,40 +55,44 @@ export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
   return (
     <div className="step-card">
       <div className="step-title">Patient Age</div>
-      <div className="step-sub">Select an age group or enter a precise age</div>
+      <div className="step-sub">Date of birth is recommended: it lets dose dates be checked precisely (e.g. against the 65th birthday for PPSV23, or the 19th-birthday adult schedule boundary)</div>
 
-      <div className="age-chips">
-        {AGE_GROUP_CHIPS.map(chip => (
-          <button
-            key={chip.label}
-            className={`age-chip${ageGroup === chip.label ? ' selected' : ''}`}
-            onClick={() => selectChip(chip)}
-          >
-            {chip.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="dob-divider">or enter precise age</div>
-
+      {/* Entry mode tabs — DOB first/default; Years/Months is the fallback for when DOB is genuinely unknown */}
       <div className="step-toggle-row">
-        <button
-          className={`history-toggle-btn step-toggle-btn${mode === 'precise' ? ' selected' : ''}`}
-          onClick={() => { setMode('precise'); setDob(''); onChange({ ageMonths: null, ageGroup: null }); }}
-        >
-          Years / Months
-        </button>
         <button
           className={`history-toggle-btn step-toggle-btn${mode === 'dob' ? ' selected' : ''}`}
           onClick={() => { setMode('dob'); setYears(''); setMonths(''); onChange({ ageMonths: null, ageGroup: null }); }}
         >
           Date of Birth
         </button>
+        <button
+          className={`history-toggle-btn step-toggle-btn${mode === 'precise' ? ' selected' : ''}`}
+          onClick={() => { setMode('precise'); setDob(''); onChange({ ageMonths: null, ageGroup: null }); }}
+        >
+          Years / Months (if DOB unknown)
+        </button>
       </div>
+
+      {mode === 'dob' && (
+        <div className="age-field">
+          <label htmlFor="dob-input">Date of Birth</label>
+          <input
+            id="dob-input"
+            type="date"
+            value={dob}
+            max={new Date().toISOString().slice(0, 10)}
+            onChange={e => handleDobChange(e.target.value)}
+          />
+        </div>
+      )}
 
       {mode === 'precise' && (
         <>
-        <div className="age-precise-hint">Age used for recommendations, refine if needed</div>
+        <div className="age-precise-hint">
+          Approximate age only. Without a date of birth, the app can't verify whether a
+          recorded dose was given on/after a specific birthday (e.g. the 65-year PPSV23
+          shared-decision cutoff). Enter the date of birth above when it's available.
+        </div>
         <div className="age-row">
           <div className="age-field">
             <label htmlFor="age-years">Years</label>
@@ -115,16 +106,6 @@ export default function StepAge({ ageMonths, ageGroup, error, onChange }) {
           </div>
         </div>
         </>
-      )}
-
-      {mode === 'dob' && (
-        <div className="age-field">
-          <label htmlFor="dob-input">Date of Birth</label>
-          <input id="dob-input" type="date" value={dob}
-            max={new Date().toISOString().slice(0, 10)}
-            onChange={e => handleDobChange(e.target.value)}
-            className="dob-field-narrow" />
-        </div>
       )}
 
       {derivedGroup && (
