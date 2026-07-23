@@ -9,7 +9,7 @@ const STATUS_LABELS = {
   'due':              'Due',
   'catchup':          'Catch-up',
   'risk-based':       'Risk-Based',
-  'shared-decision':  'Shared decision',
+  'shared-decision':  'Optional (shared decision)',
   'complete':         'Complete',
   'not-indicated':    'Not indicated',
   'deferred':         'Deferred',
@@ -144,7 +144,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
         <div className="rec-dose-label">{doseLabel}</div>
 
         {!dueToday && earliestNextDate && !advisory && (
-          <div className="next-date">Eligible {fmtDate(earliestNextDate)}</div>
+          <div className="next-date">Not yet due — eligible {fmtDate(earliestNextDate)}</div>
         )}
 
         {brands && brands.length > 0 && !isNeutral && (

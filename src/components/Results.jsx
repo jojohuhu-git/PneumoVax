@@ -25,14 +25,29 @@ export default function Results({ state, onReset, onChange, onBack }) {
 
   // PD2/D1: answer-first summary line, composed from the same dueToday flags
   // that already drive the recommendation cards below — no new logic.
+  // Item 4 parity (2026-07-23, ported from MeningoVax): a shared-decision rec
+  // (e.g. PCV20/21 after PPSV23 at ≥65y) can be dueToday AND optional at the
+  // same time -- "due" alone reads as mandatory. Split required vs. optional
+  // so the summary never calls an optional dose flatly "due."
   let summaryLine;
   if (hsct) {
     summaryLine = 'HSCT advisory series applies. See details below.';
   } else {
-    const dueVaccines = [...new Set(recs.filter(r => r.dueToday && !r.advisory).map(r => r.vaccine))];
-    summaryLine = dueVaccines.length > 0
-      ? `Due today: ${dueVaccines.join(' and ')}.`
-      : 'No pneumococcal doses due today.';
+    const activeRecs = recs.filter(r => r.dueToday && !r.advisory);
+    const requiredVaccines = [...new Set(activeRecs.filter(r => r.status !== 'shared-decision').map(r => r.vaccine))];
+    const optionalVaccines = [...new Set(activeRecs.filter(r => r.status === 'shared-decision').map(r => r.vaccine))]
+      .filter(v => !requiredVaccines.includes(v));
+
+    if (requiredVaccines.length > 0) {
+      summaryLine = `Due today: ${requiredVaccines.join(' and ')}.`;
+      if (optionalVaccines.length > 0) {
+        summaryLine += ` ${optionalVaccines.join(' and ')} ${optionalVaccines.length > 1 ? 'are' : 'is'} optional (shared clinical decision).`;
+      }
+    } else if (optionalVaccines.length > 0) {
+      summaryLine = `${optionalVaccines.join(' and ')} ${optionalVaccines.length > 1 ? 'are' : 'is'} optional today (shared clinical decision). No other pneumococcal doses due today.`;
+    } else {
+      summaryLine = 'No pneumococcal doses due today.';
+    }
   }
 
   // PC1: recorded-dose validity chips, reusing validate.js's analyzeHistory
@@ -232,7 +247,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
               <div className="history-edit-section-title">Vaccine box colors</div>
               <div className="legend-row"><span className="legend-swatch legend-swatch-due" /><span>Due today: on schedule, expected now</span></div>
               <div className="legend-row"><span className="legend-swatch legend-swatch-catchup" /><span>Catch-up: behind the routine schedule, needed now to catch up</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-shared" /><span>Shared decision: optional, patient and provider decide together</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-shared" /><span>Optional (shared decision): patient and provider decide together</span></div>
               <div className="legend-row"><span className="legend-swatch legend-swatch-neutral" /><span>Not currently due (complete, not indicated, or deferred)</span></div>
             </div>
             <div className="dose-history-block">
