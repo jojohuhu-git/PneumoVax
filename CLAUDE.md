@@ -38,7 +38,9 @@ Also read before changing any rule: `CLINICAL_SPEC.md` (every rule with source c
 Only `CLAUDE.md`, `MAP.md`, `README.md`, and `CLINICAL_SPEC.md` live at the repo root (`CLINICAL_SPEC.md` stays — code/test comments cite it by that path). Never create new root-level `.md` files. Session notes/handoffs/reviews go to `docs/archive/`; comparison scripts go to `scripts/`. Keep `MAP.md` current when folders change.
 
 ### Clinical Authority
-ACIP/CDC/immunize.org over FDA package inserts. Sources per topic are in `CLINICAL_SPEC.md`.
+ACIP/CDC/AAP/immunize.org over FDA package inserts. Sources per topic are in `CLINICAL_SPEC.md`.
+
+Within that group, AAP is a tiebreak, not a ranking (owner decision, 2026-08-10): where ACIP/CDC and AAP agree, cite either; where they disagree, AAP governs; never adopt a CDC revision recommending fewer doses or narrower eligibility than AAP; where AAP is silent, CDC/MMWR stands.
 
 ### Two Boundary Constants — Never Collapse
 `src/logic/scheduleConstants.js` exports two distinct constants:
