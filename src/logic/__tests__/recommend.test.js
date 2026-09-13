@@ -180,9 +180,9 @@ describe('§D At-risk children — Table 4 rows', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
-// §E — HSCT, children <19y (p2016 Table 5)
+// §E — HSCT, children <19y (immunize.org p3086 Table 5)
 // ════════════════════════════════════════════════════════════════════════
-describe('§E HSCT children <19y (p2016 Table 5)', () => {
+describe('§E HSCT children <19y (immunize.org p3086 Table 5)', () => {
   it('5yo HSCT → advisory PCV20 ×4, relative to transplant, not dueToday', () => {
     const r = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
     expect(r.hsct).toBeTruthy();
@@ -196,10 +196,10 @@ describe('§E HSCT children <19y (p2016 Table 5)', () => {
     expect(a.note).toMatch(/GVHD/);
   });
 
-  it('child HSCT cites p2016 Table 5 (SOLE peds-HSCT source), not CDC child notes', () => {
+  it('child HSCT cites immunize.org Table 5 (SOLE peds-HSCT source), not CDC child notes', () => {
     const r = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
     const cites = r.hsct.recs[0].citations.map((c) => c.short);
-    expect(cites.some((s) => /p2016 Table 5/.test(s))).toBe(true);
+    expect(cites.some((s) => /Table 5/.test(s))).toBe(true);
   });
 
   it('standard recs still shown below HSCT advisory', () => {

@@ -7,7 +7,7 @@
 // ages are often more restrictive than current ACIP guidance).
 //
 // HSCT sources are intentionally segregated:
-//   • Children <19y HSCT → p2016 Table 5 (SOLE source).
+//   • Children <19y HSCT → immunize.org p3086 Table 5 (SOLE source).
 //   • Adults ≥19y HSCT   → Fred Hutch LTFU §IX (SOLE source).
 //
 // Each entry: url, label (full title), short (chip text).
@@ -77,8 +77,13 @@ export const REFS = {
 
   // immunize.org ----------------------------------------------------------
   p2016: {
+    // 2026-09-13 fix: label previously claimed "Tables 1-5" — verified live
+    // that p2016.pdf, as it exists now, is a 2-page document with only
+    // Tables 1-4. Table 5 (the HSCT schedule) lives in p3086.pdf instead
+    // (see p3086Table5 below). URL itself was already correct for these
+    // Tables 1-4 call sites.
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
-    label: 'immunize.org — Recommendations for Pneumococcal Vaccines Use in Children and Teens (Tables 1–5)',
+    label: 'immunize.org — Recommendations for Pneumococcal Vaccines Use in Children and Teens (Tables 1–4)',
     short: 'immunize.org p2016',
   },
   immPCV7: {
@@ -93,11 +98,16 @@ export const REFS = {
   },
 
   // HSCT sources (segregated) --------------------------------------------
-  // Children <19y HSCT — p2016 Table 5 is the SOLE source.
-  p2016Table5: {
-    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
-    label: 'immunize.org p2016 Table 5 — Pneumococcal schedule for children <19y following HSCT (SOLE peds-HSCT source)',
-    short: 'p2016 Table 5 (HSCT)',
+  // Children <19y HSCT — p3086 Table 5 is the SOLE source.
+  // 2026-09-13 fix: this used to point to p2016.pdf, which (verified live)
+  // is a 2-page document with only Tables 1-4 — no Table 5, no HSCT content.
+  // The real Table 5 lives in p3086.pdf ("Standing Orders for Administering
+  // Pneumococcal Vaccines to Children and Teens"), page 4 of 5 — verified
+  // its text matches this app's hardcoded advisory note verbatim.
+  p3086Table5: {
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p3086.pdf',
+    label: 'immunize.org Standing Orders for Administering Pneumococcal Vaccines to Children and Teens — Table 5: Pneumococcal schedule for children <19y following HSCT (SOLE peds-HSCT source)',
+    short: 'Immunize.org Table 5 (HSCT)',
   },
   // Adults ≥19y HSCT — Fred Hutch LTFU is the SOLE source.
   fredHutchLTFU: {
