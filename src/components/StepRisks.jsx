@@ -6,9 +6,8 @@ const GROUP_LABELS = {
   IC: 'Immunocompromising conditions',
   special: 'Cochlear implant / CSF leak',
   nonIC: 'Chronic (non-immunocompromising) conditions',
-  hsct: 'Hematopoietic stem cell transplant',
 };
-const GROUP_ORDER = ['IC', 'special', 'nonIC', 'hsct'];
+const GROUP_ORDER = ['IC', 'special', 'nonIC'];
 
 export default function StepRisks({ ageMonths, riskIds, onChange }) {
   const noneSelected = riskIds.length === 0;
@@ -31,7 +30,7 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
 
       <div className="risk-list" role="group" aria-label="Risk factors">
         {GROUP_ORDER.map(group => {
-          const items = RISK_FACTORS.filter(rf => rf.class === group && (!rf.adultOnly || isAdult));
+          const items = RISK_FACTORS.filter(rf => rf.group === group && (!rf.adultOnly || isAdult));
           if (items.length === 0) return null;
           return (
             <div key={group} className="risk-group">
@@ -39,7 +38,7 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
               {items.map(rf => {
                 const selected = riskIds.includes(rf.id);
                 return (
-                  <label key={rf.id} className={`risk-item${selected ? ' selected' : ''}`}>
+                  <label key={rf.id} className={`risk-item${selected ? ' selected' : ''}${rf.exclude ? ' risk-item-exclude' : ''}`}>
                     <input type="checkbox" className="risk-checkbox"
                       checked={selected} onChange={() => toggle(rf.id)} />
                     <div className="risk-text">

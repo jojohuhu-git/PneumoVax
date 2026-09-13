@@ -119,4 +119,28 @@ describe('App wizard', () => {
     expect(screen.getByText('Recorded (does not count)')).toBeTruthy();
     expect(screen.getByText(/PCV7 \(Prevnar 7\) is not counted/)).toBeTruthy();
   });
+
+  it('CAR-T/B-cell checkbox skips History and shows the hard-stop with no rec cards', () => {
+    render(<App />);
+    setAgeYears(30);
+    fireEvent.click(getNextBtn());           // → Risks
+    fireEvent.click(screen.getByLabelText(/CAR-T therapy, B-cell malignancy/i, { exact: false }));
+    fireEvent.click(getNextBtn());           // → skips History, straight to Results
+
+    expect(screen.queryByText('Vaccination History')).toBeNull();
+    expect(screen.getByTestId('exclusion-stop')).toBeTruthy();
+    expect(screen.getAllByText(/does not apply to this patient/i).length).toBeGreaterThan(0);
+    expect(screen.queryAllByTestId('rec-card')).toHaveLength(0);
+  });
+
+  it('CAR-T/B-cell "Edit risk factors" button returns to Risks, not History', () => {
+    render(<App />);
+    setAgeYears(30);
+    fireEvent.click(getNextBtn());           // → Risks
+    fireEvent.click(screen.getByLabelText(/CAR-T therapy, B-cell malignancy/i, { exact: false }));
+    fireEvent.click(getNextBtn());           // → Results
+
+    fireEvent.click(screen.getByRole('button', { name: /edit risk factors/i }));
+    expect(screen.getByText('Risk Factors')).toBeDefined();
+  });
 });

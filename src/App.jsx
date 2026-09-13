@@ -5,6 +5,7 @@ import StepRisks from './components/StepRisks.jsx';
 import StepHistory from './components/StepHistory.jsx';
 import Results from './components/Results.jsx';
 import { PCV_HISTORY_PRODUCTS } from './data/brands.js';
+import { hasExclusion } from './data/riskFactors.js';
 
 const STEPS = ['Age', 'Risks', 'History', 'Results'];
 
@@ -33,10 +34,20 @@ export default function App() {
       }
       setAgeError('');
     }
+    // The hard-stop exclusion (CAR-T/B-cell) needs no vaccination history to
+    // show its stop message, so skip the History step straight to Results.
+    if (state.step === 1 && hasExclusion(state.riskIds)) {
+      setState(prev => ({ ...prev, step: 3 }));
+      return;
+    }
     setState(prev => ({ ...prev, step: Math.min(prev.step + 1, STEPS.length - 1) }));
   }
 
   function goBack() {
+    if (state.step === 3 && hasExclusion(state.riskIds)) {
+      setState(prev => ({ ...prev, step: 1 }));
+      return;
+    }
     setState(prev => ({ ...prev, step: Math.max(prev.step - 1, 0) }));
   }
 
@@ -91,7 +102,7 @@ export default function App() {
         )}
         {state.step === 3 && (
           <Results state={state} onReset={reset} onChange={update}
-            onBack={() => update({ step: 2 })} />
+            onBack={goBack} />
         )}
       </main>
 

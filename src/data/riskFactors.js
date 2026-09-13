@@ -1,6 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────
 // RISK FACTORS — pneumococcal indication catalog.
 //
+// `group` is DISPLAY ONLY (which StepRisks.jsx section a checkbox renders
+// under) and is separate from `class` (the clinical logic engine reads).
+// HSCT and the CAR-T/B-cell exclusion both display under "Immunocompromising
+// conditions" (owner decision, 2026-09-13) but keep their own `class` values
+// so recommend.js's hasHSCT()/hasExclusion() checks are unaffected.
+//
 // Each entry declares its risk class:
 //   class: 'IC'  — immunocompromising. Shorter PCV15→PPSV23 interval (≥8 weeks
 //                  for adults; peds uses the IC catch-up rows of p2016 Table 4
@@ -27,40 +33,59 @@ export const RISK_FACTORS = [
     id: 'asplenia',
     label: 'Asplenia or splenic dysfunction / sickle cell disease',
     sublabel: 'congenital or acquired asplenia, sickle cell disease or other hemoglobinopathies',
-    class: 'IC',
+    class: 'IC', group: 'IC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo', 'mmwr7203a1'],
   },
   {
     id: 'immunodeficiency',
     label: 'Congenital or acquired immunodeficiency',
-    class: 'IC',
+    class: 'IC', group: 'IC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'immunosuppression',
     label: 'Immunosuppressive drugs or radiation therapy',
     sublabel: 'incl. long-term systemic corticosteroids; generalized malignancy, leukemia, lymphoma, Hodgkin, multiple myeloma',
-    class: 'IC',
+    class: 'IC', group: 'IC',
     refs: ['cdcAdultPneumo', 'mmwr7203a1'],
   },
   {
     id: 'hiv',
     label: 'HIV infection',
-    class: 'IC',
+    class: 'IC', group: 'IC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'solid_organ_transplant',
     label: 'Solid organ transplant',
-    class: 'IC',
+    class: 'IC', group: 'IC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'ckd_advanced',
     label: 'Chronic kidney disease (dialysis or nephrotic syndrome)',
     sublabel: 'kidney disease on maintenance dialysis, or with nephrotic syndrome; chronic renal failure',
-    class: 'IC',
+    class: 'IC', group: 'IC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
+  },
+
+  // ── HSCT (advisory pathway) — displays under Immunocompromising conditions ──
+  {
+    id: 'hsct',
+    label: 'Hematopoietic stem cell transplant (HSCT)',
+    sublabel: 'full re-vaccination; advisory, coordinate with the transplant/ID team',
+    class: 'hsct', group: 'IC',
+    refs: ['p2016Table5', 'fredHutchLTFU'],
+  },
+
+  // ── Hard stop: too heterogeneous for one safe recipe — displays under
+  //    Immunocompromising conditions, styled distinctly via `exclude: true` ──
+  {
+    id: 'bcell_car_t_therapy',
+    label: 'CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy',
+    sublabel: 'this tool does not apply — needs an individualized, specialist-guided schedule',
+    class: 'exclude', group: 'IC', exclude: true,
+    refs: ['cdcAlteredImmunocompetence'],
   },
 
   // ── Cochlear implant / CSF leak (IC interval, non-IC peds row) ───────
@@ -68,14 +93,14 @@ export const RISK_FACTORS = [
     id: 'cochlear_implant',
     label: 'Cochlear implant',
     sublabel: 'uses the immunocompromising (≥8-week) PCV15→PPSV23 interval (CDC adult notes)',
-    class: 'special',
+    class: 'special', group: 'special',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'csf_leak',
     label: 'Cerebrospinal fluid (CSF) leak',
     sublabel: 'uses the immunocompromising (≥8-week) PCV15→PPSV23 interval (CDC adult notes)',
-    class: 'special',
+    class: 'special', group: 'special',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
 
@@ -83,39 +108,39 @@ export const RISK_FACTORS = [
   {
     id: 'chronic_heart',
     label: 'Chronic heart disease',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'chronic_lung',
     label: 'Chronic lung disease',
     sublabel: 'incl. moderate/severe persistent asthma (children); COPD/emphysema/asthma (adults)',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'chronic_liver',
     label: 'Chronic liver disease',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'diabetes',
     label: 'Diabetes mellitus',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'ckd_chronic',
     label: 'Chronic kidney disease (not on dialysis / no nephrotic syndrome)',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     refs: ['cdcChildPneumo'],
   },
   {
     id: 'alcoholism',
     label: 'Alcohol use disorder',
     sublabel: 'adult risk condition',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     adultOnly: true,
     refs: ['cdcAdultPneumo', 'mmwr7203a1'],
   },
@@ -123,18 +148,9 @@ export const RISK_FACTORS = [
     id: 'smoking',
     label: 'Cigarette smoking',
     sublabel: 'adult risk condition',
-    class: 'nonIC',
+    class: 'nonIC', group: 'nonIC',
     adultOnly: true,
     refs: ['cdcAdultPneumo', 'mmwr7203a1'],
-  },
-
-  // ── HSCT (advisory pathway) ─────────────────────────────────────────
-  {
-    id: 'hsct',
-    label: 'Hematopoietic stem cell transplant (HSCT)',
-    sublabel: 'full re-vaccination; advisory, coordinate with the transplant/ID team',
-    class: 'hsct',
-    refs: ['p2016Table5', 'fredHutchLTFU'],
   },
 ];
 
@@ -143,6 +159,12 @@ export const RISK_BY_ID = Object.fromEntries(RISK_FACTORS.map((r) => [r.id, r]))
 // Any HSCT selected?
 export function hasHSCT(riskIds = []) {
   return riskIds.includes('hsct');
+}
+
+// CAR-T therapy / B-cell malignancy / B-cell-depleting therapy selected?
+// This hard-stops the whole engine — too heterogeneous for one safe recipe.
+export function hasExclusion(riskIds = []) {
+  return riskIds.some((id) => RISK_BY_ID[id]?.class === 'exclude');
 }
 
 // Any immunocompromising condition selected (true IC, NOT cochlear/CSF)?

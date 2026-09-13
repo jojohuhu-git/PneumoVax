@@ -21,7 +21,33 @@ export default function Results({ state, onReset, onChange, onBack }) {
     ppsv23Doses,
   });
 
-  const { recs, hsct, pcv21Geo } = result;
+  const { recs, hsct, pcv21Geo, excluded, exclusionMessage, exclusionCitations } = result;
+
+  if (excluded) {
+    return (
+      <div>
+        <div className="advisory-banner advisory-banner-exclude" data-testid="exclusion-stop">
+          <div className="advisory-banner-title">Does not apply to this patient</div>
+          <div className="advisory-note">{exclusionMessage}</div>
+          {exclusionCitations && exclusionCitations.length > 0 && (
+            <div className="rec-citations">
+              {exclusionCitations.map((c, i) => (
+                <a key={i} href={c.url} target="_blank" rel="noopener noreferrer"
+                  className="citation-chip" title={c.label}>{c.short || c.label}</a>
+              ))}
+            </div>
+          )}
+        </div>
+        <Disclaimer />
+        <div className="results-actions">
+          {onBack && (
+            <button className="btn btn-outline" onClick={onBack}>Edit risk factors</button>
+          )}
+          <button className="btn btn-outline" onClick={onReset}>Start Over</button>
+        </div>
+      </div>
+    );
+  }
 
   // PD2/D1: answer-first summary line, composed from the same dueToday flags
   // that already drive the recommendation cards below — no new logic.

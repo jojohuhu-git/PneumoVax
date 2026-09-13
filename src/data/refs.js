@@ -105,6 +105,13 @@ export const REFS = {
     label: 'Fred Hutch Long-Term Follow-Up Guidelines for Referring Physicians, §IX Vaccinations, Tables IX.A1/A2 (adult HSCT — institution-specific, titer-guided, not ACIP)',
     short: 'Fred Hutch LTFU §IX',
   },
+
+  // CAR-T / B-cell malignancy / B-cell-depleting therapy hard stop -------
+  cdcAlteredImmunocompetence: {
+    url: 'https://www.cdc.gov/vaccines/hcp/acip-recs/general-recs/immunocompetence.html',
+    label: 'CDC ACIP General Best Practice Guidelines — Altered Immunocompetence',
+    short: 'CDC Altered Immunocompetence',
+  },
 };
 
 // Resolve an array of ref keys to {url, label, short} objects, dropping unknowns.
