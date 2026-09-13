@@ -75,7 +75,7 @@ export const RISK_FACTORS = [
     label: 'Hematopoietic stem cell transplant (HSCT)',
     sublabel: 'full re-vaccination; advisory, coordinate with the transplant/ID team',
     class: 'hsct', group: 'IC',
-    refs: ['p2016Table5', 'fredHutchLTFU'],
+    refs: ['p3086Table5', 'fredHutchLTFU'],
   },
 
   // ── Hard stop: too heterogeneous for one safe recipe — displays under
