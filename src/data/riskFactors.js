@@ -136,6 +136,15 @@ export const RISK_FACTORS = [
     class: 'hsct',
     refs: ['p2016Table5', 'fredHutchLTFU'],
   },
+
+  // ── Hard stop: too heterogeneous for one safe recipe ────────────────
+  {
+    id: 'bcell_car_t_therapy',
+    label: 'CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy',
+    sublabel: 'this tool does not apply — needs an individualized, specialist-guided schedule',
+    class: 'exclude',
+    refs: ['cdcAlteredImmunocompetence'],
+  },
 ];
 
 export const RISK_BY_ID = Object.fromEntries(RISK_FACTORS.map((r) => [r.id, r]));
@@ -143,6 +152,12 @@ export const RISK_BY_ID = Object.fromEntries(RISK_FACTORS.map((r) => [r.id, r]))
 // Any HSCT selected?
 export function hasHSCT(riskIds = []) {
   return riskIds.includes('hsct');
+}
+
+// CAR-T therapy / B-cell malignancy / B-cell-depleting therapy selected?
+// This hard-stops the whole engine — too heterogeneous for one safe recipe.
+export function hasExclusion(riskIds = []) {
+  return riskIds.some((id) => RISK_BY_ID[id]?.class === 'exclude');
 }
 
 // Any immunocompromising condition selected (true IC, NOT cochlear/CSF)?

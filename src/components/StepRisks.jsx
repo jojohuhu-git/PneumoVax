@@ -7,8 +7,9 @@ const GROUP_LABELS = {
   special: 'Cochlear implant / CSF leak',
   nonIC: 'Chronic (non-immunocompromising) conditions',
   hsct: 'Hematopoietic stem cell transplant',
+  exclude: 'Does this tool apply?',
 };
-const GROUP_ORDER = ['IC', 'special', 'nonIC', 'hsct'];
+const GROUP_ORDER = ['IC', 'special', 'nonIC', 'hsct', 'exclude'];
 
 export default function StepRisks({ ageMonths, riskIds, onChange }) {
   const noneSelected = riskIds.length === 0;
@@ -34,7 +35,7 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
           const items = RISK_FACTORS.filter(rf => rf.class === group && (!rf.adultOnly || isAdult));
           if (items.length === 0) return null;
           return (
-            <div key={group} className="risk-group">
+            <div key={group} className={`risk-group${group === 'exclude' ? ' risk-group-exclude' : ''}`}>
               <div className="risk-group-title">{GROUP_LABELS[group]}</div>
               {items.map(rf => {
                 const selected = riskIds.includes(rf.id);

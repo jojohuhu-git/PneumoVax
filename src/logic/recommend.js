@@ -20,6 +20,7 @@ import { resolveRefs } from '../data/refs.js';
 import {
   RISK_BY_ID,
   hasHSCT,
+  hasExclusion,
   hasIC,
   hasAnyRisk,
   adultPpsvIntervalClass,
@@ -742,12 +743,43 @@ function pcv21GeoNote(am, recs) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  Hard-stop exclusion (CAR-T therapy / B-cell malignancy / B-cell-depleting
+//  therapy) — too heterogeneous for one safe recipe. Verified live against
+//  CDC's ACIP General Best Practice Guidelines, "Altered Immunocompetence"
+//  page, 2026-09-12.
+// ═══════════════════════════════════════════════════════════════════════════
+const EXCLUSION_MESSAGE = 'This tool does not apply to this patient. Standard '
+  + 'age-based immunization logic is not valid for recipients of hematopoietic '
+  + 'cell transplant (HCT) or CAR‑T therapy, or for patients with a '
+  + 'B‑cell malignancy or recent B‑cell–depleting therapy. These '
+  + 'patients need an individualized, transplant/therapy‑specific '
+  + 'revaccination schedule, and certain live vaccines may be contraindicated. '
+  + 'Follow institutional protocols or current national guidance (e.g., ASCO, '
+  + 'NCCN, IDSA, CDC).';
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  PUBLIC API
 // ═══════════════════════════════════════════════════════════════════════════
 export function recommend(input) {
   const am = input.ageMonths ?? 0;
   const riskIds = input.riskIds ?? [];
   const today = todayISO(input.today);
+
+  // ── Hard-stop exclusion wins over everything, including HSCT (both boxes
+  //    can be ticked; owner decision 2026-09-12: the stop wins, transplant
+  //    advice is hidden rather than shown underneath a "does not apply" notice).
+  if (hasExclusion(riskIds)) {
+    return {
+      excluded: true,
+      exclusionMessage: EXCLUSION_MESSAGE,
+      exclusionCitations: resolveRefs(['cdcAlteredImmunocompetence']),
+      recs: [],
+      hsct: null,
+      pcv21Geo: null,
+      perDose: { pcv: {}, ppsv23: {} },
+      meta: { ageMonths: am, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
+    };
+  }
   const rawPcv = (input.pcvDoses ?? []).filter(Boolean);
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 

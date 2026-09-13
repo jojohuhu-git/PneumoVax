@@ -198,6 +198,11 @@ body {
 .risk-none:hover { background: var(--gy6); }
 .risk-none.selected { border-color: var(--cmd); background: var(--clt); color: var(--c); }
 
+/* Exclusion group (CAR-T/B-cell) — visually distinct hard-stop condition */
+.risk-group-exclude .risk-group-title { color: var(--r); }
+.risk-group-exclude .risk-item { border: 1.5px solid var(--rmd); }
+.risk-group-exclude .risk-item.selected { background: var(--rlt); border-color: var(--r); }
+
 /* ── History step ──────────────────────────────────────────────── */
 .history-toggle { display: flex; gap: var(--sp-12); margin-bottom: var(--sp-16); }
 .history-toggle-btn {
@@ -424,6 +429,12 @@ body {
   padding: var(--sp-12);
 }
 .advisory-banner-info .advisory-banner-title { color: var(--b); }
+.advisory-banner-exclude {
+  background: var(--rlt);
+  border: 1.5px solid var(--rmd);
+  border-left: 4px solid var(--r);
+}
+.advisory-banner-exclude .advisory-banner-title { color: var(--r); }
 .advisory-banner-title {
   font-size: var(--fs-md);
   font-weight: 700;

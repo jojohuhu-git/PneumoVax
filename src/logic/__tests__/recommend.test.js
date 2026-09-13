@@ -451,6 +451,34 @@ describe('§K Cross-cutting rules', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
+// Hard-stop exclusion: CAR-T / B-cell malignancy / B-cell-depleting therapy
+// ════════════════════════════════════════════════════════════════════════
+describe('hard-stop exclusion', () => {
+  it('CAR-T/B-cell risk id ⇒ excluded, no recs, no HSCT advisory', () => {
+    const r = run({ ageMonths: 120, riskIds: ['bcell_car_t_therapy'], pcvDoses: [] });
+    expect(r.excluded).toBe(true);
+    expect(r.exclusionMessage).toMatch(/does not apply to this patient/);
+    expect(r.recs).toEqual([]);
+    expect(r.hsct).toBeNull();
+    expect(r.exclusionCitations.length).toBeGreaterThan(0);
+  });
+
+  it('HSCT alone (no exclusion id) still returns the unchanged HSCT advisory', () => {
+    const r = run({ ageMonths: 120, riskIds: ['hsct'], pcvDoses: [] });
+    expect(r.excluded).toBeUndefined();
+    expect(r.hsct).not.toBeNull();
+    expect(r.hsct.recs.length).toBeGreaterThan(0);
+  });
+
+  it('both HSCT and CAR-T/B-cell ticked together ⇒ hard stop wins, HSCT advice hidden', () => {
+    const r = run({ ageMonths: 120, riskIds: ['hsct', 'bcell_car_t_therapy'], pcvDoses: [] });
+    expect(r.excluded).toBe(true);
+    expect(r.hsct).toBeNull();
+    expect(r.recs).toEqual([]);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════
 // rec object shape
 // ════════════════════════════════════════════════════════════════════════
 describe('rec object shape', () => {
