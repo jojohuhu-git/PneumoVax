@@ -198,10 +198,10 @@ body {
 .risk-none:hover { background: var(--gy6); }
 .risk-none.selected { border-color: var(--cmd); background: var(--clt); color: var(--c); }
 
-/* Exclusion group (CAR-T/B-cell) — visually distinct hard-stop condition */
-.risk-group-exclude .risk-group-title { color: var(--r); }
-.risk-group-exclude .risk-item { border: 1.5px solid var(--rmd); }
-.risk-group-exclude .risk-item.selected { background: var(--rlt); border-color: var(--r); }
+/* Exclusion checkbox (CAR-T/B-cell) — visually distinct hard-stop condition,
+   wherever it's grouped */
+.risk-item-exclude { border-color: var(--rmd); }
+.risk-item-exclude.selected { background: var(--rlt); border-color: var(--r); }
 
 /* ── History step ──────────────────────────────────────────────── */
 .history-toggle { display: flex; gap: var(--sp-12); margin-bottom: var(--sp-16); }
