@@ -193,7 +193,9 @@ describe('§E HSCT children <19y (immunize.org p3086 Table 5)', () => {
     expect(a.earliestNextDate).toBeNull();
     expect(a.doseLabel).toMatch(/4 doses of PCV20/);
     expect(a.note).toMatch(/3–6 months after HSCT/);
-    expect(a.note).toMatch(/GVHD/);
+    // P1-C (2026-09-14): GVHD is unmodeled in all three apps per owner
+    // decision — no checkbox, no conditional text anywhere.
+    expect(a.note).not.toMatch(/GVHD/);
   });
 
   it('child HSCT cites immunize.org Table 5 (SOLE peds-HSCT source), not CDC child notes', () => {
