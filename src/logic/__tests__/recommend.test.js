@@ -209,24 +209,34 @@ describe('§E HSCT children <19y (immunize.org p3086 Table 5)', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
-// §F — HSCT, adults ≥19y (Fred Hutch LTFU)
+// §F — HSCT, adults ≥19y (ASCO 2024 — P0-A, 2026-09-14: replaces Fred Hutch,
+// matches the pediatric row; owner decision in
+// docs/archive/fix-queue-2026-09-13-crossapp-hct-cart-parity.md)
 // ════════════════════════════════════════════════════════════════════════
-describe('§F HSCT adults ≥19y (Fred Hutch LTFU)', () => {
-  it('40yo HSCT → advisory PCV20 ×3 at ≥6/≥8/≥10mo, no PPSV23, titer note', () => {
+describe('§F HSCT adults ≥19y (ASCO 2024, matches pediatric row)', () => {
+  it('40yo HSCT → advisory PCV20 ×4 beginning 3–6mo, matching the pediatric row', () => {
     const r = run({ ageMonths: 480, riskIds: ['hsct'], pcvDoses: [] });
     expect(r.hsct.title).toMatch(/adult/i);
     const a = r.hsct.recs[0];
     expect(a.advisory).toBe(true);
-    expect(a.doseLabel).toMatch(/PCV20 ×3/);
-    expect(a.note).toMatch(/≥6, ≥8, and ≥10 months/);
-    expect(a.note).toMatch(/NO PPSV23/i);
-    expect(a.note).toMatch(/≥15 of the 20 PCV20 serotypes/);
+    expect(a.doseLabel).toMatch(/4 doses of PCV20/);
+    expect(a.note).toMatch(/3–6 months after HSCT/);
+    expect(a.note).not.toMatch(/PCV20 ×3/);
+    expect(a.note).not.toMatch(/titer/i);
+    expect(a.note).not.toMatch(/NO PPSV23/i);
   });
 
-  it('adult HSCT cites Fred Hutch LTFU (SOLE adult-HSCT source)', () => {
+  it('adult HSCT cites ASCO 2024, not Fred Hutch', () => {
     const r = run({ ageMonths: 480, riskIds: ['hsct'], pcvDoses: [] });
     const cites = r.hsct.recs[0].citations.map((c) => c.short);
-    expect(cites.some((s) => /Fred Hutch/.test(s))).toBe(true);
+    expect(cites.some((s) => /ASCO/.test(s))).toBe(true);
+    expect(cites.some((s) => /Fred Hutch/.test(s))).toBe(false);
+  });
+
+  it('adult and pediatric HSCT rows now state the identical PCV20 plan', () => {
+    const child = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
+    const adult = run({ ageMonths: 480, riskIds: ['hsct'], pcvDoses: [] });
+    expect(adult.hsct.recs[0].doseLabel).toBe(child.hsct.recs[0].doseLabel);
   });
 });
 

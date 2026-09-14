@@ -109,11 +109,24 @@ export const REFS = {
     label: 'immunize.org Standing Orders for Administering Pneumococcal Vaccines to Children and Teens — Table 5: Pneumococcal schedule for children <19y following HSCT (SOLE peds-HSCT source)',
     short: 'Immunize.org Table 5 (HSCT)',
   },
-  // Adults ≥19y HSCT — Fred Hutch LTFU is the SOLE source.
+  // Adults ≥19y HSCT — 2026-09-14 (P0-A): ASCO 2024 replaces Fred Hutch LTFU
+  // as the adult source, per owner decision in
+  // docs/archive/fix-queue-2026-09-13-crossapp-hct-cart-parity.md. Fred Hutch
+  // LTFU is retained below only as a superseded/historical entry (kept for
+  // any archived references pointing at it) — no active rec cites it.
+  ascoAdultCancer2024: {
+    url: 'https://ascopubs.org/doi/10.1200/JCO.24.00032',
+    label: 'ASCO Guideline: Vaccination of Adults With Cancer (J Clin Oncol 2024)',
+    short: 'ASCO Vaccination of Adults With Cancer (2024)',
+    quote: 'the current US recommendation is to revaccinate all HSCT recipients with the first dose of PCV-20 at 4-6 months after transplant... The subsequent two doses are given at 1-month intervals, followed by the fourth dose administered 6 months later... Earlier revaccination of HSCT recipients starting after 3 months is the preferred approach in combination with a fourth conjugate vaccine dose administered at 1 year.',
+    lastVerified: '2026-09-14',
+  },
+  // Superseded 2026-09-14 — institution-specific, titer-guided, not ACIP.
+  // Kept for historical reference only; no active rec cites this.
   fredHutchLTFU: {
     url: 'https://www.fredhutch.org/content/dam/www/research/patient-treatment-and-support/ltfu/LTFU_HSCT_guidelines_physicians.pdf',
-    label: 'Fred Hutch Long-Term Follow-Up Guidelines for Referring Physicians, §IX Vaccinations, Tables IX.A1/A2 (adult HSCT — institution-specific, titer-guided, not ACIP)',
-    short: 'Fred Hutch LTFU §IX',
+    label: 'Fred Hutch Long-Term Follow-Up Guidelines for Referring Physicians, §IX Vaccinations, Tables IX.A1/A2 (adult HSCT — institution-specific, titer-guided, not ACIP; superseded by ASCO 2024)',
+    short: 'Fred Hutch LTFU §IX (superseded)',
   },
 
   // CAR-T / B-cell malignancy / B-cell-depleting therapy hard stop -------

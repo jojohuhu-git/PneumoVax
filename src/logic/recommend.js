@@ -697,17 +697,23 @@ function lastDoseDate(pcv, ppsv) {
 function hsctAdvisory(am) {
   const adult = am >= M.y18;
   if (adult) {
+    // P0-A (2026-09-14): adult row replaced Fred Hutch LTFU with ASCO 2024,
+    // matching the pediatric row (both apps agree; see
+    // docs/archive/fix-queue-2026-09-13-crossapp-hct-cart-parity.md). ASCO's
+    // "clinical interpretation" (preferred, earlier-start) approach is used:
+    // start after 3 months, 3 doses at ~1-month intervals, 4th dose 6 months
+    // after dose 3 and by 1 year post-transplant — same shape as the peds row.
     return {
       title: 'Post-HSCT pneumococcal series (adult) — advisory',
-      coordinateFlag: 'Coordinate with the transplant/ID team — your center may use its own post-HSCT protocol. The schedule below is the Fred Hutch Long-Term Follow-Up guideline (institution-specific, titer-guided, not ACIP).',
+      coordinateFlag: 'Coordinate with the transplant/ID team — your center may use its own post-HSCT protocol. Timing below is relative to transplant (no calendar due-dates).',
       recs: [
         rec({
           vaccine: 'PCV', status: 'risk-based', advisory: true,
-          doseLabel: 'PCV20 ×3: at ≥6 months, ≥8 months, and ≥10 months after HSCT (no PPSV23)',
+          doseLabel: '4 doses of PCV20, beginning 3–6 months after HSCT: give 3 doses 4 weeks apart, then a 4th dose at least 6 months after dose 3 and at least 12 months after HSCT',
           dueToday: false, earliestNextDate: null,
           brands: ['PCV20 (Prevnar 20)'],
-          note: 'Adult post-HSCT: 3 doses of PCV20 at approximately ≥6, ≥8, and ≥10 months after transplant. NO PPSV23 in the adult post-HSCT row. Titer-guided: check baseline S. pneumoniae IgG (23 serotypes) before the first PCV20, and recheck 1–2 months after EACH dose. A seroprotective IgG response to ≥15 of the 20 PCV20 serotypes means no further PCV20 is needed.',
-          refs: ['fredHutchLTFU'],
+          note: 'Adult post-HSCT (prior pneumococcal history is nullified — full re-vaccination): 4 doses of PCV20 beginning 3–6 months after HSCT. Give 3 doses 4 weeks apart, then a 4th dose ≥6 months after dose 3 AND ≥12 months after HSCT. This matches ASCO\'s preferred earlier-start approach; ASCO also describes an alternative starting later, at 4-6 months, with the 2nd and 3rd doses 1 month apart.',
+          refs: ['ascoAdultCancer2024'],
         }),
       ],
     };

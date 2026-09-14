@@ -65,7 +65,9 @@ describe('H1/H2 – ADULT_SCHED_MIN_M and PCV21_MIN_AGE_M constants', () => {
   it('Required scenario 2b: 19y0m HSCT → adult advisory title says "adult"', () => {
     const r = run({ ageMonths: 228, riskIds: ['hsct'], pcvDoses: [] });
     expect(r.hsct.title).toMatch(/adult/i);
-    expect(r.hsct.recs[0].doseLabel).toMatch(/×3/);
+    // P0-A (2026-09-14): adult HSCT plan now matches the pediatric plan
+    // (4 doses of PCV20, ASCO 2024) — the old "×3" Fred Hutch plan is gone.
+    expect(r.hsct.recs[0].doseLabel).toMatch(/4 doses of PCV20/);
   });
 });
 
