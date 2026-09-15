@@ -386,6 +386,21 @@ body {
 .dose-val-reasons { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 0; }
 .dose-val-reason { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.4; }
 .dose-val-detail { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.4; }
+/* Group headings inside the recorded-dose list: "Primary series" / "Boosters"
+   (owner decision 2026-09-15). Ported from MeningoVax — the two apps share one
+   design system, so the grouping reads identically in both. Deliberately quiet:
+   the dose numbers are what the reader is scanning for. */
+.rec-progress-group {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--gy3);
+  padding: var(--sp-12) 0 var(--sp-4);
+  border-bottom: 1px solid var(--gy5);
+}
+.rec-progress-group:first-child { padding-top: 0; }
+
 .dose-val-dropped .rec-progress-dose-text { opacity: 0.55; text-decoration: line-through; }
 .dose-val-effective {
   display: inline-flex; align-items: center; padding: 1px var(--sp-8); border-radius: var(--rads);
