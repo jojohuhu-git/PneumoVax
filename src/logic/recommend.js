@@ -56,6 +56,12 @@ function rec(o) {
     brands: o.brands ?? [],
     note: o.note,
     advisory: !!o.advisory,             // HSCT relative-to-transplant block
+    // Series shape for the recorded-dose list's "Primary series" / "Boosters"
+    // headings (owner decision 2026-09-15). Both null on cards whose total
+    // counts a DIFFERENT set of doses than the list displays -- the list then
+    // renders ungrouped rather than showing a denominator that doesn't match.
+    seriesTotal: o.seriesTotal ?? null,
+    primaryTotal: o.primaryTotal ?? null,
     citations: resolveRefs(o.refs ?? []),
   };
 }
@@ -142,6 +148,29 @@ function dueState(anchorDate, intervalDays, today) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  CHILDREN 2–23 months — p2016 Table 1 (routine + catch-up; all children)
 // ═══════════════════════════════════════════════════════════════════════════
+// Where the primary series ends, for a child PCV schedule of `total` doses.
+//
+// Verified live 2026-09-15 — MMWR 71(37), "Use of 15-Valent Pneumococcal
+// Conjugate Vaccine Among U.S. Children"
+// (https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm):
+//   "The primary infant series consists of 3 doses of PCV."
+//   "The fourth (booster) dose is recommended at age 12-15 months and >=8
+//    weeks after the third dose"
+// So the dose at >=12 months that CLOSES a series begun in infancy is the
+// booster, and everything before it is primary — which holds for the shorter
+// 7-11-month start too (2 primary + 1 booster).
+//
+// A series BEGUN at >=12 months is pure catch-up. CDC child & adolescent
+// schedule notes, pneumococcal catch-up (fetched live 2026-09-15) describe
+// those plainly as doses — "Healthy children ages 2-4 years with any
+// incomplete PCV series: 1 dose PCV" — never as boosters. So there is no
+// booster to split off and primaryTotal is the whole total.
+function pcvSeriesShape(pcv, am, total) {
+  const begunInInfancy = pcv.band.before12 >= 1 || am < M.m12;
+  const hasBooster = begunInInfancy && total > 1;
+  return { seriesTotal: total, primaryTotal: hasBooster ? total - 1 : total };
+}
+
 // Snapshot model: compute doses still needed + the next dose's min interval.
 function pcvInfant(am, pcv, today) {
   const prior = pcv.count;
@@ -212,6 +241,7 @@ function pcvInfant(am, pcv, today) {
   if (prior >= target && boosterGiven) {
     return [rec({
       vaccine: 'PCV', status: 'complete',
+      ...pcvSeriesShape(pcv, am, target),
       doseLabel: `PCV series complete (${prior} dose${prior === 1 ? '' : 's'})`,
       note: 'The age-appropriate PCV series appears complete. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).',
       refs,
@@ -229,6 +259,7 @@ function pcvInfant(am, pcv, today) {
 
   return [rec({
     vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
+    ...pcvSeriesShape(pcv, am, target),
     doseLabel: `PCV dose ${doseNum} of ${target}`,
     dueToday: due,
     earliestNextDate: needs12moFloor ? null : earliestNextDate,

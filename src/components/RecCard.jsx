@@ -30,7 +30,7 @@ function describeDose(dose, idx, ageMonths, today) {
 // a fourth status beyond MeningoVax's three — 'noncounting' — for PCV7,
 // which was validly given but per ACIP/immunize.org never counts toward the
 // series; it must not read as "Invalid".
-function DoseValidation({ result }) {
+function DoseValidation({ result, seriesTotal }) {
   if (!result) return null;
   const { status, reasons, detail, effectiveDoseNum, doesNotCount } = result;
 
@@ -52,7 +52,9 @@ function DoseValidation({ result }) {
     <div className={`dose-val${doesNotCount ? ' dose-val-dropped' : ''}`}>
       <span className={chipClass}>{chipLabel}</span>
       {effectiveDoseNum != null && status !== 'invalid' && (
-        <span className="dose-val-effective">Effective dose {effectiveDoseNum}</span>
+        <span className="dose-val-effective">
+          {seriesTotal != null ? `Dose ${effectiveDoseNum} of ${seriesTotal}` : `Dose ${effectiveDoseNum}`}
+        </span>
       )}
       {showReasons && (
         <div className="dose-val-reasons">
@@ -66,18 +68,55 @@ function DoseValidation({ result }) {
   );
 }
 
+// Interleave "Primary series" / "Boosters" headings into a recorded-dose list
+// (owner decision 2026-09-15, option A). Ported verbatim in behaviour from
+// MeningoVax's RecCard so the two apps group doses identically — the newer
+// single-vaccine apps share one design system.
+//
+// A dose that does NOT count (PCV7, an invalid dose) has no effective dose
+// number, so it cannot name its own phase. It stays in DATE order inside
+// whichever group is open rather than being moved to the bottom: a PCV7 given
+// at 2 months belongs where it happened in the record, so the list still lines
+// up against the chart.
+//
+// primaryTotal == null means this card's total counts a different set of doses
+// than the list shows (the at-risk >=24-month catch-up card, the adult option
+// cards) — then no headings are drawn at all.
+export function doseRowsWithGroups(doses, doseValidations, primaryTotal) {
+  const rows = [];
+  let openGroup = null;
+  doses.forEach((d, i) => {
+    const n = doseValidations?.[i]?.effectiveDoseNum;
+    if (primaryTotal != null && n != null) {
+      const phase = n <= primaryTotal ? 'primary' : 'booster';
+      if (phase !== openGroup) {
+        rows.push({ kind: 'group', phase, label: phase === 'primary' ? 'Primary series' : 'Boosters' });
+        openGroup = phase;
+      }
+    }
+    rows.push({ kind: 'dose', dose: d, index: i });
+  });
+  return rows;
+}
+
 // A list of recorded doses with validity chips, labeled by `label`.
-function DoseHistoryList({ label, doses, doseValidations, ageMonths }) {
+function DoseHistoryList({ label, doses, doseValidations, ageMonths, seriesTotal = null, primaryTotal = null }) {
   if (!doses || doses.length === 0) return null;
   return (
     <div className="rec-progress" data-testid="rec-progress">
       <span className="rec-progress-label">{label}</span>
       <ul className="rec-progress-list">
-        {doses.map((d, i) => (
-          <li key={i} className="rec-progress-dose-row">
-            <span className="rec-progress-dose-text">{describeDose(d, i, ageMonths, todayISO())}</span>
-            <DoseValidation result={doseValidations[i]} />
-          </li>
+        {doseRowsWithGroups(doses, doseValidations, primaryTotal).map((row) => (
+          row.kind === 'group' ? (
+            <li key={`group-${row.phase}`} className="rec-progress-group" data-testid={`dose-group-${row.phase}`}>
+              {row.label}
+            </li>
+          ) : (
+            <li key={row.index} className="rec-progress-dose-row">
+              <span className="rec-progress-dose-text">{describeDose(row.dose, row.index, ageMonths, todayISO())}</span>
+              <DoseValidation result={doseValidations[row.index]} seriesTotal={seriesTotal} />
+            </li>
+          )
         ))}
       </ul>
     </div>
@@ -98,7 +137,7 @@ function timingClass(status, dueToday) {
 }
 
 export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, otherHistory = null }) {
-  const { vaccine, status, doseLabel, dueToday, earliestNextDate, brands, note, citations, advisory } = rec;
+  const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, citations, advisory } = rec;
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
   // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due
@@ -160,7 +199,14 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           </div>
         )}
 
-        <DoseHistoryList label="Recorded:" doses={doses} doseValidations={doseValidations} ageMonths={ageMonths} />
+        <DoseHistoryList
+          label="Recorded:"
+          doses={doses}
+          doseValidations={doseValidations}
+          ageMonths={ageMonths}
+          seriesTotal={seriesTotal}
+          primaryTotal={primaryTotal}
+        />
 
         {otherHistory && (
           <DoseHistoryList
