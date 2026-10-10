@@ -27,7 +27,8 @@ import {
   pedsRiskRowClass,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
-import { todayISO, addDays, daysBetween, intervalElapsed, DAYS } from './dateUtils.js';
+import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
+import { dobToAgeMonths } from './format.js';
 import { analyzeHistory } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
@@ -565,7 +566,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  ADULTS 19–49y (risk-only) and ≥50y (routine) — CDC adult notes
 // ═══════════════════════════════════════════════════════════════════════════
-function pcvAdult(am, riskIds, pcv, ppsv, today) {
+function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   const isOlderAdult = am >= M.y50;
   const anyRisk = hasAnyRisk(riskIds);
   const intervalClass = adultPpsvIntervalClass(riskIds); // 'short'(8wk) | 'long'(1y)
@@ -663,13 +664,31 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
     // the PPSV23 dose is undated. (Verified against CDC PneumoRecs VaxAdvisor 2026-06-07.)
     const ppsvDateForAge = ppsv.effective.find((d) => d.date)?.date || null;
     let ppsvAtOrAfter65;
-    if (ppsvDateForAge) {
-      const ageAtPpsvMonths = am - Math.round(daysBetween(ppsvDateForAge, today) / 30.4375);
-      ppsvAtOrAfter65 = ageAtPpsvMonths >= M.y65;
+    if (ppsvDateForAge && dob) {
+      // A-P0-1 (S10): compare the dose date against the patient's REAL 65th
+      // birthday. This used to be `am - Math.round(daysBetween(...) / 30.4375)
+      // >= M.y65` — a float current-age minus an elapsed span rounded to whole
+      // months — which put up to half a month of error into the reconstructed
+      // age at the dose and flipped the verdict either way within about two
+      // weeks of the birthday (2,782 of 29,565 swept pairs, 9.4%). CDC's rows
+      // say "at age 65 years or older", so the birthday itself counts.
+      //
+      // The 4-day grace does NOT apply: it governs whether a dose that was
+      // given counts as valid, and this is not a validity floor — it selects
+      // which of two CDC recommendation rows the patient is on.
+      ppsvAtOrAfter65 = ppsvDateForAge >= addCalendarMonths(dob, M.y65);
+    } else if (ppsvDateForAge) {
+      // No date of birth: the best the app can honestly do is measure back
+      // from today in calendar months. Unrounded, unlike the old expression.
+      const ageAtPpsv = ageAtDoseMonths({ date: ppsvDateForAge }, { ageMonths: am }, today);
+      ppsvAtOrAfter65 = ageAtPpsv != null && ageAtPpsv >= M.y65;
     } else {
       ppsvAtOrAfter65 = am >= M.y65; // proxy when PPSV23 is undated
     }
-    const sharedDecision = isOlderAdult && ppsvAtOrAfter65;
+    // A dose received at >=65 implies the patient is >=65, which is >50, so the
+    // old `isOlderAdult &&` half was dead. Removed rather than left looking
+    // load-bearing (A-P0-1).
+    const sharedDecision = ppsvAtOrAfter65;
     if (sharedDecision) {
       return [rec({
         vaccine: 'PCV', status: 'shared-decision',
@@ -809,9 +828,12 @@ export function recommend(input) {
   // instead of reconstructing birthdays from months x 30.4375. A patient
   // entered as years/months has no `dob` and keeps the approximate path.
   const dob = input.dob ?? null;
-  const am = input.ageMonths ?? 0;
   const riskIds = input.riskIds ?? [];
   const today = todayISO(input.today);
+  // When a date of birth is given, the age follows from it. App passes both,
+  // but deriving here means a caller that passes only a date of birth cannot
+  // silently land on age 0 and be routed to the infant schedule.
+  const am = input.ageMonths ?? (dob ? dobToAgeMonths(dob, today) : null) ?? 0;
 
   // ── Hard-stop exclusion wins over everything, including HSCT (both boxes
   //    can be ticked; owner decision 2026-09-12: the stop wins, transplant
@@ -852,7 +874,7 @@ export function recommend(input) {
       recs = pcvHealthyChild(am, pcv, ppsv, today);
     }
   } else {
-    recs = pcvAdult(am, riskIds, pcv, ppsv, today);
+    recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob);
   }
 
   // ── HSCT advisory block (prominent at top; standard recs still shown) ──
