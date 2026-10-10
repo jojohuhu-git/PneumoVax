@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ageGroup as deriveGroup, dobToAgeMonths, fmtAgeMonths } from '../logic/format.js';
+import { todayISO } from '../logic/dateUtils.js';
 
 // Date of birth is the primary, recommended entry — it lets the engine compute
 // a dose's age precisely (e.g. was PPSV23 given on/after the 65th birthday, or
@@ -7,7 +8,12 @@ import { ageGroup as deriveGroup, dobToAgeMonths, fmtAgeMonths } from '../logic/
 // age-band guess can silently contradict a dose date entered later, so there
 // is no separate age-band question; the band shown below is always derived
 // from the entered age.
-export default function StepAge({ ageMonths, error, onChange }) {
+export default function StepAge({ ageMonths, error, onChange, today }) {
+  // P3-1 (S10): the date of birth is reported UP to App, not just converted to
+  // months and dropped. Everything that needs to compare a dose date against a
+  // birthday (the 65th for PPSV23, the 19th for the adult schedule) needs the
+  // date itself; months-times-30.4375 cannot reconstruct it exactly.
+  const ref = todayISO(today);
   // Mode: 'dob' | 'precise'
   const [mode, setMode] = useState('dob');
   const [years, setYears] = useState('');
@@ -20,9 +26,9 @@ export default function StepAge({ ageMonths, error, onChange }) {
     const m = parseFloat(months) || 0;
     if (!isNaN(y) && y >= 0) {
       const am = y * 12 + m;
-      onChange({ ageMonths: am, ageGroup: deriveGroup(am) });
+      onChange({ dob: null, ageMonths: am, ageGroup: deriveGroup(am) });
     } else {
-      onChange({ ageMonths: null, ageGroup: null });
+      onChange({ dob: null, ageMonths: null, ageGroup: null });
     }
   }
 
@@ -32,21 +38,23 @@ export default function StepAge({ ageMonths, error, onChange }) {
     const m = parseFloat(v);
     if (!isNaN(m) && m >= 0) {
       const am = y * 12 + m;
-      onChange({ ageMonths: am, ageGroup: deriveGroup(am) });
+      onChange({ dob: null, ageMonths: am, ageGroup: deriveGroup(am) });
     }
   }
 
   function handleDobChange(v) {
     setDob(v);
     if (v) {
-      const am = dobToAgeMonths(v);
+      const am = dobToAgeMonths(v, ref);
       if (am != null && am >= 0) {
-        onChange({ ageMonths: am, ageGroup: deriveGroup(am) });
+        // The dob travels with the age. App keeps it and re-derives the age at
+        // render, so this value is a starting point, not the stored truth.
+        onChange({ dob: v, ageMonths: am, ageGroup: deriveGroup(am) });
       } else {
-        onChange({ ageMonths: null, ageGroup: null });
+        onChange({ dob: null, ageMonths: null, ageGroup: null });
       }
     } else {
-      onChange({ ageMonths: null, ageGroup: null });
+      onChange({ dob: null, ageMonths: null, ageGroup: null });
     }
   }
 
@@ -61,13 +69,13 @@ export default function StepAge({ ageMonths, error, onChange }) {
       <div className="step-toggle-row">
         <button
           className={`history-toggle-btn step-toggle-btn${mode === 'dob' ? ' selected' : ''}`}
-          onClick={() => { setMode('dob'); setYears(''); setMonths(''); onChange({ ageMonths: null, ageGroup: null }); }}
+          onClick={() => { setMode('dob'); setYears(''); setMonths(''); onChange({ dob: null, ageMonths: null, ageGroup: null }); }}
         >
           Date of Birth
         </button>
         <button
           className={`history-toggle-btn step-toggle-btn${mode === 'precise' ? ' selected' : ''}`}
-          onClick={() => { setMode('precise'); setDob(''); onChange({ ageMonths: null, ageGroup: null }); }}
+          onClick={() => { setMode('precise'); setDob(''); onChange({ dob: null, ageMonths: null, ageGroup: null }); }}
         >
           Years / Months (if DOB unknown)
         </button>
@@ -80,7 +88,7 @@ export default function StepAge({ ageMonths, error, onChange }) {
             id="dob-input"
             type="date"
             value={dob}
-            max={new Date().toISOString().slice(0, 10)}
+            max={ref}
             onChange={e => handleDobChange(e.target.value)}
           />
         </div>

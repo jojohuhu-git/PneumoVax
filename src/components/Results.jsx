@@ -8,17 +8,21 @@ import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
 import { Chevron } from './icons.jsx';
 
-export default function Results({ state, onReset, onChange, onBack }) {
-  const { ageMonths, riskIds, pcvDoses, ppsv23Doses } = state;
+export default function Results({ state, onReset, onChange, onBack, today }) {
+  const { ageMonths, dob, riskIds, pcvDoses, ppsv23Doses } = state;
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
 
   const result = recommend({
+    // P3-1 (S10): the date of birth goes to the engine, which uses it to
+    // compare dose dates against real birthdays instead of reconstructing them.
+    dob,
     ageMonths: ageMonths ?? 0,
     riskIds,
     pcvDoses,
     ppsv23Doses,
+    today,
   });
 
   const { recs, hsct, pcv21Geo, excluded, exclusionMessage, exclusionCitations } = result;
@@ -90,8 +94,8 @@ export default function Results({ state, onReset, onChange, onBack }) {
   // clinician can still see it (and, critically, the "PCV7 does not count"
   // note) rather than it silently disappearing.
   const histories = {
-    PCV: { label: 'PCV', doses: pcvDoses, doseValidations: analyzeHistory('PCV', pcvDoses, ageMonths ?? 0).perDose },
-    PPSV23: { label: 'PPSV23', doses: ppsv23Doses, doseValidations: analyzeHistory('PPSV23', ppsv23Doses, ageMonths ?? 0).perDose },
+    PCV: { label: 'PCV', doses: pcvDoses, doseValidations: analyzeHistory('PCV', pcvDoses, ageMonths ?? 0, today, dob).perDose },
+    PPSV23: { label: 'PPSV23', doses: ppsv23Doses, doseValidations: analyzeHistory('PPSV23', ppsv23Doses, ageMonths ?? 0, today, dob).perDose },
   };
   const seenVaccine = {};
   function historyPropsFor(vaccine) {
@@ -102,7 +106,7 @@ export default function Results({ state, onReset, onChange, onBack }) {
   }
   function buildCards(recList) {
     const cards = recList.map((r, i) => (
-      <RecCard key={i} rec={r} ageMonths={ageMonths ?? 0} {...historyPropsFor(r.vaccine)} />
+      <RecCard key={i} rec={r} ageMonths={ageMonths ?? 0} dob={dob} today={today} {...historyPropsFor(r.vaccine)} />
     ));
     const orphan = Object.values(histories).find(
       h => h.doses.length > 0 && !seenVaccine[h.label]
@@ -116,13 +120,16 @@ export default function Results({ state, onReset, onChange, onBack }) {
   const riskLabels = riskIds.map(id => RISK_FACTORS.find(r => r.id === id)?.label).filter(Boolean);
 
   const years = ageMonths != null ? Math.floor(ageMonths / 12) : '';
-  const months = ageMonths != null ? Math.round(ageMonths % 12) : '';
+  const months = ageMonths != null ? Math.floor(ageMonths % 12) : '';
   function setAge(y, m) {
     const yy = parseFloat(y);
     const mm = parseFloat(m) || 0;
     if (isNaN(yy) || yy < 0) return;
     const am = yy * 12 + mm;
-    onChange?.({ ageMonths: am, ageGroup: ageGroup(am) });
+    // P3-1 (S10): clear the stored date of birth. patientAgeMonths prefers a
+    // date of birth over an ageMonths value, so leaving it in place would make
+    // this box look editable while changing nothing.
+    onChange?.({ dob: null, ageMonths: am, ageGroup: ageGroup(am) });
   }
 
   const isAdult = (ageMonths ?? 0) >= 216;

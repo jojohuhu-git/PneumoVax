@@ -6,11 +6,19 @@ import StepHistory from './components/StepHistory.jsx';
 import Results from './components/Results.jsx';
 import { PCV_HISTORY_PRODUCTS } from './data/brands.js';
 import { hasExclusion } from './data/riskFactors.js';
+import { patientAgeMonths } from './logic/patientAge.js';
+import { todayISO } from './logic/dateUtils.js';
+import { ageGroup as deriveGroup } from './logic/format.js';
 
 const STEPS = ['Age', 'Risks', 'History', 'Results'];
 
 const INITIAL_STATE = {
   step: 0,
+  // P3-1 (S10): the date of birth is kept whenever the clinician gives one, and
+  // the age is derived from it at render rather than frozen at typing time.
+  // `ageMonths` is still the stored value for the Years/Months fallback, where
+  // there is no birthday to derive from.
+  dob: null,
   ageMonths: null,
   ageGroup: null,
   riskIds: [],
@@ -22,13 +30,21 @@ export default function App() {
   const [state, setState] = useState(INITIAL_STATE);
   const [ageError, setAgeError] = useState('');
 
+  // P3-1: one clock read, one age. Derived here so a tab left open across
+  // midnight ages the patient along with the calendar, instead of holding the
+  // snapshot taken when the date of birth was typed.
+  const today = todayISO();
+  const ageMonths = patientAgeMonths(state, today);
+  const ageGroup = ageMonths != null ? deriveGroup(ageMonths) : null;
+  const patient = { ...state, ageMonths, ageGroup };
+
   function update(patch) {
     setState(prev => ({ ...prev, ...patch }));
   }
 
   function goNext() {
     if (state.step === 0) {
-      if (state.ageMonths == null || state.ageMonths < 0) {
+      if (ageMonths == null || ageMonths < 0) {
         setAgeError('Please enter a valid age before continuing.');
         return;
       }
@@ -74,25 +90,26 @@ export default function App() {
       <main className="app-main">
         {state.step === 0 && (
           <StepAge
-            ageMonths={state.ageMonths}
-            ageGroup={state.ageGroup}
+            ageMonths={ageMonths}
+            ageGroup={ageGroup}
+            today={today}
             error={ageError}
-            onChange={({ ageMonths, ageGroup }) => {
-              update({ ageMonths, ageGroup });
-              if (ageMonths != null) setAgeError('');
+            onChange={({ dob, ageMonths: am, ageGroup: ag }) => {
+              update({ dob: dob ?? null, ageMonths: am, ageGroup: ag });
+              if (am != null) setAgeError('');
             }}
           />
         )}
         {state.step === 1 && (
           <StepRisks
-            ageMonths={state.ageMonths}
+            ageMonths={ageMonths}
             riskIds={state.riskIds}
             onChange={riskIds => update({ riskIds })}
           />
         )}
         {state.step === 2 && (
           <StepHistory
-            ageMonths={state.ageMonths}
+            ageMonths={ageMonths}
             pcvDoses={state.pcvDoses}
             ppsv23Doses={state.ppsv23Doses}
             onChangePcv={pcvDoses => update({ pcvDoses })}
@@ -101,7 +118,7 @@ export default function App() {
           />
         )}
         {state.step === 3 && (
-          <Results state={state} onReset={reset} onChange={update}
+          <Results state={patient} today={today} onReset={reset} onChange={update}
             onBack={goBack} />
         )}
       </main>

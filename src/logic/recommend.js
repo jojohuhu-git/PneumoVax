@@ -29,6 +29,7 @@ import {
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, DAYS } from './dateUtils.js';
 import { analyzeHistory } from './validate.js';
+import { ageAtDoseMonths } from './patientAge.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
@@ -81,7 +82,7 @@ function collectRefs(riskIds, defaults) {
 // `am`/`today` let us bucket each dated dose by the age it was given — matching
 // the age-band model CDC PneumoRecs uses (before 12mo / 12–23mo / 24–71mo / ≥6y).
 // Undated doses can't be banded; they're counted in `undated` and the total only.
-function summarizePcv(pcvDoses, am = 0, today = null) {
+function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
   const products = pcvDoses.map((d) => d.product).filter(Boolean);
   const has = (k) => products.includes(k);
   const hasPCV20 = has('PCV20');
@@ -97,7 +98,11 @@ function summarizePcv(pcvDoses, am = 0, today = null) {
   const band = { before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
   for (const d of pcvDoses) {
     if (!d.date || !today) { band.undated += 1; continue; }
-    const ageAtDose = am - daysBetween(d.date, today) / 30.4375;
+    // P3-3 (S10): measured from the birthday when one is on file, instead of
+    // subtracting two spans counted on different rulers. These bands decide HOW
+    // MANY doses a child needs, so a fraction of a month moved the dose count in
+    // both directions — a baby dosed on their 7-month anniversary read as 6.97.
+    const ageAtDose = ageAtDoseMonths(d, { dob, ageMonths: am }, today);
     if (ageAtDose < M.m12) band.before12 += 1;
     else if (ageAtDose < M.m24) band.m12to23 += 1;
     else if (ageAtDose < M.m72) band.m24to71 += 1;
@@ -798,6 +803,12 @@ const EXCLUSION_MESSAGE = 'This tool does not apply to this patient. Standard '
 //  PUBLIC API
 // ═══════════════════════════════════════════════════════════════════════════
 export function recommend(input) {
+  // P3-1 (S10): the patient's date of birth, when the clinician gave one. It is
+  // what lets the engine compare a dose date against a real birthday — the
+  // 65th for the PPSV23 shared-decision rule, the minimum ages in validate.js —
+  // instead of reconstructing birthdays from months x 30.4375. A patient
+  // entered as years/months has no `dob` and keeps the approximate path.
+  const dob = input.dob ?? null;
   const am = input.ageMonths ?? 0;
   const riskIds = input.riskIds ?? [];
   const today = todayISO(input.today);
@@ -814,19 +825,19 @@ export function recommend(input) {
       hsct: null,
       pcv21Geo: null,
       perDose: { pcv: {}, ppsv23: {} },
-      meta: { ageMonths: am, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
+      meta: { ageMonths: am, dob, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
     };
   }
   const rawPcv = (input.pcvDoses ?? []).filter(Boolean);
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 
   // Validate + filter to effective lists (PCV7 dropped; invalid doses dropped).
-  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today);
-  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today);
+  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob);
+  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob);
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
-  const pcv = summarizePcv(effectivePcv, am, today);
+  const pcv = summarizePcv(effectivePcv, am, today, dob);
   const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
 
   // ── Standard (age/history/risk) recommendations ──────────────────────
@@ -855,6 +866,6 @@ export function recommend(input) {
     hsct,
     pcv21Geo,
     perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
-    meta: { ageMonths: am, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
+    meta: { ageMonths: am, dob, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
   };
 }

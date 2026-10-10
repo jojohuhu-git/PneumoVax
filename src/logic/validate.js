@@ -30,6 +30,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { daysBetween } from './dateUtils.js';
+import { ageAtDoseMonths } from './patientAge.js';
 import { productByKey, PCV_MIN_AGE_M } from '../data/brands.js';
 import { PCV21_MIN_AGE_M } from './scheduleConstants.js';
 
@@ -38,10 +39,18 @@ import { PCV21_MIN_AGE_M } from './scheduleConstants.js';
 // see scheduleConstants.js for the reasoning.
 const Y18_MONTHS = PCV21_MIN_AGE_M;  // 216 — PCV21 product age, NOT schedule boundary
 
-// Age in months at a past dose, from date + current age + today. null if no date.
-export function ageAtDoseFromDate(dose, ageMonths, today) {
-  if (!dose?.date) return null;
-  return ageMonths - daysBetween(dose.date, today) / 30.4375;
+// Age in months at a past dose. null if the dose has no date.
+//
+// P3-3 (S10, 2026-10-10): this was `ageMonths - daysBetween(dose.date, today) /
+// 30.4375` — two spans measured on different rulers (the patient's own
+// anniversaries, and the dose date's), subtracted from one another. A child
+// dosed exactly on their 2nd birthday read as 23.98 months and was told the
+// dose was "below the 2-year minimum age for PPSV23", i.e. that 24 months is
+// below 24 months (peds audit P1-1). With a date of birth on file the answer is
+// measured straight from the birthday; without one the subtraction remains, now
+// in calendar months. `dob` is optional so existing callers keep working.
+export function ageAtDoseFromDate(dose, ageMonths, today, dob) {
+  return ageAtDoseMonths(dose, { dob, ageMonths }, today);
 }
 
 function fmtAgeM(m) {
@@ -80,7 +89,7 @@ function invalid(reasons, detail) {
 function noncounting(reasons = []) { return { status: 'noncounting', reasons }; }
 
 // ── Validate one PCV dose ────────────────────────────────────────────────
-function validateOnePCV(dose, ageMonths, today) {
+function validateOnePCV(dose, ageMonths, today, dob) {
   const key = dose.product || '';
   const prod = productByKey(key); // null when unknown
 
@@ -114,7 +123,7 @@ function validateOnePCV(dose, ageMonths, today) {
     ]);
   }
 
-  const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today);
+  const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
   if (ageAtDose !== null && ageAtDose < minAgeM) {
     return invalid(
       [`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`],
@@ -126,7 +135,7 @@ function validateOnePCV(dose, ageMonths, today) {
 }
 
 // ── Validate one PPSV23 dose ─────────────────────────────────────────────
-function validateOnePPSV23(dose, ageMonths, today) {
+function validateOnePPSV23(dose, ageMonths, today, dob) {
   const minAgeM = 24; // ≥2 years
   if (!dose.date) {
     if (ageMonths < minAgeM) {
@@ -137,7 +146,7 @@ function validateOnePPSV23(dose, ageMonths, today) {
     }
     return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid).']);
   }
-  const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today);
+  const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
   if (ageAtDose !== null && ageAtDose < minAgeM) {
     return invalid(
       [`Given at ~${fmtAgeM(ageAtDose)} — below the 2-year minimum age for PPSV23.`],
@@ -148,7 +157,7 @@ function validateOnePPSV23(dose, ageMonths, today) {
 }
 
 // ── Core walk ────────────────────────────────────────────────────────────
-function runWalk(vaccine, rawDoses, ageMonths, today) {
+function runWalk(vaccine, rawDoses, ageMonths, today, dob) {
   const kept = [];
   const perDose = [];
   let effectiveCount = 0;
@@ -156,8 +165,8 @@ function runWalk(vaccine, rawDoses, ageMonths, today) {
   for (let i = 0; i < rawDoses.length; i++) {
     const dose = rawDoses[i];
     const result = vaccine === 'PCV'
-      ? validateOnePCV(dose, ageMonths, today)
-      : validateOnePPSV23(dose, ageMonths, today);
+      ? validateOnePCV(dose, ageMonths, today, dob)
+      : validateOnePPSV23(dose, ageMonths, today, dob);
 
     if (result.status === 'invalid') {
       perDose.push({
@@ -191,8 +200,9 @@ function runWalk(vaccine, rawDoses, ageMonths, today) {
  * @param {Array<{date?:string, product?:string}>} doses
  * @param {number} ageMonths
  * @param {string} [today]
+ * @param {string} [dob]  patient's date of birth, when one was entered (P3-1)
  */
-export function analyzeHistory(vaccine, doses, ageMonths, today) {
+export function analyzeHistory(vaccine, doses, ageMonths, today, dob) {
   const ref = today || new Date().toISOString().slice(0, 10);
   // Sort chronologically before the walk. The last-kept algorithm and the engine both
   // assume ascending order (interval anchoring, "first/last dated dose"), so doses entered
@@ -201,7 +211,7 @@ export function analyzeHistory(vaccine, doses, ageMonths, today) {
   // the earlier (infant) dose, matching summarizePcv's convention.
   const filtered = sortDosesChronologically((doses ?? []).filter(Boolean));
   if (filtered.length === 0) return { perDose: [], effective: [] };
-  return runWalk(vaccine, filtered, ageMonths, ref);
+  return runWalk(vaccine, filtered, ageMonths, ref, dob);
 }
 
 // Chronological, stable sort. ISO date strings compare lexicographically. Undated doses
@@ -220,6 +230,6 @@ function sortDosesChronologically(doses) {
     .map((x) => x.d);
 }
 
-export function validateHistory(vaccine, doses, ageMonths, today) {
-  return analyzeHistory(vaccine, doses, ageMonths, today).perDose;
+export function validateHistory(vaccine, doses, ageMonths, today, dob) {
+  return analyzeHistory(vaccine, doses, ageMonths, today, dob).perDose;
 }

@@ -1,3 +1,5 @@
+import { calendarMonthsBetween, todayISO } from './dateUtils.js';
+
 // format.js — UI display helpers (not clinical logic)
 
 /**
@@ -47,12 +49,18 @@ export function ageGroup(am) {
   return 'Older adult (≥50y)';
 }
 
-/** Compute ageMonths from a DOB ISO string and a reference date (defaults today). */
+/** Compute ageMonths from a DOB ISO string and a reference date (defaults today).
+ *
+ * P3-2/P3-1 (S10, 2026-10-10): this divided elapsed milliseconds by an averaged
+ * 30.4375 days per month, so a birthday-to-birthday span did not land on a
+ * whole number — a child on their 2nd birthday measured 25.00205 months from a
+ * month earlier, and a dose on that birthday was graded "below the 2-year
+ * minimum age for PPSV23". Counting real calendar months instead makes an
+ * anniversary exact. See dateUtils.calendarMonthsBetween.
+ */
 export function dobToAgeMonths(dobISO, refISO) {
   if (!dobISO) return null;
-  const ref = refISO ? new Date(refISO + 'T00:00:00') : new Date();
-  const dob = new Date(dobISO + 'T00:00:00');
-  const diffMs = ref - dob;
-  if (diffMs < 0) return null;
-  return diffMs / (1000 * 60 * 60 * 24 * 30.4375);
+  const ref = refISO || todayISO();
+  if (dobISO > ref) return null;   // a date of birth in the future is not an age
+  return calendarMonthsBetween(dobISO, ref);
 }
