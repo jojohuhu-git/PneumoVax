@@ -1,5 +1,15 @@
 # PneumoVax — Handoff after S1, the paediatric clinical audit (2026-10-10)
 
+> **🛑 SUPERSEDED 2026-10-10 — do not resume from this file.**
+> **S2 is now DONE too.** The current handoff is
+> **`docs/archive/handoff-2026-10-10-s2-adult-clinical-audit.md`** — go there.
+> This file's "Resuming" section says the next session is S2; that is no longer true (next is
+> **S3**). Its findings (the peds audit's three P0s and the rest of its queue) are all still
+> **open and still valid** — read them in
+> `docs/archive/audit-2026-10-10-pneumovax-clinical-peds.md`, not here. Note that S2's audit
+> **independently corroborated peds `P0-1`** from a second source (immunize.org p3086 Table 4)
+> and confirmed the adult side correctly needs no second PPSV23.
+
 > **STATUS: CONSUMED 2026-10-10 — and its two "owner decisions" are WITHDRAWN.**
 > A later same-day session re-fetched the sources live and found that **neither open
 > decision was a real decision**: p2016 Table 1's grid keys on age-at-previous-dose, so it
