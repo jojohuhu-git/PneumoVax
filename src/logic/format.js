@@ -11,18 +11,39 @@ export function fmtAgeMonths(am) {
   if (am == null) return '';
   if (am < 0.25) return 'Birth';
   if (am <= 2) {
-    const wks = Math.round(am * 4.348);
+    const wks = floorAge(am * 4.348);          // 1 month ≈ 4.348 weeks
     if (wks < 1) return 'Birth';
     return `${wks} week${wks === 1 ? '' : 's'}`;
   }
   if (am < 24) {
-    const mo = Math.round(am);
+    const mo = floorAge(am);
     return `${mo} month${mo === 1 ? '' : 's'}`;
   }
-  const years = Math.floor(am / 12);
-  const months = Math.round(am % 12);
+  // Nudge ONCE, in months, then split. Applying floorAge to am/12 and am%12
+  // separately would let the same epsilon act twice: 59.9999999 floors to 5
+  // years AND to a 12-month remainder, and carrying that remainder produced
+  // "6 years" for an age that is five. Splitting a single nudged value cannot
+  // produce a 12-month remainder at all.
+  const a = am + FLOOR_EPS;
+  const years = Math.floor(a / 12);
+  const months = Math.floor(a - years * 12);
   if (months === 0) return `${years} year${years === 1 ? '' : 's'}`;
   return `${years} year${years === 1 ? '' : 's'} ${months} month${months === 1 ? '' : 's'}`;
+}
+
+// P3-4 (S10, 2026-10-10): ages floor, they never round up. A dose given two
+// weeks before a birthday must not display as if it were given ON it —
+// PneumoVax prints an age immediately beside a threshold claim about that
+// birthday (A-P0-1's 65-year rule), so rounding up reads as the patient having
+// crossed a line they had not.
+//
+// The epsilon is load-bearing: an age that IS exactly five years can arrive
+// from the arithmetic as 59.9999999, and flooring that bare would print
+// "4 years". 1e-6 of a month is about 2.6 seconds — far finer than a day, far
+// coarser than floating-point noise.
+export const FLOOR_EPS = 1e-6;
+export function floorAge(n) {
+  return Math.floor(n + FLOOR_EPS);
 }
 
 /** Format ISO date (YYYY-MM-DD) → "Jul 3, 2026". */

@@ -31,6 +31,7 @@
 
 import { daysBetween } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
+import { floorAge, FLOOR_EPS } from './format.js';
 import { productByKey, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
 import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M } from './scheduleConstants.js';
@@ -54,15 +55,19 @@ export function ageAtDoseFromDate(dose, ageMonths, today, dob) {
   return ageAtDoseMonths(dose, { dob, ageMonths }, today);
 }
 
+// P3-4 (S10): floors, never rounds up — the validator states an age in the
+// same breath as the minimum it is being judged against, so an age rounded up
+// onto a threshold makes the verdict read as a contradiction.
 function fmtAgeM(m) {
   if (m == null) return '?';
   if (m < 0.5) return 'birth';
   if (m < 24) {
-    const mo = Math.round(m);
+    const mo = floorAge(m);
     return `${mo} month${mo === 1 ? '' : 's'}`;
   }
-  const y = Math.floor(m / 12);
-  const rem = Math.round(m % 12);
+  const a = m + FLOOR_EPS;   // one nudge, then split — see format.fmtAgeMonths
+  const y = Math.floor(a / 12);
+  const rem = Math.floor(a - y * 12);
   return rem === 0 ? `${y} year${y === 1 ? '' : 's'}` : `${y}y ${rem}m`;
 }
 
