@@ -42,7 +42,11 @@ export const ADULT_CASES = [
 ];
 
 function summarize(recs) {
-  return recs.map((r) => `${r.vaccine}:${r.status} — ${r.doseLabel}${r.minIntervalDays ? ` [minInt ${r.minIntervalDays}d]` : ''}`).join(' || ');
+  // A rec states its minimum in the unit CDC states it in (A-P2-11): days for
+  // week-based gaps, calendar months for the 1-year and 5-year ones.
+  const minInt = (r) => (r.minIntervalDays ? ` [minInt ${r.minIntervalDays}d]`
+    : r.minIntervalMonths ? ` [minInt ${r.minIntervalMonths}mo]` : '');
+  return recs.map((r) => `${r.vaccine}:${r.status} — ${r.doseLabel}${minInt(r)}`).join(' || ');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
