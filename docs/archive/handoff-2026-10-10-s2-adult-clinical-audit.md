@@ -1,15 +1,15 @@
 # PneumoVax — Handoff after S2, the adult / HSCT clinical audit (2026-10-10)
 
-Repo: `~/Downloads/PneumoVax`. Branch: **`main`**, at `beec94b`, **in sync with origin**.
-**No commits were made** — S2 is a read-only audit session; its deliverable is two documents.
-Baseline was 156 passing tests; still **156 passing (11 files), all green** (`npm test` run
-three times — before, during and after; engine code was never touched).
+Repo: `~/Downloads/PneumoVax`. Branch: **`main`**. S2's deliverables landed **docs-only** via
+`docs/s2-adult-clinical-audit` → **PR #17**, squash-merged (same shape as S1's PR #16).
+**No engine code was changed.** Baseline was 156 passing tests; still
+**156 passing (11 files), all green** (`npm test` run four times — before, during, after, and
+pre-commit).
 
-Working tree: **two untracked files**, both deliverables —
+Deliverables, both now on `main`:
 `docs/archive/audit-2026-10-10-pneumovax-clinical-adult.md` and
-`docs/archive/census-2026-10-10-pneumovax-numbers.md`. **Nothing is committed; see
-"Open decision" below.** All six scratch probe scripts were written to the session scratchpad,
-never to the repo.
+`docs/archive/census-2026-10-10-pneumovax-numbers.md`. All six scratch probe scripts were
+written to the session scratchpad, never to the repo.
 
 This app's core promise is honesty: a silent wrong answer is worse than a crash. One of this
 audit's findings is a silent wrong answer.
