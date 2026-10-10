@@ -119,10 +119,14 @@ Not a finding; S8 should just make the quote and the label line up.
 and `preview_stop` cannot stop another chat's server. Per the queue's rule 6 I did **not**
 fall back to running the server through Bash, and I did not edit `.claude/launch.json` to
 dodge it. Everything in this audit is engine-level and was proven by *running the engine*,
-which is stronger evidence for these claims than a screenshot. What remains unseen is only
-how the cards look. Two would benefit from two minutes of looking once a slot frees:
-**A-P2-3** (the PCV21 banner sitting above a collapsed card) and **A-P1-3** (the citation chip
-that advertises itself as "superseded").
+which is stronger evidence for these claims than a screenshot.
+
+**The two UI-visible findings were then confirmed on the deployed app instead** —
+https://jojohuhu-git.github.io/PneumoVax/ serves the same commit. A 60-year-old with HSCT
+ticked shows the PCV21 banner under a PCV20-only advisory (**A-P2-3**), and the expanded
+standard card carries the chips `Immunize.org Table 5 (HSCT)` and
+`Fred Hutch LTFU §IX (superseded)` (**A-P1-3**). **Nothing in S2 is left visually unverified**
+— S10 does not need to re-check these.
 
 ## Resuming
 
