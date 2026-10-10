@@ -586,10 +586,19 @@ quote, the census is written, and the reference sweep is recorded with its one g
 engine is byte-identical to `beec94b` and the suite is green at **156 / 11 files**. No code
 was changed and nothing is half-done.
 
-**Not verified visually:** `preview_start` was refused — port 5173 is held by another chat's
-PneumoVax dev server, and per the queue's rule 6 I did not fall back to running a server
-through Bash. Everything above is engine-level and was proven by running the engine, which is
-stronger evidence than a screenshot for these claims; what remains unseen is only how the
-cards look. The two that would benefit from two minutes of looking, once a slot frees:
-A-P2-3 (the PCV21 banner sitting above a collapsed card) and A-P1-3 (the "superseded"
-citation chip).
+**Visual verification — done, on the deployed app.** `preview_start` was refused (port 5173
+is held by another chat's PneumoVax dev server) and per the queue's rule 6 I did not fall
+back to running a server through Bash. Instead the two UI-visible findings were confirmed on
+**https://jojohuhu-git.github.io/PneumoVax/**, which serves this exact commit:
+
+- **A-P2-3 confirmed.** A 60-year-old (DOB 1966-05-01) with HSCT ticked and no dose history
+  shows the blue **"PCV21 geographic note:"** banner directly beneath an advisory that offers
+  **PCV20 only** and never mentions PCV21.
+- **A-P1-3 confirmed.** Expanding "Standard age/history schedule" on that same patient shows
+  the citation chips, in this order:
+  `Immunize.org Table 5 (HSCT)` · `Fred Hutch LTFU §IX (superseded)` · `CDC Adult Notes` ·
+  `CDC Adult Timing Job Aid` · `MMWR ≥50 expansion` — a children's standing-orders document
+  and a chip that advertises its own obsolescence, both on a 60-year-old's card.
+
+Everything else above is engine-level and was proven by running the engine, which is stronger
+evidence than a screenshot for those claims.
