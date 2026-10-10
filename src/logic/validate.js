@@ -31,7 +31,8 @@
 
 import { daysBetween } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
-import { productByKey, PCV_MIN_AGE_M } from '../data/brands.js';
+import { productByKey, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M } from './scheduleConstants.js';
 
 // PCV21 product gate is 18y (216mo) — the PRODUCT minimum age per mm7336a3.
@@ -124,10 +125,19 @@ function validateOnePCV(dose, ageMonths, today, dob) {
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
-  if (ageAtDose !== null && ageAtDose < minAgeM) {
+  // CDC's 4-day grace (peds audit P1-1): a dose given up to 4 days before the
+  // minimum age counts. PCV's floor is stated in days, so when a date of birth
+  // is on file it is compared in days — exact in any month. Without one, fall
+  // back to the calendar-month comparison, which also gets the grace.
+  const ageAtDoseDays = dob && dose.date ? daysBetween(dob, dose.date) : null;
+  const minDays = prod ? prod.minAgeDays ?? null : PCV_MIN_AGE_DAYS;
+  const oldEnough = (minDays != null && ageAtDoseDays != null)
+    ? ageMeetsMinimumDays(ageAtDoseDays, minDays)
+    : ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob });
+  if (!oldEnough) {
     return invalid(
       [`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)}.`
+      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`
     );
   }
 
@@ -147,10 +157,12 @@ function validateOnePPSV23(dose, ageMonths, today, dob) {
     return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid).']);
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
-  if (ageAtDose !== null && ageAtDose < minAgeM) {
+  // CDC's 4-day grace — PPSV23's floor is 2 CALENDAR years, so the grace is
+  // applied by asking whether the dose would have cleared it 4 days later.
+  if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
     return invalid(
       [`Given at ~${fmtAgeM(ageAtDose)} — below the 2-year minimum age for PPSV23.`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: 2 years.`
+      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: 2 years (doses up to 4 days early still count, per CDC).`
     );
   }
   return valid();
