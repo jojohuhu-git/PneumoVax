@@ -144,7 +144,7 @@ describe('§D At-risk children — Table 4 rows', () => {
       pcvDoses: [{ product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2024-01-01' }] });
     expect(r.recs.some((x) => x.vaccine === 'PCV' && x.brands.includes('PCV20 (Prevnar 20)'))).toBe(true);
-    expect(r.recs.some((x) => x.vaccine === 'PPSV23' && x.minIntervalDays >= 1800)).toBe(true);
+    expect(r.recs.some((x) => x.vaccine === 'PPSV23' && x.minIntervalMonths === 60)).toBe(true);
   });
 
   it('Row 6 (non-IC): 8yo chronic_lung, no prior PCV → A) PCV20, B) PCV15→PPSV23', () => {
@@ -271,7 +271,7 @@ describe('§G Adults 19–49 with risk', () => {
   it('PCV15 only (non-IC) → PPSV23 due ≥1y, INCOMPLETE', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
     expect(ppsv(r).vaccine).toBe('PPSV23');
-    expect(ppsv(r).minIntervalDays).toBe(365);
+    expect(ppsv(r).minIntervalMonths).toBe(12);
     expect(ppsv(r).note).toMatch(/INCOMPLETE/);
   });
 
@@ -283,20 +283,20 @@ describe('§G Adults 19–49 with risk', () => {
   it('PPSV23 only → PCV ≥1y after PPSV23', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'], ppsv23Doses: [{ product: 'PPSV23', date: '2020-01-01' }] });
     expect(pcv(r).vaccine).toBe('PCV');
-    expect(pcv(r).minIntervalDays).toBe(365);
+    expect(pcv(r).minIntervalMonths).toBe(12);
   });
 
   it('PCV13 only → PCV20/PCV21 ≥1y → completes', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV13', date: '2018-01-01' }] });
     expect(pcv(r).brands).toEqual(['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)']);
-    expect(pcv(r).minIntervalDays).toBe(365);
+    expect(pcv(r).minIntervalMonths).toBe(12);
   });
 
   it('PCV13 + PPSV23 (IC) → PCV20/PCV21 ≥5y', () => {
     const r = run({ ageMonths: 360, riskIds: ['hiv'],
       pcvDoses: [{ product: 'PCV13', date: '2015-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2016-01-01' }] });
-    expect(pcv(r).minIntervalDays).toBe(1826);
+    expect(pcv(r).minIntervalMonths).toBe(60);
   });
 
   it('PCV13 + PPSV23 (chronic only, <50) → none now, review at 50', () => {
@@ -338,7 +338,7 @@ describe('§H Adults ≥50 routine', () => {
 
   it('55yo PPSV23 only → PCV ≥1y', () => {
     const r = run({ ageMonths: 660, riskIds: [], ppsv23Doses: [{ product: 'PPSV23', date: '2020-01-01' }] });
-    expect(pcv(r).minIntervalDays).toBe(365);
+    expect(pcv(r).minIntervalMonths).toBe(12);
   });
 
   it('55yo PCV13 only → PCV20/PCV21 ≥1y → complete-pathway', () => {
@@ -351,7 +351,7 @@ describe('§H Adults ≥50 routine', () => {
       pcvDoses: [{ product: 'PCV13', date: '2010-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2012-01-01' }] });
     expect(pcv(r).status).toBe('due');
-    expect(pcv(r).minIntervalDays).toBe(1826);
+    expect(pcv(r).minIntervalMonths).toBe(60);
   });
 
   // PCV13 + PPSV23: shared-decision keys on PPSV23-given-at-≥65 (CDC adult notes),
@@ -362,7 +362,7 @@ describe('§H Adults ≥50 routine', () => {
       pcvDoses: [{ product: 'PCV13', date: '2014-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2016-06-06' }] }); // age ~60 at PPSV23
     expect(pcv(r).status).toBe('due');
-    expect(pcv(r).minIntervalDays).toBe(1826);
+    expect(pcv(r).minIntervalMonths).toBe(60);
   });
 
   it('70yo PCV13 + PPSV23 given at ~67 (≥65) → shared clinical decision', () => {
