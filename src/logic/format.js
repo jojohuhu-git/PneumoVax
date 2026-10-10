@@ -9,6 +9,11 @@ import { calendarMonthsBetween, todayISO } from './dateUtils.js';
  */
 export function fmtAgeMonths(am) {
   if (am == null) return '';
+  // P3-6 (S10): a negative age used to fall into the "Birth" branch below, so
+  // -7 months and 0 months printed the same word. A dose dated before the
+  // patient was born then read "Given at ~birth" — an ordinary-looking newborn
+  // dose. A value that cannot exist must not be mistakable for a patient.
+  if (am < 0) return 'Before birth';
   if (am < 0.25) return 'Birth';
   if (am <= 2) {
     const wks = floorAge(am * 4.348);          // 1 month ≈ 4.348 weeks

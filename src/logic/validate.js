@@ -60,6 +60,7 @@ export function ageAtDoseFromDate(dose, ageMonths, today, dob) {
 // onto a threshold makes the verdict read as a contradiction.
 function fmtAgeM(m) {
   if (m == null) return '?';
+  if (m < 0) return 'before birth';   // P3-6 — never mistakable for a newborn
   if (m < 0.5) return 'birth';
   if (m < 24) {
     const mo = floorAge(m);
@@ -91,6 +92,17 @@ function invalid(reasons, detail) {
   if (detail != null) r.detail = detail;
   return r;
 }
+// P3-6: a dose dated before the patient was born is not an under-age dose, it
+// is an impossible one — almost always a mistyped year on the dose or the date
+// of birth. Saying "below the minimum age" sends the clinician looking for the
+// wrong mistake, so this names the real one.
+function beforeBirth(dose, label) {
+  return invalid(
+    [`Dated ${dose.date}, which is before the patient was born — this dose cannot be correct. Check the date on the dose and the date of birth. It does not count.`],
+    `${label || 'This dose'} is dated before the recorded date of birth.`
+  );
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = []) { return { status: 'noncounting', reasons }; }
 
@@ -130,6 +142,7 @@ function validateOnePCV(dose, ageMonths, today, dob) {
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
+  if (ageAtDose !== null && ageAtDose < 0) return beforeBirth(dose, prod?.label || key);
   // CDC's 4-day grace (peds audit P1-1): a dose given up to 4 days before the
   // minimum age counts. PCV's floor is stated in days, so when a date of birth
   // is on file it is compared in days — exact in any month. Without one, fall
@@ -162,6 +175,7 @@ function validateOnePPSV23(dose, ageMonths, today, dob) {
     return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid).']);
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
+  if (ageAtDose !== null && ageAtDose < 0) return beforeBirth(dose, 'PPSV23');
   // CDC's 4-day grace — PPSV23's floor is 2 CALENDAR years, so the grace is
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
