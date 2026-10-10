@@ -110,6 +110,7 @@ export default function App() {
         {state.step === 2 && (
           <StepHistory
             ageMonths={ageMonths}
+            today={today}
             pcvDoses={state.pcvDoses}
             ppsv23Doses={state.ppsv23Doses}
             onChangePcv={pcvDoses => update({ pcvDoses })}

@@ -29,7 +29,7 @@
 // completesSeries) to drive the matrix.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { daysBetween } from './dateUtils.js';
+import { daysBetween, todayISO } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS } from './format.js';
 import { productByKey, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
@@ -234,7 +234,8 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob) {
  * @param {string} [dob]  patient's date of birth, when one was entered (P3-1)
  */
 export function analyzeHistory(vaccine, doses, ageMonths, today, dob) {
-  const ref = today || new Date().toISOString().slice(0, 10);
+  // P3-7: local date, not UTC's — see dateUtils.todayISO.
+  const ref = todayISO(today);
   // Sort chronologically before the walk. The last-kept algorithm and the engine both
   // assume ascending order (interval anchoring, "first/last dated dose"), so doses entered
   // out of order must be re-sorted. Dated doses ascending; undated doses sort FIRST — they

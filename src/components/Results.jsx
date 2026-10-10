@@ -7,9 +7,12 @@ import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
 import { Chevron } from './icons.jsx';
+import { todayISO } from '../logic/dateUtils.js';
 
 export default function Results({ state, onReset, onChange, onBack, today }) {
   const { ageMonths, dob, riskIds, pcvDoses, ppsv23Doses } = state;
+  // queue P1-1 / P3-7 (S10): one clock read, threaded from App — see StepHistory.
+  const maxDate = todayISO(today);
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
@@ -232,7 +235,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   <div className="dose-field">
                     <label>Date (optional)</label>
                     <input type="date" value={dose.date || ''}
-                      max={new Date().toISOString().slice(0, 10)}
+                      max={maxDate}
                       onChange={e => updatePcv(i, 'date', e.target.value)} />
                   </div>
                   <button className="dose-remove" onClick={() => removePcv(i)}
@@ -260,7 +263,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   <div className="dose-field">
                     <label>Date (optional)</label>
                     <input type="date" value={dose.date || ''}
-                      max={new Date().toISOString().slice(0, 10)}
+                      max={maxDate}
                       onChange={e => updatePpsv(i, e.target.value)} />
                   </div>
                   <button className="dose-remove" onClick={() => removePpsv(i)}

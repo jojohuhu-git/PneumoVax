@@ -1,3 +1,4 @@
+import { todayISO } from '../logic/dateUtils.js';
 import React from 'react';
 
 // Vaccination history for PneumoVax — two product streams in one step:
@@ -7,7 +8,13 @@ import React from 'react';
 // Both lists are always visible and start empty — no auto-added rows.
 export default function StepHistory({
   ageMonths, pcvDoses, ppsv23Doses, onChangePcv, onChangePpsv, pcvProducts,
+  today,
 }) {
+  // queue P1-1 / P3-7 (S10): the clinician's LOCAL today, read once in App and
+  // passed down. `new Date().toISOString()` is the UTC date, which is already
+  // tomorrow after ~17:00 Pacific, so the picker offered a date validate.js
+  // then correctly refused as being in the future.
+  const maxDate = todayISO(today);
   const isAdult = (ageMonths ?? 0) >= 216;
 
   function addPcv() { onChangePcv([...pcvDoses, { date: '', product: '' }]); }
@@ -51,7 +58,7 @@ export default function StepHistory({
             <div className="dose-field">
               <label>Date (optional)</label>
               <input type="date" value={dose.date || ''}
-                max={new Date().toISOString().slice(0, 10)}
+                max={maxDate}
                 onChange={e => updatePcv(i, 'date', e.target.value)} />
             </div>
             <div className="dose-field">
@@ -78,7 +85,7 @@ export default function StepHistory({
             <div className="dose-field">
               <label>Date (optional)</label>
               <input type="date" value={dose.date || ''}
-                max={new Date().toISOString().slice(0, 10)}
+                max={maxDate}
                 onChange={e => updatePpsv(i, e.target.value)} />
             </div>
             <div className="dose-field">
