@@ -23,6 +23,7 @@
 | `src/components/__tests__/regression-p6-7-current-risk-disclaimer.test.jsx` | The current-risk-only caveat, and that the engine really behaves as it claims |
 | `src/components/__tests__/regression-p7-2-no-inline-styles.test.js` | Tripwire: no inline styles or hex literals (the regression MeningoVax has) |
 | `src/components/__tests__/regression-p3-9-risk-age-note.test.jsx` | `RiskAgeNote` on both surfaces; keyed to `ADULT_SCHED_MIN_M`, not the 18y product gate |
+| `src/logic/__tests__/regression-p1-0-recorded-dose-intervals.test.js` | Minimum intervals between recorded doses: PCV→PCV (4/8 weeks, keyed on the earlier dose), PCV→PPSV23 (8 weeks + same-visit), PPSV23 dose 2 (5 calendar years); the grace on each; invalid doses anchor, PCV7 does not; **and that adult doses are left alone** |
 
 ## Coverage Requirements
 
@@ -52,6 +53,18 @@
 9. **Every `[c]` marker has exactly one citation** — across both halves of a note, and
    across a verdict's whole `reasons` array. Swept engine-wide by
    `regression-p6-3b-note-cite-parity`.
+10. **Recorded-dose intervals are enforced, and only where a source states a minimum**
+    (S3, queue P1-0). Two halves, and a test that only checks the first half will let the
+    second rot:
+    - *It bites.* A PCV series at 2, 2.5, 3 and 3.5 months keeps **one** dose, not four.
+      An invalid dose still **anchors** the next one, because CDC spaces a repeat dose from
+      the dose it repeats — so three bad gaps invalidate three doses, not two.
+    - *It does not over-reach.* Doses given at `ADULT_SCHED_MIN_M` or later carry **no**
+      interval verdict in either stream, because CDC's adult notes state gaps as
+      recommendations and never as minimums. Keep the two adult assertions in
+      `regression-p1-0-*` — an earlier draft applied the 8-week PPSV23 floor to adults and
+      was caught only by `regression-a-p2-11`, whose fixture happens to record an adult's
+      PCV13 and PPSV23 on one day.
 
 ## Prove a new guard can fail
 

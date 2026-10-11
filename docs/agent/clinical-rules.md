@@ -75,10 +75,42 @@ NEVER counts. Records as `noncounting`, dropped from effective series. High-risk
 ### PCV15
 Requires a PPSV23 follow-up to complete the series (encoded as `requiresPPSV23: true` in `brands.js`).
 
-## Adult PPSV23 Interval — Risk-Class Keyed
+## Adult PCV15 → PPSV23 Interval — ≥1 Year at Every Adult Age
 
-Single source: `adultPpsvIntervalClass()` in `riskFactors.js`:
-- IC / cochlear implant / CSF leak → `'short'` → ≥8 weeks after PCV15
-- Non-IC chronic only → `'long'` → ≥1 year after PCV15
+**Corrected 2026-10-11 (S3).** This section still described the rule from BEFORE the
+owner's A-P1-1 amendment ("risk-class keyed: IC/cochlear/CSF = ≥8 weeks; non-IC chronic =
+≥1 year") and named `adultPpsvIntervalClass()`, which no longer exists anywhere in `src/`.
+S13 corrected the same stale rule in `testing.md` but missed this copy, so a session
+reading this file would have implemented the superseded rule. See `CLAUDE.md` and
+`CLINICAL_SPEC.md` §K for the governing wording.
 
-Never hardcode the interval check in the engine.
+PCV15 is followed by PPSV23 **≥1 year later, for every adult 19+**, and the series is then
+complete. The **8-week minimum may be *considered*** for an immunocompromising condition,
+cochlear implant or CSF leak — the app **names** that option and never silently substitutes
+it. Single source: `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in
+`riskFactors.js`. Never hardcode the interval in the engine.
+
+`adultPpsvShorterMinimumApplies()` answers the **interval** question only — do not reuse it
+to decide which CDC *row* a patient is on.
+
+## Minimum Intervals Between RECORDED Doses (S3, queue P1-0)
+
+Enforced in `validate.js`; the numbers live in `logic/intervals.js` and the scheduler reads
+them too. Full quotes and sources in `CLINICAL_SPEC.md` §K.
+
+- **PCV → PCV** — 4 weeks if the **earlier** dose was given before 12 months, 8 weeks from
+  12 months (`pcvSeriesMinIntervalDays`). CDC catch-up Table 2 states these under the
+  heading "Minimum Interval Between Doses"; p2016's footnote keys them the same way.
+- **PCV → PPSV23** — ≥8 weeks, and never the same visit.
+- **PPSV23 dose 2** — ≥5 calendar years after dose 1.
+
+Three things to know before changing any of it:
+
+1. **A sub-minimum dose is `invalid`**, not some middle verdict — CDC states the
+   consequence: the dose "should not be counted as valid and should be repeated".
+2. **An invalid dose still anchors the next one** ("the repeat dose should be spaced after
+   the invalid dose by the recommended minimum interval"). PCV7 anchors nothing.
+3. **The last two rules are paediatric only.** Doses given at `ADULT_SCHED_MIN_M` or later
+   get no interval verdict in either stream: CDC's adult notes state gaps as
+   recommendations for the next dose, never as minimums, and never say a short adult gap
+   stops a dose counting. Do not "tidy" this into a universal rule.
