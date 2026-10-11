@@ -1,3 +1,11 @@
+> **🛑 SUPERSEDED 2026-10-10 by `handoff-2026-10-10-s10b-rest-of-phase-3.md`.**
+> **Do not resume from this file.** Its queue is consumed: S10b ran next and closed all
+> three deferred items — `P3-5`, `P3-8`, and `P3-9b`'s logic half (= peds `P0-3`) — in PR #20.
+> Its one open decision ("merge PR #19") is also closed: **PR #19 merged as `1eac734`.**
+> Phase 3 is now complete except `P3-9`'s UI half (`RiskAgeNote`), still blocked on `P6-3`.
+> The two findings this file raised, `S10-N1` and `S10-N2`, remain **open** and are carried
+> forward in the new handoff.
+
 # PneumoVax — Handoff after S10 (part 1), dates and ages (2026-10-10)
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
