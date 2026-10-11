@@ -27,6 +27,7 @@ import {
   adultPpsvShorterMinimumApplies,
   ADULT_PPSV23_INTERVAL_MONTHS,
   pedsRiskRowClass,
+  pedsRiskIds,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
@@ -905,8 +906,13 @@ export function recommend(input) {
     recs = pcvInfant(am, pcv, today);
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
-    if (pedsRiskRowClass(riskIds)) {
-      recs = pcvRiskChild(am, riskIds, pcv, ppsv, today);
+    // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an
+    // adult-only tick cannot route the child here, and cannot drag an adult
+    // citation (cdcAdultPneumo / mmwr7203a1) into a child's card via
+    // collectRefs either.
+    const pedsIds = pedsRiskIds(riskIds);
+    if (pedsRiskRowClass(pedsIds)) {
+      recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today);
     } else {
       recs = pcvHealthyChild(am, pcv, ppsv, today);
     }
