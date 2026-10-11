@@ -17,16 +17,17 @@ const baseRec = {
   dueToday: true,
 };
 
-describe('RecCard dose-validation chip (PC1, vaxapp-style compliance colors)', () => {
-  it('labels a plain valid dose "On time" (green)', () => {
+describe('RecCard dose-validation chip (PC1)', () => {
+  // S14-2: the chip states the dose count, not a timing word.
+  it('labels a valid dose "Dose N of M" (green)', () => {
     render(
       <RecCard
-        rec={baseRec}
+        rec={{ ...baseRec, seriesTotal: 1 }}
         doses={[{ date: '2024-01-01', product: 'PCV15' }]}
         doseValidations={[{ status: 'valid', reasons: [], effectiveDoseNum: 1 }]}
       />
     );
-    const chip = screen.getByText('On time');
+    const chip = screen.getByText('Dose 1 of 1');
     expect(chip.className).toMatch(/dose-val-valid/);
   });
 

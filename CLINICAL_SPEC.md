@@ -430,10 +430,13 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   **No 4-day grace here, deliberately.** The grace is CDC's rule for whether a dose that
   missed a *minimum* still counts. Nothing is being voided, so there is no grace to apply.
 
-  Copy mirrors vaxapp's settled pair (design-review, cross-app copy parity): **"On time"**
-  = within the recommended window; **"Valid"** = outside it, still counts. vaxapp's third
-  term "off-window · repeat" means a dose that does NOT count — this is not that, and the
-  copy must never imply a repeat is owed.
+  **S14-2 (owner decision 2026-10-11): the chip no longer carries this distinction in a
+  word.** It used to mirror vaxapp's "On time" / "Valid" pair; that split is retired —
+  MeningoVax is now the sole vocabulary authority for these two single-vaccine apps, and
+  its chip just states the dose count. Every recorded dose's chip reads **"Dose N of M"**
+  (or "Dose N" when the card tracks no total) regardless of timing; the advisory sentence
+  above still appears in the dose's own explanation text, so the information is not lost —
+  it has moved off the chip.
 - **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
   patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
   a birthday lands on an exact whole number of months. Patients entered as Years/Months keep

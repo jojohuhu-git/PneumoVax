@@ -49,21 +49,18 @@ function describeDose(dose, idx, ageMonths, today, dob) {
 // series; it must not read as "Invalid".
 function DoseValidation({ result, seriesTotal, numberFor }) {
   if (!result) return null;
-  const { status, reasons, detail, reasonCites, effectiveDoseNum, doesNotCount } = result;
+  const { reasons, detail, reasonCites, doesNotCount } = result;
 
+  // S14-2: the chip itself carries "Dose N of M" now — no separate span next
+  // to it repeating the same count in different words.
   const chipClass = doseChipClass(result);
-  const chipLabel = doseChipLabel(result);
+  const chipLabel = doseChipLabel(result, seriesTotal);
 
   const showReasons = reasons && reasons.length > 0;
 
   return (
     <div className={`dose-val${doesNotCount ? ' dose-val-dropped' : ''}`}>
       <span className={chipClass}>{chipLabel}</span>
-      {effectiveDoseNum != null && status !== 'invalid' && (
-        <span className="dose-val-effective">
-          {seriesTotal != null ? `Dose ${effectiveDoseNum} of ${seriesTotal}` : `Dose ${effectiveDoseNum}`}
-        </span>
-      )}
       {showReasons && (
         <div className="dose-val-reasons">
           {/* P6-3: `reasonCites` is one entry per "[c]" across the whole

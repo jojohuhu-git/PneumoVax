@@ -1,11 +1,12 @@
 // S3-N1 (2026-10-11) — the surface half: an adult dose given sooner than CDC
-// advises reads "Valid", not "On time", and never reads as an error.
+// advises still counts and never reads as an error.
 //
-// Vocabulary mirrors vaxapp's settled pair (design-review, cross-app copy
-// parity): "Done · on time" = within the routine window; "Done · valid" =
-// outside it but still counts toward the series. vaxapp's third term,
-// "off-window · repeat", means a dose that does NOT count — this is not that,
-// and the copy here must never imply a repeat is owed.
+// S14-2 (owner decision 2026-10-11) retired the "On time" / "Valid" chip
+// words this file used to assert — MeningoVax is now the sole vocabulary
+// authority for these two apps, and its chip just states the dose count.
+// What this file still protects: an off-window dose counts, is numbered, and
+// is never struck through like a dropped one — the advisory moved into the
+// dose's reasons text, not away.
 // @vitest-environment happy-dom
 import React, { useState } from 'react';
 import { describe, it, expect } from 'vitest';
@@ -47,35 +48,32 @@ function renderWithDose(result) {
 }
 
 describe('S3-N1 — the chip', () => {
-  it('reads "Valid" for an off-window dose, not "On time"', () => {
+  it('an off-window dose still shows its dose number, not "Invalid"', () => {
     renderWithDose({
       status: 'valid',
       offWindow: true,
       effectiveDoseNum: 2,
       reasons: ['Given less than a year after the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts — no repeat is needed.'],
     });
-    expect(screen.getByText('Valid')).toBeInTheDocument();
-    expect(screen.queryByText('On time')).not.toBeInTheDocument();
+    expect(screen.getByText('Dose 2')).toBeInTheDocument();
     expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
   });
 
-  it('still shows the dose number — an off-window dose counts', () => {
-    renderWithDose({ status: 'valid', offWindow: true, effectiveDoseNum: 2, reasons: ['…'] });
-    expect(screen.getByText(/Dose 2/)).toBeInTheDocument();
-  });
-
-  it('is not struck through or dimmed like a dropped dose', () => {
+  it('is not struck through or dimmed like a dropped dose, and reads the plain valid color', () => {
     const { container } = renderWithDose({
       status: 'valid', offWindow: true, effectiveDoseNum: 2, reasons: ['…'],
     });
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
-    expect(container.querySelector('.dose-val-offwindow')).not.toBeNull();
+    // S14-2: the chip no longer carries a separate color for "counts, but
+    // given sooner than CDC advises" — that visual distinction retired along
+    // with the word.
+    expect(container.querySelector('.dose-val-valid')).not.toBeNull();
+    expect(container.querySelector('.dose-val-offwindow')).toBeNull();
   });
 
-  it('a plain valid dose still reads "On time"', () => {
+  it('a plain valid dose shows the same chip shape', () => {
     renderWithDose({ status: 'valid', effectiveDoseNum: 1, reasons: [] });
-    expect(screen.getByText('On time')).toBeInTheDocument();
-    expect(screen.queryByText('Valid')).not.toBeInTheDocument();
+    expect(screen.getByText('Dose 1')).toBeInTheDocument();
   });
 
   it('uses its own chip colour, distinct from PCV7 and from invalid', () => {
@@ -117,14 +115,14 @@ describe('S3-N1 — the legend explains it, and the whole flow agrees', () => {
     expect(screen.getByText(/given within the window CDC recommends/i)).toBeInTheDocument();
   });
 
-  it('end to end: the adult five-week gap renders as Valid on the real engine output', () => {
+  it('end to end: the adult five-week gap still counts on the real engine output', () => {
     const { container } = render(<Harness />);
     // A complete adult series is a neutral card, which renders collapsed — the
     // dose rows live in its body, so open it the way a clinician would.
     fireEvent.click(container.querySelector('.rec-card-head-toggle'));
-    expect(screen.getByText('Valid')).toBeInTheDocument();
     expect(screen.getByText(/CDC advises at least 1 year/i)).toBeInTheDocument();
-    // And it is still counted, not dropped.
-    expect(screen.getByText(/Dose 2/)).toBeInTheDocument();
+    // And it is still counted, not dropped, not relabeled as an error.
+    expect(screen.getByText('Dose 2')).toBeInTheDocument();
+    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
   });
 });

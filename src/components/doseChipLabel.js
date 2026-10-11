@@ -19,29 +19,36 @@
 /**
  * The chip text for one recorded PCV/PPSV23 dose.
  *
- * @param {object|null} result  one entry of `analyzeHistory().perDose`
+ * @param {object|null} result      one entry of `analyzeHistory().perDose`
+ * @param {number|null} [seriesTotal] the total this patient's series runs
+ *   to, when the card tracks one. Timing (on-time vs. given sooner than CDC
+ *   advises) is NOT part of this word — S14-2 (2026-10-11, owner decision):
+ *   it lives in the dose's reasons/explanation text instead, so the chip can
+ *   say what MeningoVax's already says for a counted dose.
  * @returns {string|null} the label, or null when there is nothing to show
  */
-export function doseChipLabel(result) {
+export function doseChipLabel(result, seriesTotal) {
   if (!result) return null;
-  const { status, offWindow } = result;
+  const { status, effectiveDoseNum } = result;
 
   if (status === 'noncounting') return 'Recorded (does not count)';
-  // S3-N1: `offWindow` is a flag on a dose that COUNTS, not a status — see
-  // validate.js. It only ever rides on 'valid', and the chip says "Valid"
-  // rather than "On time" because the dose was given earlier than CDC
-  // advises.
-  if (status === 'valid' && offWindow) return 'Valid';
-  if (status === 'valid') return 'On time';
+  if (status === 'valid') {
+    if (seriesTotal == null) return `Dose ${effectiveDoseNum}`;
+    if (effectiveDoseNum <= seriesTotal) return `Dose ${effectiveDoseNum} of ${seriesTotal}`;
+    // Defensive floor, mirroring MeningoVax's own: never print a dose number
+    // greater than the total. Nothing in PneumoVax should reach this once
+    // S14-4 gives a dose recorded past an already-complete series its own
+    // "Extra dose" wording instead of a numbered slot.
+    return 'Booster';
+  }
   if (status === 'invalid') return 'Invalid';
   return 'Unknown';
 }
 
 /** The chip's CSS class, which follows the same verdict. */
 export function doseChipClass(result) {
-  const { status, offWindow } = result;
+  const { status } = result;
   if (status === 'noncounting') return 'dose-val-chip dose-val-noncounting';
-  if (status === 'valid' && offWindow) return 'dose-val-chip dose-val-offwindow';
   if (status === 'valid') return 'dose-val-chip dose-val-valid';
   if (status === 'invalid') return 'dose-val-chip dose-val-invalid';
   return 'dose-val-chip dose-val-unknown';

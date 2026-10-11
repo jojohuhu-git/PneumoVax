@@ -56,8 +56,8 @@
   --fs-xl:   1.2rem;
 
   /* Spacing scale — ported from MeningoVax (PD1), 4px-base grid. Sub-4px
-     optical paddings on tiny chips/badges (dose-val-chip, dose-val-effective,
-     age-edit-btn, status-badge, meta-chip, due-pill) are intentionally left
+     optical paddings on tiny chips/badges (dose-val-chip, age-edit-btn,
+     status-badge, meta-chip, due-pill) are intentionally left
      off this scale — they're height-matching values, not rhythm spacing. */
   --sp-4:  4px;
   --sp-8:  8px;
@@ -445,10 +445,6 @@ body {
 .rec-progress-group:first-child { padding-top: 0; }
 
 .dose-val-dropped .rec-progress-dose-text { opacity: 0.55; text-decoration: line-through; }
-.dose-val-effective {
-  display: inline-flex; align-items: center; padding: 1px var(--sp-8); border-radius: var(--rads);
-  font-size: var(--fs-xs); color: var(--gy3); background: var(--gy6);
-}
 
 /* ── Disclaimer ────────────────────────────────────────────────── */
 .disclaimer { background: var(--gy6); border-radius: var(--rads); padding: var(--sp-16); margin-top: var(--sp-24); font-size: var(--fs-sm); color: var(--gy3); line-height: 1.5; border-left: 3px solid var(--gy5); }

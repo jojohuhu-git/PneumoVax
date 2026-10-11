@@ -16,7 +16,6 @@ describe('the chip label lives in one module', () => {
   // The literals no file outside doseChipLabel.js may spell out for itself.
   const OWNED = [
     'Recorded (does not count)',
-    'On time',
     'Invalid',
   ];
 
@@ -42,15 +41,26 @@ describe('the chip label lives in one module', () => {
 
 describe('doseChipLabel branches', () => {
   it('noncounting (PCV7) outranks everything else', () => {
-    expect(doseChipLabel({ status: 'noncounting', offWindow: true })).toBe('Recorded (does not count)');
+    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: 1 }, 2)).toBe('Recorded (does not count)');
   });
 
-  it('an off-window valid dose reads "Valid"', () => {
-    expect(doseChipLabel({ status: 'valid', offWindow: true })).toBe('Valid');
+  // S14-2 (owner decision 2026-10-11): the chip no longer distinguishes an
+  // on-time dose from one given sooner than CDC advises — that word pair is
+  // gone, win or lose the `offWindow` flag. A valid dose always reads its
+  // count; timing lives in the reasons text (see validate.js, RecCard.jsx).
+  it('a valid dose within the total reads "Dose N of M", with or without offWindow', () => {
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2 }, 2)).toBe('Dose 2 of 2');
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2, offWindow: true }, 2)).toBe('Dose 2 of 2');
   });
 
-  it('a plain valid dose reads "On time"', () => {
-    expect(doseChipLabel({ status: 'valid' })).toBe('On time');
+  it('a valid dose with no tracked series total reads "Dose N"', () => {
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2 }, null)).toBe('Dose 2');
+  });
+
+  it('never prints a dose number greater than the total', () => {
+    const label = doseChipLabel({ status: 'valid', effectiveDoseNum: 3 }, 2);
+    expect(label).toBe('Booster');
+    expect(label).not.toMatch(/\d/);
   });
 
   it('invalid and unknown', () => {

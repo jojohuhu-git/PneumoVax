@@ -128,6 +128,6 @@ was too generous. Such a dose now **counts and carries a note** — `offWindow: 
 - Adult PCV15 -> PPSV23: **>=1 year**, unless `adultPpsvShorterMinimumApplies()`, where the
   8-week option is legitimate and only a shorter gap is flagged.
 - **No 4-day grace** — nothing is being voided, so there is no grace to apply.
-- Copy mirrors vaxapp: **"On time"** (within the window) vs **"Valid"** (outside it, still
-  counts). Never imply a repeat is owed; vaxapp's "off-window - repeat" is a different
-  thing and means a dose that does NOT count.
+- **S14-2:** the chip no longer spells this out in a word — it just reads "Dose N of M"
+  (MeningoVax's own wording, which is now the vocabulary source for both apps). The timing
+  sentence still lives in the dose's reasons/explanation text.
