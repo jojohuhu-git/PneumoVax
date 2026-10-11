@@ -194,15 +194,20 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
               <button type="button" className="age-edit-btn"
                 onClick={() => { setEditingAge(v => !v); setEditingDoses(false); setShowLegend(false); }}
                 aria-expanded={editingAge}>
-                {editingAge ? 'Done' : <>Adjust age<Chevron open={editingAge} /></>}
+                {/* P6-6: the label stays when open; the chevron carries the
+                    state. "Done" discarded the only words saying what the
+                    button controls — and with the Color key and "Why this"
+                    toggles already keeping their labels, it was the odd one
+                    out in its own component. */}
+                Adjust age<Chevron open={editingAge} />
               </button>
             )}
             {onChange && (
               <button type="button" className="age-edit-btn"
                 onClick={() => { setEditingDoses(v => !v); setEditingAge(false); setShowLegend(false); }}
                 aria-expanded={editingDoses}>
-                {editingDoses ? 'Done'
-                  : <>{`Recorded doses${(pcvDoses.length + ppsv23Doses.length) > 0 ? ` (${pcvDoses.length + ppsv23Doses.length})` : ''}`}<Chevron open={editingDoses} /></>}
+                {`Recorded doses${(pcvDoses.length + ppsv23Doses.length) > 0 ? ` (${pcvDoses.length + ppsv23Doses.length})` : ''}`}
+                <Chevron open={editingDoses} />
               </button>
             )}
             <button type="button" className="age-edit-btn"
