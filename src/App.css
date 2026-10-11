@@ -386,7 +386,7 @@ body {
 /* ── Per-dose validation chips (Recorded: block) ──────────────────
    PC1: each recorded dose row shows the dose descriptor (left) and a
    validity chip (right); reasons/detail wrap to full width below. Mirrors
-   MeningoVax's dose-val-* pattern, plus dose-val-noncounting for PCV7. */
+   MeningoVax's dose-val-* pattern. */
 .rec-progress { margin-bottom: var(--sp-12); }
 .rec-progress-label { font-size: var(--fs-sm); font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; }
 .rec-progress-list { list-style: none; margin-top: var(--sp-4); }
@@ -402,12 +402,12 @@ body {
   font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
 }
 .dose-val-valid       { background: var(--glt); color: var(--g); border: 1px solid var(--gmd); }
-/* S3-N1 — counts, but given sooner than CDC advises. Blue, not amber: amber is
-   already dose-val-noncounting (PCV7), and a dose that COUNTS must not look
-   like one that does not. Within the dose-chip family blue is otherwise
-   unused, so it reads as information rather than as a warning. */
+/* S14-4/S14-6 — a dose set aside from the count for an administrative reason,
+   not an error: PCV7 ("Off-window - repeat" — never counts, a dose IS owed)
+   and an extra dose given after the series was already complete ("Extra
+   dose..." — the opposite, nothing is owed, but it likewise isn't numbered
+   against the series). Blue reads as information rather than a warning. */
 .dose-val-offwindow   { background: var(--blt); color: var(--b); border: 1px solid var(--bmd); }
-.dose-val-noncounting { background: var(--alt); color: var(--a); border: 1px solid var(--amd); }
 .dose-val-invalid     { background: var(--rlt); color: var(--r); border: 1px solid var(--rmd); }
 .dose-val-unknown     { background: var(--gy6); color: var(--gy3); border: 1px solid var(--gy5); }
 .dose-val-reasons { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 0; }

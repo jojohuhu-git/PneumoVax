@@ -64,7 +64,7 @@ describe('P6-5 — one walk of the dose history, not two', () => {
     const engine = recommend({ ...PCV7_CASE, today: '2026-06-07' });
     expect(engine.perDose.pcv[0].status).toBe('noncounting');
     render(<Harness initial={PCV7_CASE} />);
-    expect(screen.getByText('Recorded (does not count)')).toBeTruthy();
+    expect(screen.getByText('Off-window - repeat')).toBeTruthy();
   });
 
   it('perDose is an array on EVERY path, including the hard stop', () => {

@@ -324,6 +324,11 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
 ## §K — Cross-cutting rules
 
 - **PCV7 ignored** for everyone — not counted in the PCV13/15/20-based tables (`immPCV7`).
+  **UI wording (S14-6, owner decision 2026-10-11):** the chip reads MeningoVax's own
+  "Off-window - repeat" rather than "Recorded (does not count)" — high-risk patients are
+  treated as PCV-naïve for these doses, so a dose genuinely is owed, the same shape as
+  MeningoVax's meaning of the words. Internally `status` stays `'noncounting'`, distinct
+  from `'invalid'`: PCV7 was validly given, it just never counts.
 - **Unknown / undocumented history → treat as unvaccinated** (CDC).
 - **Multiple risk conditions:** apply all relevant pathways; most protective wins;
   **IC precedence over non-IC** (the ≥8wk interval and the IC catch-up rows win).

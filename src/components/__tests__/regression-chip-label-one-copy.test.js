@@ -15,7 +15,7 @@ const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 describe('the chip label lives in one module', () => {
   // The literals no file outside doseChipLabel.js may spell out for itself.
   const OWNED = [
-    'Recorded (does not count)',
+    'Off-window - repeat',
     'Invalid',
     'Extra dose — more than this series needs',
     'Extra dose? — no date recorded',
@@ -49,8 +49,11 @@ describe('the chip label lives in one module', () => {
 });
 
 describe('doseChipLabel branches', () => {
+  // S14-6: reuses MeningoVax's own wording — PCV7 never counts, so a dose IS
+  // genuinely owed (high-risk patients are treated as PCV-naïve for these
+  // doses), the same shape as MeningoVax's "off-window - repeat" meaning.
   it('noncounting (PCV7) outranks everything else', () => {
-    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: 1 }, 2)).toBe('Recorded (does not count)');
+    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: 1 }, 2)).toBe('Off-window - repeat');
   });
 
   // S14-2 (owner decision 2026-10-11): the chip no longer distinguishes an

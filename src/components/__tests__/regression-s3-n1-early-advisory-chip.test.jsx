@@ -78,11 +78,14 @@ describe('S3-N1 — the chip', () => {
     expect(screen.getByText('Dose 1')).toBeInTheDocument();
   });
 
-  it('uses its own chip colour, distinct from PCV7 and from invalid', () => {
+  it('uses the plain valid chip colour, distinct from PCV7 and from invalid', () => {
     const { container: off } = renderWithDose({
       status: 'valid', earlyAdvisory: true, effectiveDoseNum: 1, reasons: ['…'],
     });
-    expect(off.querySelector('.dose-val-noncounting')).toBeNull();
+    expect(off.querySelector('.dose-val-valid')).not.toBeNull();
+    // S14-6: PCV7 (noncounting) now uses this same blue — a counted dose
+    // must never be mistaken for one that is not.
+    expect(off.querySelector('.dose-val-offwindow')).toBeNull();
     expect(off.querySelector('.dose-val-invalid')).toBeNull();
   });
 });

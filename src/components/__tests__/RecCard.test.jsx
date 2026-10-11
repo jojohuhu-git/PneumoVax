@@ -55,7 +55,10 @@ describe('RecCard dose-validation chip (PC1)', () => {
     expect(chip.className).toMatch(/dose-val-unknown/);
   });
 
-  it('labels a PCV7 dose "Recorded (does not count)" (amber), never "Invalid"', () => {
+  // S14-6: reuses MeningoVax's own "Off-window - repeat" — PCV7 never
+  // counts, so a dose IS genuinely owed (high-risk patients are treated as
+  // PCV-naïve for these doses).
+  it('labels a PCV7 dose "Off-window - repeat" (blue), never "Invalid"', () => {
     render(
       <RecCard
         rec={baseRec}
@@ -68,8 +71,8 @@ describe('RecCard dose-validation chip (PC1)', () => {
         }]}
       />
     );
-    const chip = screen.getByText('Recorded (does not count)');
-    expect(chip.className).toMatch(/dose-val-noncounting/);
+    const chip = screen.getByText('Off-window - repeat');
+    expect(chip.className).toMatch(/dose-val-offwindow/);
     expect(screen.queryByText('Invalid')).toBeNull();
   });
 });
