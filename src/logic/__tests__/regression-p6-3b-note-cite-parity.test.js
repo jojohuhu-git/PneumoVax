@@ -69,6 +69,16 @@ function countMarkers(text) {
   return String(text ?? '').split('[c]').length - 1;
 }
 
+// P6-4: a note is `{ lead, detail }` (or still a plain string where it was
+// never split). `noteCites` is ONE ordered list across BOTH halves, so the
+// parity that matters is the TOTAL marker count — the lead's markers consume
+// the first citations and the detail's take the rest.
+function noteMarkers(note) {
+  if (note == null) return 0;
+  if (typeof note === 'string') return countMarkers(note);
+  return countMarkers(note.lead) + countMarkers(note.detail);
+}
+
 // Walk every rec and every dose verdict the engine can emit across the sweep.
 function sweep(visit) {
   let seen = 0;
@@ -102,7 +112,7 @@ describe('P6-3b — every [c] marker is paired with exactly one citation', () =>
     const mismatches = [];
     sweep((item) => {
       if (item.kind !== 'note') return;
-      const markers = countMarkers(item.rec.note);
+      const markers = noteMarkers(item.rec.note);
       const cites = (item.rec.noteCites ?? []).length;
       if (markers !== cites) {
         mismatches.push(
@@ -155,7 +165,7 @@ describe('P6-3b — every [c] marker is paired with exactly one citation', () =>
     const stray = [];
     sweep((item) => {
       if (item.kind !== 'note') return;
-      if (countMarkers(item.rec.note) === 0 && (item.rec.noteCites ?? []).length > 0) {
+      if (noteMarkers(item.rec.note) === 0 && (item.rec.noteCites ?? []).length > 0) {
         stray.push(`${item.rec.vaccine}/${item.rec.status} at ${item.ageMonths}mo`);
       }
     });
