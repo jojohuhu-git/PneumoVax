@@ -27,6 +27,7 @@ import {
   adultPpsvShorterMinimumApplies,
   ADULT_PPSV23_INTERVAL_MONTHS,
   pedsRiskRowClass,
+  pedsRiskIds,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
@@ -71,6 +72,10 @@ function rec(o) {
     minIntervalMonths: o.minIntervalMonths ?? null,
     brands: o.brands ?? [],
     note: o.note,
+    // P6-3: one cite() object per literal "[c]" in `note`, in order. RecCard
+    // assigns the visible [N] at render time, so nothing here hardcodes a
+    // number. A note with no "[c]" leaves this empty and renders as before.
+    noteCites: o.noteCites ?? [],
     advisory: !!o.advisory,             // HSCT relative-to-transplant block
     // Series shape for the recorded-dose list's "Primary series" / "Boosters"
     // headings (owner decision 2026-09-15). Both null on cards whose total
@@ -905,8 +910,13 @@ export function recommend(input) {
     recs = pcvInfant(am, pcv, today);
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
-    if (pedsRiskRowClass(riskIds)) {
-      recs = pcvRiskChild(am, riskIds, pcv, ppsv, today);
+    // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an
+    // adult-only tick cannot route the child here, and cannot drag an adult
+    // citation (cdcAdultPneumo / mmwr7203a1) into a child's card via
+    // collectRefs either.
+    const pedsIds = pedsRiskIds(riskIds);
+    if (pedsRiskRowClass(pedsIds)) {
+      recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today);
     } else {
       recs = pcvHealthyChild(am, pcv, ppsv, today);
     }

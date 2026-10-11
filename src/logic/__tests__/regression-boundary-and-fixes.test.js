@@ -231,35 +231,54 @@ describe('L1 – ageGroup label gap at 10y closed', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════════
-// Scenario 4 — 18y6m smoker: peds path, adultOnly risks not shown by engine
-// (The engine is peds at 222mo. Smoking is adultOnly; the StepRisks UI hides
-// the checkbox, but IF a smoker risk_id were smuggled in, the engine is still
-// on the peds table. Documented behavior: engine ignores unrecognized adult
-// riskIds in the peds matrix — pedsRiskRowClass returns null for unknown IDs.)
+// Scenario 4 — 18y6m smoker: the peds rulebook governs, and an adult-only risk
+// does not act on it.
+//
+// CORRECTED 2026-10-10 (S10b, P3-9b / peds audit P0-3). This block previously
+// asserted the OPPOSITE — that a smoking tick routed an 18y6m patient to the
+// at-risk peds catch-up path — and froze that in place deliberately, "so a
+// future change doesn't unknowingly alter the routing". It rested on a claim
+// about the source that is not true:
+//
+//   "'smoking' has class:'nonIC' in riskFactors.js (it appears in p2016 Table 3
+//    as a peds nonIC condition …)"
+//
+// p2016 Table 3 does NOT list smoking. Verified live 2026-10-10 by extracting
+// the whole 2-page PDF: 0 matches for /smok|alcohol|cigarette/i, while
+// "cochlear" and "diabetes" both match. CDC's child & adolescent schedule notes
+// agree — 0 matches across the fully-expanded page. Smoking carries
+// class:'nonIC' because that is what it is for ADULTS (CDC's adult notes:
+// "Alcoholism, chronic heart/liver/lung disease, cigarette smoking, or diabetes
+// mellitus…"), and the adult pathway needs it; it is not a paediatric
+// indication. See pedsRiskIds() in riskFactors.js.
+//
+// The block's real subject — that 222mo is on the PEDS rulebook, not the adult
+// one — is unchanged and still asserted below.
 // ════════════════════════════════════════════════════════════════════════════
 describe('Scenario 4 – 18y6m smoker: peds rulebook governs', () => {
-  // Scenario 4 clinical decision: an 18yo is on the PEDS rulebook (< 228mo).
-  // Smoking is adultOnly in the UI (StepRisks hides the checkbox at < 228mo),
-  // so this case should not arise in normal use.
-  //
-  // However, 'smoking' has class:'nonIC' in riskFactors.js (it appears in p2016
-  // Table 3 as a peds nonIC condition, even though it is categorized as
-  // adultOnly for the StepRisks UI). So IF a smoking riskId is submitted for an
-  // 18yo, the engine self-consistently routes to the nonIC peds catch-up path.
-  //
-  // The self-consistency check: UI (StepRisks) and engine must agree.
-  //   • UI: smoking checkbox HIDDEN at < 228mo → cannot be selected.
-  //   • Engine: if 'smoking' somehow appears, routes to risk-based (peds nonIC).
-  // The UI-level gate is the primary protection. The engine behavior is
-  // documented here as "risk-based" so a future change doesn't unknowingly
-  // alter the routing.
-  it('18y6m + smoking riskId → peds path, engine routes to risk-based (nonIC peds)', () => {
+  // The two protections, and the order they apply in:
+  //   • UI: the smoking checkbox is hidden below 228mo (StepRisks).
+  //   • Engine: even if a smoking id arrives anyway — and it can, by entering
+  //     an adult age, ticking it, going Back and lowering the age — the
+  //     paediatric pathway strips it. The engine is the protection that holds.
+  it('18y6m + smoking riskId → peds path, and the tick does not act', () => {
     // 222mo < 228mo → peds dispatch.
-    // 'smoking' has class:'nonIC' in riskFactors.js → pedsRiskRowClass returns 'nonIC'.
     const r = run({ ageMonths: 222, riskIds: ['smoking'], pcvDoses: [] });
-    // Peds nonIC path for an 18yo with no prior PCV → Option A (PCV20) or Option B
-    expect(pcv(r).status).toBe('risk-based');
+    // Pre-fix this was 'risk-based' with a three-option catch-up regimen.
+    expect(pcv(r).status).toBe('not-indicated');
+    expect(pcv(r).doseLabel).toBe('Not indicated (healthy 5–18y)');
+    // Identical to the same patient with nothing ticked.
+    const healthy = run({ ageMonths: 222, riskIds: [], pcvDoses: [] });
+    expect(r.recs.map((x) => x.doseLabel)).toEqual(healthy.recs.map((x) => x.doseLabel));
     // Must NOT use adult matrix (adult gives PCV21 in brands)
+    const allBrands = r.recs.flatMap((x) => x.brands || []);
+    expect(allBrands.some((b) => /PCV21/.test(b))).toBe(false);
+  });
+
+  it('18y6m + a GENUINE paediatric risk still routes to the at-risk peds path', () => {
+    // The guard must strip the adult-only tick, not disable the at-risk path.
+    const r = run({ ageMonths: 222, riskIds: ['diabetes'], pcvDoses: [] });
+    expect(pcv(r).status).toBe('risk-based');
     const allBrands = r.recs.flatMap((x) => x.brands || []);
     expect(allBrands.some((b) => /PCV21/.test(b))).toBe(false);
   });

@@ -26,6 +26,36 @@ export const REFS = {
     short: 'CDC Adult Notes',
   },
 
+  // Sentence-level citations (P6-3) ---------------------------------------
+  // These point at the SAME two pages as cdcChildPneumo / cdcAdultPneumo
+  // above, but each carries the ONE sentence a particular claim rests on, so
+  // cite() can deep-link the reader straight to it. The whole-page keys stay
+  // quote-free on purpose: they are the chips at the foot of a card, and a
+  // chip cites the whole recommendation rather than one sentence inside it.
+  // Two keys quoting one page share a single visible [N] (dedupe is by
+  // `page`), while each keeps its own link and hover text.
+  //
+  // Both quotes below were fetched live 2026-10-10 via the browser pane and
+  // confirmed to appear EXACTLY once on their page. (`innerText` silently
+  // omits CDC's collapsed accordion bodies — 9,184 chars with "cochlear" and
+  // "diabetes" both absent; `textContent` returns the real 75,723. Any future
+  // re-verification must use textContent and keep a positive control, or a
+  // "0 matches" result means nothing.)
+  cdcAdultRiskFactorList: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Immunization Schedule — pneumococcal, the risk-factor footnote to "Age 19–49 years with certain underlying medical conditions or other risk factors"',
+    short: 'CDC Adult Notes',
+    quote: 'Underlying medical conditions or other risk factors include alcoholism, chronic heart/liver/lung disease, chronic renal failure, cigarette smoking',
+    lastVerified: '2026-10-10',
+  },
+  cdcChildSpecialSituations: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Immunization Schedule — pneumococcal "Special situations", the non-immunocompromising risk group (CDC\'s complete paediatric enumeration; names neither smoking nor alcohol)',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Children and adolescents with cerebrospinal fluid leak; chronic heart disease; chronic kidney disease (excluding maintenance dialysis and nephrotic syndrome); chronic liver disease; chronic lung disease (including moderate persistent or severe persistent asthma); cochlear implant; or diabetes mellitus',
+    lastVerified: '2026-10-10',
+  },
+
   // CDC job aids ----------------------------------------------------------
   cdcCatchupJobAid: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
@@ -138,6 +168,58 @@ export const REFS = {
 };
 
 // Resolve an array of ref keys to {url, label, short} objects, dropping unknowns.
+// These are the whole-card chips at the foot of a recommendation: always the
+// plain page URL (with its section anchor), never a #:~:text= fragment, because
+// a chip cites the whole recommendation rather than one sentence inside it.
 export function resolveRefs(keys = []) {
   return keys.map((k) => REFS[k]).filter(Boolean);
+}
+
+// ── P6-3 (S13, 2026-10-10): per-occurrence citations for inline [N] markers ──
+//
+// Build the deep link that scrolls the reader to the exact sentence a claim
+// rests on. Kept as a pure function of (url, quote) rather than of a ref key
+// so the anchor rule below can be tested on its own.
+//
+// ⚠ The anchor rule. A URL may already carry a section anchor —
+// `.../adult-notes.html#note-pneumo` — and naive concatenation would produce
+// `.../adult-notes.html#note-pneumo#:~:text=...`: TWO fragments in one URL,
+// which no browser honours, so the superscript silently stops jumping to the
+// sentence. So the quote link is built on the page part only. The anchor is
+// not lost: `cite()` keeps it on `page`, which is what the chips and the
+// dedupe identity use. MeningoVax hit this on its one anchored citation
+// (2026-09-17); here BOTH of the most-cited refs are anchored, so it is the
+// normal case rather than an edge one.
+export function highlightUrl(url, quote) {
+  if (!url) return undefined;
+  if (!quote) return url;
+  return `${url.split('#')[0]}#:~:text=${encodeURIComponent(quote)}`;
+}
+
+// One citation occurrence: keyed, but deliberately NOT numbered. Each one
+// corresponds to a single literal "[c]" placeholder in a note or a dose
+// verdict, in order. RecCard assigns the visible [N] at render time (by order
+// of first mention within the card, deduping repeats of the same `page`), so
+// the engine never hardcodes a number and a source cannot drift to a
+// different one by being typed wrong.
+//
+//   • `page`  — the plain page URL WITH its anchor. The dedupe identity: two
+//               keys quoting different sentences of the same document share
+//               one visible [N], while each keeps its own link and hover text.
+//   • `url`   — deep-links to the quoted sentence when there is a quote.
+//   • `label` — the quoted sentence, else the ref's full title. Shown on
+//               hover, because #:~:text= does not visibly scroll in every
+//               browser.
+//
+// Refs without a `quote` yet degrade to the page URL and the title: still a
+// working, numbered link, just not scrolled to a sentence. S8/P2-8 owns the
+// full `quote` + `lastVerified` sweep of all 18 refs.
+export function cite(key) {
+  const c = REFS[key];
+  return {
+    key,
+    page: c?.url,
+    url: highlightUrl(c?.url, c?.quote),
+    label: c?.quote ?? c?.label,
+  };
 }

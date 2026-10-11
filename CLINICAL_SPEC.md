@@ -111,6 +111,64 @@ immunodeficiency, immunosuppressive drugs/radiation, HIV, solid organ transplant
 sickle cell / other hemoglobinopathies, kidney disease on maintenance dialysis,
 kidney disease with nephrotic syndrome.
 
+**The two lists above are COMPLETE. An adult-only risk condition must not put a child on
+the at-risk pathway** (added 2026-10-10, S10b — P3-9b / peds audit P0-3). **Cigarette
+smoking** and **alcohol use disorder** are adult pneumococcal indications only (§J); they
+appear in neither list here. Verified live 2026-10-10 against CDC's child & adolescent
+schedule notes, pneumococcal "Special situations", whose two risk lists are CDC's complete
+paediatric enumeration:
+
+> "Children and adolescents with cerebrospinal fluid leak; chronic heart disease; chronic
+> kidney disease (excluding maintenance dialysis and nephrotic syndrome); chronic liver
+> disease; chronic lung disease (including moderate persistent or severe persistent
+> asthma); cochlear implant; or diabetes mellitus"
+
+> "Children and adolescents on maintenance dialysis, or with immunocompromising conditions
+> such as nephrotic syndrome; congenital or acquired asplenia or splenic dysfunction;
+> congenital or acquired immunodeficiencies; diseases and conditions treated with
+> immunosuppressive drugs or radiation therapy, including malignant neoplasms, leukemias,
+> lymphomas, Hodgkin disease, and solid organ transplant; HIV infection; or sickle cell
+> disease or other hemoglobinopathies"
+
+Neither smoking nor alcohol appears: 0 matches for `/smok|alcohol|cigarette/i` across the
+fully-expanded page (60,435 characters), while "cochlear" and "diabetes" both match — so the
+absence is real, not a collapsed accordion section. immunize.org p2016 Table 3 agrees (0
+matches across the whole 2-page PDF). **AAP tiebreak:** no AAP page enumerating paediatric
+pneumococcal risk conditions was reachable, so AAP is silent and CDC stands; there is no
+sign of disagreement, since the posted July 2, 2025 schedule is the one AAP litigated to
+restore in *AAP et al. v. Kennedy*.
+
+Implemented as a single named filter, `pedsRiskIds()` in `data/riskFactors.js`, called
+inside `pedsRiskRowClass()` so the rule holds however it is called, and at the engine
+dispatch so an adult citation cannot reach a child's card either.
+
+**Made visible 2026-10-10 (S13, P3-9's UI half).** Stripping the tick silently was still a
+silent ignore: the Results summary listed the risk as a chip beside a recommendation that
+had disregarded it, with no sentence saying why. The owner held PR #20 on that basis. The
+fix is `logic/riskAgeNote.js` + `components/RiskAgeNote.jsx`, rendered on **both** surfaces
+that show the tick — the risk step and the Results header. The `adultOnly` age gate in
+`StepRisks.jsx` that used to HIDE the checkbox below 19y is removed (owner decision, option
+(b): show every risk at every age and explain the ones that do not act). The note's
+boundary is `ADULT_SCHED_MIN_M` (228), matching the engine's dispatch — **not**
+`PCV21_MIN_AGE_M` (216), which would make the note disagree with the engine at 18–19y.
+
+Its two claims are separately cited, each to the sentence that supports it, both fetched
+live 2026-10-10 and confirmed to appear exactly once on their page:
+
+> `cdcAdultRiskFactorList` — "Underlying medical conditions or other risk factors include
+> alcoholism, chronic heart/liver/lung disease, chronic renal failure, cigarette smoking"
+
+> `cdcChildSpecialSituations` — the paediatric "Special situations" non-IC list quoted
+> above, which names neither.
+
+⚠ **Re-verification method matters here.** CDC's notes pages keep their accordion bodies in
+the DOM but collapsed, so `innerText` returns ~9,200 characters with *"cochlear"* and
+*"diabetes"* both absent — a "0 matches for smoking" from that is meaningless. Use
+`textContent` (75,723 characters) and keep a positive control. **`hasAnyRisk()` and
+`hasNonIC()` are deliberately NOT narrowed** — both are reached only from the adult
+pathway, where these two risks are genuine, and `hasAnyRisk` gates whether a 19–49 adult
+gets a recommendation at all.
+
 ---
 
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
@@ -303,3 +361,19 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   an approximation, because the app does not know their birthday.
 - **A dose dated before the date of birth is refused as impossible**, with a message naming
   that rather than "below the minimum age" (P3-6).
+- **An age no living person can have is refused** (added 2026-10-10, S10b — P3-8). This is a
+  **plausibility bound, not a clinical rule** — no ACIP/CDC guidance turns on it, and no
+  source is cited for it. 120 whole years is the bound the Years box already advertised
+  (`MAX_PLAUSIBLE_AGE_YEARS`); the whole of the 120th year is allowed and the first age
+  refused is 121, because refusing a real patient is the worse error. Both entry modes ask
+  one module, `logic/ageEntry.js`, so the two doors cannot drift. It matters clinically only
+  in what it prevents: a birth year typed as `0026` instead of `2026` used to be accepted
+  silently and produced a routine **adult** recommendation for an infant.
+- **A young infant's age in weeks is counted from the birthday** (added 2026-10-10, S10b —
+  P3-5), via `fmtAgeMonths(am, { exactDays })` → `Math.floor(exactDays / 7)`. Deriving weeks
+  from the age in months (`× 4.348`) double-averages, and PCV's minimum age is stated in
+  weeks (6 weeks = `PCV_MIN_AGE_DAYS` 42): a dose at exactly 42 days printed "5 weeks" for
+  181 of 400 birth dates, beside the 6-week rule it satisfied. The band is still chosen from
+  the age in months, so this changes the number of weeks and never the unit; a patient
+  entered as Years/Months has no birthday and keeps the approximation. Applies on all three
+  surfaces that print an infant age — `StepAge`, `Results`, `RecCard`.

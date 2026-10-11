@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { fmtDate, fmtAgeMonths } from '../logic/format.js';
 import { ageAtDoseFromDate } from '../logic/validate.js';
 import { productLabel } from '../data/brands.js';
-import { todayISO } from '../logic/dateUtils.js';
+import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { Chevron } from './icons.jsx';
+// P6-3: numbered inline citations, shared with RiskAgeNote.
+import { renderNoteWithCites, cardCiteNumberer } from './citations.jsx';
 
 const STATUS_LABELS = {
   'due':              'Due',
@@ -24,7 +26,16 @@ function describeDose(dose, idx, ageMonths, today, dob) {
   // the dose against. Previously the card and the validator each subtracted
   // their own approximation and could disagree by half a month.
   const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
-  parts.push(ageAtDose != null ? `age ${fmtAgeMonths(ageAtDose)}` : 'age unknown');
+  // P3-5: this is the line the 42-day PCV dose lands on. With a date of birth
+  // and a dose date we know the real day count, so the weeks are counted
+  // rather than derived from an averaged month — a dose at exactly 42 days
+  // read "5 weeks" for 181 of 400 birth dates, beside PCV's 6-week minimum.
+  const daysAtDose = dob && dose?.date ? daysBetween(dob, dose.date) : undefined;
+  parts.push(
+    ageAtDose != null
+      ? `age ${fmtAgeMonths(ageAtDose, { exactDays: daysAtDose })}`
+      : 'age unknown',
+  );
   parts.push(dose?.product ? productLabel(dose.product) : 'product unknown');
   return parts.join(' · ');
 }
@@ -34,9 +45,9 @@ function describeDose(dose, idx, ageMonths, today, dob) {
 // a fourth status beyond MeningoVax's three — 'noncounting' — for PCV7,
 // which was validly given but per ACIP/immunize.org never counts toward the
 // series; it must not read as "Invalid".
-function DoseValidation({ result, seriesTotal }) {
+function DoseValidation({ result, seriesTotal, numberFor }) {
   if (!result) return null;
-  const { status, reasons, detail, effectiveDoseNum, doesNotCount } = result;
+  const { status, reasons, detail, reasonCites, effectiveDoseNum, doesNotCount } = result;
 
   const chipClass =
     status === 'valid' ? 'dose-val-chip dose-val-valid'
@@ -62,9 +73,23 @@ function DoseValidation({ result, seriesTotal }) {
       )}
       {showReasons && (
         <div className="dose-val-reasons">
-          {reasons.map((r, i) => (
-            <span key={i} className="dose-val-reason">{r}</span>
-          ))}
+          {/* P6-3: `reasonCites` is one entry per "[c]" across the whole
+              reasons array, in order (validate.js). Each reason takes the
+              slice matching its own marker count, so reasons the walk appends
+              afterwards — which carry no marker — never disturb the pairing. */}
+          {(() => {
+            let consumed = 0;
+            return reasons.map((r, i) => {
+              const markers = String(r).split('[c]').length - 1;
+              const cites = markers > 0 ? (reasonCites ?? []).slice(consumed, consumed + markers) : null;
+              consumed += markers;
+              return (
+                <span key={i} className="dose-val-reason">
+                  {cites && cites.length ? renderNoteWithCites(r, cites, numberFor) : r}
+                </span>
+              );
+            });
+          })()}
           {detail && <span className="dose-val-detail">{detail}</span>}
         </div>
       )}
@@ -104,7 +129,7 @@ export function doseRowsWithGroups(doses, doseValidations, primaryTotal) {
 }
 
 // A list of recorded doses with validity chips, labeled by `label`.
-function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null, today = null, seriesTotal = null, primaryTotal = null }) {
+function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null, today = null, seriesTotal = null, primaryTotal = null, numberFor }) {
   if (!doses || doses.length === 0) return null;
   return (
     <div className="rec-progress" data-testid="rec-progress">
@@ -118,7 +143,7 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null,
           ) : (
             <li key={row.index} className="rec-progress-dose-row">
               <span className="rec-progress-dose-text">{describeDose(row.dose, row.index, ageMonths, todayISO(today), dob)}</span>
-              <DoseValidation result={doseValidations[row.index]} seriesTotal={seriesTotal} />
+              <DoseValidation result={doseValidations[row.index]} seriesTotal={seriesTotal} numberFor={numberFor} />
             </li>
           )
         ))}
@@ -141,7 +166,9 @@ function timingClass(status, dueToday) {
 }
 
 export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, dob = null, today = null, otherHistory = null }) {
-  const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, citations, advisory } = rec;
+  const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, noteCites, citations, advisory } = rec;
+  // P6-3: one numbering sequence for the whole card, seeded in reading order.
+  const numberFor = cardCiteNumberer(doseValidations, otherHistory?.doseValidations, noteCites);
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
   // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due
@@ -212,6 +239,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           today={today}
           seriesTotal={seriesTotal}
           primaryTotal={primaryTotal}
+          numberFor={numberFor}
         />
 
         {otherHistory && (
@@ -222,10 +250,15 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
             ageMonths={ageMonths}
             dob={dob}
             today={today}
+            numberFor={numberFor}
           />
         )}
 
-        {note && <div className="rec-note">{note}</div>}
+        {note && (
+          <div className="rec-note">
+            {renderNoteWithCites(note, noteCites, numberFor)}
+          </div>
+        )}
 
         {citations && citations.length > 0 && (
           <div className="rec-citations">

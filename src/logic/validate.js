@@ -85,12 +85,24 @@ function fmtMinAge(minAgeM) {
   return `${minAgeM} month${minAgeM === 1 ? '' : 's'}`;
 }
 
-function valid(reasons = []) { return { status: 'valid', reasons }; }
-function unknown(reasons = []) { return { status: 'unknown', reasons }; }
-function invalid(reasons, detail) {
+// P6-3 (S13, 2026-10-10): a verdict that sets a recorded dose aside can carry
+// the sentence it rests on, shown the same way as on the cards — a numbered
+// superscript linking to that exact sentence, with the quote on hover.
+// `reasonCites` is ONE ordered list of cite() objects per literal "[c]" across
+// the whole `reasons` array, in order; RecCard slices it per reason by marker
+// count, so reasons appended later that carry no marker never disturb the
+// pairing. Omitted entirely when a verdict cites nothing, which is most of
+// them today — the wiring is P6-3c's job.
+function withCites(result, reasonCites) {
+  if (reasonCites && reasonCites.length) result.reasonCites = reasonCites;
+  return result;
+}
+function valid(reasons = [], reasonCites) { return withCites({ status: 'valid', reasons }, reasonCites); }
+function unknown(reasons = [], reasonCites) { return withCites({ status: 'unknown', reasons }, reasonCites); }
+function invalid(reasons, detail, reasonCites) {
   const r = { status: 'invalid', reasons };
   if (detail != null) r.detail = detail;
-  return r;
+  return withCites(r, reasonCites);
 }
 // P3-6: a dose dated before the patient was born is not an under-age dose, it
 // is an impossible one — almost always a mistyped year on the dose or the date
@@ -104,7 +116,7 @@ function beforeBirth(dose, label) {
 }
 
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
-function noncounting(reasons = []) { return { status: 'noncounting', reasons }; }
+function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
 // ── Validate one PCV dose ────────────────────────────────────────────────
 function validateOnePCV(dose, ageMonths, today, dob) {

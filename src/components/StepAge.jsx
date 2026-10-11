@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ageGroup as deriveGroup, dobToAgeMonths, fmtAgeMonths } from '../logic/format.js';
-import { todayISO } from '../logic/dateUtils.js';
+import { todayISO, daysBetween } from '../logic/dateUtils.js';
+import { ageEntryProblem } from '../logic/ageEntry.js';
 
 // Date of birth is the primary, recommended entry — it lets the engine compute
 // a dose's age precisely (e.g. was PPSV23 given on/after the 65th birthday, or
@@ -19,43 +20,46 @@ export default function StepAge({ ageMonths, error, onChange, today }) {
   const [years, setYears] = useState('');
   const [months, setMonths] = useState('');
   const [dob, setDob] = useState('');
+  // P3-8: what is wrong with what has been typed, shown as it is typed. Both
+  // entry modes ask the same module (ageEntry.js) so the two doors cannot
+  // drift. When there is a problem the age is CLEARED rather than passed up,
+  // which is what keeps Next shut — App's goNext already refuses a null age.
+  const [entryError, setEntryError] = useState('');
+
+  // Report an age only if the entry is plausible; otherwise report the problem
+  // and hand up nothing.
+  function commit(entry, am, dobValue) {
+    const problem = ageEntryProblem({ ...entry, today });
+    setEntryError(problem || '');
+    if (problem || am == null || !Number.isFinite(am) || am < 0) {
+      onChange({ dob: null, ageMonths: null, ageGroup: null });
+      return;
+    }
+    onChange({ dob: dobValue ?? null, ageMonths: am, ageGroup: deriveGroup(am) });
+  }
 
   function handleYearsChange(v) {
     setYears(v);
     const y = parseFloat(v);
     const m = parseFloat(months) || 0;
-    if (!isNaN(y) && y >= 0) {
-      const am = y * 12 + m;
-      onChange({ dob: null, ageMonths: am, ageGroup: deriveGroup(am) });
-    } else {
-      onChange({ dob: null, ageMonths: null, ageGroup: null });
-    }
+    const am = !isNaN(y) && y >= 0 ? y * 12 + m : null;
+    commit({ mode: 'precise', years: v, months }, am, null);
   }
 
   function handleMonthsChange(v) {
     setMonths(v);
     const y = parseFloat(years) || 0;
     const m = parseFloat(v);
-    if (!isNaN(m) && m >= 0) {
-      const am = y * 12 + m;
-      onChange({ dob: null, ageMonths: am, ageGroup: deriveGroup(am) });
-    }
+    const am = !isNaN(m) && m >= 0 ? y * 12 + m : null;
+    commit({ mode: 'precise', years, months: v }, am, null);
   }
 
   function handleDobChange(v) {
     setDob(v);
-    if (v) {
-      const am = dobToAgeMonths(v, ref);
-      if (am != null && am >= 0) {
-        // The dob travels with the age. App keeps it and re-derives the age at
-        // render, so this value is a starting point, not the stored truth.
-        onChange({ dob: v, ageMonths: am, ageGroup: deriveGroup(am) });
-      } else {
-        onChange({ dob: null, ageMonths: null, ageGroup: null });
-      }
-    } else {
-      onChange({ dob: null, ageMonths: null, ageGroup: null });
-    }
+    // The dob travels with the age. App keeps it and re-derives the age at
+    // render, so this value is a starting point, not the stored truth.
+    const am = v ? dobToAgeMonths(v, ref) : null;
+    commit({ mode: 'dob', dob: v }, am, v);
   }
 
   const derivedGroup = ageMonths != null ? deriveGroup(ageMonths) : null;
@@ -69,13 +73,13 @@ export default function StepAge({ ageMonths, error, onChange, today }) {
       <div className="step-toggle-row">
         <button
           className={`history-toggle-btn step-toggle-btn${mode === 'dob' ? ' selected' : ''}`}
-          onClick={() => { setMode('dob'); setYears(''); setMonths(''); onChange({ dob: null, ageMonths: null, ageGroup: null }); }}
+          onClick={() => { setMode('dob'); setYears(''); setMonths(''); setEntryError(''); onChange({ dob: null, ageMonths: null, ageGroup: null }); }}
         >
           Date of Birth
         </button>
         <button
           className={`history-toggle-btn step-toggle-btn${mode === 'precise' ? ' selected' : ''}`}
-          onClick={() => { setMode('precise'); setDob(''); onChange({ dob: null, ageMonths: null, ageGroup: null }); }}
+          onClick={() => { setMode('precise'); setDob(''); setEntryError(''); onChange({ dob: null, ageMonths: null, ageGroup: null }); }}
         >
           Years / Months (if DOB unknown)
         </button>
@@ -119,12 +123,22 @@ export default function StepAge({ ageMonths, error, onChange, today }) {
       {derivedGroup && (
         <div className="age-badge-row">
           <span className="age-badge">
-            {ageMonths != null ? fmtAgeMonths(ageMonths) : ''} · {derivedGroup}
+            {ageMonths != null
+              ? fmtAgeMonths(ageMonths, {
+                  // P3-5: with a date of birth on file the weeks are counted
+                  // from the birthday, not derived from an averaged month.
+                  exactDays: dob ? daysBetween(dob, ref) : undefined,
+                })
+              : ''} · {derivedGroup}
           </span>
         </div>
       )}
 
-      {error && <div className="age-error">{error}</div>}
+      {/* P3-8: the specific problem with what was typed wins over App's generic
+          "please enter a valid age", which says nothing about where to look. */}
+      {(entryError || error) && (
+        <div className="age-error">{entryError || error}</div>
+      )}
     </div>
   );
 }

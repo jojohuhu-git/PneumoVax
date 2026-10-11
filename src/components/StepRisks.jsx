@@ -1,6 +1,6 @@
 import React from 'react';
 import { RISK_FACTORS } from '../data/riskFactors.js';
-import { ADULT_SCHED_MIN_M } from '../logic/scheduleConstants.js';
+import RiskAgeNote from './RiskAgeNote.jsx';
 
 const GROUP_LABELS = {
   IC: 'Immunocompromising conditions',
@@ -11,8 +11,17 @@ const GROUP_ORDER = ['IC', 'special', 'nonIC'];
 
 export default function StepRisks({ ageMonths, riskIds, onChange }) {
   const noneSelected = riskIds.length === 0;
-  // adultOnly risks (smoking, alcohol) shown only when patient is on adult rulebook (≥19y).
-  const isAdult = (ageMonths ?? 0) >= ADULT_SCHED_MIN_M;
+  // P3-9 (S13, 2026-10-10): the `adultOnly` age gate that used to hide smoking
+  // and alcohol use disorder below 19y is GONE — owner decision, option (b):
+  // show every risk factor at every age and explain the ones that do not act,
+  // rather than withholding the checkbox.
+  //
+  // The gate was never a real guard in any case. It only decided what
+  // RENDERED; it never cleared a tick already in state, so entering 25y,
+  // ticking smoking, going Back and correcting the age to 15 carried the tick
+  // through to a 15-year-old's recommendation. That hole is closed in the
+  // engine by `pedsRiskIds()` (P3-9b, S10b), and RiskAgeNote below is what
+  // tells the clinician the tick was seen and why it did not act.
 
   function toggle(id) {
     if (riskIds.includes(id)) onChange(riskIds.filter(r => r !== id));
@@ -30,7 +39,7 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
 
       <div className="risk-list" role="group" aria-label="Risk factors">
         {GROUP_ORDER.map(group => {
-          const items = RISK_FACTORS.filter(rf => rf.group === group && (!rf.adultOnly || isAdult));
+          const items = RISK_FACTORS.filter(rf => rf.group === group);
           if (items.length === 0) return null;
           return (
             <div key={group} className="risk-group">
@@ -52,6 +61,8 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
           );
         })}
       </div>
+
+      <RiskAgeNote riskIds={riskIds} ageMonths={ageMonths} />
 
       <label className={`risk-none${noneSelected ? ' selected' : ''}`}
         onClick={clearAll} role="button" tabIndex={0}

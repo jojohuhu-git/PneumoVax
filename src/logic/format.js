@@ -6,17 +6,47 @@ import { calendarMonthsBetween, todayISO } from './dateUtils.js';
  * Format ageMonths using clinical immunization units.
  *   0 → "Birth", weeks for ≤2 months, months for 2–23 months,
  *   years (+months) for ≥24 months. Never "72 months" → "6 years".
+ *
+ * P3-5 (S10b, 2026-10-10): pass `exactDays` — the real number of days between
+ * the birthday and the date being described — whenever the caller has a date of
+ * birth and a real date. Weeks are then COUNTED (exactDays / 7) instead of
+ * derived from the age in months via a second averaged constant.
+ *
+ * Why it matters: PCV's minimum age is stated in weeks ("minimum age: 6 weeks")
+ * and PCV_MIN_AGE_DAYS is 42, but `am * 4.348` double-averages — calendar
+ * months carry a denominator that is the length of the month the date falls in,
+ * so the same 42 days came out as 5.94 weeks in a 30-day month and floored to
+ * "5 weeks". Measured across 400 consecutive birth dates, 181 of them printed a
+ * 42-day dose as "5 weeks", beside a rule written in 6. The engine graded those
+ * doses correctly (validate.js works in exact days); only the display lied.
+ *
+ * `exactDays` is advisory: when it is absent or unusable — a patient entered as
+ * Years/Months has no birthday to count from — the averaged path is used, as
+ * before. The BAND is always chosen from `am`, so passing exactDays never moves
+ * an age between weeks, months and years; it only makes the weeks count exact.
+ *
+ * @param {number|null} am           age in months
+ * @param {object}  [opts]
+ * @param {number}  [opts.exactDays] real days from the birthday, when known
  */
-export function fmtAgeMonths(am) {
+export function fmtAgeMonths(am, { exactDays } = {}) {
   if (am == null) return '';
   // P3-6 (S10): a negative age used to fall into the "Birth" branch below, so
   // -7 months and 0 months printed the same word. A dose dated before the
   // patient was born then read "Given at ~birth" — an ordinary-looking newborn
   // dose. A value that cannot exist must not be mistakable for a patient.
   if (am < 0) return 'Before birth';
-  if (am < 0.25) return 'Birth';
+  const haveDays = typeof exactDays === 'number' && Number.isFinite(exactDays);
+  if (haveDays && exactDays < 0) return 'Before birth';
+  // P3-5: the "Birth" cut was a second averaged constant of the same kind —
+  // am < 0.25 months is about 7.6 days, so a genuine one-week-old printed
+  // "Birth". When the days are known, the cut is simply the first whole week.
+  if (haveDays ? exactDays < 7 : am < 0.25) return 'Birth';
   if (am <= 2) {
-    const wks = floorAge(am * 4.348);          // 1 month ≈ 4.348 weeks
+    // Count the weeks when we can; fall back to the average when we cannot.
+    const wks = haveDays
+      ? Math.floor(exactDays / 7)              // completed weeks, exactly
+      : floorAge(am * 4.348);                  // 1 month ≈ 4.348 weeks
     if (wks < 1) return 'Birth';
     return `${wks} week${wks === 1 ? '' : 's'}`;
   }

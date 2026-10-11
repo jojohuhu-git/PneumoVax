@@ -6,8 +6,9 @@ import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
+import RiskAgeNote from './RiskAgeNote.jsx';
 import { Chevron } from './icons.jsx';
-import { todayISO } from '../logic/dateUtils.js';
+import { todayISO, daysBetween } from '../logic/dateUtils.js';
 
 export default function Results({ state, onReset, onChange, onBack, today }) {
   const { ageMonths, dob, riskIds, pcvDoses, ppsv23Doses } = state;
@@ -166,12 +167,23 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
         <div className="results-title">Pneumococcal Recommendation</div>
         <div className="results-meta">
           <div className="meta-chips">
-            <span className="meta-chip meta-age">{fmtAgeMonths(ageMonths)}</span>
+            <span className="meta-chip meta-age">
+              {/* P3-5: exact weeks when a date of birth is on file. */}
+              {fmtAgeMonths(ageMonths, {
+                // maxDate, not the raw prop: it is the one resolved clock read.
+                exactDays: dob ? daysBetween(dob, maxDate) : undefined,
+              })}
+            </span>
             {group && <span className="meta-chip meta-group">{group}</span>}
             {riskLabels.length > 0
               ? riskLabels.map((l, i) => <span key={i} className="meta-chip meta-risk">{l}</span>)
               : <span className="meta-chip meta-norisk">No risk factors</span>}
           </div>
+
+          {/* P3-9: the chips above list every tick, including an adult-only
+              one that the engine disregarded for a child. This is the sentence
+              that says so — the surface the owner's hold on PR #20 was about. */}
+          <RiskAgeNote riskIds={riskIds} ageMonths={ageMonths} />
           <div className="meta-actions">
             {onChange && (
               <button type="button" className="age-edit-btn"

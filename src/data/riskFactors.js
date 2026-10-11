@@ -239,11 +239,64 @@ export function adultPpsvShorterMinimumApplies(riskIds = []) {
   return hasIC(riskIds) || hasSpecial(riskIds);
 }
 
+/**
+ * The risk ids that mean anything on the PAEDIATRIC pathway (<19y) — i.e. the
+ * selection with the `adultOnly` conditions removed.
+ *
+ * P3-9b / peds audit P0-3 (S10b, 2026-10-10). `smoking` and `alcoholism` are
+ * `class: 'nonIC'` because that is what they are FOR ADULTS, and the adult
+ * pathway depends on it. But CDC's paediatric risk lists do not contain them,
+ * so on a child they must mean nothing at all. Before this filter,
+ * pedsRiskRowClass returned 'nonIC' for any nonIC tick, and a 15-year-old
+ * whose only tick was "Cigarette smoking" was given the same three-option
+ * at-risk catch-up regimen as a 15-year-old with diabetes.
+ *
+ * Sources, fetched live 2026-10-10 — CDC's complete paediatric enumeration,
+ * verbatim from the child & adolescent schedule notes, "Pneumococcal
+ * vaccination / Special situations":
+ *
+ *   non-IC: "Children and adolescents with cerebrospinal fluid leak; chronic
+ *     heart disease; chronic kidney disease (excluding maintenance dialysis and
+ *     nephrotic syndrome); chronic liver disease; chronic lung disease
+ *     (including moderate persistent or severe persistent asthma); cochlear
+ *     implant; or diabetes mellitus"
+ *   IC: "Children and adolescents on maintenance dialysis, or with
+ *     immunocompromising conditions such as nephrotic syndrome; congenital or
+ *     acquired asplenia or splenic dysfunction; congenital or acquired
+ *     immunodeficiencies; diseases and conditions treated with
+ *     immunosuppressive drugs or radiation therapy, including malignant
+ *     neoplasms, leukemias, lymphomas, Hodgkin disease, and solid organ
+ *     transplant; HIV infection; or sickle cell disease or other
+ *     hemoglobinopathies"
+ *
+ * Neither smoking nor alcohol appears in either list (0 matches across the
+ * fully-expanded page), and immunize.org p2016 Table 3 agrees. CDC's ADULT
+ * notes do list them: "Alcoholism, chronic heart/liver/lung disease, cigarette
+ * smoking, or diabetes mellitus…". So the filter is scoped to paediatrics.
+ *
+ * WHY THE FILTER IS HERE AND NOT IN `hasAnyRisk`. hasAnyRisk and hasNonIC are
+ * reached only from pcvAdult, where these two risks are genuine. hasAnyRisk in
+ * particular gates `if (!isOlderAdult && !anyRisk)` — the test that decides
+ * whether a 19–49 adult gets a recommendation at all. Narrowing those helpers
+ * to fix the paediatric row would have silently withdrawn the recommendation
+ * from every adult smoker, which is the mirror image of the bug being fixed.
+ *
+ * The `adultOnly` flag itself stays on the risk entries: P3-9's RiskAgeNote is
+ * what will tell the clinician the tick was seen and why it did not act on a
+ * child, so the data must keep knowing which risks are adult ones.
+ */
+export function pedsRiskIds(riskIds = []) {
+  return riskIds.filter((id) => !RISK_BY_ID[id]?.adultOnly);
+}
+
 // The peds at-risk ROW class (p2016 Table 4): IC vs non-IC.
 // Cochlear/CSF are listed under non-IC in p2016 Table 3 → 'nonIC' for the row.
 // IC precedence: any true IC condition → 'IC'.
+// adultOnly risks are stripped first (P3-9b) — filtering INSIDE this helper, so
+// the rule holds however it is called, rather than at one call site.
 export function pedsRiskRowClass(riskIds = []) {
-  if (hasIC(riskIds)) return 'IC';
-  if (hasNonIC(riskIds) || hasSpecial(riskIds)) return 'nonIC';
+  const peds = pedsRiskIds(riskIds);
+  if (hasIC(peds)) return 'IC';
+  if (hasNonIC(peds) || hasSpecial(peds)) return 'nonIC';
   return null;
 }
