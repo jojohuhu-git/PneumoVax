@@ -1,3 +1,10 @@
+> # ⛔ SUPERSEDED — do not resume from this file.
+> **Superseded 2026-10-11 by [`handoff-2026-10-11-s13-phase-6b-done.md`](handoff-2026-10-11-s13-phase-6b-done.md).**
+>
+> Everything below about **PR #20 being held is now HISTORY**. The owner released the hold on
+> 2026-10-11 once `P3-9`'s `RiskAgeNote` landed in it, and **PR #20 is MERGED** (`6e9dbe5`).
+> Phase 3 is closed, and S13/Phase 6b is done too (PR #21). Read the newer handoff instead.
+
 # PneumoVax — Handoff after S10b, the rest of Phase 3 (2026-10-10)
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
