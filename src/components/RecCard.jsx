@@ -152,6 +152,58 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null,
   );
 }
 
+// P6-4 (S13, 2026-10-10): the note is `{ lead, detail }` — `lead` is what to
+// do for THIS patient, `detail` sits behind a "Why this" disclosure.
+//
+// Measured before the change, across the 31 distinct notes the engine can
+// produce: median 188 characters, longest 459, 15 of 31 over 200. That is an
+// ACIP schedule row recited to a reader who needed one line.
+//
+// `noteCites` stays ONE ordered list across both halves (the contract rec()
+// documents): the lead's "[c]" markers consume the first entries and the
+// detail's take the rest. Both halves share the card's `numberFor`, so a
+// source keeps the same number whether the disclosure is open or shut — and a
+// source quoted in both halves shows one number, not two.
+//
+// A note with no `detail` renders no toggle: most short notes stay one line.
+// A plain string note is treated as all lead, so an unsplit note still works.
+function RecNote({ note, noteCites, numberFor }) {
+  const [open, setOpen] = useState(false);
+  if (!note) return null;
+  const lead = typeof note === 'string' ? note : note.lead;
+  const detail = typeof note === 'string' ? null : note.detail;
+  if (!lead && !detail) return null;
+
+  const leadCiteCount = String(lead ?? '').split('[c]').length - 1;
+  const cites = noteCites ?? [];
+
+  return (
+    <div className="rec-note">
+      <div className="rec-note-lead">
+        {renderNoteWithCites(lead, cites.slice(0, leadCiteCount), numberFor)}
+      </div>
+      {detail && (
+        <>
+          <button
+            type="button"
+            className="rec-note-toggle"
+            data-testid="rec-note-toggle"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+          >
+            Why this<Chevron open={open} />
+          </button>
+          {open && (
+            <div className="rec-note-detail">
+              {renderNoteWithCites(detail, cites.slice(leadCiteCount), numberFor)}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // PD2/D9: the card head is a full-width bar tinted by TIMING only — is this
 // due today, does it need catch-up, or is it a shared (optional) decision, or
 // neither urgent right now. The body below stays plain white. The clinical
@@ -254,11 +306,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           />
         )}
 
-        {note && (
-          <div className="rec-note">
-            {renderNoteWithCites(note, noteCites, numberFor)}
-          </div>
-        )}
+        <RecNote note={note} noteCites={noteCites} numberFor={numberFor} />
 
         {citations && citations.length > 0 && (
           <div className="rec-citations">

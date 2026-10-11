@@ -1,6 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 
+// P6-4 (S13, 2026-10-10): a note is now `{ lead, detail }` — `lead` is what to
+// do for THIS patient, `detail` sits behind a "Why this" disclosure. Short
+// notes that were never split are still plain strings.
+//
+// `noteLead` asserts against the half the clinician sees WITHOUT clicking.
+// Use it wherever the claim is something they must act on; `noteText` (both
+// halves) is for supporting context that may legitimately be disclosed.
+const noteLead = (r) => (typeof r.note === 'string' ? r.note : (r.note?.lead ?? ''));
+const noteText = (r) => (typeof r.note === 'string'
+  ? r.note
+  : [r.note?.lead, r.note?.detail].filter(Boolean).join(' '));
+
 const TODAY = '2026-06-06';
 function run(input) { return recommend({ today: TODAY, ...input }); }
 const first = (r) => r.recs[0];
@@ -72,7 +84,7 @@ describe('§B Healthy children 24mo–18y', () => {
     // (Contrast: a PCV20 DATED in infancy does not complete — see the P09 test.)
     const r = run({ ageMonths: 30, riskIds: [], pcvDoses: [{ product: 'PCV20' }] });
     expect(pcv(r).status).toBe('complete');
-    expect(pcv(r).note).toMatch(/PCV20|PPSV23/i);
+    expect(noteText(pcv(r))).toMatch(/PCV20|PPSV23/i);
   });
 
   it('30mo with a PCV20 DATED at 12mo → NOT complete, 1 more dose due (P09)', () => {
@@ -136,7 +148,7 @@ describe('§D At-risk children — Table 4 rows', () => {
       { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' },
     ] });
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
-    expect(b.note).toMatch(/5 years/);
+    expect(noteLead(b)).toMatch(/5 years/);
   });
 
   it('Row 5 (IC): PPSV23 already given → PCV20 or 2nd PPSV23 ≥5y', () => {
@@ -169,13 +181,13 @@ describe('§D At-risk children — Table 4 rows', () => {
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
     expect(a.brands).toEqual(['PCV20 (Prevnar 20)']);
     expect(b.vaccine).toBe('PPSV23');
-    expect(b.note).not.toMatch(/5 years/); // non-IC has no 5y step
+    expect(noteText(b)).not.toMatch(/5 years/); // non-IC has no 5y step
   });
 
   it('Row 9 (IC): 10yo asplenia, PCV13 only → B has the 5y PCV20/2nd-PPSV23 step', () => {
     const r = run({ ageMonths: 120, riskIds: ['asplenia'], pcvDoses: [{ product: 'PCV13' }] });
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
-    expect(b.note).toMatch(/5 years/);
+    expect(noteLead(b)).toMatch(/5 years/);
   });
 });
 
@@ -192,10 +204,10 @@ describe('§E HSCT children <19y (immunize.org p3086 Table 5)', () => {
     expect(a.dueToday).toBe(false);
     expect(a.earliestNextDate).toBeNull();
     expect(a.doseLabel).toMatch(/4 doses of PCV20/);
-    expect(a.note).toMatch(/3–6 months after HSCT/);
+    expect(noteText(a)).toMatch(/3–6 months after HSCT/);
     // P1-C (2026-09-14): GVHD is unmodeled in all three apps per owner
     // decision — no checkbox, no conditional text anywhere.
-    expect(a.note).not.toMatch(/GVHD/);
+    expect(noteText(a)).not.toMatch(/GVHD/);
   });
 
   it('child HSCT cites immunize.org Table 5 (SOLE peds-HSCT source), not CDC child notes', () => {
@@ -222,10 +234,10 @@ describe('§F HSCT adults ≥19y (ASCO 2024, matches pediatric row)', () => {
     const a = r.hsct.recs[0];
     expect(a.advisory).toBe(true);
     expect(a.doseLabel).toMatch(/4 doses of PCV20/);
-    expect(a.note).toMatch(/3–6 months after HSCT/);
-    expect(a.note).not.toMatch(/PCV20 ×3/);
-    expect(a.note).not.toMatch(/titer/i);
-    expect(a.note).not.toMatch(/NO PPSV23/i);
+    expect(noteText(a)).toMatch(/3–6 months after HSCT/);
+    expect(noteText(a)).not.toMatch(/PCV20 ×3/);
+    expect(noteText(a)).not.toMatch(/titer/i);
+    expect(noteText(a)).not.toMatch(/NO PPSV23/i);
   });
 
   it('adult HSCT cites ASCO 2024, not Fred Hutch', () => {
@@ -250,29 +262,29 @@ describe('§G Adults 19–49 with risk', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [] });
     expect(pcv(r).status).toBe('risk-based');
     expect(pcv(r).brands).toContain('PCV21 (Capvaxive)');
-    expect(pcv(r).note).toMatch(/1 year/);
+    expect(noteText(pcv(r))).toMatch(/1 year/);
   });
 
   it('none/unknown + IC → PCV15→PPSV23 ≥8 weeks note', () => {
     const r = run({ ageMonths: 360, riskIds: ['hiv'], pcvDoses: [] });
-    expect(pcv(r).note).toMatch(/8 weeks/);
+    expect(noteText(pcv(r))).toMatch(/8 weeks/);
   });
 
   it('cochlear implant uses the IC (≥8 week) interval', () => {
     const r = run({ ageMonths: 360, riskIds: ['cochlear_implant'], pcvDoses: [] });
-    expect(pcv(r).note).toMatch(/8 weeks/);
+    expect(noteText(pcv(r))).toMatch(/8 weeks/);
   });
 
   it('CSF leak uses the IC (≥8 week) interval', () => {
     const r = run({ ageMonths: 360, riskIds: ['csf_leak'], pcvDoses: [] });
-    expect(pcv(r).note).toMatch(/8 weeks/);
+    expect(noteText(pcv(r))).toMatch(/8 weeks/);
   });
 
   it('PCV15 only (non-IC) → PPSV23 due ≥1y, INCOMPLETE', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
     expect(ppsv(r).vaccine).toBe('PPSV23');
     expect(ppsv(r).minIntervalMonths).toBe(12);
-    expect(ppsv(r).note).toMatch(/INCOMPLETE/);
+    expect(noteText(ppsv(r))).toMatch(/INCOMPLETE/);
   });
 
   // A-P1-1 (owner decision 2026-10-10): >=1 year is the recommendation for
@@ -283,7 +295,7 @@ describe('§G Adults 19–49 with risk', () => {
     const r = run({ ageMonths: 360, riskIds: ['hiv'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
     expect(ppsv(r).minIntervalMonths).toBe(12);
     expect(ppsv(r).minIntervalDays).toBe(null);
-    expect(ppsv(r).note).toMatch(/8 weeks may be considered/);
+    expect(noteLead(ppsv(r))).toMatch(/8 weeks may be considered/);
   });
 
   it('PPSV23 only → PCV ≥1y after PPSV23', () => {
@@ -388,7 +400,7 @@ describe('§H Adults ≥50 routine', () => {
   it('55yo PCV15 only → PPSV23 ≥1y INCOMPLETE', () => {
     const r = run({ ageMonths: 660, riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2024-01-01' }] });
     expect(ppsv(r).vaccine).toBe('PPSV23');
-    expect(ppsv(r).note).toMatch(/INCOMPLETE/);
+    expect(noteText(ppsv(r))).toMatch(/INCOMPLETE/);
   });
 
   it('55yo PCV20 → complete', () => {
@@ -410,7 +422,7 @@ describe('§I PCV21 eligibility + geo note', () => {
     const r = run({ ageMonths: 660, riskIds: [], pcvDoses: [] });
     expect(pcv(r).brands).toContain('PCV21 (Capvaxive)');
     expect(r.pcv21Geo).toBeTruthy();
-    expect(r.pcv21Geo.note).toMatch(/serotype 4/);
+    expect(noteText(r.pcv21Geo)).toMatch(/serotype 4/);
   });
 
   it('child is never offered PCV21 (adults only)', () => {
@@ -447,13 +459,13 @@ describe('§K Cross-cutting rules', () => {
 
   it('multi-condition: IC + non-IC → IC precedence (8-week interval)', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes', 'hiv'], pcvDoses: [] });
-    expect(pcv(r).note).toMatch(/8 weeks/);
+    expect(noteText(pcv(r))).toMatch(/8 weeks/);
   });
 
   it('multi-condition peds: IC + non-IC → IC row class', () => {
     const r = run({ ageMonths: 120, riskIds: ['diabetes', 'hiv'], pcvDoses: [{ product: 'PCV13' }] });
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
-    expect(b.note).toMatch(/5 years/); // IC has the 5y step
+    expect(noteLead(b)).toMatch(/5 years/); // IC has the 5y step
   });
 
   it('PCV21 recorded for a child is invalid (does not count)', () => {

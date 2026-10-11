@@ -30,6 +30,18 @@
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 
+// P6-4 (S13, 2026-10-10): a note is now `{ lead, detail }` — `lead` is what to
+// do for THIS patient, `detail` sits behind a "Why this" disclosure. Short
+// notes that were never split are still plain strings.
+//
+// `noteLead` asserts against the half the clinician sees WITHOUT clicking.
+// Use it wherever the claim is something they must act on; `noteText` (both
+// halves) is for supporting context that may legitimately be disclosed.
+const noteLead = (r) => (typeof r.note === 'string' ? r.note : (r.note?.lead ?? ''));
+const noteText = (r) => (typeof r.note === 'string'
+  ? r.note
+  : [r.note?.lead, r.note?.detail].filter(Boolean).join(' '));
+
 const TODAY = '2026-10-10';
 const PCV15_ON = '2026-10-10';
 
@@ -69,21 +81,21 @@ describe('A-P1-1 — the 8-week minimum is NAMED, never silently substituted', (
   it('is offered to an immunocompromised adult, at either age', () => {
     for (const who of [SIXTY, THIRTY]) {
       const r = afterPcv15({ ...who, riskIds: ['hiv'] });
-      expect(r.note).toMatch(/8 weeks/);
-      expect(r.note).toMatch(/minimum/i);
-      expect(r.note).toMatch(/immunocompromising|cochlear|cerebrospinal/i);
+      expect(noteLead(r)).toMatch(/8 weeks/);
+      expect(noteLead(r)).toMatch(/minimum/i);
+      expect(noteLead(r)).toMatch(/immunocompromising|cochlear|cerebrospinal/i);
     }
   });
 
   it('is offered for cochlear implant and CSF leak', () => {
     for (const risk of ['cochlear_implant', 'csf_leak']) {
-      expect(afterPcv15({ ...SIXTY, riskIds: [risk] }).note).toMatch(/8 weeks/);
+      expect(noteLead(afterPcv15({ ...SIXTY, riskIds: [risk] }))).toMatch(/8 weeks/);
     }
   });
 
   it('is NOT offered for a chronic, non-immunocompromising condition', () => {
     const r = afterPcv15({ ...SIXTY, riskIds: ['diabetes'] });
-    expect(r.note).not.toMatch(/8 weeks/);
+    expect(noteLead(r)).not.toMatch(/8 weeks/);
   });
 });
 
@@ -92,7 +104,7 @@ describe('A-P1-1 — the app no longer contradicts itself one step apart', () =>
     const naive = recommend({
       ...SIXTY, riskIds: ['hiv'], today: TODAY, pcvDoses: [], ppsv23Doses: [],
     }).recs[0];
-    expect(naive.note).toMatch(/PPSV23 ≥1 year later|PPSV23 at least 1 year/i);
+    expect(noteLead(naive)).toMatch(/PPSV23 ≥1 year later|PPSV23 at least 1 year/i);
 
     const after = afterPcv15({ ...SIXTY, riskIds: ['hiv'] });
     expect(after.doseLabel).toMatch(/1 year/);

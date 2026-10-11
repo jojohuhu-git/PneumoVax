@@ -32,9 +32,17 @@ src/
                          note, standard rec cards. Inline "Adjust age" + "Recorded doses ▾"
                          editors. "← Edit history" back button at bottom.
     RecCard.jsx          Single rec card (status shading, brands, note, citations).
+    citations.jsx        [c] -> numbered superscript links. Shared by RecCard and
+                         RiskAgeNote; numbering is per-card, in reading order.
+    RiskAgeNote.jsx      Quiet cited note: an adult-only risk ticked on a child was
+                         seen, and does not change the schedule (P3-9). Renders on
+                         BOTH StepRisks and the Results header.
     Disclaimer.jsx       Clinical disclaimer footer.
   logic/
     recommend.js         THE engine. recommend(input) → { recs[], hsct, pcv21Geo, perDose, meta }.
+    riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
+                         and the cited sentence that does it. Keyed to
+                         ADULT_SCHED_MIN_M (228), matching the engine's dispatch.
     validate.js          analyzeHistory(vaccine, doses, ageMonths, today) → { perDose, effective }.
     dateUtils.js         todayISO, addDays, daysBetween, intervalElapsed, DAYS.
                          ⚠ Mirror-synced with MeningoVax dateUtils.js — keep in sync.
@@ -58,12 +66,39 @@ HANDOFF.md               Author-review checklist, source-vs-p2016 reconciliation
 - `recs` — array of rec objects (PCV and/or PPSV23 streams; Option A/B pairs for peds at-risk rows)
 - `hsct` — `{ title, coordinateFlag, recs[] }` advisory block, or `null`
 - `pcv21Geo` — `{ note, citations }` serotype-4 advisory, or `null`
-- `perDose` — `{ pcv:[...], ppsv23:[...] }` per-dose validation results
+- `perDose` — `{ pcv:[...], ppsv23:[...] }` per-dose validation results. **Always arrays, on every path including the hard stop** (P6-5) — `Results.jsx` renders its dose chips from these rather than walking the history a second time.
 - `meta` — `{ ageMonths, today, riskIds, pcvCount, ppsv23Count }`
 
 **Status values:** `due | catchup | risk-based | shared-decision | complete | not-indicated | deferred`
 
 **Design rule:** All clinical logic in the engine. Product validity, PCV15→PPSV23 vs PCV20-complete distinction, prior-vaccine matrix, PCV7-not-counted — computed in `recommend.js`. UI consumes pre-built recs.
+
+### Note shape and citations (S13, 2026-10-10)
+
+A rec's `note` is **`{ lead, detail }`** (a plain string is still accepted and read as
+all lead). `lead` is what to do for THIS patient and is always visible; `detail` sits
+behind RecCard's "Why this" disclosure. A note with no `detail` renders no toggle.
+
+**What belongs in which half:** `lead` carries everything the clinician must *do* —
+including future steps such as the 8-week PPSV23 minimum and an immunocompromised
+child's 5-year second dose. `detail` carries which CDC row this is, and why. Moving an
+action into `detail` hides it behind a click; the A-P1-1 tests assert specifically
+against `lead` to stop that happening.
+
+`noteCites` is **one ordered list of `cite()` objects per literal `[c]` in the note**,
+across BOTH halves — the lead's markers consume the first entries and the detail's take
+the rest. Numbers are assigned at render time by `components/citations.jsx`, never in
+the engine, deduped by source page, once per card. `validate.js` verdicts use the same
+contract via `reasonCites`.
+
+`data/refs.js` exports `cite(key)` → `{ key, page, url, label }` and
+`highlightUrl(url, quote)`. ⚠ A quote link is built on the page part ONLY: CDC's child
+and adult notes URLs end in `#note-pneumo`, and two `#` fragments in one URL stop the
+browser scrolling to the sentence.
+
+A sweep test (`regression-p6-3b-note-cite-parity`) walks 9,024 notes and 7,452 dose
+verdicts and fails if markers and citations ever stop matching one-for-one, or if a
+citation names a ref that does not exist.
 
 ## Schedule Boundary Constants (`scheduleConstants.js`)
 
