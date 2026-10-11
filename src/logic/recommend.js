@@ -23,7 +23,9 @@ import {
   hasExclusion,
   hasIC,
   hasAnyRisk,
-  adultPpsvIntervalClass,
+  hasSpecial,
+  adultPpsvShorterMinimumApplies,
+  ADULT_PPSV23_INTERVAL_MONTHS,
   pedsRiskRowClass,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
@@ -591,10 +593,16 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
 function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   const isOlderAdult = am >= M.y50;
   const anyRisk = hasAnyRisk(riskIds);
-  const intervalClass = adultPpsvIntervalClass(riskIds); // 'short'(8wk) | 'long'(1y)
-  const ppsvIntervalDays = intervalClass === 'short' ? WK8 : null;
-  const ppsvIntervalMonths = intervalClass === 'short' ? null : MO12;
-  const ppsvIntervalLabel = intervalClass === 'short' ? '8 weeks' : '1 year';
+  // A-P1-1 (owner decision 2026-10-10): >=1 year is the recommendation for
+  // EVERY adult. The 8-week minimum is named as an option for IC / cochlear
+  // implant / CSF leak rather than substituted for the recommendation.
+  const shorterMinimumApplies = adultPpsvShorterMinimumApplies(riskIds);
+  const ppsvIntervalDays = null;
+  const ppsvIntervalMonths = ADULT_PPSV23_INTERVAL_MONTHS;
+  const ppsvIntervalLabel = '1 year';
+  const shorterMinimumNote = shorterMinimumApplies
+    ? ' A minimum interval of 8 weeks may be considered for an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak.'
+    : '';
   const refs = collectRefs(riskIds, [
     'cdcAdultPneumo', 'cdcAdultTimingJobAid', isOlderAdult ? 'mmwr7401a1' : 'mmwr7203a1',
   ]);
@@ -643,7 +651,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       dueToday, earliestNextDate,
       minIntervalDays: ppsvIntervalDays, minIntervalMonths: ppsvIntervalMonths,
       brands: ['PPSV23 (Pneumovax 23)'],
-      note: `PCV15 was given but PPSV23 is still pending — the series is INCOMPLETE. Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose (${intervalClass === 'short' ? 'immunocompromising condition, cochlear implant, or CSF leak → ≥8 weeks' : 'chronic condition → ≥1 year'}). If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.`,
+      note: `PCV15 was given but PPSV23 is still pending — the series is INCOMPLETE. Give PPSV23 ≥1 year after the PCV15 dose; the pneumococcal series is then complete.${shorterMinimumNote} If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.`,
       refs,
     })];
   }
@@ -726,7 +734,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       })];
     }
     // chronic-only adult <50: nothing now, review at 50.
-    if (!isOlderAdult && !hasIC(riskIds) && !require8wk(riskIds)) {
+    // Not the interval question. CDC's 19–49 special-situations rows split on
+    // "cochlear implant, cerebrospinal fluid leak, or an immunocompromising
+    // condition" (→ ≥5 years) versus chronic conditions (→ review at 50). Said
+    // directly here rather than borrowed from the interval predicate, which is
+    // how these two unrelated rules came to share one function (A-P1-1).
+    if (!isOlderAdult && !hasIC(riskIds) && !hasSpecial(riskIds)) {
       return [rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: 'No dose now — review at age 50',
@@ -753,15 +766,13 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     brands: adultBrands,
     note: isOlderAdult
       ? 'Routine pneumococcal vaccination for adults ≥50 with no (or unknown, or PCV7-only) history: 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥1 year later. PCV20 and PCV21 each complete the series alone.'
-      : `Adult 19–49 with a qualifying risk condition and no (or unknown, or PCV7-only) pneumococcal history: 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later (${intervalClass === 'short' ? 'immunocompromising / cochlear implant / CSF leak' : 'chronic condition'}). PCV20 and PCV21 each complete the series alone.`,
+      : `Adult 19–49 with a qualifying risk condition and no (or unknown, or PCV7-only) pneumococcal history: 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥1 year later; the pneumococcal series is then complete.${shorterMinimumNote} PCV20 and PCV21 each complete the series alone.`,
     refs,
   })];
 }
 
 // Whether the patient needs the ≥8wk (IC) interval (IC or cochlear/CSF).
-function require8wk(riskIds) {
-  return adultPpsvIntervalClass(riskIds) === 'short';
-}
+
 
 // Most recent dose date across PCV + PPSV23 effective lists.
 function lastDoseDate(pcv, ppsv) {

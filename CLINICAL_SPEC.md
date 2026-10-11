@@ -186,7 +186,7 @@ Prior-vaccine branches:
 ## §H — Adults ≥50 y (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`; routine lowered 65→50 eff. 2024-10-23)
 
 Routine for ALL adults ≥50 regardless of risk.
-- **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 ≥1y.
+- **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 **≥1 year** (8-week minimum may be *considered* for IC / cochlear implant / CSF leak — named, never substituted; A-P1-1).
 - **PPSV23 only:** PCV15/20/21 ≥1y after PPSV23 (PCV15 → no further PPSV23).
 - **PCV13 only:** PCV20 or PCV21 ≥1y → complete.
 - **PCV13 + PPSV23, and NO PPSV23 was received at ≥65:** PCV20 or PCV21 **≥5y** after the
@@ -195,7 +195,7 @@ Routine for ALL adults ≥50 regardless of risk.
   decision-making" for both rows, which is the documentation half of A-P0-1.)
 - **PCV13 + PPSV23, AND PPSV23 was received at ≥65:** **shared clinical decision-making** —
   PCV20/PCV21 ≥5y, or nothing.
-- **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 ≥1y (or substitute PCV20/21).
+- **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 **≥1 year** (or substitute PCV20/21). Series complete once given.
 - **PCV15 & PPSV23, or PCV20, or PCV21 (any age):** complete.
 
 > Implementation note on `PCV13+PPSV23 at ≥65` (rewritten 2026-10-10, S10 — A-P0-1).
@@ -261,6 +261,24 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   **IC precedence over non-IC** (the ≥8wk interval and the IC catch-up rows win).
 - **A series containing PCV20 (or PCV21 in adults) ⇒ no PPSV23.**
 - **PCV15 (without a later PCV20/21) ⇒ a PPSV23 follow-up is required to be complete.**
+- **Adult PCV15→PPSV23 interval = ≥1 year, at EVERY adult age** (owner decision 2026-10-10,
+  A-P1-1). CDC Adult Schedule Notes, fetched live 2026-10-10 — the sentence appears twice on
+  that page, identically, under "Age 50 years or older" **and** under "Age 19–49 years with
+  certain underlying medical conditions":
+  > "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use
+  > minimum interval of 8 weeks for adults with an immunocompromising condition, cochlear
+  > implant, or cerebrospinal fluid leak)."
+
+  So ≥1 year is the **recommendation** and 8 weeks a minimum that may be **considered** for
+  IC / cochlear implant / CSF leak, at any adult age. The app prints the year and **names** the
+  8-week option; it never substitutes one for the other. The series is complete once the
+  PPSV23 is given. (CDC's Timing Job Aid prints a flat "8 weeks" on its 19–49 pages — a
+  per-page simplification; the schedule notes govern.) Single source:
+  `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()`.
+- **The 19–49 PCV13+PPSV23 row split is a SEPARATE rule** from the interval above, even though
+  both name IC / cochlear implant / CSF leak. Cochlear implant, CSF leak or an
+  immunocompromising condition → PCV20/PCV21 **≥5 years**; chronic conditions only → no dose
+  now, review at 50. One predicate used to serve both and must not again (A-P1-1).
 - **CDC's 4-day grace** (added 2026-10-10, S10 — peds audit P1-1). CDC Child and Adult
   Schedule Notes, "Additional Information", both fetched live 2026-10-10:
   > "Vaccine doses administered ≤4 days before the minimum age or interval are considered

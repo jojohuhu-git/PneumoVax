@@ -275,9 +275,15 @@ describe('§G Adults 19–49 with risk', () => {
     expect(ppsv(r).note).toMatch(/INCOMPLETE/);
   });
 
-  it('PCV15 only (IC) → PPSV23 ≥8 weeks', () => {
+  // A-P1-1 (owner decision 2026-10-10): >=1 year is the recommendation for
+  // EVERY adult, with 8 weeks NAMED as a minimum that may be considered for an
+  // immunocompromising condition, cochlear implant or CSF leak. This test
+  // previously asserted the 8-week minimum as the recommendation itself.
+  it('PCV15 only (IC) → PPSV23 ≥1 year, with the 8-week minimum offered', () => {
     const r = run({ ageMonths: 360, riskIds: ['hiv'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
-    expect(ppsv(r).minIntervalDays).toBe(56);
+    expect(ppsv(r).minIntervalMonths).toBe(12);
+    expect(ppsv(r).minIntervalDays).toBe(null);
+    expect(ppsv(r).note).toMatch(/8 weeks may be considered/);
   });
 
   it('PPSV23 only → PCV ≥1y after PPSV23', () => {

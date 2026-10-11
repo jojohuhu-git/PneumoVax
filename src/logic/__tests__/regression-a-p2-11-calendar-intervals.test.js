@@ -85,13 +85,17 @@ describe('A-P2-11 — the 5-year gap after PCV13 + PPSV23', () => {
 
 describe('A-P2-11 — week-stated intervals are unchanged', () => {
   it('8 weeks stays an exact day count', () => {
+    // An at-risk child's ">=8 weeks after the most recent PCV" catch-up dose.
+    // (This used to use an adult PCV15 -> PPSV23 gap, but A-P1-1 moved that one
+    // onto the calendar: >=1 year for every adult.)
     const r = recommend({
-      dob: '1960-03-01', ageMonths: 800,
-      riskIds: ['hiv'],
-      pcvDoses: [{ date: '2026-01-01', product: 'PCV15' }],
+      dob: '2018-03-01', ageMonths: 100,
+      riskIds: ['asplenia'],
+      pcvDoses: [{ date: '2026-01-01', product: 'PCV13' }],
       ppsv23Doses: [],
       today: '2026-02-01',
-    }).recs.find((x) => x.vaccine === 'PPSV23');
+    }).recs.find((x) => x.minIntervalDays != null);
+    expect(r).toBeDefined();
     expect(r.minIntervalDays).toBe(56);
     expect(r.minIntervalMonths).toBe(null);
   });

@@ -191,13 +191,52 @@ export function hasAnyRisk(riskIds = []) {
   });
 }
 
-// The PCV15→PPSV23 interval class for ADULTS:
-//   IC, cochlear implant, or CSF leak → 'short' (≥8 weeks)
-//   non-IC chronic only               → 'long'  (≥1 year)
-// IC precedence: if any IC/special present, returns 'short'.
-export function adultPpsvIntervalClass(riskIds = []) {
-  if (hasIC(riskIds) || hasSpecial(riskIds)) return 'short';
-  return 'long';
+// The PCV15→PPSV23 interval for ADULTS — one recommendation, at every adult age.
+//
+// OWNER DECISION 2026-10-10 (A-P1-1), amending the CLAUDE.md rule "Adult PPSV23
+// Interval Is Risk-Class-Keyed", which keyed the interval on risk class with no
+// age term and substituted the 8-week minimum FOR the recommendation:
+//
+//   "When PCV15 is used, it should be followed by a dose of PPSV23 at least
+//    1 year later. The minimum interval (8 weeks) can be considered in adults
+//    with an immunocompromising condition, cochlear implant, or cerebrospinal
+//    fluid leak. Their pneumococcal vaccinations are then complete."
+//
+// Source, CDC Adult Immunization Schedule Notes, fetched live 2026-10-10. The
+// sentence appears EXACTLY TWICE on that page, identically — once under
+// "Routine vaccination / Age 50 years or older" and once under "Special
+// situations / Age 19–49 years with certain underlying medical conditions":
+//
+//   "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15
+//    dose (may use minimum interval of 8 weeks for adults with an
+//    immunocompromising condition,* cochlear implant, or cerebrospinal fluid
+//    leak)."
+//
+// So the primary source carries NO age distinction. ≥1 year is the
+// recommendation for every adult; 8 weeks is a minimum that MAY BE CONSIDERED
+// for IC / cochlear implant / CSF leak, at any adult age. The app states the
+// year and NAMES the option — it never silently substitutes one for the other.
+// (CDC's Timing Job Aid prints a flat "8 weeks" on its 19–49 pages; that is a
+// per-page simplification of the sentence above, which governs.)
+
+/** The recommended PCV15→PPSV23 interval for any adult, in calendar months. */
+export const ADULT_PPSV23_INTERVAL_MONTHS = 12;
+
+/** The shorter minimum that may be considered, in weeks. */
+export const ADULT_PPSV23_SHORTER_MINIMUM_WEEKS = 8;
+
+/**
+ * May the 8-week minimum be considered for this adult?
+ * True for an immunocompromising condition, cochlear implant or CSF leak.
+ *
+ * This answers ONLY the interval question. It is deliberately not reused to
+ * decide which CDC row a patient is on — the predicate it replaced was doing
+ * both jobs, so flattening the interval would silently have moved 19–49
+ * cochlear/CSF patients off CDC's ">=5 years" row onto "review at 50".
+ * Call sites that mean "is this patient IC or cochlear/CSF" say so directly.
+ */
+export function adultPpsvShorterMinimumApplies(riskIds = []) {
+  return hasIC(riskIds) || hasSpecial(riskIds);
 }
 
 // The peds at-risk ROW class (p2016 Table 4): IC vs non-IC.
