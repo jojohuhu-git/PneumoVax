@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { fmtDate, fmtAgeMonths } from '../logic/format.js';
 import { ageAtDoseFromDate } from '../logic/validate.js';
 import { productLabel } from '../data/brands.js';
-import { todayISO } from '../logic/dateUtils.js';
+import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { Chevron } from './icons.jsx';
 
 const STATUS_LABELS = {
@@ -24,7 +24,16 @@ function describeDose(dose, idx, ageMonths, today, dob) {
   // the dose against. Previously the card and the validator each subtracted
   // their own approximation and could disagree by half a month.
   const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
-  parts.push(ageAtDose != null ? `age ${fmtAgeMonths(ageAtDose)}` : 'age unknown');
+  // P3-5: this is the line the 42-day PCV dose lands on. With a date of birth
+  // and a dose date we know the real day count, so the weeks are counted
+  // rather than derived from an averaged month — a dose at exactly 42 days
+  // read "5 weeks" for 181 of 400 birth dates, beside PCV's 6-week minimum.
+  const daysAtDose = dob && dose?.date ? daysBetween(dob, dose.date) : undefined;
+  parts.push(
+    ageAtDose != null
+      ? `age ${fmtAgeMonths(ageAtDose, { exactDays: daysAtDose })}`
+      : 'age unknown',
+  );
   parts.push(dose?.product ? productLabel(dose.product) : 'product unknown');
   return parts.join(' · ');
 }

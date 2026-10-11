@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ageGroup as deriveGroup, dobToAgeMonths, fmtAgeMonths } from '../logic/format.js';
-import { todayISO } from '../logic/dateUtils.js';
+import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { ageEntryProblem } from '../logic/ageEntry.js';
 
 // Date of birth is the primary, recommended entry — it lets the engine compute
@@ -123,7 +123,13 @@ export default function StepAge({ ageMonths, error, onChange, today }) {
       {derivedGroup && (
         <div className="age-badge-row">
           <span className="age-badge">
-            {ageMonths != null ? fmtAgeMonths(ageMonths) : ''} · {derivedGroup}
+            {ageMonths != null
+              ? fmtAgeMonths(ageMonths, {
+                  // P3-5: with a date of birth on file the weeks are counted
+                  // from the birthday, not derived from an averaged month.
+                  exactDays: dob ? daysBetween(dob, ref) : undefined,
+                })
+              : ''} · {derivedGroup}
           </span>
         </div>
       )}
