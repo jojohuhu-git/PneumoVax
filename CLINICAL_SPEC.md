@@ -365,6 +365,46 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   So the 4-week and 8-week minimums are exact day counts (`DAYS.weeks`), and the 1-year and
   5-year gaps are **calendar** months (`addCalendarMonths`, 12 and 60). A rec reports
   whichever unit applies: `minIntervalDays` or `minIntervalMonths`, exactly one non-null.
+- **Minimum intervals BETWEEN recorded doses** (added 2026-10-11, S3 — queue P1-0, peds
+  audit P1-4/P1-5). Until S3 the validator graded every dose in isolation, so a PCV series
+  recorded at 2, 2.5, 3 and 3.5 months counted as a complete 4-dose series. The minimums
+  live in `logic/intervals.js` and are read by both `validate.js` and `recommend.js`.
+
+  The validator enforces an interval **only where a source states it as a minimum**, which
+  is the paediatric schedule. Three rules, all fetched live 2026-10-11:
+
+  1. **PCV → PCV.** CDC Catch-up Schedule (Table 2), under the column heading *"Minimum
+     Interval Between Doses"*:
+     > "4 weeks if first dose was administered before the 1st birthday / 8 weeks (as final
+     > dose for healthy children) if first dose was administered at the 1st birthday or after"
+
+     and p2016 Table 1's footnote, keyed the same way: *"for children younger than age 12
+     months = 4 weeks; for children age 12 months or older = 8 weeks"*. Keyed on the age at
+     the **earlier** dose. `pcvSeriesMinIntervalDays()`.
+  2. **PCV → PPSV23 = ≥8 weeks**, and never the same visit. CDC Child Notes:
+     > "administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV
+     > dose" … "PCV15 and PPSV23 should not be administered during the same visit."
+  3. **PPSV23 dose 2 = ≥5 calendar years** after dose 1. CDC Child Notes: *"administer
+     either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23."*
+
+  **A dose below a minimum is `invalid`, not a new middle verdict** — CDC states the
+  consequence itself: such doses "should not be counted as valid and should be repeated as
+  age appropriate", and "the repeat dose should be spaced after the invalid dose by the
+  recommended minimum interval". That last clause is why an **invalid dose still anchors**
+  the next one: the dose replacing it is measured from it, not from the last dose that
+  counted. PCV7 anchors nothing — it is a properly given dose of a superseded product, not
+  a mistimed one, and no source states an interval from it.
+
+  **Rules 2 and 3 are paediatric only, and that is a source fact.** The adult notes were
+  searched live 2026-10-11 (positive control: "pneumococcal", 13 hits, so the whole page
+  including its collapsed sections was read): they contain **no** "same visit" sentence,
+  **no** "8 weeks after the most recent PCV", and **no** "8 weeks after the PCV15 dose".
+  Adult gaps are stated as recommendations for the *next* dose ("1 dose PCV20 or 1 dose
+  PCV21 at least 1 year after the last PCV13 dose"), never as minimum intervals, and CDC
+  nowhere says a short adult gap stops a dose counting. Doses given at or after
+  `ADULT_SCHED_MIN_M` therefore carry **no** interval verdict in either stream; calling one
+  invalid would substitute a minimum for a recommendation, which is exactly the mistake
+  A-P1-1 corrected.
 - **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
   patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
   a birthday lands on an exact whole number of months. Patients entered as Years/Months keep
