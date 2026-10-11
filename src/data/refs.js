@@ -56,6 +56,175 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
 
+  // Adult schedule-note sentences (P6-3b) ---------------------------------
+  // One key per sentence the adult pathway rests on, all on the SAME page as
+  // `cdcAdultPneumo` above — so they share one visible [N] (dedupe is by
+  // `page`) while each links and hovers its own sentence.
+  //
+  // All fetched live 2026-10-10 (browser pane, `textContent`) and checked for
+  // exact presence. Three of them — adultPcv15ThenPpsv, adultPcv13Only and
+  // adultPcv7Only — occur TWICE on the page, because CDC prints them
+  // identically under "Age 50 years or older" and under "Age 19-49 years".
+  // That duplication is the evidence behind this app's no-age-split interval
+  // rule (CLAUDE.md, A-P1-1); the deep link lands on the first occurrence.
+  adultRoutine50: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, routine vaccination at age 50+ with no prior PCV or unknown history',
+    short: 'CDC Adult Notes',
+    quote: 'Not previously received a dose of PCV13, PCV15, PCV20, or PCV21 or whose previous vaccination history is unknown: 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21.',
+    lastVerified: '2026-10-10',
+  },
+  adultPcv15ThenPpsv: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, the PCV15 -> PPSV23 interval (>=1 year, with 8 weeks named as a minimum that MAY be considered). Printed identically under BOTH "Age 50 years or older" and "Age 19-49 years" — which is why this app applies one interval at every adult age (CLAUDE.md, A-P1-1)',
+    short: 'CDC Adult Notes',
+    quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
+    lastVerified: '2026-10-10',
+  },
+  adultPcv13Only: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PCV13',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PCV13 dose.',
+    lastVerified: '2026-10-10',
+  },
+  adultPpsvOnly: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PPSV23',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received only PPSV23: 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PPSV23 dose.',
+    lastVerified: '2026-10-10',
+  },
+  adultBothNotAt65: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, PCV13 + PPSV23 where no PPSV23 was given at 65+',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received both PCV13 and PPSV23 but NO PPSV23 was received at age 65 years or older: 1 dose PCV20 or 1 dose PCV21 at least 5 years after the last pneumococcal vaccine dose.',
+    lastVerified: '2026-10-10',
+  },
+  adultBothAt65: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, PCV13 + PPSV23 with PPSV23 given at 65+ (shared clinical decision-making)',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received both PCV13 and PPSV23, AND PPSV23 was received at age 65 years or older: Based on shared clinical decision',
+    lastVerified: '2026-10-10',
+  },
+  adultPcv20or21Complete: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, a series containing PCV20 or PCV21 is complete',
+    short: 'CDC Adult Notes',
+    quote: 'Adults aged 19 years and older who have received PCV20 or PCV21: no additional pneumococcal vaccine dose recommended.',
+    lastVerified: '2026-10-10',
+  },
+  adultPcv7Only: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, a PCV7-only history is treated as no PCV history',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received only PCV7: follow the recommendation above.',
+    lastVerified: '2026-10-10',
+  },
+
+  // Child & adolescent schedule-note sentences (P6-3b) --------------------
+  // One key per sentence the paediatric pathways rest on, all on the SAME page
+  // as `cdcChildPneumo` above, so they share one visible [N].
+  //
+  // Fetched live 2026-10-10 (browser pane, `textContent`, with "cochlear" as a
+  // positive control) and each checked for exact presence. Several occur more
+  // than once because CDC repeats the same row under the immunocompromising
+  // and non-immunocompromising groups; the deep link lands on the first.
+  pedsRoutine4Dose: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, routine infant 4-dose PCV series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Routine vaccination with PCV 4-dose series at 2, 4, 6, 12–15 months',
+    lastVerified: '2026-10-10',
+  },
+  pedsHealthyCatchup: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, catch-up for healthy children 2-4 years',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Healthy children ages 2–4 years with any incomplete* PCV series: 1 dose PCV',
+    lastVerified: '2026-10-10',
+  },
+  pedsNoPcv20IfComplete: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, PCV20 not indicated for a child without risk conditions who already completed an age-appropriate series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'For children without risk conditions, PCV20 is not indicated if they have received 4 doses of PCV13 or PCV15 or another age appropriate complete PCV series.',
+    lastVerified: '2026-10-10',
+  },
+  pedsRisk6to18NoPcv: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk 6-18 years with no prior PCV13/15/20 (and the 8-week PCV15 -> PPSV23 interval)',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Not previously received any dose of PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or PCV20. If PCV15 is used and no previous receipt of PPSV23, administer 1 dose of PPSV23 at least 8 weeks after the PCV15 dose.',
+    lastVerified: '2026-10-10',
+  },
+  pedsRiskPcv20Complete: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", a prior PCV20 completes an at-risk child\'s series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
+    lastVerified: '2026-10-10',
+  },
+  pedsRiskPcv13At6: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk child who received PCV13 only at or after age 6',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Received PCV13 only at or after age 6 years: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose.',
+    lastVerified: '2026-10-10',
+  },
+  pedsRiskDone: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", PCV13 + PPSV23 at or after age 6 completes the series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: no further doses of any PCV or PPSV23 indicated.',
+    lastVerified: '2026-10-10',
+  },
+  pedsMinAge: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal minimum ages (6 weeks for PCV15/PCV20; 2 years for PPSV23)',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Pneumococcal vaccination (minimum age: 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])',
+    lastVerified: '2026-10-10',
+  },
+
+  // Risk-based summary sentences (P6-3b) ----------------------------------
+  // Same page as `cdcRiskIndications` above, so they share its visible [N].
+  // Fetched live 2026-10-10 (textContent; "PPSV23" x46 as a positive control).
+  // The 5-year sentence occurs twice — CDC prints it under both the 2-5y and
+  // the 6-18y groups — so the deep link lands on the first.
+  pedsSecondPpsv5y: {
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC Risk-based Pneumococcal Recommendations — when PPSV23 is used for an at-risk child, a further pneumococcal vaccine follows at least 5 years later',
+    short: 'CDC Risk-based Pneumococcal',
+    quote: 'When PPSV23 is used, they need another pneumococcal vaccine at least 5 years later.',
+    lastVerified: '2026-10-10',
+  },
+  pedsBefore6NoPcv20: {
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC Risk-based Pneumococcal Recommendations — the 6-18y row for a child who received PCV13 or PCV15 before age 6 and never PCV20',
+    short: 'CDC Risk-based Pneumococcal',
+    quote: 'Received PCV13 or PCV15 before age 6 years, never received PCV20',
+    lastVerified: '2026-10-10',
+  },
+
+  // (continued) Child & adolescent sentences, verified the same way.
+  pedsRiskIncompleteCatchup: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk 2-5y with fewer than 3 prior PCV doses',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after the most recent dose and administered at least 8 weeks apart)',
+    lastVerified: '2026-10-10',
+  },
+  pedsRiskPcv20orPpsv23: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk child who completed the PCV series without PCV20 and without PPSV23',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most recent PCV dose.',
+    lastVerified: '2026-10-10',
+  },
+
   // CDC job aids ----------------------------------------------------------
   cdcCatchupJobAid: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
@@ -74,7 +243,12 @@ export const REFS = {
   },
   cdcRiskIndications: {
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
-    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations (incl. "received PCV only before age 6 years")',
+    // 2026-10-10 (S13): this label used to claim the page contains the phrase
+    // "received PCV only before age 6 years". Fetched live — it does not. The
+    // row it means is headed "Received PCV13 or PCV15 before age 6 years,
+    // never received PCV20". Corrected rather than left as a citation that
+    // promises wording the source never used.
+    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations (incl. the row "Received PCV13 or PCV15 before age 6 years, never received PCV20")',
     short: 'CDC Risk-based Pneumococcal',
   },
 
