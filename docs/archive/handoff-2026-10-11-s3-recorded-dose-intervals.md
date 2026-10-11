@@ -54,16 +54,31 @@ S13's work is on `main` and the Pages deploy succeeded. Do not re-litigate it.
 ## What's NOT done — the remaining queue
 
 **New, from this session (both written up in the ledger):**
-- **`S3-N1` (P2) — ⚠ OWNER DECISION.** An adult's too-close doses read "On time" with no
-  caveat. The honest answer is a **third dose status** — *counts, but earlier than CDC
-  advises* — which is the "off-window" middle verdict P1-0 asked about. It is right for
-  adults and wrong for children (children have a real minimum, so they get `invalid`). It
-  adds a chip to every surface that shows a dose, so **ask before building it**.
+- **`S3-N1` (P2) — DECIDED 2026-10-11: build it. Recommend Opus 5 at high effort.** An
+  adult's too-close doses read "On time" with no caveat. The answer is a **third dose
+  status** — *counts, but earlier than CDC advises* — which is the "off-window" middle
+  verdict P1-0 asked about. It is right for adults and wrong for children (children have a
+  real minimum, so they get `invalid`).
+  **Why Opus:** the clinical question is already settled and sourced, so this is not
+  research — it earns Opus on the ledger's "a refactor touches many files at once" rule plus
+  one specific risk. The new status must be added in `validate.js` and then handled
+  correctly by every surface that renders a dose chip **and** by the engine's effective-dose
+  list. If any one of them treats "counts but early" as not-counting, an adult silently
+  loses a dose from their series — a dose-counting error, the category this app exists not
+  to produce. Needs the `design-review` skill: the copy must not read as an error.
 - **`S3-N2` (P2)** — CDC Table 2's stricter dose-2→3 cell (previous dose at 7–11 months
   needs 8 weeks **and** age ≥12 months) is not enforced; the validator uses p2016's gentler
   footnote, so it can never demand a repeat CDC would have accepted. It is a **keying**
   question, which peds audit `P0-2` owns — do both halves together or the app will advise a
   date it then rejects.
+- **The stale-clinical-rule sweep → fold into S8, Sonnet 5 at medium effort** (owner
+  direction, 2026-10-11). S3 found a superseded rule still live in
+  `docs/agent/clinical-rules.md`; a third copy may exist somewhere. **Do not run this as its
+  own session.** S8 already carries `P7-1` (the plain-English rulebook) + `P2-7`
+  (`rule-docs-match-code.test.js`), and its stopping point is "the 12-month staleness
+  tripwire is live". S8 has to read every current rule statement anyway to build the
+  rulebook, so the sweep is nearly free there and duplicated work anywhere else. A one-off
+  sweep finds today's copy; the tripwire stops a fourth from appearing.
 
 **Pre-existing:**
 - **`S10-N1` (P2)** — PCV21's 18-year gate is checked against CURRENT age, not age at the
@@ -102,14 +117,14 @@ items it spawned are both deliberately deferred with reasons, not dropped.
 2. Confirm the suite: **371 passing / 36 files** (or whatever `main` reports after the
    squash merge). Stop and diagnose any mismatch before new work.
 3. **Say the session number and its recommended model + effort in one line, and WAIT**
-   (queue rule 1). Likely next is **S4 — Sonnet 5 at medium effort** (three well-specified
-   UI bugs, MeningoVax commits as reference, no clinical judgment) or **S5 — Sonnet 5 at
-   medium effort**. **Owner picks the order — ask, don't default.**
-4. **Open owner decisions:** (a) merge PR #22; (b) **`S3-N1`** — whether to add the third
-   "counts but early" dose status for adults; (c) whether to open a small PR against
-   MeningoVax for its inline styles. **No clinical decisions are outstanding** — do not
-   re-litigate the adult PPSV23 interval (`CLAUDE.md` + `CLINICAL_SPEC.md` §K), the
-   paediatric risk lists (§C), or the adult interval-check exclusion (§K, and `S3-N1`).
+   (queue rule 1). **The owner's chosen order, 2026-10-11:** `S3-N1` first (**Opus 5 /
+   high**), then **S8** (**Sonnet 5 / medium**) with the stale-rule sweep folded in. After
+   those, likely **S4 — Sonnet 5 / medium**. **Owner picks the order — ask, don't default.**
+4. **Open owner decisions:** (a) merge PR #22; (b) whether to open a small PR against
+   MeningoVax for its inline styles. **`S3-N1` is no longer a decision — it was approved on
+   2026-10-11; build it.** **No clinical decisions are outstanding** — do not re-litigate
+   the adult PPSV23 interval (`CLAUDE.md` + `CLINICAL_SPEC.md` §K), the paediatric risk
+   lists (§C), or the adult interval-check exclusion (§K, and `S3-N1`).
 5. Per-item workflow: reproduce → failing test first (confirm it fails) → fix → full suite
    green → live-verify in the running app → one commit per finding ID. **For any guard whose
    assertion is "nothing is wrong", introduce the fault on purpose and watch it go red.**
