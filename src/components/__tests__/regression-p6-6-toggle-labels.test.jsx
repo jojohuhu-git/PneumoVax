@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 // P6-6 (S13, 2026-10-10): the toggle buttons in the Results header labelled
 // themselves two different ways. "Adjust age" and "Recorded doses" swapped
-// their label to "Done" when open; "Color key" kept its label and rotated its
-// chevron. The queue called it trivial but visible, and said: pick one.
+// their label to "Done" when open; the since-removed "Color key" toggle
+// (S14-5) kept its label and rotated its chevron. The queue called it
+// trivial but visible, and said: pick one.
 //
 // Picked: keep the label, rotate the chevron. Three reasons, in order of
 // weight —
@@ -61,15 +62,15 @@ describe('P6-6 — a toggle keeps its label when open', () => {
 
   it('no toggle in the results header renders the word "Done"', () => {
     render(<Harness />);
-    for (const name of [/Adjust age/i, /Recorded doses/i, /Color key/i]) {
+    for (const name of [/Adjust age/i, /Recorded doses/i]) {
       fireEvent.click(screen.getByRole('button', { name }));
     }
     expect(screen.queryByRole('button', { name: /^Done$/ })).toBeNull();
   });
 
-  it('all three header toggles report state through aria-expanded', () => {
+  it('both header toggles report state through aria-expanded', () => {
     render(<Harness />);
-    for (const name of [/Adjust age/i, /Recorded doses/i, /Color key/i]) {
+    for (const name of [/Adjust age/i, /Recorded doses/i]) {
       const btn = screen.getByRole('button', { name });
       expect(btn.getAttribute('aria-expanded')).toBe('false');
       fireEvent.click(btn);

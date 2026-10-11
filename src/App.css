@@ -281,22 +281,6 @@ body {
 .dose-history-panel { flex-direction: column; align-items: flex-start; }
 .dose-history-block { width: 100%; }
 
-/* ── PD2/E6: color legend ─────────────────────────────────────────── */
-.legend-row {
-  display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base);
-  color: var(--gy2); padding: var(--sp-4) 0;
-}
-.legend-swatch { width: 14px; height: 14px; border-radius: var(--rads); flex-shrink: 0; border: 1px solid var(--gy5); }
-.legend-swatch-due        { background: var(--glt); border-color: var(--gmd); }
-.legend-swatch-catchup    { background: var(--alt); border-color: var(--amd); }
-.legend-swatch-shared     { background: var(--blt); border-color: var(--bmd); }
-.legend-swatch-neutral    { background: var(--gy6); border-color: var(--gy5); }
-.legend-swatch-valid      { background: var(--glt); border-color: var(--gmd); }
-.legend-swatch-offwindow  { background: var(--blt); border-color: var(--bmd); }
-.legend-swatch-noncounting{ background: var(--alt); border-color: var(--amd); }
-.legend-swatch-invalid    { background: var(--rlt); border-color: var(--rmd); }
-.legend-swatch-unknown    { background: var(--gy6); border-color: var(--gy5); }
-
 /* ── Rec cards ─────────────────────────────────────────────────── */
 .rec-section { margin-bottom: var(--sp-16); }
 .rec-section-title {

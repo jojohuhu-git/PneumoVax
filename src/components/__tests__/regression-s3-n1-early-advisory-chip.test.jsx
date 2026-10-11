@@ -87,7 +87,7 @@ describe('S3-N1 — the chip', () => {
   });
 });
 
-describe('S3-N1 — the legend explains it, and the whole flow agrees', () => {
+describe('S3-N1 — the whole flow agrees, end to end', () => {
   function Harness() {
     const [state, setState] = useState({
       ageMonths: 845,
@@ -109,13 +109,6 @@ describe('S3-N1 — the legend explains it, and the whole flow agrees', () => {
       />
     );
   }
-
-  it('the colour key says the dose still counts and needs no repeat', () => {
-    render(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: /Color key/i }));
-    expect(screen.getByText(/given sooner than CDC advises, but it still counts/i)).toBeInTheDocument();
-    expect(screen.getByText(/given within the window CDC recommends/i)).toBeInTheDocument();
-  });
 
   it('end to end: the adult five-week gap still counts on the real engine output', () => {
     const { container } = render(<Harness />);

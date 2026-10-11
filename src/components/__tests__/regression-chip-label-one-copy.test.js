@@ -23,6 +23,13 @@ describe('the chip label lives in one module', () => {
 
   const CONSUMERS = [
     ['RecCard.jsx', '../RecCard.jsx'],
+    // S14-5: Results.jsx's "Color key" legend used to hand-type these same
+    // words to explain the chip colors — exactly the second-copy drift this
+    // file guards against (S3-N1 "hand-copied its wording into RecCard.jsx
+    // and Results.jsx", per the S14-RC handoff). The legend is gone now, so
+    // this consumer should stay clean for free; guarding it stops a new copy
+    // from creeping back in its place.
+    ['Results.jsx', '../Results.jsx'],
   ];
 
   for (const [name, rel] of CONSUMERS) {
