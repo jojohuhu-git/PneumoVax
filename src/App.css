@@ -292,6 +292,7 @@ body {
 .legend-swatch-shared     { background: var(--blt); border-color: var(--bmd); }
 .legend-swatch-neutral    { background: var(--gy6); border-color: var(--gy5); }
 .legend-swatch-valid      { background: var(--glt); border-color: var(--gmd); }
+.legend-swatch-offwindow  { background: var(--blt); border-color: var(--bmd); }
 .legend-swatch-noncounting{ background: var(--alt); border-color: var(--amd); }
 .legend-swatch-invalid    { background: var(--rlt); border-color: var(--rmd); }
 .legend-swatch-unknown    { background: var(--gy6); border-color: var(--gy5); }
@@ -417,6 +418,11 @@ body {
   font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
 }
 .dose-val-valid       { background: var(--glt); color: var(--g); border: 1px solid var(--gmd); }
+/* S3-N1 — counts, but given sooner than CDC advises. Blue, not amber: amber is
+   already dose-val-noncounting (PCV7), and a dose that COUNTS must not look
+   like one that does not. Within the dose-chip family blue is otherwise
+   unused, so it reads as information rather than as a warning. */
+.dose-val-offwindow   { background: var(--blt); color: var(--b); border: 1px solid var(--bmd); }
 .dose-val-noncounting { background: var(--alt); color: var(--a); border: 1px solid var(--amd); }
 .dose-val-invalid     { background: var(--rlt); color: var(--r); border: 1px solid var(--rmd); }
 .dose-val-unknown     { background: var(--gy6); color: var(--gy3); border: 1px solid var(--gy5); }

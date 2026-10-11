@@ -29,7 +29,8 @@
 // completesSeries) to drive the matrix.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { daysBetween, todayISO } from './dateUtils.js';
+import { daysBetween, todayISO, calendarIntervalElapsed } from './dateUtils.js';
+import { adultPpsvShorterMinimumApplies, ADULT_PPSV23_INTERVAL_MONTHS } from '../data/riskFactors.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS } from './format.js';
 import { productByKey, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
@@ -41,6 +42,7 @@ import {
   pcvSeriesMinIntervalDays,
   PCV_PPSV23_MIN_INTERVAL_DAYS,
   PPSV23_REVACC_MIN_MONTHS,
+  ADULT_ADVISED_PCV_GAP_MONTHS,
 } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
@@ -240,6 +242,59 @@ function checkPpsvRevaccInterval(dose, prev, ageAtDose) {
   );
 }
 
+// ── The adult advisory: counts, but earlier than CDC advises (S3-N1) ─────
+//
+// Adult gaps are the mirror image of the paediatric ones. CDC states them as
+// recommendations for the NEXT dose and never as minimum intervals, so a short
+// adult gap cannot make a dose invalid (that is why checkPcvInterval and
+// checkPpsvAfterPcv both stop at the adult boundary). But "On time" was too
+// generous: it told a clinician a five-week adult gap was what the schedule
+// wanted.
+//
+// So this is a third thing — the dose COUNTS and carries a note. It is
+// deliberately a FLAG on a valid result and not a status of its own: `status`
+// stays 'valid' and the dose still gets its `effectiveDoseNum`, so nothing
+// downstream that counts doses can mistake it for a dropped one. Vocabulary
+// follows vaxapp's settled "Done · valid" — "given outside the routine window
+// but still counts toward the series" — which is distinct from its
+// "off-window · repeat", a dose that does NOT count. This one counts.
+//
+// No 4-day grace here, deliberately. The grace is CDC's rule for whether a
+// dose that missed a minimum still COUNTS. This is not a minimum and nothing is
+// being voided, so there is no grace to apply and a day short of the year is a
+// day short.
+function advise(result, reason) {
+  return { ...result, offWindow: true, reasons: [...(result.reasons ?? []), reason] };
+}
+
+// Two adult PCV doses: CDC advises at least a year.
+function adultPcvGapAdvice(dose, prev, ageAtDose) {
+  if (!prev || !dose.date || !prev.date) return null;
+  if (ageAtDose == null || ageAtDose < ADULT_SCHED_MIN_M) return null;
+  if (calendarIntervalElapsed(prev.date, ADULT_ADVISED_PCV_GAP_MONTHS, dose.date)) return null;
+  return 'Given less than a year after the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts — no repeat is needed.';
+}
+
+// An adult's PPSV23 after a PCV15: CDC advises a year, and names 8 weeks as a
+// minimum that may be CONSIDERED for an immunocompromising condition, cochlear
+// implant or CSF leak (CLAUDE.md, A-P1-1). So for those patients a gap over 8
+// weeks is a legitimate choice and must not be second-guessed; a gap under 8
+// weeks is short of even that option.
+function adultPpsvGapAdvice(dose, priorPcv, ageAtDose, riskIds) {
+  if (!dose.date || !priorPcv || priorPcv.length === 0) return null;
+  if (ageAtDose == null || ageAtDose < ADULT_SCHED_MIN_M) return null;
+  const before = priorPcv.filter((d) => d.date && d.date <= dose.date && d.product === 'PCV15');
+  if (before.length === 0) return null;
+  const mostRecent = before[before.length - 1];
+
+  if (adultPpsvShorterMinimumApplies(riskIds)) {
+    if (intervalMeetsMinimum(daysBetween(mostRecent.date, dose.date), PCV_PPSV23_MIN_INTERVAL_DAYS)) return null;
+    return 'Given less than 8 weeks after the PCV15 dose. CDC advises PPSV23 at least 1 year after PCV15, and for this patient the 8-week minimum may be considered — this gap is shorter than either. The dose still counts.';
+  }
+  if (calendarIntervalElapsed(mostRecent.date, ADULT_PPSV23_INTERVAL_MONTHS, dose.date)) return null;
+  return 'Given less than a year after the PCV15 dose. CDC advises PPSV23 at least 1 year after PCV15 for adults. This dose still counts — no repeat is needed.';
+}
+
 // ── Validate one PCV dose ────────────────────────────────────────────────
 function validateOnePCV(dose, ageMonths, today, dob, prev) {
   const key = dose.product || '';
@@ -297,11 +352,13 @@ function validateOnePCV(dose, ageMonths, today, dob, prev) {
   const tooSoon = checkPcvInterval(dose, prev, ageAtDose);
   if (tooSoon) return tooSoon;
 
-  return key ? valid() : unknown(['Product not recorded — counted as a generic PCV dose.']);
+  const result = key ? valid() : unknown(['Product not recorded — counted as a generic PCV dose.']);
+  const advice = adultPcvGapAdvice(dose, prev, ageAtDose);
+  return advice ? advise(result, advice) : result;
 }
 
 // ── Validate one PPSV23 dose ─────────────────────────────────────────────
-function validateOnePPSV23(dose, ageMonths, today, dob, prev, priorPcv) {
+function validateOnePPSV23(dose, ageMonths, today, dob, prev, priorPcv, riskIds) {
   const minAgeM = 24; // ≥2 years
   if (!dose.date) {
     if (ageMonths < minAgeM) {
@@ -325,13 +382,16 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, priorPcv) {
   // Age is settled; now the two interval rules (queue P1-0, peds audit P1-4).
   // The PCV gap is checked first: a PPSV23 given at the same visit as PCV15 is
   // the error the clinician most needs named, even if the 5-year gap also fails.
-  return checkPpsvAfterPcv(dose, priorPcv, ageAtDose)
-    || checkPpsvRevaccInterval(dose, prev, ageAtDose)
-    || valid();
+  const failed = checkPpsvAfterPcv(dose, priorPcv, ageAtDose)
+    || checkPpsvRevaccInterval(dose, prev, ageAtDose);
+  if (failed) return failed;
+
+  const advice = adultPpsvGapAdvice(dose, priorPcv, ageAtDose, riskIds);
+  return advice ? advise(valid(), advice) : valid();
 }
 
 // ── Core walk ────────────────────────────────────────────────────────────
-function runWalk(vaccine, rawDoses, ageMonths, today, dob, priorPcv) {
+function runWalk(vaccine, rawDoses, ageMonths, today, dob, priorPcv, riskIds) {
   const kept = [];
   const perDose = [];
   let effectiveCount = 0;
@@ -350,7 +410,7 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, priorPcv) {
     const dose = rawDoses[i];
     const result = vaccine === 'PCV'
       ? validateOnePCV(dose, ageMonths, today, dob, prev)
-      : validateOnePPSV23(dose, ageMonths, today, dob, prev, priorPcv);
+      : validateOnePPSV23(dose, ageMonths, today, dob, prev, priorPcv, riskIds);
 
     if (result.status === 'invalid') {
       perDose.push({
@@ -406,7 +466,7 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
   const priorPcv = vaccine === 'PPSV23'
     ? sortDosesChronologically((opts.pcvDoses ?? []).filter(Boolean))
     : null;
-  return runWalk(vaccine, filtered, ageMonths, ref, dob, priorPcv);
+  return runWalk(vaccine, filtered, ageMonths, ref, dob, priorPcv, opts.riskIds);
 }
 
 // Chronological, stable sort. ISO date strings compare lexicographically. Undated doses

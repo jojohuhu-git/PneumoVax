@@ -65,6 +65,17 @@
       `regression-p1-0-*` — an earlier draft applied the 8-week PPSV23 floor to adults and
       was caught only by `regression-a-p2-11`, whose fixture happens to record an adult's
       PCV13 and PPSV23 on one day.
+11. **An off-window adult dose COUNTS** (S3-N1). `offWindow` is a flag on a `'valid'`
+    result, never a status: `status` stays `'valid'` and `effectiveDoseNum` is still
+    assigned. `regression-s3-n1-*` asserts that explicitly, and those assertions are what
+    should stop a future change promoting it to a status of its own.
+    **Test the wiring, not just the unit.** The unit tests passed `riskIds` straight into
+    `analyzeHistory` and stayed green while `recommend.js` was not forwarding it at all —
+    so every adult was judged against the flat 1-year advice and an immunocompromised
+    patient who had legitimately used the 8-week option was told their dose was early.
+    Driving the running app is what caught it. The `riskIds actually reach the validator`
+    block goes through `recommend()` for exactly that reason; verified it fails without
+    the forwarding line.
 
 ## Prove a new guard can fail
 

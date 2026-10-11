@@ -405,6 +405,35 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   `ADULT_SCHED_MIN_M` therefore carry **no** interval verdict in either stream; calling one
   invalid would substitute a minimum for a recommendation, which is exactly the mistake
   A-P1-1 corrected.
+- **Adult gaps CDC ADVISES but does not require** (added 2026-10-11, S3-N1). The mirror
+  image of the rule above. Adult gaps are recommendations for the *next* dose, so a short
+  one cannot void a dose — but "On time" was too generous, because it told a clinician a
+  five-week adult gap was what the schedule wanted. Such a dose now **counts and carries a
+  note**: `offWindow: true` on a `status: 'valid'` result.
+
+  **It is a flag, never a status.** `status` stays `'valid'` and the dose still receives
+  its `effectiveDoseNum`, so nothing that counts doses can mistake it for a dropped one.
+  Do not promote it to a status of its own. Two rules, both live 2026-10-11:
+
+  1. **Two adult PCV doses — CDC advises ≥1 year** (`ADULT_ADVISED_PCV_GAP_MONTHS`):
+     > "Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1 year after
+     > the last PCV13 dose."
+
+     1 year is the *shortest* of CDC's adult gaps (the PCV13+PPSV23 rows say 5 years), so
+     the advisory under-flags rather than over-flags. The longer rows depend on which
+     prior-vaccine row the patient is on — the engine's job, not the validator's.
+  2. **Adult PCV15 → PPSV23 — ≥1 year**, unless `adultPpsvShorterMinimumApplies()`, in
+     which case the 8-week option is a legitimate choice and only a gap under 8 weeks is
+     flagged. Reuses `ADULT_PPSV23_INTERVAL_MONTHS` — never a hardcoded number, and never
+     reused to decide which CDC *row* a patient is on (see the A-P1-1 note above).
+
+  **No 4-day grace here, deliberately.** The grace is CDC's rule for whether a dose that
+  missed a *minimum* still counts. Nothing is being voided, so there is no grace to apply.
+
+  Copy mirrors vaxapp's settled pair (design-review, cross-app copy parity): **"On time"**
+  = within the recommended window; **"Valid"** = outside it, still counts. vaxapp's third
+  term "off-window · repeat" means a dose that does NOT count — this is not that, and the
+  copy must never imply a repeat is owed.
 - **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
   patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
   a birthday lands on an exact whole number of months. Patients entered as Years/Months keep

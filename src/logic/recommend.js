@@ -1001,6 +1001,11 @@ export function recommend(input) {
   // the PCV walk has to run first and hand them over (peds audit P1-4).
   const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob, {
     pcvDoses: pcvAnalysis.effective,
+    // S3-N1: needed to tell whether the 8-week minimum may be CONSIDERED for
+    // this adult (immunocompromising condition, cochlear implant, CSF leak).
+    // Without it every adult is judged against the flat 1-year advice and an
+    // IC patient who legitimately used the shorter option gets second-guessed.
+    riskIds,
   });
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;

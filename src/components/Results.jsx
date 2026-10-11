@@ -310,7 +310,8 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             </div>
             <div className="dose-history-block">
               <div className="history-edit-section-title">Recorded-dose validity colors</div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-valid" /><span>On time</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-valid" /><span>On time: given within the window CDC recommends</span></div>
+              <div className="legend-row"><span className="legend-swatch legend-swatch-offwindow" /><span>Valid: given sooner than CDC advises, but it still counts — no repeat needed</span></div>
               <div className="legend-row"><span className="legend-swatch legend-swatch-noncounting" /><span>Recorded (does not count): valid dose, doesn't count toward the series (e.g. PCV7)</span></div>
               <div className="legend-row"><span className="legend-swatch legend-swatch-invalid" /><span>Invalid (does not count)</span></div>
               <div className="legend-row"><span className="legend-swatch legend-swatch-unknown" /><span>Unknown (no date recorded)</span></div>

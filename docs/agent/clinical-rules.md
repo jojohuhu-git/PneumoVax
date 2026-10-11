@@ -15,7 +15,7 @@
 | **Peds HSCT (<19y)** | **immunize.org p2016 Table 5 — SOLE source** (NOT CDC child notes) |
 | PCV7-not-counted | immunize.org Ask the Experts |
 | Adult routine ≥50 + 19–49 risk matrix | CDC adult schedule notes + mm7401a1 |
-| Adult intervals | CDC adult notes (IC/cochlear/CSF = ≥8wk; chronic = ≥1y) |
+| Adult PCV15→PPSV23 interval | CDC adult notes — **≥1 year at every adult age**, 8 weeks *may be considered* for IC/cochlear/CSF (A-P1-1; see below) |
 | PCV21 eligibility + serotype-4 geo note | CDC MMWR mm7336a3 |
 | ≥50 expansion | CDC MMWR mm7401a1 |
 | **Adult HSCT (≥19y)** | **Fred Hutch LTFU §IX Tables IX.A1/A2 — SOLE source** |
@@ -114,3 +114,20 @@ Three things to know before changing any of it:
    get no interval verdict in either stream: CDC's adult notes state gaps as
    recommendations for the next dose, never as minimums, and never say a short adult gap
    stops a dose counting. Do not "tidy" this into a universal rule.
+
+## Adult Gaps: Advised, Not Required (S3-N1)
+
+The mirror image of the rules above. A short adult gap cannot void a dose, but "On time"
+was too generous. Such a dose now **counts and carries a note** — `offWindow: true` on a
+`status: 'valid'` result.
+
+- **It is a flag, never a status.** `status` stays `'valid'` and `effectiveDoseNum` is
+  still assigned, so nothing that counts doses can treat it as dropped. Do not promote it.
+- Two adult PCV doses: CDC advises **>=1 year** (`ADULT_ADVISED_PCV_GAP_MONTHS`). That is
+  the shortest of CDC's adult gaps, so the advisory under-flags rather than over-flags.
+- Adult PCV15 -> PPSV23: **>=1 year**, unless `adultPpsvShorterMinimumApplies()`, where the
+  8-week option is legitimate and only a shorter gap is flagged.
+- **No 4-day grace** — nothing is being voided, so there is no grace to apply.
+- Copy mirrors vaxapp: **"On time"** (within the window) vs **"Valid"** (outside it, still
+  counts). Never imply a repeat is owed; vaxapp's "off-window - repeat" is a different
+  thing and means a dose that does NOT count.

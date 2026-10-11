@@ -47,16 +47,23 @@ function describeDose(dose, idx, ageMonths, today, dob) {
 // series; it must not read as "Invalid".
 function DoseValidation({ result, seriesTotal, numberFor }) {
   if (!result) return null;
-  const { status, reasons, detail, reasonCites, effectiveDoseNum, doesNotCount } = result;
+  const { status, reasons, detail, reasonCites, effectiveDoseNum, doesNotCount, offWindow } = result;
 
+  // S3-N1: `offWindow` is a flag on a dose that COUNTS, not a status — see
+  // validate.js. It only ever rides on 'valid', and the chip says "Valid"
+  // rather than "On time" because the dose was given earlier than CDC advises.
+  // Vocabulary mirrors vaxapp's settled pair: "Done · on time" (within the
+  // routine window) vs "Done · valid" (outside it, still counts).
   const chipClass =
-    status === 'valid' ? 'dose-val-chip dose-val-valid'
+    status === 'valid' && offWindow ? 'dose-val-chip dose-val-offwindow'
+    : status === 'valid' ? 'dose-val-chip dose-val-valid'
     : status === 'invalid' ? 'dose-val-chip dose-val-invalid'
     : status === 'noncounting' ? 'dose-val-chip dose-val-noncounting'
     : 'dose-val-chip dose-val-unknown';
 
   const chipLabel =
-    status === 'valid' ? 'On time'
+    status === 'valid' && offWindow ? 'Valid'
+    : status === 'valid' ? 'On time'
     : status === 'invalid' ? 'Invalid'
     : status === 'noncounting' ? 'Recorded (does not count)'
     : 'Unknown';

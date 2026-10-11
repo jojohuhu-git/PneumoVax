@@ -143,17 +143,18 @@ Encoded as `completesSeries` / `requiresPPSV23` flags in `brands.js`. Never cont
 | Peds ≥12mo | ≥8 weeks |
 | Peds final/booster | ≥12 months |
 | Peds at-risk ≥24mo | ≥8 weeks; IC rows add ≥5-year step |
-| Adult PCV15→PPSV23 (IC / cochlear / CSF leak) | ≥8 weeks |
-| Adult PCV15→PPSV23 (non-IC chronic only) | ≥1 year |
+| Adult PCV15→PPSV23 (**every** adult 19+) | **≥1 year**, with 8 weeks named as a minimum that may be *considered* for IC / cochlear implant / CSF leak |
 | PCV13→PCV20/21 | ≥1 year |
 | PCV13+PPSV23→PCV20/21 | ≥5 years |
 
-`adultPpsvIntervalClass()` in `riskFactors.js` is the single source — cochlear/CSF return `'short'` (IC interval). Never hardcode the interval check.
+`ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in `riskFactors.js` are the single source. Never hardcode the interval check.
+
+**Corrected 2026-10-11 (S3).** The two rows above were one risk-class-keyed pair ("IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year") naming `adultPpsvIntervalClass()`, which no longer exists in `src/` — the rule from BEFORE the owner's A-P1-1 amendment. This was the third and fourth copy of that stale rule found in one sweep (after `testing.md` in S13 and `clinical-rules.md` in S3); `P7-1`'s `rule-docs-match-code` tripwire in S8 is what stops a fifth appearing.
 
 ## Risk Classes
 
 - **IC** — immunocompromising: asplenia/SCD, immunodeficiency, immunosuppression, HIV, solid-organ transplant, advanced CKD/dialysis/nephrotic.
-- **special** — cochlear implant, CSF leak. IC interval for adults; non-IC row in peds grid. `pedsRiskRowClass()` maps them to nonIC; `adultPpsvIntervalClass()` maps them to short.
+- **special** — cochlear implant, CSF leak. Non-IC row in the peds grid; for adults they are among the conditions for which the 8-week PCV15→PPSV23 minimum may be *considered*. `pedsRiskRowClass()` maps them to nonIC; `adultPpsvShorterMinimumApplies()` returns true for them. **These are two separate questions** — the predicate answers the interval one only, never which CDC row a patient is on (A-P1-1).
 - **nonIC** — chronic heart/lung/liver, diabetes, chronic CKD, alcohol, smoking (last two adultOnly).
 - **hsct** — advisory pathway only (no calendar dates).
 - **IC precedence over non-IC** when both present.

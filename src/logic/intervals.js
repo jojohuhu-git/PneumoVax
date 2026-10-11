@@ -120,6 +120,21 @@ export function pcvSeriesMinIntervalDays(ageMonths) {
 export const PCV_PPSV23_MIN_INTERVAL_DAYS = 56;      // 8 weeks
 
 /**
+ * Calendar months CDC ADVISES between two adult PCV doses (S3-N1).
+ *
+ * This is not a minimum and must never be used as one — see the adult note in
+ * validate.js. CDC Adult Schedule Notes, live 2026-10-11:
+ *   "Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1
+ *    year after the last PCV13 dose."
+ *
+ * 1 year is the SHORTEST of CDC's adult gaps — the PCV13+PPSV23 rows say 5
+ * years — so an advisory keyed on it under-flags rather than over-flags. The
+ * longer rows depend on which prior-vaccine row the patient is on, which is the
+ * engine's job; the validator does not re-derive that matrix.
+ */
+export const ADULT_ADVISED_PCV_GAP_MONTHS = 12;
+
+/**
  * Minimum CALENDAR months between a first and second PPSV23 dose.
  *
  * CDC Child & Adolescent Schedule Notes, pneumococcal, IC (live 2026-10-11):
