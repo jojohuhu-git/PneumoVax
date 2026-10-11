@@ -1,5 +1,26 @@
 # PneumoVax — Handoff after S3 + S3-N1, recorded-dose intervals (2026-10-11)
 
+> ## ⚠️ SUPERSEDED 2026-10-11 — do not resume from this file
+>
+> Replaced by **`handoff-2026-10-11-s14-interval-enforcement-root-cause.md`**. A later
+> review the same day found the **root cause** behind S3-N1 and the owner **reversed two
+> decisions this file records as settled**:
+>
+> 1. §Resuming item 4 below says the **adult interval-check exclusion** is settled and must
+>    not be re-litigated. **It was reopened and reversed.** An adult PCV20/PCV21 given under
+>    a year after PCV13 is now to be treated as **invalid and repeated** (owner clinical
+>    determination — *not* ACIP; the published sources say otherwise and the new handoff
+>    quotes them).
+> 2. §What's done item 3 describes S3-N1's advisory as load-bearing ("a FLAG, not a status").
+>    **Its chip words, the `offWindow` flag name, and its "no repeat is needed" copy are all
+>    being removed.** `vaxapp` is **retired**; MeningoVax is now the sole vocabulary
+>    authority, so the "mirrors vaxapp's settled pair" rationale no longer applies.
+>
+> The root cause: `validate.js` decides whether a timing rule may invalidate a dose from the
+> patient's **age** rather than from what the rule says — five gates on one axis, with two
+> further symptoms beyond the PCV20 case, one of them silent. Everything else in this file
+> (the P1-0 work, the four findings, the pre-existing queue) is still accurate.
+
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
 Branch: **`fix/s3-recorded-dose-intervals`**, off `main` @ `9a27e5a`. **Pushed → PR #22,
 CI green (`test: SUCCESS`), `OPEN / MERGEABLE` — awaiting the owner's merge decision.**
