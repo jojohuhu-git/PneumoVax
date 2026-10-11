@@ -161,6 +161,16 @@ live 2026-10-10 and confirmed to appear exactly once on their page:
 > `cdcChildSpecialSituations` — the paediatric "Special situations" non-IC list quoted
 > above, which names neither.
 
+**Risk status is TODAY's only** (stated in the UI from 2026-10-10, S13 — P6-7). The app
+collects risk factors as they are now and grades doses recorded years ago against them; it
+never records when a risk factor began or ended. The one case where that is visible:
+**PPSV23 at ages 2–5 is only *indicated* for an at-risk child**, yet a PPSV23 already given
+to a then-healthy three-year-old is counted as a valid dose if that child later becomes
+at-risk. That is correct — a real vaccine at a valid age (PPSV23 minimum age 2 years) — and
+is now said in `Disclaimer.jsx` rather than left to be inferred. Verified against the engine
+before the copy was written, and pinned by
+`regression-p6-7-current-risk-disclaimer.test.jsx`. Deliberately **not** a per-dose prompt.
+
 ⚠ **Re-verification method matters here.** CDC's notes pages keep their accordion bodies in
 the DOM but collapsed, so `innerText` returns ~9,200 characters with *"cochlear"* and
 *"diabetes"* both absent — a "0 matches for smoking" from that is meaningless. Use
