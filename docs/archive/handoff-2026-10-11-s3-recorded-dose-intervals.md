@@ -1,13 +1,13 @@
-# PneumoVax — Handoff after S3, the recorded-dose interval check (2026-10-11)
+# PneumoVax — Handoff after S3 + S3-N1, recorded-dose intervals (2026-10-11)
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
 Branch: **`fix/s3-recorded-dose-intervals`**, off `main` @ `9a27e5a`. **Pushed → PR #22,
-CI green (`test: pass`), `OPEN / MERGEABLE` — awaiting the owner's merge decision.**
+CI green (`test: SUCCESS`), `OPEN / MERGEABLE` — awaiting the owner's merge decision.**
 
-Working tree **clean** at `8ca1295`. Baseline was 353 passing (35 files); now **371 passing
-(36 files), all green.** Production build clean. All three PneumoRecs comparison harnesses
-(`adult`, `peds`, `hsct`) are **byte-identical before and after this change** — no clinical
-verdict moved on a correctly spaced record.
+Working tree **clean** at `244e2d3`. Baseline was 353 passing (35 files); now **393 passing
+(38 files), all green.** Production build clean. All three PneumoRecs comparison harnesses
+(`adult`, `peds`, `hsct`) are **byte-identical before and after**, checked twice — after S3
+and again after S3-N1. No clinical verdict moved on a correctly spaced record.
 
 This app's core promise is honesty: a silent wrong answer is worse than a crash.
 
@@ -28,6 +28,14 @@ S13's work is on `main` and the Pages deploy succeeded. Do not re-litigate it.
    walk can see the PCV doses that counted (the cross-stream design P1-4 asked for).
 2. **Docs** `8ca1295` — `CLINICAL_SPEC.md` §K, `docs/agent/clinical-rules.md`,
    `docs/agent/testing.md` (new invariant 10), and closure notes on the two peds-audit items.
+3. **`S3-N1`** `244e2d3` — the owner approved building it, so adults are no longer told
+   "On time" for a gap shorter than CDC advises. Such a dose reads **"Valid"** and carries
+   a note saying it still counts and needs no repeat. Two gaps are flagged: ≥1 year between
+   two adult PCV doses, and ≥1 year PCV15→PPSV23 — except where the 8-week minimum may be
+   *considered* (IC / cochlear implant / CSF leak), where only a gap under 8 weeks is
+   flagged. Copy mirrors vaxapp's settled "on time" / "valid" pair. **The advisory is a
+   FLAG (`offWindow`) on a `status: 'valid'` result, never a status of its own** — the dose
+   still gets its `effectiveDoseNum`, so nothing that counts doses can drop it.
 
 ## Three things the owner should know
 
@@ -45,40 +53,37 @@ S13's work is on `main` and the Pages deploy succeeded. Do not re-litigate it.
    same-visit sentence and **no** 8-week floor. Invalidating an adult dose would substitute
    a minimum for a recommendation — the mistake A-P1-1 was raised to correct. The cost: a
    70-year-old given PCV13 then PCV20 five weeks later still reads "On time".
-3. **A stale clinical rule was still live in the agent guide.**
-   `docs/agent/clinical-rules.md` described the adult PCV15→PPSV23 interval as risk-class
-   keyed and named `adultPpsvIntervalClass()`, deleted weeks ago — the rule from *before*
-   A-P1-1. S13 fixed this same stale rule in `testing.md` and missed this copy. Corrected.
-   **Worth a sweep:** a third copy may exist somewhere neither session looked.
+3. **The stale pre-A-P1-1 adult rule had FOUR copies, not one.** `testing.md` (fixed by
+   S13), `docs/agent/clinical-rules.md` — both its prose section *and* its summary table —
+   and `docs/agent/architecture.md`, twice (the interval table and the risk-class list).
+   All named `adultPpsvIntervalClass()`, deleted weeks ago. All corrected 2026-10-11; a
+   grep for it now returns only correctly-framed history notes. **This is the sweep the
+   owner folded into S8 — it is DONE for today's copies, but the durable fix is not.**
+   `P7-1`'s `rule-docs-match-code` tripwire is what stops a fifth appearing, and that is
+   still S8's to build.
+4. **A unit test can pass while the wiring is missing.** The S3-N1 unit tests passed
+   `riskIds` straight into `analyzeHistory` and were green while `recommend.js` never
+   forwarded it — so in the real app every adult was judged against the flat 1-year advice
+   and an immunocompromised patient who had legitimately used the 8-week option was told
+   their dose was early. **Driving the running app is the only thing that caught it.**
+   There is now a test block that goes through `recommend()`, and I removed the forwarding
+   line again to watch those assertions fail before trusting them.
 
 ## What's NOT done — the remaining queue
 
-**New, from this session (both written up in the ledger):**
-- **`S3-N1` (P2) — DECIDED 2026-10-11: build it. Recommend Opus 5 at high effort.** An
-  adult's too-close doses read "On time" with no caveat. The answer is a **third dose
-  status** — *counts, but earlier than CDC advises* — which is the "off-window" middle
-  verdict P1-0 asked about. It is right for adults and wrong for children (children have a
-  real minimum, so they get `invalid`).
-  **Why Opus:** the clinical question is already settled and sourced, so this is not
-  research — it earns Opus on the ledger's "a refactor touches many files at once" rule plus
-  one specific risk. The new status must be added in `validate.js` and then handled
-  correctly by every surface that renders a dose chip **and** by the engine's effective-dose
-  list. If any one of them treats "counts but early" as not-counting, an adult silently
-  loses a dose from their series — a dose-counting error, the category this app exists not
-  to produce. Needs the `design-review` skill: the copy must not read as an error.
+**New, from this session (written up in the ledger):**
+- ~~**`S3-N1`**~~ — **DONE 2026-10-11** (`244e2d3`), see above.
 - **`S3-N2` (P2)** — CDC Table 2's stricter dose-2→3 cell (previous dose at 7–11 months
   needs 8 weeks **and** age ≥12 months) is not enforced; the validator uses p2016's gentler
   footnote, so it can never demand a repeat CDC would have accepted. It is a **keying**
   question, which peds audit `P0-2` owns — do both halves together or the app will advise a
   date it then rejects.
-- **The stale-clinical-rule sweep → fold into S8, Sonnet 5 at medium effort** (owner
-  direction, 2026-10-11). S3 found a superseded rule still live in
-  `docs/agent/clinical-rules.md`; a third copy may exist somewhere. **Do not run this as its
-  own session.** S8 already carries `P7-1` (the plain-English rulebook) + `P2-7`
-  (`rule-docs-match-code.test.js`), and its stopping point is "the 12-month staleness
+- **The stale-clinical-rule sweep → folded into S8, Sonnet 5 at medium effort** (owner
+  direction, 2026-10-11). **Today's four copies are already fixed** (see finding 3 above),
+  so what remains for S8 is the DURABLE half: `P7-1` (the plain-English rulebook) + `P2-7`
+  (`rule-docs-match-code.test.js`), whose stopping point is "the 12-month staleness
   tripwire is live". S8 has to read every current rule statement anyway to build the
-  rulebook, so the sweep is nearly free there and duplicated work anywhere else. A one-off
-  sweep finds today's copy; the tripwire stops a fourth from appearing.
+  rulebook. A sweep finds today's copies; only the tripwire stops the next one.
 
 **Pre-existing:**
 - **`S10-N1` (P2)** — PCV21's 18-year gate is checked against CURRENT age, not age at the
@@ -105,26 +110,28 @@ PPSV23. Re-reproduce before writing anything.
 ## Why this is a good stopping point
 
 P1-0 was the most serious finding in either audit and it is closed, with the paediatric
-audit's P1-4 closed alongside it because they are the same code path. The suite is green,
-the tree is clean, the build is clean, and the comparison harnesses prove no verdict moved
-on a well-spaced record. Nothing remaining in the queue is blocked by this work, and the two
-items it spawned are both deliberately deferred with reasons, not dropped.
+audit's P1-4 closed alongside it because they are the same code path, and S3-N1 — the one
+owner decision the work spawned — decided and built. Recorded-dose timing is now coherent
+end to end: children get a real minimum and an `invalid` verdict, adults get the advice
+CDC actually writes and keep their dose. The suite is green, the tree is clean, the build
+is clean, and the comparison harnesses prove no verdict moved on a well-spaced record.
 
 ## Resuming
 
 1. `cd ~/Downloads/PneumoVax`. **PR #22 is open and green — merge it first** unless the
    owner wants changes, then `git checkout main && git pull`.
-2. Confirm the suite: **371 passing / 36 files** (or whatever `main` reports after the
+2. Confirm the suite: **393 passing / 38 files** (or whatever `main` reports after the
    squash merge). Stop and diagnose any mismatch before new work.
 3. **Say the session number and its recommended model + effort in one line, and WAIT**
-   (queue rule 1). **The owner's chosen order, 2026-10-11:** `S3-N1` first (**Opus 5 /
-   high**), then **S8** (**Sonnet 5 / medium**) with the stale-rule sweep folded in. After
-   those, likely **S4 — Sonnet 5 / medium**. **Owner picks the order — ask, don't default.**
+   (queue rule 1). **Next, by the owner's direction of 2026-10-11: S8 — Sonnet 5 at medium
+   effort** (Phase 2d: citation data, citation tests, coverage, plus `P7-1` + `P2-7`, the
+   rulebook and its match-code tripwire). After that, likely **S4 — Sonnet 5 / medium**.
+   **Owner picks the order — ask, don't default.**
 4. **Open owner decisions:** (a) merge PR #22; (b) whether to open a small PR against
-   MeningoVax for its inline styles. **`S3-N1` is no longer a decision — it was approved on
-   2026-10-11; build it.** **No clinical decisions are outstanding** — do not re-litigate
-   the adult PPSV23 interval (`CLAUDE.md` + `CLINICAL_SPEC.md` §K), the paediatric risk
-   lists (§C), or the adult interval-check exclusion (§K, and `S3-N1`).
+   MeningoVax for its inline styles. **No clinical decisions are outstanding** — do not
+   re-litigate the adult PPSV23 interval (`CLAUDE.md` + `CLINICAL_SPEC.md` §K), the
+   paediatric risk lists (§C), the adult interval-check exclusion (§K), or S3-N1's
+   advisory design (§K — it is a flag, not a status, and that is load-bearing).
 5. Per-item workflow: reproduce → failing test first (confirm it fails) → fix → full suite
    green → live-verify in the running app → one commit per finding ID. **For any guard whose
    assertion is "nothing is wrong", introduce the fault on purpose and watch it go red.**
