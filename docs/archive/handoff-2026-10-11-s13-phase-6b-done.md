@@ -1,3 +1,9 @@
+> **⚠️ SUPERSEDED (2026-10-11) — do not resume from this file.**
+> Its two open items are both resolved: **PR #21 was merged** (`9a27e5a`, Pages deploy
+> succeeded), and **S3 ran** against the queue it pointed at. The current handoff is
+> [handoff-2026-10-11-s3-recorded-dose-intervals.md](handoff-2026-10-11-s3-recorded-dose-intervals.md)
+> — use its queue and its test count (371 / 36 files), not the 353 / 35 below.
+
 # PneumoVax — Handoff after S13, Phase 6b (2026-10-11)
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
