@@ -33,7 +33,7 @@ import { daysBetween, todayISO, calendarIntervalElapsed } from './dateUtils.js';
 import { adultPpsvShorterMinimumApplies, ADULT_PPSV23_INTERVAL_MONTHS } from '../data/riskFactors.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS } from './format.js';
-import { productByKey, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
 import {
   ageMeetsMinimum,
   ageMeetsMinimumDays,
@@ -429,6 +429,55 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, priorPcv, riskIds) {
     if (result.status === 'noncounting') {
       // PCV7 — recorded but not added to the effective list.
       perDose.push({ ...result, effectiveDoseNum: null, doesNotCount: true });
+      continue;
+    }
+
+    // S14-4: an ADULT PCV dose recorded after the series was already complete
+    // BY PRODUCT (history already includes a PCV20 or PCV21) is an extra
+    // dose, not a mistimed one — see brands.js `completesSeries`. Until this
+    // existed, `adultPcvGapAdvice` graded such a dose purely on the gap since
+    // the previous one, so a PCV21 given five weeks after a completing PCV20
+    // read "given less than a year after the previous dose ... still counts"
+    // when no further PCV was ever recommended. Root cause: S14-RC handoff.
+    //
+    // ADULTS ONLY. `completesSeries` on a product means "no PPSV23 follow-up
+    // needed" — for a CHILD it does not mean "no more PCV doses of any kind":
+    // a PCV20 given as infant dose 2 of 4 still leaves the 12–15mo booster
+    // due, and an at-risk child's PCV20 only completes the series alongside
+    // other conditions pcvRiskChild checks (age band, catch-up count). Only
+    // in the adult rulebook does "includes PCV20/PCV21" mean the series is
+    // done outright (`pcvAdult`'s own "already complete by product" check).
+    const ageAtDoseForExtra = dose.date
+      ? ageAtDoseFromDate(dose, ageMonths, today, dob)
+      : ageMonths;
+    const priorCompletingDose = vaccine === 'PCV'
+      && ageAtDoseForExtra != null && ageAtDoseForExtra >= ADULT_SCHED_MIN_M
+      ? kept.find((d) => productByKey(d.product)?.completesSeries)
+      : null;
+    if (priorCompletingDose) {
+      const undatedExtra = !dose.date;
+      // Strip the early-advisory flag/sentence if validateOnePCV attached
+      // one — "still counts" would contradict "does not extend the series".
+      const { earlyAdvisory, reasons: resultReasons, ...rest } = result;
+      const reasons = earlyAdvisory ? resultReasons.slice(0, -1) : resultReasons;
+      perDose.push({
+        ...rest,
+        effectiveDoseNum: null,
+        extraDose: true,
+        ...(undatedExtra ? { extraDoseUnverified: true } : {}),
+        reasons: undatedExtra
+          ? [
+            'No date recorded, so this dose cannot be placed in time.',
+            'Do you mean this was an extra dose given after the series was already complete? With no date recorded, the app cannot tell whether this is a dose beyond the series or a series dose whose date is missing, so it is not counted. Adding the date settles it.',
+          ]
+          : [
+            ...reasons,
+            `Given after the series was already complete (a ${productLabel(priorCompletingDose.product)} dose already completes it): this dose does not extend the series.`,
+          ],
+      });
+      // Validly given, with a real date — worth anchoring the next dose's gap
+      // check, same as an invalid dose does.
+      anchorOn(dose);
       continue;
     }
 

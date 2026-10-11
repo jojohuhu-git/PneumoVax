@@ -78,6 +78,14 @@
     Driving the running app is what caught it. The `riskIds actually reach the validator`
     block goes through `recommend()` for exactly that reason; verified it fails without
     the forwarding line.
+12. **An extra PCV dose after the series completed does not extend it, and is adults
+    only** (S14-4). `regression-s14-4-extra-dose` keeps both halves live: *it bites* (a
+    PCV21 given after a completing PCV20 gets `extraDose: true`, `effectiveDoseNum: null`,
+    dropped from `effective`, not graded against `earlyAdvisory`); *it does not over-reach*
+    (the identical history pattern in a child — PCV20 as an early infant dose, another PCV
+    dose still due — keeps counting normally, because `completesSeries` means "no PPSV23"
+    for a child, not "no more doses"). Gated on the CURRENT dose's age vs.
+    `ADULT_SCHED_MIN_M`, matching the interval checks in invariant 10.
 
 ## Prove a new guard can fail
 

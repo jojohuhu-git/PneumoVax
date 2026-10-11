@@ -133,3 +133,26 @@ count; this one counts.)
 - **S14-2:** the chip no longer spells this out in a word — it just reads "Dose N of M"
   (MeningoVax's own wording, which is now the vocabulary source for both apps). The timing
   sentence still lives in the dose's reasons/explanation text.
+
+## Extra Doses: Given After the Series Was Already Complete (S14-4)
+
+An **adult** PCV dose recorded after history already includes a completing product
+(PCV20/PCV21, `completesSeries` in brands.js) is `extraDose: true`,
+`effectiveDoseNum: null`, excluded from `effective` — not an interval problem, and not
+invalid (it was validly given). Before S14-4 such a dose fell through to
+`adultPcvGapAdvice`, which only looks at the gap since the previous dose and has no way to
+know the series was already done: a PCV21 given 5 weeks after a completing PCV20 read
+"this dose still counts" when no further PCV was ever recommended.
+
+- **Gated on the CURRENT dose's age ≥ `ADULT_SCHED_MIN_M`, not on the product.** For a
+  child, `completesSeries` means "no PPSV23 needed," never "no more PCV doses" — an infant
+  PCV20 at dose 2 of 4 still leaves the 12–15mo booster due, and `pcvRiskChild`'s own
+  completeness checks require more than "includes PCV20" (age band, catch-up count).
+  Applying this rule to children was the exact over-generalisation the S14-RC root-cause
+  review flagged.
+- **An undated extra dose asks, not asserts** (`extraDoseUnverified`) — mirrors
+  MeningoVax's G6: with no date, the app cannot tell a genuine extra dose from an ordinary
+  series dose whose date is missing.
+- **Outranks the early-advisory flag.** If the dose would also have triggered
+  `earlyAdvisory`, that flag and its "still counts" sentence are dropped — they'd
+  contradict "this dose does not extend the series."

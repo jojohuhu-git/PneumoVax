@@ -439,6 +439,28 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   (or "Dose N" when the card tracks no total) regardless of timing; the advisory sentence
   above still appears in the dose's own explanation text, so the information is not lost —
   it has moved off the chip.
+- **An ADULT PCV dose recorded after the series was already complete by product is an
+  extra dose, not a mistimed one** (added 2026-10-11, S14-4). An adult series containing
+  PCV20 or PCV21 is complete — the engine's own "already complete by product" check
+  (`pcvAdult`) says so (`adultPcv20or21Complete`). Before S14-4, `validate.js` had no
+  matching per-dose rule: a PCV21
+  given after a completing PCV20 was graded purely on the gap since the previous dose, so
+  a 70-year-old's PCV21 five weeks after PCV20 read "given less than a year after the
+  previous dose ... this dose still counts" — an advisory for a dose no recommendation
+  ever asked for. Such a dose now reads `extraDose: true`, `effectiveDoseNum: null`,
+  excluded from the effective count — validly administered, but it does not extend the
+  series. Mirrors MeningoVax's own "extra dose" shape (`doseChipLabel.js`); an undated
+  extra dose asks rather than asserts (`extraDoseUnverified`), because the app cannot
+  place an undated row in time.
+
+  **ADULTS ONLY, deliberately** (`ADULT_SCHED_MIN_M`, not the PCV21 product gate — ages
+  18–18.99y route through the paediatric rulebook, see scheduleConstants.js). For a CHILD,
+  `completesSeries` on a product means "no PPSV23 follow-up needed," not "no more PCV
+  doses of any kind" — a PCV20 given as infant dose 2 of 4 still leaves the 12–15mo
+  booster due, and an at-risk child's series only completes alongside other conditions
+  `pcvRiskChild` checks (age band, catch-up dose count), never from the product alone.
+  Generalising this rule to children was exactly the mistake the S14-RC root-cause review
+  (docs/archive/) found and warned against repeating.
 - **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
   patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
   a birthday lands on an exact whole number of months. Patients entered as Years/Months keep

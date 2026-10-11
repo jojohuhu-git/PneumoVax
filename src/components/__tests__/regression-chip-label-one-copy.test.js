@@ -17,6 +17,8 @@ describe('the chip label lives in one module', () => {
   const OWNED = [
     'Recorded (does not count)',
     'Invalid',
+    'Extra dose — more than this series needs',
+    'Extra dose? — no date recorded',
   ];
 
   const CONSUMERS = [
@@ -67,5 +69,16 @@ describe('doseChipLabel branches', () => {
     expect(doseChipLabel({ status: 'invalid' })).toBe('Invalid');
     expect(doseChipLabel({ status: 'whatever' })).toBe('Unknown');
     expect(doseChipLabel(null)).toBeNull();
+  });
+
+  // S14-4: a dose recorded after the series was already complete by product.
+  it('an extra dose outranks the numbered-count branches', () => {
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: null, extraDose: true }, 2))
+      .toBe('Extra dose — more than this series needs');
+  });
+
+  it('an undated extra dose asks rather than asserts', () => {
+    expect(doseChipLabel({ status: 'unknown', effectiveDoseNum: null, extraDose: true, extraDoseUnverified: true }, 2))
+      .toBe('Extra dose? — no date recorded');
   });
 });

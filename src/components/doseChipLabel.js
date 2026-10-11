@@ -29,9 +29,15 @@
  */
 export function doseChipLabel(result, seriesTotal) {
   if (!result) return null;
-  const { status, effectiveDoseNum } = result;
+  const { status, effectiveDoseNum, extraDose, extraDoseUnverified } = result;
 
   if (status === 'noncounting') return 'Recorded (does not count)';
+  // S14-4: a dose given after the series was already complete by product
+  // (validate.js, `completesSeries`). G6 (MeningoVax, 2026-09-16) — ASK,
+  // don't assert, for an undated row: with no date the app cannot tell a
+  // genuine extra dose from an ordinary series dose whose date is missing.
+  if (extraDoseUnverified) return 'Extra dose? — no date recorded';
+  if (extraDose) return 'Extra dose — more than this series needs';
   if (status === 'valid') {
     if (seriesTotal == null) return `Dose ${effectiveDoseNum}`;
     if (effectiveDoseNum <= seriesTotal) return `Dose ${effectiveDoseNum} of ${seriesTotal}`;
@@ -47,8 +53,12 @@ export function doseChipLabel(result, seriesTotal) {
 
 /** The chip's CSS class, which follows the same verdict. */
 export function doseChipClass(result) {
-  const { status } = result;
+  const { status, extraDose, extraDoseUnverified } = result;
   if (status === 'noncounting') return 'dose-val-chip dose-val-noncounting';
+  // S14-4/S14-3: a dose set aside from the count for an administrative reason
+  // (not an error) shares MeningoVax's "off-window" blue — freed up by S14-2
+  // retiring its old meaning here.
+  if (extraDose || extraDoseUnverified) return 'dose-val-chip dose-val-offwindow';
   if (status === 'valid') return 'dose-val-chip dose-val-valid';
   if (status === 'invalid') return 'dose-val-chip dose-val-invalid';
   return 'dose-val-chip dose-val-unknown';
