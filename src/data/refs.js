@@ -26,6 +26,36 @@ export const REFS = {
     short: 'CDC Adult Notes',
   },
 
+  // Sentence-level citations (P6-3) ---------------------------------------
+  // These point at the SAME two pages as cdcChildPneumo / cdcAdultPneumo
+  // above, but each carries the ONE sentence a particular claim rests on, so
+  // cite() can deep-link the reader straight to it. The whole-page keys stay
+  // quote-free on purpose: they are the chips at the foot of a card, and a
+  // chip cites the whole recommendation rather than one sentence inside it.
+  // Two keys quoting one page share a single visible [N] (dedupe is by
+  // `page`), while each keeps its own link and hover text.
+  //
+  // Both quotes below were fetched live 2026-10-10 via the browser pane and
+  // confirmed to appear EXACTLY once on their page. (`innerText` silently
+  // omits CDC's collapsed accordion bodies — 9,184 chars with "cochlear" and
+  // "diabetes" both absent; `textContent` returns the real 75,723. Any future
+  // re-verification must use textContent and keep a positive control, or a
+  // "0 matches" result means nothing.)
+  cdcAdultRiskFactorList: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Immunization Schedule — pneumococcal, the risk-factor footnote to "Age 19–49 years with certain underlying medical conditions or other risk factors"',
+    short: 'CDC Adult Notes',
+    quote: 'Underlying medical conditions or other risk factors include alcoholism, chronic heart/liver/lung disease, chronic renal failure, cigarette smoking',
+    lastVerified: '2026-10-10',
+  },
+  cdcChildSpecialSituations: {
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Immunization Schedule — pneumococcal "Special situations", the non-immunocompromising risk group (CDC\'s complete paediatric enumeration; names neither smoking nor alcohol)',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Children and adolescents with cerebrospinal fluid leak; chronic heart disease; chronic kidney disease (excluding maintenance dialysis and nephrotic syndrome); chronic liver disease; chronic lung disease (including moderate persistent or severe persistent asthma); cochlear implant; or diabetes mellitus',
+    lastVerified: '2026-10-10',
+  },
+
   // CDC job aids ----------------------------------------------------------
   cdcCatchupJobAid: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',

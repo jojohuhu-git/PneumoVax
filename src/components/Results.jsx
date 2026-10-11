@@ -6,6 +6,7 @@ import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
+import RiskAgeNote from './RiskAgeNote.jsx';
 import { Chevron } from './icons.jsx';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
 
@@ -178,6 +179,11 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
               ? riskLabels.map((l, i) => <span key={i} className="meta-chip meta-risk">{l}</span>)
               : <span className="meta-chip meta-norisk">No risk factors</span>}
           </div>
+
+          {/* P3-9: the chips above list every tick, including an adult-only
+              one that the engine disregarded for a child. This is the sentence
+              that says so — the surface the owner's hold on PR #20 was about. */}
+          <RiskAgeNote riskIds={riskIds} ageMonths={ageMonths} />
           <div className="meta-actions">
             {onChange && (
               <button type="button" className="age-edit-btn"

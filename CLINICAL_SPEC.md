@@ -140,7 +140,31 @@ restore in *AAP et al. v. Kennedy*.
 
 Implemented as a single named filter, `pedsRiskIds()` in `data/riskFactors.js`, called
 inside `pedsRiskRowClass()` so the rule holds however it is called, and at the engine
-dispatch so an adult citation cannot reach a child's card either. **`hasAnyRisk()` and
+dispatch so an adult citation cannot reach a child's card either.
+
+**Made visible 2026-10-10 (S13, P3-9's UI half).** Stripping the tick silently was still a
+silent ignore: the Results summary listed the risk as a chip beside a recommendation that
+had disregarded it, with no sentence saying why. The owner held PR #20 on that basis. The
+fix is `logic/riskAgeNote.js` + `components/RiskAgeNote.jsx`, rendered on **both** surfaces
+that show the tick — the risk step and the Results header. The `adultOnly` age gate in
+`StepRisks.jsx` that used to HIDE the checkbox below 19y is removed (owner decision, option
+(b): show every risk at every age and explain the ones that do not act). The note's
+boundary is `ADULT_SCHED_MIN_M` (228), matching the engine's dispatch — **not**
+`PCV21_MIN_AGE_M` (216), which would make the note disagree with the engine at 18–19y.
+
+Its two claims are separately cited, each to the sentence that supports it, both fetched
+live 2026-10-10 and confirmed to appear exactly once on their page:
+
+> `cdcAdultRiskFactorList` — "Underlying medical conditions or other risk factors include
+> alcoholism, chronic heart/liver/lung disease, chronic renal failure, cigarette smoking"
+
+> `cdcChildSpecialSituations` — the paediatric "Special situations" non-IC list quoted
+> above, which names neither.
+
+⚠ **Re-verification method matters here.** CDC's notes pages keep their accordion bodies in
+the DOM but collapsed, so `innerText` returns ~9,200 characters with *"cochlear"* and
+*"diabetes"* both absent — a "0 matches for smoking" from that is meaningless. Use
+`textContent` (75,723 characters) and keep a positive control. **`hasAnyRisk()` and
 `hasNonIC()` are deliberately NOT narrowed** — both are reached only from the adult
 pathway, where these two risks are genuine, and `hasAnyRisk` gates whether a 19–49 adult
 gets a recommendation at all.
