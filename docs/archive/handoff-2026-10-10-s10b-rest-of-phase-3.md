@@ -1,8 +1,29 @@
 # PneumoVax — Handoff after S10b, the rest of Phase 3 (2026-10-10)
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
-Branch: **`fix/s10b-rest-of-phase-3`**, off `main` @ `1eac734`. **Pushed → PR #20.**
-Working tree **clean** at `07762f3`.
+Branch: **`fix/s10b-rest-of-phase-3`**, off `main` @ `1eac734`. **Pushed → PR #20, CI green
+(`test: pass`), `mergeStateStatus: CLEAN` — and DELIBERATELY NOT MERGED.**
+
+> **🔴 OWNER DECISION 2026-10-10: HOLD PR #20 until `P3-9`'s `RiskAgeNote` can ship with it.**
+> The owner was shown that merging now puts the three fixes live but leaves a child's
+> adult-only risk tick ignored with no sentence saying why, and chose to wait for the note
+> rather than ship a silent ignore. **Do not merge #20.** The note is blocked on `P6-3`
+> (S13's citation machinery), so this hold is expected to last several sessions.
+>
+> **The owner accepted the stated trade-off:** while #20 is held, the live site keeps giving
+> a 15-year-old with "Cigarette smoking" ticked an at-risk catch-up regimen (peds `P0-3`).
+> This is recorded so no later session "helpfully" merges to fix that — it is a decision,
+> not an oversight.
+>
+> **⚠ ONE QUESTION THIS RAISES — ASK THE OWNER, DO NOT DEFAULT.** The hold means `main` does
+> **not** contain S10b. So when the next code session starts (S3 or S4), does it branch off
+> `main` (and forgo S10b's `pedsRiskIds`, `ageEntry.js` and exact-weeks work) or off
+> `fix/s10b-rest-of-phase-3` (stacking a second PR on a held one)? **S3 in particular is
+> affected**: it must reuse `intervals.js`'s `GRACE_DAYS`, which IS on `main` (it shipped in
+> PR #19), so S3 can branch off `main` cleanly — but any session touching `riskFactors.js`,
+> `format.js`, `StepAge`, `Results` or `RecCard` will conflict with the held branch.
+
+Working tree **clean** at `4ef3650`.
 
 Baseline was 244 passing (21 files); now **298 passing (26 files), all green**. Production
 build clean. The three PneumoRecs comparison harnesses (`adult`, `peds`, `hsct`) were run on
@@ -76,11 +97,13 @@ not its own risk model. MeningoVax is out of scope (meningococcal). No sibling P
 ## What's NOT done — the remaining queue
 
 - **`P3-9`'s UI half** — `RiskAgeNote`: show adult-only risks at every age with a quiet doubt
-  note. **Still blocked on `P6-3`** (S13's citation machinery), unchanged. **Until it lands
-  there is a real gap:** a child's adult-only tick is now ignored by the engine and still
-  listed in the Results summary, but **no sentence explains why it did not act**. The owner's
-  decision (option b, 2026-10-10) was that the note is what tells the clinician the tick was
-  seen. That is the one piece of Phase 3 not closed.
+  note. **Still blocked on `P6-3`** (S13's citation machinery). **It now also gates PR #20**,
+  by owner decision 2026-10-10 (see the banner): a child's adult-only tick is ignored by the
+  engine and still listed in the Results summary, but no sentence explains why it did not
+  act, and the owner chose to hold the whole PR rather than ship that silent ignore. So
+  `P3-9` is on the critical path twice over — **raising the priority of `P6-3`/S13, which is
+  what unblocks both.** Worth asking the owner whether S13 should be pulled forward ahead of
+  S3–S9 for that reason.
 - **`S10-N1` (P2)** — PCV21's 18-year gate is checked against the patient's CURRENT age, not
   the age at the dose (`validate.js`). A 20-year-old with PCV21 recorded at 17 has that dose
   counted. Still deliberately left for a sourced item.
@@ -100,9 +123,16 @@ tree is clean, the build is clean, and the comparison harnesses prove nothing el
 
 ## Resuming
 
-1. `cd ~/Downloads/PneumoVax` — **first check whether PR #20 merged.** If yes,
-   `git checkout main && git pull`. If not, it is the blocker; nothing new should start.
-2. `npm test` — confirm **298 passing / 26 files** before any new work.
+1. `cd ~/Downloads/PneumoVax`. **PR #20 is held on purpose (see the banner at the top) —
+   it is NOT a blocker to be cleared, and it must NOT be merged.** Do not treat an unmerged
+   #20 as unfinished business.
+2. **Ask the owner which base the next session branches from** (`main`, or the held
+   `fix/s10b-rest-of-phase-3`) — see the ⚠ question in the banner. Then:
+   - off `main`: `git checkout main && git pull`; the suite there is **244 passing /
+     21 files**.
+   - off the held branch: `git checkout fix/s10b-rest-of-phase-3`; the suite is
+     **298 passing / 26 files**.
+   Confirm the matching count before any new work.
 3. **Say the session number and its recommended model + effort in one line, and WAIT**
    (queue rule 1). Likely next is **S3 — Opus 5 at high effort** (its gate is satisfied) or
    **S4 — Sonnet 5 at medium effort**. **Owner picks the order — ask, don't default.**
@@ -112,7 +142,7 @@ tree is clean, the build is clean, and the comparison harnesses prove nothing el
 5. Per-item workflow: reproduce → failing test first (confirm it fails) → fix → full suite
    green → live-verify in the running app → one commit per finding ID.
 6. Push/merge policy: **`main` is protected — branch, PR, squash merge. Never push to
-   `main`.**
+   `main`.** **Exception in force: PR #20 is held by owner decision — do not merge it.**
 7. **Dev-server gotcha found this session:** `preview_start` reported port 62597 while Vite
    had actually bound to **5174** (5173 was taken by another chat), and navigating to the
    reported port failed. Read the real port from `preview_logs` before driving the app. The
