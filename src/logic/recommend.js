@@ -72,6 +72,10 @@ function rec(o) {
     minIntervalMonths: o.minIntervalMonths ?? null,
     brands: o.brands ?? [],
     note: o.note,
+    // P6-3: one cite() object per literal "[c]" in `note`, in order. RecCard
+    // assigns the visible [N] at render time, so nothing here hardcodes a
+    // number. A note with no "[c]" leaves this empty and renders as before.
+    noteCites: o.noteCites ?? [],
     advisory: !!o.advisory,             // HSCT relative-to-transplant block
     // Series shape for the recorded-dose list's "Primary series" / "Boosters"
     // headings (owner decision 2026-09-15). Both null on cards whose total

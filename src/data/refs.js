@@ -138,6 +138,58 @@ export const REFS = {
 };
 
 // Resolve an array of ref keys to {url, label, short} objects, dropping unknowns.
+// These are the whole-card chips at the foot of a recommendation: always the
+// plain page URL (with its section anchor), never a #:~:text= fragment, because
+// a chip cites the whole recommendation rather than one sentence inside it.
 export function resolveRefs(keys = []) {
   return keys.map((k) => REFS[k]).filter(Boolean);
+}
+
+// ── P6-3 (S13, 2026-10-10): per-occurrence citations for inline [N] markers ──
+//
+// Build the deep link that scrolls the reader to the exact sentence a claim
+// rests on. Kept as a pure function of (url, quote) rather than of a ref key
+// so the anchor rule below can be tested on its own.
+//
+// ⚠ The anchor rule. A URL may already carry a section anchor —
+// `.../adult-notes.html#note-pneumo` — and naive concatenation would produce
+// `.../adult-notes.html#note-pneumo#:~:text=...`: TWO fragments in one URL,
+// which no browser honours, so the superscript silently stops jumping to the
+// sentence. So the quote link is built on the page part only. The anchor is
+// not lost: `cite()` keeps it on `page`, which is what the chips and the
+// dedupe identity use. MeningoVax hit this on its one anchored citation
+// (2026-09-17); here BOTH of the most-cited refs are anchored, so it is the
+// normal case rather than an edge one.
+export function highlightUrl(url, quote) {
+  if (!url) return undefined;
+  if (!quote) return url;
+  return `${url.split('#')[0]}#:~:text=${encodeURIComponent(quote)}`;
+}
+
+// One citation occurrence: keyed, but deliberately NOT numbered. Each one
+// corresponds to a single literal "[c]" placeholder in a note or a dose
+// verdict, in order. RecCard assigns the visible [N] at render time (by order
+// of first mention within the card, deduping repeats of the same `page`), so
+// the engine never hardcodes a number and a source cannot drift to a
+// different one by being typed wrong.
+//
+//   • `page`  — the plain page URL WITH its anchor. The dedupe identity: two
+//               keys quoting different sentences of the same document share
+//               one visible [N], while each keeps its own link and hover text.
+//   • `url`   — deep-links to the quoted sentence when there is a quote.
+//   • `label` — the quoted sentence, else the ref's full title. Shown on
+//               hover, because #:~:text= does not visibly scroll in every
+//               browser.
+//
+// Refs without a `quote` yet degrade to the page URL and the title: still a
+// working, numbered link, just not scrolled to a sentence. S8/P2-8 owns the
+// full `quote` + `lastVerified` sweep of all 18 refs.
+export function cite(key) {
+  const c = REFS[key];
+  return {
+    key,
+    page: c?.url,
+    url: highlightUrl(c?.url, c?.quote),
+    label: c?.quote ?? c?.label,
+  };
 }

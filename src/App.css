@@ -349,6 +349,17 @@ body {
 .rec-brand-item { display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base); color: var(--gy); padding: 2px 0; }
 .rec-brand-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gy4); flex-shrink: 0; }
 .rec-note { font-size: var(--fs-base); color: var(--gy2); line-height: 1.55; margin-bottom: var(--sp-12); }
+/* P6-3: [N] superscript deep-links inside .rec-note and the dose verdicts —
+   one per cited sentence. Rule matched to MeningoVax's .note-cite so the two
+   sibling apps render a citation identically. */
+.note-cite {
+  font-size: var(--fs-2xs);
+  vertical-align: super;
+  color: var(--c);
+  text-decoration: none;
+  padding: 0 1px;
+}
+.note-cite:hover { text-decoration: underline; }
 .rec-citations {
   display: flex; flex-wrap: wrap; gap: var(--sp-8); margin-top: var(--sp-8); padding-top: var(--sp-12);
   border-top: 1px solid var(--gy6); min-width: 0; overflow: hidden;

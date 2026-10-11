@@ -38,14 +38,93 @@ function describeDose(dose, idx, ageMonths, today, dob) {
   return parts.join(' · ');
 }
 
+// ── P6-3 (S13, 2026-10-10): numbered inline citations ────────────────────
+//
+// Before this, a note was one plain string and its sources were chips at the
+// foot of the card. Reproduced live on a 70-year-old with no risks and no
+// history: the note made three separate claims (PCV20-or-PCV21, the
+// PCV15→PPSV23 alternative, and "each completes the series alone") above three
+// unlabelled chips, with nothing saying which source backed which claim.
+//
+// `[c]` placeholders in note and verdict text become clickable numbered
+// superscripts. Numbers are assigned HERE, at render time — never hardcoded in
+// the engine — so a source cannot drift to a different number by being typed
+// wrong.
+
+// Assign [N] by order of first mention. The key is the source DOCUMENT
+// (cite()'s `page`), not the citation key, so two sentences quoted from one
+// page share a number while each keeps its own link and hover text: the number
+// identifies the document, the link identifies the sentence.
+function makeCiteNumberer() {
+  const numberByPage = new Map();
+  let nextNumber = 1;
+  return (dedupeKey) => {
+    if (!numberByPage.has(dedupeKey)) numberByPage.set(dedupeKey, nextNumber++);
+    return numberByPage.get(dedupeKey);
+  };
+}
+
+// Split text on "[c]" and replace each marker with its citation's superscript.
+// `cites` is one entry per marker, in order.
+//
+// An orphan marker (more "[c]" than cites) is DROPPED, never paired with the
+// previous citation — attaching a source to a claim it does not support is the
+// one failure mode worse than no citation at all. It is dropped rather than
+// shown raw so a clinician never reads "[c]" as if it meant something; the
+// guard that stops the mismatch arising in the first place is the engine-wide
+// marker/cite count test.
+function renderNoteWithCites(text, cites, numberFor = makeCiteNumberer()) {
+  if (!cites || cites.length === 0) return text;
+  const parts = String(text).split('[c]');
+  return parts.flatMap((part, i) => {
+    if (i === parts.length - 1) return [part];
+    const c = cites[i];
+    if (!c) return [part];
+    return [part, (
+      <a
+        key={i}
+        href={c.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="note-cite"
+        title={c.label}
+      >
+        {`[${numberFor(c.page ?? c.key)}]`}
+      </a>
+    )];
+  });
+}
+
+// One numbering sequence per CARD, so the note and a dose verdict can never
+// show a different [1] for the same document.
+//
+// The map is pre-seeded here, in the order the reader meets the citations
+// going down the card — recorded doses, then any other-vaccine history, then
+// the note — because React runs a child component's body after its parent's,
+// so seeding on first render would number the note before the verdicts above
+// it. (Same rule as MeningoVax's cardCiteNumberer, applied to this layout:
+// PneumoVax has no booster line, and its note sits below both dose lists.)
+function cardCiteNumberer(doseValidations, otherValidations, noteCites) {
+  const numberFor = makeCiteNumberer();
+  const seed = (validations) => {
+    for (const v of validations || []) {
+      for (const c of v?.reasonCites || []) numberFor(c.page ?? c.key);
+    }
+  };
+  seed(doseValidations);
+  seed(otherValidations);
+  for (const c of noteCites || []) numberFor(c.page ?? c.key);
+  return numberFor;
+}
+
 // Render a small status chip + reasons for a single recorded dose, reusing
 // validate.js's analyzeHistory output (never recomputed here). PneumoVax adds
 // a fourth status beyond MeningoVax's three — 'noncounting' — for PCV7,
 // which was validly given but per ACIP/immunize.org never counts toward the
 // series; it must not read as "Invalid".
-function DoseValidation({ result, seriesTotal }) {
+function DoseValidation({ result, seriesTotal, numberFor }) {
   if (!result) return null;
-  const { status, reasons, detail, effectiveDoseNum, doesNotCount } = result;
+  const { status, reasons, detail, reasonCites, effectiveDoseNum, doesNotCount } = result;
 
   const chipClass =
     status === 'valid' ? 'dose-val-chip dose-val-valid'
@@ -71,9 +150,23 @@ function DoseValidation({ result, seriesTotal }) {
       )}
       {showReasons && (
         <div className="dose-val-reasons">
-          {reasons.map((r, i) => (
-            <span key={i} className="dose-val-reason">{r}</span>
-          ))}
+          {/* P6-3: `reasonCites` is one entry per "[c]" across the whole
+              reasons array, in order (validate.js). Each reason takes the
+              slice matching its own marker count, so reasons the walk appends
+              afterwards — which carry no marker — never disturb the pairing. */}
+          {(() => {
+            let consumed = 0;
+            return reasons.map((r, i) => {
+              const markers = String(r).split('[c]').length - 1;
+              const cites = markers > 0 ? (reasonCites ?? []).slice(consumed, consumed + markers) : null;
+              consumed += markers;
+              return (
+                <span key={i} className="dose-val-reason">
+                  {cites && cites.length ? renderNoteWithCites(r, cites, numberFor) : r}
+                </span>
+              );
+            });
+          })()}
           {detail && <span className="dose-val-detail">{detail}</span>}
         </div>
       )}
@@ -113,7 +206,7 @@ export function doseRowsWithGroups(doses, doseValidations, primaryTotal) {
 }
 
 // A list of recorded doses with validity chips, labeled by `label`.
-function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null, today = null, seriesTotal = null, primaryTotal = null }) {
+function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null, today = null, seriesTotal = null, primaryTotal = null, numberFor }) {
   if (!doses || doses.length === 0) return null;
   return (
     <div className="rec-progress" data-testid="rec-progress">
@@ -127,7 +220,7 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null,
           ) : (
             <li key={row.index} className="rec-progress-dose-row">
               <span className="rec-progress-dose-text">{describeDose(row.dose, row.index, ageMonths, todayISO(today), dob)}</span>
-              <DoseValidation result={doseValidations[row.index]} seriesTotal={seriesTotal} />
+              <DoseValidation result={doseValidations[row.index]} seriesTotal={seriesTotal} numberFor={numberFor} />
             </li>
           )
         ))}
@@ -150,7 +243,9 @@ function timingClass(status, dueToday) {
 }
 
 export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, dob = null, today = null, otherHistory = null }) {
-  const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, citations, advisory } = rec;
+  const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, noteCites, citations, advisory } = rec;
+  // P6-3: one numbering sequence for the whole card, seeded in reading order.
+  const numberFor = cardCiteNumberer(doseValidations, otherHistory?.doseValidations, noteCites);
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
   // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due
@@ -221,6 +316,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           today={today}
           seriesTotal={seriesTotal}
           primaryTotal={primaryTotal}
+          numberFor={numberFor}
         />
 
         {otherHistory && (
@@ -231,10 +327,15 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
             ageMonths={ageMonths}
             dob={dob}
             today={today}
+            numberFor={numberFor}
           />
         )}
 
-        {note && <div className="rec-note">{note}</div>}
+        {note && (
+          <div className="rec-note">
+            {renderNoteWithCites(note, noteCites, numberFor)}
+          </div>
+        )}
 
         {citations && citations.length > 0 && (
           <div className="rec-citations">
