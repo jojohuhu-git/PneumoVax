@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { recommend } from '../logic/recommend.js';
-import { analyzeHistory } from '../logic/validate.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
@@ -97,9 +96,15 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   // a labeled secondary block on the first card that DOES render, so a
   // clinician can still see it (and, critically, the "PCV7 does not count"
   // note) rather than it silently disappearing.
+  // P6-5 (S13): the ENGINE's walk, not a second one of our own. `recommend()`
+  // already ran analyzeHistory for both vaccines to build the recommendation
+  // above; reading its result means the chip beside a dose can never disagree
+  // with the recommendation that was computed from it. Results used to call
+  // analyzeHistory again with the same arguments — the two agreed only by
+  // coincidence, with nothing enforcing it.
   const histories = {
-    PCV: { label: 'PCV', doses: pcvDoses, doseValidations: analyzeHistory('PCV', pcvDoses, ageMonths ?? 0, today, dob).perDose },
-    PPSV23: { label: 'PPSV23', doses: ppsv23Doses, doseValidations: analyzeHistory('PPSV23', ppsv23Doses, ageMonths ?? 0, today, dob).perDose },
+    PCV: { label: 'PCV', doses: pcvDoses, doseValidations: result.perDose.pcv },
+    PPSV23: { label: 'PPSV23', doses: ppsv23Doses, doseValidations: result.perDose.ppsv23 },
   };
   const seenVaccine = {};
   function historyPropsFor(vaccine) {

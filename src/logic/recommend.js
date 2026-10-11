@@ -977,7 +977,12 @@ export function recommend(input) {
       recs: [],
       hsct: null,
       pcv21Geo: null,
-      perDose: { pcv: {}, ppsv23: {} },
+      // P6-5 (S13, 2026-10-10): ARRAYS, not `{}`. Every other return path
+      // sets these to analyzeHistory().perDose, which is an array, so the
+      // hard-stop path was the one shape a consumer could not iterate. Latent
+      // while Results re-walked the history itself; a crash the moment it
+      // started reading these instead.
+      perDose: { pcv: [], ppsv23: [] },
       meta: { ageMonths: am, dob, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
     };
   }

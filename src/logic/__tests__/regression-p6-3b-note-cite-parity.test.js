@@ -80,18 +80,25 @@ function noteMarkers(note) {
 }
 
 // Walk every rec and every dose verdict the engine can emit across the sweep.
+// ⚠ `recommend()` returns `perDose: { pcv: [...], ppsv23: [...] }` — the
+// ARRAYS directly, not objects wrapping a `perDose` field. An earlier version
+// of this sweep read `out.perDose[which].perDose`, which is always undefined,
+// so it walked ZERO dose verdicts and the two verdict assertions below passed
+// without testing anything. The combined "sweep is not empty" check did not
+// catch it, because the notes alone cleared the threshold. Hence the separate
+// per-kind counts returned here, and the separate floor asserted on each.
 function sweep(visit) {
-  let seen = 0;
+  const seen = { notes: 0, verdicts: 0 };
   for (const ageMonths of AGES) {
     const dob = dobForAgeMonths(ageMonths);
     for (const riskIds of RISK_SETS) {
       for (const history of historiesFor(dob)) {
         const out = recommend({ ageMonths, dob, riskIds, today: TODAY, ...history });
-        for (const rec of out.recs ?? []) { visit({ kind: 'note', ageMonths, riskIds, rec }); seen++; }
+        for (const rec of out.recs ?? []) { visit({ kind: 'note', ageMonths, riskIds, rec }); seen.notes++; }
         for (const which of ['pcv', 'ppsv23']) {
-          for (const v of out.perDose?.[which]?.perDose ?? []) {
+          for (const v of out.perDose?.[which] ?? []) {
             visit({ kind: 'verdict', ageMonths, riskIds, verdict: v });
-            seen++;
+            seen.verdicts++;
           }
         }
       }
@@ -101,11 +108,12 @@ function sweep(visit) {
 }
 
 describe('P6-3b — every [c] marker is paired with exactly one citation', () => {
-  it('sweeps a non-trivial number of recommendations (the sweep is not empty)', () => {
-    // Guard-on-the-guard: a sweep that silently produced nothing would make
-    // every assertion below pass vacuously.
+  it('sweeps a non-trivial number of BOTH notes and dose verdicts', () => {
+    // Guard-on-the-guard, counted per kind. A combined total hid a sweep that
+    // walked thousands of notes and not one verdict — see the note on sweep().
     const seen = sweep(() => {});
-    expect(seen).toBeGreaterThan(1000);
+    expect(seen.notes, 'the sweep walked no recommendation notes').toBeGreaterThan(1000);
+    expect(seen.verdicts, 'the sweep walked no dose verdicts').toBeGreaterThan(500);
   });
 
   it('no note has more markers than citations, or more citations than markers', () => {
