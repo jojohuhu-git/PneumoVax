@@ -62,8 +62,14 @@ Recorded as `noncounting`, dropped from effective series. High-risk patients tre
 ### PCV15 Always Requires PPSV23
 `requiresPPSV23: true` in `brands.js`. Never emit a PCV15 rec without the PPSV23 follow-up path.
 
-### Adult PPSV23 Interval Is Risk-Class-Keyed
-Single source: `adultPpsvIntervalClass()` in `riskFactors.js`. IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year. Never hardcode the interval.
+### Adult PCV15→PPSV23 Interval Is ≥1 Year, With 8 Weeks Named As An Option
+**Amended 2026-10-10 by owner decision (A-P1-1).** The previous rule ("risk-class-keyed: IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year") had no age term and substituted the minimum *for* the recommendation.
+
+When PCV15 is used it is followed by PPSV23 **≥1 year later**, for **every adult (19+)**, and the series is then complete. The **8-week minimum may be *considered*** for an immunocompromising condition, cochlear implant, or CSF leak — the app **names** that option in the note and never silently substitutes it. Single source: `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in `riskFactors.js`. Never hardcode the interval.
+
+CDC's adult schedule notes print this sentence identically under *both* "Age 50 years or older" and "Age 19–49 years…", so there is no age split. CDC's Timing Job Aid shows a flat "8 weeks" on its 19–49 pages; that is a per-page simplification and the schedule notes govern.
+
+`adultPpsvShorterMinimumApplies()` answers the **interval** question only. Do not reuse it to decide which CDC *row* a patient is on — the predicate it replaced did both jobs, and that coupling is why flattening the interval nearly moved 19–49 cochlear/CSF patients off the "≥5 years" row onto "review at 50".
 
 ### dateUtils.js Is Mirror-Synced
 `dateUtils.js` is byte-for-byte identical across PneumoVax, MeningoVax, and vaxapp. If you change it here, apply the same change to the sibling apps.

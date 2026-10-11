@@ -1,3 +1,5 @@
+import { calendarMonthsBetween, todayISO } from './dateUtils.js';
+
 // format.js — UI display helpers (not clinical logic)
 
 /**
@@ -7,20 +9,46 @@
  */
 export function fmtAgeMonths(am) {
   if (am == null) return '';
+  // P3-6 (S10): a negative age used to fall into the "Birth" branch below, so
+  // -7 months and 0 months printed the same word. A dose dated before the
+  // patient was born then read "Given at ~birth" — an ordinary-looking newborn
+  // dose. A value that cannot exist must not be mistakable for a patient.
+  if (am < 0) return 'Before birth';
   if (am < 0.25) return 'Birth';
   if (am <= 2) {
-    const wks = Math.round(am * 4.348);
+    const wks = floorAge(am * 4.348);          // 1 month ≈ 4.348 weeks
     if (wks < 1) return 'Birth';
     return `${wks} week${wks === 1 ? '' : 's'}`;
   }
   if (am < 24) {
-    const mo = Math.round(am);
+    const mo = floorAge(am);
     return `${mo} month${mo === 1 ? '' : 's'}`;
   }
-  const years = Math.floor(am / 12);
-  const months = Math.round(am % 12);
+  // Nudge ONCE, in months, then split. Applying floorAge to am/12 and am%12
+  // separately would let the same epsilon act twice: 59.9999999 floors to 5
+  // years AND to a 12-month remainder, and carrying that remainder produced
+  // "6 years" for an age that is five. Splitting a single nudged value cannot
+  // produce a 12-month remainder at all.
+  const a = am + FLOOR_EPS;
+  const years = Math.floor(a / 12);
+  const months = Math.floor(a - years * 12);
   if (months === 0) return `${years} year${years === 1 ? '' : 's'}`;
   return `${years} year${years === 1 ? '' : 's'} ${months} month${months === 1 ? '' : 's'}`;
+}
+
+// P3-4 (S10, 2026-10-10): ages floor, they never round up. A dose given two
+// weeks before a birthday must not display as if it were given ON it —
+// PneumoVax prints an age immediately beside a threshold claim about that
+// birthday (A-P0-1's 65-year rule), so rounding up reads as the patient having
+// crossed a line they had not.
+//
+// The epsilon is load-bearing: an age that IS exactly five years can arrive
+// from the arithmetic as 59.9999999, and flooring that bare would print
+// "4 years". 1e-6 of a month is about 2.6 seconds — far finer than a day, far
+// coarser than floating-point noise.
+export const FLOOR_EPS = 1e-6;
+export function floorAge(n) {
+  return Math.floor(n + FLOOR_EPS);
 }
 
 /** Format ISO date (YYYY-MM-DD) → "Jul 3, 2026". */
@@ -47,12 +75,18 @@ export function ageGroup(am) {
   return 'Older adult (≥50y)';
 }
 
-/** Compute ageMonths from a DOB ISO string and a reference date (defaults today). */
+/** Compute ageMonths from a DOB ISO string and a reference date (defaults today).
+ *
+ * P3-2/P3-1 (S10, 2026-10-10): this divided elapsed milliseconds by an averaged
+ * 30.4375 days per month, so a birthday-to-birthday span did not land on a
+ * whole number — a child on their 2nd birthday measured 25.00205 months from a
+ * month earlier, and a dose on that birthday was graded "below the 2-year
+ * minimum age for PPSV23". Counting real calendar months instead makes an
+ * anniversary exact. See dateUtils.calendarMonthsBetween.
+ */
 export function dobToAgeMonths(dobISO, refISO) {
   if (!dobISO) return null;
-  const ref = refISO ? new Date(refISO + 'T00:00:00') : new Date();
-  const dob = new Date(dobISO + 'T00:00:00');
-  const diffMs = ref - dob;
-  if (diffMs < 0) return null;
-  return diffMs / (1000 * 60 * 60 * 24 * 30.4375);
+  const ref = refISO || todayISO();
+  if (dobISO > ref) return null;   // a date of birth in the future is not an age
+  return calendarMonthsBetween(dobISO, ref);
 }

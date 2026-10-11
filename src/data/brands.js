@@ -38,7 +38,12 @@ export const VAX = {
 // routine start. Expressed in months for the validator's float-month comparison.
 // (42 / 30.4375 ≈ 1.38mo.) Using the routine 2-month start as the minimum wrongly
 // rejects a dose given at the recommended 2-month visit (56–62 days < 60.9 days).
-export const PCV_MIN_AGE_M = 42 / 30.4375;
+// ACIP's PCV floor is 6 weeks, and weeks are EXACT day counts ("4 weeks = 28
+// days", CDC schedule notes). 42 is therefore the real number and the months
+// form is the derived one — stated here once so the two can never drift (S10;
+// see also the number census in docs/archive/).
+export const PCV_MIN_AGE_DAYS = 42;
+export const PCV_MIN_AGE_M = PCV_MIN_AGE_DAYS / 30.4375;
 
 // PCV product catalog. `key` matches the value stored in history doses.
 export const PCV_PRODUCTS = [
@@ -51,6 +56,7 @@ export const PCV_PRODUCTS = [
     requiresPPSV23: false,
     completesSeries: false,
     minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks
+    minAgeDays: PCV_MIN_AGE_DAYS,  // the floor as CDC states it: exact days
     maxAgeM: 999,
     historyOnly: true,
     childOk: true,
@@ -66,6 +72,7 @@ export const PCV_PRODUCTS = [
     requiresPPSV23: false,  // alone does NOT complete; residual dose handled by matrix
     completesSeries: false,
     minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks
+    minAgeDays: PCV_MIN_AGE_DAYS,  // the floor as CDC states it: exact days
     maxAgeM: 999,
     historyOnly: true,      // phased out of new series; record-only
     childOk: true,
@@ -81,6 +88,7 @@ export const PCV_PRODUCTS = [
     requiresPPSV23: true,   // a series ending in PCV15 needs a PPSV23 follow-up
     completesSeries: false,
     minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks (was 2mo routine start — rejected valid 2mo doses)
+    minAgeDays: PCV_MIN_AGE_DAYS,  // the floor as CDC states it: exact days
     maxAgeM: 999,
     historyOnly: false,
     childOk: true,
@@ -96,6 +104,7 @@ export const PCV_PRODUCTS = [
     requiresPPSV23: false,
     completesSeries: true,  // a series including PCV20 = complete (no PPSV23)
     minAgeM: PCV_MIN_AGE_M,  // ACIP 6 weeks
+    minAgeDays: PCV_MIN_AGE_DAYS,  // the floor as CDC states it: exact days
     maxAgeM: 999,
     historyOnly: false,
     childOk: true,

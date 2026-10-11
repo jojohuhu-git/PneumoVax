@@ -16,10 +16,14 @@ const STATUS_LABELS = {
 };
 
 // One recorded past dose → "D1 · Jul 3, 2025 · age 11 years · PCV15 (Vaxneuvance)"
-function describeDose(dose, idx, ageMonths, today) {
+function describeDose(dose, idx, ageMonths, today, dob) {
   const parts = [`D${idx + 1}`];
   parts.push(dose?.date ? fmtDate(dose.date) : 'date unknown');
-  const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today) : null;
+  // P3-1/P3-3 (S10): with a date of birth on file this is measured from the
+  // birthday, so the age printed here is the same number the validator graded
+  // the dose against. Previously the card and the validator each subtracted
+  // their own approximation and could disagree by half a month.
+  const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
   parts.push(ageAtDose != null ? `age ${fmtAgeMonths(ageAtDose)}` : 'age unknown');
   parts.push(dose?.product ? productLabel(dose.product) : 'product unknown');
   return parts.join(' · ');
@@ -100,7 +104,7 @@ export function doseRowsWithGroups(doses, doseValidations, primaryTotal) {
 }
 
 // A list of recorded doses with validity chips, labeled by `label`.
-function DoseHistoryList({ label, doses, doseValidations, ageMonths, seriesTotal = null, primaryTotal = null }) {
+function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null, today = null, seriesTotal = null, primaryTotal = null }) {
   if (!doses || doses.length === 0) return null;
   return (
     <div className="rec-progress" data-testid="rec-progress">
@@ -113,7 +117,7 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths, seriesTotal
             </li>
           ) : (
             <li key={row.index} className="rec-progress-dose-row">
-              <span className="rec-progress-dose-text">{describeDose(row.dose, row.index, ageMonths, todayISO())}</span>
+              <span className="rec-progress-dose-text">{describeDose(row.dose, row.index, ageMonths, todayISO(today), dob)}</span>
               <DoseValidation result={doseValidations[row.index]} seriesTotal={seriesTotal} />
             </li>
           )
@@ -136,7 +140,7 @@ function timingClass(status, dueToday) {
   return 'timing-neutral';
 }
 
-export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, otherHistory = null }) {
+export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, dob = null, today = null, otherHistory = null }) {
   const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, citations, advisory } = rec;
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
@@ -204,6 +208,8 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           doses={doses}
           doseValidations={doseValidations}
           ageMonths={ageMonths}
+          dob={dob}
+          today={today}
           seriesTotal={seriesTotal}
           primaryTotal={primaryTotal}
         />
@@ -214,6 +220,8 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
             doses={otherHistory.doses}
             doseValidations={otherHistory.doseValidations}
             ageMonths={ageMonths}
+            dob={dob}
+            today={today}
           />
         )}
 

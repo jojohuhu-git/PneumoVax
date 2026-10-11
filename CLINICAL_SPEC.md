@@ -186,20 +186,36 @@ Prior-vaccine branches:
 ## §H — Adults ≥50 y (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`; routine lowered 65→50 eff. 2024-10-23)
 
 Routine for ALL adults ≥50 regardless of risk.
-- **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 ≥1y.
+- **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 **≥1 year** (8-week minimum may be *considered* for IC / cochlear implant / CSF leak — named, never substituted; A-P1-1).
 - **PPSV23 only:** PCV15/20/21 ≥1y after PPSV23 (PCV15 → no further PPSV23).
 - **PCV13 only:** PCV20 or PCV21 ≥1y → complete.
-- **PCV13 + PPSV23 (PPSV23 at <65):** PCV20 or PCV21 **≥5y** after last pneumo (shared
-  clinical decision-making) → complete.
-- **PCV13 + PPSV23 (PPSV23 at ≥65):** shared clinical decision — PCV20/PCV21 ≥5y, or nothing.
-- **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 ≥1y (or substitute PCV20/21).
+- **PCV13 + PPSV23, and NO PPSV23 was received at ≥65:** PCV20 or PCV21 **≥5y** after the
+  last pneumococcal dose → complete. This is a **plain recommendation**, not shared
+  decision-making. (Corrected 2026-10-10, S10: this line previously said "shared clinical
+  decision-making" for both rows, which is the documentation half of A-P0-1.)
+- **PCV13 + PPSV23, AND PPSV23 was received at ≥65:** **shared clinical decision-making** —
+  PCV20/PCV21 ≥5y, or nothing.
+- **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 **≥1 year** (or substitute PCV20/21). Series complete once given.
 - **PCV15 & PPSV23, or PCV20, or PCV21 (any age):** complete.
 
-> Implementation note on `PCV13+PPSV23 at ≥65`: PneumoVax does not store the age at which
-> each historical dose was given for adults (history is dose-counts of products). It models
-> the PPSV23-age branch using the **patient's current age** as a proxy: if current age ≥65
-> and PCV13+PPSV23 present, the residual PCV20/21 is offered as **shared-decision** (status
-> `shared-decision`); if <65, it is `due` with the ≥5y interval. Flagged in HANDOFF.
+> Implementation note on `PCV13+PPSV23 at ≥65` (rewritten 2026-10-10, S10 — A-P0-1).
+> The split is decided on the **date of the PPSV23 dose versus the patient's real 65th
+> birthday**, to the day. When the clinician enters a date of birth, the engine keeps it
+> (`patientAge.js`) and compares `ppsvDate >= addCalendarMonths(dob, 780)`. "At age 65 years
+> or older" includes the birthday itself.
+>
+> CDC's 4-day grace does **not** apply to this test: the grace governs whether a dose that
+> was given counts as valid, and this test instead selects which of two recommendation rows
+> the patient is on.
+>
+> Fallbacks, in order: an **undated** PPSV23 falls back to the patient's current age as a
+> proxy; a patient entered as **Years/Months** (no date of birth) falls back to current age
+> minus the calendar months since the dose. Both are approximations and are labelled as such
+> in the Age step's own copy.
+>
+> This previously used `am - Math.round(daysBetween(ppsvDate, today) / 30.4375) >= 780` — a
+> float current-age minus an elapsed span rounded to whole months — which misclassified
+> 2,782 of 29,565 swept (dob, dose-date) pairs, all within −14…+15 days of the birthday.
 
 ---
 
@@ -245,3 +261,45 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   **IC precedence over non-IC** (the ≥8wk interval and the IC catch-up rows win).
 - **A series containing PCV20 (or PCV21 in adults) ⇒ no PPSV23.**
 - **PCV15 (without a later PCV20/21) ⇒ a PPSV23 follow-up is required to be complete.**
+- **Adult PCV15→PPSV23 interval = ≥1 year, at EVERY adult age** (owner decision 2026-10-10,
+  A-P1-1). CDC Adult Schedule Notes, fetched live 2026-10-10 — the sentence appears twice on
+  that page, identically, under "Age 50 years or older" **and** under "Age 19–49 years with
+  certain underlying medical conditions":
+  > "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use
+  > minimum interval of 8 weeks for adults with an immunocompromising condition, cochlear
+  > implant, or cerebrospinal fluid leak)."
+
+  So ≥1 year is the **recommendation** and 8 weeks a minimum that may be **considered** for
+  IC / cochlear implant / CSF leak, at any adult age. The app prints the year and **names** the
+  8-week option; it never substitutes one for the other. The series is complete once the
+  PPSV23 is given. (CDC's Timing Job Aid prints a flat "8 weeks" on its 19–49 pages — a
+  per-page simplification; the schedule notes govern.) Single source:
+  `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()`.
+- **The 19–49 PCV13+PPSV23 row split is a SEPARATE rule** from the interval above, even though
+  both name IC / cochlear implant / CSF leak. Cochlear implant, CSF leak or an
+  immunocompromising condition → PCV20/PCV21 **≥5 years**; chronic conditions only → no dose
+  now, review at 50. One predicate used to serve both and must not again (A-P1-1).
+- **CDC's 4-day grace** (added 2026-10-10, S10 — peds audit P1-1). CDC Child and Adult
+  Schedule Notes, "Additional Information", both fetched live 2026-10-10:
+  > "Vaccine doses administered ≤4 days before the minimum age or interval are considered
+  > valid. Doses of any vaccine administered ≥5 days earlier than the minimum age or minimum
+  > interval should not be counted as valid and should be repeated as age appropriate."
+
+  Implemented in `logic/intervals.js` (`GRACE_DAYS = 4`) and applied to the minimum-age
+  checks in `validate.js`. It is a **validity** rule and deliberately does **not** move the
+  scheduler: `earliestNextDate` still shows the real minimum, because CDC's sentence permits
+  *counting* a dose given 4 days early, not *advising* one.
+- **Interval arithmetic** (added 2026-10-10, S10 — A-P2-11). Same source, same sentence
+  block:
+  > "For calculating intervals between doses, 4 weeks = 28 days. Intervals of ≥4 months are
+  > determined by calendar months."
+
+  So the 4-week and 8-week minimums are exact day counts (`DAYS.weeks`), and the 1-year and
+  5-year gaps are **calendar** months (`addCalendarMonths`, 12 and 60). A rec reports
+  whichever unit applies: `minIntervalDays` or `minIntervalMonths`, exactly one non-null.
+- **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
+  patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
+  a birthday lands on an exact whole number of months. Patients entered as Years/Months keep
+  an approximation, because the app does not know their birthday.
+- **A dose dated before the date of birth is refused as impossible**, with a message naming
+  that rather than "below the minimum age" (P3-6).

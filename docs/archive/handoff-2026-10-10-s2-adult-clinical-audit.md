@@ -1,3 +1,8 @@
+> **SUPERSEDED 2026-10-10 by `handoff-2026-10-10-s10-dates-and-ages.md`.** S2's queue is
+> consumed: S10 ran next as this file directed, and closed `A-P0-1`, peds `P1-1` and
+> `A-P2-11` (PR #19). Do **not** resume from this file. Its one still-live item is open
+> decision 2, `A-P1-1`, which is carried forward in the new handoff.
+
 # PneumoVax — Handoff after S2, the adult / HSCT clinical audit (2026-10-10)
 
 Repo: `~/Downloads/PneumoVax`. Branch: **`main`**. S2's deliverables landed **docs-only** via

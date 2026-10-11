@@ -23,12 +23,16 @@ import {
   hasExclusion,
   hasIC,
   hasAnyRisk,
-  adultPpsvIntervalClass,
+  hasSpecial,
+  adultPpsvShorterMinimumApplies,
+  ADULT_PPSV23_INTERVAL_MONTHS,
   pedsRiskRowClass,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
-import { todayISO, addDays, daysBetween, intervalElapsed, DAYS } from './dateUtils.js';
+import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
+import { dobToAgeMonths } from './format.js';
 import { analyzeHistory } from './validate.js';
+import { ageAtDoseMonths } from './patientAge.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
@@ -41,8 +45,17 @@ const M = {
 
 const WK8 = DAYS.weeks(8);   // 56
 const WK4 = DAYS.weeks(4);   // 28
-const Y1  = DAYS.years(1);   // 365
-const Y5  = DAYS.years(5);   // 1826
+// A-P2-11 (S10, 2026-10-10): the year-and-longer gaps are counted in CALENDAR
+// months, not fixed day counts. CDC Adult and Child Schedule Notes, "Additional
+// Information", fetched live 2026-10-10: "For calculating intervals between
+// doses, 4 weeks = 28 days. Intervals of >=4 months are determined by calendar
+// months." DAYS.years(1) is 365, a day short across a leap year, and
+// DAYS.years(5) is 1826, a day short of some five-calendar-year spans — so the
+// "eligible on" date printed on the card could be a day or two early.
+// Week-based minimums above stay as exact day counts, which is the other half
+// of the same sentence.
+const MO12 = 12;   // "at least 1 year"
+const MO60 = 60;   // "at least 5 years"
 
 // ── rec() helper ──────────────────────────────────────────────────────────
 function rec(o) {
@@ -53,6 +66,9 @@ function rec(o) {
     dueToday: !!o.dueToday,
     earliestNextDate: o.earliestNextDate ?? null,
     minIntervalDays: o.minIntervalDays ?? null,
+    // Set instead of minIntervalDays when CDC states the gap in calendar
+    // months/years (A-P2-11). Exactly one of the two is non-null.
+    minIntervalMonths: o.minIntervalMonths ?? null,
     brands: o.brands ?? [],
     note: o.note,
     advisory: !!o.advisory,             // HSCT relative-to-transplant block
@@ -81,7 +97,7 @@ function collectRefs(riskIds, defaults) {
 // `am`/`today` let us bucket each dated dose by the age it was given — matching
 // the age-band model CDC PneumoRecs uses (before 12mo / 12–23mo / 24–71mo / ≥6y).
 // Undated doses can't be banded; they're counted in `undated` and the total only.
-function summarizePcv(pcvDoses, am = 0, today = null) {
+function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
   const products = pcvDoses.map((d) => d.product).filter(Boolean);
   const has = (k) => products.includes(k);
   const hasPCV20 = has('PCV20');
@@ -97,7 +113,11 @@ function summarizePcv(pcvDoses, am = 0, today = null) {
   const band = { before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
   for (const d of pcvDoses) {
     if (!d.date || !today) { band.undated += 1; continue; }
-    const ageAtDose = am - daysBetween(d.date, today) / 30.4375;
+    // P3-3 (S10): measured from the birthday when one is on file, instead of
+    // subtracting two spans counted on different rulers. These bands decide HOW
+    // MANY doses a child needs, so a fraction of a month moved the dose count in
+    // both directions — a baby dosed on their 7-month anniversary read as 6.97.
+    const ageAtDose = ageAtDoseMonths(d, { dob, ageMonths: am }, today);
     if (ageAtDose < M.m12) band.before12 += 1;
     else if (ageAtDose < M.m24) band.m12to23 += 1;
     else if (ageAtDose < M.m72) band.m24to71 += 1;
@@ -143,6 +163,16 @@ function dueState(anchorDate, intervalDays, today) {
     dueToday: elapsed,
     earliestNextDate: elapsed ? null : addDays(anchorDate, intervalDays),
   };
+}
+
+// The same, for an interval CDC states in months or years (A-P2-11). The
+// anniversary itself counts as elapsed: "at least 1 year after" is satisfied ON
+// the 1-year date, not the day after. ISO date strings compare correctly with >=.
+function dueStateMonths(anchorDate, months, today) {
+  if (!anchorDate) return { dueToday: true, earliestNextDate: null };
+  const next = addCalendarMonths(anchorDate, months);
+  const elapsed = today >= next;
+  return { dueToday: elapsed, earliestNextDate: elapsed ? null : next };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -442,10 +472,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         note: 'Immunocompromising at-risk child who completed PCV13/15 and already received PPSV23: give 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine — OR a 2nd PPSV23 ≥5 years after the first PPSV23.',
         refs,
       }));
-      const ppsv2 = dueState(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, Y5, today);
+      const ppsv2 = dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today);
       out.push(rec({
         vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
-        dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalDays: Y5,
+        dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalMonths: MO60,
         brands: ['PPSV23 (Pneumovax 23)'],
         note: 'Alternative to the PCV20 above: a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option (PCV20 or 2nd PPSV23), not both.',
         refs,
@@ -499,10 +529,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       note: 'Immunocompromising at-risk child (PCV13 at/after age 6) who already received PPSV23: give 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine — OR a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option.',
       refs,
     }));
-    const ppsv2 = dueState(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, Y5, today);
+    const ppsv2 = dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today);
     out.push(rec({
       vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
-      dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalDays: Y5,
+      dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalMonths: MO60,
       brands: ['PPSV23 (Pneumovax 23)'],
       note: 'Alternative to the PCV20 above: a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option (PCV20 or 2nd PPSV23), not both.',
       refs,
@@ -560,12 +590,19 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  ADULTS 19–49y (risk-only) and ≥50y (routine) — CDC adult notes
 // ═══════════════════════════════════════════════════════════════════════════
-function pcvAdult(am, riskIds, pcv, ppsv, today) {
+function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   const isOlderAdult = am >= M.y50;
   const anyRisk = hasAnyRisk(riskIds);
-  const intervalClass = adultPpsvIntervalClass(riskIds); // 'short'(8wk) | 'long'(1y)
-  const ppsvIntervalDays = intervalClass === 'short' ? WK8 : Y1;
-  const ppsvIntervalLabel = intervalClass === 'short' ? '8 weeks' : '1 year';
+  // A-P1-1 (owner decision 2026-10-10): >=1 year is the recommendation for
+  // EVERY adult. The 8-week minimum is named as an option for IC / cochlear
+  // implant / CSF leak rather than substituted for the recommendation.
+  const shorterMinimumApplies = adultPpsvShorterMinimumApplies(riskIds);
+  const ppsvIntervalDays = null;
+  const ppsvIntervalMonths = ADULT_PPSV23_INTERVAL_MONTHS;
+  const ppsvIntervalLabel = '1 year';
+  const shorterMinimumNote = shorterMinimumApplies
+    ? ' A minimum interval of 8 weeks may be considered for an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak.'
+    : '';
   const refs = collectRefs(riskIds, [
     'cdcAdultPneumo', 'cdcAdultTimingJobAid', isOlderAdult ? 'mmwr7401a1' : 'mmwr7203a1',
   ]);
@@ -605,13 +642,16 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
 
   // ── PCV15 only, no PPSV23 → INCOMPLETE: give PPSV23 ─────────────────
   if (pcv.hasPCV15 && !ppsvGiven) {
-    const { dueToday, earliestNextDate } = dueState(pcv.lastDate, ppsvIntervalDays, today);
+    const { dueToday, earliestNextDate } = ppsvIntervalDays != null
+      ? dueState(pcv.lastDate, ppsvIntervalDays, today)
+      : dueStateMonths(pcv.lastDate, ppsvIntervalMonths, today);
     return [rec({
       vaccine: 'PPSV23', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: `PPSV23 (≥${ppsvIntervalLabel} after PCV15) — completes the series`,
-      dueToday, earliestNextDate, minIntervalDays: ppsvIntervalDays,
+      dueToday, earliestNextDate,
+      minIntervalDays: ppsvIntervalDays, minIntervalMonths: ppsvIntervalMonths,
       brands: ['PPSV23 (Pneumovax 23)'],
-      note: `PCV15 was given but PPSV23 is still pending — the series is INCOMPLETE. Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose (${intervalClass === 'short' ? 'immunocompromising condition, cochlear implant, or CSF leak → ≥8 weeks' : 'chronic condition → ≥1 year'}). If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.`,
+      note: `PCV15 was given but PPSV23 is still pending — the series is INCOMPLETE. Give PPSV23 ≥1 year after the PCV15 dose; the pneumococcal series is then complete.${shorterMinimumNote} If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.`,
       refs,
     })];
   }
@@ -623,11 +663,11 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
   // way per ACIP: a PCV15/20/21 ≥1y after PPSV23 completes the series.
   if (ppsvGiven && !pcv.hasPCV13 && !pcv.hasPCV15) {
     const ppsvDate = ppsv.effective.find((d) => d.date)?.date || null;
-    const { dueToday, earliestNextDate } = dueState(ppsvDate, Y1, today);
+    const { dueToday, earliestNextDate } = dueStateMonths(ppsvDate, MO12, today);
     return [rec({
       vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: 'PCV (PCV15, PCV20, or PCV21) ≥1 year after PPSV23',
-      dueToday, earliestNextDate, minIntervalDays: Y1,
+      dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: adultBrands,
       note: 'PPSV23 was given previously (with no prior PCV, or a PCV of unknown product): give 1 dose of PCV15, PCV20, or PCV21 ≥1 year after the PPSV23 dose. If PCV15 is chosen, no further PPSV23 is needed (the PPSV23 requirement is already met).',
       refs,
@@ -636,11 +676,11 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
 
   // ── PCV13 only (no PPSV23) → PCV20 or PCV21 ≥1y → complete ───────────
   if (pcv.hasPCV13 && !ppsvGiven) {
-    const { dueToday, earliestNextDate } = dueState(pcv.lastDate, Y1, today);
+    const { dueToday, earliestNextDate } = dueStateMonths(pcv.lastDate, MO12, today);
     return [rec({
       vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: 'PCV20 or PCV21 ≥1 year after PCV13 — completes the series',
-      dueToday, earliestNextDate, minIntervalDays: Y1,
+      dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
       note: 'PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥1 year after the last PCV13 dose. This completes the series — no PPSV23 needed.',
       refs,
@@ -650,7 +690,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
   // ── PCV13 + PPSV23 → PCV20/PCV21 ≥5y (SCDM nuance by PPSV23 age) ─────
   if (pcv.hasPCV13 && ppsvGiven) {
     const anchor = lastDoseDate(pcv, ppsv);
-    const { dueToday, earliestNextDate } = dueState(anchor, Y5, today);
+    const { dueToday, earliestNextDate } = dueStateMonths(anchor, MO60, today);
     // PCV13+PPSV23 → shared decision ONLY when the PPSV23 dose was given at age
     // ≥65 (CDC adult notes) — NOT when the patient is merely ≥65 now. PneumoVax
     // captures both the patient's age and the PPSV23 date, so compute age-at-PPSV23
@@ -658,25 +698,48 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
     // the PPSV23 dose is undated. (Verified against CDC PneumoRecs VaxAdvisor 2026-06-07.)
     const ppsvDateForAge = ppsv.effective.find((d) => d.date)?.date || null;
     let ppsvAtOrAfter65;
-    if (ppsvDateForAge) {
-      const ageAtPpsvMonths = am - Math.round(daysBetween(ppsvDateForAge, today) / 30.4375);
-      ppsvAtOrAfter65 = ageAtPpsvMonths >= M.y65;
+    if (ppsvDateForAge && dob) {
+      // A-P0-1 (S10): compare the dose date against the patient's REAL 65th
+      // birthday. This used to be `am - Math.round(daysBetween(...) / 30.4375)
+      // >= M.y65` — a float current-age minus an elapsed span rounded to whole
+      // months — which put up to half a month of error into the reconstructed
+      // age at the dose and flipped the verdict either way within about two
+      // weeks of the birthday (2,782 of 29,565 swept pairs, 9.4%). CDC's rows
+      // say "at age 65 years or older", so the birthday itself counts.
+      //
+      // The 4-day grace does NOT apply: it governs whether a dose that was
+      // given counts as valid, and this is not a validity floor — it selects
+      // which of two CDC recommendation rows the patient is on.
+      ppsvAtOrAfter65 = ppsvDateForAge >= addCalendarMonths(dob, M.y65);
+    } else if (ppsvDateForAge) {
+      // No date of birth: the best the app can honestly do is measure back
+      // from today in calendar months. Unrounded, unlike the old expression.
+      const ageAtPpsv = ageAtDoseMonths({ date: ppsvDateForAge }, { ageMonths: am }, today);
+      ppsvAtOrAfter65 = ageAtPpsv != null && ageAtPpsv >= M.y65;
     } else {
       ppsvAtOrAfter65 = am >= M.y65; // proxy when PPSV23 is undated
     }
-    const sharedDecision = isOlderAdult && ppsvAtOrAfter65;
+    // A dose received at >=65 implies the patient is >=65, which is >50, so the
+    // old `isOlderAdult &&` half was dead. Removed rather than left looking
+    // load-bearing (A-P0-1).
+    const sharedDecision = ppsvAtOrAfter65;
     if (sharedDecision) {
       return [rec({
         vaccine: 'PCV', status: 'shared-decision',
         doseLabel: 'PCV20 or PCV21 ≥5 years (shared clinical decision-making)',
-        dueToday, earliestNextDate, minIntervalDays: Y5,
+        dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
         note: 'PCV13 and PPSV23 already given. For adults whose PPSV23 was received at ≥65 years, an additional PCV20 or PCV21 (≥5 years after the last pneumococcal dose) is a shared clinical decision — it may be given or omitted.',
         refs,
       })];
     }
     // chronic-only adult <50: nothing now, review at 50.
-    if (!isOlderAdult && !hasIC(riskIds) && !require8wk(riskIds)) {
+    // Not the interval question. CDC's 19–49 special-situations rows split on
+    // "cochlear implant, cerebrospinal fluid leak, or an immunocompromising
+    // condition" (→ ≥5 years) versus chronic conditions (→ review at 50). Said
+    // directly here rather than borrowed from the interval predicate, which is
+    // how these two unrelated rules came to share one function (A-P1-1).
+    if (!isOlderAdult && !hasIC(riskIds) && !hasSpecial(riskIds)) {
       return [rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: 'No dose now — review at age 50',
@@ -687,7 +750,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
     return [rec({
       vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: 'PCV20 or PCV21 ≥5 years after last pneumococcal dose — completes the series',
-      dueToday, earliestNextDate, minIntervalDays: Y5,
+      dueToday, earliestNextDate, minIntervalMonths: MO60,
       brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
       note: 'PCV13 and PPSV23 already given: give 1 dose of PCV20 or PCV21 ≥5 years after the last pneumococcal dose. This completes the series.',
       refs,
@@ -703,15 +766,13 @@ function pcvAdult(am, riskIds, pcv, ppsv, today) {
     brands: adultBrands,
     note: isOlderAdult
       ? 'Routine pneumococcal vaccination for adults ≥50 with no (or unknown, or PCV7-only) history: 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥1 year later. PCV20 and PCV21 each complete the series alone.'
-      : `Adult 19–49 with a qualifying risk condition and no (or unknown, or PCV7-only) pneumococcal history: 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later (${intervalClass === 'short' ? 'immunocompromising / cochlear implant / CSF leak' : 'chronic condition'}). PCV20 and PCV21 each complete the series alone.`,
+      : `Adult 19–49 with a qualifying risk condition and no (or unknown, or PCV7-only) pneumococcal history: 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥1 year later; the pneumococcal series is then complete.${shorterMinimumNote} PCV20 and PCV21 each complete the series alone.`,
     refs,
   })];
 }
 
 // Whether the patient needs the ≥8wk (IC) interval (IC or cochlear/CSF).
-function require8wk(riskIds) {
-  return adultPpsvIntervalClass(riskIds) === 'short';
-}
+
 
 // Most recent dose date across PCV + PPSV23 effective lists.
 function lastDoseDate(pcv, ppsv) {
@@ -798,9 +859,18 @@ const EXCLUSION_MESSAGE = 'This tool does not apply to this patient. Standard '
 //  PUBLIC API
 // ═══════════════════════════════════════════════════════════════════════════
 export function recommend(input) {
-  const am = input.ageMonths ?? 0;
+  // P3-1 (S10): the patient's date of birth, when the clinician gave one. It is
+  // what lets the engine compare a dose date against a real birthday — the
+  // 65th for the PPSV23 shared-decision rule, the minimum ages in validate.js —
+  // instead of reconstructing birthdays from months x 30.4375. A patient
+  // entered as years/months has no `dob` and keeps the approximate path.
+  const dob = input.dob ?? null;
   const riskIds = input.riskIds ?? [];
   const today = todayISO(input.today);
+  // When a date of birth is given, the age follows from it. App passes both,
+  // but deriving here means a caller that passes only a date of birth cannot
+  // silently land on age 0 and be routed to the infant schedule.
+  const am = input.ageMonths ?? (dob ? dobToAgeMonths(dob, today) : null) ?? 0;
 
   // ── Hard-stop exclusion wins over everything, including HSCT (both boxes
   //    can be ticked; owner decision 2026-09-12: the stop wins, transplant
@@ -814,19 +884,19 @@ export function recommend(input) {
       hsct: null,
       pcv21Geo: null,
       perDose: { pcv: {}, ppsv23: {} },
-      meta: { ageMonths: am, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
+      meta: { ageMonths: am, dob, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
     };
   }
   const rawPcv = (input.pcvDoses ?? []).filter(Boolean);
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 
   // Validate + filter to effective lists (PCV7 dropped; invalid doses dropped).
-  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today);
-  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today);
+  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob);
+  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob);
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
-  const pcv = summarizePcv(effectivePcv, am, today);
+  const pcv = summarizePcv(effectivePcv, am, today, dob);
   const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
 
   // ── Standard (age/history/risk) recommendations ──────────────────────
@@ -841,7 +911,7 @@ export function recommend(input) {
       recs = pcvHealthyChild(am, pcv, ppsv, today);
     }
   } else {
-    recs = pcvAdult(am, riskIds, pcv, ppsv, today);
+    recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob);
   }
 
   // ── HSCT advisory block (prominent at top; standard recs still shown) ──
@@ -855,6 +925,6 @@ export function recommend(input) {
     hsct,
     pcv21Geo,
     perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
-    meta: { ageMonths: am, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
+    meta: { ageMonths: am, dob, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
   };
 }
