@@ -407,9 +407,11 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   A-P1-1 corrected.
 - **Adult gaps CDC ADVISES but does not require** (added 2026-10-11, S3-N1). The mirror
   image of the rule above. Adult gaps are recommendations for the *next* dose, so a short
-  one cannot void a dose — but "On time" was too generous, because it told a clinician a
-  five-week adult gap was what the schedule wanted. Such a dose now **counts and carries a
-  note**: `offWindow: true` on a `status: 'valid'` result.
+  one cannot void a dose, but it should not pass unremarked either. Such a dose **counts
+  and carries a note**: `earlyAdvisory: true` on a `status: 'valid'` result. (Named
+  `earlyAdvisory`, not `offWindow` — S14-3, owner decision 2026-10-11 — because
+  "off-window" is reserved for MeningoVax's sense of the word: a dose that does NOT count
+  and is owed a repeat. This dose counts; the two names must never collide.)
 
   **It is a flag, never a status.** `status` stays `'valid'` and the dose still receives
   its `effectiveDoseNum`, so nothing that counts doses can mistake it for a dropped one.

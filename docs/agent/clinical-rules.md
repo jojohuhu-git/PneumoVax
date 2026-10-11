@@ -117,9 +117,11 @@ Three things to know before changing any of it:
 
 ## Adult Gaps: Advised, Not Required (S3-N1)
 
-The mirror image of the rules above. A short adult gap cannot void a dose, but "On time"
-was too generous. Such a dose now **counts and carries a note** — `offWindow: true` on a
-`status: 'valid'` result.
+The mirror image of the rules above. A short adult gap cannot void a dose, but it should
+not pass unremarked either. Such a dose **counts and carries a note** —
+`earlyAdvisory: true` on a `status: 'valid'` result. (Named `earlyAdvisory`, not
+`offWindow` — S14-3 — because "off-window" is MeningoVax's name for a dose that does NOT
+count; this one counts.)
 
 - **It is a flag, never a status.** `status` stays `'valid'` and `effectiveDoseNum` is
   still assigned, so nothing that counts doses can treat it as dropped. Do not promote it.

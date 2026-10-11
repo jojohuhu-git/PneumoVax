@@ -46,11 +46,11 @@ describe('doseChipLabel branches', () => {
 
   // S14-2 (owner decision 2026-10-11): the chip no longer distinguishes an
   // on-time dose from one given sooner than CDC advises — that word pair is
-  // gone, win or lose the `offWindow` flag. A valid dose always reads its
+  // gone, win or lose the `earlyAdvisory` flag. A valid dose always reads its
   // count; timing lives in the reasons text (see validate.js, RecCard.jsx).
-  it('a valid dose within the total reads "Dose N of M", with or without offWindow', () => {
+  it('a valid dose within the total reads "Dose N of M", with or without earlyAdvisory', () => {
     expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2 }, 2)).toBe('Dose 2 of 2');
-    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2, offWindow: true }, 2)).toBe('Dose 2 of 2');
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2, earlyAdvisory: true }, 2)).toBe('Dose 2 of 2');
   });
 
   it('a valid dose with no tracked series total reads "Dose N"', () => {

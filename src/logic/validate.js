@@ -247,24 +247,25 @@ function checkPpsvRevaccInterval(dose, prev, ageAtDose) {
 // Adult gaps are the mirror image of the paediatric ones. CDC states them as
 // recommendations for the NEXT dose and never as minimum intervals, so a short
 // adult gap cannot make a dose invalid (that is why checkPcvInterval and
-// checkPpsvAfterPcv both stop at the adult boundary). But "On time" was too
-// generous: it told a clinician a five-week adult gap was what the schedule
-// wanted.
+// checkPpsvAfterPcv both stop at the adult boundary).
 //
 // So this is a third thing — the dose COUNTS and carries a note. It is
 // deliberately a FLAG on a valid result and not a status of its own: `status`
 // stays 'valid' and the dose still gets its `effectiveDoseNum`, so nothing
-// downstream that counts doses can mistake it for a dropped one. Vocabulary
-// follows vaxapp's settled "Done · valid" — "given outside the routine window
-// but still counts toward the series" — which is distinct from its
-// "off-window · repeat", a dose that does NOT count. This one counts.
+// downstream that counts doses can mistake it for a dropped one.
+//
+// S14-3 (owner decision 2026-10-11): this flag is named `earlyAdvisory`, not
+// `offWindow`. "Off-window" is reserved for MeningoVax's sense of the word —
+// a dose that does NOT count and is owed a repeat (see doseChipLabel.js,
+// S14-6) — and this dose is the opposite of that: it counts. The old name
+// invited exactly the confusion S14-RC's root-cause review found.
 //
 // No 4-day grace here, deliberately. The grace is CDC's rule for whether a
 // dose that missed a minimum still COUNTS. This is not a minimum and nothing is
 // being voided, so there is no grace to apply and a day short of the year is a
 // day short.
 function advise(result, reason) {
-  return { ...result, offWindow: true, reasons: [...(result.reasons ?? []), reason] };
+  return { ...result, earlyAdvisory: true, reasons: [...(result.reasons ?? []), reason] };
 }
 
 // Two adult PCV doses: CDC advises at least a year.

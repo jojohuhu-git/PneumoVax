@@ -4,9 +4,11 @@
 // S14-2 (owner decision 2026-10-11) retired the "On time" / "Valid" chip
 // words this file used to assert — MeningoVax is now the sole vocabulary
 // authority for these two apps, and its chip just states the dose count.
-// What this file still protects: an off-window dose counts, is numbered, and
-// is never struck through like a dropped one — the advisory moved into the
-// dose's reasons text, not away.
+// S14-3 renamed the underlying flag `earlyAdvisory` (off `offWindow`, which
+// collided with MeningoVax's "off-window" meaning — a dose that does NOT
+// count). What this file still protects: a dose carrying the flag counts, is
+// numbered, and is never struck through like a dropped one — the advisory
+// moved into the dose's reasons text, not away.
 // @vitest-environment happy-dom
 import React, { useState } from 'react';
 import { describe, it, expect } from 'vitest';
@@ -51,7 +53,7 @@ describe('S3-N1 — the chip', () => {
   it('an off-window dose still shows its dose number, not "Invalid"', () => {
     renderWithDose({
       status: 'valid',
-      offWindow: true,
+      earlyAdvisory: true,
       effectiveDoseNum: 2,
       reasons: ['Given less than a year after the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts — no repeat is needed.'],
     });
@@ -61,7 +63,7 @@ describe('S3-N1 — the chip', () => {
 
   it('is not struck through or dimmed like a dropped dose, and reads the plain valid color', () => {
     const { container } = renderWithDose({
-      status: 'valid', offWindow: true, effectiveDoseNum: 2, reasons: ['…'],
+      status: 'valid', earlyAdvisory: true, effectiveDoseNum: 2, reasons: ['…'],
     });
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
     // S14-2: the chip no longer carries a separate color for "counts, but
@@ -78,7 +80,7 @@ describe('S3-N1 — the chip', () => {
 
   it('uses its own chip colour, distinct from PCV7 and from invalid', () => {
     const { container: off } = renderWithDose({
-      status: 'valid', offWindow: true, effectiveDoseNum: 1, reasons: ['…'],
+      status: 'valid', earlyAdvisory: true, effectiveDoseNum: 1, reasons: ['…'],
     });
     expect(off.querySelector('.dose-val-noncounting')).toBeNull();
     expect(off.querySelector('.dose-val-invalid')).toBeNull();
