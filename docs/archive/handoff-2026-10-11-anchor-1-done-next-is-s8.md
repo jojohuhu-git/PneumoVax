@@ -1,3 +1,8 @@
+> ## ⛔ SUPERSEDED — 2026-10-11
+>
+> Item **1 (`S8`)** below is **DONE** (PR #32, green, awaiting merge). Do not resume this
+> queue. Read **`handoff-2026-10-11-s8-done-pr32-awaiting-merge.md`** instead.
+
 # PneumoVax — Handoff after ANCHOR-1 (2026-10-11)
 
 > **Supersedes `handoff-2026-10-11-p0-2-done-next-is-anchor-1.md`.** That file's item **3
