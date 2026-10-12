@@ -1,5 +1,11 @@
 # PneumoVax — Handoff after W1 merged (2026-10-11)
 
+> **⚠️ SUPERSEDED (2026-10-11) by `handoff-2026-10-11-p0-2-done-next-is-anchor-1.md`.**
+> Items 2 (`S3-N2`/`P0-2`) and 4 (peds `P1-2`) of the queue below are **DONE** — they were
+> one bug, closed in PR #26. Do not resume from this file's queue; use the newer handoff,
+> which resumes at item 3 (`ANCHOR-1`).
+
+
 > **Supersedes `handoff-2026-10-11-anchoring-decided-and-reordered-queue.md`.** Item 1
 > (`W1`) of that file's queue is **DONE and MERGED**. Resume from item 2 (`S3-N2`) below,
 > not from the superseded file's queue.
