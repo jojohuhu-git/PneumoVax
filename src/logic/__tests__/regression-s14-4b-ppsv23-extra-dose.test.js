@@ -77,16 +77,29 @@ describe('S14-4B — a PPSV23 recorded after the series already completed', () =
     expect(r.ppsv23.effective).toHaveLength(1);
   });
 
-  it('SAME DAY is not "after" — a PCV20 and a PPSV23 at one visit is co-administration', () => {
-    // The series was not already complete when this PPSV23 was given; it was
-    // completed at the same visit. "Given after the series was already
-    // complete" would be a false statement about the record.
+  it('SAME DAY is still not "after" — but it IS an extra dose (S14-4C)', () => {
+    // REPOINTED, not deleted, by S14-4C (2026-10-12, owner decision).
+    //
+    // S14-4B asserted here that a same-day pair is NOT an extra dose, for a
+    // reason that was only ever about the sentence: the series was completed
+    // at that visit, not before it, so "given after the series was already
+    // complete" would be a false statement about the record. True — and it
+    // left the dose reading "CDC advises at least 1 year… this dose still
+    // counts", which advises a spacing fix for a dose that no interval would
+    // have made right. The verdict was abandoned to protect the wording.
+    //
+    // S14-4C gives the same-day case its own sentence instead. The claim this
+    // test was written to protect is UNCHANGED and still asserted — the app
+    // must not say "after" about two doses carrying one date.
     const r = analyzeBoth({
       pcvDoses: [{ date: '2018-03-01', product: 'PCV20' }],
       ppsv23Doses: [{ date: '2018-03-01' }],
       ageMonths: AM, today: TODAY, dob: DOB, riskIds: [],
     });
-    expect(r.ppsv23.perDose[0].extraDose).toBeFalsy();
+    const t = r.ppsv23.perDose[0].reasons.join(' ');
+    expect(t, 'neither dose came "after" the other').not.toMatch(/after the series was already complete/);
+    expect(r.ppsv23.perDose[0].extraDose).toBe(true);
+    expect(t).toMatch(/given at the same visit as the/i);
   });
 
   it('a PPSV23 given BEFORE the completing PCV dose is not an extra dose', () => {

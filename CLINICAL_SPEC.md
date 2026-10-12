@@ -699,15 +699,9 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   the same sentence. Moved 648 of 16,250 sweep verdicts (348 formerly silent, 300 formerly
   carrying the 1-year advisory); no recommendation and no PCV-stream verdict changed.
 
-  **Two deliberate limits, narrower than the PCV side:**
-  1. **The completing dose must be DATED and STRICTLY EARLIER.** A PCV20 and a PPSV23 at
-     one visit is co-administration: the series was completed *at* that visit, not before
-     it, so "given after the series was already complete" would be a false statement about
-     the record. Such a pair still reaches `ADULT-PPSV23-AFTER-PCV-CATCH-ALL`, which after
-     this change is the **only** pair that row can still speak for. Its flat 1-year
-     sentence is imperfect wording for a co-administered PPSV23 nobody needed — an **open
-     wording question for the owner**, deliberately not invented here (precedent: W1).
-  2. **No undated mirror.** The PCV side asks rather than asserts when a dose has no date
+  **One deliberate limit, narrower than the PCV side** (the second, "strictly earlier",
+  was lifted by S14-4C below):
+  1. **No undated mirror.** The PCV side asks rather than asserts when a dose has no date
      (`extraDoseUnverified`). That is not carried over: an undated PPSV23 alongside a
      PCV20 is overwhelmingly an old dose whose date was forgotten and which was given
      *before* the conjugate — the opposite of an extra dose — so the question would be
@@ -717,6 +711,51 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   PPSV23 fell before their 19th birthday correctly did not move. A PCV20/PCV21 that is
   itself **invalid** completes nothing (12 more non-moves) — a gap is measured from the
   dose that counted (ANCHOR-1).
+- **A dose given at the SAME VISIT as the completing dose** (added 2026-10-12, S14-4C).
+  S14-4B's "strictly earlier" limit protected the *sentence* and abandoned the *verdict*.
+  A same-day PCV20 + PPSV23 fell through to `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` and read
+  *"CDC advises at least 1 year between a conjugate dose and PPSV23. This dose still
+  counts"* — which tells a clinician to fix a spacing problem that is not the problem,
+  because **no PPSV23 follows a PCV20 or PCV21 at any interval**. 144 of 16,250 patients.
+
+  It was also an **asymmetry, not a principle.** The PCV arm of the same branch reads
+  `kept`, which by walk order already holds a same-day completing dose (ANCHOR-1's
+  tie-break steps PCV before PPSV23 on equal dates), so a PCV21 recorded the same day as a
+  PCV20 was **already** an extra dose — and was already saying "after" about two doses
+  carrying one date, the exact falseness the PPSV23 limit existed to avoid.
+
+  **Owner decision 2026-10-12:** fix both surfaces together — chip *and* sentence. A
+  same-day dose joins the same extra-dose class a dose one day later already gets (one day
+  cannot move a verdict from "Dose 1 of 1" to "Extra dose"), and gets a **second
+  sentence** rather than the "after" one: *"Given at the same visit as the PCV20 (Prevnar
+  20) dose, which completes the adult series on its own: no PPSV23 was needed, and this
+  dose does not add to the series."* Both sentences live in one place
+  (`validate.js`, `extraDoseSentence`) because both streams print them.
+
+  **The bound that makes it safe.** A PPSV23 that an **earlier** PCV15 already owed
+  (`requiresPPSV23`) is the dose that *completes* that series. When a PCV20 and that
+  PPSV23 land at one visit, either one finishes the job and which to call surplus is
+  arbitrary — so the app calls neither and counts both, as it did before. Only the
+  same-day case needs the guard: once the completing conjugate is strictly earlier, the
+  series really was finished before this PPSV23, whatever an older PCV15 once owed.
+  Without the guard the naive fix relabels a legitimately owed PPSV23 "not needed", which
+  is a clinical error rather than a wording one.
+
+  **Measured, not assumed.** 144 moved in exactly 4 history shapes, every one an adult
+  PPSV23 dated the same day as a PCV20/PCV21; 0 recommendations and 0 PCV-stream verdicts
+  changed; 0 cases added or removed. The transition is uniform: the rule id and the series
+  number go, `earlyAdvisory` clears, `status` stays `valid`.
+- **What `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` is actually for** (corrected 2026-10-12,
+  S14-4C). S14-4B's note above claimed the same-day pair was the "**only**" pair that row
+  could still speak for. That was wrong, and S14-4C measured it: **324** of the 16,250
+  grid patients reach the row, in 9 history shapes, of which the completing-product
+  same-day pair is **144** (4 shapes). The other **180** (5 shapes) are anchored on a PCV
+  dose whose **product the clinician could not name** — the "Unknown PCV product" option
+  on the history step. No product-keyed row can select on an unnamed product, so no
+  enumerated row will *ever* name those pairs, and the generic ≥1-year sentence is the
+  right thing to say about them. That — not the same-day pair — is the row's standing job,
+  and it is why the row stays. `regression-s14-7-one-rule-table.test.js` now anchors its
+  catch-all assertion there, having been moved off a completing-product pair twice.
 - **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
   patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
   a birthday lands on an exact whole number of months. Patients entered as Years/Months keep

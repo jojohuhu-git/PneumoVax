@@ -591,14 +591,17 @@ export const DOSE_INTERVAL_RULES = [
     source: 'The PPSV23-stream twin of ADULT-PCV-AFTER-PCV-CATCH-ALL, and it exists for the same '
       + 'reason: without it a pair the enumerated rows do not name would pass in total silence — the '
       + 'exact shape of bug S14-7 exists to remove. ≥1 year is the shortest adult PCV→PPSV23 gap CDC '
-      + 'states, so it under-flags. After the owner promoted PCV13→PPSV23 to a floor (2026-10-11) the '
-      + 'only pairs still reaching this row are a PPSV23 after a PCV20 or PCV21 — sequences no CDC row '
-      + 'recommends at all, because those products complete the series on their own, so no source '
-      + 'states an interval to enforce. NARROWED AGAIN by S14-4B (2026-10-12): a PPSV23 dated AFTER a '
-      + 'counting PCV20/PCV21 is now an extra dose and this row\'s advisory is stripped from it, so the '
-      + 'row is reachable only by a SAME-DAY pair — the series was completed at that visit, not before '
-      + 'it. Keep the row: deleting it would restore total silence for that pair, and the sentence it '
-      + 'prints for a co-administered PPSV23 is an open wording question, not a dead branch.',
+      + 'states, so it under-flags. S14-4B and S14-4C (2026-10-12) then took the PCV20/PCV21 pairs '
+      + 'away from it entirely — a PPSV23 recorded after, or at the same visit as, a counting '
+      + 'PCV20/PCV21 is an extra dose and validate.js strips this row\'s advisory from it, because no '
+      + 'PPSV23 follows those products at ANY interval. WHAT IS LEFT is this row\'s real job, and it '
+      + 'was measured on the 16,250-patient grid rather than assumed: 324 patients reach the row in 9 '
+      + 'history shapes, and 180 of them (5 shapes) are anchored on a PCV dose whose PRODUCT THE '
+      + 'CLINICIAN COULD NOT NAME (the "Unknown PCV product" option). No product-keyed row can select '
+      + 'on an unnamed product, so no enumerated row will ever name those pairs, and CDC\'s generic '
+      + '≥1-year sentence is exactly the right thing to say about them. An earlier version of this '
+      + 'comment claimed the row was "reachable only by a SAME-DAY pair"; that was never true, and '
+      + 'it is recorded here because a row whose purpose is mis-stated is a row someone deletes.',
     message: (ctx, anchor) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose. For adults CDC advises at least 1 year between a conjugate dose and PPSV23. This dose still counts.`,
   },
 ];

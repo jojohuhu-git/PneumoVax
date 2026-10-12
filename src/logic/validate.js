@@ -131,6 +131,33 @@ function beforeBirth(dose, label) {
   );
 }
 
+// ── What to say about a dose the series did not need ─────────────────────
+//
+// S14-4C (2026-10-12, owner decision). TWO sentences, because the record says
+// two different things, and written here once because both streams print them
+// (S14-4 for PCV, S14-4B for PPSV23) and a second hand-typed copy would drift
+// — the same reason doseChipLabel.js exists.
+//
+//   • Completing dose STRICTLY EARLIER → "given after the series was already
+//     complete". True, and the wording S14-4/4B shipped.
+//   • Completing dose on the SAME DATE → "given at the same visit as". Two
+//     doses carrying one date: neither came after the other, and saying so
+//     would be a false statement about the record. The clinician needs the
+//     substance anyway — the conjugate finished the series by itself, so the
+//     second dose added nothing — which is what this says instead.
+//
+// The PPSV23 sentence names PPSV23 because that is the dose a clinician was
+// deciding about; the PCV sentence cannot (the judged dose and the completing
+// dose are both conjugates) and stops at the shared clause.
+function extraDoseSentence(completingDose, dose, vaccine) {
+  const label = productLabel(completingDose.product);
+  if (completingDose.date !== dose.date) {
+    return `Given after the series was already complete (a ${label} dose already completes it): this dose does not extend the series.`;
+  }
+  const needed = vaccine === 'PPSV23' ? 'no PPSV23 was needed, and this dose' : 'this dose';
+  return `Given at the same visit as the ${label} dose, which completes the adult series on its own: ${needed} does not add to the series.`;
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
@@ -423,33 +450,58 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // `adultPcv20or21Complete`), which is what `completesSeries` has always
     // meant. Owner decision 2026-10-12: mirror the PCV sentence exactly.
     //
-    // Two deliberate limits on the PPSV23 side, both in CLINICAL_SPEC.md §K:
-    //   • DATED, STRICTLY EARLIER completing dose. Same-day PCV20 + PPSV23 is
-    //     co-administration — the series was completed at that visit, not
-    //     before it — so "given after the series was already complete" would
-    //     be a false statement about the record.
+    // One deliberate limit on the PPSV23 side, in CLINICAL_SPEC.md §K:
     //   • NO undated mirror. An undated PPSV23 alongside a PCV20 is
     //     overwhelmingly an old dose whose date was forgotten and which was
     //     given BEFORE the conjugate; the PCV side's `extraDoseUnverified`
     //     question would be wrong more often than right here.
+    //
+    // S14-4C (2026-10-12, owner decision): the PPSV23 side's OTHER limit —
+    // "the completing dose must be STRICTLY EARLIER" — is gone. It was there
+    // because the sentence below opened "Given AFTER the series was already
+    // complete", which is false of two doses carrying one date. That reasoning
+    // protected the wording and abandoned the verdict: a same-day PPSV23 fell
+    // through to `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` and read "CDC advises at
+    // least 1 year… this dose still counts", which tells a clinician to fix a
+    // spacing problem that is not the problem — no PPSV23 follows a PCV20 at
+    // ANY interval. 108 of the 16,250 grid patients.
+    //
+    // It was also an asymmetry, not a principle: the PCV arm below has always
+    // used `kept`, which by walk order already holds a SAME-DAY completing
+    // dose (ANCHOR-1's tie-break steps PCV before PPSV23 on equal dates), so a
+    // PCV21 recorded the same day as a PCV20 was already an extra dose — and
+    // was already saying "after" about it. Both streams now get a second
+    // sentence instead (see `extraDoseSentence`).
     const ageAtDoseForExtra = dose.date
       ? ageAtDoseFromDate(dose, ageMonths, today, dob)
       : ageMonths;
     const isAdultDose = ageAtDoseForExtra != null
       && ageAtDoseForExtra >= ADULT_SCHED_MIN_M;
+    // S14-4C's bound. A PPSV23 that an EARLIER PCV15 already owed is the dose
+    // that COMPLETES that series (brands.js `requiresPPSV23`). When a PCV20
+    // and that PPSV23 land at one visit, either one finishes the job, and
+    // which of the two to call surplus is arbitrary — so the app calls
+    // neither, and counts both, exactly as it does today. Only same-day needs
+    // the guard: once the completing conjugate is strictly earlier, the series
+    // really was finished before this PPSV23, whatever an older PCV15 once
+    // owed.
+    const sameDayPpsv23WasOwed = vaccine === 'PPSV23' && !!dose.date
+      && crossStream.some((d) => d.date && d.date < dose.date
+        && productByKey(d.product)?.requiresPPSV23);
     const priorCompletingDose = !isAdultDose
       ? null
       : vaccine === 'PCV'
-        // Own stream. The walk has only ever put EARLIER doses in `kept`, so
-        // no date test is needed — and must not be added, or the two-undated
-        // -doses case below stops being reachable.
+        // Own stream. The walk has only ever put EARLIER-OR-SAME-DAY doses in
+        // `kept`, so no date test is needed — and must not be added, or the
+        // two-undated-doses case below stops being reachable.
         ? kept.find((d) => productByKey(d.product)?.completesSeries)
         // Other stream. `crossStream` is whatever the caller handed over on
         // the `analyzeHistory` path, which can include LATER doses, so the
         // date test is explicit here rather than inherited from walk order.
         : dose.date
-          ? crossStream.find((d) => d.date < dose.date
-            && productByKey(d.product)?.completesSeries)
+          ? crossStream.find((d) => d.date && d.date <= dose.date
+            && productByKey(d.product)?.completesSeries
+            && !(d.date === dose.date && sameDayPpsv23WasOwed))
           : null;
     if (priorCompletingDose) {
       // PCV only, by construction: the PPSV23 arm above requires a date.
@@ -471,7 +523,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           ]
           : [
             ...reasons,
-            `Given after the series was already complete (a ${productLabel(priorCompletingDose.product)} dose already completes it): this dose does not extend the series.`,
+            extraDoseSentence(priorCompletingDose, dose, vaccine),
           ],
       });
       // Validly given, with a real date — worth anchoring the next dose's gap
