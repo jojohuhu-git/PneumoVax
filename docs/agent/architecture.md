@@ -45,12 +45,13 @@ src/
                          BOTH StepRisks and the Results header.
     Disclaimer.jsx       Clinical disclaimer footer.
   logic/
-    recommend.js         THE engine. recommend(input) → { recs[], hsct, pcv21Geo, perDose, meta }.
+    recommend.js         THE engine. recommend(input) → { recs[], hsct, pcv21Geo, perDose,
+                         orderedDoses, meta }.
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
                          and the cited sentence that does it. Keyed to
                          ADULT_SCHED_MIN_M (228), matching the engine's dispatch.
     validate.js          analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob,
-                         riskIds }) → { pcv: {perDose, effective}, ppsv23: {…} }.
+                         riskIds }) → { pcv: {perDose, effective, doses}, ppsv23: {…} }.
                          ⚠ THE ENGINE'S ENTRY POINT — use this, not two analyzeHistory
                          calls. Owns minimum-AGE and product rules; delegates every
                          timing question to doseIntervalRules.js.
@@ -64,7 +65,7 @@ src/
                          dose. On a same-date tie the PCV is judged first, so a
                          same-visit PPSV23 still sees its PCV15.
                          analyzeHistory(vaccine, doses, ageMonths, today, dob, opts)
-                         → { perDose, effective } remains for single-stream callers and
+                         → { perDose, effective, doses } remains for single-stream callers and
                          tests; it takes the other stream's doses on trust, as the ones
                          that counted.
     doseIntervalRules.js DOSE_INTERVAL_RULES + evaluateDoseInterval(ctx). Every
@@ -78,6 +79,15 @@ src/
                          apply the grace. The RULES that use them live in
                          doseIntervalRules.js; recommend.js reads the numbers directly for
                          its forward-looking scheduler.
+    doseIdentity.js      newDoseRow / isBlankDoseRow / dropBlankDoseRows (P1-3). What
+                         makes a row of the history a recorded DOSE. A row the
+                         clinician added and never typed in is not one; a row they
+                         ticked "a dose was given, date and product unknown"
+                         (`detailsUnknown`) is. Blanks are dropped in exactly ONE
+                         place — analyzeBoth's walk — plus the UI's own tidy-up on
+                         leaving a step; do not add a second filter. NOT mirror-
+                         synced: it is a sibling of MeningoVax's module, and the
+                         header records the two deliberate differences.
     dateUtils.js         todayISO, addDays, daysBetween, intervalElapsed, DAYS.
                          ⚠ Mirror-synced with MeningoVax dateUtils.js — keep in sync.
     format.js            fmtAgeMonths, fmtDate, ageGroup, dobToAgeMonths.
@@ -101,6 +111,7 @@ HANDOFF.md               Author-review checklist, source-vs-p2016 reconciliation
 - `hsct` — `{ title, coordinateFlag, recs[] }` advisory block, or `null`
 - `pcv21Geo` — `{ note, citations }` serotype-4 advisory, or `null`
 - `perDose` — `{ pcv:[...], ppsv23:[...] }` per-dose validation results. **Always arrays, on every path including the hard stop** (P6-5) — `Results.jsx` renders its dose chips from these rather than walking the history a second time.
+- `orderedDoses` — `{ pcv:[...], ppsv23:[...] }` the doses themselves, **index-for-index with `perDose`** (P0, 2026-10-12). The walk sorts into date order before grading, so `perDose` is NOT in input order; anything rendering a verdict beside its dose must take the dose from here, never from its own input array. Both are built in the same `stepStream` call, so they cannot disagree. Also always arrays, including on the hard stop. Guarded over all 16,250 grid patients by `regression-p0-ordered-doses-pair-with-verdicts.test.js`.
 - `meta` — `{ ageMonths, today, riskIds, pcvCount, ppsv23Count }`
 
 **Status values:** `due | catchup | risk-based | shared-decision | complete | not-indicated | deferred`

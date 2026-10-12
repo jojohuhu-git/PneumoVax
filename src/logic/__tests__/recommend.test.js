@@ -407,7 +407,10 @@ describe('§H Adults ≥50 routine', () => {
   it('70yo PCV13 + UNDATED PPSV23 → proxy (current age ≥65) → shared decision', () => {
     const r = run({ ageMonths: 840, riskIds: [],
       pcvDoses: [{ product: 'PCV13', date: '2014-01-01' }],
-      ppsv23Doses: [{ product: 'PPSV23' }] });
+      // P1-3 (2026-10-12): `detailsUnknown` is how a row says "a dose was given,
+      // I just have no date". Without it this is an untouched row, which is no
+      // longer a dose. The clinical case under test is unchanged.
+      ppsv23Doses: [{ product: 'PPSV23', detailsUnknown: true }] });
     expect(pcv(r).status).toBe('shared-decision');
   });
 

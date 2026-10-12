@@ -129,7 +129,9 @@ describe('P6-3c — minimum-age verdicts show CDC\'s minimum-age sentence', () =
     expect(cites(pcv).map((c) => c.key)).toEqual(['pedsMinAge']);
     expectPaired(pcv);
 
-    const ppsv = run({ ppsv23Doses: [{ product: 'PPSV23', date: '' }], ageMonths: 12, dob: '2025-10-12' })
+    // P1-3 (2026-10-12): an undated dose declares itself; an untouched row
+    // is no longer a dose. Case unchanged.
+    const ppsv = run({ ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }], ageMonths: 12, dob: '2025-10-12' })
       .ppsv23.perDose[0];
     expect(ppsv.status).toBe('invalid');
     expect(cites(ppsv).map((c) => c.key)).toEqual(['pedsMinAge']);

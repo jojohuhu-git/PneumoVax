@@ -219,6 +219,27 @@ body {
   display: flex; gap: var(--sp-12); align-items: flex-end; padding: var(--sp-12);
   background: var(--gy6); border-radius: var(--rads); flex-wrap: wrap;
 }
+/* P1-3 (2026-10-12): the "a dose was given, details unknown" tick, shown only
+   while a dose row is otherwise empty. Ported from MeningoVax K1 — design
+   changes flow MeningoVax -> PneumoVax. `flex-basis: 100%` puts it on its own
+   line below the date and product fields of the wrapping .dose-row. The
+   .dose-row here sits on --gy6 already, so the tick uses --wh to separate
+   itself from the row rather than MeningoVax's --gy6 on white. */
+.dose-row-unknown {
+  flex-basis: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-8);
+  margin-top: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+  border-radius: var(--rads);
+  background: var(--wh);
+  font-size: var(--fs-base);
+  color: var(--gy2);
+  cursor: pointer;
+}
+.dose-row-unknown-hint { display: block; color: var(--gy3); }
+
 .dose-field { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 130px; }
 .dose-field label { font-size: var(--fs-sm); color: var(--gy3); font-weight: 500; }
 .dose-field input[type="date"],

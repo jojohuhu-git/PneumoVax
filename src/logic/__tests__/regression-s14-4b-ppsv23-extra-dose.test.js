@@ -120,7 +120,9 @@ describe('S14-4B — a PPSV23 recorded after the series already completed', () =
     // this an extra dose?" would be wrong more often than right.
     const r = analyzeBoth({
       pcvDoses: [{ date: '2012-01-01', product: 'PCV20' }],
-      ppsv23Doses: [{}],
+      // P1-3 (2026-10-12): says "a dose, date unknown" rather than being an
+      // empty row, which is no longer a dose. Case unchanged.
+      ppsv23Doses: [{ detailsUnknown: true }],
       ageMonths: AM, today: TODAY, dob: DOB, riskIds: [],
     });
     expect(r.ppsv23.perDose[0].extraDose).toBeFalsy();
