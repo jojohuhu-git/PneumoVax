@@ -1,12 +1,3 @@
-> ## ⚠ SUPERSEDED (2026-10-12) — do not resume from this file
->
-> Both of this handoff's open queue items are **DONE and merged** in PR #36 (`efc99a8`):
-> item **1** (the same-day PCV20 + PPSV23 wording) became **S14-4C**, and item **2** (the
-> two sources the app showed nobody) became **P6-3c**. Its `P2-9` follow-ups are partly
-> done too — the two uncovered undated minimum-age branches are now covered.
->
-> **Current handoff: `handoff-2026-10-12-s14-4c-p6-3c-merged.md`.**
-
 # PneumoVax — Handoff after merging S8 and shipping S14-4B + P2-8/P2-9 (2026-10-12)
 
 > ⛔ **SUPERSEDED 2026-10-12 by `handoff-2026-10-12-p0-p1-3-merged.md`.** Do not resume

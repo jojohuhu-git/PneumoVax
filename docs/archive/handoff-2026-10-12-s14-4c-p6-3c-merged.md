@@ -1,5 +1,12 @@
 # PneumoVax — Handoff after merging S14-4C and P6-3c (2026-10-12)
 
+> ⛔ **SUPERSEDED 2026-10-12 by `handoff-2026-10-12-p0-p1-3-merged.md`.** Do not resume this
+> queue. This file reaches `main` late (it sat on PR #37's branch while two further sessions
+> landed), so its mtime is newer than the handoff that replaced it — it is archive, not the
+> current plan. Its item **1 (the P0 row mismatch) is DONE and MERGED** (PR #38, `13b5d9c`);
+> its item **2 (the sweep blind spot) is still open** and is carried forward in the
+> superseding file.
+
 > **Supersedes `handoff-2026-10-12-s8-merged-s14-4b-p2-8-p2-9-done.md`.** Both of its open
 > queue items — **1 (same-day PCV20 + PPSV23 wording)** and **2 (the two uncited sources)**
 > — are DONE and merged. Resume from "What's NOT done" below.
