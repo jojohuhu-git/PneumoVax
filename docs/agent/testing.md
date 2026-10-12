@@ -3,6 +3,11 @@
 ## Framework
 
 - **Vitest** — `npm test` = `vitest run`
+- **Coverage** — `npm run test:coverage` (P2-9, 2026-10-12). Scoped to `recommend.js` and
+  `validate.js` only, and **no threshold is enforced on purpose**: a percentage is not
+  evidence a rule is right (peds `P0-2` lived inside fully-covered lines). Read the
+  uncovered-line list. The standing report is
+  [docs/archive/coverage-2026-10-12-engine-uncovered.md](../archive/coverage-2026-10-12-engine-uncovered.md).
 - All tests run in the default `node` environment
 - Test files live in `src/logic/__tests__/` and `src/components/__tests__/`
 
@@ -14,6 +19,8 @@
 | `src/logic/__tests__/validate.test.js` | Dose validation — PCV7 noncounting, PCV21 child invalid, min ages, intervals |
 | `src/logic/__tests__/regression-boundary-and-fixes.test.js` | Two-boundary split (ADULT_SCHED_MIN_M vs PCV21_MIN_AGE_M), infant booster H5, at-risk peds M1/M2/M3, ageGroup L1; incl. 18y0m/18y6m/19y0m boundaries |
 | `src/components/__tests__/App.test.jsx` | Wizard render/flow tests |
+| `src/data/__tests__/citation-freshness.test.js` | **The citation freshness tripwire (P2-8).** Every entry in `refs.js` must carry a real, non-future `lastVerified` date no more than 12 months old. Reads the REAL clock via `vi.getRealSystemTime()`, with a guard-on-the-guard that fails if anything fakes it — ported before `P2-1` pins a suite-wide clock, because a pinned clock would freeze this check silently. Caught on its first run: CDC had moved `cdcAlteredImmunocompetence`, and the old URL only still worked through a redirect. |
+| `src/data/__tests__/citation-orphans.test.js` | **The citation orphan tripwire (P2-8).** An entry in `refs.js` that no source file names is either a rule that lost its citation or a source left behind by a deleted rule. A **static** check, deliberately — a sweep-based version could not tell "nothing names it" from "a rule names it but no grid patient reaches it", and reported `pedsNoPcv20IfComplete` (cited twice in `recommend.js`) as an orphan. Exceptions live in `KNOWN_UNCITED` and must carry a reason; the test also fails on a stale exception. |
 | `src/data/__tests__/regression-p6-3-cite-and-highlight-url.test.js` | `cite()` / `highlightUrl()`; the one-`#`-fragment rule for quote deep links |
 | `src/components/__tests__/regression-p6-3-note-citations.test.jsx` | `[c]` → numbered superscripts; per-card numbering in reading order; dedupe by page; orphan markers dropped |
 | `src/logic/__tests__/regression-p6-3b-note-cite-parity.test.js` | Engine-wide sweep: marker/citation parity and no dead refs. **Counts notes and verdicts separately — a combined total once hid a sweep walking zero verdicts** |
