@@ -367,15 +367,19 @@ export const DOSE_INTERVAL_RULES = [
     interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
     grace: true,
     enforcement: 'floor',
-    authority: 'CDC',
-    source: 'CDC Adult Immunization Schedule Notes: "If PCV15 is used, administer 1 dose PPSV23 at least '
-      + '1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an '
-      + 'immunocompromising condition, cochlear implant, or cerebrospinal fluid leak)." This is the ONLY '
-      + 'place the words "minimum interval" appear anywhere in the adult notes, and it names exactly '
-      + 'these patients — so the 8-week floor is source-stated, not owner-determined.',
+    authority: 'OWNER',
+    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. ⚠️ CORRECTED 2026-10-11 after '
+      + 'reading rr7203a1 live: this row was first labelled CDC authority on the grounds that the adult '
+      + 'notes call 8 weeks a "minimum interval". The full sentence points the other way — rr7203a1 '
+      + 'says "A minimum interval of 8 weeks CAN BE CONSIDERED for adults with an immunocompromising '
+      + 'condition, a CSF leak, or a cochlear implant TO MINIMIZE THE TIME OF RISK for IPD caused by '
+      + 'serotypes unique to PPSV23". It is permission to vaccinate SOONER, not a bar to fall below. '
+      + 'rr7203a1 says "should be repeated" 0 times and "not be counted" 0 times (positive control: '
+      + '"interval", 64 hits). So the 8 weeks is the shortest RECOMMENDED gap for these patients, and '
+      + 'treating it as a floor is the owner\'s determination, like every other adult floor.',
     message: (ctx, anchor) => ({
       reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}, and the recommended interval is 1 year.`],
-      detail: `Previous PCV15: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the minimum interval CDC names for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is 1 year.`,
+      detail: `Previous PCV15: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the shortest interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is 1 year. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -398,6 +402,68 @@ export const DOSE_INTERVAL_RULES = [
     message: (ctx, anchor) => ({
       reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — PPSV23 is given at least 1 year after PCV15.`],
       detail: `Previous PCV15: ${anchor.date}. Minimum: 1 year later (doses up to 4 days early still count, per CDC). The 8-week minimum interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+    }),
+  },
+  // PPSV23 after PCV13 — the pair rr7203a1 spells out, added 2026-10-11 after
+  // the owner reviewed it. Two floors, exactly as that MMWR keys the gap:
+  //
+  //   "When PPSV23 is used instead of PCV20, the minimum recommended interval
+  //    between PCV13 and PPSV23 administration is >=8 weeks for adults with an
+  //    immunocompromising condition, a CSF leak, or a cochlear implant and
+  //    >=1 year for adults without these conditions."
+  //
+  // Same two-tier shape as the PCV15 rows above, and for the same reason: the
+  // interval a dose is judged against is the one that applied to THAT patient.
+  // ⚠️ rr7203a1 states these as RECOMMENDED intervals and nowhere says a dose
+  // given sooner stops counting — treating them as floors is the owner's
+  // determination, like every other adult floor here.
+  //
+  // `anchorMustBeProduct` keeps this on CDC's actual row. "Previously received
+  // PCV13" stops describing a patient once a PCV15 is also on the record, and
+  // the PCV15 rows above then govern.
+  {
+    id: 'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM',
+    what: 'An adult PPSV23 after PCV13, for an immunocompromising condition, cochlear implant or CSF leak — 8 weeks',
+    rulebook: 'adult',
+    vaccine: 'PPSV23',
+    products: null,
+    from: 'lastPcv',
+    anchorMustBeProduct: 'PCV13',
+    shorterMinimum: true,
+    interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
+    grace: true,
+    enforcement: 'floor',
+    authority: 'OWNER',
+    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. The INTERVAL is rr7203a1\'s, '
+      + 'verified live 2026-10-11: "the minimum recommended interval between PCV13 and PPSV23 '
+      + 'administration is >=8 weeks for adults with an immunocompromising condition, a CSF leak, or a '
+      + 'cochlear implant and >=1 year for adults without these conditions." Treating it as a validity '
+      + 'floor is the owner\'s: rr7203a1 says "should be repeated" 0 times and "not be counted" 0 '
+      + 'times, and CDSI v4.64 gives every adult pneumococcal interval absMinInt = 0 days.',
+    message: (ctx, anchor) => ({
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — for this patient PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after PCV13.`],
+      detail: `Previous PCV13: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+    }),
+  },
+  {
+    id: 'ADULT-PPSV23-AFTER-PCV13',
+    what: 'An adult PPSV23 after PCV13, for any other adult — 1 year',
+    rulebook: 'adult',
+    vaccine: 'PPSV23',
+    products: null,
+    from: 'lastPcv',
+    anchorMustBeProduct: 'PCV13',
+    shorterMinimum: false,
+    interval: { months: ADULT_PPSV23_INTERVAL_MONTHS },
+    grace: true,
+    enforcement: 'floor',
+    authority: 'OWNER',
+    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. Same rr7203a1 sentence as the '
+      + 'row above, other half: ">=1 year for adults without these conditions". Treating it as a '
+      + 'validity floor is the owner\'s determination.',
+    message: (ctx, anchor) => ({
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — PPSV23 is given at least 1 year after PCV13.`],
+      detail: `Previous PCV13: ${anchor.date}. Minimum: 1 year later (doses up to 4 days early still count, per CDC). The 8-week interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -486,6 +552,7 @@ export const DOSE_INTERVAL_RULES = [
     from: 'prevSameStream',
     interval: { months: ADULT_ADVISED_PCV_GAP_MONTHS },
     grace: false,
+    catchAll: true,
     enforcement: 'recommendation',
     authority: 'CDC',
     source: 'CDC Adult Immunization Schedule Notes: "Previously received only PCV13: 1 dose PCV20 or 1 '
@@ -504,17 +571,16 @@ export const DOSE_INTERVAL_RULES = [
     from: 'lastPcv',
     interval: { months: ADULT_PPSV23_INTERVAL_MONTHS },
     grace: false,
+    catchAll: true,
     enforcement: 'recommendation',
     authority: 'CDC',
     source: 'The PPSV23-stream twin of ADULT-PCV-AFTER-PCV-CATCH-ALL, and it exists for the same '
-      + 'reason: the enumerated adult rows name only PCV15→PPSV23, so without it an adult PPSV23 given '
-      + 'days after a PCV13 or PCV20 would pass in total silence — the exact shape of bug S14-7 exists '
-      + 'to remove. ≥1 year is the shortest adult PCV→PPSV23 gap CDC states, so it under-flags. '
-      + 'NOTE FOR THE OWNER: rr7203a1 does state a PCV13→PPSV23 MINIMUM in so many words — "the '
-      + 'minimum recommended interval between PCV13 and PPSV23 administration is ≥8 weeks … and ≥1 '
-      + 'year for adults without these conditions" — so this pair is a candidate to be promoted to a '
-      + 'floor. It is left as a note because the owner enumerated the adult rows on 2026-10-11 and '
-      + 'this pair was not among them; promoting it would void doses on a rule they have not reviewed.',
+      + 'reason: without it a pair the enumerated rows do not name would pass in total silence — the '
+      + 'exact shape of bug S14-7 exists to remove. ≥1 year is the shortest adult PCV→PPSV23 gap CDC '
+      + 'states, so it under-flags. After the owner promoted PCV13→PPSV23 to a floor (2026-10-11) the '
+      + 'only pairs still reaching this row are a PPSV23 after a PCV20 or PCV21 — sequences no CDC row '
+      + 'recommends at all, because those products complete the series on their own, so no source '
+      + 'states an interval to enforce.',
     message: (ctx, anchor) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose. For adults CDC advises at least 1 year between a conjugate dose and PPSV23. This dose still counts.`,
   },
 ];
@@ -541,6 +607,15 @@ function ruleApplies(rule, ctx, book) {
   if (rule.shorterMinimum !== undefined
     && rule.shorterMinimum !== adultPpsvShorterMinimumApplies(ctx.riskIds)) return false;
   return true;
+}
+
+// Some rows name a CDC prior-vaccine row that only holds while the anchor is
+// still the patient's MOST RECENT dose of its kind — "previously received
+// PCV13" stops describing someone once they have had a PCV15 as well. Checked
+// after the anchor resolves, because it is a fact about the anchor, not the
+// judged dose.
+function anchorAllowed(rule, anchor) {
+  return !rule.anchorMustBeProduct || anchor.product === rule.anchorMustBeProduct;
 }
 
 // Is the gap long enough? `null` interval (a never-flagged row) is always met.
@@ -582,14 +657,26 @@ export function evaluateDoseInterval(ctx) {
   // that an undated dose cannot have its intervals checked.
   if (!book || !ctx.doseDate) return null;
 
+  // Has an enumerated (non-catch-all) row already spoken for this dose?
+  let namedByRule = false;
   for (const rule of DOSE_INTERVAL_RULES) {
     if (!ruleApplies(rule, ctx, book)) continue;
     const anchor = ANCHORS[rule.from](ctx);
     if (!anchor || !anchor.date || anchor.date > ctx.doseDate) continue;
+    if (!anchorAllowed(rule, anchor)) continue;
 
     // A matching never-flagged row stops the walk — that is its whole job.
     if (rule.enforcement === 'none') return null;
-    if (intervalMet(rule, ctx, anchor)) continue;
+
+    // A catch-all only speaks for a pair NO enumerated row named. Without
+    // this, the generic note talks over the specific rule and gets the number
+    // wrong: an immunocompromised adult whose PPSV23 came 10 weeks after PCV13
+    // met the 8-week interval rr7203a1 states FOR THEM, and was then told
+    // "CDC advises at least 1 year" by a row that cannot see their risk class.
+    // That is the A-P1-1 mistake — one flat interval quoted at every adult —
+    // reappearing one rule along.
+    if (rule.catchAll && namedByRule) continue;
+    if (intervalMet(rule, ctx, anchor)) { namedByRule = namedByRule || !rule.catchAll; continue; }
 
     const msg = rule.message(ctx, anchor);
     if (rule.enforcement === 'floor') {

@@ -239,16 +239,28 @@ describe('peds audit P1-4 — PPSV23 must follow PCV by 8 weeks, and never the s
   // with "pneumococcal" (13 hits) as a positive control that the page's
   // collapsed sections had loaded — so the adult answers below come from
   // DIFFERENT rows, not from the paediatric ones leaking upward.
-  it('an adult PPSV23 on the same day as a PCV13 is noted, not voided by the paediatric rule', () => {
+  it('an adult PPSV23 on the same day as a PCV13 is voided by the ADULT rule, not the paediatric one', () => {
     const a = analyzeHistory('PPSV23', [{ date: '2019-03-01' }], 915, '2026-06-01', '1950-06-15',
       { pcvDoses: [{ date: '2019-03-01', product: 'PCV13' }] });
-    // Counts — no adult rule states a floor for a PPSV23 after a PCV13 (see
-    // ADULT-PPSV23-AFTER-PCV-CATCH-ALL, which is a note and says why) — but it
-    // no longer passes in silence, which is the S14-7 root cause.
-    expect(a.perDose[0].status).toBe('valid');
-    expect(a.perDose[0].earlyAdvisory).toBe(true);
-    // And NOT with the paediatric wording: no "same visit", no 8 weeks.
-    expect(a.perDose[0].reasons.join(' ')).not.toMatch(/same visit|8 weeks/i);
+    expect(a.perDose[0].status).toBe('invalid');
+    // The ADULT row's wording — rr7203a1's 1 year for an adult with no
+    // immunocompromising condition — never the paediatric "same visit"
+    // sentence or the paediatric 8 weeks, which the adult notes do not state.
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PCV13/);
+    expect(a.perDose[0].reasons.join(' ')).not.toMatch(/same visit/i);
+    expect(a.perDose[0].detail).toMatch(/owner clinical determination/i);
+  });
+
+  it('...and an immunocompromised adult is judged against rr7203a1\'s 8 weeks instead', () => {
+    const ppsv = (date, riskIds) => analyzeHistory('PPSV23', [{ date }], 915, '2026-06-01', '1950-06-15',
+      { pcvDoses: [{ date: '2019-03-01', product: 'PCV13' }], riskIds });
+    // 10 weeks clears the interval rr7203a1 states for them: nothing to say.
+    expect(ppsv('2019-05-10', ['hiv']).perDose[0].status).toBe('valid');
+    expect(ppsv('2019-05-10', ['hiv']).perDose[0].earlyAdvisory).toBeFalsy();
+    // 4 weeks is short of it.
+    expect(ppsv('2019-03-29', ['hiv']).perDose[0].status).toBe('invalid');
+    // The same 10 weeks is short of the YEAR that applies to everyone else.
+    expect(ppsv('2019-05-10', []).perDose[0].status).toBe('invalid');
   });
 
   it('voids an adult second PPSV23 given less than 5 years after the first (owner rule, S14-7)', () => {

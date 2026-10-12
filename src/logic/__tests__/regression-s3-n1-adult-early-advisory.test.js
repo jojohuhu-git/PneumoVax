@@ -163,11 +163,15 @@ describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', (
     const a = adultPpsv('2026-02-02', '2026-01-05', { riskIds: ['hiv'] });
     expect(a.perDose[0].status).toBe('invalid');
     expect(a.perDose[0].reasons.join(' ')).toMatch(/8 weeks/);
-    // THIS floor is CDC's own — "minimum interval of 8 weeks" is the only place
-    // those words appear in the adult notes — so it must NOT be labelled as the
-    // owner's determination.
-    expect(a.perDose[0].detail).not.toMatch(/owner clinical determination/i);
-    expect(a.perDose[0].detail).toMatch(/minimum interval CDC names/i);
+    // CORRECTED 2026-10-11, after reading rr7203a1 live. This floor was first
+    // labelled CDC's on the grounds that the adult notes call 8 weeks a
+    // "minimum interval". The full sentence points the other way — "a minimum
+    // interval of 8 weeks CAN BE CONSIDERED ... TO MINIMIZE THE TIME OF RISK"
+    // is permission to vaccinate SOONER, not a bar to fall below — and
+    // rr7203a1 never says a dose given sooner stops counting. So the INTERVAL
+    // is ACIP's and the FLOOR is the owner's, and the text must say so.
+    expect(a.perDose[0].detail).toMatch(/owner clinical determination/i);
+    expect(a.perDose[0].detail).toMatch(/shortest interval ACIP recommends/i);
   });
 
   it('leaves a full year alone, with no note at all', () => {

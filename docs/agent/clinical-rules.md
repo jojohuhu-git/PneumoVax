@@ -151,9 +151,21 @@ says "not ACIP, not CDC", and the per-dose explanation the clinician reads names
 determination. Tests enforce all three. The enumerated rows and the full evidence are in
 `CLINICAL_SPEC.md` §K.
 
-One adult floor is CDC's own: **≥8 weeks PCV15→PPSV23 for an immunocompromising condition,
-cochlear implant or CSF leak** — the only place the words "minimum interval" appear
-anywhere in the adult notes. It must not be labelled as the owner's.
+**Every adult floor is the owner's — there is no CDC-authority adult floor.** An earlier
+draft of this file claimed the 8-week PCV15→PPSV23 gap as CDC's, because "minimum interval"
+appears in the adult notes. Reading rr7203a1 live corrected it: *"A minimum interval of 8
+weeks **can be considered** … **to minimize the time of risk**"* is permission to vaccinate
+SOONER, not a bar to fall below, and rr7203a1 says "should be repeated" 0 times. Watch the
+vocabulary: ACIP's "**minimum recommended** interval" is the shortest *recommended* spacing
+for a group; General Best Practices' "**minimum interval**" is the validity floor that
+carries the repeat consequence. They are different concepts and only the second one voids a
+dose.
+
+**The two-tier adult intervals.** Both PCV13→PPSV23 and PCV15→PPSV23 are keyed on risk,
+never on age: **8 weeks** for an immunocompromising condition / cochlear implant / CSF
+leak, **1 year** for every other adult. `adultPpsvShorterMinimumApplies()` picks the tier —
+and answers the INTERVAL question only, never which CDC recommendation row a patient is on
+(A-P1-1).
 
 ### Still a note, not a floor
 
@@ -167,10 +179,15 @@ NOT count; this one counts.)
   recommended year (`ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED`). The note says the
   minimum was met — information, not second-guessing. A-P1-1 still governs the
   recommendation.
-- Any adult pair the enumerated rows do not name — PCV13→PCV15, or a PPSV23 days after a
-  PCV13 (`ADULT-PCV-AFTER-PCV-CATCH-ALL`, `ADULT-PPSV23-AFTER-PCV-CATCH-ALL`). Keyed on
-  ≥1 year, the shortest adult gap CDC states, so they under-flag. **They exist so that
-  "enumerate, never generalise" cannot turn into silence.**
+- Any adult pair the enumerated rows do not name — PCV13→PCV15, or a PPSV23 after a PCV20
+  (`ADULT-PCV-AFTER-PCV-CATCH-ALL`, `ADULT-PPSV23-AFTER-PCV-CATCH-ALL`). Keyed on ≥1 year,
+  the shortest adult gap CDC states, so they under-flag. **They exist so that "enumerate,
+  never generalise" cannot turn into silence.**
+- **A catch-all may never speak for a pair an enumerated row already named** (`catchAll:
+  true`). A catch-all quotes one flat interval and cannot see risk class, so talking over a
+  specific rule reproduces A-P1-1. It did: an immunocompromised adult 10 weeks after PCV13
+  had met rr7203a1's 8 weeks and was still told "CDC advises at least 1 year". A dose whose
+  own rule named it and was satisfied now says nothing.
 - **No 4-day grace** — nothing is being voided, so there is no grace to apply.
 - **S14-2:** the chip no longer spells this out in a word — it just reads "Dose N of M"
   (MeningoVax's own wording, which is now the vocabulary source for both apps). The timing

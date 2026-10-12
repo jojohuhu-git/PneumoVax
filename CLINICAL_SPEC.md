@@ -431,12 +431,27 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   read the *same* 5-year constant — proof the old age gate on that rule was pure loss — and
   a test asserts they cannot drift apart.
 
-  Rows whose floor CDC states **as a minimum in so many words** (`authority: 'CDC'`): all
-  three paediatric rows, plus the adult 8-week PCV15→PPSV23 minimum, which is the only place
-  the words "minimum interval" appear anywhere in the adult notes:
-  > "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may
-  > use minimum interval of 8 weeks for adults with an immunocompromising condition,
-  > cochlear implant, or cerebrospinal fluid leak)."
+  Rows whose floor CDC states **as a minimum in so many words** (`authority: 'CDC'`): the
+  three **paediatric** rows, and only those.
+
+  > ⚠️ **CORRECTED 2026-10-11, same day.** An earlier draft of this section also claimed the
+  > adult 8-week PCV15→PPSV23 gap as a CDC-stated floor, on the grounds that "minimum
+  > interval" appears in the adult notes. **That was wrong, and it was wrong because the
+  > sentence had been transcribed from a handoff file rather than read from the source.**
+  > rr7203a1, fetched live:
+  >
+  > > "A minimum interval of 8 weeks **can be considered** for adults with an
+  > > immunocompromising condition, a CSF leak, or a cochlear implant **to minimize the time
+  > > of risk** for IPD caused by serotypes unique to PPSV23 in these groups at increased
+  > > risk for pneumococcal disease."
+  >
+  > It is permission to vaccinate **sooner**, not a bar to fall below. rr7203a1's recurring
+  > phrase is "**minimum recommended** interval" — the shortest *recommended* spacing for a
+  > group — which is a different concept from the General Best Practices "minimum interval"
+  > that carries the repeat-the-dose consequence. On the whole page: "should be repeated" 0
+  > hits, "not be counted" / "does not count" 0 hits, with "interval" at 64 hits as the
+  > positive control. So **every adult floor in this app is the owner's determination**, the
+  > 8-week one included, and the app's own per-dose text says so.
 
 - ⚠️ **ADULT INTERVALS AS VALIDITY FLOORS — OWNER CLINICAL DETERMINATION, 2026-10-11.
   Never cite ACIP or CDC for this.** Every `authority: 'OWNER'` row in
@@ -471,9 +486,21 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   | PCV20/PCV21, history has PCV13 **and** PPSV23 | last PCV | ≥1 year | `ADULT-PCV20-21-1Y-AFTER-PCV` |
   | PCV20/PCV21, history has PCV13, no PPSV23 | last PCV13 | ≥1 year | `ADULT-PCV20-21-AFTER-PCV13` |
   | PCV15/20/21, history has PPSV23 only | last PPSV23 | ≥1 year | `ADULT-PCV-AFTER-PPSV23` |
-  | PPSV23, IC / cochlear implant / CSF leak | last PCV15 | ≥8 weeks (**CDC**, not owner) | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` |
+  | PPSV23, IC / cochlear implant / CSF leak | last PCV15 | ≥8 weeks | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` |
   | PPSV23, any other adult | last PCV15 | ≥1 year | `ADULT-PPSV23-AFTER-PCV15` |
+  | PPSV23, IC / cochlear implant / CSF leak | last PCV13 | ≥8 weeks | `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` |
+  | PPSV23, any other adult | last PCV13 | ≥1 year | `ADULT-PPSV23-AFTER-PCV13` |
   | A second PPSV23 | previous PPSV23 | ≥5 years | `ADULT-PPSV23-AFTER-PPSV23` |
+
+  The two **PCV13→PPSV23** rows were added 2026-10-11, on the owner's instruction that this
+  pair gets no exception. Their interval is rr7203a1's, verified live that day:
+  > "When PPSV23 is used instead of PCV20, the minimum recommended interval between PCV13
+  > and PPSV23 administration is ≥8 weeks for adults with an immunocompromising condition, a
+  > CSF leak, or a cochlear implant and ≥1 year for adults without these conditions."
+
+  They carry `anchorMustBeProduct: 'PCV13'`, so they apply only while PCV13 really is the
+  patient's most recent conjugate dose — "previously received PCV13" stops describing
+  someone once a PCV15 is also on the record, and the PCV15 rows then govern.
 
   Two keying decisions inside that table, both deliberate:
   - **CDC's prior-vaccine rows are selected from the HISTORY's products, never from risk
@@ -504,16 +531,19 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
      the recommended year. The dose met the minimum CDC names for them, so it counts; the
      note states that, which is information rather than second-guessing.
   2. `ADULT-PCV-AFTER-PCV-CATCH-ALL` and `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` — any adult pair
-     the enumerated rows do not name (PCV13→PCV15, or a PPSV23 days after a PCV13). Keyed on
+     the enumerated rows do not name (PCV13→PCV15, or a PPSV23 after a PCV20). Keyed on
      ≥1 year, the *shortest* adult gap CDC states, so they under-flag rather than over-flag.
      They exist so that "enumerate, never generalise" cannot turn into silence — which was
      the S14-7 root cause.
 
-  **Open, for the owner:** rr7203a1 states a PCV13→PPSV23 minimum in so many words — "the
-  minimum recommended interval between PCV13 and PPSV23 administration is ≥8 weeks … and ≥1
-  year for adults without these conditions" — so that pair is a candidate to be promoted
-  from the catch-all note to a CDC-authority floor. It was not among the rows the owner
-  enumerated on 2026-10-11 and has not been promoted.
+     **A catch-all may never speak for a pair an enumerated row already named**
+     (`catchAll: true`, checked by the evaluator). A catch-all is risk-blind by design — it
+     quotes one flat interval — so letting it talk over a specific rule reproduces the
+     A-P1-1 mistake one rule along. It did: an immunocompromised adult whose PPSV23 came 10
+     weeks after PCV13 had **met** the 8-week interval rr7203a1 states for them, and was
+     told "CDC advises at least 1 year" by a row that cannot see risk class. A dose whose
+     own rule named it and was satisfied — including one that passed on the 4-day grace —
+     now says nothing at all.
 
   **S14-2 (owner decision 2026-10-11): the chip no longer carries this distinction in a
   word.** Every recorded dose's chip reads **"Dose N of M"** (or "Dose N" when the card

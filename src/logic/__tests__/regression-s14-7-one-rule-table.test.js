@@ -397,27 +397,49 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
   });
 
   // CDC's grace applies to the FLOOR: 4 days short of the year still counts,
-  // 5 days short does not. The dose that squeaks through on the grace still
-  // picks up the catch-all's note, which is the honest answer — it counts, and
-  // it was short of the year. The grace decides whether a dose is VOIDED; it
-  // was never a reason to say nothing.
-  it('applies the grace to a calendar-month floor: 4 days short counts (with a note), 5 does not', () => {
+  // 5 days short does not. A graced dose says NOTHING — its own rule named it
+  // and was satisfied, and a catch-all may not then talk over that rule with a
+  // generic number (see the catchAll guard in the evaluator).
+  it('applies the grace to a calendar-month floor: 4 days short counts, 5 does not', () => {
     const anniversary = addCalendarMonths('2026-01-05', 12);
     const ctx = (doseDate) => ({
       ...base, doseDate,
       priorPcv: [{ date: '2026-01-05', product: 'PCV13' }],
       prev: { date: '2026-01-05', ageAtDose: 840, product: 'PCV13' },
     });
-    const graced = evaluateDoseInterval(ctx(addDays(anniversary, -4)));
-    expect(graced.kind).toBe('recommendation');
-    expect(graced.ruleId).toBe('ADULT-PCV-AFTER-PCV-CATCH-ALL');
+    expect(evaluateDoseInterval(ctx(addDays(anniversary, -4)))).toBeNull();
 
     const tooEarly = evaluateDoseInterval(ctx(addDays(anniversary, -5)));
     expect(tooEarly.kind).toBe('floor');
     expect(tooEarly.ruleId).toBe('ADULT-PCV20-21-AFTER-PCV13');
 
-    // A full year clears both, and says nothing at all.
+    // A full year clears it, and says nothing at all.
     expect(evaluateDoseInterval(ctx(anniversary))).toBeNull();
+  });
+
+  // THE DEFECT THIS GUARD EXISTS FOR. A catch-all is risk-blind by design — it
+  // quotes one flat interval. Letting it speak for a pair an enumerated row
+  // already named reproduces the A-P1-1 mistake one rule along: an
+  // immunocompromised adult whose PPSV23 came 10 weeks after PCV13 met the
+  // 8-week interval rr7203a1 states FOR THEM, and was told "CDC advises at
+  // least 1 year" by a row that cannot see their risk class.
+  it('a catch-all never speaks for a pair an enumerated row already named', () => {
+    const ppsv = (date, riskIds) => analyzeHistory('PPSV23', [{ date }],
+      ADULT.ageMonths, TODAY, ADULT.dob,
+      { pcvDoses: [{ date: '2019-03-01', product: 'PCV13' }], riskIds });
+
+    const met = ppsv('2019-05-10', ['hiv']);       // 10 weeks — their interval is 8
+    expect(met.perDose[0].status).toBe('valid');
+    expect(met.perDose[0].earlyAdvisory).toBeFalsy();
+    expect(met.perDose[0].reasons).toEqual([]);
+
+    // The catch-all still does its own job for a pair nothing else names:
+    // a PPSV23 after a PCV20, which no CDC row recommends at all.
+    const afterPcv20 = analyzeHistory('PPSV23', [{ date: '2019-05-10' }],
+      ADULT.ageMonths, TODAY, ADULT.dob,
+      { pcvDoses: [{ date: '2019-03-01', product: 'PCV20' }] });
+    expect(afterPcv20.perDose[0].status).toBe('valid');
+    expect(afterPcv20.perDose[0].earlyAdvisory).toBe(true);
   });
 });
 
