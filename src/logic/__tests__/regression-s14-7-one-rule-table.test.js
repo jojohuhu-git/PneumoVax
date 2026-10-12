@@ -20,9 +20,10 @@
 // logic/doseIntervalRules.js, and nothing anywhere asks the patient's age in
 // order to decide whether a rule is allowed to bite.
 //
-// ⚠️ Most adult floors here are an OWNER CLINICAL DETERMINATION dated
+// ⚠️ EVERY adult floor here is an OWNER CLINICAL DETERMINATION dated
 // 2026-10-11, not ACIP and not CDC — see doseIntervalRules.js's header and
-// CLINICAL_SPEC.md §K. The assertions below check that the app SAYS so.
+// CLINICAL_SPEC.md §K. The assertions below check that the app SAYS so, and
+// that no adult floor can arrive later carrying a CDC citation.
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -275,6 +276,36 @@ describe('S14-7 — the table cannot drift back', () => {
     for (const r of DOSE_INTERVAL_RULES.filter((x) => x.authority === 'CDC')) {
       expect(r.source, r.id).not.toMatch(/OWNER CLINICAL DETERMINATION/);
     }
+  });
+
+  // S14-7b's headline invariant, as a lock. Every adult FLOOR in this app is
+  // the owner's determination — the sources state adult gaps as advice for the
+  // next dose, so an adult floor citing CDC would credit CDC with something it
+  // did not say. CLAUDE.md states this in capitals; nothing enforced it until
+  // now, so a new adult row could have arrived carrying 'CDC' and the suite
+  // would have stayed green.
+  it('no adult floor may cite CDC — every one of them is the owner\'s', () => {
+    const adultFloors = DOSE_INTERVAL_RULES.filter(
+      (r) => r.rulebook === 'adult' && r.enforcement === 'floor',
+    );
+    expect(adultFloors.length).toBeGreaterThan(0);
+    for (const r of adultFloors) expect(r.authority, r.id).toBe('OWNER');
+  });
+
+  // The same claim in prose. doseIntervalRules.js's header is the first thing
+  // CLAUDE.md sends a session to read before touching an interval rule, so a
+  // stale sentence there is how the mislabelling S14-7b removed grows back.
+  it('the header does not attribute any adult floor to CDC', () => {
+    const src = fs.readFileSync(path.join(process.cwd(), 'src/logic/doseIntervalRules.js'), 'utf8');
+    const header = src.slice(0, src.indexOf('authority: \'OWNER\''));
+    const cdcPara = header.slice(header.indexOf('`authority: \'CDC\'`'));
+    // The exact stale sentence S14-7b removed. It counted one adult row into
+    // the CDC bucket; that row is the owner's.
+    expect(cdcPara).not.toMatch(/plus one adult row/i);
+    // And the correction has to be stated, not merely implied — if a later
+    // rewrite drops it, this fails rather than going quiet.
+    expect(cdcPara).toMatch(/paediatric/i);
+    expect(cdcPara).toMatch(/no adult floor is cdc/i);
   });
 
   // The five gates, by name. If any of them comes back, this fails.

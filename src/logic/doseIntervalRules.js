@@ -37,9 +37,22 @@
 // ── Authority ────────────────────────────────────────────────────────────
 //
 // `authority: 'CDC'`  — the source states this gap as a MINIMUM in so many
-// words, so voiding a dose below it claims no more than the source does. Every
-// paediatric row, plus one adult row: the 8-week PCV15→PPSV23 minimum, which is
-// the only place "minimum interval" appears anywhere in the adult notes.
+// words, so voiding a dose below it claims no more than the source does. The
+// three **paediatric** floors, and only those. The adult rows that carry 'CDC'
+// are the ones that void nothing — `enforcement: 'none'` and the catch-all
+// `'recommendation'` rows — where CDC really is the one speaking.
+//
+// ⚠️ **No adult FLOOR is CDC's.** An earlier draft of this header claimed the
+// 8-week PCV15→PPSV23 gap as a CDC-stated adult floor, because "minimum
+// interval" appears in the adult notes. That was wrong, and it was wrong
+// because the sentence had been transcribed from a handoff file instead of read
+// from the source. rr7203a1, fetched live 2026-10-11, says a minimum of 8 weeks
+// "**can be considered** … to minimize the time of risk" — permission to
+// vaccinate SOONER, not a bar to fall below. ACIP's recurring phrase is
+// "minimum **recommended** interval", the shortest *recommended* spacing, which
+// is a different concept from the General Best Practices "minimum interval"
+// that carries the repeat-the-dose consequence. Corrected in S14-7b; two tests
+// now hold both the rows and this paragraph to it.
 //
 // `authority: 'OWNER'` — ⚠️ **OWNER CLINICAL DETERMINATION, 2026-10-11. Never
 // cite ACIP or CDC for these rows.** The published sources disagree, and were
