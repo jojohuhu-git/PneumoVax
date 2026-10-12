@@ -39,7 +39,7 @@
 import { daysBetween, todayISO } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS } from './format.js';
-import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS, PPSV23_PRODUCT } from '../data/brands.js';
 import { cite } from '../data/refs.js';
 // S14-7: only the MINIMUM-AGE helpers are imported here. Every minimum
 // INTERVAL — and every decision about whether a gap can void a dose — lives in
@@ -111,6 +111,13 @@ function fmtMinAge(minAgeM) {
     return `${w} week${w === 1 ? '' : 's'}`;
   }
   return `${minAgeM} month${minAgeM === 1 ? '' : 's'}`;
+}
+
+// The same minimum worn as an adjective: "2 years" → "2-year", "6 weeks" →
+// "6-week". Exists so a message can read "below the 2-year minimum age"
+// without writing the number out a second time (queue P2-12).
+function fmtMinAgeAdj(minAgeM) {
+  return fmtMinAge(minAgeM).replace(/^(\d+) (\w+?)s?$/, '$1-$2');
 }
 
 // P6-3 (S13, 2026-10-10): a verdict that sets a recorded dose aside can carry
@@ -347,7 +354,14 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
 
 // ── Validate one PPSV23 dose ─────────────────────────────────────────────
 function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
-  const minAgeM = 24; // ≥2 years
+  // queue P2-12: the minimum age lives in the product catalogue, where every
+  // other product's does. It used to be stated here a second time, as a bare
+  // `24`, with "2 years" typed by hand into five of the messages below — so
+  // the app could have compared against one number and told the clinician
+  // another. Every sentence here is now built from this one value.
+  const minAgeM = PPSV23_PRODUCT.minAgeM;
+  const minAgeNoun = fmtMinAge(minAgeM);      // "2 years"
+  const minAgeAdj = fmtMinAgeAdj(minAgeM);    // "2-year"
   // P6-3c: the 2 years is the second of the two numbers `pedsMinAge` quotes
   // ("2 years [PPSV23]"), so every PPSV23 minimum-age verdict cites it — no
   // product test needed here, unlike the PCV side where PCV21 carries a
@@ -356,21 +370,21 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!dose.date) {
     if (ageMonths < minAgeM) {
       return invalid(
-        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the 2-year minimum age for PPSV23[c]. This dose does not count.`],
-        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: 2 years.`,
+        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${minAgeAdj} minimum age for PPSV23[c]. This dose does not count.`],
+        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${minAgeNoun}.`,
         ageCites
       );
     }
-    return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid)[c].'], ageCites);
+    return unknown([`No date recorded — counted (must have been given at ≥${minAgeNoun} to be valid)[c].`], ageCites);
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
   if (ageAtDose !== null && ageAtDose < 0) return beforeBirth(dose, 'PPSV23');
-  // CDC's 4-day grace — PPSV23's floor is 2 CALENDAR years, so the grace is
+  // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
     return invalid(
-      [`Given at ~${fmtAgeM(ageAtDose)} — below the 2-year minimum age for PPSV23[c].`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: 2 years (doses up to 4 days early still count, per CDC).`,
+      [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
+      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
       ageCites
     );
   }
