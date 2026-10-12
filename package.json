@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "sweep:update": "node scripts/updateVerdictCorpus.mjs",
     "test:watch": "vitest",
     "prepare": "git config core.hooksPath .githooks || true"
   },
