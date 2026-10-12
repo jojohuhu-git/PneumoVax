@@ -1,5 +1,13 @@
 # PneumoVax — Handoff after S8 (2026-10-11)
 
+> ⛔ **SUPERSEDED (2026-10-12) — do not resume from this file.**
+> Its item **1 (merge PR #32)** is done, and so are item **2 (`P2-8` + `P2-9`)** and item
+> **4 (the silent PPSV23, shipped as `S14-4B`)**. The ⚠ banner below saying PR #32 is not
+> merged is **no longer true** — it merged as `6d88acd`. Current state and the remaining
+> queue live in
+> [`handoff-2026-10-12-s8-merged-s14-4b-p2-8-p2-9-done.md`](handoff-2026-10-12-s8-merged-s14-4b-p2-8-p2-9-done.md).
+
+
 > **Supersedes `handoff-2026-10-11-anchor-1-done-next-is-s8.md`.** That file's item **1
 > (`S8`)** is **DONE** and sitting in **PR #32, green and awaiting the owner's merge**.
 > Resume from item **2** below.
