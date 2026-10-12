@@ -313,44 +313,62 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
 }
 
 // ── Core walk ────────────────────────────────────────────────────────────
-function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds) {
-  const kept = [];
-  const perDose = [];
-  let effectiveCount = 0;
-  // The previous DATED dose in THIS stream, which anchors the same-stream
-  // interval rows. Undated doses count but can never anchor a gap. An invalid
-  // dose DOES anchor — CDC: "The repeat dose should be spaced after the
-  // invalid dose by the recommended minimum interval." PCV7 does not: it is a
-  // properly given dose of a superseded product rather than a mistimed one,
-  // and no source states an interval from it.
-  let prev = null;
-  const anchorOn = (dose) => {
-    if (dose.date) {
-      prev = {
-        date: dose.date,
-        ageAtDose: ageAtDoseFromDate(dose, ageMonths, today, dob),
-        product: dose.product || '',
+//
+// One stream's running state. Held in an object rather than in closure
+// variables so that two streams can be advanced dose by dose in a single
+// chronological pass — see walkBothStreams (ANCHOR-1).
+function freshStreamState() {
+  return {
+    kept: [],          // this stream's COUNTING doses, in order
+    perDose: [],       // the verdict on each dose, chronological
+    effectiveCount: 0, // how many have counted so far
+    // The previous DATED dose in THIS stream, which anchors the same-stream
+    // interval rows. Undated doses count but can never anchor a gap. An
+    // invalid dose DOES anchor — CDC: "The repeat dose should be spaced after
+    // the invalid dose by the recommended minimum interval." PCV7 does not:
+    // it is a properly given dose of a superseded product rather than a
+    // mistimed one, and no source states an interval from it.
+    prev: null,
+  };
+}
+
+// Judge ONE dose and fold the verdict into `st`.
+//
+// `otherKept` is what the cross-stream rows measure from: the other stream's
+// COUNTING doses. `st.kept` supplies this stream's own, which is what CDC's
+// prior-vaccine rows are composed from (a PCV7 or a voided dose is not
+// "previously received PCV13"). Both lists are narrowed to doses dated on or
+// before the judged dose inside validateOnePCV / validateOnePPSV23.
+//
+// ANCHOR-1 (owner decision 2026-10-11) — `otherKept` is COUNTING doses in
+// BOTH directions. It used to be counting one way and raw the other: the
+// PPSV23 stream received `pcvAnalysis.effective` because the PCV walk ran
+// first, while the PCV stream received the raw PPSV23 list, whose verdicts did
+// not exist yet. So a PPSV23 that did not count could still void a later PCV
+// dose. Two adult rows measure a conjugate dose from a PPSV23
+// (`ADULT-PCV-AFTER-PPSV23`, `ADULT-PCV20-21-5Y-AFTER-PPSV23`), and both
+// anchored on the raw list, which is how a 70-year-old's PCV20 was rejected
+// for sitting too close to a PPSV23 that had itself been rejected. The owner's
+// words: that dose "is rejected not because it is too soon but because it was
+// unnecessary", and an unnecessary dose cannot reset a clock.
+function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds) {
+  const anchorOn = (d) => {
+    if (d.date) {
+      st.prev = {
+        date: d.date,
+        ageAtDose: ageAtDoseFromDate(d, ageMonths, today, dob),
+        product: d.product || '',
       };
     }
   };
+  const crossStream = (otherKept ?? []).filter((d) => d && d.date);
+  const perDose = st.perDose;
 
-  // What the cross-stream rows measure from. The PCV stream is handed the
-  // other stream's PPSV23 doses and vice versa; `kept` supplies this stream's
-  // own counting doses, which is what CDC's prior-vaccine rows are composed
-  // from (a PCV7 or a voided dose is not "previously received PCV13").
-  //
-  // ASYMMETRY, deliberate and worth knowing about: the PPSV23 stream receives
-  // the COUNTING PCV doses (recommend.js hands over `pcvAnalysis.effective`,
-  // since the PCV walk runs first), while the PCV stream receives the RAW
-  // PPSV23 doses — their verdicts do not exist yet. So a voided PPSV23 can
-  // anchor a PCV dose's gap but a voided PCV cannot anchor a PPSV23's. CDC's
-  // repeat-dose sentence favours the raw reading; aligning the two would move
-  // existing paediatric verdicts, which is outside S14-7. Recorded in the
-  // handoff as an open item rather than changed quietly here.
-  const crossStream = (otherStream ?? []).filter((d) => d && d.date);
-
-  for (let i = 0; i < rawDoses.length; i++) {
-    const dose = rawDoses[i];
+  // One dose, so every branch below RETURNS where the old per-stream loop
+  // used `continue`.
+  {
+    const kept = st.kept;
+    const prev = st.prev;
     const ctxParts = vaccine === 'PCV'
       ? { priorPcv: kept, priorPpsv23: crossStream, riskIds }
       : { priorPcv: crossStream, priorPpsv23: kept, riskIds };
@@ -376,12 +394,12 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds)
         reasons: [...result.reasons, closingSentence],
       });
       anchorOn(dose);
-      continue;
+      return;
     }
     if (result.status === 'noncounting') {
       // PCV7 — recorded but not added to the effective list.
       perDose.push({ ...result, effectiveDoseNum: null, doesNotCount: true });
-      continue;
+      return;
     }
 
     // S14-4: an ADULT PCV dose recorded after the series was already complete
@@ -430,16 +448,84 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds)
       // Validly given, with a real date — worth anchoring the next dose's gap
       // check, same as an invalid dose does.
       anchorOn(dose);
-      continue;
+      return;
     }
 
-    effectiveCount++;
-    perDose.push({ ...result, effectiveDoseNum: effectiveCount });
+    st.effectiveCount++;
+    perDose.push({ ...result, effectiveDoseNum: st.effectiveCount });
     kept.push(dose);
     anchorOn(dose);
   }
+}
 
-  return { perDose, effective: kept };
+// ── One stream, the other stream's verdicts already settled ──────────────
+//
+// The standalone path, kept for callers that analyse a single stream and hand
+// over the other one themselves (`analyzeHistory`). Whatever is handed in is
+// taken at face value as the other stream's COUNTING doses — which is what
+// `analyzeHistory`'s own contract says it is.
+function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds) {
+  const st = freshStreamState();
+  for (const dose of rawDoses) {
+    stepStream(vaccine, dose, st, otherStream, ageMonths, today, dob, riskIds);
+  }
+  return { perDose: st.perDose, effective: st.kept };
+}
+
+// ── Both streams, one chronological pass (ANCHOR-1) ──────────────────────
+//
+// WHY ONE PASS AND NOT TWO WALKS.
+//
+// Each stream needs the other stream's COUNTING doses, which reads like a
+// circular dependency: PCV validity would depend on PPSV23 validity and vice
+// versa. It is not circular, because every interval rule measures a gap from a
+// dose given EARLIER. Walk both streams together in date order and the
+// dependency always points backwards: by the time a dose is judged, every
+// dose that could possibly anchor it — in either stream — already has its
+// verdict. No iteration, no fixed point to converge on.
+//
+// TIES: a PCV and a PPSV23 on the SAME DAY. The PCV is judged first, so a
+// same-visit PPSV23 still sees the PCV15 it was given alongside — the
+// co-administration error a clinician most needs named, and the one S14-7's
+// rule table is ordered around. The consequence runs the other way too: a PCV
+// dose is no longer judged against a PPSV23 given at the same visit. That
+// follows from the same decision — a dose cannot be made invalid by a dose
+// that was not given before it — and it is the narrower, more honest reading:
+// of a same-day PCV15 + PPSV23 pair, the PPSV23 is the dose that was early,
+// and it is now the only one set aside.
+function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds }) {
+  const pcv = freshStreamState();
+  const ppsv23 = freshStreamState();
+  const queue = [
+    ...pcvDoses.map((dose) => ({ dose, vaccine: 'PCV' })),
+    ...ppsv23Doses.map((dose) => ({ dose, vaccine: 'PPSV23' })),
+  ];
+  // Undated doses first — they count but can never anchor a gap, and an
+  // undated historical dose is assumed to be the earlier one (the same
+  // convention summarizePcv uses). Then by date; on a tie, PCV before PPSV23.
+  // `sort` is stable, so each stream's own order survives untouched.
+  queue.sort((a, b) => {
+    const da = a.dose?.date || '';
+    const db = b.dose?.date || '';
+    if (da !== db) {
+      if (!da) return -1;
+      if (!db) return 1;
+      return da < db ? -1 : 1;
+    }
+    if (a.vaccine === b.vaccine) return 0;
+    return a.vaccine === 'PCV' ? -1 : 1;
+  });
+
+  for (const { dose, vaccine } of queue) {
+    const self = vaccine === 'PCV' ? pcv : ppsv23;
+    const other = vaccine === 'PCV' ? ppsv23 : pcv;
+    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds);
+  }
+
+  return {
+    pcv: { perDose: pcv.perDose, effective: pcv.kept },
+    ppsv23: { perDose: ppsv23.perDose, effective: ppsv23.kept },
+  };
 }
 
 /**
@@ -481,6 +567,41 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
     ((vaccine === 'PPSV23' ? opts.pcvDoses : opts.ppsv23Doses) ?? []).filter(Boolean)
   );
   return runWalk(vaccine, filtered, ageMonths, ref, dob, otherStream, opts.riskIds);
+}
+
+/**
+ * analyzeBoth — both pneumococcal streams, judged together (ANCHOR-1).
+ *
+ * The engine's entry point. Use this rather than two `analyzeHistory` calls:
+ * it is the only path on which a gap is measured from a dose that COUNTED in
+ * BOTH directions. Two separate calls can only ever get that right one way
+ * round, because the second call needs the first call's verdicts and the first
+ * call needs the second's. See walkBothStreams for why one chronological pass
+ * removes the circularity instead of iterating on it.
+ *
+ * @param {object} input
+ * @param {Array<{date?:string, product?:string}>} input.pcvDoses
+ * @param {Array<{date?:string, product?:string}>} input.ppsv23Doses
+ * @param {number} input.ageMonths
+ * @param {string} [input.today]
+ * @param {string} [input.dob]
+ * @param {string[]} [input.riskIds]
+ *   Risk class decides WHICH floor an adult's PPSV23 after a PCV15 is judged
+ *   against — the 8-week minimum CDC names for an immunocompromising
+ *   condition, cochlear implant or CSF leak, or the year. One call now, so the
+ *   two streams cannot be handed different risk lists.
+ * @returns {{pcv: {perDose: Array, effective: Array}, ppsv23: {perDose: Array, effective: Array}}}
+ */
+export function analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds }) {
+  const ref = todayISO(today);
+  return walkBothStreams({
+    pcvDoses: sortDosesChronologically((pcvDoses ?? []).filter(Boolean)),
+    ppsv23Doses: sortDosesChronologically((ppsv23Doses ?? []).filter(Boolean)),
+    ageMonths,
+    today: ref,
+    dob,
+    riskIds: riskIds ?? [],
+  });
 }
 
 // Chronological, stable sort. ISO date strings compare lexicographically. Undated doses
