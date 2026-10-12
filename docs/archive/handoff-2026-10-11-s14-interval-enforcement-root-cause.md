@@ -1,12 +1,14 @@
 # PneumoVax — Handoff after the S3-N1 root-cause review (2026-10-11)
 
-> **PARTIALLY SUPERSEDED 2026-10-11** by
-> `handoff-2026-10-11-s14-1-through-6-done.md`. **`S14-1`…`S14-6` below are now DONE** —
-> read the newer file for what shipped and the current branch/test state. **This file is
-> still the source of truth for `S14-7`** (the rule-table rewrite) and everything below it
-> — its clinical rule tables, the owner's cross-checked sources, and the "one rule that
-> contradicts the sources" determination are unchanged and not restated elsewhere. Don't
-> resume `S14-1`…`S14-6` from here; they're closed.
+> **FULLY SUPERSEDED 2026-10-11** by `handoff-2026-10-11-s14-7-one-rule-table.md`.
+> **`S14-1`…`S14-7` are all DONE.** This file's rule tables are now implemented in
+> `src/logic/doseIntervalRules.js`, and its clinical content — including the owner
+> determination in "The one rule that contradicts the sources" — is restated, with the
+> owner's further 2026-10-11 answers folded in, in `CLINICAL_SPEC.md` §K. **Read §K, not
+> this file, for the current rules.** Two things changed after this file was written and
+> are only correct in §K: the adult floors were extended beyond PCV13→PCV20/21 to every
+> enumerated adult gap, and `S10-N1` did not reproduce. Kept for the source-checking
+> record; do not resume any item from it.
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
 Branch: **`fix/s3-recorded-dose-intervals`**, off `main` @ `9a27e5a`. Pushed → **PR #22

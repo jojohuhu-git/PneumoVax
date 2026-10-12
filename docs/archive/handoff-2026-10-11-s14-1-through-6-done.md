@@ -1,5 +1,10 @@
 # PneumoVax — Handoff after S14-1…S14-6 (2026-10-11)
 
+> **SUPERSEDED 2026-10-11** by `handoff-2026-10-11-s14-7-one-rule-table.md`. Its only open
+> item, `S14-7`, is now **DONE** (commit `dfa1d92`, suite 455 passing / 41 files). Do not
+> resume anything from this file — the newer handoff carries the current branch state, the
+> remaining queue, and the open owner decisions.
+
 > **Supersedes `handoff-2026-10-11-s14-interval-enforcement-root-cause.md`** for the
 > mechanical half of its queue. That file's `S14-1`…`S14-6` items are now **DONE** — see
 > below. `S14-7` (the five-age-gates → one rule table rewrite) is still open and that
