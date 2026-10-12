@@ -4,8 +4,8 @@ Standalone, client-side React SPA giving **ACIP/CDC-cited clinical decision supp
 for pneumococcal vaccination** (PCV15 / PCV20 / PCV21 conjugate + PPSV23
 polysaccharide) across the full lifespan — infants through adults.
 
-The pneumococcal sibling of [vaxapp/PediVax](https://github.com/jojohuhu-git) and
-MeningoVax. No backend, no auth, no database — everything runs in the browser.
+The pneumococcal sibling of MeningoVax. No backend, no auth, no database — everything
+runs in the browser.
 
 ## Quick start
 ```bash
