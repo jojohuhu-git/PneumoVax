@@ -79,7 +79,11 @@ describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', 
     expect(second.doesNotCount).toBe(true);
     expect(a.effective).toHaveLength(1);
     expect(second.reasons.join(' ')).toMatch(/at least 1 year after the last PCV13 dose/);
-    expect(second.reasons.join(' ')).toMatch(/repeat this dose only/);
+    // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
+    // only early — it is not "repeated". See
+    // regression-w1-too-soon-not-repeated.test.js for the dedicated coverage.
+    expect(second.reasons.join(' ')).toMatch(/due on or after 2027-01-01/);
+    expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
     // Must NOT keep the old reassurance — it is now false.
     expect(second.reasons.join(' ')).not.toMatch(/still counts/);
     // Honesty: the rule is the owner's, not ACIP's, and the detail says so.

@@ -85,7 +85,7 @@
 // flagged", so a future reader can tell a decision from an oversight.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { daysBetween, calendarMonthsBetween, calendarIntervalElapsed } from './dateUtils.js';
+import { daysBetween, calendarMonthsBetween, calendarIntervalElapsed, addDays, addCalendarMonths } from './dateUtils.js';
 import {
   intervalMeetsMinimum,
   calendarIntervalMeetsMinimum,
@@ -93,6 +93,7 @@ import {
   PCV_PPSV23_MIN_INTERVAL_DAYS,
   PPSV23_REVACC_MIN_MONTHS,
   ADULT_ADVISED_PCV_GAP_MONTHS,
+  GRACE_DAYS,
 } from './intervals.js';
 import { ADULT_PPSV23_INTERVAL_MONTHS, adultPpsvShorterMinimumApplies } from '../data/riskFactors.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
@@ -631,6 +632,20 @@ function anchorAllowed(rule, anchor) {
   return !rule.anchorMustBeProduct || anchor.product === rule.anchorMustBeProduct;
 }
 
+// W1 (2026-10-11): the earliest date a floor's dose could have validly been
+// given — anchor date + the rule's own interval, minus the 4-day grace that
+// `intervalMet` already extends in the same direction. Lets validate.js say
+// "the next dose is due on or after <date>" instead of "repeat this dose",
+// which is wrong for a dose that was never missing, only early.
+function earliestValidDate(rule, anchor) {
+  const grace = rule.grace ? GRACE_DAYS : 0;
+  if (rule.interval.months != null) {
+    return addDays(addCalendarMonths(anchor.date, rule.interval.months), -grace);
+  }
+  const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor) : rule.interval.days;
+  return addDays(anchor.date, minDays - grace);
+}
+
 // Is the gap long enough? `null` interval (a never-flagged row) is always met.
 function intervalMet(rule, ctx, anchor) {
   if (!rule.interval) return true;
@@ -660,7 +675,7 @@ function intervalMet(rule, ctx, anchor) {
  *   PPSV23 doses dated on or before this dose
  * @param {string[]} ctx.riskIds
  * @returns {null
- *   | {kind:'floor', ruleId:string, authority:string, reasons:string[], detail:string}
+ *   | {kind:'floor', ruleId:string, authority:string, reasons:string[], detail:string, earliestValidDate:string}
  *   | {kind:'recommendation', ruleId:string, authority:string, reason:string}}
  */
 export function evaluateDoseInterval(ctx) {
@@ -696,6 +711,7 @@ export function evaluateDoseInterval(ctx) {
       return {
         kind: 'floor', ruleId: rule.id, authority: rule.authority,
         reasons: msg.reasons, detail: msg.detail,
+        earliestValidDate: earliestValidDate(rule, anchor),
       };
     }
     return { kind: 'recommendation', ruleId: rule.id, authority: rule.authority, reason: msg };

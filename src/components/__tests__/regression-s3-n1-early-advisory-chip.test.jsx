@@ -141,7 +141,10 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     ]} />);
     openEveryCard(container);
     expect(screen.getByText(/at least 1 year after the last PCV13 dose/i)).toBeInTheDocument();
-    expect(screen.getByText(/repeat this dose only/i)).toBeInTheDocument();
+    // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
+    // only early — the UI must not tell the clinician to repeat it.
+    expect(screen.getByText(/due on or after 2027-01-01/i)).toBeInTheDocument();
+    expect(screen.queryByText(/repeat this dose only/i)).not.toBeInTheDocument();
     // The clinician must be able to see this is the owner's rule, not ACIP's.
     expect(screen.getByText(/owner clinical determination/i)).toBeInTheDocument();
     // And it must NOT still claim the dose counts.

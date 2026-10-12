@@ -40,8 +40,10 @@
 //
 // That last sentence is why a sub-minimum dose is `invalid` here rather than a
 // new middle verdict: CDC states the consequence itself — the dose does not
-// count and is repeated. The existing `invalid` path already says "repeat this
-// dose only (do not restart the series)", which is CDC's next sentence.
+// count. W1 (2026-10-11, owner-approved wording) changed WHAT it is told to
+// do about that: a dose rejected only for being too soon was never missing,
+// so it names the earliest valid date instead of saying "repeat this dose" —
+// see regression-w1-too-soon-not-repeated.test.js.
 //
 // ── What is deliberately NOT checked ─────────────────────────────────────
 //
@@ -137,12 +139,16 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     expect(b.effective).toHaveLength(2);
   });
 
-  it('says so in plain English, and keeps the repeat-this-dose-only wording', () => {
+  // W1 (owner-approved wording, 2026-10-11): a dose rejected for being given
+  // too soon is not a missing dose, so it is not "repeated" — see
+  // regression-w1-too-soon-not-repeated.test.js for the dedicated coverage.
+  it('says so in plain English, and names the earliest valid date instead of "repeat"', () => {
     const a = pcv(['2026-03-01', '2026-03-15'], { am: 4, today: '2026-05-01' });
     const reasons = a.perDose[1].reasons.join(' ');
     expect(reasons).toMatch(/14 days after the previous dose/);
     expect(reasons).toMatch(/4 weeks/);
-    expect(reasons).toMatch(/repeat this dose only/);
+    expect(reasons).toMatch(/due on or after 2026-03-25/);
+    expect(reasons).not.toMatch(/repeat this dose only/);
   });
 
   it('cannot check an interval it has no dates for', () => {

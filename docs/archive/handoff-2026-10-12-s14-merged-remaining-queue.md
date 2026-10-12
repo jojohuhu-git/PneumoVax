@@ -1,5 +1,12 @@
 # PneumoVax — Handoff after PR #22 merged (2026-10-12)
 
+> ⛔ **SUPERSEDED 2026-10-11 by `handoff-2026-10-11-anchoring-decided-and-reordered-queue.md`.**
+> Do not resume this queue. Its one open clinical question — row 1, "does a dose that doesn't
+> count still start the clock for the next one?" — has been **answered by the owner**, and its
+> recommended ORDER has been **reversed**: the owner asked for the anchoring rework to go
+> **last**, after two smaller fixes, not first. The worked examples below are still accurate
+> and the superseding file re-verifies them, but read that file for the current plan.
+
 > **Supersedes `handoff-2026-10-11-s14-7-one-rule-table.md`.** The whole interval
 > programme — `S3`, `S3-N1`, `S14-1`…`S14-7`, plus `S14-7b` and `S14-7c` — is **DONE and
 > MERGED**. The one open question that handoff left you (rr7203a1's PCV13→PPSV23 minimum)
