@@ -1,5 +1,9 @@
 # PneumoVax — Handoff after the anchoring decision (2026-10-11)
 
+> ⛔ **SUPERSEDED 2026-10-11 by `handoff-2026-10-11-w1-done-next-is-s3-n2.md`.** This
+> file's item 1 (`W1`) is **DONE and MERGED** (PR #24). Resume from that file's item 2
+> (`S3-N2`), not from this file's queue.
+
 > **Supersedes `handoff-2026-10-12-s14-merged-remaining-queue.md`.** That file's open
 > clinical question (row 1, "does a dose that doesn't count still start the clock?") is
 > **ANSWERED by the owner — see §Owner decisions below.** Its recommended ORDER is also
