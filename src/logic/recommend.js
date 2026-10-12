@@ -1070,6 +1070,11 @@ export function recommend(input) {
       // while Results re-walked the history itself; a crash the moment it
       // started reading these instead.
       perDose: { pcv: [], ppsv23: [] },
+      // P0 (2026-10-12): the doses in the order their verdicts are in. Empty
+      // here for the same reason perDose is, and an ARRAY for the same
+      // reason — a consumer iterating it must not have to special-case the
+      // hard stop.
+      orderedDoses: { pcv: [], ppsv23: [] },
       meta: { ageMonths: am, dob, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
     };
   }
@@ -1143,6 +1148,11 @@ export function recommend(input) {
     hsct,
     pcv21Geo,
     perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
+    // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
+    // computed for. A caller rendering a verdict beside its dose reads BOTH
+    // from here; reading its own input array alongside `perDose` is what put
+    // every verdict on the wrong row for a history typed newest-first.
+    orderedDoses: { pcv: pcvAnalysis.doses, ppsv23: ppsvAnalysis.doses },
     meta: { ageMonths: am, dob, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
   };
 }

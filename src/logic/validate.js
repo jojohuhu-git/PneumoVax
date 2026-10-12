@@ -8,8 +8,15 @@
 // analyzeHistory(vaccine, doses, ageMonths, today)
 //   → { perDose: [...], effective: [...] }
 //
-//   perDose — parallel to input; each { status, effectiveDoseNum, reasons[],
-//             detail?, doesNotCount? } for display.
+//   perDose — the verdict on each dose, in DATE order (NOT input order — the
+//             walk sorts first, because a gap can only be measured from a
+//             dose given earlier). Each { status, effectiveDoseNum,
+//             reasons[], detail?, doesNotCount? } for display.
+//   doses   — the doses themselves, in the SAME order as `perDose`. Anything
+//             rendering a verdict beside its dose must read this, never the
+//             caller's own input array: pairing `perDose` with input order by
+//             index showed every verdict against the wrong dose whenever a
+//             history was typed newest-first (P0, 2026-10-12).
 //   effective — the kept doses the recommendation engine counts.
 //
 // Counting policy (CLINICAL_SPEC §Products, §K):
@@ -389,6 +396,7 @@ function freshStreamState() {
   return {
     kept: [],          // this stream's COUNTING doses, in order
     perDose: [],       // the verdict on each dose, chronological
+    doses: [],         // the doses themselves, same order as `perDose` (P0)
     effectiveCount: 0, // how many have counted so far
     // The previous DATED dose in THIS stream, which anchors the same-stream
     // interval rows. Undated doses count but can never anchor a gap. An
@@ -420,6 +428,14 @@ function freshStreamState() {
 // words: that dose "is rejected not because it is too soon but because it was
 // unnecessary", and an unnecessary dose cannot reset a clock.
 function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds) {
+  // P0 (2026-10-12): the dose is recorded here, at the single entry point
+  // that also produces its verdict, so `st.doses[i]` is BY CONSTRUCTION the
+  // dose `st.perDose[i]` was computed for. The UI used to hold its own copy
+  // of the dose list — the raw input array — and pair the two by index; the
+  // walk sorts into date order, so a history typed newest-first showed every
+  // verdict against the wrong dose. There is now one ordering in the app and
+  // the component does not own it.
+  st.doses.push(dose);
   const anchorOn = (d) => {
     if (d.date) {
       st.prev = {
@@ -596,7 +612,7 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds)
   for (const dose of rawDoses) {
     stepStream(vaccine, dose, st, otherStream, ageMonths, today, dob, riskIds);
   }
-  return { perDose: st.perDose, effective: st.kept };
+  return { perDose: st.perDose, effective: st.kept, doses: st.doses };
 }
 
 // ── Both streams, one chronological pass (ANCHOR-1) ──────────────────────
@@ -650,8 +666,8 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
   }
 
   return {
-    pcv: { perDose: pcv.perDose, effective: pcv.kept },
-    ppsv23: { perDose: ppsv23.perDose, effective: ppsv23.kept },
+    pcv: { perDose: pcv.perDose, effective: pcv.kept, doses: pcv.doses },
+    ppsv23: { perDose: ppsv23.perDose, effective: ppsv23.kept, doses: ppsv23.doses },
   };
 }
 
@@ -688,7 +704,7 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
   // count but are never a timing anchor, and an undated historical dose is assumed to be
   // the earlier (infant) dose, matching summarizePcv's convention.
   const filtered = sortDosesChronologically((doses ?? []).filter(Boolean));
-  if (filtered.length === 0) return { perDose: [], effective: [] };
+  if (filtered.length === 0) return { perDose: [], effective: [], doses: [] };
   // The OTHER stream's doses, which the cross-stream rule rows measure from.
   const otherStream = sortDosesChronologically(
     ((vaccine === 'PPSV23' ? opts.pcvDoses : opts.ppsv23Doses) ?? []).filter(Boolean)
@@ -717,7 +733,9 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
  *   against — the 8-week minimum CDC names for an immunocompromising
  *   condition, cochlear implant or CSF leak, or the year. One call now, so the
  *   two streams cannot be handed different risk lists.
- * @returns {{pcv: {perDose: Array, effective: Array}, ppsv23: {perDose: Array, effective: Array}}}
+ * @returns {{pcv: {perDose: Array, effective: Array, doses: Array},
+ *            ppsv23: {perDose: Array, effective: Array, doses: Array}}}
+ *   `doses[i]` is the dose `perDose[i]` was computed for, in date order.
  */
 export function analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds }) {
   const ref = todayISO(today);

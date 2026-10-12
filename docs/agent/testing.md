@@ -27,6 +27,8 @@
 | `src/logic/__tests__/regression-p6-3b-note-cite-parity.test.js` | Engine-wide sweep: marker/citation parity and no dead refs. **Counts notes and verdicts separately — a combined total once hid a sweep walking zero verdicts** |
 | `src/components/__tests__/regression-p6-4-note-lead-and-detail.test.jsx` | `{lead, detail}` + "Why this"; one citation list spanning both halves |
 | `src/components/__tests__/regression-p6-5-one-history-walk.test.jsx` | Results reads the engine's `perDose`; `perDose` is an array on every path |
+| `src/logic/__tests__/regression-p0-ordered-doses-pair-with-verdicts.test.js` | `orderedDoses[i]` is the dose `perDose[i]` was computed for, over all 16,250 grid patients; date order; array on the hard stop |
+| `src/components/__tests__/regression-p0-row-order-ui.test.jsx` | A history typed newest-first shows each verdict on its own dose row, oldest first, with D1/D2 following |
 | `src/components/__tests__/regression-p6-6-toggle-labels.test.jsx` | Header toggles keep their label; no "Done" |
 | `src/components/__tests__/regression-p6-7-current-risk-disclaimer.test.jsx` | The current-risk-only caveat, and that the engine really behaves as it claims |
 | `src/components/__tests__/regression-p7-2-no-inline-styles.test.js` | Tripwire: no inline styles or hex literals (the regression MeningoVax has) |

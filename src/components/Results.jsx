@@ -101,9 +101,19 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   // with the recommendation that was computed from it. Results used to call
   // analyzeHistory again with the same arguments — the two agreed only by
   // coincidence, with nothing enforcing it.
+  // P0 (2026-10-12): the doses come from the ENGINE, not from `pcvDoses` /
+  // `ppsv23Doses`. Those are the raw state arrays in the order the clinician
+  // typed them; the walk sorts into date order before grading, so pairing
+  // them with `perDose` by index showed every verdict against the wrong dose
+  // the moment a history was entered newest-first. `orderedDoses[v][i]` and
+  // `perDose[v][i]` are built in the same loop and cannot disagree.
+  //
+  // Sorting here instead would have been a second implementation of the
+  // walk's ordering — the same two-sources-of-truth shape P6-5 removed when
+  // it stopped Results walking the history itself.
   const histories = {
-    PCV: { label: 'PCV', doses: pcvDoses, doseValidations: result.perDose.pcv },
-    PPSV23: { label: 'PPSV23', doses: ppsv23Doses, doseValidations: result.perDose.ppsv23 },
+    PCV: { label: 'PCV', doses: result.orderedDoses.pcv, doseValidations: result.perDose.pcv },
+    PPSV23: { label: 'PPSV23', doses: result.orderedDoses.ppsv23, doseValidations: result.perDose.ppsv23 },
   };
   const seenVaccine = {};
   function historyPropsFor(vaccine) {
