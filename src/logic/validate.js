@@ -79,19 +79,14 @@ function fmtAgeM(m) {
   return rem === 0 ? `${y} year${y === 1 ? '' : 's'}` : `${y}y ${rem}m`;
 }
 
-// Minimums read back to a clinician the way the source states them: "4 weeks
-// (28 days)", not "28 days".
-function fmtDays(days) {
-  if (days % 7 === 0) {
-    const w = days / 7;
-    return `${w} week${w === 1 ? '' : 's'} (${days} days)`;
-  }
-  return `${days} days`;
-}
-
-function fmtDayCount(days) {
-  return `${days} day${days === 1 ? '' : 's'}`;
-}
+// P2-9 (2026-10-12): `fmtDays` and `fmtDayCount` used to live here and were
+// DELETED. Coverage found them: both unreachable, and both duplicated
+// verbatim in doseIntervalRules.js (its own fmtDays/fmtDayCount), which is
+// where every interval message has been written since S14-7 moved the rules
+// into one table. Two stranded copies of the wording that tells a clinician
+// how long a gap was, in the one file this repo's rules say must own no
+// interval logic at all. If you need to format an interval, reach for
+// doseIntervalRules.js — do not re-add a local copy here.
 
 function fmtMinAge(minAgeM) {
   if (minAgeM >= 12) {

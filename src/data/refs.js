@@ -10,7 +10,43 @@
 //   • Children <19y HSCT → immunize.org p3086 Table 5 (SOLE source).
 //   • Adults ≥19y HSCT   → Fred Hutch LTFU §IX (SOLE source).
 //
-// Each entry: url, label (full title), short (chip text).
+// Each entry: url, label (full title), short (chip text), lastVerified, and —
+// for sentence-level keys only — quote.
+//
+// ── What `lastVerified` attests to (P2-8, 2026-10-12) ────────────────────
+//
+// Every entry carries one, and `citation-freshness.test.js` fails if any is
+// missing, malformed, or more than 12 months old. It is NOT decoration: it is
+// the only thing in the repo that schedules the re-read, and until P2-8
+// nothing in `src/` read it at all.
+//
+// The date means different things for the two kinds of entry, and the
+// difference is deliberate — do not flatten it:
+//
+//   • A QUOTED (sentence-level) key: the page was opened and the `quote` was
+//     confirmed to be present, verbatim, on that date. Re-verifying one means
+//     re-reading the sentence — not touching the date.
+//
+//   • A QUOTE-FREE (whole-page / whole-document) key: these are the chips at
+//     the foot of a card, citing a whole recommendation rather than one
+//     sentence, so there is no sentence to re-check. The date means the
+//     document still resolves at that exact URL and is still the document the
+//     `label` claims.
+//
+// Verification depth on 2026-10-12, recorded honestly: the 12 HTML pages were
+// loaded live and checked for title, canonical URL, section anchor and
+// expected content; the 5 PDFs (both job aids, p2016, p3086, Fred Hutch LTFU)
+// were confirmed to return HTTP 200 as `application/pdf` at those URLs with
+// no redirect, but their text was NOT re-read. That is the right depth for a
+// quote-free document reference and the wrong depth for a quoted one — so if
+// a quote is ever added to one of those five, it must be re-verified by
+// reading the PDF, not by copying this date forward.
+//
+// CDC pages must be read with `textContent`, never `innerText`: innerText
+// silently omits CDC's collapsed accordion bodies. Keep a positive control —
+// the child notes page is 75,723 chars with textContent and 9,184 with
+// innerText, and "cochlear" appears in only the former. Without a control, a
+// "0 matches" result means nothing.
 // ─────────────────────────────────────────────────────────────────────────
 
 export const REFS = {
@@ -19,11 +55,13 @@ export const REFS = {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child/Adolescent Immunization Schedule — Pneumococcal notes',
     short: 'CDC Child/Adolescent Notes',
+    lastVerified: '2026-10-12',
   },
   cdcAdultPneumo: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Immunization Schedule — Pneumococcal notes',
     short: 'CDC Adult Notes',
+    lastVerified: '2026-10-12',
   },
 
   // Sentence-level citations (P6-3) ---------------------------------------
@@ -230,16 +268,19 @@ export const REFS = {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
     label: 'CDC PCV Catch-Up Job Aid — Healthy Children 4 months–4 years (Jan 2025)',
     short: 'CDC PCV Catch-up Job Aid',
+    lastVerified: '2026-10-12',
   },
   cdcAdultTimingJobAid: {
     url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
     label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid',
     short: 'CDC Adult Timing Job Aid',
+    lastVerified: '2026-10-12',
   },
   cdcPneumoIndex: {
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/index.html',
     label: 'CDC — Pneumococcal Vaccine Recommendations (HCP)',
     short: 'CDC Pneumococcal Recommendations',
+    lastVerified: '2026-10-12',
   },
   cdcRiskIndications: {
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
@@ -250,6 +291,7 @@ export const REFS = {
     // promises wording the source never used.
     label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations (incl. the row "Received PCV13 or PCV15 before age 6 years, never received PCV20")',
     short: 'CDC Risk-based Pneumococcal',
+    lastVerified: '2026-10-12',
   },
 
   // ACIP MMWRs ------------------------------------------------------------
@@ -257,26 +299,31 @@ export const REFS = {
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 — Expanded routine pneumococcal vaccination of adults aged ≥50 years (MMWR mm7401a1)',
     short: 'MMWR ≥50 expansion',
+    lastVerified: '2026-10-12',
   },
   mmwr7336a3: {
     url: 'https://www.cdc.gov/mmwr/volumes/73/wr/mm7336a3.htm',
     label: 'ACIP 2024 — Use of 21-valent pneumococcal conjugate vaccine (PCV21/Capvaxive) in adults (MMWR mm7336a3)',
     short: 'PCV21 MMWR',
+    lastVerified: '2026-10-12',
   },
   mmwr7203a1: {
     url: 'https://www.cdc.gov/mmwr/volumes/72/rr/rr7203a1.htm',
     label: 'ACIP — Use of pneumococcal vaccines among U.S. adults ≥19 years (MMWR rr7203a1)',
     short: 'Adult Pneumococcal MMWR',
+    lastVerified: '2026-10-12',
   },
   mmwr7239a5: {
     url: 'https://www.cdc.gov/mmwr/volumes/72/wr/mm7239a5.htm',
     label: 'ACIP 2023 — Use of PCV20 among children (MMWR mm7239a5)',
     short: 'PCV20 Children MMWR',
+    lastVerified: '2026-10-12',
   },
   mmwr7137a3: {
     url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
     label: 'ACIP 2022 — Use of PCV15 and PCV20 among adults (MMWR mm7137a3)',
     short: 'PCV15 Adults MMWR',
+    lastVerified: '2026-10-12',
   },
 
   // immunize.org ----------------------------------------------------------
@@ -289,16 +336,19 @@ export const REFS = {
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
     label: 'immunize.org — Recommendations for Pneumococcal Vaccines Use in Children and Teens (Tables 1–4)',
     short: 'immunize.org p2016',
+    lastVerified: '2026-10-12',
   },
   immPCV7: {
     url: 'https://www.immunize.org/ask-experts/how-do-we-account-for-the-history-of-pcv7-vaccination-when-determining-the-pneumococcal-vaccination-needs-of-an-older-teen-or-young-adult-with-a-high-risk-condition/',
     label: 'immunize.org Ask the Experts — PCV7 history is ignored; treat high-risk patient as PCV-naïve',
     short: 'immunize.org PCV7 rule',
+    lastVerified: '2026-10-12',
   },
   immPneumo: {
     url: 'https://www.immunize.org/ask-experts/topic/pneumococcal/',
     label: 'immunize.org Ask the Experts — Pneumococcal',
     short: 'immunize.org Ask the Experts',
+    lastVerified: '2026-10-12',
   },
 
   // HSCT sources (segregated) --------------------------------------------
@@ -312,6 +362,7 @@ export const REFS = {
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p3086.pdf',
     label: 'immunize.org Standing Orders for Administering Pneumococcal Vaccines to Children and Teens — Table 5: Pneumococcal schedule for children <19y following HSCT (SOLE peds-HSCT source)',
     short: 'Immunize.org Table 5 (HSCT)',
+    lastVerified: '2026-10-12',
   },
   // Adults ≥19y HSCT — 2026-09-14 (P0-A): ASCO 2024 replaces Fred Hutch LTFU
   // as the adult source, per owner decision in
@@ -331,13 +382,21 @@ export const REFS = {
     url: 'https://www.fredhutch.org/content/dam/www/research/patient-treatment-and-support/ltfu/LTFU_HSCT_guidelines_physicians.pdf',
     label: 'Fred Hutch Long-Term Follow-Up Guidelines for Referring Physicians, §IX Vaccinations, Tables IX.A1/A2 (adult HSCT — institution-specific, titer-guided, not ACIP; superseded by ASCO 2024)',
     short: 'Fred Hutch LTFU §IX (superseded)',
+    lastVerified: '2026-10-12',
   },
 
   // CAR-T / B-cell malignancy / B-cell-depleting therapy hard stop -------
   cdcAlteredImmunocompetence: {
-    url: 'https://www.cdc.gov/vaccines/hcp/acip-recs/general-recs/immunocompetence.html',
+    // P2-8 (2026-10-12): the old path
+    // `/vaccines/hcp/acip-recs/general-recs/immunocompetence.html` still
+    // works, but only through a CDC redirect — the page has moved to
+    // imz-best-practices. Recorded here as the first thing the freshness
+    // sweep caught: the link was never broken, so nothing would ever have
+    // reported it, and a redirect is one reorganisation away from a 404.
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/altered-immunocompetence.html',
     label: 'CDC ACIP General Best Practice Guidelines — Altered Immunocompetence',
     short: 'CDC Altered Immunocompetence',
+    lastVerified: '2026-10-12',
   },
 };
 
