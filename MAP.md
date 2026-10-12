@@ -13,7 +13,7 @@ folder — they go where the table at the bottom says.**
 |---|---|
 | `src/` | The app's working parts. This is where the actual program lives. |
 | `src/components/` | The screens, cards, and buttons you see on screen. |
-| `src/logic/` | The "brain" — `recommend.js` decides what's due; `validate.js` checks recorded doses. |
+| `src/logic/` | The "brain" — `recommend.js` decides what's due; `validate.js` checks recorded doses; `doseIntervalRules.js` is the single list of "how long must there be between two doses" rules. |
 | `src/data/` | The facts the brain uses: brands, risk factors, schedules. |
 | `public/` | Images and files shipped with the app exactly as-is. |
 | `index.html` | The single web page the app loads into. |

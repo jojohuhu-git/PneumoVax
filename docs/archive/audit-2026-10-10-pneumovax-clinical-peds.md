@@ -619,7 +619,15 @@ implement the minimum-age/grace work and leave this rule alone.
 
 ---
 
-## P1-4 — PCV15 and PPSV23 on the same day are accepted, counted, and called "Complete"
+## P1-4 — PCV15 and PPSV23 on the same day are accepted, counted, and called "Complete" — ✅ FIXED 2026-10-11 (S3, PR #22)
+
+> **CLOSED**, with the cross-stream design this item asked for: `analyzeHistory` takes the
+> PCV doses that counted when it walks the PPSV23 stream. Driven live — the 10-year-old
+> below now shows the PPSV23 as **Invalid** ("Given on the same day as a PCV dose…") and the
+> verdict is no longer `complete`. **Paediatric only**: the adult notes state no same-visit
+> rule and no 8-week floor (verified live with a positive control), so adult doses are not
+> judged against it — see queue `S3-N1`. The "PCV13" label on a PCV15 record (the P2
+> secondary below) is **still open** as P2-2.
 
 **File:** `src/logic/validate.js` (no co-administration or interval check);
 `src/logic/recommend.js` (the 6–18y "PCV13 + PPSV23 at/after age 6" complete branch).
@@ -648,7 +656,19 @@ under the 4-day grace).
 
 ---
 
-## P1-5 — Reconfirms P1-0: the validator checks no intervals at all, in either stream
+## P1-5 — Reconfirms P1-0: the validator checks no intervals at all, in either stream — ✅ FIXED 2026-10-11 (S3, PR #22)
+
+> **CLOSED** for both streams. Two notes for whoever reads this next:
+>
+> - The **"worth S3's attention"** item below — the engine recommending "2nd PPSV23
+>   (alternative, ≥5y after first)" to a patient who already has two — **did not
+>   reproduce** on 2026-10-11. An IC 13-year-old with two PPSV23 doses 5 years apart now
+>   returns `PCV series complete (PCV before age 6 + PPSV23)` and offers no further PPSV23.
+>   Not fixed by S3; it appears to have been closed by an earlier session. **Do not write a
+>   fix for it — re-reproduce first.**
+> - `validate.js`'s private `const minAgeM = 24` (PPSV23's 2-year floor) is **still a second
+>   copy** of that number. S3 added the interval constants to `logic/intervals.js` but did
+>   not move the age floors; that is still S6 / P2-12's census work.
 
 The queue's P1-0 is real and was reproduced independently here, in both vaccine streams.
 

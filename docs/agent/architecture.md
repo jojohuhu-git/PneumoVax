@@ -43,7 +43,23 @@ src/
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
                          and the cited sentence that does it. Keyed to
                          ADULT_SCHED_MIN_M (228), matching the engine's dispatch.
-    validate.js          analyzeHistory(vaccine, doses, ageMonths, today) → { perDose, effective }.
+    validate.js          analyzeHistory(vaccine, doses, ageMonths, today, dob, opts)
+                         → { perDose, effective }. Owns minimum-AGE and product rules;
+                         delegates every timing question to doseIntervalRules.js.
+                         opts: { pcvDoses, ppsv23Doses, riskIds } — each stream needs the
+                         other's doses, because adult rows measure a conjugate dose from a
+                         PPSV23 and vice versa (S14-7).
+    doseIntervalRules.js DOSE_INTERVAL_RULES + evaluateDoseInterval(ctx). Every
+                         gap-between-recorded-doses rule, as one table. Each row declares
+                         `rulebook` (which schedule states it) and `enforcement`
+                         (floor / recommendation / none) SEPARATELY — no age test decides
+                         whether a rule may void a dose. ⚠ Adult floors are an owner
+                         clinical determination (2026-10-11), not ACIP: read the file
+                         header and CLINICAL_SPEC.md §K before touching a row.
+    intervals.js         GRACE_DAYS + the minimum NUMBERS and the comparison helpers that
+                         apply the grace. The RULES that use them live in
+                         doseIntervalRules.js; recommend.js reads the numbers directly for
+                         its forward-looking scheduler.
     dateUtils.js         todayISO, addDays, daysBetween, intervalElapsed, DAYS.
                          ⚠ Mirror-synced with MeningoVax dateUtils.js — keep in sync.
     format.js            fmtAgeMonths, fmtDate, ageGroup, dobToAgeMonths.
@@ -109,7 +125,7 @@ citation names a ref that does not exist.
 | `ADULT_SCHED_MIN_M` | 228 (19y) | Adult vs peds SCHEDULE routing boundary |
 | `PCV21_MIN_AGE_M` | 216 (18y) | PCV21 (Capvaxive) PRODUCT min-age only |
 
-`recommend.js` uses `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js` use `PCV21_MIN_AGE_M` for the PCV21 gate. StepRisks imports the shared constant for the `adultOnly` risk gate.
+`recommend.js` uses `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js` use `PCV21_MIN_AGE_M` for the PCV21 gate. `doseIntervalRules.js` uses `ADULT_SCHED_MIN_M` in exactly one place — `rulebookOf()`, which picks which schedule's row applies — and a test fails if a second comparison appears. StepRisks imports the shared constant for the `adultOnly` risk gate.
 
 ## Counting Policy
 
@@ -143,17 +159,18 @@ Encoded as `completesSeries` / `requiresPPSV23` flags in `brands.js`. Never cont
 | Peds ≥12mo | ≥8 weeks |
 | Peds final/booster | ≥12 months |
 | Peds at-risk ≥24mo | ≥8 weeks; IC rows add ≥5-year step |
-| Adult PCV15→PPSV23 (IC / cochlear / CSF leak) | ≥8 weeks |
-| Adult PCV15→PPSV23 (non-IC chronic only) | ≥1 year |
+| Adult PCV15→PPSV23 (**every** adult 19+) | **≥1 year**, with 8 weeks named as a minimum that may be *considered* for IC / cochlear implant / CSF leak |
 | PCV13→PCV20/21 | ≥1 year |
 | PCV13+PPSV23→PCV20/21 | ≥5 years |
 
-`adultPpsvIntervalClass()` in `riskFactors.js` is the single source — cochlear/CSF return `'short'` (IC interval). Never hardcode the interval check.
+`ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in `riskFactors.js` are the single source. Never hardcode the interval check.
+
+**Corrected 2026-10-11 (S3).** The two rows above were one risk-class-keyed pair ("IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year") naming `adultPpsvIntervalClass()`, which no longer exists in `src/` — the rule from BEFORE the owner's A-P1-1 amendment. This was the third and fourth copy of that stale rule found in one sweep (after `testing.md` in S13 and `clinical-rules.md` in S3); `P7-1`'s `rule-docs-match-code` tripwire in S8 is what stops a fifth appearing.
 
 ## Risk Classes
 
 - **IC** — immunocompromising: asplenia/SCD, immunodeficiency, immunosuppression, HIV, solid-organ transplant, advanced CKD/dialysis/nephrotic.
-- **special** — cochlear implant, CSF leak. IC interval for adults; non-IC row in peds grid. `pedsRiskRowClass()` maps them to nonIC; `adultPpsvIntervalClass()` maps them to short.
+- **special** — cochlear implant, CSF leak. Non-IC row in the peds grid; for adults they are among the conditions for which the 8-week PCV15→PPSV23 minimum may be *considered*. `pedsRiskRowClass()` maps them to nonIC; `adultPpsvShorterMinimumApplies()` returns true for them. **These are two separate questions** — the predicate answers the interval one only, never which CDC row a patient is on (A-P1-1).
 - **nonIC** — chronic heart/lung/liver, diabetes, chronic CKD, alcohol, smoking (last two adultOnly).
 - **hsct** — advisory pathway only (no calendar dates).
 - **IC precedence over non-IC** when both present.

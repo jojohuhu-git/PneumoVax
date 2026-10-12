@@ -6,6 +6,8 @@ import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { Chevron } from './icons.jsx';
 // P6-3: numbered inline citations, shared with RiskAgeNote.
 import { renderNoteWithCites, cardCiteNumberer } from './citations.jsx';
+// S14-1: the chip's wording and CSS class live in one module — see its header.
+import { doseChipLabel, doseChipClass } from './doseChipLabel.js';
 
 const STATUS_LABELS = {
   'due':              'Due',
@@ -47,30 +49,18 @@ function describeDose(dose, idx, ageMonths, today, dob) {
 // series; it must not read as "Invalid".
 function DoseValidation({ result, seriesTotal, numberFor }) {
   if (!result) return null;
-  const { status, reasons, detail, reasonCites, effectiveDoseNum, doesNotCount } = result;
+  const { reasons, detail, reasonCites, doesNotCount } = result;
 
-  const chipClass =
-    status === 'valid' ? 'dose-val-chip dose-val-valid'
-    : status === 'invalid' ? 'dose-val-chip dose-val-invalid'
-    : status === 'noncounting' ? 'dose-val-chip dose-val-noncounting'
-    : 'dose-val-chip dose-val-unknown';
-
-  const chipLabel =
-    status === 'valid' ? 'On time'
-    : status === 'invalid' ? 'Invalid'
-    : status === 'noncounting' ? 'Recorded (does not count)'
-    : 'Unknown';
+  // S14-2: the chip itself carries "Dose N of M" now — no separate span next
+  // to it repeating the same count in different words.
+  const chipClass = doseChipClass(result);
+  const chipLabel = doseChipLabel(result, seriesTotal);
 
   const showReasons = reasons && reasons.length > 0;
 
   return (
     <div className={`dose-val${doesNotCount ? ' dose-val-dropped' : ''}`}>
       <span className={chipClass}>{chipLabel}</span>
-      {effectiveDoseNum != null && status !== 'invalid' && (
-        <span className="dose-val-effective">
-          {seriesTotal != null ? `Dose ${effectiveDoseNum} of ${seriesTotal}` : `Dose ${effectiveDoseNum}`}
-        </span>
-      )}
       {showReasons && (
         <div className="dose-val-reasons">
           {/* P6-3: `reasonCites` is one entry per "[c]" across the whole

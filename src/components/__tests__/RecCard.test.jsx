@@ -17,16 +17,17 @@ const baseRec = {
   dueToday: true,
 };
 
-describe('RecCard dose-validation chip (PC1, vaxapp-style compliance colors)', () => {
-  it('labels a plain valid dose "On time" (green)', () => {
+describe('RecCard dose-validation chip (PC1)', () => {
+  // S14-2: the chip states the dose count, not a timing word.
+  it('labels a valid dose "Dose N of M" (green)', () => {
     render(
       <RecCard
-        rec={baseRec}
+        rec={{ ...baseRec, seriesTotal: 1 }}
         doses={[{ date: '2024-01-01', product: 'PCV15' }]}
         doseValidations={[{ status: 'valid', reasons: [], effectiveDoseNum: 1 }]}
       />
     );
-    const chip = screen.getByText('On time');
+    const chip = screen.getByText('Dose 1 of 1');
     expect(chip.className).toMatch(/dose-val-valid/);
   });
 
@@ -54,7 +55,10 @@ describe('RecCard dose-validation chip (PC1, vaxapp-style compliance colors)', (
     expect(chip.className).toMatch(/dose-val-unknown/);
   });
 
-  it('labels a PCV7 dose "Recorded (does not count)" (amber), never "Invalid"', () => {
+  // S14-6: reuses MeningoVax's own "Off-window - repeat" — PCV7 never
+  // counts, so a dose IS genuinely owed (high-risk patients are treated as
+  // PCV-naïve for these doses).
+  it('labels a PCV7 dose "Off-window - repeat" (blue), never "Invalid"', () => {
     render(
       <RecCard
         rec={baseRec}
@@ -67,8 +71,8 @@ describe('RecCard dose-validation chip (PC1, vaxapp-style compliance colors)', (
         }]}
       />
     );
-    const chip = screen.getByText('Recorded (does not count)');
-    expect(chip.className).toMatch(/dose-val-noncounting/);
+    const chip = screen.getByText('Off-window - repeat');
+    expect(chip.className).toMatch(/dose-val-offwindow/);
     expect(screen.queryByText('Invalid')).toBeNull();
   });
 });

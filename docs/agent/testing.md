@@ -23,6 +23,7 @@
 | `src/components/__tests__/regression-p6-7-current-risk-disclaimer.test.jsx` | The current-risk-only caveat, and that the engine really behaves as it claims |
 | `src/components/__tests__/regression-p7-2-no-inline-styles.test.js` | Tripwire: no inline styles or hex literals (the regression MeningoVax has) |
 | `src/components/__tests__/regression-p3-9-risk-age-note.test.jsx` | `RiskAgeNote` on both surfaces; keyed to `ADULT_SCHED_MIN_M`, not the 18y product gate |
+| `src/logic/__tests__/regression-p1-0-recorded-dose-intervals.test.js` | Minimum intervals between recorded doses: PCV→PCV (4/8 weeks, keyed on the earlier dose), PCV→PPSV23 (8 weeks + same-visit), PPSV23 dose 2 (5 calendar years); the grace on each; invalid doses anchor, PCV7 does not; **and that adult doses are left alone** |
 
 ## Coverage Requirements
 
@@ -52,6 +53,56 @@
 9. **Every `[c]` marker has exactly one citation** — across both halves of a note, and
    across a verdict's whole `reasons` array. Swept engine-wide by
    `regression-p6-3b-note-cite-parity`.
+10. **Recorded-dose intervals are enforced, and only where a source states a minimum**
+    (S3, queue P1-0). Two halves, and a test that only checks the first half will let the
+    second rot:
+    - *It bites.* A PCV series at 2, 2.5, 3 and 3.5 months keeps **one** dose, not four.
+      An invalid dose still **anchors** the next one, because CDC spaces a repeat dose from
+      the dose it repeats — so three bad gaps invalidate three doses, not two.
+    - *It does not over-reach — but "over-reach" changed meaning in S14-7.* Adults are no
+      longer exempt from interval verdicts; they have their own rows with their own
+      numbers. What must still never happen is the paediatric WORDING on an adult's dose
+      (no "same visit", no "8 weeks" for a non-IC adult) — `regression-p1-0-*` asserts
+      that, and `regression-s14-7-*` asserts the adult rows produce their own messages.
+11. **Every interval rule lives in one table, and no age test decides whether a rule may
+    bite** (S14-7). `regression-s14-7-one-rule-table` is the guard file. Six of its
+    assertions are "nothing is wrong" guards; each was confirmed to fail with the fault
+    introduced on purpose (see *Prove a new guard can fail* below):
+    - the child and adult PPSV23-revaccination rows read the **same** constant — if they
+      diverge, someone has re-introduced an age-keyed interval;
+    - every `authority: 'OWNER'` row says "OWNER CLINICAL DETERMINATION 2026-10-11" and
+      "not ACIP, not CDC" in its own source text, and no `'CDC'` row claims to be the
+      owner's;
+    - floors carry the 4-day grace, recommendations never do;
+    - none of the five deleted functions reappears in `validate.js`;
+    - `validate.js` imports no interval minimums (they belong to the table);
+    - `ADULT_SCHED_MIN_M` appears in `doseIntervalRules.js` exactly twice outside comments —
+      the import, and the one comparison inside `rulebookOf()`.
+12. **An adult dose that keeps `earlyAdvisory` still COUNTS** (S3-N1, narrowed by S14-7).
+    Most adult gaps now void the dose; the flag survives for the two cases where the dose
+    genuinely counts (the legitimate 8-week option, and a pair no enumerated row names).
+    Where it appears it is a flag on a `'valid'` result, never a status: `status` stays
+    `'valid'` and `effectiveDoseNum` is still assigned. (Named `earlyAdvisory`, not
+    `offWindow` — S14-3 — because "off-window" is MeningoVax's name for a dose that does
+    NOT count.) `regression-s3-n1-*` asserts that explicitly, and those assertions are what
+    should stop a future change promoting it to a status of its own.
+    **Test the wiring, not just the unit.** The unit tests passed `riskIds` straight into
+    `analyzeHistory` and stayed green while `recommend.js` was not forwarding it at all —
+    so every adult was judged against the flat 1-year advice and an immunocompromised
+    patient who had legitimately used the 8-week option was told their dose was early.
+    Driving the running app is what caught it. The `riskIds actually reach the validator`
+    block goes through `recommend()` for exactly that reason; verified it fails without
+    the forwarding line.
+13. **An extra PCV dose after the series completed does not extend it, and is adults
+    only** (S14-4). `regression-s14-4-extra-dose` keeps both halves live: *it bites* (a
+    PCV21 given after a completing PCV20 gets `extraDose: true`, `effectiveDoseNum: null`,
+    dropped from `effective`, not graded against `earlyAdvisory`); *it does not over-reach*
+    (the identical history pattern in a child — PCV20 as an early infant dose, another PCV
+    dose still due — keeps counting normally, because `completesSeries` means "no PPSV23"
+    for a child, not "no more doses"). Gated on the CURRENT dose's age vs.
+    `ADULT_SCHED_MIN_M`. **This check runs AFTER the interval table**, so a dose the table
+    voids reads `invalid`, not "extra" — which is why its fixture has to space the doses
+    more than a year apart now that the adult PCV13→PCV20 gap is a floor.
 
 ## Prove a new guard can fail
 

@@ -56,8 +56,8 @@
   --fs-xl:   1.2rem;
 
   /* Spacing scale — ported from MeningoVax (PD1), 4px-base grid. Sub-4px
-     optical paddings on tiny chips/badges (dose-val-chip, dose-val-effective,
-     age-edit-btn, status-badge, meta-chip, due-pill) are intentionally left
+     optical paddings on tiny chips/badges (dose-val-chip, age-edit-btn,
+     status-badge, meta-chip, due-pill) are intentionally left
      off this scale — they're height-matching values, not rhythm spacing. */
   --sp-4:  4px;
   --sp-8:  8px;
@@ -281,21 +281,6 @@ body {
 .dose-history-panel { flex-direction: column; align-items: flex-start; }
 .dose-history-block { width: 100%; }
 
-/* ── PD2/E6: color legend ─────────────────────────────────────────── */
-.legend-row {
-  display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base);
-  color: var(--gy2); padding: var(--sp-4) 0;
-}
-.legend-swatch { width: 14px; height: 14px; border-radius: var(--rads); flex-shrink: 0; border: 1px solid var(--gy5); }
-.legend-swatch-due        { background: var(--glt); border-color: var(--gmd); }
-.legend-swatch-catchup    { background: var(--alt); border-color: var(--amd); }
-.legend-swatch-shared     { background: var(--blt); border-color: var(--bmd); }
-.legend-swatch-neutral    { background: var(--gy6); border-color: var(--gy5); }
-.legend-swatch-valid      { background: var(--glt); border-color: var(--gmd); }
-.legend-swatch-noncounting{ background: var(--alt); border-color: var(--amd); }
-.legend-swatch-invalid    { background: var(--rlt); border-color: var(--rmd); }
-.legend-swatch-unknown    { background: var(--gy6); border-color: var(--gy5); }
-
 /* ── Rec cards ─────────────────────────────────────────────────── */
 .rec-section { margin-bottom: var(--sp-16); }
 .rec-section-title {
@@ -401,7 +386,7 @@ body {
 /* ── Per-dose validation chips (Recorded: block) ──────────────────
    PC1: each recorded dose row shows the dose descriptor (left) and a
    validity chip (right); reasons/detail wrap to full width below. Mirrors
-   MeningoVax's dose-val-* pattern, plus dose-val-noncounting for PCV7. */
+   MeningoVax's dose-val-* pattern. */
 .rec-progress { margin-bottom: var(--sp-12); }
 .rec-progress-label { font-size: var(--fs-sm); font-weight: 600; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.05em; }
 .rec-progress-list { list-style: none; margin-top: var(--sp-4); }
@@ -417,7 +402,12 @@ body {
   font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
 }
 .dose-val-valid       { background: var(--glt); color: var(--g); border: 1px solid var(--gmd); }
-.dose-val-noncounting { background: var(--alt); color: var(--a); border: 1px solid var(--amd); }
+/* S14-4/S14-6 — a dose set aside from the count for an administrative reason,
+   not an error: PCV7 ("Off-window - repeat" — never counts, a dose IS owed)
+   and an extra dose given after the series was already complete ("Extra
+   dose..." — the opposite, nothing is owed, but it likewise isn't numbered
+   against the series). Blue reads as information rather than a warning. */
+.dose-val-offwindow   { background: var(--blt); color: var(--b); border: 1px solid var(--bmd); }
 .dose-val-invalid     { background: var(--rlt); color: var(--r); border: 1px solid var(--rmd); }
 .dose-val-unknown     { background: var(--gy6); color: var(--gy3); border: 1px solid var(--gy5); }
 .dose-val-reasons { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 0; }
@@ -439,10 +429,6 @@ body {
 .rec-progress-group:first-child { padding-top: 0; }
 
 .dose-val-dropped .rec-progress-dose-text { opacity: 0.55; text-decoration: line-through; }
-.dose-val-effective {
-  display: inline-flex; align-items: center; padding: 1px var(--sp-8); border-radius: var(--rads);
-  font-size: var(--fs-xs); color: var(--gy3); background: var(--gy6);
-}
 
 /* ── Disclaimer ────────────────────────────────────────────────── */
 .disclaimer { background: var(--gy6); border-radius: var(--rads); padding: var(--sp-16); margin-top: var(--sp-24); font-size: var(--fs-sm); color: var(--gy3); line-height: 1.5; border-left: 3px solid var(--gy5); }

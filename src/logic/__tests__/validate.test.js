@@ -97,8 +97,15 @@ describe('effective dose numbering', () => {
   });
 
   it('PCV7 between valid doses does not advance the count', () => {
+    // S14-7 (2026-10-11): the dates are spread over years on purpose. This
+    // patient is 55, and an adult's PCV20 now has to fall at least a year
+    // after the last PCV13 to count (doseIntervalRules.js,
+    // ADULT-PCV20-21-AFTER-PCV13). The original fixture put them three months
+    // apart, which made the PCV20 invalid and quietly stopped testing the
+    // thing this case is about: that the PCV7 in the middle anchors nothing
+    // and advances no count.
     const { perDose } = analyzeHistory('PCV',
-      [{ product: 'PCV13', date: '2024-01-01' }, { product: 'PCV7', date: '2024-02-01' }, { product: 'PCV20', date: '2024-04-01' }],
+      [{ product: 'PCV13', date: '2021-01-01' }, { product: 'PCV7', date: '2021-02-01' }, { product: 'PCV20', date: '2024-04-01' }],
       660, TODAY);
     expect(perDose[0].effectiveDoseNum).toBe(1);
     expect(perDose[1].effectiveDoseNum).toBeNull(); // PCV7

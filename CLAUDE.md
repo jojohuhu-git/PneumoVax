@@ -71,6 +71,15 @@ CDC's adult schedule notes print this sentence identically under *both* "Age 50 
 
 `adultPpsvShorterMinimumApplies()` answers the **interval** question only. Do not reuse it to decide which CDC *row* a patient is on — the predicate it replaced did both jobs, and that coupling is why flattening the interval nearly moved 19–49 cochlear/CSF patients off the "≥5 years" row onto "review at 50".
 
+**S14-7 (2026-10-11) added a second, separate job for the same two numbers: validity.** The ≥1 year above is still what the app **recommends**, unchanged. A dose that was *already given* inside the interval is now judged against a **floor** — 8 weeks for IC / cochlear implant / CSF leak (CDC's own words), the year for every other adult (owner determination). Recommendation and floor are different questions; do not let one answer stand in for the other.
+
+### Every Interval Rule Lives In One Table
+`src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
+
+Each row declares **`rulebook`** (child / adult / any — which schedule states it, so which number and which citation apply) and **`enforcement`** separately: `'floor'` voids the dose and gets CDC's 4-day grace; `'recommendation'` keeps the dose and adds a note, no grace; `'none'` is never flagged, with the reason written down. **Never add an age test that decides whether a rule may bite** — that was the S14-RC root cause, and three adult gaps fell in the hole it left. Add a row instead.
+
+⚠️ **EVERY adult floor is an OWNER CLINICAL DETERMINATION dated 2026-10-11 — never cite ACIP or CDC for one.** The *intervals* are ACIP's (rr7203a1 keys both PCV13→PPSV23 and PCV15→PPSV23 at 8 weeks for an immunocompromising condition / cochlear implant / CSF leak and 1 year otherwise); treating them as floors is not. Watch ACIP's vocabulary: "**minimum recommended** interval" is the shortest *recommended* spacing, **not** the General Best Practices "minimum interval" that voids a dose. rr7203a1's 8 weeks is explicitly something that "can be considered… to minimize the time of risk" — permission to vaccinate sooner. CDSI v4.64 sets `absMinInt = 0 days` for every adult pneumococcal interval and the current adult MMWRs never say a short gap means repeat the dose; the owner was shown that and reaffirmed. Rows carry `authority: 'OWNER'` and the app's own per-dose text says so. Full evidence and the enumerated rows: `CLINICAL_SPEC.md` §K.
+
 ### dateUtils.js Is Mirror-Synced
 `dateUtils.js` is byte-for-byte identical across PneumoVax, MeningoVax, and vaxapp. If you change it here, apply the same change to the sibling apps.
 

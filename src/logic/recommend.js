@@ -34,6 +34,7 @@ import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAY
 import { dobToAgeMonths } from './format.js';
 import { analyzeHistory } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
+import { pcvSeriesMinIntervalDays } from './intervals.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
@@ -216,8 +217,13 @@ function pcvInfant(am, pcv, today) {
   // Determine total target doses + whether the booster (≥12mo) is the next due.
   // Reduced from p2016 Table 1 to: remaining count + next interval + 12mo floor.
   // Healthy and at-risk infants follow Table 1 alike.
-  // Min interval: <12mo → 4 weeks; ≥12mo → 8 weeks.
-  const minInterval = am < M.m12 ? WK4 : WK8;
+  // Min interval: <12mo → 4 weeks; ≥12mo → 8 weeks. The numbers now come from
+  // intervals.js, which the validator reads too (queue P1-0) — they were only
+  // ever written here, which is half of why the validator never checked an
+  // interval at all. The KEYING is unchanged: this passes the patient's current
+  // age, as it always has. Whether it should key on the age at the previous
+  // dose instead is peds audit P0-2's open question, not S3's.
+  const minInterval = pcvSeriesMinIntervalDays(am);
 
   // Target total doses per CDC Table 1, computed from age band + prior doses.
   //
@@ -990,8 +996,27 @@ export function recommend(input) {
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 
   // Validate + filter to effective lists (PCV7 dropped; invalid doses dropped).
-  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob);
-  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob);
+  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob, {
+    // S14-7: the PCV walk needs the PPSV23 stream too. The adult floors that
+    // measure a conjugate dose from a PPSV23 dose — "previously received only
+    // PPSV23" (≥1 year) and PCV13 + PPSV23 (≥5 years) — are measured from it,
+    // and before S14-7 the PCV walk could not see PPSV23 at all, so neither
+    // gap was checked for anyone.
+    ppsv23Doses: rawPpsv,
+    // Risk class decides which floor an adult's PPSV23-after-PCV15 is judged
+    // against; pass it on both calls so the two cannot disagree.
+    riskIds,
+  });
+  // PPSV23's 8-week floor is measured against the PCV doses that counted, so
+  // the PCV walk has to run first and hand them over (peds audit P1-4).
+  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob, {
+    pcvDoses: pcvAnalysis.effective,
+    // S3-N1: needed to tell whether the 8-week minimum may be CONSIDERED for
+    // this adult (immunocompromising condition, cochlear implant, CSF leak).
+    // Without it every adult is judged against the flat 1-year advice and an
+    // IC patient who legitimately used the shorter option gets second-guessed.
+    riskIds,
+  });
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 

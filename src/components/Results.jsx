@@ -15,7 +15,6 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   const maxDate = todayISO(today);
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
-  const [showLegend, setShowLegend] = useState(false);
 
   const result = recommend({
     // P3-1 (S10): the date of birth goes to the engine, which uses it to
@@ -192,29 +191,23 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
           <div className="meta-actions">
             {onChange && (
               <button type="button" className="age-edit-btn"
-                onClick={() => { setEditingAge(v => !v); setEditingDoses(false); setShowLegend(false); }}
+                onClick={() => { setEditingAge(v => !v); setEditingDoses(false); }}
                 aria-expanded={editingAge}>
                 {/* P6-6: the label stays when open; the chevron carries the
                     state. "Done" discarded the only words saying what the
-                    button controls — and with the Color key and "Why this"
-                    toggles already keeping their labels, it was the odd one
-                    out in its own component. */}
+                    button controls — and with "Why this" already keeping its
+                    label, it was the odd one out in its own component. */}
                 Adjust age<Chevron open={editingAge} />
               </button>
             )}
             {onChange && (
               <button type="button" className="age-edit-btn"
-                onClick={() => { setEditingDoses(v => !v); setEditingAge(false); setShowLegend(false); }}
+                onClick={() => { setEditingDoses(v => !v); setEditingAge(false); }}
                 aria-expanded={editingDoses}>
                 {`Recorded doses${(pcvDoses.length + ppsv23Doses.length) > 0 ? ` (${pcvDoses.length + ppsv23Doses.length})` : ''}`}
                 <Chevron open={editingDoses} />
               </button>
             )}
-            <button type="button" className="age-edit-btn"
-              onClick={() => { setShowLegend(v => !v); setEditingAge(false); setEditingDoses(false); }}
-              aria-expanded={showLegend}>
-              Color key<Chevron open={showLegend} />
-            </button>
           </div>
         </div>
         {editingAge && (
@@ -298,25 +291,12 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             <span className="age-edit-hint">Changes update recommendations immediately.</span>
           </div>
         )}
-        {/* PD2/E6/D6: what the colors used throughout this page mean. */}
-        {showLegend && (
-          <div className="age-edit-row legend-panel dose-history-panel" data-testid="legend-panel">
-            <div className="dose-history-block">
-              <div className="history-edit-section-title">Vaccine box colors</div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-due" /><span>Due today: on schedule, expected now</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-catchup" /><span>Catch-up: behind the routine schedule, needed now to catch up</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-shared" /><span>Optional (shared decision): patient and provider decide together</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-neutral" /><span>Not currently due (complete, not indicated, or deferred)</span></div>
-            </div>
-            <div className="dose-history-block">
-              <div className="history-edit-section-title">Recorded-dose validity colors</div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-valid" /><span>On time</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-noncounting" /><span>Recorded (does not count): valid dose, doesn't count toward the series (e.g. PCV7)</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-invalid" /><span>Invalid (does not count)</span></div>
-              <div className="legend-row"><span className="legend-swatch legend-swatch-unknown" /><span>Unknown (no date recorded)</span></div>
-            </div>
-          </div>
-        )}
+        {/* S14-5 (owner decision, mirrors MeningoVax decision C1): the color
+            key is removed, not merely hidden. Every pill and chip states its
+            own verdict in words — "Dose N of M", "Invalid", "Extra dose —
+            more than this series needs" — so card fill and chip color only
+            reinforce what the label already says; nothing needs a key to
+            decode it. */}
       </div>
 
       {/* HSCT advisory block — alert banner, prominent at top */}

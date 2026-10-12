@@ -63,9 +63,16 @@ describe('A-P2-11 — the 5-year gap after PCV13 + PPSV23', () => {
       dob: '1950-06-15',
       ageMonths: 915,
       riskIds: [],
-      // Chosen so the five-year span contains TWO leap days (2020, 2024) and
-      // is therefore 1827 days: a fixed 1826 lands on 2024-02-29, a day early.
-      pcvDoses: [{ date: '2019-03-01', product: 'PCV13' }],
+      // The PPSV23 date is chosen so the five-year span contains TWO leap days
+      // (2020, 2024) and is therefore 1827 days: a fixed 1826 lands on
+      // 2024-02-29, a day early. That date is what this case is about.
+      //
+      // S14-7 (2026-10-11): the PCV13 is now dated 14 months EARLIER. It used
+      // to sit on the same day as the PPSV23, which the rr7203a1 floor added
+      // this session correctly voids — leaving the patient with no PPSV23 at
+      // all, on a different CDC row, and this case quietly testing nothing.
+      // The leap-day arithmetic it exists for is untouched.
+      pcvDoses: [{ date: '2018-01-01', product: 'PCV13' }],
       ppsv23Doses: [{ date: '2019-03-01', product: 'PPSV23' }],
       today,
     }).recs.find((r) => r.vaccine === 'PCV');
