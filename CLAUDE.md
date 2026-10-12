@@ -2,7 +2,7 @@
 
 ## What This App Is
 
-Standalone client-side React SPA for **pneumococcal** vaccine clinical decision support (PCV15/PCV20/PCV21/Capvaxive + PPSV23) across the full lifespan (infants → adults). No backend, no auth, no DB. Sibling of PediVax (vaxapp) and MeningoVax; independent codebase that mirrors MeningoVax's architecture.
+Standalone client-side React SPA for **pneumococcal** vaccine clinical decision support (PCV15/PCV20/PCV21/Capvaxive + PPSV23) across the full lifespan (infants → adults). No backend, no auth, no DB. Sibling of MeningoVax; independent codebase that mirrors MeningoVax's architecture.
 
 ## Start Here
 
@@ -81,7 +81,7 @@ Each row declares **`rulebook`** (child / adult / any — which schedule states 
 ⚠️ **EVERY adult floor is an OWNER CLINICAL DETERMINATION dated 2026-10-11 — never cite ACIP or CDC for one.** The *intervals* are ACIP's (rr7203a1 keys both PCV13→PPSV23 and PCV15→PPSV23 at 8 weeks for an immunocompromising condition / cochlear implant / CSF leak and 1 year otherwise); treating them as floors is not. Watch ACIP's vocabulary: "**minimum recommended** interval" is the shortest *recommended* spacing, **not** the General Best Practices "minimum interval" that voids a dose. rr7203a1's 8 weeks is explicitly something that "can be considered… to minimize the time of risk" — permission to vaccinate sooner. CDSI v4.64 sets `absMinInt = 0 days` for every adult pneumococcal interval and the current adult MMWRs never say a short gap means repeat the dose; the owner was shown that and reaffirmed. Rows carry `authority: 'OWNER'` and the app's own per-dose text says so. Full evidence and the enumerated rows: `CLINICAL_SPEC.md` §K.
 
 ### dateUtils.js Is Mirror-Synced
-`dateUtils.js` is byte-for-byte identical across PneumoVax, MeningoVax, and vaxapp. If you change it here, apply the same change to the sibling apps.
+`dateUtils.js` is byte-for-byte identical across PneumoVax and MeningoVax. If you change it here, apply the same change to MeningoVax.
 
 ## Testing Expectations
 
