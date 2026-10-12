@@ -8,6 +8,7 @@ import Disclaimer from './Disclaimer.jsx';
 import RiskAgeNote from './RiskAgeNote.jsx';
 import { Chevron } from './icons.jsx';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
+import { newDoseRow, dropBlankDoseRows } from '../logic/doseIdentity.js';
 
 export default function Results({ state, onReset, onChange, onBack, today }) {
   const { ageMonths, dob, riskIds, pcvDoses, ppsv23Doses } = state;
@@ -157,16 +158,64 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     return true;
   });
 
+  // P1-3 (2026-10-12): what the "Recorded doses (N)" button counts. Rows the
+  // clinician has not typed in are not doses, and the engine does not count
+  // them, so the button must not either — a button reading "(1)" above a card
+  // showing no doses is the app contradicting itself.
+  const recordedDoseCount =
+    dropBlankDoseRows(pcvDoses).length + dropBlankDoseRows(ppsv23Doses).length;
+
   // ── Recorded-dose editors (live re-render via onChange) ──
-  function addPcv() { onChange?.({ pcvDoses: [...pcvDoses, { date: '', product: '' }] }); }
+  function addPcv() { onChange?.({ pcvDoses: [...pcvDoses, newDoseRow()] }); }
   function removePcv(i) { onChange?.({ pcvDoses: pcvDoses.filter((_, idx) => idx !== i) }); }
   function updatePcv(i, field, val) {
     onChange?.({ pcvDoses: pcvDoses.map((d, idx) => idx === i ? { ...d, [field]: val } : d) });
   }
-  function addPpsv() { onChange?.({ ppsv23Doses: [...ppsv23Doses, { date: '', product: 'PPSV23' }] }); }
+  // The product is stamped on at creation so the card can print it;
+  // `isBlankDoseRow` treats that stamp as a label, not an answer.
+  function addPpsv() { onChange?.({ ppsv23Doses: [...ppsv23Doses, newDoseRow({ product: 'PPSV23' })] }); }
   function removePpsv(i) { onChange?.({ ppsv23Doses: ppsv23Doses.filter((_, idx) => idx !== i) }); }
   function updatePpsv(i, val) {
     onChange?.({ ppsv23Doses: ppsv23Doses.map((d, idx) => idx === i ? { ...d, date: val } : d) });
+  }
+  function updatePpsvField(i, field, val) {
+    onChange?.({ ppsv23Doses: ppsv23Doses.map((d, idx) => idx === i ? { ...d, [field]: val } : d) });
+  }
+
+  // P1-3 (2026-10-12): rows the clinician added and never typed in are swept
+  // when the panel CLOSES, never while it is open — a half-typed row must not
+  // vanish under the cursor. The engine ignores them either way; this stops
+  // them accumulating in the list.
+  function closeDosePanel() {
+    setEditingDoses(false);
+    const pcvKept = dropBlankDoseRows(pcvDoses);
+    const ppsvKept = dropBlankDoseRows(ppsv23Doses);
+    if (pcvKept.length !== pcvDoses.length || ppsvKept.length !== ppsv23Doses.length) {
+      onChange?.({ pcvDoses: pcvKept, ppsv23Doses: ppsvKept });
+    }
+  }
+
+  // Same tick as the history step. Shown only while the row is otherwise
+  // empty, which is the only case where "not typed yet" and "a dose was
+  // given, details unknown" differ.
+  function UnknownDoseTick({ checked, onToggle }) {
+    return (
+      <label className="dose-row-unknown">
+        <input
+          type="checkbox"
+          className="risk-checkbox"
+          checked={!!checked}
+          onChange={e => onToggle(e.target.checked)}
+        />
+        <span>
+          A dose was given, but the date and product are unknown.
+          <span className="dose-row-unknown-hint">
+            Tick this to keep the dose on the record. An empty row is removed
+            when you close this panel.
+          </span>
+        </span>
+      </label>
+    );
   }
 
   return (
@@ -201,7 +250,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
           <div className="meta-actions">
             {onChange && (
               <button type="button" className="age-edit-btn"
-                onClick={() => { setEditingAge(v => !v); setEditingDoses(false); }}
+                onClick={() => { setEditingAge(v => !v); if (editingDoses) closeDosePanel(); }}
                 aria-expanded={editingAge}>
                 {/* P6-6: the label stays when open; the chevron carries the
                     state. "Done" discarded the only words saying what the
@@ -212,9 +261,11 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             )}
             {onChange && (
               <button type="button" className="age-edit-btn"
-                onClick={() => { setEditingDoses(v => !v); setEditingAge(false); }}
+                onClick={() => { if (editingDoses) closeDosePanel(); else setEditingDoses(true); setEditingAge(false); }}
                 aria-expanded={editingDoses}>
-                {`Recorded doses${(pcvDoses.length + ppsv23Doses.length) > 0 ? ` (${pcvDoses.length + ppsv23Doses.length})` : ''}`}
+                {/* P1-3: count DOSES, not rows. An untouched row the engine
+                    ignores must not be announced as a recorded dose. */}
+                {`Recorded doses${recordedDoseCount > 0 ? ` (${recordedDoseCount})` : ''}`}
                 <Chevron open={editingDoses} />
               </button>
             )}
@@ -265,6 +316,12 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   </div>
                   <button className="dose-remove" onClick={() => removePcv(i)}
                     aria-label={`Remove PCV dose ${i + 1}`}>×</button>
+                  {!dose.date && !dose.product && (
+                    <UnknownDoseTick
+                      checked={dose.detailsUnknown}
+                      onToggle={(v) => updatePcv(i, 'detailsUnknown', v)}
+                    />
+                  )}
                 </div>
               ))}
               <button className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
@@ -293,6 +350,12 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   </div>
                   <button className="dose-remove" onClick={() => removePpsv(i)}
                     aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
+                  {!dose.date && (
+                    <UnknownDoseTick
+                      checked={dose.detailsUnknown}
+                      onToggle={(v) => updatePpsvField(i, 'detailsUnknown', v)}
+                    />
+                  )}
                 </div>
               ))}
               <button className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>

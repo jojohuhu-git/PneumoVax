@@ -1078,6 +1078,14 @@ export function recommend(input) {
       meta: { ageMonths: am, dob, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
     };
   }
+  // P1-3 (2026-10-12): rows nobody typed in are not doses — but they are
+  // dropped ONCE, inside the walk (`analyzeBoth`), not here. These two lists
+  // are only ever handed to that walk, and `meta.pcvCount` is counted from
+  // its output, so a second filter here would be a second place that decides
+  // what a dose is. An earlier draft of this fix had one; removing it changed
+  // no test, which is exactly what a redundant source of truth looks like
+  // before it drifts. If you need blanks gone somewhere new, call
+  // `dropBlankDoseRows` there — do not re-add it here.
   const rawPcv = (input.pcvDoses ?? []).filter(Boolean);
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 

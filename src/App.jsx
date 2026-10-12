@@ -5,6 +5,7 @@ import StepRisks from './components/StepRisks.jsx';
 import StepHistory from './components/StepHistory.jsx';
 import Results from './components/Results.jsx';
 import { PCV_HISTORY_PRODUCTS } from './data/brands.js';
+import { dropBlankDoseRows } from './logic/doseIdentity.js';
 import { hasExclusion } from './data/riskFactors.js';
 import { patientAgeMonths } from './logic/patientAge.js';
 import { todayISO } from './logic/dateUtils.js';
@@ -42,6 +43,19 @@ export default function App() {
     setState(prev => ({ ...prev, ...patch }));
   }
 
+  // P1-3 (2026-10-12): rows the clinician added and never typed in are swept
+  // when they LEAVE the history step — never while they are in it, or a
+  // half-typed row would disappear under the cursor. The engine ignores blank
+  // rows regardless; this stops them accumulating in the list the clinician
+  // comes back to.
+  function sweepHistory(prev) {
+    const pcvDoses = dropBlankDoseRows(prev.pcvDoses);
+    const ppsv23Doses = dropBlankDoseRows(prev.ppsv23Doses);
+    if (pcvDoses.length === (prev.pcvDoses ?? []).length &&
+        ppsv23Doses.length === (prev.ppsv23Doses ?? []).length) return prev;
+    return { ...prev, pcvDoses, ppsv23Doses };
+  }
+
   function goNext() {
     if (state.step === 0) {
       if (ageMonths == null || ageMonths < 0) {
@@ -56,7 +70,7 @@ export default function App() {
       setState(prev => ({ ...prev, step: 3 }));
       return;
     }
-    setState(prev => ({ ...prev, step: Math.min(prev.step + 1, STEPS.length - 1) }));
+    setState(prev => ({ ...sweepHistory(prev), step: Math.min(prev.step + 1, STEPS.length - 1) }));
   }
 
   function goBack() {
@@ -64,7 +78,7 @@ export default function App() {
       setState(prev => ({ ...prev, step: 1 }));
       return;
     }
-    setState(prev => ({ ...prev, step: Math.max(prev.step - 1, 0) }));
+    setState(prev => ({ ...sweepHistory(prev), step: Math.max(prev.step - 1, 0) }));
   }
 
   function reset() {

@@ -50,6 +50,10 @@ import { cite } from '../data/refs.js';
 import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 import { evaluateDoseInterval } from './doseIntervalRules.js';
+// P1-3 (2026-10-12): a row the clinician added and never typed in is not a
+// dose. Dropped HERE, at the walk, so that no caller can count one by
+// forgetting to filter — the UI sweeps them too, but only for tidiness.
+import { dropBlankDoseRows } from './doseIdentity.js';
 
 // PCV21 product gate is 18y (216mo) — the PRODUCT minimum age per mm7336a3.
 // This is intentionally distinct from the ADULT_SCHED_MIN_M (228mo / 19y);
@@ -703,11 +707,11 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
   // out of order must be re-sorted. Dated doses ascending; undated doses sort FIRST — they
   // count but are never a timing anchor, and an undated historical dose is assumed to be
   // the earlier (infant) dose, matching summarizePcv's convention.
-  const filtered = sortDosesChronologically((doses ?? []).filter(Boolean));
+  const filtered = sortDosesChronologically(dropBlankDoseRows((doses ?? []).filter(Boolean)));
   if (filtered.length === 0) return { perDose: [], effective: [], doses: [] };
   // The OTHER stream's doses, which the cross-stream rule rows measure from.
   const otherStream = sortDosesChronologically(
-    ((vaccine === 'PPSV23' ? opts.pcvDoses : opts.ppsv23Doses) ?? []).filter(Boolean)
+    dropBlankDoseRows(((vaccine === 'PPSV23' ? opts.pcvDoses : opts.ppsv23Doses) ?? []).filter(Boolean))
   );
   return runWalk(vaccine, filtered, ageMonths, ref, dob, otherStream, opts.riskIds);
 }
@@ -740,8 +744,8 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
 export function analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds }) {
   const ref = todayISO(today);
   return walkBothStreams({
-    pcvDoses: sortDosesChronologically((pcvDoses ?? []).filter(Boolean)),
-    ppsv23Doses: sortDosesChronologically((ppsv23Doses ?? []).filter(Boolean)),
+    pcvDoses: sortDosesChronologically(dropBlankDoseRows((pcvDoses ?? []).filter(Boolean))),
+    ppsv23Doses: sortDosesChronologically(dropBlankDoseRows((ppsv23Doses ?? []).filter(Boolean))),
     ageMonths,
     today: ref,
     dob,

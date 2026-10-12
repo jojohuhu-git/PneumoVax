@@ -79,6 +79,15 @@ src/
                          apply the grace. The RULES that use them live in
                          doseIntervalRules.js; recommend.js reads the numbers directly for
                          its forward-looking scheduler.
+    doseIdentity.js      newDoseRow / isBlankDoseRow / dropBlankDoseRows (P1-3). What
+                         makes a row of the history a recorded DOSE. A row the
+                         clinician added and never typed in is not one; a row they
+                         ticked "a dose was given, date and product unknown"
+                         (`detailsUnknown`) is. Blanks are dropped in exactly ONE
+                         place — analyzeBoth's walk — plus the UI's own tidy-up on
+                         leaving a step; do not add a second filter. NOT mirror-
+                         synced: it is a sibling of MeningoVax's module, and the
+                         header records the two deliberate differences.
     dateUtils.js         todayISO, addDays, daysBetween, intervalElapsed, DAYS.
                          ⚠ Mirror-synced with MeningoVax dateUtils.js — keep in sync.
     format.js            fmtAgeMonths, fmtDate, ageGroup, dobToAgeMonths.
