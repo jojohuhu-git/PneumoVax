@@ -834,6 +834,15 @@ function sortDosesChronologically(doses) {
     .map((x) => x.d);
 }
 
-export function validateHistory(vaccine, doses, ageMonths, today, dob) {
-  return analyzeHistory(vaccine, doses, ageMonths, today, dob).perDose;
-}
+// DELETED (owner decision 2026-10-12): `validateHistory(vaccine, doses, ...)`.
+// A one-line wrapper around `analyzeHistory(...).perDose`, exported and called
+// by nothing — not the app, not the scripts, not the tests.
+//
+// It was removed for what it INVITED, not for being unused. It took one vaccine
+// stream and had no risk-factor argument at all, while carrying the most
+// obvious name in this file. Anyone looking for "the function that checks a
+// dose history" found it first and got answers that silently ignore the other
+// vaccine and every risk condition — no error, just a confident wrong answer.
+//
+// The door to use is `analyzeBoth()`, which sees both streams and the risk
+// list. Do not re-add a one-stream convenience wrapper here.
