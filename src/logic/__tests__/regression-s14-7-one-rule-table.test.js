@@ -472,3 +472,42 @@ describe('S14-7 — no message prints a raw fraction', () => {
     expect(a.perDose[1].reasons[0]).toMatch(/^Given 1 month after the PCV13 dose/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────
+// Same-visit co-administration is the most likely real-world error on these
+// pairs, so it must read as one sentence a clinician recognises — not as
+// "Given 0 days after", which the first version of these messages produced.
+// ─────────────────────────────────────────────────────────────────────────
+describe('S14-7 — a same-day pair says so in words', () => {
+  const SAME_DAY = [
+    ['an adult PPSV23 on the same day as a PCV13', 'PPSV23', [{ date: '2019-03-01' }],
+      { pcvDoses: [{ date: '2019-03-01', product: 'PCV13' }] }],
+    ['an adult PPSV23 on the same day as a PCV15', 'PPSV23', [{ date: '2019-03-01' }],
+      { pcvDoses: [{ date: '2019-03-01', product: 'PCV15' }] }],
+    ['an immunocompromised adult\'s PPSV23 on the same day as a PCV15', 'PPSV23', [{ date: '2019-03-01' }],
+      { pcvDoses: [{ date: '2019-03-01', product: 'PCV15' }], riskIds: ['hiv'] }],
+    ['an adult PCV20 on the same day as a PCV13', 'PCV',
+      [{ date: '2019-03-01', product: 'PCV13' }, { date: '2019-03-01', product: 'PCV20' }], {}],
+    ['an adult PCV20 on the same day as a PPSV23', 'PCV',
+      [{ date: '2019-03-01', product: 'PCV20' }], { ppsv23Doses: [{ date: '2019-03-01' }] }],
+  ];
+
+  for (const [label, vaccine, doses, opts] of SAME_DAY) {
+    it(`says "on the same day as" for ${label}`, () => {
+      const a = analyzeHistory(vaccine, doses, ADULT.ageMonths, TODAY, ADULT.dob, opts);
+      const judged = a.perDose[a.perDose.length - 1];
+      const text = [...(judged.reasons ?? []), judged.detail ?? ''].join(' ');
+      expect(text).toMatch(/on the same day as/);
+      expect(text).not.toMatch(/0 days after/);
+    });
+  }
+
+  it('and a real gap still reads as a gap, not as a same-day pair', () => {
+    const a = analyzeHistory('PCV', [
+      { date: '2019-03-01', product: 'PCV13' },
+      { date: '2019-06-01', product: 'PCV20' },
+    ], ADULT.ageMonths, TODAY, ADULT.dob);
+    expect(a.perDose[1].reasons[0]).toMatch(/^Given 3 months after the PCV13 dose/);
+    expect(a.perDose[1].reasons[0]).not.toMatch(/same day/);
+  });
+});

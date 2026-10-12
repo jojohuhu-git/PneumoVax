@@ -119,6 +119,24 @@ function fmtGap(fromISO, toISO) {
   return rem === 0 ? `${y} years` : `${y} years ${rem} month${rem === 1 ? '' : 's'}`;
 }
 
+// "Given <X> the previous dose" — the connecting phrase, so a same-visit pair
+// reads as one. Without this the messages said "Given 0 days after the
+// previous pneumococcal conjugate dose", which is both ugly and easy to
+// misread as "no gap was required". Same-visit is the single most likely
+// real-world co-administration error on these pairs, so it is the one phrase
+// that most needs to land.
+function fmtSince(fromISO, toISO) {
+  return daysBetween(fromISO, toISO) === 0
+    ? 'on the same day as'
+    : `${fmtGap(fromISO, toISO)} after`;
+}
+
+// The day-count twin, for the rows whose minimum is stated in weeks.
+function fmtSinceDays(fromISO, toISO) {
+  const d = daysBetween(fromISO, toISO);
+  return d === 0 ? 'on the same day as' : `${fmtDayCount(d)} after`;
+}
+
 // ── Anchors: what a gap is measured FROM ─────────────────────────────────
 //
 // `prevSameStream` is the previous DATED dose in this vaccine's own stream,
@@ -270,7 +288,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'vaccine dose", and CDSI v4.64 sets absMinInt = 0 days for it. The owner determined that a dose '
       + 'given inside the interval was not validly given. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtGap(anchor.date, ctx.doseDate)} after the PPSV23 dose of ${anchor.date}. With both PCV13 and PPSV23 already on the record, this dose is given at least 5 years after the most recent pneumococcal dose.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. With both PCV13 and PPSV23 already on the record, this dose is given at least 5 years after the most recent pneumococcal dose.`],
       detail: `Previous PPSV23: ${anchor.date}. Minimum: 5 years later (doses up to 4 days early still count, per CDC). This 5-year gap is enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -290,7 +308,7 @@ export const DOSE_INTERVAL_RULES = [
     source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. The second leg of the row '
       + 'above: both the 5-year gap from the PPSV23 and the 1-year gap from the last PCV must hold.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtGap(anchor.date, ctx.doseDate)} after the previous pneumococcal conjugate dose of ${anchor.date} — at least 1 year is required between conjugate doses.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose of ${anchor.date} — at least 1 year is required between conjugate doses.`],
       detail: `Previous PCV: ${anchor.date}. Minimum: 1 year later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -313,7 +331,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'determined that a PCV20/PCV21 given inside that year does not count and must be repeated, '
       + 'with the 4-day grace. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtGap(anchor.date, ctx.doseDate)} after the PCV13 dose of ${anchor.date} — PCV20 or PCV21 is given at least 1 year after the last PCV13 dose.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — PCV20 or PCV21 is given at least 1 year after the last PCV13 dose.`],
       detail: `Previous PCV13: ${anchor.date}. Minimum: 1 year later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -334,7 +352,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'previously received only PPSV23: give PCV15, PCV20 or PCV21 at least 1 year after the PPSV23 '
       + 'dose — advice for the next dose, with CDSI v4.64 absMinInt = 0 days. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtGap(anchor.date, ctx.doseDate)} after the PPSV23 dose of ${anchor.date} — a conjugate dose is given at least 1 year after PPSV23.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date} — a conjugate dose is given at least 1 year after PPSV23.`],
       detail: `Previous PPSV23: ${anchor.date}. Minimum: 1 year later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -356,7 +374,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'place the words "minimum interval" appear anywhere in the adult notes, and it names exactly '
       + 'these patients — so the 8-week floor is source-stated, not owner-determined.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtDayCount(daysBetween(anchor.date, ctx.doseDate))} after the PCV15 dose of ${anchor.date} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}, and the recommended interval is 1 year.`],
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}, and the recommended interval is 1 year.`],
       detail: `Previous PCV15: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the minimum interval CDC names for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is 1 year.`,
     }),
   },
@@ -378,7 +396,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'A-P1-1 is untouched: ≥1 year remains what the app RECOMMENDS at every adult age, and the '
       + '8-week option is still named rather than substituted. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtGap(anchor.date, ctx.doseDate)} after the PCV15 dose of ${anchor.date} — PPSV23 is given at least 1 year after PCV15.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — PPSV23 is given at least 1 year after PCV15.`],
       detail: `Previous PCV15: ${anchor.date}. Minimum: 1 year later (doses up to 4 days early still count, per CDC). The 8-week minimum interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -405,7 +423,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'recommendation engine\'s question, and keying the floor on risk class is what left this gap '
       + 'unchecked for adults in the first place. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor) => ({
-      reasons: [`Given ${fmtGap(anchor.date, ctx.doseDate)} after the previous PPSV23 dose of ${anchor.date} — a second PPSV23 is given at least 5 years after the first.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${anchor.date} — a second PPSV23 is given at least 5 years after the first.`],
       detail: `Previous PPSV23: ${anchor.date}. Minimum: 5 years later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -457,7 +475,7 @@ export const DOSE_INTERVAL_RULES = [
       + '≥1 year is the recommendation for every adult; 8 weeks is a minimum that MAY BE CONSIDERED '
       + 'for an immunocompromising condition, cochlear implant or CSF leak. A-P1-1: the app names the '
       + 'option, and never substitutes it for the recommendation.',
-    message: (ctx, anchor) => `Given ${fmtGap(anchor.date, ctx.doseDate)} after the PCV15 dose. CDC recommends PPSV23 at least 1 year after PCV15 and names an 8-week minimum that may be considered for an immunocompromising condition, cochlear implant or CSF leak — this dose met that minimum, so it counts.`,
+    message: (ctx, anchor) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose. CDC recommends PPSV23 at least 1 year after PCV15 and names an 8-week minimum that may be considered for an immunocompromising condition, cochlear implant or CSF leak — this dose met that minimum, so it counts.`,
   },
   {
     id: 'ADULT-PCV-AFTER-PCV-CATCH-ALL',
@@ -475,7 +493,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'gaps, so a catch-all keyed on it under-flags rather than over-flags. It exists so that a pair '
       + 'the enumerated rows above do not name — PCV13→PCV15, say — does not pass unremarked; without '
       + 'it, "enumerate, never generalise" would turn into silence.',
-    message: (ctx, anchor) => `Given ${fmtGap(anchor.date, ctx.doseDate)} after the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts.`,
+    message: (ctx, anchor) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts.`,
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV-CATCH-ALL',
@@ -497,7 +515,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'year for adults without these conditions" — so this pair is a candidate to be promoted to a '
       + 'floor. It is left as a note because the owner enumerated the adult rows on 2026-10-11 and '
       + 'this pair was not among them; promoting it would void doses on a rule they have not reviewed.',
-    message: (ctx, anchor) => `Given ${fmtGap(anchor.date, ctx.doseDate)} after the previous pneumococcal conjugate dose. For adults CDC advises at least 1 year between a conjugate dose and PPSV23. This dose still counts.`,
+    message: (ctx, anchor) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose. For adults CDC advises at least 1 year between a conjugate dose and PPSV23. This dose still counts.`,
   },
 ];
 
