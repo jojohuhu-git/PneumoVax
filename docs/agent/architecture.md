@@ -130,6 +130,30 @@ contract via `reasonCites`.
 and adult notes URLs end in `#note-pneumo`, and two `#` fragments in one URL stop the
 browser scrolling to the sentence.
 
+**P6-3c (2026-10-12) — the first verdicts that actually cite anything.** P6-3 built the
+whole mechanism and wired it to nothing: every `reasonCites` in `src/` was absent, and
+the only one in the repo was a RecCard test fixture. Two sources sat in `refs.js`
+reaching no clinician, both pinned in `citation-orphans.test.js`'s `KNOWN_UNCITED`.
+Now wired, and both entries deleted from that list:
+
+- **`immPCV7`** on the PCV7 "does not count" verdict — the source for a CLAUDE.md
+  non-negotiable, which until now told the clinician "Per ACIP/immunize.org" and gave
+  them no way to reach it. Its `quote` was fetched live and added at the same time.
+- **`pedsMinAge`** on the minimum-age verdicts, PCV and PPSV23, dated and undated.
+
+**The rule for a marker** (owner-delegated clinical-copy decision): a `[c]` goes only on
+a claim the quoted sentence actually supports. `pedsMinAge` quotes two numbers — the
+6-week conjugate floor (one constant shared by every PCV in `brands.js`) and PPSV23's 2
+years — so `minAgeCites()` in `validate.js` cites it for those and **not** for PCV21's
+18 years, which comes from a different source the sentence never mentions.
+
+⚠ **A quote must exist CONTIGUOUSLY in one block element on the page**, or the
+`#:~:text=` fragment matches nothing and the link dies silently at the top of the page.
+`pedsMinAge`'s quote was the section heading plus the parenthetical, which CDC renders
+as two elements; it was trimmed to the parenthetical in P6-3c. Checked live, not
+assumed. Nothing in the suite can catch this — asserting it needs the network — so
+check it by hand when adding a `quote`.
+
 A sweep test (`regression-p6-3b-note-cite-parity`) walks 9,024 notes and 7,452 dose
 verdicts and fails if markers and citations ever stop matching one-for-one, or if a
 citation names a ref that does not exist.

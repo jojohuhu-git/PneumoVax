@@ -33,6 +33,7 @@ import { daysBetween, todayISO } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS } from './format.js';
 import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { cite } from '../data/refs.js';
 // S14-7: only the MINIMUM-AGE helpers are imported here. Every minimum
 // INTERVAL — and every decision about whether a gap can void a dose — lives in
 // doseIntervalRules.js, reached through the single call below. If you find
@@ -158,6 +159,35 @@ function extraDoseSentence(completingDose, dose, vaccine) {
   return `Given at the same visit as the ${label} dose, which completes the adult series on its own: ${needed} does not add to the series.`;
 }
 
+// ── P6-3c (2026-10-12): which sentence a minimum-age verdict cites ───────
+//
+// `pedsMinAge` quotes CDC's child/adolescent schedule notes verbatim:
+// "(minimum age: 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])". That sentence
+// states exactly TWO numbers, and this is the rule that keeps the marker on
+// claims it actually supports — which is the whole decision P6-3c was waiting
+// on, since a citation on the wrong claim is the one failure mode citations.jsx
+// calls worse than no citation at all.
+//
+//   • The 6-week pneumococcal conjugate floor. ONE constant shared by every PCV
+//     in brands.js (`PCV_MIN_AGE_M`), which is why a PCV13 or PCV7 verdict
+//     cites it too: the number being enforced IS the schedule's pneumococcal
+//     conjugate minimum age, and CDC names the products currently on the
+//     schedule rather than the discontinued ones. The clinician is shown the
+//     sentence verbatim on hover and can see exactly that.
+//   • PPSV23's 2 years, stated in the same parenthesis.
+//
+// NOT PCV21's 18 years — a different number from a different source (mm7336a3
+// and the FDA label), which this sentence does not mention. That verdict cites
+// nothing until someone wires its own source.
+function minAgeCites(minAgeM) {
+  return minAgeM === PCV_MIN_AGE_M ? [cite('pedsMinAge')] : undefined;
+}
+// The marker goes on only when a citation goes with it: one "[c]" per entry in
+// `reasonCites`, or RecCard drops the orphan and the parity guard fails.
+function withMarker(text, cites) {
+  return cites ? `${text}[c]` : text;
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
@@ -217,10 +247,16 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   const prod = productByKey(key); // null when unknown
 
   // PCV7 — never counts (ACIP / immunize.org). Recorded, acknowledged, excluded.
+  //
+  // P6-3c (2026-10-12): the sentence used to end "Per ACIP/immunize.org" and
+  // stop there — naming a source the clinician had no way to reach. This is a
+  // CLAUDE.md non-negotiable that sets aside a real vaccine a real patient
+  // received, so of all the verdicts in this file it is the one that most owes
+  // the reader its source. The marker sits on the clause it supports.
   if (prod && prod.key === 'PCV7') {
     return noncounting([
-      'PCV7 (Prevnar 7) is not counted toward the pneumococcal series. Per ACIP/immunize.org, PCV7 doses are ignored when determining current pneumococcal needs — treat the patient as if PCV-naïve for these doses.',
-    ]);
+      'PCV7 (Prevnar 7) is not counted toward the pneumococcal series. Per ACIP/immunize.org[c], PCV7 doses are ignored when determining current pneumococcal needs — treat the patient as if PCV-naïve for these doses.',
+    ], [cite('immPCV7')]);
   }
 
   // PCV21 is licensed from 18y (the PRODUCT gate — PCV21_MIN_AGE_M, NOT the
@@ -250,17 +286,19 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
 
   // Min-age check.
   const minAgeM = prod?.minAgeM ?? PCV_MIN_AGE_M; // unknown product → permissive (ACIP 6wk)
+  const ageCites = minAgeCites(minAgeM);
   if (!dose.date) {
     // Dateless: current age is an upper bound on age at administration.
     if (ageMonths < minAgeM) {
       return invalid(
-        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`],
-        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${fmtMinAge(minAgeM)}.`
+        [withMarker(`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
+        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${fmtMinAge(minAgeM)}.`,
+        ageCites
       );
     }
     return unknown([
-      `No date recorded — cannot verify age or interval. Counted in the series (must have been given at ≥${fmtMinAge(minAgeM)} to be valid).`,
-    ]);
+      withMarker(`No date recorded — cannot verify age or interval. Counted in the series (must have been given at ≥${fmtMinAge(minAgeM)} to be valid).`, ageCites),
+    ], ageCites);
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
@@ -276,8 +314,9 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     : ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob });
   if (!oldEnough) {
     return invalid(
-      [`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`
+      [withMarker(`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
+      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`,
+      ageCites
     );
   }
 
@@ -298,14 +337,20 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
 // ── Validate one PPSV23 dose ─────────────────────────────────────────────
 function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   const minAgeM = 24; // ≥2 years
+  // P6-3c: the 2 years is the second of the two numbers `pedsMinAge` quotes
+  // ("2 years [PPSV23]"), so every PPSV23 minimum-age verdict cites it — no
+  // product test needed here, unlike the PCV side where PCV21 carries a
+  // different number from a different source.
+  const ageCites = [cite('pedsMinAge')];
   if (!dose.date) {
     if (ageMonths < minAgeM) {
       return invalid(
-        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the 2-year minimum age for PPSV23. This dose does not count.`],
-        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: 2 years.`
+        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the 2-year minimum age for PPSV23[c]. This dose does not count.`],
+        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: 2 years.`,
+        ageCites
       );
     }
-    return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid).']);
+    return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid)[c].'], ageCites);
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
   if (ageAtDose !== null && ageAtDose < 0) return beforeBirth(dose, 'PPSV23');
@@ -313,8 +358,9 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
     return invalid(
-      [`Given at ~${fmtAgeM(ageAtDose)} — below the 2-year minimum age for PPSV23.`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: 2 years (doses up to 4 days early still count, per CDC).`
+      [`Given at ~${fmtAgeM(ageAtDose)} — below the 2-year minimum age for PPSV23[c].`],
+      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: 2 years (doses up to 4 days early still count, per CDC).`,
+      ageCites
     );
   }
   // Age is settled; now the dose's timing, against the one rule table. Rule

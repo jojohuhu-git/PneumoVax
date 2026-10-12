@@ -219,12 +219,22 @@ export const REFS = {
     quote: 'Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: no further doses of any PCV or PPSV23 indicated.',
     lastVerified: '2026-10-10',
   },
+  // P6-3c (2026-10-12): the quote was TRIMMED, and the reason is worth keeping.
+  // It used to read "Pneumococcal vaccination (minimum age: 6 weeks ...)" —
+  // the section heading plus the parenthetical. Checked live against the
+  // rendered page on 2026-10-12: those are two separate elements (an <h*> and
+  // its own <p>), so that string does not exist contiguously anywhere on the
+  // page, and the `#:~:text=` deep link `cite()` builds from it matched
+  // NOTHING — landing the clinician at the top of a long page with no
+  // indication anything had failed. Harmless while this ref was shown to
+  // nobody; the moment P6-3c put it on a verdict it would have been a dead
+  // link. The parenthetical alone is one <p> and does match.
   pedsMinAge: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal minimum ages (6 weeks for PCV15/PCV20; 2 years for PPSV23)',
     short: 'CDC Child/Adolescent Notes',
-    quote: 'Pneumococcal vaccination (minimum age: 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])',
-    lastVerified: '2026-10-10',
+    quote: '(minimum age: 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])',
+    lastVerified: '2026-10-12',
   },
 
   // Risk-based summary sentences (P6-3b) ----------------------------------
@@ -338,10 +348,29 @@ export const REFS = {
     short: 'immunize.org p2016',
     lastVerified: '2026-10-12',
   },
+  // P6-3c (2026-10-12): `quote` added so this stops being a bare page link and
+  // starts deep-linking the sentence the rule rests on. Fetched LIVE from the
+  // page on 2026-10-12 and copied verbatim — not transcribed from CLAUDE.md's
+  // one-line summary of it.
+  //
+  // ⚠ READ THE SCOPE. The app's rule ("PCV7 never counts", CLAUDE.md) is
+  // BROADER than this sentence, which speaks of "an older teen or adult
+  // patient at increased risk". Two reasons that is still the right sentence
+  // to show, both recorded so nobody has to re-derive them:
+  //   • The AGE half is not a real gap. The quote says so itself: PCV7 was
+  //     used in the US between 2000 and 2010, so anyone with a PCV7 dose on
+  //     record is an older teen or an adult today.
+  //   • The RISK half changes no answer. For a patient not at increased risk,
+  //     counting the PCV7 or ignoring it lands on the same recommendation —
+  //     the current adult schedule keys on age 50 and on risk condition, not
+  //     on a PCV7 history.
+  // The clinician is shown the sentence verbatim and can judge it. If a future
+  // source states the rule without the risk qualifier, cite that instead.
   immPCV7: {
     url: 'https://www.immunize.org/ask-experts/how-do-we-account-for-the-history-of-pcv7-vaccination-when-determining-the-pneumococcal-vaccination-needs-of-an-older-teen-or-young-adult-with-a-high-risk-condition/',
     label: 'immunize.org Ask the Experts — PCV7 history is ignored; treat high-risk patient as PCV-naïve',
     short: 'immunize.org PCV7 rule',
+    quote: 'Because of the limited number of serogroups covered by PCV7 (which was used in the United States between 2000 and 2010), CDC recommends that doses of PCV7 should be ignored for the purposes of calculating the current pneumococcal vaccination needs of an older teen or adult patient at increased risk for pneumococcal disease.',
     lastVerified: '2026-10-12',
   },
   immPneumo: {
