@@ -105,6 +105,100 @@ export function pcvSeriesMinIntervalDays(ageMonths) {
 }
 
 /**
+ * Minimum days before the NEXT PCV dose is due, per CDC Catch-up Table 2.
+ *
+ * ── Why this exists alongside pcvSeriesMinIntervalDays ──────────────────
+ *
+ * pcvSeriesMinIntervalDays (above) is the VALIDITY FLOOR's key: it grades a
+ * gap that already happened, and owner decision 2 of 2026-10-11 left it
+ * exactly as it was. This function answers the other question — what the app
+ * ADVISES for a dose not yet given — and CDC states that one dose by dose.
+ *
+ * Neither age alone can reproduce CDC Table 2, which is the whole finding of
+ * peds audit P0-2. A patient at 12.2 months whose previous dose was at 11.5
+ * months gets 4 weeks as dose 2 and 8 weeks as dose 3: same two ages, same
+ * child, different answer, because the DOSE NUMBER is part of the key. The
+ * scheduler used to pass the current age and the validator the age at the
+ * previous dose, and each was right in some cells and wrong in others.
+ *
+ * This is NOT a gap-between-recorded-doses rule, so it does not belong in
+ * doseIntervalRules.js — that table owns doses already given. Do not move it
+ * there, and do not key the table's row off this function.
+ *
+ * SOURCE, fetched live 2026-10-11 (CLINICAL_SPEC.md §L carries the full
+ * quotes): CDC Catch-up Immunization Schedule, "Children age 4 months through
+ * 6 years", pneumococcal conjugate row, column "Minimum Interval Between
+ * Doses".
+ *   https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html
+ *
+ *   Dose 1 to Dose 2: "4 weeks if first dose was administered before the 1st
+ *     birthday" / "8 weeks (as final dose for healthy children) if first dose
+ *     was administered at the 1st birthday or after"
+ *   Dose 2 to Dose 3: "4 weeks if current age is younger than 12 months and
+ *     previous dose was administered at <7 months old" / "8 weeks (as final
+ *     dose for healthy children) if previous dose was administered between
+ *     7-11 months (wait until at least 12 months old); OR if current age is 12
+ *     months or older and at least 1 dose was administered before age 12
+ *     months"
+ *   Dose 3 to Dose 4: "8 weeks (as final dose)"
+ *
+ * The "wait until at least 12 months old" parenthetical is not an interval, so
+ * it is not returned here — the caller's own ≥12-month floor on the closing
+ * dose expresses it (and p2016 Table 1 states the same thing as "last dose at
+ * age 12-15 months").
+ *
+ * Table 2's two "No further doses needed … at age 24 months or older" cells
+ * are also absent: this function is only ever called for a child under 24
+ * months, for whom no earlier dose can have been given at 24 months or later.
+ *
+ * Where Table 2 lists no branch — a 12-23-month-old whose doses were all given
+ * at or after the first birthday — the answer falls through to 8 weeks, which
+ * is both the stricter option and what p2016 footnote t states for a child
+ * aged 12 months or older.
+ *
+ * @param {object} p
+ * @param {number}  p.doseNumber        the dose about to be given (2, 3 or 4+)
+ * @param {?number} p.ageAtPrevDose     age in months at the most recent counting dose
+ * @param {number}  p.currentAgeMonths  the patient's age now
+ * @param {boolean} p.anyDoseBefore12   was any counting dose given before 12 months?
+ */
+export function pcvNextDoseMinIntervalDays({
+  doseNumber,
+  ageAtPrevDose,
+  currentAgeMonths,
+  anyDoseBefore12,
+}) {
+  // Dose 1 to Dose 2 — keyed on the age at that first dose.
+  if (doseNumber <= 2) {
+    return ageAtPrevDose != null && ageAtPrevDose < 12
+      ? PCV_MIN_INTERVAL_DAYS_UNDER_12M
+      : PCV_MIN_INTERVAL_DAYS_FROM_12M;
+  }
+  // Dose 2 to Dose 3 — the only cell that needs BOTH ages. Each branch below
+  // is one clause of Table 2's cell, in the order the cell states them.
+  if (doseNumber === 3) {
+    // "4 weeks if current age is younger than 12 months and previous dose was
+    //  administered at <7 months old"
+    if (currentAgeMonths < 12 && ageAtPrevDose != null && ageAtPrevDose < 7) {
+      return PCV_MIN_INTERVAL_DAYS_UNDER_12M;
+    }
+    // "8 weeks ... if previous dose was administered between 7-11 months
+    //  (wait until at least 12 months old); OR if current age is 12 months or
+    //  older and at least 1 dose was administered before age 12 months"
+    const prev7to11 = ageAtPrevDose != null && ageAtPrevDose >= 7 && ageAtPrevDose < 12;
+    if (prev7to11 || (currentAgeMonths >= 12 && anyDoseBefore12)) {
+      return PCV_MIN_INTERVAL_DAYS_FROM_12M;
+    }
+    // Unlisted by Table 2: every dose given at or after the first birthday.
+    // 8 weeks is the stricter option and matches p2016 footnote t for a child
+    // aged 12 months or older.
+    return PCV_MIN_INTERVAL_DAYS_FROM_12M;
+  }
+  // Dose 3 to Dose 4 and anything beyond — a flat 8 weeks "(as final dose)".
+  return PCV_MIN_INTERVAL_DAYS_FROM_12M;
+}
+
+/**
  * Minimum days between a PCV dose and a PPSV23 dose given after it.
  *
  * CDC Child & Adolescent Schedule Notes, pneumococcal (live 2026-10-11):

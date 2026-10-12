@@ -34,7 +34,7 @@ import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAY
 import { dobToAgeMonths } from './format.js';
 import { analyzeHistory } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
-import { pcvSeriesMinIntervalDays } from './intervals.js';
+import { pcvNextDoseMinIntervalDays } from './intervals.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
@@ -116,7 +116,11 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
   const lastDated = [...pcvDoses].reverse().find((d) => d.date) || null;
 
   // Age-banded counts (months at administration), from dated doses only.
-  const band = { before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
+  // before7 / m7to11 split the infant band because p2016 Table 1 keys its rows
+  // on it ("1 or 2 before age 7 months" vs "1 at age 7 months or older") and
+  // CDC Catch-up Table 2 keys the dose 2->3 interval on it too (P0-2). Both
+  // are DATED-ONLY; see the undated policy where the ladder consumes them.
+  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
   for (const d of pcvDoses) {
     if (!d.date || !today) { band.undated += 1; continue; }
     // P3-3 (S10): measured from the birthday when one is on file, instead of
@@ -124,8 +128,11 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
     // MANY doses a child needs, so a fraction of a month moved the dose count in
     // both directions — a baby dosed on their 7-month anniversary read as 6.97.
     const ageAtDose = ageAtDoseMonths(d, { dob, ageMonths: am }, today);
-    if (ageAtDose < M.m12) band.before12 += 1;
-    else if (ageAtDose < M.m24) band.m12to23 += 1;
+    if (ageAtDose < M.m12) {
+      band.before12 += 1;
+      if (ageAtDose < M.m7) band.before7 += 1;
+      else band.m7to11 += 1;
+    } else if (ageAtDose < M.m24) band.m12to23 += 1;
     else if (ageAtDose < M.m72) band.m24to71 += 1;
     else band.ge72 += 1;
   }
@@ -151,6 +158,13 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
     includesCompleting,
     hasUndatedCompleting,
     lastDate: lastDated?.date || null,
+    // Age in months at the dose `lastDate` names — the anchor CDC Catch-up
+    // Table 2 keys its intervals on. Derived from `lastDated` rather than
+    // counted in the loop above so that the interval's key and the interval's
+    // anchor date can never refer to different doses. null when undated.
+    lastAgeAtDose: lastDated && today
+      ? ageAtDoseMonths(lastDated, { dob, ageMonths: am }, today)
+      : null,
     band,
   };
 }
@@ -217,56 +231,103 @@ function pcvInfant(am, pcv, today) {
   // Determine total target doses + whether the booster (≥12mo) is the next due.
   // Reduced from p2016 Table 1 to: remaining count + next interval + 12mo floor.
   // Healthy and at-risk infants follow Table 1 alike.
-  // Min interval: <12mo → 4 weeks; ≥12mo → 8 weeks. The numbers now come from
-  // intervals.js, which the validator reads too (queue P1-0) — they were only
-  // ever written here, which is half of why the validator never checked an
-  // interval at all. The KEYING is unchanged: this passes the patient's current
-  // age, as it always has. Whether it should key on the age at the previous
-  // dose instead is peds audit P0-2's open question, not S3's.
-  const minInterval = pcvSeriesMinIntervalDays(am);
+  // ── The interval to the NEXT dose: CDC Catch-up Table 2, dose by dose ──
+  //
+  // P0-2 (owner decision 1, 2026-10-11). This used to be
+  // `pcvSeriesMinIntervalDays(am)` — the patient's CURRENT age — while the
+  // validator keyed the same number off the age at the PREVIOUS dose. Neither
+  // can reproduce CDC Table 2, which keys on the DOSE NUMBER as well: a
+  // 12.2-month-old whose previous dose was at 11.5 months gets 4 weeks as
+  // dose 2 and 8 weeks as dose 3. See intervals.js for the quoted cells.
+  //
+  // The VALIDITY FLOOR is deliberately untouched (owner decision 2): a dose
+  // already given is still graded by doseIntervalRules.js's more permissive
+  // reading, so nothing a clinician already did is retroactively invalidated.
+  // Only what the app advises changes.
+  // Keyed off `anchor`, not off `prior`: an interval only exists when there is
+  // a DATED earlier dose to measure it from. With no prior dose (or only
+  // undated ones) the honest answer is null, not a number nothing was measured
+  // against — dueState short-circuits on a null anchor anyway.
+  const minInterval = anchor
+    ? pcvNextDoseMinIntervalDays({
+      doseNumber: prior + 1,
+      ageAtPrevDose: pcv.lastAgeAtDose,
+      currentAgeMonths: am,
+      anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
+    })
+    : null;
 
-  // Target total doses per CDC Table 1, computed from age band + prior doses.
+  // ── The series total: immunize.org p2016 Table 1, cell by cell ──────────
   //
-  // FIX M1 + M3: the old `Math.max(2, Math.min(4, prior + 1))` formula for
-  // am≥12mo caused two bugs:
-  //   • M1: 1 dose at 2mo → prior=1 → target=2, says "dose 2 of 2" → clinically
-  //         only 1 of the 2 remaining at-this-age doses, ignoring the 12–15mo
-  //         booster that is ALSO still needed.
-  //   • M3: 3 doses before 12mo → prior=3 → target=4, but the booster is a
-  //         separate dose, so label "dose 4 of 3" was impossible.
+  // P0-2. The previous ladder was a formula (`Math.min(4, prior + 2)` and a
+  // `prior < 1 ? 3 : 4` collapse of the whole 7-11-month band) with no
+  // counterpart in any source; it over-stated the total in 5 of Table 1's 14
+  // cells, and its half-written `before7` line was computed and never used.
   //
-  // Corrected logic per CDC Table 1:
-  //   <7mo  → target=4 (3 primary + 1 booster), regardless of prior
-  //   7–11mo → target = prior<1 ? 3 : 4  (0 before 7mo → 2+booster; ≥1 → 1+booster)
-  //   ≥12mo  → target = prior<3 ? (prior<1 ? 2 : prior + 1) : 4
-  //             — with ≥3 infant doses the booster is still needed (→ 4 total)
-  //             — with <3 infant doses, target climbs with prior but ≥2
+  // Table 1 keys every row on the child's CURRENT age band crossed with the
+  // count of prior doses SPLIT BY WHEN THEY WERE GIVEN. The counts come from
+  // summarizePcv's bands; the totals below are `prior + (doses Table 1 says
+  // are still owed)`, which is what the table's third column states.
   //
-  // Practically for a 12–23mo child: the booster IS the remaining dose, so the
-  // series total must reach 4 if 3 primary doses were given <12mo.  For partial
-  // histories (<3 primary), the count of "doses still needed" drives the label.
+  // UNDATED DOSES (the audit's open question, decided here): an undated dose
+  // cannot be placed in a before-7-months band, so it is treated as an infant
+  // dose — the convention `band.before24` already states, and the same
+  // benefit-of-the-doubt `boosterGiven` below gives it. For a 7-11-month-old
+  // the two possible readings agree (total 3 either way); for a 12-23-month-old
+  // it yields the HIGHER total, which is the direction the authority rule
+  // allows (never fewer doses than a source supports).
+  const undatedAsInfant = pcv.band.undated;
+  const before7 = pcv.band.before7 + undatedAsInfant;
+  const m7to11 = pcv.band.m7to11;
+  const before12 = pcv.band.before12 + undatedAsInfant;
+  const at12plus = pcv.band.m12to23;
+
+  // The arithmetic that makes every cell come out right:
+  //
+  //     target = (the doses the ROW KEYS ON) + (the doses it says are owed)
+  //
+  // and NOT `prior + owed`. Table 1's "1 additional dose" is counted against
+  // the doses in its own key — the infant doses — so adding it to EVERY prior
+  // dose double-counts a closing dose the child has already had. Worked
+  // example (regression-boundary-and-fixes H5): a 15-month-old with 3 infant
+  // doses and a booster at 12.01 months keys on "2 or 3 before age 12 months
+  // -> 1 additional dose"; that additional dose IS the booster they already
+  // received, so the total is 3 + 1 = 4 and the series is complete. `prior + 1`
+  // would have made it 5 and called a finished series "catchup".
+  //
+  // It also settles the mixed histories Table 1 does not tabulate (a dose
+  // before 7 months AND one at 7-11 months, say): the later dose counts as the
+  // first of the "additional" doses the row owes, rather than stacking on top
+  // of them.
   let target;
   if (am < M.m7) {
-    // Start at 0–6mo: full 4-dose series (3 primary + booster) regardless of prior.
+    // "2 through 6 months": 0 prior -> "4 doses"; 1 -> "3 additional doses";
+    // 2 -> "2 additional doses"; 3 -> "1 additional dose at age 12-15 months".
+    // Every row sums to 4, so the band needs no sub-branching.
     target = 4;
   } else if (am < M.m12) {
-    // Start at 7–11mo: 0 prior → 3 total (2 primary + booster); ≥1 prior → 4 total.
-    // (CDC Table 1: "7–11 months, 1 dose → 2 more doses"; "0 doses → 2 primary + 1 booster")
-    const before7 = pcv.band.before12 - (pcv.band.m12to23); // doses given <7mo (approx)
-    target = prior < 1 ? 3 : 4;
-  } else {
-    // Start at ≥12mo: child needs the booster, plus any missing primary doses.
-    // With ≥3 prior infant doses: need 1 booster → total = 4.
-    // With 1–2 prior doses:       need remaining primaries + booster → prior + 2, max 4.
-    // With 0 prior:                2-dose catch-up at this age → total = 2.
-    if (prior === 0) {
-      target = 2;
-    } else if (pcv.band.before12 >= 3) {
-      // 3 primary doses before 12mo — booster is the only thing left → total = 4.
-      target = 4;
+    // "7 through 11 months", keyed on WHEN the prior doses were given.
+    if (before7 >= 3) {
+      target = before7 + 1;      // "3 before age 7 months" -> 1 additional
+    } else if (before7 >= 1) {
+      target = before7 + 2;      // "1 or 2 before age 7 months" -> 2 additional
+    } else if (m7to11 >= 2) {
+      target = m7to11 + 1;       // "2 at age 7 months or older" -> 1 additional
+    } else if (m7to11 === 1) {
+      target = m7to11 + 2;       // "1 at age 7 months or older" -> 2 additional
     } else {
-      // 1–2 primary doses; need remaining primaries + booster — max 4 total.
-      target = Math.min(4, prior + 2);
+      target = 3;                // "0 before age 7 months" -> "3 doses"
+    }
+  } else {
+    // "12 through 23 months".
+    if (before12 >= 2) {
+      target = before12 + 1;     // "2 or 3 before age 12 months" -> 1 additional
+    } else if (before12 === 1) {
+      target = before12 + 2;     // "1 before age 12 months" -> 2 additional
+    } else if (at12plus >= 1) {
+      target = at12plus + 1;     // "1 dose at age 12 months or older" -> 1 additional
+    } else {
+      target = 2;                // "0 before age 12 months" -> "2 doses"
     }
   }
 
@@ -278,6 +339,15 @@ function pcvInfant(am, pcv, today) {
   // Undated doses get benefit-of-the-doubt (matching completedInfantSeries logic
   // in pcvHealthyChild) — consistent with validate.js counting policy.
   const boosterGiven = (pcv.band.m12to23 + pcv.band.ge72 + pcv.band.undated) >= 1 && prior >= target;
+
+  // P1-2 — "PCV dose 5 of 4" was an impossible label. A child can hold more
+  // doses than p2016 Table 1 contemplates (four infant doses, say, where the
+  // table's 2-6-month rows total 4) and STILL owe the >=12-month closing dose,
+  // because Table 1 ends every infant row with "last dose at age 12-15
+  // months". The old code floored `remaining` at 1 while leaving `target`
+  // behind, so `doseNum` overtook it. The owed closing dose is a real dose, so
+  // it belongs in the total: this child's series is their own doses plus it.
+  if (prior >= target && !boosterGiven) target = prior + 1;
 
   if (prior >= target && boosterGiven) {
     return [rec({
@@ -308,8 +378,19 @@ function pcvInfant(am, pcv, today) {
     minIntervalDays: minInterval,
     brands,
     note: {
-      lead: `Routine infant PCV (PCV15 or PCV20), 4-dose series at 2, 4, 6, and 12–15 months [c].${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
-      detail: `Minimum interval ${am < M.m12 ? '4 weeks (under 12 months)' : '8 weeks (12 months or older)'}; the final/booster dose is given at ≥12 months. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
+      // P0-2: the lead used to assert a "4-dose series" for every infant,
+      // which was invisible while the ladder over-stated every total AS 4 and
+      // became a flat contradiction once the totals were corrected ("4-dose
+      // series" above "PCV dose 3 of 3"). A child starting at 7-11 months owes
+      // 3 doses and one starting at 12-23 months owes 2, per p2016 Table 1, so
+      // the routine sentence is kept for the routine case and the child's own
+      // total is stated otherwise. One [c] either way — noteCites has one cite.
+      lead: `${target === 4
+        ? 'Routine infant PCV (PCV15 or PCV20), 4-dose series at 2, 4, 6, and 12–15 months [c].'
+        : `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child [c].`}${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
+      detail: `${minInterval
+        ? `The next dose is due ${minInterval === 28 ? '4 weeks' : '8 weeks'} after the most recent one`
+        : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
     },
     noteCites: [cite('pedsRoutine4Dose')],
     refs,

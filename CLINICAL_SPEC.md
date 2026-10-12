@@ -56,7 +56,10 @@ Unknown/undocumented history → treat as unvaccinated (`cdcAdultPneumo`, CDC ge
 Applies to **all** children (healthy AND at-risk) age 2–23 months.
 4-dose PCV (PCV15 or PCV20) at 2, 4, 6, 12–15 months.
 
-Minimum interval: <12 months = 4 weeks; ≥12 months = 8 weeks; dose 4 not before 12 months.
+Minimum interval: see **§L** — the number is CDC Catch-up Table 2's, keyed on the **dose
+number** as well as the age. p2016 Table 1's footnote † ("<12 months = 4 weeks; ≥12 months
+= 8 weeks") is the simplification of it, and remains the **validity floor** the recorded-dose
+rule table applies. Dose 4 is not before 12 months either way.
 
 Catch-up grid by current age band × # previous PCV13/15/20 doses × age-at-prior-doses
 (p2016 Table 1 — implemented verbatim):
@@ -82,9 +85,18 @@ Catch-up grid by current age band × # previous PCV13/15/20 doses × age-at-prio
 
 > Implementation note: PneumoVax models the **number of doses still needed and the next
 > dose's minimum interval**, not a full multi-dose forecast. The grid above is reduced to:
-> `dosesNeeded(currentAge, priorCount, ages)` + the 4wk/8wk min-interval and the 12-mo
+> `dosesNeeded(currentAge, priorCount, ages)` + the §L min-interval and the 12-mo
 > floor for the booster (dose ≥ "last dose at 12–15mo"). This is the snapshot model the
 > sibling apps use.
+>
+> **The grid above was correct in this document and absent from the engine until
+> 2026-10-11** (peds audit P0-2). `pcvInfant` carried a formula with no counterpart in any
+> source — `Math.min(4, prior + 2)`, and a `prior < 1 ? 3 : 4` collapse of the entire 7–11
+> month band — which over-stated the total in **5 of these 14 cells** and could render the
+> impossible "PCV dose 5 of 4". The arithmetic the grid actually states is
+> **`target = (the doses the row keys on) + (the doses it says are owed)`**, never
+> `prior + owed`: "1 additional dose" is counted against the row's own key, so adding it to
+> every prior dose double-counts a closing dose the child already received.
 
 ---
 
@@ -593,3 +605,68 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   the age in months, so this changes the number of weeks and never the unit; a patient
   entered as Years/Months has no birthday and keeps the approximation. Applies on all three
   surfaces that print an infant age — `StepAge`, `Results`, `RecCard`.
+
+---
+
+## §L — The next dose's minimum interval, children <24 months (`cdcCatchupJobAid`)
+
+**Added 2026-10-11 (peds audit P0-2 / queue S3-N2).** Owner decisions of the same date,
+taken from worked engine runs.
+
+### The finding
+
+The app held the same number twice, keyed two different ways: `recommend.js`'s scheduler
+used the patient's **current age**, and `doseIntervalRules.js`'s validator the **age at the
+previous dose**. Neither can reproduce CDC Catch-up Table 2, because Table 2 keys on the
+**dose number** as well. The decisive pair — identical ages, different dose number,
+different CDC answer:
+
+| Case | Patient | Old scheduler | Old validator | CDC Table 2 |
+|---|---|---|---|---|
+| A | 12.2 mo, 1 dose @ 11.5 mo | 56 d | 28 d | **28 d** |
+| B | 12.2 mo, 2 doses @ 3, 11.5 mo | 56 d | 28 d | **56 d** |
+| C | 10 mo, 2 doses @ 8, 9.5 mo | 28 d | 28 d | **56 d + wait to 12 mo** |
+
+In case C the app advised a dose roughly **two months before CDC would count it**.
+
+### The source, fetched live 2026-10-11
+
+CDC Catch-up Immunization Schedule ("Addendum updated July 2, 2025"), table **"Children age
+4 months through 6 years"**, pneumococcal conjugate row, column **"Minimum Interval Between
+Doses"**:
+<https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html>
+
+- **Dose 1 to Dose 2** — "4 weeks if first dose was administered before the 1st birthday" /
+  "8 weeks (as final dose for healthy children) if first dose was administered at the 1st
+  birthday or after"
+- **Dose 2 to Dose 3** — "4 weeks if current age is younger than 12 months and previous dose
+  was administered at <7 months old" / "8 weeks (as final dose for healthy children) if
+  previous dose was administered between 7–11 months (wait until at least 12 months old);
+  OR if current age is 12 months or older and at least 1 dose was administered before age
+  12 months"
+- **Dose 3 to Dose 4** — "8 weeks (as final dose)"
+
+Both cells also carry a "No further doses needed for healthy children" terminator at a dose
+given **at age 24 months or older**; it cannot arise for a child under 24 months, so it is
+not implemented here (§B owns that age band).
+
+### The owner decisions
+
+1. **The advised interval follows CDC Table 2, dose by dose.**
+   `pcvNextDoseMinIntervalDays()` in `intervals.js`. A single age key is not an option.
+2. **The validity floor does not move.** A dose **already given** is still graded by
+   `doseIntervalRules.js`'s more permissive reading (p2016 footnote †). The app's job is to
+   stop *advising* a dose that will not count; it does not retroactively invalidate a dose a
+   clinician already gave. Case C's 4-week dose therefore stays **valid** while the app now
+   advises 8 weeks and a wait to the first birthday.
+3. **There is no separate "recommended" interval layered over Table 2's number.** p2016
+   Table 1's body says "8 weeks apart" at every infant interval, and a blanket 8-week
+   recommendation was considered and **declined**: the 4-vs-8-week choice is age-governed
+   exactly as footnote † states it, and Table 2 says which age applies at which dose.
+   (Contrast the adult rule, A-P1-1 / §K, where recommendation and floor *are* separate.)
+
+### Where it lives
+
+`pcvNextDoseMinIntervalDays()` is in `intervals.js`, **not** in `doseIntervalRules.js`. That
+table owns gaps between doses **already recorded**; this answers what to advise for a dose
+not yet given. Do not move it there, and do not key a table row off it.

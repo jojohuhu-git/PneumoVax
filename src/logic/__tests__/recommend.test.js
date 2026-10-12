@@ -46,8 +46,22 @@ describe('§A Routine infants 2–23mo', () => {
     expect(pcv(r).minIntervalDays).toBe(28);
   });
 
-  it('min interval is 8 weeks at 12 months or older', () => {
+  // P0-2 (owner decision 1, 2026-10-11): the advised interval follows CDC
+  // Catch-up Table 2 dose by dose, not the patient's current age. This case
+  // used to assert 56 on the strength of the patient being 14 months old, but
+  // their one prior dose was given at 11.83 months, and Table 2's dose 1->2
+  // cell reads "4 weeks if first dose was administered before the 1st
+  // birthday". 28 is the rule; 56 was the old current-age keying.
+  it('min interval is 4 weeks past the 1st birthday when the first dose preceded it', () => {
     const r = run({ ageMonths: 14, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '2026-04-01' }] });
+    expect(pcv(r).minIntervalDays).toBe(28);
+  });
+
+  it('min interval is 8 weeks when the first dose was given at or after the 1st birthday', () => {
+    // Dose given 2026-05-01, i.e. at ~12.8 months for a 14-month-old:
+    // "8 weeks (as final dose for healthy children) if first dose was
+    //  administered at the 1st birthday or after".
+    const r = run({ ageMonths: 14, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '2026-05-01' }] });
     expect(pcv(r).minIntervalDays).toBe(56);
   });
 
