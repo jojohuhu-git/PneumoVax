@@ -73,6 +73,23 @@ CDC's adult schedule notes print this sentence identically under *both* "Age 50 
 
 **S14-7 (2026-10-11) added a second, separate job for the same two numbers: validity.** The ≥1 year above is still what the app **recommends**, unchanged. A dose that was *already given* inside the interval is now judged against a **floor** — 8 weeks for IC / cochlear implant / CSF leak (CDC's own words), the year for every other adult (owner determination). Recommendation and floor are different questions; do not let one answer stand in for the other.
 
+### The Rulebook Is `CLINICAL_SPEC.md`, And A Test Holds It To The Code
+`CLINICAL_SPEC.md` is the rulebook (owner decision, S8, 2026-10-11) — the one document
+stating every clinical rule with its source. `docs/agent/*.md` summarise and point; they may
+leave a rule out, never contradict it. §K's **"The rule table, row by row"** mirrors
+`DOSE_INTERVAL_RULES` exactly, and `rule-docs-match-code.test.js` compares the two cell by
+cell on every run. **Change a rule row → update that table in the same commit.** The same
+test fails if any doc names a function or constant deleted from `src/` — the tell shared by
+all four stale copies of the pre-A-P1-1 adult interval.
+
+### A Verdict That Moves Must Be Explained
+`sweep-verdict-corpus.test.js` re-runs the engine over 16,250 synthetic patients
+(`src/test-grid.js`) and fails if any answer differs from the committed corpus. **Do not run
+`npm run sweep:update` until you can say why those patients should get a different answer**,
+then put the moved count in the PR. This exists because peds `P0-2` and `ANCHOR-1` each moved
+thousands of verdicts while all three PneumoRecs harnesses stayed byte-identical. New sweeps
+build on `src/test-grid.js` — never a second case list.
+
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
 

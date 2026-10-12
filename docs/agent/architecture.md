@@ -20,6 +20,12 @@ src/
                         Age → Risks → History → Results.
   main.jsx              React entry.
   App.css               All styles + CSS custom properties (:root tokens).
+  test-grid.js          The SHARED synthetic patient grid: ~16,250 cases of age x risk
+                        profile x PCV history x PPSV23 history, on a clock pinned to
+                        2026-10-11, plus verdictOf() / corpusLines(). Test-only — nothing
+                        in the app imports it, so it is not in the shipped bundle
+                        (verified against dist/). S7's four invariant sweeps must be
+                        built on THIS grid, not a second list of cases.
   components/
     Stepper.jsx          Top progress indicator (4 steps).
     StepAge.jsx          Age entry: group chips + precise (years/months) + DOB.
@@ -176,6 +182,8 @@ Encoded as `completesSeries` / `requiresPPSV23` flags in `brands.js`. Never cont
 | PCV13+PPSV23→PCV20/21 | ≥5 years |
 
 `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in `riskFactors.js` are the single source. Never hardcode the interval check.
+
+**The table above is a reader's summary, not the rulebook.** The complete, authoritative list of all 16 interval rows — with each one's anchor, enforcement and authority — is the table in `CLINICAL_SPEC.md` §K, and `rule-docs-match-code.test.js` holds that one to `DOSE_INTERVAL_RULES` cell by cell. If this summary and §K ever disagree, §K wins and this is the file to fix.
 
 **Corrected 2026-10-11 (S3).** The two rows above were one risk-class-keyed pair ("IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year") naming `adultPpsvIntervalClass()`, which no longer exists in `src/` — the rule from BEFORE the owner's A-P1-1 amendment. This was the third and fourth copy of that stale rule found in one sweep (after `testing.md` in S13 and `clinical-rules.md` in S3); `P7-1`'s `rule-docs-match-code` tripwire in S8 is what stops a fifth appearing.
 

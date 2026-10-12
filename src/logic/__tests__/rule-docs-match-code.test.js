@@ -43,7 +43,7 @@
 // story — and, through the sweep harness, that a change to the code cannot move
 // thousands of patients' verdicts without someone seeing it.
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { DOSE_INTERVAL_RULES } from '../doseIntervalRules.js';
 import {
   GRACE_DAYS,
@@ -327,6 +327,98 @@ describe('P2-7: the agent-facing document does not contradict the rulebook', () 
         + 'This is the exact failure S3 found four copies of: a superseded interval left '
         + 'behind in an agent-facing document, still readable as current.'
       ).toBe(true);
+    });
+  }
+});
+
+describe('P2-7: no document names a function or constant the code no longer has', () => {
+  // The four stale copies of the pre-A-P1-1 adult interval all shared one tell:
+  // each named `adultPpsvIntervalClass()`, a function that had been deleted
+  // weeks earlier. The rule they described was gone from the code, and the name
+  // they used to describe it was gone too — so a document that mentions an
+  // identifier `src/` does not contain is, on this repo's own evidence, the
+  // single best signal that it is describing superseded behaviour.
+  //
+  // This check is deliberately wider than the interval rules: it covers every
+  // agent-facing document and every identifier they name.
+  const DOCS = [
+    SPEC_PATH,
+    CLINICAL_PATH,
+    'docs/agent/architecture.md',
+    'docs/agent/testing.md',
+    'CLAUDE.md',
+  ];
+
+  /**
+   * Names that are GONE from the code and may still be written down, because
+   * the sentence mentioning them is explaining that they are gone.
+   *
+   * Adding a name here is a deliberate act. It does not license describing the
+   * old behaviour as current: every mention must still sit next to words that
+   * frame it as history, which is asserted below.
+   */
+  const RETIRED_IDENTIFIERS = new Set([
+    // Deleted when the owner amended the adult PCV15->PPSV23 interval (A-P1-1,
+    // 2026-10-10). Its risk-class-keyed rule outlived it in four documents.
+    'adultPpsvIntervalClass',
+  ]);
+
+  const HISTORY_FRAMING = /no longer|used to|deleted|removed|superseded|replaced|before (the|it|this)|which no longer exists|stale|the rule from BEFORE/i;
+
+  const srcText = (() => {
+    // Read every source file once; an identifier "exists" if it appears
+    // anywhere in src/, which is deliberately loose — this test is hunting
+    // names that are entirely gone, not auditing export lists.
+    const walk = (dirUrl) => {
+      const out = [];
+      for (const entry of readdirSync(dirUrl, { withFileTypes: true })) {
+        if (entry.name === '__corpus__') continue;
+        const child = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, dirUrl);
+        if (entry.isDirectory()) out.push(...walk(child));
+        else if (/\.(js|jsx)$/.test(entry.name)) out.push(readFileSync(child, 'utf8'));
+      }
+      return out;
+    };
+    return walk(new URL('../../', import.meta.url)).join('\n');
+  })();
+
+  for (const path of DOCS) {
+    it(`${path} names no identifier that has been deleted from src/`, () => {
+      const doc = read(path);
+      const named = new Set([
+        ...[...doc.matchAll(/`([a-z][a-zA-Z0-9_]{3,})\(\)`/g)].map((m) => m[1]),
+        ...[...doc.matchAll(/`([A-Z][A-Z0-9_]{4,})`/g)].map((m) => m[1]),
+      ]);
+
+      const gone = [...named].filter((n) => !srcText.includes(n));
+      const unexplained = gone.filter((n) => !RETIRED_IDENTIFIERS.has(n));
+
+      expect(
+        unexplained,
+        `${path} names ${unexplained.join(', ')}, which no longer appears anywhere in src/.\n\n`
+        + 'On this repo\'s own history that almost always means the surrounding text is '
+        + 'describing behaviour the code has stopped implementing — the pre-A-P1-1 adult '
+        + 'interval survived in FOUR documents exactly this way, each one naming a function '
+        + 'that had already been deleted.\n\n'
+        + 'Fix the text. If the name is genuinely being discussed AS history, add it to '
+        + 'RETIRED_IDENTIFIERS in this file and make sure the sentence says it is gone.'
+      ).toEqual([]);
+
+      // A retired name may only appear in a sentence that frames it as retired.
+      for (const name of gone) {
+        const n = norm(doc);
+        for (let i = n.indexOf(name); i !== -1; i = n.indexOf(name, i + 1)) {
+          const around = n.slice(Math.max(0, i - 400), i + name.length + 400);
+          expect(
+            HISTORY_FRAMING.test(around),
+            `${path} mentions the retired identifier \`${name}\` without saying it is `
+            + 'retired. A reader meeting the name cold will take the rule around it as '
+            + 'current, which is exactly how the superseded adult interval stayed readable '
+            + 'as live in four documents.\n\n'
+            + `Context: ...${around.slice(300, 560)}...`
+          ).toBe(true);
+        }
+      }
     });
   }
 });
