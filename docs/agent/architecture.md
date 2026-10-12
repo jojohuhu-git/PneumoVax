@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Standalone client-side React SPA giving ACIP/CDC-cited clinical decision support for **pneumococcal** vaccination only — PCV (PCV15/PCV20/PCV21/Capvaxive) and PPSV23 — across the full lifespan (infants → adults). No backend, no auth, no DB. Sibling of PediVax (vaxapp) and MeningoVax; engine-design rules are ported from those but this codebase is independent and mirrors MeningoVax's architecture.
+Standalone client-side React SPA giving ACIP/CDC-cited clinical decision support for **pneumococcal** vaccination only — PCV (PCV15/PCV20/PCV21/Capvaxive) and PPSV23 — across the full lifespan (infants → adults). No backend, no auth, no DB. Sibling of MeningoVax; engine-design rules are ported from it but this codebase is independent and mirrors MeningoVax's architecture.
 
 ## Tech Stack
 
@@ -192,4 +192,4 @@ The app does NOT capture an HSCT date. HSCT pathway is informational:
 
 ## dateUtils.js Sync
 
-`dateUtils.js` is byte-for-byte identical across PneumoVax, MeningoVax, and vaxapp. Date arithmetic uses UTC (`'T00:00:00Z'` + UTC getters); `todayISO()` derives from the LOCAL clock. If you change this file, apply the same change to the sibling apps. Open follow-up: extract to a shared package.
+`dateUtils.js` is byte-for-byte identical across PneumoVax and MeningoVax. Date arithmetic uses UTC (`'T00:00:00Z'` + UTC getters); `todayISO()` derives from the LOCAL clock. If you change this file, apply the same change to MeningoVax. Open follow-up: extract to a shared package.
