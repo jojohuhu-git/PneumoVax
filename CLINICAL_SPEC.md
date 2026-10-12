@@ -680,6 +680,43 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   `pcvRiskChild` checks (age band, catch-up dose count), never from the product alone.
   Generalising this rule to children was exactly the mistake the S14-RC root-cause review
   (docs/archive/) found and warned against repeating.
+- **The same rule for an ADULT PPSV23 dose** (added 2026-10-12, S14-4B). S14-4 taught the
+  walk about an extra **PCV** dose and stopped there: `stepStream`'s branch opened with
+  `vaccine === 'PCV'`, so the mirror-image record said nothing. An adult's PPSV23 dated
+  after a counting PCV20 or PCV21 was labelled **"series dose 1"** with no comment, which
+  read **identically** to a PPSV23 that had actually *completed* a PCV15 series — the app
+  could not tell a clinician apart a dose that finished the job from one that added
+  nothing. Where an interval row did speak, it was worse than silence: 300 of the sweep's
+  16,250 patients were told *"CDC advises at least 1 year between a conjugate dose and
+  PPSV23. This dose still counts"* about a dose no recommendation had ever asked for —
+  the A-P1-1 mistake one rule along.
+
+  **No new clinical rule.** The premise is §H's, already cited: an adult series containing
+  PCV20 or PCV21 is complete — `pcvAdult`'s complete-by-product branch says in so many
+  words "no PPSV23 and no further PCV needed" (`adultPcv20or21Complete`), which is exactly
+  what `completesSeries` has always meant in `brands.js`. **Owner decision 2026-10-12:**
+  mirror the PCV sentence exactly — stop numbering such a dose as a series dose, and print
+  the same sentence. Moved 648 of 16,250 sweep verdicts (348 formerly silent, 300 formerly
+  carrying the 1-year advisory); no recommendation and no PCV-stream verdict changed.
+
+  **Two deliberate limits, narrower than the PCV side:**
+  1. **The completing dose must be DATED and STRICTLY EARLIER.** A PCV20 and a PPSV23 at
+     one visit is co-administration: the series was completed *at* that visit, not before
+     it, so "given after the series was already complete" would be a false statement about
+     the record. Such a pair still reaches `ADULT-PPSV23-AFTER-PCV-CATCH-ALL`, which after
+     this change is the **only** pair that row can still speak for. Its flat 1-year
+     sentence is imperfect wording for a co-administered PPSV23 nobody needed — an **open
+     wording question for the owner**, deliberately not invented here (precedent: W1).
+  2. **No undated mirror.** The PCV side asks rather than asserts when a dose has no date
+     (`extraDoseUnverified`). That is not carried over: an undated PPSV23 alongside a
+     PCV20 is overwhelmingly an old dose whose date was forgotten and which was given
+     *before* the conjugate — the opposite of an extra dose — so the question would be
+     wrong more often than right.
+
+  **ADULTS ONLY**, for S14-4's reasons, and measured at the dose: 117 sweep patients whose
+  PPSV23 fell before their 19th birthday correctly did not move. A PCV20/PCV21 that is
+  itself **invalid** completes nothing (12 more non-moves) — a gap is measured from the
+  dose that counted (ANCHOR-1).
 - **Age at a recorded dose** (added 2026-10-10, S10 — P3-1/P3-3). Measured from the
   patient's date of birth when one was entered (`patientAge.ageAtDoseMonths`), so a dose on
   a birthday lands on an exact whole number of months. Patients entered as Years/Months keep

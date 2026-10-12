@@ -417,17 +417,51 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // other conditions pcvRiskChild checks (age band, catch-up count). Only
     // in the adult rulebook does "includes PCV20/PCV21" mean the series is
     // done outright (`pcvAdult`'s own "already complete by product" check).
+    //
+    // S14-4B (2026-10-12): the SAME rule for a PPSV23 dose. This branch used
+    // to open with `vaccine === 'PCV'`, so the mirror-image record said
+    // nothing: an adult's PPSV23 given years after a completing PCV20 was
+    // labelled "series dose 1" with no comment, reading identically to a
+    // PPSV23 that had actually COMPLETED a PCV15 series. Same premise, same
+    // citation — `pcvAdult`'s complete-by-product branch says in so many
+    // words "no PPSV23 and no further PCV needed" (ref
+    // `adultPcv20or21Complete`), which is what `completesSeries` has always
+    // meant. Owner decision 2026-10-12: mirror the PCV sentence exactly.
+    //
+    // Two deliberate limits on the PPSV23 side, both in CLINICAL_SPEC.md §K:
+    //   • DATED, STRICTLY EARLIER completing dose. Same-day PCV20 + PPSV23 is
+    //     co-administration — the series was completed at that visit, not
+    //     before it — so "given after the series was already complete" would
+    //     be a false statement about the record.
+    //   • NO undated mirror. An undated PPSV23 alongside a PCV20 is
+    //     overwhelmingly an old dose whose date was forgotten and which was
+    //     given BEFORE the conjugate; the PCV side's `extraDoseUnverified`
+    //     question would be wrong more often than right here.
     const ageAtDoseForExtra = dose.date
       ? ageAtDoseFromDate(dose, ageMonths, today, dob)
       : ageMonths;
-    const priorCompletingDose = vaccine === 'PCV'
-      && ageAtDoseForExtra != null && ageAtDoseForExtra >= ADULT_SCHED_MIN_M
-      ? kept.find((d) => productByKey(d.product)?.completesSeries)
-      : null;
+    const isAdultDose = ageAtDoseForExtra != null
+      && ageAtDoseForExtra >= ADULT_SCHED_MIN_M;
+    const priorCompletingDose = !isAdultDose
+      ? null
+      : vaccine === 'PCV'
+        // Own stream. The walk has only ever put EARLIER doses in `kept`, so
+        // no date test is needed — and must not be added, or the two-undated
+        // -doses case below stops being reachable.
+        ? kept.find((d) => productByKey(d.product)?.completesSeries)
+        // Other stream. `crossStream` is whatever the caller handed over on
+        // the `analyzeHistory` path, which can include LATER doses, so the
+        // date test is explicit here rather than inherited from walk order.
+        : dose.date
+          ? crossStream.find((d) => d.date < dose.date
+            && productByKey(d.product)?.completesSeries)
+          : null;
     if (priorCompletingDose) {
+      // PCV only, by construction: the PPSV23 arm above requires a date.
       const undatedExtra = !dose.date;
-      // Strip the early-advisory flag/sentence if validateOnePCV attached
-      // one — "still counts" would contradict "does not extend the series".
+      // Strip the early-advisory flag/sentence if validateOnePCV or
+      // validateOnePPSV23 attached one — "still counts" would contradict
+      // "does not extend the series".
       const { earlyAdvisory, intervalRuleId, reasons: resultReasons, ...rest } = result;
       const reasons = earlyAdvisory ? resultReasons.slice(0, -1) : resultReasons;
       perDose.push({

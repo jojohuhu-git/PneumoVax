@@ -594,7 +594,11 @@ export const DOSE_INTERVAL_RULES = [
       + 'states, so it under-flags. After the owner promoted PCV13→PPSV23 to a floor (2026-10-11) the '
       + 'only pairs still reaching this row are a PPSV23 after a PCV20 or PCV21 — sequences no CDC row '
       + 'recommends at all, because those products complete the series on their own, so no source '
-      + 'states an interval to enforce.',
+      + 'states an interval to enforce. NARROWED AGAIN by S14-4B (2026-10-12): a PPSV23 dated AFTER a '
+      + 'counting PCV20/PCV21 is now an extra dose and this row\'s advisory is stripped from it, so the '
+      + 'row is reachable only by a SAME-DAY pair — the series was completed at that visit, not before '
+      + 'it. Keep the row: deleting it would restore total silence for that pair, and the sentence it '
+      + 'prints for a co-administered PPSV23 is an open wording question, not a dead branch.',
     message: (ctx, anchor) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose. For adults CDC advises at least 1 year between a conjugate dose and PPSV23. This dose still counts.`,
   },
 ];
