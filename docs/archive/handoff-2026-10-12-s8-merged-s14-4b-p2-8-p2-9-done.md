@@ -9,6 +9,10 @@
 
 # PneumoVax — Handoff after merging S8 and shipping S14-4B + P2-8/P2-9 (2026-10-12)
 
+> ⛔ **SUPERSEDED 2026-10-12 by `handoff-2026-10-12-p0-p1-3-merged.md`.** Do not resume
+> this queue — two further sessions have landed since (S14-4C + P6-3c, then P0 + P1-3).
+> Read that file for the current state and remaining items.
+
 > **Supersedes `handoff-2026-10-11-s8-done-pr32-awaiting-merge.md`.** Its item **1 (merge
 > PR #32)** is DONE, and so are its item **2 (`P2-8` + `P2-9`)** and its item **4 (the
 > silent PPSV23)**. Resume from "What's NOT done" below.

@@ -1,4 +1,5 @@
 import { todayISO } from '../logic/dateUtils.js';
+import { newDoseRow } from '../logic/doseIdentity.js';
 import React from 'react';
 
 // Vaccination history for PneumoVax — two product streams in one step:
@@ -17,15 +18,47 @@ export default function StepHistory({
   const maxDate = todayISO(today);
   const isAdult = (ageMonths ?? 0) >= 216;
 
-  function addPcv() { onChangePcv([...pcvDoses, { date: '', product: '' }]); }
+  function addPcv() { onChangePcv([...pcvDoses, newDoseRow()]); }
   function removePcv(i) { onChangePcv(pcvDoses.filter((_, idx) => idx !== i)); }
   function updatePcv(i, field, val) {
     onChangePcv(pcvDoses.map((d, idx) => idx === i ? { ...d, [field]: val } : d));
   }
-  function addPpsv() { onChangePpsv([...ppsv23Doses, { date: '', product: 'PPSV23' }]); }
+  // The product is stamped on at creation because the recommendation card
+  // prints the product of every recorded dose; `isBlankDoseRow` knows it is a
+  // label rather than an answer, so an untouched row is still not a dose.
+  function addPpsv() { onChangePpsv([...ppsv23Doses, newDoseRow({ product: 'PPSV23' })]); }
   function removePpsv(i) { onChangePpsv(ppsv23Doses.filter((_, idx) => idx !== i)); }
   function updatePpsv(i, val) {
     onChangePpsv(ppsv23Doses.map((d, idx) => idx === i ? { ...d, date: val } : d));
+  }
+  function updatePpsvField(i, field, val) {
+    onChangePpsv(ppsv23Doses.map((d, idx) => idx === i ? { ...d, [field]: val } : d));
+  }
+
+  // P1-3 (2026-10-12): an empty row means two things — "I have not typed yet"
+  // and "a dose was given, but I have no card". The app cannot tell them
+  // apart, and it used to guess the second, so a row nobody had touched was
+  // graded as a dose of unknown date. The clinician now says which it is.
+  // The tick appears only while the row is otherwise empty, because that is
+  // the only case where the two readings differ.
+  function UnknownDoseTick({ checked, onToggle }) {
+    return (
+      <label className="dose-row-unknown">
+        <input
+          type="checkbox"
+          className="risk-checkbox"
+          checked={!!checked}
+          onChange={e => onToggle(e.target.checked)}
+        />
+        <span>
+          A dose was given, but the date and product are unknown.
+          <span className="dose-row-unknown-hint">
+            Tick this to keep the dose on the record. An empty row is removed
+            when you continue.
+          </span>
+        </span>
+      </label>
+    );
   }
 
   function clearAll() {
@@ -72,6 +105,12 @@ export default function StepHistory({
             </div>
             <button className="dose-remove" onClick={() => removePcv(i)}
               aria-label={`Remove PCV dose ${i + 1}`}>×</button>
+            {!dose.date && !dose.product && (
+              <UnknownDoseTick
+                checked={dose.detailsUnknown}
+                onToggle={(v) => updatePcv(i, 'detailsUnknown', v)}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -95,6 +134,12 @@ export default function StepHistory({
             </div>
             <button className="dose-remove" onClick={() => removePpsv(i)}
               aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
+            {!dose.date && (
+              <UnknownDoseTick
+                checked={dose.detailsUnknown}
+                onToggle={(v) => updatePpsvField(i, 'detailsUnknown', v)}
+              />
+            )}
           </div>
         ))}
       </div>

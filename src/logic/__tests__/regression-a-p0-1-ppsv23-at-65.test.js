@@ -118,7 +118,9 @@ describe('A-P0-1 — patients with no date of birth keep the honest approximatio
       ageMonths: 800,
       riskIds: [],
       pcvDoses: [{ date: '2005-05-01', product: 'PCV13' }],
-      ppsv23Doses: [{ product: 'PPSV23' }],   // no date
+      // P1-3 (2026-10-12): an undated dose now says so explicitly — an
+      // untouched row is no longer counted as one. Case unchanged.
+      ppsv23Doses: [{ product: 'PPSV23', detailsUnknown: true }],   // no date
       today: TODAY,
     });
     expect(out.recs[0].status).toBe('shared-decision');
