@@ -91,16 +91,19 @@ describe('S3-N1 — the chip', () => {
 });
 
 describe('S3-N1 — the whole flow agrees, end to end', () => {
-  function Harness() {
+  // S14-7 (owner decision 2026-10-11) changed which history produces an
+  // advisory. PCV13 → PCV20 five weeks apart — the fixture this harness used
+  // to carry — now VOIDS the PCV20, so it no longer exercises the flag at all.
+  // PCV13 → PCV15 does: CDC recommends no such sequence, so no enumerated row
+  // names it, and ADULT-PCV-AFTER-PCV-CATCH-ALL notes it rather than voiding
+  // it. That is the surface this file is for — a dose that counts, carries a
+  // note, and never reads as an error.
+  function Harness({ pcvDoses }) {
     const [state, setState] = useState({
       ageMonths: 845,
       dob: '1956-01-01',
       riskIds: [],
-      // PCV13 then PCV20 five weeks later — CDC advises at least a year.
-      pcvDoses: [
-        { product: 'PCV13', date: '2026-01-05' },
-        { product: 'PCV20', date: '2026-02-09' },
-      ],
+      pcvDoses,
       ppsv23Doses: [],
     });
     return (
@@ -113,14 +116,35 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     );
   }
 
-  it('end to end: the adult five-week gap still counts on the real engine output', () => {
-    const { container } = render(<Harness />);
-    // A complete adult series is a neutral card, which renders collapsed — the
-    // dose rows live in its body, so open it the way a clinician would.
-    fireEvent.click(container.querySelector('.rec-card-head-toggle'));
+  function openEveryCard(container) {
+    // A neutral card renders collapsed; its dose rows live in the body.
+    container.querySelectorAll('.rec-card-head-toggle').forEach((b) => fireEvent.click(b));
+  }
+
+  it('end to end: an adult five-week PCV13 → PCV15 gap counts on the real engine output', () => {
+    const { container } = render(<Harness pcvDoses={[
+      { product: 'PCV13', date: '2026-01-05' },
+      { product: 'PCV15', date: '2026-02-09' },
+    ]} />);
+    openEveryCard(container);
     expect(screen.getByText(/CDC advises at least 1 year/i)).toBeInTheDocument();
-    // And it is still counted, not dropped, not relabeled as an error.
-    expect(screen.getByText('Dose 2')).toBeInTheDocument();
+    // Still counted, not dropped, not relabeled as an error.
+    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
     expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(container.querySelector('.dose-val-dropped')).toBeNull();
+  });
+
+  it('end to end: an adult five-week PCV13 → PCV20 gap now reads as a dose that does not count', () => {
+    const { container } = render(<Harness pcvDoses={[
+      { product: 'PCV13', date: '2026-01-05' },
+      { product: 'PCV20', date: '2026-02-09' },
+    ]} />);
+    openEveryCard(container);
+    expect(screen.getByText(/at least 1 year after the last PCV13 dose/i)).toBeInTheDocument();
+    expect(screen.getByText(/repeat this dose only/i)).toBeInTheDocument();
+    // The clinician must be able to see this is the owner's rule, not ACIP's.
+    expect(screen.getByText(/owner clinical determination/i)).toBeInTheDocument();
+    // And it must NOT still claim the dose counts.
+    expect(screen.queryByText(/This dose still counts/i)).not.toBeInTheDocument();
   });
 });

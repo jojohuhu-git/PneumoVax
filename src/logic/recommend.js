@@ -996,7 +996,17 @@ export function recommend(input) {
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 
   // Validate + filter to effective lists (PCV7 dropped; invalid doses dropped).
-  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob);
+  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob, {
+    // S14-7: the PCV walk needs the PPSV23 stream too. The adult floors that
+    // measure a conjugate dose from a PPSV23 dose — "previously received only
+    // PPSV23" (≥1 year) and PCV13 + PPSV23 (≥5 years) — are measured from it,
+    // and before S14-7 the PCV walk could not see PPSV23 at all, so neither
+    // gap was checked for anyone.
+    ppsv23Doses: rawPpsv,
+    // Risk class decides which floor an adult's PPSV23-after-PCV15 is judged
+    // against; pass it on both calls so the two cannot disagree.
+    riskIds,
+  });
   // PPSV23's 8-week floor is measured against the PCV doses that counted, so
   // the PCV walk has to run first and hand them over (peds audit P1-4).
   const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob, {

@@ -372,8 +372,10 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   whichever unit applies: `minIntervalDays` or `minIntervalMonths`, exactly one non-null.
 - **Minimum intervals BETWEEN recorded doses** (added 2026-10-11, S3 — queue P1-0, peds
   audit P1-4/P1-5). Until S3 the validator graded every dose in isolation, so a PCV series
-  recorded at 2, 2.5, 3 and 3.5 months counted as a complete 4-dose series. The minimums
-  live in `logic/intervals.js` and are read by both `validate.js` and `recommend.js`.
+  recorded at 2, 2.5, 3 and 3.5 months counted as a complete 4-dose series. The minimum
+  NUMBERS live in `logic/intervals.js`; since S14-7 the RULES that use them live in
+  `logic/doseIntervalRules.js`, which the validator reads, and `recommend.js` reads the
+  numbers directly for its forward-looking scheduler.
 
   The validator enforces an interval **only where a source states it as a minimum**, which
   is the paediatric schedule. Three rules, all fetched live 2026-10-11:
@@ -400,50 +402,123 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   counted. PCV7 anchors nothing — it is a properly given dose of a superseded product, not
   a mistimed one, and no source states an interval from it.
 
-  **Rules 2 and 3 are paediatric only, and that is a source fact.** The adult notes were
-  searched live 2026-10-11 (positive control: "pneumococcal", 13 hits, so the whole page
-  including its collapsed sections was read): they contain **no** "same visit" sentence,
-  **no** "8 weeks after the most recent PCV", and **no** "8 weeks after the PCV15 dose".
-  Adult gaps are stated as recommendations for the *next* dose ("1 dose PCV20 or 1 dose
-  PCV21 at least 1 year after the last PCV13 dose"), never as minimum intervals, and CDC
-  nowhere says a short adult gap stops a dose counting. Doses given at or after
-  `ADULT_SCHED_MIN_M` therefore carry **no** interval verdict in either stream; calling one
-  invalid would substitute a minimum for a recommendation, which is exactly the mistake
-  A-P1-1 corrected.
-- **Adult gaps CDC ADVISES but does not require** (added 2026-10-11, S3-N1). The mirror
-  image of the rule above. Adult gaps are recommendations for the *next* dose, so a short
-  one cannot void a dose, but it should not pass unremarked either. Such a dose **counts
-  and carries a note**: `earlyAdvisory: true` on a `status: 'valid'` result. (Named
-  `earlyAdvisory`, not `offWindow` — S14-3, owner decision 2026-10-11 — because
-  "off-window" is reserved for MeningoVax's sense of the word: a dose that does NOT count
-  and is owed a repeat. This dose counts; the two names must never collide.)
+  **Rules 1–3 above are the PAEDIATRIC rows, and they are paediatric because the CHILD
+  schedule is where CDC states them as minimums.** The adult notes were searched live
+  2026-10-11 (positive control: "pneumococcal", 13 hits, so the whole page including its
+  collapsed sections was read): they contain **no** "same visit" sentence, **no** "8 weeks
+  after the most recent PCV", and **no** "8 weeks after the PCV15 dose". So the paediatric
+  wording must never appear on an adult's dose. The adult answers come from their own rows —
+  see the next bullet.
+- **Every interval rule lives in ONE table** (added 2026-10-11, S14-7 — root cause S14-RC).
+  `logic/doseIntervalRules.js` holds them; `validate.js` calls `evaluateDoseInterval()` once
+  per dose and owns no interval logic at all.
 
-  **It is a flag, never a status.** `status` stays `'valid'` and the dose still receives
-  its `effectiveDoseNum`, so nothing that counts doses can mistake it for a dropped one.
-  Do not promote it to a status of its own. Two rules, both live 2026-10-11:
+  **The bug this replaced.** `validate.js` had five functions that each decided whether a
+  timing rule may void a dose **from the patient's age, not from what the rule says** —
+  `checkPcvInterval`, `checkPpsvAfterPcv`, `checkPpsvRevaccInterval` returned early at
+  `ageAtDose >= ADULT_SCHED_MIN_M`, and `adultPcvGapAdvice`, `adultPpsvGapAdvice` returned
+  early below it. Below 19 every gap could void a dose; at 19+ none could. **Three adult
+  gaps fell in the hole between the two halves and were checked by nothing at all** — the
+  worst being a 70-year-old's second PPSV23 two years after the first, which read
+  `status: 'valid'`, numbered, with an empty `reasons` array. Silent.
 
-  1. **Two adult PCV doses — CDC advises ≥1 year** (`ADULT_ADVISED_PCV_GAP_MONTHS`):
-     > "Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1 year after
-     > the last PCV13 dose."
+  In the table, the two questions are two separate **fields** on every row:
+  `rulebook` (child / adult / any — which schedule states the rule, so which interval and
+  which citation apply) and `enforcement` (`'floor'` → a short gap voids the dose and CDC's
+  4-day grace applies; `'recommendation'` → the dose counts and carries a note, no grace;
+  `'none'` → explicitly never flagged, with the reason written down). **No age test decides
+  whether a rule may bite.** `CHILD-PPSV23-AFTER-PPSV23` and `ADULT-PPSV23-AFTER-PPSV23`
+  read the *same* 5-year constant — proof the old age gate on that rule was pure loss — and
+  a test asserts they cannot drift apart.
 
-     1 year is the *shortest* of CDC's adult gaps (the PCV13+PPSV23 rows say 5 years), so
-     the advisory under-flags rather than over-flags. The longer rows depend on which
-     prior-vaccine row the patient is on — the engine's job, not the validator's.
-  2. **Adult PCV15 → PPSV23 — ≥1 year**, unless `adultPpsvShorterMinimumApplies()`, in
-     which case the 8-week option is a legitimate choice and only a gap under 8 weeks is
-     flagged. Reuses `ADULT_PPSV23_INTERVAL_MONTHS` — never a hardcoded number, and never
-     reused to decide which CDC *row* a patient is on (see the A-P1-1 note above).
+  Rows whose floor CDC states **as a minimum in so many words** (`authority: 'CDC'`): all
+  three paediatric rows, plus the adult 8-week PCV15→PPSV23 minimum, which is the only place
+  the words "minimum interval" appear anywhere in the adult notes:
+  > "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may
+  > use minimum interval of 8 weeks for adults with an immunocompromising condition,
+  > cochlear implant, or cerebrospinal fluid leak)."
 
-  **No 4-day grace here, deliberately.** The grace is CDC's rule for whether a dose that
-  missed a *minimum* still counts. Nothing is being voided, so there is no grace to apply.
+- ⚠️ **ADULT INTERVALS AS VALIDITY FLOORS — OWNER CLINICAL DETERMINATION, 2026-10-11.
+  Never cite ACIP or CDC for this.** Every `authority: 'OWNER'` row in
+  `doseIntervalRules.js` rests on it, and the per-dose explanation the app prints says so in
+  words ("an owner clinical determination dated 2026-10-11, not ACIP").
+
+  **The determination:** an interval is an interval. An adult dose given inside one was not
+  validly given, does not count, and is owed a repeat — with CDC's 4-day grace. The owner
+  was shown all of the evidence below, which disagrees, and reaffirmed. Recorded the same
+  way the Fred Hutch HSCT pathway is (`CLAUDE.md`: "label as institution-specific in UI
+  copy").
+
+  **What the published sources actually say, all checked live 2026-10-11:**
+  - **CDSI v4.64** (CDC's own machine-readable rule set; local copy). Each interval carries
+    `minInt` (the recommended gap) and `absMinInt` (the hard floor below which a dose is
+    invalid). Where CDC intends a floor it writes `minInt − 4 days` — infant PCV dose 2 is
+    `absMinInt = 4 weeks − 4 days`, i.e. **CDC encodes the grace itself**. Series
+    *"Pneumococcal 50+ 2-dose PCV13"*: `minInt = 1 year`, `earliestRecInt = 1 year`,
+    **`absMinInt = 0 days`**. Same for every adult 5-year interval.
+  - **rr7203a1 / mm7336a3 / mm7401a1** (the three current adult MMWRs): "grace" 0 hits;
+    "should be repeated" / "does not count" 0 hits. Adult gaps are stated as advice for the
+    *next* dose — "1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PCV13 dose".
+  - **CDC General Best Practices**: the grace attaches to *minimum* intervals, and Table 3-2
+    gives adult PCV none (footnote x defers to ACIP prose).
+
+  **The adult floors, enumerated — never generalised** (owner decision 6). Each is a row id
+  in `doseIntervalRules.js`:
+
+  | Dose judged | Measured from | Floor | Row |
+  |---|---|---|---|
+  | PCV20/PCV21, history has PCV13 **and** PPSV23 | last PPSV23 | ≥5 years | `ADULT-PCV20-21-5Y-AFTER-PPSV23` |
+  | PCV20/PCV21, history has PCV13 **and** PPSV23 | last PCV | ≥1 year | `ADULT-PCV20-21-1Y-AFTER-PCV` |
+  | PCV20/PCV21, history has PCV13, no PPSV23 | last PCV13 | ≥1 year | `ADULT-PCV20-21-AFTER-PCV13` |
+  | PCV15/20/21, history has PPSV23 only | last PPSV23 | ≥1 year | `ADULT-PCV-AFTER-PPSV23` |
+  | PPSV23, IC / cochlear implant / CSF leak | last PCV15 | ≥8 weeks (**CDC**, not owner) | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` |
+  | PPSV23, any other adult | last PCV15 | ≥1 year | `ADULT-PPSV23-AFTER-PCV15` |
+  | A second PPSV23 | previous PPSV23 | ≥5 years | `ADULT-PPSV23-AFTER-PPSV23` |
+
+  Two keying decisions inside that table, both deliberate:
+  - **CDC's prior-vaccine rows are selected from the HISTORY's products, never from risk
+    class.** Whether a second PPSV23 was *indicated* is the recommendation engine's
+    question; the validator only judges the timing of a dose that was given. Keying the
+    5-year floor on the risk row is what left it unchecked for adults in the first place.
+  - **`adultPpsvShorterMinimumApplies()` is used for the INTERVAL only** — which floor an
+    adult's PPSV23-after-PCV15 is judged against — and never to pick a CDC recommendation
+    row. That coupling is what A-P1-1 broke apart and it must not come back.
+
+  **Deliberately never flagged**, as its own `enforcement: 'none'` row so a reader can tell
+  a decision from an oversight: **PCV20/PCV21 after an adult PCV15** (the "PPSV23 not
+  available" substitute path) — CDC states no interval for that substitution, and inventing
+  one would claim more than the source does.
+
+  **A-P1-1 is untouched.** ≥1 year remains what the app **recommends** after a PCV15 at
+  every adult age, and the 8-week option is still **named** rather than substituted. S14-7
+  changes only what happens to a dose that was *already given* inside the interval.
+- **Adult gaps that are still a note, not a floor** (amended 2026-10-11, S14-7). Two rows
+  keep `earlyAdvisory: true` on a `status: 'valid'` result — the dose **counts**, carries a
+  sentence, and keeps its `effectiveDoseNum`. **It is a flag, never a status**; nothing that
+  counts doses may mistake it for a dropped one. No 4-day grace, deliberately: the grace is
+  CDC's rule for whether a dose that missed a *minimum* still counts, and nothing is being
+  voided here, so a day short of the year is a day short.
+
+  1. `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` — an adult with an immunocompromising
+     condition, cochlear implant or CSF leak who used the 8-week option instead of waiting
+     the recommended year. The dose met the minimum CDC names for them, so it counts; the
+     note states that, which is information rather than second-guessing.
+  2. `ADULT-PCV-AFTER-PCV-CATCH-ALL` and `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` — any adult pair
+     the enumerated rows do not name (PCV13→PCV15, or a PPSV23 days after a PCV13). Keyed on
+     ≥1 year, the *shortest* adult gap CDC states, so they under-flag rather than over-flag.
+     They exist so that "enumerate, never generalise" cannot turn into silence — which was
+     the S14-7 root cause.
+
+  **Open, for the owner:** rr7203a1 states a PCV13→PPSV23 minimum in so many words — "the
+  minimum recommended interval between PCV13 and PPSV23 administration is ≥8 weeks … and ≥1
+  year for adults without these conditions" — so that pair is a candidate to be promoted
+  from the catch-all note to a CDC-authority floor. It was not among the rows the owner
+  enumerated on 2026-10-11 and has not been promoted.
 
   **S14-2 (owner decision 2026-10-11): the chip no longer carries this distinction in a
-  word.** It used to mirror vaxapp's "On time" / "Valid" pair; that split is retired —
-  MeningoVax is now the sole vocabulary authority for these two single-vaccine apps, and
-  its chip just states the dose count. Every recorded dose's chip reads **"Dose N of M"**
-  (or "Dose N" when the card tracks no total) regardless of timing; the advisory sentence
-  above still appears in the dose's own explanation text, so the information is not lost —
-  it has moved off the chip.
+  word.** Every recorded dose's chip reads **"Dose N of M"** (or "Dose N" when the card
+  tracks no total) regardless of timing; the advisory sentence appears in the dose's own
+  explanation text, so the information has moved off the chip rather than been lost.
 - **An ADULT PCV dose recorded after the series was already complete by product is an
   extra dose, not a mistimed one** (added 2026-10-11, S14-4). An adult series containing
   PCV20 or PCV21 is complete — the engine's own "already complete by product" check

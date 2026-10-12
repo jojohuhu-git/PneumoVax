@@ -43,7 +43,23 @@ src/
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
                          and the cited sentence that does it. Keyed to
                          ADULT_SCHED_MIN_M (228), matching the engine's dispatch.
-    validate.js          analyzeHistory(vaccine, doses, ageMonths, today) → { perDose, effective }.
+    validate.js          analyzeHistory(vaccine, doses, ageMonths, today, dob, opts)
+                         → { perDose, effective }. Owns minimum-AGE and product rules;
+                         delegates every timing question to doseIntervalRules.js.
+                         opts: { pcvDoses, ppsv23Doses, riskIds } — each stream needs the
+                         other's doses, because adult rows measure a conjugate dose from a
+                         PPSV23 and vice versa (S14-7).
+    doseIntervalRules.js DOSE_INTERVAL_RULES + evaluateDoseInterval(ctx). Every
+                         gap-between-recorded-doses rule, as one table. Each row declares
+                         `rulebook` (which schedule states it) and `enforcement`
+                         (floor / recommendation / none) SEPARATELY — no age test decides
+                         whether a rule may void a dose. ⚠ Adult floors are an owner
+                         clinical determination (2026-10-11), not ACIP: read the file
+                         header and CLINICAL_SPEC.md §K before touching a row.
+    intervals.js         GRACE_DAYS + the minimum NUMBERS and the comparison helpers that
+                         apply the grace. The RULES that use them live in
+                         doseIntervalRules.js; recommend.js reads the numbers directly for
+                         its forward-looking scheduler.
     dateUtils.js         todayISO, addDays, daysBetween, intervalElapsed, DAYS.
                          ⚠ Mirror-synced with MeningoVax dateUtils.js — keep in sync.
     format.js            fmtAgeMonths, fmtDate, ageGroup, dobToAgeMonths.
@@ -109,7 +125,7 @@ citation names a ref that does not exist.
 | `ADULT_SCHED_MIN_M` | 228 (19y) | Adult vs peds SCHEDULE routing boundary |
 | `PCV21_MIN_AGE_M` | 216 (18y) | PCV21 (Capvaxive) PRODUCT min-age only |
 
-`recommend.js` uses `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js` use `PCV21_MIN_AGE_M` for the PCV21 gate. StepRisks imports the shared constant for the `adultOnly` risk gate.
+`recommend.js` uses `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js` use `PCV21_MIN_AGE_M` for the PCV21 gate. `doseIntervalRules.js` uses `ADULT_SCHED_MIN_M` in exactly one place — `rulebookOf()`, which picks which schedule's row applies — and a test fails if a second comparison appears. StepRisks imports the shared constant for the `adultOnly` risk gate.
 
 ## Counting Policy
 

@@ -1,24 +1,44 @@
-// S3-N1 (2026-10-11) — an adult's too-close doses used to silently read as
-// routine, same as any other valid dose.
+// S3-N1, as amended by S14-7 (owner decision 2026-10-11).
 //
-// S3 deliberately did not mark them invalid: CDC's adult notes state their gaps
-// as recommendations for the NEXT dose ("1 dose PCV20 or 1 dose PCV21 at least
-// 1 year after the last PCV13 dose"), never as minimum intervals, and nowhere
-// say a short adult gap stops a dose counting. Calling one invalid would
-// substitute a minimum for a recommendation — the mistake A-P1-1 corrected.
+// WHAT THIS FILE USED TO ASSERT, AND WHY IT CHANGED.
 //
-// The honest answer is a third thing: **this dose counts, and it was given
-// sooner than CDC advises.** validate.js names the flag `earlyAdvisory` — S14-3
-// (owner decision 2026-10-11) renamed it off `offWindow`, which collided with
-// MeningoVax's sense of "off-window": a dose that does NOT count and is owed
-// a repeat. This one counts; the two must never share a name.
+// S3 found that an adult's too-close doses read as routine, the same as any
+// other valid dose. S3-N1 answered that with a THIRD thing: the dose counts,
+// and carries a note — `earlyAdvisory: true` on a `status: 'valid'` result.
+// It deliberately did NOT void such a dose, on the grounds that CDC states
+// adult gaps as recommendations for the NEXT dose and never as minimum
+// intervals.
 //
-// THE SAFETY PROPERTY THIS FILE EXISTS TO PROTECT: a dose carrying this flag
-// still counts. `status` stays 'valid' and `effectiveDoseNum` is still
-// assigned, so no consumer that counts doses can treat it as dropped. The
-// advisory is a flag on top, never a new counting state. If a future change
-// turns `earlyAdvisory` into its own status, these assertions are what should
-// stop it.
+// The owner reviewed that evidence on 2026-10-11 and reversed it:
+//
+//   • CDSI v4.64, CDC's own machine-readable rule set, carries `minInt` (the
+//     recommended gap) and `absMinInt` (the hard floor). Infant PCV dose 2
+//     reads `absMinInt = 4 weeks − 4 days`. EVERY adult pneumococcal interval
+//     reads `absMinInt = 0 days`.
+//   • rr7203a1, mm7336a3 and mm7401a1 contain zero hits for "should be
+//     repeated" or "does not count".
+//
+// The owner's determination: an interval is an interval, and a dose given
+// inside one was not validly given, whatever age the patient was. So almost
+// every gap that used to produce a note now VOIDS the dose. ⚠️ This is an
+// owner clinical determination, recorded in CLINICAL_SPEC.md §K and in
+// logic/doseIntervalRules.js — never cite ACIP or CDC for it.
+//
+// `earlyAdvisory` SURVIVES, for the two cases where a dose really does count
+// and the timing is still worth saying out loud:
+//   1. An adult who legitimately used the 8-week option after a PCV15 instead
+//      of waiting the recommended year. The dose met the minimum CDC names
+//      for them, so it counts; the note says the recommendation is a year.
+//   2. A pair of adult doses no enumerated row names (PCV13→PCV15, say),
+//      caught by ADULT-PCV-AFTER-PCV-CATCH-ALL so that "enumerate, never
+//      generalise" does not turn into silence.
+//
+// THE SAFETY PROPERTY THIS FILE STILL EXISTS TO PROTECT: a dose carrying
+// `earlyAdvisory` COUNTS. `status` stays 'valid' and `effectiveDoseNum` is
+// still assigned, so no consumer that counts doses can treat it as dropped.
+// The advisory is a flag on top, never a counting state of its own. If a
+// future change turns `earlyAdvisory` into a status, these assertions are
+// what should stop it.
 //
 // Sources, fetched live 2026-10-11 (see CLINICAL_SPEC.md §K):
 //   "Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1
@@ -49,89 +69,111 @@ function adultPpsv(ppsvDate, pcvDate, { product = 'PCV15', riskIds = [] } = {}) 
   });
 }
 
-describe('S3-N1 — adult PCV to PCV, CDC advises at least 1 year', () => {
-  it('flags five weeks as off-window — and the dose STILL COUNTS', () => {
+describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', () => {
+  it('voids five weeks, and says the reason is the owner determination', () => {
     const a = adultPcv(['2026-01-05', '2026-02-09'], ['PCV13', 'PCV20']);
     const second = a.perDose[1];
 
-    expect(second.earlyAdvisory).toBe(true);
-    expect(second.reasons.join(' ')).toMatch(/at least 1 year/);
-    // The safety property: counts, numbered, not dropped.
-    expect(second.status).toBe('valid');
-    expect(second.doesNotCount).toBeFalsy();
-    expect(second.effectiveDoseNum).toBe(2);
-    expect(a.effective).toHaveLength(2);
-    // The copy must reassure, not read as an error: it says the dose counts,
-    // and never borrows the invalid path's wording.
-    expect(second.reasons.join(' ')).toMatch(/still counts/);
-    expect(second.reasons.join(' ')).not.toMatch(/does not count toward the series/);
-    expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
+    expect(second.status).toBe('invalid');
+    expect(second.effectiveDoseNum).toBeNull();
+    expect(second.doesNotCount).toBe(true);
+    expect(a.effective).toHaveLength(1);
+    expect(second.reasons.join(' ')).toMatch(/at least 1 year after the last PCV13 dose/);
+    expect(second.reasons.join(' ')).toMatch(/repeat this dose only/);
+    // Must NOT keep the old reassurance — it is now false.
+    expect(second.reasons.join(' ')).not.toMatch(/still counts/);
+    // Honesty: the rule is the owner's, not ACIP's, and the detail says so.
+    expect(second.detail).toMatch(/owner clinical determination dated 2026-10-11/i);
   });
 
-  it('does not flag a gap of exactly 1 calendar year, or longer', () => {
+  it('does not void a gap of exactly 1 calendar year, or longer', () => {
     const first = '2026-01-05';
     expect(adultPcv([first, addCalendarMonths(first, 12)], ['PCV13', 'PCV20'])
-      .perDose[1].earlyAdvisory).toBeFalsy();
+      .perDose[1].status).toBe('valid');
     expect(adultPcv([first, addCalendarMonths(first, 18)], ['PCV13', 'PCV20'])
-      .perDose[1].earlyAdvisory).toBeFalsy();
+      .perDose[1].status).toBe('valid');
   });
 
-  it('flags one day short of the year', () => {
+  // The owner's decision names the 4-day grace explicitly: "with the 4-day
+  // grace around the 12-month interval". CDC's own sentence is the source of
+  // the grace itself — "doses administered ≤4 days before the minimum age or
+  // interval are considered valid ... ≥5 days earlier ... should be repeated".
+  it('applies CDC\'s 4-day grace to the owner floor: 4 days short counts, 5 days short does not', () => {
     const first = '2026-01-05';
-    const a = adultPcv([first, addDays(addCalendarMonths(first, 12), -1)], ['PCV13', 'PCV20']);
-    expect(a.perDose[1].earlyAdvisory).toBe(true);
+    const anniversary = addCalendarMonths(first, 12);
+    expect(adultPcv([first, addDays(anniversary, -4)], ['PCV13', 'PCV20'])
+      .perDose[1].status).toBe('valid');
+    expect(adultPcv([first, addDays(anniversary, -5)], ['PCV13', 'PCV20'])
+      .perDose[1].status).toBe('invalid');
   });
 
-  it('never flags the first dose — there is no previous dose to be early after', () => {
-    expect(adultPcv(['2026-01-05']).perDose[0].earlyAdvisory).toBeFalsy();
+  it('never judges the first dose — there is no previous dose to be early after', () => {
+    const only = adultPcv(['2026-01-05']).perDose[0];
+    expect(only.status).toBe('valid');
+    expect(only.earlyAdvisory).toBeFalsy();
   });
 
-  it('leaves children alone: a too-close paediatric dose is invalid, not off-window', () => {
+  it('a too-close paediatric dose is still invalid, on the paediatric rule', () => {
     const child = analyzeHistory('PCV', [
       { date: '2026-03-01', product: 'PCV13' },
       { date: '2026-03-15', product: 'PCV13' },
     ], 4, '2026-05-01', '2026-01-01');
     expect(child.perDose[1].status).toBe('invalid');
-    expect(child.perDose[1].earlyAdvisory).toBeFalsy();
+    // The paediatric minimum, stated by CDC — not the adult owner rule.
+    expect(child.perDose[1].reasons.join(' ')).toMatch(/minimum interval is 4 weeks/);
+    expect(child.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
-  it('does not flag an undated dose', () => {
+  it('never judges an undated dose — there is no date to measure from', () => {
     const a = analyzeHistory('PCV', [
       { date: '2026-01-05', product: 'PCV13' },
       { product: 'PCV20' },
     ], AM, TODAY, DOB);
     expect(a.perDose.every((d) => !d.earlyAdvisory)).toBe(true);
+    expect(a.perDose[1].status).not.toBe('invalid');
   });
 });
 
-describe('S3-N1 — adult PCV15 to PPSV23, the A-P1-1 interval', () => {
-  it('flags 3 months for an adult with no immunocompromising condition', () => {
+describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', () => {
+  it('voids 3 months for an adult with no immunocompromising condition — their floor is the year', () => {
     const a = adultPpsv('2026-04-05', '2026-01-05');
-    expect(a.perDose[0].earlyAdvisory).toBe(true);
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year/);
-    expect(a.perDose[0].effectiveDoseNum).toBe(1);
-    expect(a.effective).toHaveLength(1);
+    expect(a.perDose[0].status).toBe('invalid');
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PCV15/);
+    expect(a.effective).toHaveLength(0);
+    expect(a.perDose[0].detail).toMatch(/owner clinical determination/i);
   });
 
-  it('does NOT flag 3 months when the 8-week minimum may be considered', () => {
+  it('keeps 3 months when the 8-week minimum may be considered — and SAYS it counts', () => {
     // CLAUDE.md / A-P1-1: an immunocompromising condition, cochlear implant or
-    // CSF leak may use the 8-week minimum. Three months clears it, so this is a
-    // legitimate choice and must not be second-guessed.
-    expect(adultPpsv('2026-04-05', '2026-01-05', { riskIds: ['hiv'] }).perDose[0].earlyAdvisory)
-      .toBeFalsy();
-    expect(adultPpsv('2026-04-05', '2026-01-05', { riskIds: ['cochlear_implant'] }).perDose[0].earlyAdvisory)
-      .toBeFalsy();
+    // CSF leak may use the 8-week minimum. Three months clears it, so the dose
+    // is validly given and must not be voided. It still carries a note, because
+    // ≥1 year remains the recommendation — the note states that the minimum was
+    // met, which is information, not second-guessing.
+    for (const risk of ['hiv', 'cochlear_implant', 'csf_leak']) {
+      const a = adultPpsv('2026-04-05', '2026-01-05', { riskIds: [risk] });
+      expect(a.perDose[0].status).toBe('valid');
+      expect(a.perDose[0].effectiveDoseNum).toBe(1);
+      expect(a.effective).toHaveLength(1);
+      expect(a.perDose[0].earlyAdvisory).toBe(true);
+      expect(a.perDose[0].reasons.join(' ')).toMatch(/met that minimum, so it counts/);
+    }
   });
 
-  it('flags 4 weeks even when the 8-week minimum applies — it is short of that too', () => {
+  it('voids 4 weeks even when the 8-week minimum applies — it is short of that too', () => {
     const a = adultPpsv('2026-02-02', '2026-01-05', { riskIds: ['hiv'] });
-    expect(a.perDose[0].earlyAdvisory).toBe(true);
+    expect(a.perDose[0].status).toBe('invalid');
     expect(a.perDose[0].reasons.join(' ')).toMatch(/8 weeks/);
+    // THIS floor is CDC's own — "minimum interval of 8 weeks" is the only place
+    // those words appear in the adult notes — so it must NOT be labelled as the
+    // owner's determination.
+    expect(a.perDose[0].detail).not.toMatch(/owner clinical determination/i);
+    expect(a.perDose[0].detail).toMatch(/minimum interval CDC names/i);
   });
 
-  it('does not flag a full year', () => {
-    expect(adultPpsv(addCalendarMonths('2026-01-05', 12), '2026-01-05').perDose[0].earlyAdvisory)
-      .toBeFalsy();
+  it('leaves a full year alone, with no note at all', () => {
+    const a = adultPpsv(addCalendarMonths('2026-01-05', 12), '2026-01-05');
+    expect(a.perDose[0].status).toBe('valid');
+    expect(a.perDose[0].earlyAdvisory).toBeFalsy();
   });
 });
 
@@ -139,9 +181,13 @@ describe('S3-N1 — adult PCV15 to PPSV23, the A-P1-1 interval', () => {
 // tests above pass `riskIds` straight into the validator, so they stayed green
 // while recommend() was not forwarding it at all — every adult was judged
 // against the flat 1-year advice and an immunocompromised patient who had
-// legitimately used the 8-week option was told their dose was early. Driving
-// the running app is what caught it. Assert the WIRING, not just the unit.
-describe('S3-N1 — riskIds actually reach the validator from the engine', () => {
+// legitimately used the 8-week option got second-guessed. Driving the running
+// app is what caught it. Assert the WIRING, not just the unit.
+//
+// S14-7 raises the stakes: `riskIds` no longer decides whether a NOTE appears,
+// it decides whether the dose COUNTS. A 3-month gap is valid for an
+// immunocompromised adult and void for everyone else.
+describe('S14-7 — riskIds actually reach the validator from the engine', () => {
   function ppsvAfterPcv15(riskIds) {
     const out = recommend({
       ageMonths: AM, dob: DOB, today: TODAY,
@@ -152,25 +198,58 @@ describe('S3-N1 — riskIds actually reach the validator from the engine', () =>
     return out.perDose.ppsv23[0];
   }
 
-  it('an immunocompromised adult is NOT told a 3-month gap was early', () => {
-    expect(ppsvAfterPcv15(['hiv']).earlyAdvisory).toBeFalsy();
+  it('an immunocompromised adult keeps their 3-month dose', () => {
+    expect(ppsvAfterPcv15(['hiv']).status).toBe('valid');
+    expect(ppsvAfterPcv15(['hiv']).effectiveDoseNum).toBe(1);
   });
 
   it('a cochlear implant gets the same treatment', () => {
-    expect(ppsvAfterPcv15(['cochlear_implant']).earlyAdvisory).toBeFalsy();
+    expect(ppsvAfterPcv15(['cochlear_implant']).status).toBe('valid');
   });
 
-  it('but an adult with only a chronic condition IS flagged', () => {
-    expect(ppsvAfterPcv15(['diabetes']).earlyAdvisory).toBe(true);
+  it('but an adult with only a chronic condition has the dose voided', () => {
+    expect(ppsvAfterPcv15(['diabetes']).status).toBe('invalid');
   });
 
-  it('and so is an adult with no risk factors at all', () => {
-    expect(ppsvAfterPcv15([]).earlyAdvisory).toBe(true);
+  it('and so does an adult with no risk factors at all', () => {
+    expect(ppsvAfterPcv15([]).status).toBe('invalid');
   });
 });
 
-describe('S3-N1 — the engine still counts off-window doses', () => {
-  it('a 70-year-old PCV13 + PCV20 five weeks apart is a 2-dose history to the engine', () => {
+describe('S14-7 — the catch-all keeps an unenumerated adult pair from going silent', () => {
+  // PCV13 → PCV15 is not a path CDC recommends, so no enumerated row names it
+  // and no floor applies. Without the catch-all it would pass in total
+  // silence — the exact shape of bug S14-7 exists to remove.
+  it('notes PCV13 then PCV15 five weeks later, and the dose still counts', () => {
+    const a = adultPcv(['2026-01-05', '2026-02-09'], ['PCV13', 'PCV15']);
+    const second = a.perDose[1];
+    expect(second.status).toBe('valid');
+    expect(second.earlyAdvisory).toBe(true);
+    expect(second.effectiveDoseNum).toBe(2);
+    expect(a.effective).toHaveLength(2);
+    expect(second.reasons.join(' ')).toMatch(/at least 1 year between pneumococcal conjugate doses/);
+    expect(second.reasons.join(' ')).toMatch(/still counts/);
+    expect(second.reasons.join(' ')).not.toMatch(/does not count toward the series/);
+    expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
+  });
+
+  it('and the engine still counts it: two doses, not one', () => {
+    const out = recommend({
+      ageMonths: AM, dob: DOB, today: TODAY,
+      pcvDoses: [
+        { date: '2026-01-05', product: 'PCV13' },
+        { date: '2026-02-09', product: 'PCV15' },
+      ],
+      ppsv23Doses: [], riskIds: [],
+    });
+    expect(out.meta.pcvCount).toBe(2);
+    expect(out.perDose.pcv[1].earlyAdvisory).toBe(true);
+    expect(out.perDose.pcv[1].effectiveDoseNum).toBe(2);
+  });
+});
+
+describe('S14-7 — a voided adult dose is dropped from the engine\'s count', () => {
+  it('a 70-year-old PCV13 + PCV20 five weeks apart is a ONE-dose history now', () => {
     const out = recommend({
       ageMonths: AM, dob: DOB, today: TODAY,
       pcvDoses: [
@@ -179,10 +258,12 @@ describe('S3-N1 — the engine still counts off-window doses', () => {
       ],
       ppsv23Doses: [], riskIds: [],
     });
-    expect(out.meta.pcvCount).toBe(2);
-    expect(out.perDose.pcv[1].earlyAdvisory).toBe(true);
-    expect(out.perDose.pcv[1].effectiveDoseNum).toBe(2);
-    // PCV20 completes an adult series; the early gap does not change that.
-    expect(out.recs.some((r) => r.status === 'complete' || r.status === 'not-indicated')).toBe(true);
+    // The PCV20 does not count, so the patient is a PCV13-only adult and is
+    // owed the PCV20/PCV21 again — which is the whole point of calling the
+    // dose invalid rather than noting it.
+    expect(out.meta.pcvCount).toBe(1);
+    expect(out.perDose.pcv[1].status).toBe('invalid');
+    expect(out.perDose.pcv[1].effectiveDoseNum).toBeNull();
+    expect(out.recs.some((r) => r.status === 'complete')).toBe(false);
   });
 });

@@ -25,10 +25,17 @@ const AM = 845; // ~70 years
 
 describe('S14-4 — a dose recorded after the series already completed', () => {
   it('PCV20 then PCV21 five weeks later: the PCV21 is an extra dose, not an interval advisory', () => {
+    // S14-7 (2026-10-11): the PCV20 is now dated more than a year after the
+    // PCV13 on purpose. An adult's PCV20/PCV21 has to fall at least a year
+    // after the last PCV13 to count at all (ADULT-PCV20-21-AFTER-PCV13), and
+    // the original fixture had them five weeks apart — which voided the PCV20,
+    // left the series incomplete, and so stopped exercising the "extra dose"
+    // path this case exists for. See the case below for that scenario's own,
+    // now-different, correct answer.
     const a = analyzeHistory('PCV', [
-      { date: '2026-01-05', product: 'PCV13' },
-      { date: '2026-02-09', product: 'PCV20' },  // completes the series
-      { date: '2026-03-16', product: 'PCV21' },  // extra — already complete
+      { date: '2024-01-05', product: 'PCV13' },
+      { date: '2025-02-09', product: 'PCV20' },  // completes the series
+      { date: '2025-03-16', product: 'PCV21' },  // extra — already complete
     ], AM, TODAY, DOB);
 
     const extra = a.perDose[2];

@@ -154,15 +154,26 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     expect(a.effective).toHaveLength(2);
   });
 
-  it('leaves adult PCV gaps alone — CDC states no minimum interval for them', () => {
-    // 70-year-old: PCV13 then PCV20 five weeks later. Below the adult notes'
-    // "at least 1 year", but that is a recommendation, not a stated minimum.
+  // REVERSED BY S14-7 (owner decision 2026-10-11). This case used to assert
+  // that an adult PCV gap can never void a dose, because CDC states adult gaps
+  // as advice for the next dose rather than as minimum intervals. The owner
+  // reviewed that evidence — CDSI v4.64 sets absMinInt = 0 days for every adult
+  // pneumococcal interval, and the three current adult MMWRs never say a short
+  // gap means repeat the dose — and determined that an interval is an interval:
+  // a dose given inside one was not validly given, whatever the patient's age.
+  // The full new rule set lives in logic/doseIntervalRules.js; its header
+  // carries the sources and labels the owner-determined rows as such.
+  it('voids an adult PCV20 given less than a year after PCV13 (owner rule, S14-7)', () => {
     const a = analyzeHistory('PCV', [
       { date: '2026-01-05', product: 'PCV13' },
       { date: '2026-02-09', product: 'PCV20' },
     ], 840, TODAY, '1956-01-01');
-    expect(statuses(a)).toEqual(['valid', 'valid']);
-    expect(a.effective).toHaveLength(2);
+    expect(statuses(a)).toEqual(['valid', 'invalid']);
+    expect(a.effective).toHaveLength(1);
+    // The reason has to name the owner determination, never ACIP — the app's
+    // honesty promise turns on a clinician being able to tell the two apart.
+    expect(a.perDose[1].detail).toMatch(/owner clinical determination/i);
+    expect(a.perDose[1].detail).not.toMatch(/ACIP recommends|per ACIP/i);
   });
 });
 
@@ -223,18 +234,28 @@ describe('peds audit P1-4 — PPSV23 must follow PCV by 8 weeks, and never the s
       { pcvDoses: [{ date: pcvDate, product: 'PCV15' }] }).perDose[0].status).toBe('invalid');
   });
 
-  it('leaves adult doses alone — the 8-week floor and the same-visit rule are paediatric', () => {
-    // The adult notes were searched live on 2026-10-11 (positive control:
-    // "pneumococcal", 13 hits): no "same visit" sentence, no "8 weeks after the
-    // most recent PCV", no "8 weeks after the PCV15 dose". The adult gap is a
-    // recommendation of >=1 year, not a validity floor (CLAUDE.md, A-P1-1).
+  // ALSO REVERSED BY S14-7. The 8-week floor and the same-visit sentence really
+  // are paediatric — the adult notes contain neither, verified live 2026-10-11
+  // with "pneumococcal" (13 hits) as a positive control that the page's
+  // collapsed sections had loaded — so the adult answers below come from
+  // DIFFERENT rows, not from the paediatric ones leaking upward.
+  it('an adult PPSV23 on the same day as a PCV13 is noted, not voided by the paediatric rule', () => {
     const a = analyzeHistory('PPSV23', [{ date: '2019-03-01' }], 915, '2026-06-01', '1950-06-15',
       { pcvDoses: [{ date: '2019-03-01', product: 'PCV13' }] });
+    // Counts — no adult rule states a floor for a PPSV23 after a PCV13 (see
+    // ADULT-PPSV23-AFTER-PCV-CATCH-ALL, which is a note and says why) — but it
+    // no longer passes in silence, which is the S14-7 root cause.
     expect(a.perDose[0].status).toBe('valid');
+    expect(a.perDose[0].earlyAdvisory).toBe(true);
+    // And NOT with the paediatric wording: no "same visit", no 8 weeks.
+    expect(a.perDose[0].reasons.join(' ')).not.toMatch(/same visit|8 weeks/i);
+  });
 
+  it('voids an adult second PPSV23 given less than 5 years after the first (owner rule, S14-7)', () => {
     const twoDoses = analyzeHistory('PPSV23', [{ date: '2019-03-01' }, { date: '2020-03-01' }],
       915, '2026-06-01', '1950-06-15');
-    expect(statuses(twoDoses)).toEqual(['valid', 'valid']);
+    expect(statuses(twoDoses)).toEqual(['valid', 'invalid']);
+    expect(twoDoses.perDose[1].detail).toMatch(/owner clinical determination/i);
   });
 
   it('a PPSV23 given BEFORE any PCV dose is not judged against it', () => {
