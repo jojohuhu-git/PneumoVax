@@ -464,30 +464,34 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(met.perDose[0].earlyAdvisory).toBeFalsy();
     expect(met.perDose[0].reasons).toEqual([]);
 
-    // The catch-all still does its own job for the one pair nothing else
-    // names — but S14-4B (2026-10-12) narrowed that to a SAME-DAY pair.
+    // The catch-all still does its own job for the pairs nothing else names.
+    // This assertion has now been repointed TWICE, and where it has landed is
+    // the point:
     //
-    // This assertion used to use a PPSV23 given 10 weeks AFTER a PCV20, and
-    // expected the advisory. S14-4B reclassified exactly that dose: a PCV20
-    // completes the adult series, so a later PPSV23 is an extra dose and the
-    // "still counts" advisory is stripped — quoting an interval for a dose no
-    // recommendation ever asked for is the A-P1-1 mistake this very test
-    // guards against. 300 of the sweep's 16,250 patients were in that state.
+    //   • Originally a PPSV23 given 10 weeks AFTER a PCV20. S14-4B
+    //     (2026-10-12) reclassified exactly that dose — a PCV20 completes the
+    //     adult series, so a later PPSV23 is an extra dose and the "still
+    //     counts" advisory is stripped. 300 of 16,250 patients.
+    //   • Then the SAME-DAY version of the same pair. S14-4C (2026-10-12)
+    //     reclassified that too: co-administration is not a spacing problem,
+    //     because no PPSV23 follows a PCV20 at any interval. 144 of 16,250.
     //
-    // Same-day is the pair that remains, and the distinction is real: the
-    // series was completed AT that visit, not before it, so "given after the
-    // series was already complete" would be a false statement about the
-    // record. The flat 1-year advisory is still imperfect wording for a
-    // co-administered PPSV23 nobody needed — carried as an open wording
-    // question for the owner, not silently invented here.
-    const sameDayAsPcv20 = analyzeHistory('PPSV23', [{ date: '2019-03-01' }],
+    // Twice the anchor was a pair involving a product that COMPLETES the
+    // series, and twice it moved, because for such a pair there is no interval
+    // to advise about in the first place. The stable anchor is the one the
+    // catch-all actually exists for: a PCV product the clinician could not
+    // name. No product-keyed row can select on it, so no enumerated row will
+    // ever name this pair, and the generic 1-year sentence is the right thing
+    // to say. Measured on the grid: 216 of the 324 patients reaching this row
+    // are this shape.
+    const afterUnknownPcv = analyzeHistory('PPSV23', [{ date: '2019-05-10' }],
       ADULT.ageMonths, TODAY, ADULT.dob,
-      { pcvDoses: [{ date: '2019-03-01', product: 'PCV20' }] });
-    expect(sameDayAsPcv20.perDose[0].status).toBe('valid');
-    expect(sameDayAsPcv20.perDose[0].earlyAdvisory).toBe(true);
-    expect(sameDayAsPcv20.perDose[0].intervalRuleId)
+      { pcvDoses: [{ date: '2019-03-01', product: '' }] });
+    expect(afterUnknownPcv.perDose[0].status).toBe('valid');
+    expect(afterUnknownPcv.perDose[0].earlyAdvisory).toBe(true);
+    expect(afterUnknownPcv.perDose[0].intervalRuleId)
       .toBe('ADULT-PPSV23-AFTER-PCV-CATCH-ALL');
-    expect(sameDayAsPcv20.perDose[0].extraDose).toBeFalsy();
+    expect(afterUnknownPcv.perDose[0].extraDose).toBeFalsy();
   });
 });
 

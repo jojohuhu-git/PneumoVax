@@ -33,20 +33,10 @@ import { join, resolve } from 'node:path';
 // place to park a finding to avoid dealing with it. Deleting a key from this
 // list without wiring the citation up will fail the suite, which is the point.
 const KNOWN_UNCITED = {
-  pedsMinAge:
-    'A QUOTED, sentence-level citation for the paediatric minimum ages (6 weeks '
-    + 'PCV15/PCV20, 2 years PPSV23) that no rule references. The minimum-age rules '
-    + 'themselves live in validate.js and DO run; they just render no [c]. Wiring '
-    + 'per-dose verdict citations is P6-3c (see validate.js, `withCites`), which is '
-    + 'not done — most verdicts cite nothing today. Flagged to the owner 2026-10-12 '
-    + 'rather than silently wired, because which sentence a verdict should cite is a '
-    + 'clinical-copy decision.',
-  immPCV7:
-    'The source for a CLAUDE.md non-negotiable — "PCV7 never counts; high-risk '
-    + 'patients are treated as PCV-naive". The rule runs and the dose reads '
-    + '"Off-window - repeat", but the clinician is never shown immunize.org Ask the '
-    + 'Experts behind it. Same blocker as pedsMinAge: it belongs on a per-dose '
-    + 'verdict, which is P6-3c. Flagged 2026-10-12, not wired.',
+  // `pedsMinAge` and `immPCV7` were both listed here until P6-3c wired them
+  // (2026-10-12). They are deliberately NOT replaced with a softer excuse:
+  // they are now cited on the per-dose verdicts in validate.js, so if either
+  // key stops appearing in src/ this test will fail, which is the point.
   cdcPneumoIndex:
     'CDC\'s pneumococcal landing page. Kept as the general "where this all comes '
     + 'from" pointer; every specific rule cites the schedule notes or an MMWR '

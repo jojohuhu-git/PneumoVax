@@ -243,8 +243,24 @@ labelled "series dose 1" in silence — reading identically to a PPSV23 that had
 the sweep's 16,250 verdicts; no recommendation and no PCV verdict changed. Two deliberate
 narrowings versus the PCV side, both reasoned out in `CLINICAL_SPEC.md` §K:
 
-- the completing dose must be **dated and strictly earlier** — a same-day pair is
-  co-administration, and still reaches `ADULT-PPSV23-AFTER-PCV-CATCH-ALL`, now the only
-  pair that row can speak for;
+- the completing dose must be **dated and strictly earlier** — **lifted by S14-4C below**;
 - **no undated mirror** — an undated PPSV23 beside a PCV20 is usually an old dose given
   *before* the conjugate, so the PCV side's question would mislead more often than help.
+
+**S14-4C (2026-10-12) — a dose given at the SAME VISIT as the completing dose.** S14-4B's
+"strictly earlier" limit protected the sentence and abandoned the verdict: a same-day
+PCV20 + PPSV23 read *"CDC advises at least 1 year… this dose still counts"*, advising a
+spacing fix for a dose no interval would have made right. It was also an asymmetry — the
+PCV arm reads `kept`, which already holds a same-day completing dose, so a PCV21 recorded
+the same day as a PCV20 was already an extra dose *and* already said "after" about it.
+
+Owner decision: chip and sentence together. Same-day joins the extra-dose class, with a
+**second sentence** ("Given at the same visit as…") instead of the "after" one; both
+sentences live in `validate.js`'s `extraDoseSentence`, written once because both streams
+print them. **Bound:** a PPSV23 an **earlier** PCV15 already owed stays counted when a
+PCV20 lands at the same visit — either dose finishes the series, so the app calls neither
+surplus. Moved 144 of 16,250; 0 recommendations and 0 PCV verdicts changed.
+
+`ADULT-PPSV23-AFTER-PCV-CATCH-ALL` is **not** left with nothing: 180 of the 324 grid
+patients that reach it are anchored on a PCV whose **product was not recorded**, which no
+product-keyed row can ever name. That is the row's standing job.
