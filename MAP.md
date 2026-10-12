@@ -15,9 +15,11 @@ folder — they go where the table at the bottom says.**
 | `src/components/` | The screens, cards, and buttons you see on screen. |
 | `src/logic/` | The "brain" — `recommend.js` decides what's due; `validate.js` checks recorded doses; `doseIntervalRules.js` is the single list of "how long must there be between two doses" rules. |
 | `src/data/` | The facts the brain uses: brands, risk factors, schedules. |
+| `src/test-grid.js` | A list of about 16,000 made-up patients (every age, risk tick and vaccination history worth testing). Used only by the tests, never shipped to anyone using the app. |
 | `public/` | Images and files shipped with the app exactly as-is. |
 | `index.html` | The single web page the app loads into. |
-| `scripts/` | Verification tools: compare this app's answers against CDC's PneumoRecs tool. Not part of the app. |
+| `scripts/` | Verification tools: compare this app's answers against CDC's PneumoRecs tool, and rebuild the saved answers file below. Not part of the app. |
+| `src/logic/__tests__/__corpus__/` | The app's saved answers for all ~16,000 made-up patients. The tests re-run the app over them and complain if any answer changed, so a change that quietly moves thousands of patients' advice can't slip through. If a change was meant to move them, run `npm run sweep:update` and say in the pull request how many moved. |
 
 ## Instructions and manuals
 
@@ -26,7 +28,7 @@ folder — they go where the table at the bottom says.**
 | `CLAUDE.md` | The instruction sheet the AI assistant reads at the start of every session. Short on purpose. |
 | `MAP.md` | This file — the building directory. |
 | `README.md` | The public description of the app for anyone visiting the code online. |
-| `CLINICAL_SPEC.md` | **The active rulebook** — every clinical rule with its source citation. The code and tests refer to it by name, which is why it stays at the top level. |
+| `CLINICAL_SPEC.md` | **The active rulebook** — every clinical rule with its source citation. The code and tests refer to it by name, which is why it stays at the top level. Its section K now holds a table that must match the code exactly; a test checks it on every run, so the document can't quietly fall behind. |
 | `docs/agent/` | The technical manuals (architecture, clinical rules, testing rules). |
 | `docs/archive/` | Old session notes, handoffs, past reviews. Nothing here is current; kept for history. Safe to ignore. |
 

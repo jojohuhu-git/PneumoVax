@@ -25,6 +25,8 @@
 | `src/components/__tests__/regression-p3-9-risk-age-note.test.jsx` | `RiskAgeNote` on both surfaces; keyed to `ADULT_SCHED_MIN_M`, not the 18y product gate |
 | `src/logic/__tests__/regression-p0-2-peds-series-total-and-interval.test.js` | p2016 Table 1's series total in **all 14 cells**; the never-event sweep (no "dose N of M" with N > M, the old "dose 5 of 4"); the advised interval per CDC Catch-up Table 2 dose by dose, incl. the pair that proves a single age key cannot work; that the validity floor did **not** move; that the note never contradicts the computed total |
 | `src/logic/__tests__/regression-p1-0-recorded-dose-intervals.test.js` | Minimum intervals between recorded doses: PCV→PCV (4/8 weeks, keyed on the earlier dose), PCV→PPSV23 (8 weeks + same-visit), PPSV23 dose 2 (5 calendar years); the grace on each; invalid doses anchor, PCV7 does not; **and that adult doses are left alone** |
+| `src/logic/__tests__/rule-docs-match-code.test.js` | **The document-versus-code tripwire (P2-7).** Parses the 16-row table in `CLINICAL_SPEC.md` §K and compares it to `DOSE_INTERVAL_RULES` cell by cell — interval, enforcement, authority, rulebook, anchor. Every expected value is read out of the code, so no number in the test is transcribed. Also asserts the invariants the prose states: no adult floor may cite ACIP or CDC, only paediatric floors cite CDC, a never-flagged row carries no interval, and the 4-day grace tracks enforcement. **Proven by mutating all 16 rows × 3 fields: before it, 4 mutations passed silently; after it, 0 do.** |
+| `src/logic/__tests__/sweep-verdict-corpus.test.js` | **The sweep gate (S8).** Re-runs the engine over `src/test-grid.js`'s 16,250 synthetic patients and requires it to reproduce `__corpus__/verdict-corpus.tsv` exactly. A moved verdict fails the suite with the count and a before/after sample; `npm run sweep:update` regenerates it and prints how many moved, which belongs in the PR. **Measured: reverting ANCHOR-1 moves 180 cases; overstating the infant series total by one moves 1,128 — both were invisible to the three PneumoRecs harnesses.** Carries its own anti-vacuity guards (grid size, pinned clock, verdict variety, hard stop and HSCT reached, rejected doses produced, half the interval rules and ≥1 adult floor fired, every risk group and recordable product covered). |
 
 ## Coverage Requirements
 
@@ -32,6 +34,9 @@
 - **At least one test per `CLINICAL_SPEC.md` § sub-section** — every Table 4 row, both HSCT pathways, every adult history branch × interval.
 - When changing `scheduleConstants.js`: verify the two constants (`ADULT_SCHED_MIN_M` and `PCV21_MIN_AGE_M`) remain distinct and that all consumers import the right one.
 - When changing `dateUtils.js`: apply the same change to MeningoVax (mirror-synced).
+- **When changing any row of `doseIntervalRules.js`: update the table in `CLINICAL_SPEC.md` §K in the same commit.** `rule-docs-match-code.test.js` fails until you do, and names the row and the field.
+- **When the suite reports moved verdicts, do not regenerate the corpus until you can say why they moved.** `npm run sweep:update` is for a change you meant to make; the count it prints goes in the pull request description. This gate exists because two changes (peds `P0-2` and `ANCHOR-1`) each moved thousands of verdicts past byte-identical harnesses.
+- **Build new sweeps on `src/test-grid.js`, not a new case list.** S7's four invariant sweeps (never-events, two-run relations, dose-counter, grid-covers-the-app) share this grid, or "the sweeps cover every risk factor" stops being checkable.
 
 ## Key Invariants to Test
 

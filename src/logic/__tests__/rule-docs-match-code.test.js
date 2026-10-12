@@ -1,0 +1,468 @@
+// ─────────────────────────────────────────────────────────────────────────
+// rule-docs-match-code.test.js — P2-7 + P7-1 (S8, 2026-10-11).
+//
+// THE DOCUMENT-VERSUS-CODE TRIPWIRE.
+//
+// `CLINICAL_SPEC.md` is this app's RULEBOOK (owner decision, S8, 2026-10-11):
+// the one document that states every clinical rule the engine implements, with
+// its source. `docs/agent/clinical-rules.md` is the agent-facing companion. Both
+// have, until now, carried an honour-system promise that whoever changes a rule
+// updates them in the same pull request.
+//
+// That promise failed four times in one week, all on the same rule. The adult
+// PCV15→PPSV23 interval was amended by the owner (A-P1-1) and the superseded
+// version — risk-class-keyed, naming a function that no longer existed — was
+// still being described in `docs/agent/testing.md` (found in S13),
+// `docs/agent/clinical-rules.md` in BOTH its prose and its summary table, and
+// `docs/agent/architecture.md` twice (all three found in S3). Four copies of a
+// rule the code had stopped implementing, each one readable as current.
+//
+// So the numbers stop being a promise and become an assertion.
+//
+// ── How this works, and why it is a TABLE and not prose ──────────────────
+//
+// Since S14-7 every gap-between-recorded-doses rule lives in one machine-
+// readable table, `DOSE_INTERVAL_RULES`. This test parses the matching table
+// out of the rulebook and compares the two **field by field, row by row**.
+// A prose tripwire asks "does the document mention 8 weeks somewhere near this
+// rule's name?", which is loose in both directions: it passes on a document
+// that happens to contain the right number for the wrong reason, and it fails
+// on a harmless rewording — and a documentation rule that fails on rewording is
+// a rule people learn to delete. Comparing two tables has neither problem.
+//
+// Every expected value below is READ OUT OF THE CODE. Nothing in this file
+// hardcodes an interval. Change a rule and the expected cell changes with it,
+// so the test fails until the rulebook is corrected, and the failure message
+// names the row, the field, and both values.
+//
+// ── What this does NOT do ────────────────────────────────────────────────
+//
+// It does not judge whether a rule is clinically RIGHT. That is the owner's
+// review, `CLINICAL_SPEC.md`'s citations, and the `verify-clinical-source`
+// procedure. This only guarantees that the rulebook and the code tell the same
+// story — and, through the sweep harness, that a change to the code cannot move
+// thousands of patients' verdicts without someone seeing it.
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { DOSE_INTERVAL_RULES } from '../doseIntervalRules.js';
+import {
+  GRACE_DAYS,
+  PCV_MIN_INTERVAL_DAYS_UNDER_12M,
+  PCV_MIN_INTERVAL_DAYS_FROM_12M,
+} from '../intervals.js';
+
+const SPEC_PATH = 'CLINICAL_SPEC.md';
+const CLINICAL_PATH = 'docs/agent/clinical-rules.md';
+
+const read = (rel) => readFileSync(new URL(`../../../${rel}`, import.meta.url), 'utf8');
+
+const spec = read(SPEC_PATH);
+const clinical = read(CLINICAL_PATH);
+
+// Normalise so a line wrap, a non-breaking space or an en-dash never decides
+// whether a rule is documented.
+const norm = (s) => s
+  .replace(/[‐-―]/g, '-')
+  .replace(/ /g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+// A failure should tell a clinician what to do, not just what did not match.
+const why = (what) =>
+  `${SPEC_PATH} no longer matches the code: ${what}\n\n`
+  + 'CLINICAL_SPEC.md is this app\'s rulebook, and the code is the behaviour patients '
+  + 'actually see — so normally the document is what needs fixing. If instead the CODE '
+  + 'change was the mistake, fix that. Either way the two must agree before this merges.\n'
+  + 'If you added or removed a rule row, update the "The rule table, row by row" table '
+  + 'in CLINICAL_SPEC.md section K to match, and re-run.';
+
+// ── Expected cell values, every one DERIVED FROM THE CODE ────────────────
+
+const weeks = (d) => (d % 7 === 0 ? `>=${d / 7} weeks` : `>=${d} days`);
+const months = (m) => (m % 12 === 0
+  ? `>=${m / 12} year${m / 12 === 1 ? '' : 's'}`
+  : `>=${m} months`);
+
+/**
+ * The minimum gap this row enforces, spelled the one way the rulebook spells it.
+ *
+ * Derived, never hardcoded: if someone changes a row from 12 months to 24, the
+ * string this returns becomes ">=2 years" and the rulebook's ">=1 year" stops
+ * matching. That is the whole mechanism.
+ */
+function canonicalGap(rule) {
+  const iv = rule.interval;
+  if (iv == null) return 'none stated';
+  if (typeof iv.daysFrom === 'function') {
+    // The paediatric PCV series: the minimum depends on the age at the dose the
+    // gap is measured FROM, so the rulebook states both halves of the rule.
+    const under = iv.daysFrom({ ageAtDose: 6 });
+    const from12 = iv.daysFrom({ ageAtDose: 18 });
+    return `${weeks(under)} under 12 months, ${weeks(from12)} from 12 months`;
+  }
+  if (iv.days != null) return weeks(iv.days);
+  return months(iv.months);
+}
+
+/** Every field of a code row, as the rulebook's seven columns. */
+function expectedRow(rule) {
+  return {
+    id: rule.id,
+    rulebook: rule.rulebook,
+    vaccine: rule.vaccine,
+    from: rule.from,
+    gap: canonicalGap(rule),
+    enforcement: rule.enforcement,
+    authority: rule.authority,
+  };
+}
+
+// ── Parsing the rulebook's table ─────────────────────────────────────────
+
+const CELL_JUNK = /[`*_]/g;
+
+/**
+ * Pull the rule table out of CLINICAL_SPEC.md.
+ *
+ * Keyed on the heading, not on line numbers, so the section can move. Only rows
+ * whose first cell is a known rule id are taken, so the header and separator
+ * rows are ignored without having to count them.
+ */
+function parseSpecTable(doc) {
+  const anchor = doc.indexOf('The rule table, row by row');
+  if (anchor === -1) return null;
+  const after = doc.slice(anchor);
+  const rows = [];
+  for (const line of after.split('\n')) {
+    const t = line.trim();
+    if (!t.startsWith('|')) {
+      // Stop at the first non-table line AFTER the table has begun, so a later
+      // table elsewhere in the document cannot be read as part of this one.
+      if (rows.length) break;
+      continue;
+    }
+    const cells = t.replace(/^\|/, '').replace(/\|$/, '').split('|')
+      .map((c) => norm(c.replace(CELL_JUNK, '')));
+    if (cells.length < 7) continue;
+    // A rule id is SHOUTING-KEBAB and must START with a letter — which is how the
+    // `|---|---|` separator row gets skipped. Matching `[A-Z0-9-]+` alone let the
+    // separator through as a rule called "---".
+    if (!/^[A-Z][A-Z0-9-]*[A-Z0-9]$/.test(cells[0])) continue; // header / separator row
+    rows.push({
+      id: cells[0],
+      rulebook: cells[1],
+      vaccine: cells[2],
+      from: cells[3],
+      gap: cells[4],
+      enforcement: cells[5],
+      authority: cells[6],
+    });
+  }
+  return rows;
+}
+
+const specRows = parseSpecTable(spec);
+
+describe('P2-7: the rulebook has a rule table at all', () => {
+  it('CLINICAL_SPEC.md contains the row-by-row rule table this test reads', () => {
+    expect(specRows, why(
+      'it has no section headed "The rule table, row by row". That table IS the rulebook\'s '
+      + 'statement of every gap-between-recorded-doses rule, and without it nothing holds '
+      + 'the prose to the code.'
+    )).not.toBeNull();
+    expect(specRows.length, why('its rule table is empty.')).toBeGreaterThan(0);
+  });
+});
+
+describe('P2-7: the rulebook lists exactly the rules the code implements', () => {
+  it('no rule is implemented but undocumented, and none documented but unimplemented', () => {
+    const inCode = DOSE_INTERVAL_RULES.map((r) => r.id).sort();
+    const inDoc = specRows.map((r) => r.id).sort();
+
+    const undocumented = inCode.filter((id) => !inDoc.includes(id));
+    const unimplemented = inDoc.filter((id) => !inCode.includes(id));
+
+    expect(undocumented, why(
+      `these rules are in DOSE_INTERVAL_RULES but in no row of the rulebook's table: `
+      + `${undocumented.join(', ')}. A rule the rulebook does not mention is a rule nobody `
+      + 'can review — and an `enforcement: \'none\'` row that goes unmentioned reads as an '
+      + 'oversight rather than the decision it is.'
+    )).toEqual([]);
+    expect(unimplemented, why(
+      `the rulebook's table has rows for rules the code does not implement: `
+      + `${unimplemented.join(', ')}. Either the row is stale, or a rule was deleted from `
+      + 'the code and the rulebook was not told.'
+    )).toEqual([]);
+  });
+
+  it('the table has no duplicate rows', () => {
+    const ids = specRows.map((r) => r.id);
+    expect(ids.length, why('its rule table lists the same rule id more than once.'))
+      .toBe(new Set(ids).size);
+  });
+});
+
+describe('P2-7: every field of every rule matches the rulebook, cell by cell', () => {
+  // One `it` per rule, so a failure names the rule in the test title rather than
+  // burying it in one giant assertion. The expectation is built from the code.
+  for (const rule of DOSE_INTERVAL_RULES) {
+    it(`${rule.id} is documented exactly as implemented`, () => {
+      const want = expectedRow(rule);
+      const got = specRows.find((r) => r.id === rule.id);
+      expect(got, why(`${rule.id} has no row in the rule table.`)).toBeDefined();
+
+      for (const field of ['rulebook', 'vaccine', 'from', 'gap', 'enforcement', 'authority']) {
+        expect(got[field], why(
+          `${rule.id}'s "${field}" reads "${got[field]}" in the rulebook but the code says `
+          + `"${want[field]}".`
+          + (field === 'gap'
+            ? ' This is the number a clinician reads off the document to check the app — a '
+              + 'document that states the wrong minimum is worse than one that states none.'
+            : '')
+          + (field === 'authority'
+            ? ' Remember that EVERY adult floor is an owner clinical determination dated '
+              + '2026-10-11 and may never be attributed to ACIP or CDC.'
+            : '')
+        )).toBe(want[field]);
+      }
+    });
+  }
+});
+
+describe('P2-7: the invariants the rulebook states in words hold in the code', () => {
+  // These are the claims CLINICAL_SPEC.md section K and CLAUDE.md make in prose.
+  // Asserting them against the code means the prose cannot quietly become false.
+  it('every adult floor is an OWNER determination, never CDC\'s', () => {
+    const misattributed = DOSE_INTERVAL_RULES
+      .filter((r) => r.rulebook === 'adult' && r.enforcement === 'floor' && r.authority !== 'OWNER')
+      .map((r) => r.id);
+    expect(misattributed, why(
+      `these adult rows void a dose but claim an authority other than OWNER: `
+      + `${misattributed.join(', ')}. CLAUDE.md and CLINICAL_SPEC.md section K both state that `
+      + 'no adult floor is ACIP\'s or CDC\'s: rr7203a1 says 8 weeks "can be considered", and '
+      + 'CDSI v4.64 sets absMinInt = 0 days for every adult pneumococcal interval. Treating '
+      + 'an adult interval as a floor is the owner\'s determination of 2026-10-11, and the '
+      + 'app\'s own per-dose text says so. Citing CDC for it would make the app misstate its '
+      + 'own source to a clinician.'
+    )).toEqual([]);
+  });
+
+  it('every floor that DOES cite CDC is a paediatric one', () => {
+    const notChild = DOSE_INTERVAL_RULES
+      .filter((r) => r.enforcement === 'floor' && r.authority === 'CDC' && r.rulebook !== 'child')
+      .map((r) => r.id);
+    expect(notChild, why(
+      `these rows cite CDC for a floor but are not on the child schedule: ${notChild.join(', ')}. `
+      + 'The three paediatric rows are the only ones whose source states the gap as a minimum '
+      + 'in so many words.'
+    )).toEqual([]);
+  });
+
+  it('a rule that is never flagged states no interval, so the field cannot mislead', () => {
+    // Found by the S8 mutation sweep: an `enforcement: 'none'` row's interval is
+    // never read, so a number put there is inert — it looks like a rule and is
+    // not one. A later reader could "fix" the enforcement and silently switch on
+    // whatever number had been sitting in the field.
+    const inert = DOSE_INTERVAL_RULES
+      .filter((r) => r.enforcement === 'none' && r.interval != null)
+      .map((r) => r.id);
+    expect(inert, why(
+      `these rows are never flagged yet carry an interval: ${inert.join(', ')}. The interval `
+      + 'on such a row is dead code that reads as a live rule. Leave it null and put the '
+      + 'reason in `source`.'
+    )).toEqual([]);
+  });
+
+  it('every row that voids a dose gets CDC\'s grace, and no row that only advises does', () => {
+    const wrong = DOSE_INTERVAL_RULES
+      .filter((r) => (r.enforcement === 'floor') !== (r.grace === true))
+      .map((r) => `${r.id} (enforcement: ${r.enforcement}, grace: ${r.grace})`);
+    expect(wrong, why(
+      `the grace and the enforcement disagree on these rows: ${wrong.join('; ')}. CDC's `
+      + `${GRACE_DAYS}-day grace governs whether a dose that missed a MINIMUM still counts. A `
+      + 'floor voids a dose, so the grace applies to it; a recommendation voids nothing, so '
+      + 'there is nothing for the grace to rescue and a day short of the year is a day short.'
+    )).toEqual([]);
+  });
+
+  it('the paediatric series minimum really is the two-step rule the rulebook describes', () => {
+    // Guards the derivation in canonicalGap() above: if these two constants ever
+    // collapse into one, the "4 weeks under 12 months, 8 weeks from 12 months"
+    // cell would still be generated and would still match, while the rule it
+    // describes had quietly become a single flat interval.
+    expect(PCV_MIN_INTERVAL_DAYS_UNDER_12M).not.toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
+    const childSeries = DOSE_INTERVAL_RULES.find((r) => r.id === 'CHILD-PCV-AFTER-PCV');
+    expect(childSeries.interval.daysFrom({ ageAtDose: 6 })).toBe(PCV_MIN_INTERVAL_DAYS_UNDER_12M);
+    expect(childSeries.interval.daysFrom({ ageAtDose: 18 })).toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
+  });
+});
+
+describe('P2-7: the agent-facing document does not contradict the rulebook', () => {
+  // docs/agent/clinical-rules.md deliberately does NOT repeat all sixteen rows —
+  // a second full copy is the drift mechanism this whole item exists to remove.
+  // It may mention any rule it likes; what it may not do is state a different
+  // minimum from the one the code enforces.
+  const normalisedClinical = norm(clinical);
+
+  for (const rule of DOSE_INTERVAL_RULES) {
+    if (!normalisedClinical.includes(rule.id)) continue;
+    it(`${rule.id}, which clinical-rules.md mentions, is not given a different minimum there`, () => {
+      const gap = canonicalGap(rule);
+      if (gap === 'none stated') return; // nothing numeric to contradict
+      // Accept any spelling of the SAME number; reject a different number.
+      const n = gap.match(/\d+/)[0];
+      const unit = gap.includes('week') ? 'week' : gap.includes('year') ? 'year' : 'month';
+      const line = normalisedClinical;
+      const idAt = line.indexOf(rule.id);
+      const window = line.slice(Math.max(0, idAt - 400), idAt + rule.id.length + 400);
+      const numbers = [...window.matchAll(/(\d+)[- ]?(week|month|year)/g)]
+        .map((m) => `${m[1]} ${m[2]}`);
+      // If it states any interval near this rule at all, the code's own must be among them.
+      if (numbers.length === 0) return;
+      expect(
+        numbers.some((x) => x === `${n} ${unit}`),
+        `${CLINICAL_PATH} states an interval near ${rule.id} that the code does not use.\n\n`
+        + `The code enforces ${gap.replace('>=', 'at least ')}. Nearby that rule's name the `
+        + `document mentions: ${numbers.join(', ')}. One of them should be the code's number.\n`
+        + 'This is the exact failure S3 found four copies of: a superseded interval left '
+        + 'behind in an agent-facing document, still readable as current.'
+      ).toBe(true);
+    });
+  }
+});
+
+describe('P2-7: no document names a function or constant the code no longer has', () => {
+  // The four stale copies of the pre-A-P1-1 adult interval all shared one tell:
+  // each named `adultPpsvIntervalClass()`, a function that had been deleted
+  // weeks earlier. The rule they described was gone from the code, and the name
+  // they used to describe it was gone too — so a document that mentions an
+  // identifier `src/` does not contain is, on this repo's own evidence, the
+  // single best signal that it is describing superseded behaviour.
+  //
+  // This check is deliberately wider than the interval rules: it covers every
+  // agent-facing document and every identifier they name.
+  const DOCS = [
+    SPEC_PATH,
+    CLINICAL_PATH,
+    'docs/agent/architecture.md',
+    'docs/agent/testing.md',
+    'CLAUDE.md',
+  ];
+
+  /**
+   * Names that are GONE from the code and may still be written down, because
+   * the sentence mentioning them is explaining that they are gone.
+   *
+   * Adding a name here is a deliberate act. It does not license describing the
+   * old behaviour as current: every mention must still sit next to words that
+   * frame it as history, which is asserted below.
+   */
+  const RETIRED_IDENTIFIERS = new Set([
+    // Deleted when the owner amended the adult PCV15->PPSV23 interval (A-P1-1,
+    // 2026-10-10). Its risk-class-keyed rule outlived it in four documents.
+    'adultPpsvIntervalClass',
+  ]);
+
+  const HISTORY_FRAMING = /no longer|used to|deleted|removed|superseded|replaced|before (the|it|this)|which no longer exists|stale|the rule from BEFORE/i;
+
+  const srcText = (() => {
+    // Read every source file once; an identifier "exists" if it appears
+    // anywhere in src/, which is deliberately loose — this test is hunting
+    // names that are entirely gone, not auditing export lists.
+    const walk = (dirUrl) => {
+      const out = [];
+      for (const entry of readdirSync(dirUrl, { withFileTypes: true })) {
+        if (entry.name === '__corpus__') continue;
+        const child = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, dirUrl);
+        if (entry.isDirectory()) out.push(...walk(child));
+        else if (/\.(js|jsx)$/.test(entry.name)) out.push(readFileSync(child, 'utf8'));
+      }
+      return out;
+    };
+    return walk(new URL('../../', import.meta.url)).join('\n');
+  })();
+
+  for (const path of DOCS) {
+    it(`${path} names no identifier that has been deleted from src/`, () => {
+      const doc = read(path);
+      const named = new Set([
+        ...[...doc.matchAll(/`([a-z][a-zA-Z0-9_]{3,})\(\)`/g)].map((m) => m[1]),
+        ...[...doc.matchAll(/`([A-Z][A-Z0-9_]{4,})`/g)].map((m) => m[1]),
+      ]);
+
+      const gone = [...named].filter((n) => !srcText.includes(n));
+      const unexplained = gone.filter((n) => !RETIRED_IDENTIFIERS.has(n));
+
+      expect(
+        unexplained,
+        `${path} names ${unexplained.join(', ')}, which no longer appears anywhere in src/.\n\n`
+        + 'On this repo\'s own history that almost always means the surrounding text is '
+        + 'describing behaviour the code has stopped implementing — the pre-A-P1-1 adult '
+        + 'interval survived in FOUR documents exactly this way, each one naming a function '
+        + 'that had already been deleted.\n\n'
+        + 'Fix the text. If the name is genuinely being discussed AS history, add it to '
+        + 'RETIRED_IDENTIFIERS in this file and make sure the sentence says it is gone.'
+      ).toEqual([]);
+
+      // A retired name may only appear in a sentence that frames it as retired.
+      for (const name of gone) {
+        const n = norm(doc);
+        for (let i = n.indexOf(name); i !== -1; i = n.indexOf(name, i + 1)) {
+          const around = n.slice(Math.max(0, i - 400), i + name.length + 400);
+          expect(
+            HISTORY_FRAMING.test(around),
+            `${path} mentions the retired identifier \`${name}\` without saying it is `
+            + 'retired. A reader meeting the name cold will take the rule around it as '
+            + 'current, which is exactly how the superseded adult interval stayed readable '
+            + 'as live in four documents.\n\n'
+            + `Context: ...${around.slice(300, 560)}...`
+          ).toBe(true);
+        }
+      }
+    });
+  }
+});
+
+describe('P2-7: both documents say when they were last checked against the code', () => {
+  for (const [path, doc] of [[SPEC_PATH, spec], [CLINICAL_PATH, clinical]]) {
+    it(`${path} carries a dated "verified against code" stamp`, () => {
+      expect(norm(doc), `${path} needs a dated "verified against code: YYYY-MM-DD" stamp, `
+        + 'so a reader can tell how much to trust it — and so that a reviewer can see at a '
+        + 'glance whether anyone has looked since the last rule change.')
+        .toMatch(/verified against code:?\s*\d{4}-\d{2}-\d{2}/i);
+    });
+  }
+});
+
+describe('P2-7: the tripwire cannot pass vacuously', () => {
+  // The lesson of MeningoVax's no-vacuous-negative-assertions guard: a checking
+  // helper that silently stops working makes every check above pass. These are
+  // the controls that fail if the parser or the normaliser breaks.
+  it('the table parser really read every rule row, not zero rows', () => {
+    expect(specRows.length).toBe(DOSE_INTERVAL_RULES.length);
+    expect(specRows.length).toBeGreaterThanOrEqual(16);
+  });
+
+  it('the parser rejects a row whose id is not a rule id', () => {
+    const planted = parseSpecTable(
+      'The rule table, row by row\n'
+      + '| Rule | Rulebook | Vaccine | From | Gap | Enforcement | Authority |\n'
+      + '| --- | --- | --- | --- | --- | --- | --- |\n'
+      + '| `CHILD-PCV-AFTER-PCV` | child | PCV | prevSameStream | >=4 weeks | floor | CDC |\n'
+    );
+    expect(planted).toHaveLength(1);
+    expect(planted[0].id).toBe('CHILD-PCV-AFTER-PCV');
+    expect(planted[0].authority).toBe('CDC');
+  });
+
+  it('a changed interval really does change the expected cell', () => {
+    // If canonicalGap stopped deriving from the code, every gap check above
+    // would compare a constant against itself and pass forever.
+    const twelveMonths = { interval: { months: 12 } };
+    const twentyFour = { interval: { months: 24 } };
+    expect(canonicalGap(twelveMonths)).toBe('>=1 year');
+    expect(canonicalGap(twentyFour)).toBe('>=2 years');
+    expect(canonicalGap({ interval: { days: 56 } })).toBe('>=8 weeks');
+    expect(canonicalGap({ interval: null })).toBe('none stated');
+  });
+});

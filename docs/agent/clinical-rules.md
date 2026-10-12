@@ -1,5 +1,14 @@
 # PneumoVax — Clinical Rules Reference
 
+> **The rulebook is `CLINICAL_SPEC.md`, not this file** (owner decision, S8, 2026-10-11).
+> This is the agent-facing companion: it summarises and points. It may leave a rule out, but
+> it may never state a different number from the one the code enforces — four copies of a
+> superseded adult interval were found in the agent docs in one week (S3, S13), each still
+> readable as current. `rule-docs-match-code.test.js` now fails if any interval stated near a
+> rule's name here is not the one that rule enforces.
+>
+> **Verified against code: 2026-10-11.**
+
 ## Source Priority
 
 **ACIP/CDC/immunize.org over FDA package inserts.** Sources are listed at the top of `recommend.js`, in `refs.js`, and with full citations in `CLINICAL_SPEC.md`. Update `CLINICAL_SPEC.md` when changing any rule.

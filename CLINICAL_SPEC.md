@@ -1,5 +1,14 @@
 # PneumoVax — Clinical Specification
 
+> **This file is PneumoVax's RULEBOOK** (owner decision, S8, 2026-10-11). It is the single
+> document that states every clinical rule the app implements, with the source for each.
+> `docs/agent/clinical-rules.md` is an agent-facing companion that may summarise but must
+> never contradict it; `docs/agent/architecture.md` describes structure, not rules. When a
+> rule changes, this file changes in the same pull request — and for the interval rules that
+> is no longer an honour system: see §K "The rule table, row by row".
+>
+> **Verified against code: 2026-10-11.**
+
 Every rule below is traceable to a source listed in §Sources. This document is the
 authority the engine (`src/logic/recommend.js`) and validator (`src/logic/validate.js`)
 implement against. **Sourcing is strict** — only the build-prompt §3 sources were used.
@@ -481,6 +490,55 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   whether a rule may bite.** `CHILD-PPSV23-AFTER-PPSV23` and `ADULT-PPSV23-AFTER-PPSV23`
   read the *same* 5-year constant — proof the old age gate on that rule was pure loss — and
   a test asserts they cannot drift apart.
+
+  #### The rule table, row by row
+
+  **This table mirrors `DOSE_INTERVAL_RULES` exactly, and a test
+  (`rule-docs-match-code.test.js`, P2-7) holds it there, cell by cell.** Every expected
+  value in that test is read out of the code, so changing a rule's interval, its
+  enforcement or its authority — or adding or deleting a row — fails the suite until this
+  table is corrected. Nothing below is transcribed by hand.
+
+  "Measured from" is the anchor key in `doseIntervalRules.js`, and names the dose the gap
+  runs from: `prevSameStream` is the previous dated dose of the same vaccine **including
+  one that did not count** (CDC: "the repeat dose should be spaced after the invalid dose by
+  the recommended minimum interval"), while `lastPcv`, `lastPcv13`, `lastPcv15` and
+  `lastPpsv23` read the most recent **counting** dose of that product in the other stream
+  (ANCHOR-1, 2026-10-11).
+
+  | Rule | Rulebook | Vaccine | Measured from | Minimum gap | Enforcement | Authority |
+  |---|---|---|---|---|---|---|
+  | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | >=4 weeks under 12 months, >=8 weeks from 12 months | floor | CDC |
+  | `CHILD-PPSV23-AFTER-PCV` | child | PPSV23 | `lastPcv` | >=8 weeks | floor | CDC |
+  | `CHILD-PPSV23-AFTER-PPSV23` | child | PPSV23 | `prevSameStream` | >=5 years | floor | CDC |
+  | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | floor | OWNER |
+  | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | floor | OWNER |
+  | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | floor | OWNER |
+  | `ADULT-PCV-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=1 year | floor | OWNER |
+  | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv15` | >=8 weeks | floor | OWNER |
+  | `ADULT-PPSV23-AFTER-PCV15` | adult | PPSV23 | `lastPcv15` | >=1 year | floor | OWNER |
+  | `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv` | >=8 weeks | floor | OWNER |
+  | `ADULT-PPSV23-AFTER-PCV13` | adult | PPSV23 | `lastPcv` | >=1 year | floor | OWNER |
+  | `ADULT-PPSV23-AFTER-PPSV23` | adult | PPSV23 | `prevSameStream` | >=5 years | floor | OWNER |
+  | `ADULT-PCV20-21-AFTER-PCV15-NO-INTERVAL` | adult | PCV | `lastPcv15` | none stated | none | CDC |
+  | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` | adult | PPSV23 | `lastPcv15` | >=1 year | recommendation | CDC |
+  | `ADULT-PCV-AFTER-PCV-CATCH-ALL` | adult | PCV | `prevSameStream` | >=1 year | recommendation | CDC |
+  | `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` | adult | PPSV23 | `lastPcv` | >=1 year | recommendation | CDC |
+
+  Reading the table:
+  - **Enforcement** — `floor`: a shorter gap means the dose does not count and is owed a
+    repeat. `recommendation`: the dose counts, keeps its number, and carries a sentence
+    explaining the gap. `none`: deliberately never flagged, with the reason in the row's
+    `source` field. A `none` row states no interval at all, because an interval it never
+    reads would read as a live rule to the next person (asserted by P2-7).
+  - **Authority** — ⚠️ `OWNER` means an **owner clinical determination dated 2026-10-11**,
+    not ACIP's and not CDC's. Every adult floor is one; see the determination below. `CDC`
+    appears only on the three paediatric floors, whose sources state the gap as a minimum in
+    so many words, and on the rows that void nothing.
+  - **Minimum gap** is the gap the rule *enforces*, which for adults is a different question
+    from the gap the app *recommends*. The app recommends ≥1 year after a PCV15 for every
+    adult (A-P1-1) and merely **names** the 8-week option; the two 8-week rows above judge a
+    dose that was *already given* inside that year.
 
   Rows whose floor CDC states **as a minimum in so many words** (`authority: 'CDC'`): the
   three **paediatric** rows, and only those.
