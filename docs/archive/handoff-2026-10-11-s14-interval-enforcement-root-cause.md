@@ -1,5 +1,13 @@
 # PneumoVax — Handoff after the S3-N1 root-cause review (2026-10-11)
 
+> **PARTIALLY SUPERSEDED 2026-10-11** by
+> `handoff-2026-10-11-s14-1-through-6-done.md`. **`S14-1`…`S14-6` below are now DONE** —
+> read the newer file for what shipped and the current branch/test state. **This file is
+> still the source of truth for `S14-7`** (the rule-table rewrite) and everything below it
+> — its clinical rule tables, the owner's cross-checked sources, and the "one rule that
+> contradicts the sources" determination are unchanged and not restated elsewhere. Don't
+> resume `S14-1`…`S14-6` from here; they're closed.
+
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
 Branch: **`fix/s3-recorded-dose-intervals`**, off `main` @ `9a27e5a`. Pushed → **PR #22
 still `OPEN / MERGEABLE`, CI green — not merged.**
