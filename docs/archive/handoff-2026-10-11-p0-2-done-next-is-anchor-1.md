@@ -1,5 +1,9 @@
 # PneumoVax — Handoff after P0-2 + P1-2 (2026-10-11)
 
+> ⛔ **SUPERSEDED 2026-10-11 by `handoff-2026-10-11-anchor-1-done-next-is-s8.md`.** This
+> file's item **3 (`ANCHOR-1`)** is **DONE and MERGED** (PR #30). Resume from that file's
+> item **1 (`S8`)**, not from this file's queue.
+
 > **Supersedes `handoff-2026-10-11-w1-done-next-is-s3-n2.md`.** Items **2 (`S3-N2`/`P0-2`)**
 > and **4 (peds `P1-2`)** of that file's queue are **DONE** — they were one bug, closed in
 > one commit. Resume from item **3 (`ANCHOR-1`)** below, not from the superseded queue.
