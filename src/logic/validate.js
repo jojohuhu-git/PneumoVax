@@ -183,6 +183,7 @@ function applyIntervalRules(result, ctx) {
   if (verdict.kind === 'floor') {
     const r = invalid(verdict.reasons, verdict.detail);
     r.intervalRuleId = verdict.ruleId;
+    r.earliestValidDate = verdict.earliestValidDate;
     return r;
   }
   return advise(result, verdict.reason, verdict.ruleId);
@@ -358,14 +359,21 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds)
       : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts);
 
     if (result.status === 'invalid') {
+      // W1 (owner-approved wording, 2026-10-11): a dose rejected only for
+      // TIMING (`intervalRuleId` — it came from doseIntervalRules.js) was
+      // never missing, so "repeat this dose" is wrong advice for it — there
+      // is nothing to repeat, the next dose is simply due once the interval
+      // has elapsed. Every other invalid reason (below minimum age, wrong
+      // product for age, dated before birth) IS a missing dose, and keeps
+      // the repeat sentence, which is correct for those.
+      const closingSentence = result.intervalRuleId
+        ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.earliestValidDate}.`
+        : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       perDose.push({
         ...result,
         effectiveDoseNum: null,
         doesNotCount: true,
-        reasons: [
-          ...result.reasons,
-          'This dose does not count toward the series — repeat this dose only (do not restart the series).',
-        ],
+        reasons: [...result.reasons, closingSentence],
       });
       anchorOn(dose);
       continue;
