@@ -43,12 +43,24 @@ src/
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
                          and the cited sentence that does it. Keyed to
                          ADULT_SCHED_MIN_M (228), matching the engine's dispatch.
-    validate.js          analyzeHistory(vaccine, doses, ageMonths, today, dob, opts)
-                         → { perDose, effective }. Owns minimum-AGE and product rules;
-                         delegates every timing question to doseIntervalRules.js.
-                         opts: { pcvDoses, ppsv23Doses, riskIds } — each stream needs the
-                         other's doses, because adult rows measure a conjugate dose from a
-                         PPSV23 and vice versa (S14-7).
+    validate.js          analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob,
+                         riskIds }) → { pcv: {perDose, effective}, ppsv23: {…} }.
+                         ⚠ THE ENGINE'S ENTRY POINT — use this, not two analyzeHistory
+                         calls. Owns minimum-AGE and product rules; delegates every
+                         timing question to doseIntervalRules.js.
+                         Each stream needs the other's doses, because adult rows measure
+                         a conjugate dose from a PPSV23 and vice versa (S14-7) — and
+                         each must see only the other's doses that COUNTED (ANCHOR-1,
+                         owner decision 2026-10-11). Two separate walks cannot do that:
+                         whichever runs first has no verdicts from the second. So both
+                         streams are walked together in DATE ORDER, which has no
+                         circularity because every interval is measured from an EARLIER
+                         dose. On a same-date tie the PCV is judged first, so a
+                         same-visit PPSV23 still sees its PCV15.
+                         analyzeHistory(vaccine, doses, ageMonths, today, dob, opts)
+                         → { perDose, effective } remains for single-stream callers and
+                         tests; it takes the other stream's doses on trust, as the ones
+                         that counted.
     doseIntervalRules.js DOSE_INTERVAL_RULES + evaluateDoseInterval(ctx). Every
                          gap-between-recorded-doses rule, as one table. Each row declares
                          `rulebook` (which schedule states it) and `enforcement`

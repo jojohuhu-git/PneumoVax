@@ -32,7 +32,7 @@ import {
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
 import { dobToAgeMonths } from './format.js';
-import { analyzeHistory } from './validate.js';
+import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { pcvNextDoseMinIntervalDays } from './intervals.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
@@ -1065,7 +1065,7 @@ export function recommend(input) {
       hsct: null,
       pcv21Geo: null,
       // P6-5 (S13, 2026-10-10): ARRAYS, not `{}`. Every other return path
-      // sets these to analyzeHistory().perDose, which is an array, so the
+      // sets these to the walk's perDose, which is an array, so the
       // hard-stop path was the one shape a consumer could not iterate. Latent
       // while Results re-walked the history itself; a crash the moment it
       // started reading these instead.
@@ -1077,27 +1077,35 @@ export function recommend(input) {
   const rawPpsv = (input.ppsv23Doses ?? []).filter(Boolean);
 
   // Validate + filter to effective lists (PCV7 dropped; invalid doses dropped).
-  const pcvAnalysis = analyzeHistory('PCV', rawPcv, am, today, dob, {
-    // S14-7: the PCV walk needs the PPSV23 stream too. The adult floors that
-    // measure a conjugate dose from a PPSV23 dose — "previously received only
-    // PPSV23" (≥1 year) and PCV13 + PPSV23 (≥5 years) — are measured from it,
-    // and before S14-7 the PCV walk could not see PPSV23 at all, so neither
-    // gap was checked for anyone.
+  // ANCHOR-1 (owner decision 2026-10-11): ONE call, both streams, judged in
+  // date order — so every gap is measured from a dose that COUNTED.
+  //
+  // This used to be two calls, and the order of them was the bug. The PCV call
+  // ran first and was handed `rawPpsv`, the PPSV23 stream INCLUDING doses that
+  // did not count, because their verdicts did not exist yet; the PPSV23 call
+  // then got `pcvAnalysis.effective`, the counting PCV doses only (peds audit
+  // P1-4). So a PPSV23 that had itself been rejected could still void a later
+  // PCV dose — a 70-year-old's PCV20 was turned away for sitting too close to
+  // a PPSV23 that the app had already set aside. Whichever stream went first
+  // was going to have this problem; two calls cannot both see the other's
+  // verdicts. `analyzeBoth` walks them together instead, which works because
+  // every interval is measured from an EARLIER dose.
+  //
+  // Risk class goes in once now, so the two streams cannot be handed different
+  // risk lists (S3-N1: it decides whether the 8-week minimum may be CONSIDERED
+  // for an adult's PPSV23 after a PCV15 — immunocompromising condition,
+  // cochlear implant, CSF leak — and without it every adult is judged against
+  // the flat 1-year advice).
+  const analysis = analyzeBoth({
+    pcvDoses: rawPcv,
     ppsv23Doses: rawPpsv,
-    // Risk class decides which floor an adult's PPSV23-after-PCV15 is judged
-    // against; pass it on both calls so the two cannot disagree.
+    ageMonths: am,
+    today,
+    dob,
     riskIds,
   });
-  // PPSV23's 8-week floor is measured against the PCV doses that counted, so
-  // the PCV walk has to run first and hand them over (peds audit P1-4).
-  const ppsvAnalysis = analyzeHistory('PPSV23', rawPpsv, am, today, dob, {
-    pcvDoses: pcvAnalysis.effective,
-    // S3-N1: needed to tell whether the 8-week minimum may be CONSIDERED for
-    // this adult (immunocompromising condition, cochlear implant, CSF leak).
-    // Without it every adult is judged against the flat 1-year advice and an
-    // IC patient who legitimately used the shorter option gets second-guessed.
-    riskIds,
-  });
+  const pcvAnalysis = analysis.pcv;
+  const ppsvAnalysis = analysis.ppsv23;
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 

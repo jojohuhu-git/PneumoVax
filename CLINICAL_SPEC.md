@@ -410,9 +410,48 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   consequence itself: such doses "should not be counted as valid and should be repeated as
   age appropriate", and "the repeat dose should be spaced after the invalid dose by the
   recommended minimum interval". That last clause is why an **invalid dose still anchors**
-  the next one: the dose replacing it is measured from it, not from the last dose that
-  counted. PCV7 anchors nothing — it is a properly given dose of a superseded product, not
-  a mistimed one, and no source states an interval from it.
+  the next one *in its own stream*: the dose replacing it is measured from it, not from the
+  last dose that counted. PCV7 anchors nothing — it is a properly given dose of a superseded
+  product, not a mistimed one, and no source states an interval from it.
+
+  **ANCHORING ACROSS the two streams is the opposite, and deliberately so (ANCHOR-1, OWNER
+  DECISION 2026-10-11).** A PCV dose measured from a PPSV23 — or a PPSV23 measured from a
+  PCV — is measured from a dose **that COUNTED**. A dose that did not count anchors nothing
+  in the other stream.
+
+  The two halves are not in tension, because they answer different questions. CDC's
+  repeat-dose sentence is about *replacing* a mistimed dose: the replacement is spaced from
+  the dose it replaces, which is same-stream by construction. Nothing in it says a dose the
+  app has already set aside should start the clock for a *different* vaccine.
+
+  The owner's reasoning, in her words, on the 70-year-old whose second PPSV23 was rejected:
+  that dose "is rejected not because it is too soon but because it was unnecessary", and an
+  unnecessary dose cannot reset a clock. Her acceptance cases, with a control:
+
+  | History (adult 70) | Before | After |
+  |---|---|---|
+  | PPSV23 2015 ✓, PPSV23 2018 ✗ (5-yr), PCV20 2018-06 | PCV20 rejected | **PCV20 counts** |
+  | PCV13 2010 ✓, PPSV23 2012 ✓, PPSV23 2014 ✗ (5-yr), PCV20 2018 | PCV20 rejected | **PCV20 counts** |
+  | PPSV23 2018-01 ✓, PCV20 2018-03 (a real 2-month gap) | PCV20 rejected | **unchanged — still rejected** |
+
+  The third row is the point: only a dose caught behind *someone else's rejected dose* is
+  rescued. A dose that was simply given too early after a dose that counted is still
+  rejected. The cheaper alternative — downgrading the two adult conjugate-after-PPSV23 rows
+  from `floor` to `recommendation` — would have fixed rows 1 and 2 as well, and was
+  **declined** because it would also have let row 3 through.
+
+  **Same-day pairs.** When a PCV and a PPSV23 are recorded on the same date, the PCV is
+  judged first, so a same-visit PPSV23 is still measured against the PCV15 it was given
+  alongside — the co-administration error the rule table is ordered around. The consequence
+  runs the other way too: a PCV dose is no longer judged against a PPSV23 given at the same
+  visit. For a same-day PCV15 + PPSV23 pair the app now sets aside the **PPSV23** (the dose
+  that was early) and counts the PCV15, where it used to do the reverse — discard the
+  correct PCV15 and advise restarting the conjugate.
+
+  Implemented as ONE chronological walk over both streams (`validate.js` `analyzeBoth`),
+  not as two walks that hand each other lists. Two walks can only get this right one way
+  round, because each needs the other's verdicts; one walk in date order has no circularity
+  to resolve, since every interval is measured from an EARLIER dose.
 
   **Rules 1–3 above are the PAEDIATRIC rows, and they are paediatric because the CHILD
   schedule is where CDC states them as minimums.** The adult notes were searched live
