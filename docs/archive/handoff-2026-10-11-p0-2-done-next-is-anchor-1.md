@@ -5,9 +5,13 @@
 > one commit. Resume from item **3 (`ANCHOR-1`)** below, not from the superseded queue.
 
 Repo: `~/Downloads/PneumoVax`. Live: https://jojohuhu-git.github.io/PneumoVax/
-Branch: **`p0-2-peds-series-total-and-interval`**, off `main` @ `f9fe910`, pushed.
-**PR [#26](https://github.com/jojohuhu-git/PneumoVax/pull/26), open, mergeable.**
-Baseline was 468 passing; now **496 passing (43 files)**, all green, tree clean at `92be565`.
+Branch: **`main`**, clean, synced with origin at **`c0509d0`**.
+Baseline was 468 passing; now **496 passing (43 files)**, all green.
+
+Merged this session: **PR #26** (`45f6d88`, the P0-2 work), **PR #27** (`af23b4d`) and
+**PR #28** (`c0509d0`, docs — dropping retired vaxapp; #27 was incomplete and #28 finished
+it). Pages deploy **succeeded and was verified by asset hash**: a clean `npm run build`
+from merged `main` produces `index-nUNgJgEI.js`, exactly what the live site serves.
 
 ## What's done
 
@@ -80,8 +84,19 @@ Unranked leftovers; several predate S14 and may be moot. Re-read each before sta
 
 **Dropped:** the old item 7 (MeningoVax inline styles) is unaffected, but **vaxapp is
 retired** (owner, 2026-10-11) — do not port pneumococcal changes to it, do not probe it for
-parity. The `vaccine-parity` skill and both CLAUDE.md files still name vaxapp; the owner was
-asked whether to edit them.
+parity, do not audit it.
+
+Cleaned this session at the owner's request: the `vaccine-parity` skill, the global
+`~/.claude/CLAUDE.md`, and in this repo `CLAUDE.md`, `README.md`, `docs/agent/testing.md`
+and `docs/agent/architecture.md` (PRs #27 and #28). Two source comments were deliberately
+kept because they record provenance rather than direct work — `src/App.css`'s accent-colour
+note and `src/logic/recommend.js:14`'s "ported from vaxapp/MeningoVax". `docs/archive/`
+still mentions vaxapp and should: it is historical record.
+
+⚠️ **Still stale, not yet cleaned** — four skills name vaxapp as a live repo to push to,
+audit and style: `ship` (push-policy table, "flow for protected repos"), `app-audit`,
+`design-review`, `verify-clinical-source`. If one of them sends you to vaxapp, ignore it
+and offer to clean it.
 
 ## Why this is a good stopping point
 
@@ -92,8 +107,7 @@ commit is self-contained, the harnesses prove nothing else moved, and no part of
 
 ## Resuming
 
-1. `cd ~/Downloads/PneumoVax`. If PR #26 merged: `git checkout main && git pull`.
-   Otherwise `git checkout p0-2-peds-series-total-and-interval` and finish the merge first.
+1. `cd ~/Downloads/PneumoVax && git checkout main && git pull` — expect `c0509d0`.
 2. Confirm the suite: **496 passing / 43 files.** Stop and diagnose any mismatch.
 3. **Do not re-litigate:** the three P0-2 decisions above; the anchoring decision; the
    keep-the-adult-floors and order decisions; the 2026-10-11 adult-floor determination;
