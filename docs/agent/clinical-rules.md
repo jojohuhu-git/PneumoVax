@@ -207,7 +207,9 @@ NOT count; this one counts.)
   (MeningoVax's own wording, which is now the vocabulary source for both apps). The timing
   sentence still lives in the dose's reasons/explanation text.
 
-## Extra Doses: Given After the Series Was Already Complete (S14-4)
+## Extra Doses: Given After the Series Was Already Complete (S14-4, S14-4B)
+
+> Summary only — `CLINICAL_SPEC.md` §K is the rulebook for both halves.
 
 An **adult** PCV dose recorded after history already includes a completing product
 (PCV20/PCV21, `completesSeries` in brands.js) is `extraDose: true`,
@@ -233,3 +235,16 @@ space its fixture more than a year apart once S14-7 made the adult PCV13→PCV20
 - **Outranks the early-advisory flag.** If the dose would also have triggered
   `earlyAdvisory`, that flag and its "still counts" sentence are dropped — they'd
   contradict "this dose does not extend the series."
+
+**S14-4B (2026-10-12) — the same rule for an adult PPSV23 dose.** The branch used to open
+with `vaccine === 'PCV'`, so an adult's PPSV23 dated after a counting PCV20/PCV21 was
+labelled "series dose 1" in silence — reading identically to a PPSV23 that had actually
+*completed* a PCV15 series. Owner decision: mirror the PCV sentence exactly. Moved 648 of
+the sweep's 16,250 verdicts; no recommendation and no PCV verdict changed. Two deliberate
+narrowings versus the PCV side, both reasoned out in `CLINICAL_SPEC.md` §K:
+
+- the completing dose must be **dated and strictly earlier** — a same-day pair is
+  co-administration, and still reaches `ADULT-PPSV23-AFTER-PCV-CATCH-ALL`, now the only
+  pair that row can speak for;
+- **no undated mirror** — an undated PPSV23 beside a PCV20 is usually an old dose given
+  *before* the conjugate, so the PCV side's question would mislead more often than help.

@@ -109,6 +109,15 @@
     `ADULT_SCHED_MIN_M`. **This check runs AFTER the interval table**, so a dose the table
     voids reads `invalid`, not "extra" — which is why its fixture has to space the doses
     more than a year apart now that the adult PCV13→PCV20 gap is a floor.
+    **S14-4B (2026-10-12) adds the PPSV23 half**, in
+    `regression-s14-4b-ppsv23-extra-dose.test.js` (logic) and
+    `regression-s14-4b-ppsv23-extra-dose-ui.test.jsx` (UI). The UI half matters more than
+    usual here: every patient this rule touches has a `complete` or `not-indicated` card,
+    and RecCard collapses those by default — so the test has to OPEN the card, exactly as a
+    clinician does, or it proves nothing. Its verdicts come from `recommend()`, never from
+    hand-written fixtures. Both files carry the control case the bug was really about: the
+    PPSV23 that COMPLETED a PCV15 series must keep reading "Dose 1", because before S14-4B
+    the two rendered identically.
 
 ## Prove a new guard can fail
 

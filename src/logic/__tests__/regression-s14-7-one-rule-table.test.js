@@ -464,13 +464,30 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(met.perDose[0].earlyAdvisory).toBeFalsy();
     expect(met.perDose[0].reasons).toEqual([]);
 
-    // The catch-all still does its own job for a pair nothing else names:
-    // a PPSV23 after a PCV20, which no CDC row recommends at all.
-    const afterPcv20 = analyzeHistory('PPSV23', [{ date: '2019-05-10' }],
+    // The catch-all still does its own job for the one pair nothing else
+    // names — but S14-4B (2026-10-12) narrowed that to a SAME-DAY pair.
+    //
+    // This assertion used to use a PPSV23 given 10 weeks AFTER a PCV20, and
+    // expected the advisory. S14-4B reclassified exactly that dose: a PCV20
+    // completes the adult series, so a later PPSV23 is an extra dose and the
+    // "still counts" advisory is stripped — quoting an interval for a dose no
+    // recommendation ever asked for is the A-P1-1 mistake this very test
+    // guards against. 300 of the sweep's 16,250 patients were in that state.
+    //
+    // Same-day is the pair that remains, and the distinction is real: the
+    // series was completed AT that visit, not before it, so "given after the
+    // series was already complete" would be a false statement about the
+    // record. The flat 1-year advisory is still imperfect wording for a
+    // co-administered PPSV23 nobody needed — carried as an open wording
+    // question for the owner, not silently invented here.
+    const sameDayAsPcv20 = analyzeHistory('PPSV23', [{ date: '2019-03-01' }],
       ADULT.ageMonths, TODAY, ADULT.dob,
       { pcvDoses: [{ date: '2019-03-01', product: 'PCV20' }] });
-    expect(afterPcv20.perDose[0].status).toBe('valid');
-    expect(afterPcv20.perDose[0].earlyAdvisory).toBe(true);
+    expect(sameDayAsPcv20.perDose[0].status).toBe('valid');
+    expect(sameDayAsPcv20.perDose[0].earlyAdvisory).toBe(true);
+    expect(sameDayAsPcv20.perDose[0].intervalRuleId)
+      .toBe('ADULT-PPSV23-AFTER-PCV-CATCH-ALL');
+    expect(sameDayAsPcv20.perDose[0].extraDose).toBeFalsy();
   });
 });
 
