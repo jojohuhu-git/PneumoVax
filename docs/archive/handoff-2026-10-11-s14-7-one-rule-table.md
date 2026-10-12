@@ -1,5 +1,22 @@
 # PneumoVax — Handoff after S14-7 (2026-10-11)
 
+> ## ⚠️ SUPERSEDED 2026-10-12 — do not resume from this file
+>
+> Replaced by **`handoff-2026-10-12-s14-merged-remaining-queue.md`**. The whole interval
+> programme is **DONE and MERGED** (PR #22, squash `b942261`, deployed). Three things
+> below are now out of date:
+>
+> 1. It names `dfa1d92` as the branch tip. Two more commits landed after it
+>    (`ea3dc10`, `4016ae0`), plus `8e7cb08` in the following session.
+> 2. Its open owner decision — rr7203a1's PCV13→PPSV23 minimum — was **answered: no
+>    exception.** It is an enforced floor, implemented in `4016ae0`.
+> 3. Its "known asymmetry" note says aligning the cross-stream anchors "would move
+>    existing paediatric verdicts". **That is only true of one of the two directions.**
+>    The newer handoff carries worked examples and the correction.
+>
+> `S14-1`…`S14-7` plus `S14-7b`/`S14-7c` are all DONE. Read `CLINICAL_SPEC.md` §K for the
+> current rules and the newer handoff for the remaining queue.
+
 > **Supersedes `handoff-2026-10-11-s14-1-through-6-done.md`** and closes the last open item
 > of `handoff-2026-10-11-s14-interval-enforcement-root-cause.md`. **`S14-1`…`S14-7` are all
 > DONE.** The root-cause file's rule tables are now implemented in code
