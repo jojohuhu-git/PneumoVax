@@ -149,14 +149,14 @@ Encoded as `completesSeries` / `requiresPPSV23` flags in `brands.js`. Never cont
 
 ## Age-Banded Dose Counts (`summarizePcv`)
 
-`band = { before12, m12to23, m24to71, ge72, undated, before24, ge24 }`. Undated doses fold into `before24` (assumed infant); never assume `ge24` (catch-up age). Matches the CDC PneumoRecs input model.
+`band = { before7, m7to11, before12, m12to23, m24to71, ge72, undated, before24, ge24 }`, plus `lastAgeAtDose` (age at the dose `lastDate` names). Undated doses fold into `before24` (assumed infant); never assume `ge24` (catch-up age). `before7`/`m7to11` split the infant band because p2016 Table 1 keys its rows on it and CDC Table 2 keys the dose 2→3 interval on it (P0-2); both are dated-only, and the infant ladder treats an undated dose as an infant dose. Matches the CDC PneumoRecs input model.
 
 ## Interval Rules
 
 | Context | Interval |
 |---|---|
-| Peds <12mo | ≥4 weeks |
-| Peds ≥12mo | ≥8 weeks |
+| Peds, dose already given (floor) | ≥4 weeks if the earlier dose was <12mo, ≥8 weeks from 12mo (`pcvSeriesMinIntervalDays`) |
+| Peds, next dose advised | CDC Catch-up Table 2, **keyed on the dose number** as well as the age (`pcvNextDoseMinIntervalDays`) — see `CLINICAL_SPEC.md` §L |
 | Peds final/booster | ≥12 months |
 | Peds at-risk ≥24mo | ≥8 weeks; IC rows add ≥5-year step |
 | Adult PCV15→PPSV23 (**every** adult 19+) | **≥1 year**, with 8 weeks named as a minimum that may be *considered* for IC / cochlear implant / CSF leak |

@@ -98,9 +98,14 @@ to decide which CDC *row* a patient is on.
 Enforced in `validate.js`; the numbers live in `logic/intervals.js` and the scheduler reads
 them too. Full quotes and sources in `CLINICAL_SPEC.md` §K.
 
-- **PCV → PCV** — 4 weeks if the **earlier** dose was given before 12 months, 8 weeks from
-  12 months (`pcvSeriesMinIntervalDays`). CDC catch-up Table 2 states these under the
-  heading "Minimum Interval Between Doses"; p2016's footnote keys them the same way.
+- **PCV → PCV** — **two different jobs, two different functions** (P0-2, 2026-10-11):
+  - *Grading a dose already given* (the floor): 4 weeks if the **earlier** dose was given
+    before 12 months, 8 weeks from 12 months — `pcvSeriesMinIntervalDays`, p2016 footnote †.
+    **Unchanged by P0-2**, by owner decision: the app does not retroactively invalidate a
+    dose a clinician already gave.
+  - *Advising a dose not yet given*: CDC Catch-up Table 2 **dose by dose** —
+    `pcvNextDoseMinIntervalDays`. Table 2 keys on the dose number as well as the age, so
+    neither age alone reproduces it. Quotes and the worked cases: `CLINICAL_SPEC.md` §L.
 - **PCV → PPSV23** — ≥8 weeks, and never the same visit.
 - **PPSV23 dose 2** — ≥5 calendar years after dose 1.
 

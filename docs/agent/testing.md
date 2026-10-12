@@ -23,6 +23,7 @@
 | `src/components/__tests__/regression-p6-7-current-risk-disclaimer.test.jsx` | The current-risk-only caveat, and that the engine really behaves as it claims |
 | `src/components/__tests__/regression-p7-2-no-inline-styles.test.js` | Tripwire: no inline styles or hex literals (the regression MeningoVax has) |
 | `src/components/__tests__/regression-p3-9-risk-age-note.test.jsx` | `RiskAgeNote` on both surfaces; keyed to `ADULT_SCHED_MIN_M`, not the 18y product gate |
+| `src/logic/__tests__/regression-p0-2-peds-series-total-and-interval.test.js` | p2016 Table 1's series total in **all 14 cells**; the never-event sweep (no "dose N of M" with N > M, the old "dose 5 of 4"); the advised interval per CDC Catch-up Table 2 dose by dose, incl. the pair that proves a single age key cannot work; that the validity floor did **not** move; that the note never contradicts the computed total |
 | `src/logic/__tests__/regression-p1-0-recorded-dose-intervals.test.js` | Minimum intervals between recorded doses: PCV→PCV (4/8 weeks, keyed on the earlier dose), PCV→PPSV23 (8 weeks + same-visit), PPSV23 dose 2 (5 calendar years); the grace on each; invalid doses anchor, PCV7 does not; **and that adult doses are left alone** |
 
 ## Coverage Requirements
