@@ -249,11 +249,23 @@ body {
 
    `flex-basis: 100%` puts it on its own line under the date and product fields
    of the wrapping .dose-row, the same way .dose-row-unknown above does. */
+/* PARITY-1 (2026-10-12): declaration-for-declaration the same rule as
+   MeningoVax's `.dose-row-problem`, which says the identical thing about the
+   identical field. It used to be bare `--r` text, which sat on the dose row's
+   own grey background with nothing to mark it off. Owner decision: PneumoVax
+   matches MeningoVax, not the other way around — the standing design-parity
+   rule's direction too. Every token here is defined identically in both apps.
+   `regression-parity-1-dose-date-problem-box` compares the two rules and fails
+   if either side drifts. */
 .dose-row-date-problem {
   flex-basis: 100%;
-  margin-top: var(--sp-4);
+  margin-top: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+  border-radius: var(--rads);
+  background: var(--rlt);
+  border-left: 3px solid var(--r);
+  font-size: var(--fs-base);
   color: var(--r);
-  font-size: var(--fs-sm);
 }
 
 .dose-field { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 130px; }
