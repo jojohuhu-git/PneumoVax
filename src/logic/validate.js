@@ -297,6 +297,50 @@ function sameDayDifferentBrandNote(dose, kept) {
   return `Two different pneumococcal vaccines are recorded on the same day (${productLabel(twin.product)} and ${productLabel(dose.product)}). They are not given together at one visit, so check the record — a mistyped date or a mistyped brand on one of the rows is the usual cause.`;
 }
 
+// ── The same two refusals, said in one line, for the history step ────────
+//
+// Owner decision, 2026-10-12. Typing 05/01/2030 into a dose row used to show
+// nothing at all — no warning, "View Results" fully enabled — while the AGE
+// step already stopped you dead on the identical slip ("That date of birth is
+// in the future. Check the year"). The two date fields disagreed about the same
+// mistake. The step now says so under the row as the date is typed, and the
+// results card keeps its fuller explanation.
+//
+// WARN, do not trap: "View Results" stays enabled (owner decision). A clinician
+// who means it can still see the rest of the record.
+//
+// This lives here, not in the component, because the component must not decide
+// what an impossible entry IS — CLAUDE.md's rule, and the reason the PCV21
+// licence check once got the blame for a date before birth. It calls the very
+// same `futureDated` and `isBeforeBirth` the engine grades with, so only the
+// WORDING is specific to the step, and the two wordings sit beside each other
+// in one file so an edit to either is made looking at the other.
+// `regression-history-step-warns-on-impossible-dates` asserts that the kind
+// returned here equals the `recordProblem` the engine reports for the same row.
+//
+// Returns null when the row is fine (including an undated row — there is no
+// date to be wrong), so the caller can render nothing.
+export function dateEntryWarning(dose, { ageMonths, today, dob } = {}) {
+  if (!dose?.date) return null;
+  const ref = todayISO(today);
+  if (futureDated(dose, ref)) {
+    return {
+      kind: 'future',
+      text: `This date is in the future — today is ${fmtDate(ref)}. Check the year; a dose cannot have been given yet.`,
+    };
+  }
+  const ageAtDose = ageAtDoseFromDate(dose, ageMonths, ref, dob);
+  if (isBeforeBirth(dose, ageAtDose, dob)) {
+    return {
+      kind: 'before-birth',
+      text: dob
+        ? `This date is before the patient was born (${fmtDate(dob)}). Check the year.`
+        : 'This date is before the patient was born, going by the age entered. Check the year.',
+    };
+  }
+  return null;
+}
+
 // Every record problem, settled in ONE place for both vaccines before any
 // vaccine-specific rule runs. Nothing here is vaccine-specific, and a second
 // copy is how rules drift — the before-birth test used to sit inside each of

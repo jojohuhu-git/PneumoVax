@@ -240,6 +240,22 @@ body {
 }
 .dose-row-unknown-hint { display: block; color: var(--gy3); }
 
+/* An impossible dose date, said under the row as it is typed (owner decision,
+   2026-10-12: warn, do not trap). Deliberately the SAME presentation as
+   `.age-error`, which is the app's existing answer to the identical mistake one
+   step earlier ("That date of birth is in the future. Check the year") — plain
+   --r text, no background, no border, no icon. A second visual treatment for
+   one kind of message is how a palette stops meaning anything.
+
+   `flex-basis: 100%` puts it on its own line under the date and product fields
+   of the wrapping .dose-row, the same way .dose-row-unknown above does. */
+.dose-row-date-problem {
+  flex-basis: 100%;
+  margin-top: var(--sp-4);
+  color: var(--r);
+  font-size: var(--fs-sm);
+}
+
 .dose-field { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 130px; }
 .dose-field label { font-size: var(--fs-sm); color: var(--gy3); font-weight: 500; }
 .dose-field input[type="date"],

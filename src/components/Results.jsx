@@ -1,3 +1,4 @@
+import DoseDateProblem from './DoseDateProblem.jsx';
 import React, { useState } from 'react';
 import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
@@ -316,6 +317,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   </div>
                   <button className="dose-remove" onClick={() => removePcv(i)}
                     aria-label={`Remove PCV dose ${i + 1}`}>×</button>
+                  <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
                   {!dose.date && !dose.product && (
                     <UnknownDoseTick
                       checked={dose.detailsUnknown}
@@ -350,6 +352,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   </div>
                   <button className="dose-remove" onClick={() => removePpsv(i)}
                     aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
+                  <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
                   {!dose.date && (
                     <UnknownDoseTick
                       checked={dose.detailsUnknown}

@@ -1,5 +1,6 @@
 import { todayISO } from '../logic/dateUtils.js';
 import { newDoseRow } from '../logic/doseIdentity.js';
+import DoseDateProblem from './DoseDateProblem.jsx';
 import React from 'react';
 
 // Vaccination history for PneumoVax — two product streams in one step:
@@ -9,7 +10,7 @@ import React from 'react';
 // Both lists are always visible and start empty — no auto-added rows.
 export default function StepHistory({
   ageMonths, pcvDoses, ppsv23Doses, onChangePcv, onChangePpsv, pcvProducts,
-  today,
+  today, dob,
 }) {
   // queue P1-1 / P3-7 (S10): the clinician's LOCAL today, read once in App and
   // passed down. `new Date().toISOString()` is the UTC date, which is already
@@ -105,6 +106,7 @@ export default function StepHistory({
             </div>
             <button className="dose-remove" onClick={() => removePcv(i)}
               aria-label={`Remove PCV dose ${i + 1}`}>×</button>
+            <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
             {!dose.date && !dose.product && (
               <UnknownDoseTick
                 checked={dose.detailsUnknown}
@@ -134,6 +136,7 @@ export default function StepHistory({
             </div>
             <button className="dose-remove" onClick={() => removePpsv(i)}
               aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
+            <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
             {!dose.date && (
               <UnknownDoseTick
                 checked={dose.detailsUnknown}

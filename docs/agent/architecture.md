@@ -43,6 +43,16 @@ src/
     Results.jsx          Output. Calls recommend(); renders HSCT advisory card, PCV21 geo
                          note, standard rec cards. Inline "Adjust age" + "Recorded doses ▾"
                          editors. "← Edit history" back button at bottom.
+    DoseDateProblem.jsx  The one-line "this date is impossible" warning shown under a dose
+                         row as the date is typed (owner decision, 2026-10-12: WARN, do not
+                         trap — "View Results" stays enabled). Used by BOTH dose editors,
+                         StepHistory.jsx and the inline one in Results.jsx, because the
+                         editor is duplicated (open S9 / P4-1) and a warning written into
+                         one of them is a surface the other silently lacks. It decides
+                         nothing: `dateEntryWarning()` in validate.js calls the same
+                         futureDated / isBeforeBirth predicates the engine grades with, and
+                         regression-history-step-warns-on-impossible-dates asserts the kind
+                         it shows equals the engine's own recordProblem for that row.
     RecCard.jsx          Single rec card (status shading, brands, note, citations).
     citations.jsx        [c] -> numbered superscript links. Shared by RecCard and
                          RiskAgeNote; numbering is per-card, in reading order.

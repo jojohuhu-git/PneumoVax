@@ -125,6 +125,7 @@ export default function App() {
           <StepHistory
             ageMonths={ageMonths}
             today={today}
+            dob={state.dob}
             pcvDoses={state.pcvDoses}
             ppsv23Doses={state.ppsv23Doses}
             onChangePcv={pcvDoses => update({ pcvDoses })}
