@@ -19,6 +19,13 @@ export default function StepHistory({
   const maxDate = todayISO(today);
   const isAdult = (ageMonths ?? 0) >= 216;
 
+  // S11 (2026-10-12): every dose-row label is attached to its own box.
+  // `useId` gives this component instance a prefix nothing else in the document
+  // can repeat — which matters because the inline editor in Results.jsx renders
+  // the same fields, and because two rows sharing one id would silently point
+  // every label at the FIRST row's box, a bug that looks like it works.
+  const uid = React.useId();
+
   function addPcv() { onChangePcv([...pcvDoses, newDoseRow()]); }
   function removePcv(i) { onChangePcv(pcvDoses.filter((_, idx) => idx !== i)); }
   function updatePcv(i, field, val) {
@@ -90,14 +97,14 @@ export default function StepHistory({
         {pcvDoses.map((dose, i) => (
           <div key={i} className="dose-row">
             <div className="dose-field">
-              <label>Date (optional)</label>
-              <input type="date" value={dose.date || ''}
+              <label htmlFor={`${uid}-pcv-date-${i}`}>Date (optional)</label>
+              <input type="date" id={`${uid}-pcv-date-${i}`} value={dose.date || ''}
                 max={maxDate}
                 onChange={e => updatePcv(i, 'date', e.target.value)} />
             </div>
             <div className="dose-field">
-              <label>Product</label>
-              <select value={dose.product || ''}
+              <label htmlFor={`${uid}-pcv-product-${i}`}>Product</label>
+              <select id={`${uid}-pcv-product-${i}`} value={dose.product || ''}
                 onChange={e => updatePcv(i, 'product', e.target.value)}>
                 {pcvOptions.map(p => (
                   <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
@@ -124,14 +131,15 @@ export default function StepHistory({
         {ppsv23Doses.map((dose, i) => (
           <div key={i} className="dose-row">
             <div className="dose-field">
-              <label>Date (optional)</label>
-              <input type="date" value={dose.date || ''}
+              <label htmlFor={`${uid}-ppsv-date-${i}`}>Date (optional)</label>
+              <input type="date" id={`${uid}-ppsv-date-${i}`} value={dose.date || ''}
                 max={maxDate}
                 onChange={e => updatePpsv(i, e.target.value)} />
             </div>
             <div className="dose-field">
-              <label>Product</label>
-              <input type="text" value="PPSV23 (Pneumovax 23)" disabled
+              <label htmlFor={`${uid}-ppsv-product-${i}`}>Product</label>
+              <input type="text" id={`${uid}-ppsv-product-${i}`}
+                value="PPSV23 (Pneumovax 23)" disabled
                 className="dose-field-disabled" />
             </div>
             <button className="dose-remove" onClick={() => removePpsv(i)}

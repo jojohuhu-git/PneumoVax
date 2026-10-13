@@ -18,6 +18,11 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
 
+  // S11 (2026-10-12): see StepHistory.jsx — the same labels, the same fix. The
+  // two prefixes differ because `useId` is per component instance, so these ids
+  // cannot collide with the history step's even if both were ever on screen.
+  const uid = React.useId();
+
   const result = recommend({
     // P3-1 (S10): the date of birth goes to the engine, which uses it to
     // compare dose dates against real birthdays instead of reconstructing them.
@@ -301,8 +306,8 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
               {pcvDoses.map((dose, i) => (
                 <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
-                    <label>Product</label>
-                    <select value={dose.product || ''}
+                    <label htmlFor={`${uid}-pcv-product-${i}`}>Product</label>
+                    <select id={`${uid}-pcv-product-${i}`} value={dose.product || ''}
                       onChange={e => updatePcv(i, 'product', e.target.value)}>
                       {pcvOptions.map(p => (
                         <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
@@ -310,8 +315,8 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                     </select>
                   </div>
                   <div className="dose-field">
-                    <label>Date (optional)</label>
-                    <input type="date" value={dose.date || ''}
+                    <label htmlFor={`${uid}-pcv-date-${i}`}>Date (optional)</label>
+                    <input type="date" id={`${uid}-pcv-date-${i}`} value={dose.date || ''}
                       max={maxDate}
                       onChange={e => updatePcv(i, 'date', e.target.value)} />
                   </div>
@@ -340,13 +345,14 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
               {ppsv23Doses.map((dose, i) => (
                 <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
-                    <label>Product</label>
-                    <input type="text" value="PPSV23 (Pneumovax 23)" disabled
+                    <label htmlFor={`${uid}-ppsv-product-${i}`}>Product</label>
+                    <input type="text" id={`${uid}-ppsv-product-${i}`}
+                      value="PPSV23 (Pneumovax 23)" disabled
                       className="dose-field-disabled" />
                   </div>
                   <div className="dose-field">
-                    <label>Date (optional)</label>
-                    <input type="date" value={dose.date || ''}
+                    <label htmlFor={`${uid}-ppsv-date-${i}`}>Date (optional)</label>
+                    <input type="date" id={`${uid}-ppsv-date-${i}`} value={dose.date || ''}
                       max={maxDate}
                       onChange={e => updatePpsv(i, e.target.value)} />
                   </div>
