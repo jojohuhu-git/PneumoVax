@@ -1,3 +1,13 @@
+> **SUPERSEDED (2026-10-12) by `handoff-2026-10-12-parity-1-and-s11-keyboard.md`.**
+> Do not resume the queue below. Its two "ask the owner" items are ANSWERED — the owner's
+> answer is "PneumoVax should match MeningoVax, not the other way around" — and the FIRST of
+> them rested on a **wrong premise**: it says MeningoVax disables Next on a future dose date.
+> It does not. MeningoVax has no `disabled` prop anywhere in its `src/`; both apps warn and
+> let the clinician through, so "warn, do not trap" was never in conflict with the sibling
+> app. The real difference was only how the warning LOOKED, and that is fixed (`1d36e84`).
+> Its **`S11` is DONE in full** — all six sub-items plus 8 orphaned labels (not the 4 named
+> below). `S5`, `S6`, `S9` are untouched and carried forward in the new file.
+
 # PneumoVax — Handoff after the impossible-entry work (2026-10-12)
 
 > **Supersedes `handoff-2026-10-12-queue-small-items-and-record-problems.md`.** Its PR #40 is
