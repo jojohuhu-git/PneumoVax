@@ -54,9 +54,9 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
         <Disclaimer />
         <div className="results-actions">
           {onBack && (
-            <button className="btn btn-outline" onClick={onBack}>Edit risk factors</button>
+            <button type="button" className="btn btn-outline" onClick={onBack}>Edit risk factors</button>
           )}
-          <button className="btn btn-outline" onClick={onReset}>Start Over</button>
+          <button type="button" className="btn btn-outline" onClick={onReset}>Start Over</button>
         </div>
       </div>
     );
@@ -320,7 +320,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                       max={maxDate}
                       onChange={e => updatePcv(i, 'date', e.target.value)} />
                   </div>
-                  <button className="dose-remove" onClick={() => removePcv(i)}
+                  <button type="button" className="dose-remove" onClick={() => removePcv(i)}
                     aria-label={`Remove PCV dose ${i + 1}`}>×</button>
                   <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
                   {!dose.date && !dose.product && (
@@ -331,7 +331,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   )}
                 </div>
               ))}
-              <button className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
+              <button type="button" className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
             </div>
 
             {/* PPSV23 doses */}
@@ -356,7 +356,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                       max={maxDate}
                       onChange={e => updatePpsv(i, e.target.value)} />
                   </div>
-                  <button className="dose-remove" onClick={() => removePpsv(i)}
+                  <button type="button" className="dose-remove" onClick={() => removePpsv(i)}
                     aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
                   <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
                   {!dose.date && (
@@ -367,7 +367,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   )}
                 </div>
               ))}
-              <button className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
+              <button type="button" className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
             </div>
 
             <span className="age-edit-hint">Changes update recommendations immediately.</span>
@@ -442,9 +442,9 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
 
       <div className="results-actions">
         {onBack && (
-          <button className="btn btn-outline" onClick={onBack}>Edit history</button>
+          <button type="button" className="btn btn-outline" onClick={onBack}>Edit history</button>
         )}
-        <button className="btn btn-outline" onClick={onReset}>Start Over</button>
+        <button type="button" className="btn btn-outline" onClick={onReset}>Start Over</button>
       </div>
     </div>
   );

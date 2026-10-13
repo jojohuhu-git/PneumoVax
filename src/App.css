@@ -91,6 +91,12 @@ body {
 
 /* ── App shell ─────────────────────────────────────────────────── */
 .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+/* S11 / P5-1: the <form> sits between .app-shell and .app-main, so it has to
+   take over main's place in the shell's flex column — otherwise `.app-main`'s
+   `flex: 1` has nothing to grow against and the page stops filling the window.
+   No visual change today (the background is painted by body), but leaving the
+   column broken would be a trap for the next layout change. */
+.app-form { display: flex; flex-direction: column; flex: 1; }
 
 /* ── Header ────────────────────────────────────────────────────── */
 .app-header {

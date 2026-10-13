@@ -111,7 +111,7 @@ export default function StepHistory({
                 ))}
               </select>
             </div>
-            <button className="dose-remove" onClick={() => removePcv(i)}
+            <button type="button" className="dose-remove" onClick={() => removePcv(i)}
               aria-label={`Remove PCV dose ${i + 1}`}>×</button>
             <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
             {!dose.date && !dose.product && (
@@ -123,7 +123,7 @@ export default function StepHistory({
           </div>
         ))}
       </div>
-      <button className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
+      <button type="button" className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
 
       {/* ── PPSV23 stream ── */}
       <div className="history-section-title history-section-title-spaced">PPSV23 (Pneumovax 23) doses</div>
@@ -142,7 +142,7 @@ export default function StepHistory({
                 value="PPSV23 (Pneumovax 23)" disabled
                 className="dose-field-disabled" />
             </div>
-            <button className="dose-remove" onClick={() => removePpsv(i)}
+            <button type="button" className="dose-remove" onClick={() => removePpsv(i)}
               aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
             <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
             {!dose.date && (
@@ -154,7 +154,7 @@ export default function StepHistory({
           </div>
         ))}
       </div>
-      <button className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
+      <button type="button" className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
 
       <div className="family-note family-note-neutral">
         Unknown / undocumented history is treated as unvaccinated. PCV7 doses are recorded for
