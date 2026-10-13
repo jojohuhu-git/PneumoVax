@@ -1,5 +1,5 @@
 import DoseDateProblem from './DoseDateProblem.jsx';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
@@ -22,6 +22,35 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   // two prefixes differ because `useId` is per component instance, so these ids
   // cannot collide with the history step's even if both were ever on screen.
   const uid = React.useId();
+
+  // S11 / P5-5 (2026-10-12): Escape closes whichever panel is open. Both
+  // panels could be opened and neither could be closed from the keyboard
+  // without tabbing back to the toggle that opened it; Escape is what people
+  // press.
+  //
+  // The dose panel goes first — it is the more specific, more nested edit
+  // surface. It closes through `closeDosePanel`, the same function the toggle
+  // calls, so Escape cannot take a different path from the mouse and leave the
+  // never-typed rows behind that closing by mouse sweeps away.
+  //
+  // `pcvDoses` / `ppsv23Doses` are dependencies because `closeDosePanel` reads
+  // them: without that, the listener would close over the dose list as it was
+  // before the clinician's most recent edit.
+  //
+  // It sits HERE, above the `if (excluded)` early return below, because a hook
+  // has to run on every render. Placed after that return it would be skipped
+  // for an excluded patient and React would throw "rendered fewer hooks than
+  // expected". `closeDosePanel` is a hoisted function declaration, so calling
+  // it from above its definition is fine.
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key !== 'Escape') return;
+      if (editingDoses) closeDosePanel();
+      else if (editingAge) setEditingAge(false);
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [editingAge, editingDoses, pcvDoses, ppsv23Doses]);
 
   const result = recommend({
     // P3-1 (S10): the date of birth goes to the engine, which uses it to
@@ -200,6 +229,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
       onChange?.({ pcvDoses: pcvKept, ppsv23Doses: ppsvKept });
     }
   }
+
 
   // Same tick as the history step. Shown only while the row is otherwise
   // empty, which is the only case where "not typed yet" and "a dose was

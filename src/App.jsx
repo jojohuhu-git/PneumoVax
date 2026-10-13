@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Stepper from './components/Stepper.jsx';
 import StepAge from './components/StepAge.jsx';
 import StepRisks from './components/StepRisks.jsx';
@@ -38,6 +38,35 @@ export default function App() {
   const ageMonths = patientAgeMonths(state, today);
   const ageGroup = ageMonths != null ? deriveGroup(ageMonths) : null;
   const patient = { ...state, ageMonths, ageGroup };
+  const mainRef = useRef(null);
+
+  // S11 / P5-3 (2026-10-12): after Next or Back, nothing was focused, so a
+  // keyboard user had to press Tab once before they could type — and that one
+  // stray keystroke is what makes people give up and reach for the mouse.
+  //
+  // Owner decision, recorded in MeningoVax's K4 and applied here unchanged:
+  // always focus the step's first real field, ON PHONES TOO, even though that
+  // opens the on-screen keyboard and hides part of the page there. If that
+  // turns out to be annoying in practice, a narrow-screen exception is a
+  // one-line change — not pre-empted here.
+  //
+  // The Results step is excluded on purpose: it is read, not filled in, so
+  // taking focus would move a screen reader off the recommendation the
+  // clinician just asked for.
+  useEffect(() => {
+    if (state.step >= 3) return;      // Results — read, not filled in.
+    const main = mainRef.current;
+    if (!main) return;
+    const target =
+      // The age step offers two modes; `#dob-input` exists only in the first.
+      state.step === 0 ? main.querySelector('#dob-input, #age-years') :
+      state.step === 1 ? main.querySelector('input[type="checkbox"]') :
+      // History: the first date box once doses are recorded, otherwise the
+      // "+ Add PCV dose" button, which is the only control on an empty step.
+      (main.querySelector('.dose-field input[type="date"]') ||
+       main.querySelector('.add-dose-btn'));
+    target?.focus();
+  }, [state.step]);
 
   function update(patch) {
     setState(prev => ({ ...prev, ...patch }));
@@ -118,7 +147,7 @@ export default function App() {
           dose" advance the step. */}
       <form className="app-form" onSubmit={e => { e.preventDefault(); goNext(); }}>
 
-      <main className="app-main">
+      <main className="app-main" ref={mainRef}>
         {state.step === 0 && (
           <StepAge
             ageMonths={ageMonths}
