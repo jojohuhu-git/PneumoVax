@@ -208,10 +208,14 @@ body {
 .risk-text { flex: 1; min-width: 0; }
 .risk-label { font-size: var(--fs-md); font-weight: 500; color: var(--gy); overflow-wrap: anywhere; }
 .risk-sublabel { font-size: var(--fs-sm); color: var(--gy3); margin-top: 2px; overflow-wrap: anywhere; }
+/* S11 / P5-6: this is a <button> now, not a <label>, so it needs the four
+   resets that stop it looking like a browser button — full width, no chrome,
+   the app's own font, left-aligned text. Same four MeningoVax's rule carries. */
 .risk-none {
   display: flex; align-items: center; gap: var(--sp-12); padding: var(--sp-12); margin-top: var(--sp-8);
   border-radius: var(--rads); border: 1.5px dashed var(--gy5); cursor: pointer;
   color: var(--gy3); font-size: var(--fs-md);
+  width: 100%; background: none; font-family: inherit; text-align: left;
 }
 .risk-none:hover { background: var(--gy6); }
 .risk-none.selected { border-color: var(--cmd); background: var(--clt); color: var(--c); }

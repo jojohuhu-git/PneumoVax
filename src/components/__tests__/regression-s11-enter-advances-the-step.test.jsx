@@ -17,7 +17,7 @@
 // dose", every "×" remove button and every "Start Over" silently becomes a
 // submit, so clicking "+ Add PCV dose" would add a row AND advance the step.
 // Tabbing onto one and pressing Enter would do the same. So the explicit
-// `type="button"` on all 14 of them has to land with or before the form — which
+// `type="button"` on all 16 of them has to land with or before the form — which
 // is exactly what the queue said, and why these are not two commits.
 //
 // ── What Enter should do ─────────────────────────────────────────────────
@@ -95,6 +95,23 @@ describe('S11 / P5-1 — Enter continues the wizard', () => {
 // this reads the source instead and allows no exceptions.
 const SRC = resolve(process.cwd(), 'src');
 
+/**
+ * The file with its comments removed.
+ *
+ * Needed because the comments explaining THIS rule contain the words
+ * `<button>` and `type="button"`. Matching the raw source made the guard report
+ * a comment as an offending button — a false positive that would teach the next
+ * session to distrust it. Only real markup should be scanned.
+ */
+function codeOnly(src) {
+  // Comment text is replaced by its own newlines rather than deleted, so a
+  // reported line number still points at the right line of the real file.
+  const blank = (m) => m.replace(/[^\n]/g, '');
+  return src
+    .replace(/\{?\/\*[\s\S]*?\*\/\}?/g, blank)
+    .replace(/^\s*\/\/.*$/gm, blank);
+}
+
 function jsxFiles(dir, out = []) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
@@ -112,7 +129,7 @@ describe('S11 / P5-2 — no button is left to default to submit', () => {
   it('every <button> in src/ declares its type', () => {
     const offenders = [];
     for (const file of jsxFiles(SRC)) {
-      const src = readFileSync(file, 'utf8');
+      const src = codeOnly(readFileSync(file, 'utf8'));
       // Each `<button` up to the matching `>` of the opening tag.
       const re = /<button\b([\s\S]*?)>/g;
       let m;
@@ -129,7 +146,7 @@ describe('S11 / P5-2 — no button is left to default to submit', () => {
   it('exactly one button in the app is a submit — the one Enter should press', () => {
     const submits = [];
     for (const file of jsxFiles(SRC)) {
-      const src = readFileSync(file, 'utf8');
+      const src = codeOnly(readFileSync(file, 'utf8'));
       const re = /<button\b([\s\S]*?)>/g;
       let m;
       while ((m = re.exec(src)) !== null) {

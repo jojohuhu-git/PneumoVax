@@ -64,11 +64,19 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
 
       <RiskAgeNote riskIds={riskIds} ageMonths={ageMonths} />
 
-      <label className={`risk-none${noneSelected ? ' selected' : ''}`}
-        onClick={clearAll} role="button" tabIndex={0}
-        onKeyDown={e => e.key === 'Enter' && clearAll()}>
+      {/* S11 / P5-6 (2026-10-12): a real button, not a <label> wearing
+          role="button". The old version hand-wrote an onKeyDown for Enter and
+          so did nothing at all on SPACE — the key most people press on a
+          button. A <button> gets both from the browser, for free. `aria-pressed`
+          says whether it is currently chosen; that state used to live only in a
+          CSS class, so a screen reader announced it identically either way.
+          Ported from MeningoVax's StepRisks.jsx. */}
+      <button type="button"
+        className={`risk-none${noneSelected ? ' selected' : ''}`}
+        onClick={clearAll}
+        aria-pressed={noneSelected}>
         <span>No risk factors apply</span>
-      </label>
+      </button>
     </div>
   );
 }
