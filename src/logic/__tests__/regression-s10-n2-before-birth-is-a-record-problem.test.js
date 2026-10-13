@@ -83,6 +83,18 @@ describe('S10-N2 — a date before birth is a record problem, not a missing dose
     expect(v.recordProblem).toBe('before-birth');
     expect(allText(v)).toMatch(/age entered/i);
   });
+
+  // Moving the record-problem test into the walk, ahead of every
+  // vaccine-specific rule, fixed this as a side effect. The check used to sit
+  // INSIDE each validator, which put it AFTER the PCV21 licensing test: a
+  // PCV21 dated before a child's birth was refused with "PCV21 is licensed for
+  // adults 18 years and over", sending the clinician to check the product when
+  // the real problem was the date.
+  it('blames the impossible date, not the product licence', () => {
+    const v = verdicts({ pcvDoses: [{ date: '2019-05-01', product: 'PCV21' }], ageMonths: 72 }).pcv.perDose[0];
+    expect(v.recordProblem).toBe('before-birth');
+    expect(allText(v)).not.toMatch(/licensed for adults/i);
+  });
 });
 
 describe('S10-N2 controls — W1 still stands for a dose that was really given', () => {

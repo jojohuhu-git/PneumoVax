@@ -54,8 +54,19 @@ import { recommend } from '../recommend.js';
 import { addCalendarMonths, addDays } from '../dateUtils.js';
 
 const DOB = '1956-01-01';
-const TODAY = '2026-06-01';
-const AM = 845;                 // ~70 years
+// The clock sits AFTER every dose date these tests use, including the derived
+// ones — `addCalendarMonths('2026-01-05', 12)` is 2027-01-05, and the 18-month
+// case reaches 2027-07-05.
+//
+// It used to be 2026-06-01, which put those doses in the FUTURE: the fixtures
+// recorded, as already given, shots dated months from "now". Nothing noticed,
+// because the app did not check future dates at all. It does now (owner
+// decision 2026-10-12), and these three cases turned red the moment it did.
+// The rule under test here is the INTERVAL between two doses, which is
+// unchanged — only the fixture was impossible, so the clock moved rather than
+// the dates, keeping every gap exactly as it was.
+const TODAY = '2028-01-01';
+const AM = 864;                 // 72 years — DOB to TODAY, kept consistent
 
 function adultPcv(dates, products = []) {
   return analyzeHistory('PCV', dates.map((date, i) => ({ date, product: products[i] || 'PCV13' })),

@@ -194,6 +194,47 @@ function isBeforeBirth(dose, ageAtDose, dob) {
   return ageAtDose !== null && ageAtDose < 0;
 }
 
+// A dose dated AFTER today. The history lists doses the patient has already
+// received, so a future date is either a mistyped year or a scheduled
+// appointment typed into the wrong place. Counting it would tell a clinician
+// the patient is covered by a shot that is not in their arm — and could call a
+// series complete on the strength of it.
+//
+// Ported from MeningoVax's G3 (owner decision 2026-10-12), the rule and the
+// wording. `dose.date <= today` is deliberate: a dose given today counts.
+function futureDated(dose, today) {
+  if (!dose?.date || !today || dose.date <= today) return null;
+  return recordProblem(
+    'future',
+    [`This date is in the future — today is ${fmtDate(today)}. A dose cannot have been given yet, so it is not counted. Check the date: if the year is a typo, correct it; if this is an appointment the patient has not attended yet, take it out of the record, which lists doses already given.`],
+    `Recorded date: ${fmtDate(dose.date)}. Today: ${fmtDate(today)}.`
+  );
+}
+
+// Every record problem, settled in ONE place for both vaccines before any
+// vaccine-specific rule runs. Nothing here is vaccine-specific, and a second
+// copy is how rules drift — the before-birth test used to sit inside each of
+// the two validators, which is also how it ended up running AFTER the PCV21
+// licensing check and blaming an impossible date on the patient's age.
+//
+// The future test runs first, copied from MeningoVax. Measured, not assumed:
+// in PneumoVax that order cannot currently change any answer — swapping the two
+// fails no test — because a date cannot be both after today and before a date
+// of birth that is itself in the past. It would only start to matter if a date
+// of birth in the FUTURE became reachable, which the app does not reject today
+// (noted as a finding, not fixed here). Kept in MeningoVax's order so the two
+// apps read the same; do not treat it as live coverage.
+//
+// Returns null when the row has no record problem, so the caller falls through
+// to the real grading.
+function recordProblemFor(dose, { ageMonths, today, dob }) {
+  const future = futureDated(dose, today);
+  if (future) return future;
+  const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
+  if (isBeforeBirth(dose, ageAtDose, dob)) return beforeBirth(dose, dob);
+  return null;
+}
+
 // ── What to say about a dose the series did not need ─────────────────────
 //
 // S14-4C (2026-10-12, owner decision). TWO sentences, because the record says
@@ -364,7 +405,6 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
-  if (isBeforeBirth(dose, ageAtDose, dob)) return beforeBirth(dose, dob);
   // CDC's 4-day grace (peds audit P1-1): a dose given up to 4 days before the
   // minimum age counts. PCV's floor is stated in days, so when a date of birth
   // is on file it is compared in days — exact in any month. Without one, fall
@@ -422,7 +462,6 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
     return unknown([`No date recorded — counted (must have been given at ≥${minAgeNoun} to be valid)[c].`], ageCites);
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
-  if (isBeforeBirth(dose, ageAtDose, dob)) return beforeBirth(dose, dob);
   // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
@@ -518,9 +557,13 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const ctxParts = vaccine === 'PCV'
       ? { priorPcv: kept, priorPpsv23: crossStream, riskIds }
       : { priorPcv: crossStream, priorPpsv23: kept, riskIds };
-    const result = vaccine === 'PCV'
-      ? validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts)
-      : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts);
+    // A record problem — an impossible ENTRY — is settled before any
+    // vaccine-specific rule runs: there is no dose to GRADE when the date
+    // itself is wrong, whatever the schedule says.
+    const result = recordProblemFor(dose, { ageMonths, today, dob })
+      || (vaccine === 'PCV'
+        ? validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts)
+        : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts));
 
     if (result.status === 'invalid') {
       // W1 (owner-approved wording, 2026-10-11): a dose rejected only for
