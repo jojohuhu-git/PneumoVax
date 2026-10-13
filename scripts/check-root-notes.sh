@@ -8,6 +8,19 @@
 
 allowed="CLAUDE.md MAP.md README.md CLINICAL_SPEC.md"
 
+# queue P1-4: the message below is built FROM "allowed" above, never typed out
+# a second time. It used to name three files while the list permitted four,
+# so the guardrail told you a rule it was not enforcing. Edit "allowed" and the
+# message follows; a test runs this script and checks that it still does.
+allowed_sentence=$(printf '%s' "$allowed" | tr ' ' '\n' | awk '
+  { names[NR] = $0 }
+  END {
+    for (i = 1; i <= NR; i++) {
+      if (i > 1) printf (i == NR ? (NR > 2 ? ", and " : " and ") : ", ")
+      printf "%s", names[i]
+    }
+  }')
+
 added=$(git diff --cached --name-only --diff-filter=A)
 
 stray=""
@@ -33,7 +46,7 @@ if [ -n "$stray" ]; then
   printf '  ─────────────────────────────────────────────────────────────\n\n'
   printf '  These file(s) were about to be saved at the top level:\n\n'
   printf '%s\n' "$stray"
-  printf '  Only CLAUDE.md, MAP.md, and README.md belong at the top level.\n\n'
+  printf '  Only %s belong at the top level.\n\n' "$allowed_sentence"
   printf '  Ask Claude: "where should this file live?" — it will suggest a\n'
   printf '  folder (notes usually go in docs/archive/, manuals in docs/agent/).\n\n'
   printf '  If you truly want it at the top level anyway, redo the save with:\n'

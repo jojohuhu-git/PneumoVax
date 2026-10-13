@@ -38,8 +38,8 @@
 
 import { daysBetween, todayISO } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
-import { floorAge, FLOOR_EPS } from './format.js';
-import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { floorAge, FLOOR_EPS, fmtDate } from './format.js';
+import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS, PPSV23_PRODUCT } from '../data/brands.js';
 import { cite } from '../data/refs.js';
 // S14-7: only the MINIMUM-AGE helpers are imported here. Every minimum
 // INTERVAL — and every decision about whether a gap can void a dose — lives in
@@ -113,6 +113,13 @@ function fmtMinAge(minAgeM) {
   return `${minAgeM} month${minAgeM === 1 ? '' : 's'}`;
 }
 
+// The same minimum worn as an adjective: "2 years" → "2-year", "6 weeks" →
+// "6-week". Exists so a message can read "below the 2-year minimum age"
+// without writing the number out a second time (queue P2-12).
+function fmtMinAgeAdj(minAgeM) {
+  return fmtMinAge(minAgeM).replace(/^(\d+) (\w+?)s?$/, '$1-$2');
+}
+
 // P6-3 (S13, 2026-10-10): a verdict that sets a recorded dose aside can carry
 // the sentence it rests on, shown the same way as on the cards — a numbered
 // superscript linking to that exact sentence, with the quote on hover.
@@ -132,15 +139,100 @@ function invalid(reasons, detail, reasonCites) {
   if (detail != null) r.detail = detail;
   return withCites(r, reasonCites);
 }
+// A RECORD PROBLEM: the entry itself is wrong, as opposed to a real dose that
+// was given at the wrong time. Graded like any other invalid dose — it does not
+// count — but it must NOT collect the walk's "repeat this dose only" advice.
+// That advice is for a dose the patient actually received; when the problem is
+// the typing, repeating a shot nobody had is nonsense, and the fix is to
+// correct the record.
+//
+// S10-N2 (owner decision 2026-10-12: "copy what MeningoVax does"). Ported from
+// MeningoVax's `recordProblemResult` (its P1-1 / G3 work), the RULE and the
+// wording, not the code — PneumoVax has no `kind`-keyed chip vocabulary, so
+// `recordProblem` here only has to be truthy and name which problem it is.
+//
+// This does NOT reopen W1: every other invalid reason (below the minimum age,
+// wrong product for the age) is still a dose that WAS given and still keeps the
+// repeat sentence. Only an impossible ENTRY is carved out.
+function recordProblem(kind, reasons, detail) {
+  return { ...invalid(reasons, detail), recordProblem: kind };
+}
+
 // P3-6: a dose dated before the patient was born is not an under-age dose, it
 // is an impossible one — almost always a mistyped year on the dose or the date
 // of birth. Saying "below the minimum age" sends the clinician looking for the
 // wrong mistake, so this names the real one.
-function beforeBirth(dose, label) {
-  return invalid(
-    [`Dated ${dose.date}, which is before the patient was born — this dose cannot be correct. Check the date on the dose and the date of birth. It does not count.`],
-    `${label || 'This dose'} is dated before the recorded date of birth.`
+//
+// Two ways to know, matching MeningoVax:
+//   • a date of birth is recorded → compare the dates directly.
+//   • years/months were typed instead → there is no birthday to compare
+//     against, so the test is that the computed age at the dose is negative.
+//     That is the most the app can honestly claim, and the wording says so.
+//
+// Measured, not assumed: with a date of birth, PneumoVax's `ageAtDoseFromDate`
+// already returns a fractional negative for a dose dated even ONE day early,
+// so today the direct comparison changes no verdict — deleting it fails no
+// test. It is kept because it says what it means and cannot be knocked out by
+// a future change to how age is rounded, which is the bug it guards in
+// MeningoVax. Do not read it as live coverage.
+function beforeBirth(dose, dob) {
+  const because = dob
+    ? `The date of birth recorded is ${fmtDate(dob)}.`
+    : 'The age entered puts this date before the patient was born.';
+  return recordProblem(
+    'before-birth',
+    ['This date is before the patient was born, so it is not counted. Check the date — a mistyped year is the usual cause. No repeat dose is needed on the strength of it: correct the date, or take the row out if it does not belong to this patient.'],
+    `Recorded date: ${fmtDate(dose.date)}. ${because}`
   );
+}
+
+// True when `dose` is dated before the patient was born, by whichever of the
+// two tests above the recorded information allows.
+function isBeforeBirth(dose, ageAtDose, dob) {
+  if (!dose?.date) return false;
+  if (dob) return dose.date < dob;
+  return ageAtDose !== null && ageAtDose < 0;
+}
+
+// A dose dated AFTER today. The history lists doses the patient has already
+// received, so a future date is either a mistyped year or a scheduled
+// appointment typed into the wrong place. Counting it would tell a clinician
+// the patient is covered by a shot that is not in their arm — and could call a
+// series complete on the strength of it.
+//
+// Ported from MeningoVax's G3 (owner decision 2026-10-12), the rule and the
+// wording. `dose.date <= today` is deliberate: a dose given today counts.
+function futureDated(dose, today) {
+  if (!dose?.date || !today || dose.date <= today) return null;
+  return recordProblem(
+    'future',
+    [`This date is in the future — today is ${fmtDate(today)}. A dose cannot have been given yet, so it is not counted. Check the date: if the year is a typo, correct it; if this is an appointment the patient has not attended yet, take it out of the record, which lists doses already given.`],
+    `Recorded date: ${fmtDate(dose.date)}. Today: ${fmtDate(today)}.`
+  );
+}
+
+// Every record problem, settled in ONE place for both vaccines before any
+// vaccine-specific rule runs. Nothing here is vaccine-specific, and a second
+// copy is how rules drift — the before-birth test used to sit inside each of
+// the two validators, which is also how it ended up running AFTER the PCV21
+// licensing check and blaming an impossible date on the patient's age.
+//
+// The future test runs first, copied from MeningoVax. Measured, not assumed:
+// in PneumoVax that order cannot currently change any answer — swapping the two
+// fails no test — because a date cannot be both after today and before a date
+// of birth that is itself in the past. It would only start to matter if a date
+// of birth in the FUTURE became reachable, which the app does not reject today
+// (noted as a finding, not fixed here). Kept in MeningoVax's order so the two
+// apps read the same; do not treat it as live coverage.
+//
+// Returns null when the row has no record problem, so the caller falls through
+// to the real grading.
+function recordProblemFor(dose, { ageMonths, today, dob }) {
+  const future = futureDated(dose, today);
+  if (future) return future;
+  const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
+  if (isBeforeBirth(dose, ageAtDose, dob)) return beforeBirth(dose, dob);
+  return null;
 }
 
 // ── What to say about a dose the series did not need ─────────────────────
@@ -313,7 +405,6 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
-  if (ageAtDose !== null && ageAtDose < 0) return beforeBirth(dose, prod?.label || key);
   // CDC's 4-day grace (peds audit P1-1): a dose given up to 4 days before the
   // minimum age counts. PCV's floor is stated in days, so when a date of birth
   // is on file it is compared in days — exact in any month. Without one, fall
@@ -347,7 +438,14 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
 
 // ── Validate one PPSV23 dose ─────────────────────────────────────────────
 function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
-  const minAgeM = 24; // ≥2 years
+  // queue P2-12: the minimum age lives in the product catalogue, where every
+  // other product's does. It used to be stated here a second time, as a bare
+  // `24`, with "2 years" typed by hand into five of the messages below — so
+  // the app could have compared against one number and told the clinician
+  // another. Every sentence here is now built from this one value.
+  const minAgeM = PPSV23_PRODUCT.minAgeM;
+  const minAgeNoun = fmtMinAge(minAgeM);      // "2 years"
+  const minAgeAdj = fmtMinAgeAdj(minAgeM);    // "2-year"
   // P6-3c: the 2 years is the second of the two numbers `pedsMinAge` quotes
   // ("2 years [PPSV23]"), so every PPSV23 minimum-age verdict cites it — no
   // product test needed here, unlike the PCV side where PCV21 carries a
@@ -356,21 +454,20 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!dose.date) {
     if (ageMonths < minAgeM) {
       return invalid(
-        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the 2-year minimum age for PPSV23[c]. This dose does not count.`],
-        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: 2 years.`,
+        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${minAgeAdj} minimum age for PPSV23[c]. This dose does not count.`],
+        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${minAgeNoun}.`,
         ageCites
       );
     }
-    return unknown(['No date recorded — counted (must have been given at ≥2 years to be valid)[c].'], ageCites);
+    return unknown([`No date recorded — counted (must have been given at ≥${minAgeNoun} to be valid)[c].`], ageCites);
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
-  if (ageAtDose !== null && ageAtDose < 0) return beforeBirth(dose, 'PPSV23');
-  // CDC's 4-day grace — PPSV23's floor is 2 CALENDAR years, so the grace is
+  // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
     return invalid(
-      [`Given at ~${fmtAgeM(ageAtDose)} — below the 2-year minimum age for PPSV23[c].`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: 2 years (doses up to 4 days early still count, per CDC).`,
+      [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
+      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
       ageCites
     );
   }
@@ -460,9 +557,13 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const ctxParts = vaccine === 'PCV'
       ? { priorPcv: kept, priorPpsv23: crossStream, riskIds }
       : { priorPcv: crossStream, priorPpsv23: kept, riskIds };
-    const result = vaccine === 'PCV'
-      ? validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts)
-      : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts);
+    // A record problem — an impossible ENTRY — is settled before any
+    // vaccine-specific rule runs: there is no dose to GRADE when the date
+    // itself is wrong, whatever the schedule says.
+    const result = recordProblemFor(dose, { ageMonths, today, dob })
+      || (vaccine === 'PCV'
+        ? validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts)
+        : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts));
 
     if (result.status === 'invalid') {
       // W1 (owner-approved wording, 2026-10-11): a dose rejected only for
@@ -472,14 +573,21 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // has elapsed. Every other invalid reason (below minimum age, wrong
       // product for age, dated before birth) IS a missing dose, and keeps
       // the repeat sentence, which is correct for those.
-      const closingSentence = result.intervalRuleId
-        ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.earliestValidDate}.`
-        : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
+      //
+      // S10-N2: a RECORD PROBLEM (the entry itself is impossible — see
+      // `recordProblem` above) takes NEITHER sentence. Its own wording already
+      // says it does not count and says what to do instead, and both of the
+      // sentences below would be advice about a dose the patient never had.
+      const closingSentence = result.recordProblem
+        ? null
+        : result.intervalRuleId
+          ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.earliestValidDate}.`
+          : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       perDose.push({
         ...result,
         effectiveDoseNum: null,
         doesNotCount: true,
-        reasons: [...result.reasons, closingSentence],
+        reasons: closingSentence ? [...result.reasons, closingSentence] : result.reasons,
       });
       anchorOn(dose);
       return;
@@ -769,6 +877,15 @@ function sortDosesChronologically(doses) {
     .map((x) => x.d);
 }
 
-export function validateHistory(vaccine, doses, ageMonths, today, dob) {
-  return analyzeHistory(vaccine, doses, ageMonths, today, dob).perDose;
-}
+// DELETED (owner decision 2026-10-12): `validateHistory(vaccine, doses, ...)`.
+// A one-line wrapper around `analyzeHistory(...).perDose`, exported and called
+// by nothing — not the app, not the scripts, not the tests.
+//
+// It was removed for what it INVITED, not for being unused. It took one vaccine
+// stream and had no risk-factor argument at all, while carrying the most
+// obvious name in this file. Anyone looking for "the function that checks a
+// dose history" found it first and got answers that silently ignore the other
+// vaccine and every risk condition — no error, just a confident wrong answer.
+//
+// The door to use is `analyzeBoth()`, which sees both streams and the risk
+// list. Do not re-add a one-stream convenience wrapper here.

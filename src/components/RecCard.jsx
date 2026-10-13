@@ -215,11 +215,21 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
   const isShared = status === 'shared-decision';
   // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due
   // items visually dominate the screen.
-  const [expanded, setExpanded] = useState(!isNeutral);
+  //
+  // queue P1-2: `expanded` records the clinician's own click and NOTHING else.
+  // It must not be seeded from `isNeutral`, because a card's status changes
+  // while it is mounted ("Adjust age" can turn a complete card into a due
+  // card) and only the neutral head carries the control that flips this
+  // state. Seeded state said "collapsed" while the current status had already
+  // removed the button that could undo it, and the recommendation disappeared
+  // with no way back. What is SHOWN is therefore derived from the status every
+  // render: a card with no collapse control always shows its body.
+  const [expanded, setExpanded] = useState(false);
+  const showBody = !isNeutral || expanded;
 
   return (
     <div
-      className={`rec-card ${timingClass(status, dueToday)}${isNeutral && !expanded ? ' rec-card-collapsed' : ''}`}
+      className={`rec-card ${timingClass(status, dueToday)}${showBody ? '' : ' rec-card-collapsed'}`}
       data-testid="rec-card"
     >
       {isNeutral ? (
@@ -251,7 +261,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
         </div>
       )}
 
-      {expanded && (
+      {showBody && (
       <div className="rec-card-inner">
         <div className="rec-dose-label">{doseLabel}</div>
 

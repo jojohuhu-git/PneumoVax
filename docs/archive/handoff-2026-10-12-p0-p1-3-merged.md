@@ -1,5 +1,11 @@
 # PneumoVax — Handoff after merging P0 and P1-3 (2026-10-12)
 
+> ⛔ **SUPERSEDED 2026-10-12 by `handoff-2026-10-12-queue-small-items-and-record-problems.md`.**
+> Do not resume this queue. Its "Loose end — PR #37" is DONE (merged, `1462152`), and its
+> remaining-queue **item 2 is DONE in full** — all five sub-items. Its **item 1 (the sweep
+> blind spot) is still open**, and is restated in the superseding file with two further
+> measured instances.
+
 > **Supersedes `handoff-2026-10-12-s14-4c-p6-3c-merged.md`** (which lives only on PR #37's
 > branch, not on `main` — see "Loose end" below) **and
 > `handoff-2026-10-12-s8-merged-s14-4b-p2-8-p2-9-done.md`.** Both of the live items the
