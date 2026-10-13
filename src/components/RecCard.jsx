@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { fmtDate, fmtAgeMonths } from '../logic/format.js';
-import { ageAtDoseFromDate } from '../logic/validate.js';
+import { dateEntryWarning, ageAtDoseFromDate } from '../logic/validate.js';
 import { productLabel } from '../data/brands.js';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { Chevron } from './icons.jsx';
@@ -33,10 +33,27 @@ function describeDose(dose, idx, ageMonths, today, dob) {
   // rather than derived from an averaged month — a dose at exactly 42 days
   // read "5 weeks" for 181 of 400 birth dates, beside PCV's 6-week minimum.
   const daysAtDose = dob && dose?.date ? daysBetween(dob, dose.date) : undefined;
+  // Owner decision, 2026-10-12. A dose dated in the future used to print the
+  // age the patient WILL be — "D1 · May 1, 2030 · age 10 years 4 months" for a
+  // child who is 6 years 9 months today. The verdict beside it was right and
+  // said the dose is not counted; the AGE was a number describing a visit that
+  // has not happened, in the slot that elsewhere describes one that did.
+  //
+  // A date before BIRTH is already handled a layer down — fmtAgeMonths returns
+  // the phrase "Before birth" for a negative age (P3-6) — which is why that one
+  // reads "age Before birth" and this one does not carry the word "age" at all.
+  // The owner chose to add the future case, not to restyle the shipped one.
+  //
+  // The card does not decide what "in the future" means: `dateEntryWarning`
+  // lives in validate.js and uses the same `futureDated` the engine grades
+  // with, so the chip and the verdict under it cannot disagree about a date.
+  const future = dateEntryWarning(dose, { ageMonths, today, dob })?.kind === 'future';
   parts.push(
-    ageAtDose != null
-      ? `age ${fmtAgeMonths(ageAtDose, { exactDays: daysAtDose })}`
-      : 'age unknown',
+    future
+      ? 'In the future'
+      : ageAtDose != null
+        ? `age ${fmtAgeMonths(ageAtDose, { exactDays: daysAtDose })}`
+        : 'age unknown',
   );
   parts.push(dose?.product ? productLabel(dose.product) : 'product unknown');
   return parts.join(' · ');
