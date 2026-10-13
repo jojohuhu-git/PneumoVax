@@ -20,7 +20,13 @@ src/
                         Age → Risks → History → Results.
   main.jsx              React entry.
   App.css               All styles + CSS custom properties (:root tokens).
-  test-grid.js          The SHARED synthetic patient grid: ~16,250 cases of age x risk
+  test-grid.js          The SHARED synthetic patient grids. Real patients: ~16,250 cases
+                        of age x risk x PCV history x PPSV23 history. Impossible entries
+                        (buildRecordProblemCases): ~17,485 cases whose record holds a dose
+                        dated before birth or after today — the complement of the first grid
+                        plus GRID_FUTURE_* shapes, in its own corpus so the 16,250 count
+                        keeps meaning "patients a clinician could really enter". Each of
+                        age x risk
                         profile x PCV history x PPSV23 history, on a clock pinned to
                         2026-10-11, plus verdictOf() / corpusLines(). Test-only — nothing
                         in the app imports it, so it is not in the shipped bundle

@@ -269,7 +269,16 @@ function doseVerdict(d) {
  * the record whether it counts and which rule judged it.
  */
 export function verdictOf(input) {
-  const r = recommend(input);
+  return verdictFromResult(recommend(input));
+}
+
+/**
+ * The same line, from an already-computed result.
+ *
+ * Split out so the record-problem corpus can append its own field without
+ * running `recommend()` twice over its own ~17,000 cases.
+ */
+function verdictFromResult(r) {
   if (r.excluded) return 'EXCLUDED';
   return [
     `R=${(r.recs ?? []).map(recVerdict).join(';')}`,
@@ -288,3 +297,155 @@ export function corpusLines({ today = CORPUS_TODAY } = {}) {
 }
 
 export const CORPUS_RELATIVE_PATH = 'src/logic/__tests__/__corpus__/verdict-corpus.tsv';
+
+// ─────────────────────────────────────────────────────────────────────────
+// THE IMPOSSIBLE-ENTRY GRID (owner decision, 2026-10-12)
+// ─────────────────────────────────────────────────────────────────────────
+//
+// A second corpus, in its own file, for histories a clinician could never
+// really have given: a dose dated before the patient was born, and a dose
+// dated after today.
+//
+// ── Why it is separate, and why it exists at all ─────────────────────────
+//
+// The grid above skips every case where a dose falls before birth — 15,340 of
+// its 31,590 combinations, nearly half, thrown away on one line. The rule that
+// judges those doses was therefore guarded by nothing: deleting `isBeforeBirth`
+// outright left `sweep-verdict-corpus.test.js` green, 12 of 12. The same was
+// true of `futureDated` — stronger still, because a dose dated after today
+// cannot even be WRITTEN in the grid above, whose every offset is "days ago".
+//
+// Three changes in one session reported "0 of 16,250 moved". All three were
+// honest and none was informative.
+//
+// They live in a SEPARATE corpus rather than being folded into the one above
+// (owner decision) so that the 16,250 figure keeps meaning "patients a
+// clinician could really enter". When a real clinical change moves 300 of
+// them, the reviewer reads 300 lines — not 300 buried among 23,000 patients
+// whose records are impossible.
+//
+// ── What is in it ────────────────────────────────────────────────────────
+//
+//   • Every combination the grid above REFUSES to build. Free coverage: it is
+//     the exact complement of `buildCases()`, machine-enumerated over the same
+//     ages and risk profiles, so it cannot drift from the main grid's shape.
+//   • Future-dated shapes, which the grid above cannot express. A negative
+//     offset here means "that many days AFTER today".
+//
+// Add a new impossible-entry rule to `recordProblemFor()` and add its shape
+// here in the same commit, or the rule ships unguarded exactly as these two did.
+
+/**
+ * PCV histories dated in the FUTURE. Offsets are days before today, so a
+ * negative number is a date after today.
+ *
+ *   -1    tomorrow — one day the far side of the boundary, and the reason the
+ *         boundary is worth a case at all: a dose dated TODAY still counts
+ *         (`dose.date <= today`), and nothing but a case on each side of that
+ *         line stops someone "simplifying" it to `<`.
+ *   -30   the ordinary typo: a clinic appointment typed into the history.
+ *   365 / -365  a real dose and a future one in the same record, which is the
+ *         shape that proves the rule is judged per dose rather than per patient.
+ */
+export const GRID_FUTURE_PCV_HISTORIES = [
+  [],
+  [['PCV20', -1]],
+  [['PCV20', -30]],
+  [['PCV13', 365], ['PCV20', -365]],
+];
+
+/** PPSV23 histories dated in the future. Same convention. */
+export const GRID_FUTURE_PPSV23_HISTORIES = [
+  [],
+  [-1],
+  [-30],
+];
+
+const caseKey = (ageMonths, riskIds, pcvPattern, ppsvPattern) => key([
+  `a${ageMonths}`,
+  `r:${riskIds.join('+')}`,
+  `P:${pcvPattern.map(([p, d]) => `${p || '?'}@${d}`).join(',')}`,
+  `S:${ppsvPattern.join(',')}`,
+]);
+
+const caseInput = (ageMonths, dob, riskIds, pcvPattern, ppsvPattern, today) => ({
+  ageMonths,
+  dob,
+  today,
+  riskIds,
+  pcvDoses: pcvPattern.map(([product, d]) => ({ product, date: addDays(today, -d) })),
+  ppsv23Doses: ppsvPattern.map((d) => ({ product: 'PPSV23', date: addDays(today, -d) })),
+});
+
+/**
+ * Enumerate the impossible-entry grid.
+ *
+ * Part 1 is the complement of `buildCases()` — the same four loops, keeping
+ * exactly what that function skips. Written as the same condition negated, not
+ * as a hand-listed set, so the two can never fall out of step.
+ *
+ * Part 2 crosses the future-dated shapes. The empty/empty pair is dropped: it
+ * contains no future dose and would duplicate a case the main grid already owns.
+ */
+export function buildRecordProblemCases({ today = CORPUS_TODAY } = {}) {
+  const cases = [];
+  for (const ageMonths of GRID_AGES_MONTHS) {
+    const dob = addCalendarMonths(today, -ageMonths);
+    for (const riskIds of GRID_RISK_PROFILES) {
+      // Part 1 — the cases buildCases() throws away.
+      for (const pcvPattern of GRID_PCV_HISTORIES) {
+        for (const ppsvPattern of GRID_PPSV23_HISTORIES) {
+          const offsets = [...pcvPattern.map(([, d]) => d), ...ppsvPattern];
+          if (!offsets.some((d) => addDays(today, -d) < dob)) continue;
+          cases.push({
+            key: caseKey(ageMonths, riskIds, pcvPattern, ppsvPattern),
+            input: caseInput(ageMonths, dob, riskIds, pcvPattern, ppsvPattern, today),
+          });
+        }
+      }
+      // Part 2 — dates after today.
+      for (const pcvPattern of GRID_FUTURE_PCV_HISTORIES) {
+        for (const ppsvPattern of GRID_FUTURE_PPSV23_HISTORIES) {
+          if (!pcvPattern.length && !ppsvPattern.length) continue;
+          cases.push({
+            key: caseKey(ageMonths, riskIds, pcvPattern, ppsvPattern),
+            input: caseInput(ageMonths, dob, riskIds, pcvPattern, ppsvPattern, today),
+          });
+        }
+      }
+    }
+  }
+  return cases;
+}
+
+/**
+ * One impossible-entry case's answer.
+ *
+ * The whole ordinary verdict, plus `RP=` — which KIND of record problem each
+ * recorded dose was judged to be, in dose order, PCV stream then PPSV23.
+ *
+ * The kind is in here because it is the thing this corpus exists to watch, and
+ * because without it the line could not tell "the rule fired" from "the rule
+ * fired for the wrong reason" — the PCV21-licence misblame that `recordProblemFor`
+ * was built to stop would have looked identical. It is a one-word verdict, not
+ * prose: the sentences themselves stay out, for the reason test-grid.js gives.
+ */
+export function recordProblemVerdictOf(input) {
+  const r = recommend(input);
+  const base = verdictFromResult(r);
+  if (base === 'EXCLUDED') return base;
+  const kinds = (stream) => (r.perDose?.[stream] ?? [])
+    .map((d) => d.recordProblem ?? '-')
+    .join(',');
+  return `${base} RP=${kinds('pcv')}/${kinds('ppsv23')}`;
+}
+
+/** The impossible-entry corpus, one `key\tverdict` line per case, sorted. */
+export function recordProblemCorpusLines({ today = CORPUS_TODAY } = {}) {
+  return buildRecordProblemCases({ today })
+    .map((c) => `${c.key}\t${recordProblemVerdictOf(c.input)}`)
+    .sort();
+}
+
+export const RECORD_PROBLEM_CORPUS_RELATIVE_PATH =
+  'src/logic/__tests__/__corpus__/record-problem-corpus.tsv';
