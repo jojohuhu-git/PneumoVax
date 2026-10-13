@@ -52,6 +52,7 @@ import {
   GRID_RISK_PROFILES,
   GRID_FUTURE_PCV_HISTORIES,
   GRID_FUTURE_PPSV23_HISTORIES,
+  GRID_DUPLICATE_PCV_HISTORIES,
 } from '../../test-grid.js';
 
 const corpusUrl = new URL(`../../../${RECORD_PROBLEM_CORPUS_RELATIVE_PATH}`, import.meta.url);
@@ -150,22 +151,51 @@ describe('impossible-entry sweep: the grid cannot pass by sweeping nothing', () 
     expect(cases.every((c) => c.input.today === CORPUS_TODAY)).toBe(true);
   });
 
-  it('every case that is graded at all contains a refused dose', () => {
+  it('no case in this grid is graded as an ordinary, fully valid history', () => {
     // The point of the grid in one assertion. If a case here grades every dose
-    // as ordinary, either the grid stopped building impossible records or the
-    // engine stopped noticing them. (Hard-stop patients return 'EXCLUDED' before
-    // any dose is graded, so they are excluded from the count, not from the grid.)
-    const silent = graded.filter((v) => !/ RP=.*(before-birth|future)/.test(v));
+    // as fine, either the grid stopped building impossible records or the engine
+    // stopped noticing them. (Hard-stop patients return 'EXCLUDED' before any
+    // dose is graded, so they are counted out, not left out.)
+    //
+    // Phrased as "nothing was refused" rather than "no RECORD PROBLEM was
+    // raised", because 84 cases legitimately raise none and the stronger
+    // wording failed on them. Measured, and the engine is right: a 12-month-old
+    // with two PCV20 rows both dated at birth has the FIRST row refused for
+    // being below the 6-week minimum age, so it never enters `kept` — and the
+    // second row is therefore not a duplicate of a counted dose but a second
+    // under-age dose in its own right. That is `duplicateEntry` matching
+    // against doses that COUNTED, which is the behaviour its own regression
+    // test pins down. Of those 84, exactly 0 come back fully valid.
+    const ordinary = graded.filter((v) => !/:1:[01]:/.test(v));
     expect(
-      silent.length,
-      `${silent.length} of ${graded.length} impossible-entry cases had no dose refused. `
-      + `First: ${silent[0] ?? '(none)'}`
+      ordinary.length,
+      `${ordinary.length} of ${graded.length} impossible-entry cases had nothing refused at all. `
+      + `First: ${ordinary[0] ?? '(none)'}`
     ).toBe(0);
   });
 
-  it('both kinds of impossible entry are actually reached', () => {
-    expect(graded.some((v) => v.includes('before-birth'))).toBe(true);
-    expect(graded.some((v) => v.includes('future'))).toBe(true);
+  it('all three kinds of impossible entry are actually reached', () => {
+    // Every kind `recordProblemFor` can return. A kind that no case reaches is
+    // a rule this corpus cannot notice changing — which is how the first two
+    // shipped guarded by nothing, and why a new kind must arrive with a shape.
+    //
+    // Counted, not just "some", so a kind cannot quietly collapse to a handful
+    // of cases and still look guarded. Measured at the time of writing:
+    // before-birth 14,544, future 1,980, duplicate 576.
+    const count = (kind) => graded.filter((v) => new RegExp(` RP=.*${kind}`).test(v)).length;
+    expect(count('before-birth')).toBeGreaterThan(1000);
+    expect(count('future')).toBeGreaterThan(500);
+    expect(count('duplicate')).toBeGreaterThan(100);
+  });
+
+  it('the double-entry shapes cover both a named and an unnamed second row', () => {
+    // `duplicateEntry` treats a blank product as a match, on the ground that a
+    // clinician who named the brand on one line and not the other wrote one
+    // dose twice. A grid with only the named shape could not notice that half
+    // of the rule being removed.
+    const pairs = GRID_DUPLICATE_PCV_HISTORIES.filter((h) => h.length === 2);
+    expect(pairs.some(([a, b]) => a[0] === b[0] && a[1] === b[1])).toBe(true);
+    expect(pairs.some(([a, b]) => a[1] === b[1] && (!a[0] || !b[0]))).toBe(true);
   });
 
   it('a dose dated TODAY is still counted — the boundary, from both sides', () => {

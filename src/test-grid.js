@@ -361,6 +361,37 @@ export const GRID_FUTURE_PPSV23_HISTORIES = [
   [-30],
 ];
 
+/**
+ * One shot recorded on TWO rows — the third impossible entry (owner decision,
+ * 2026-10-12).
+ *
+ * Added in the same commit as the rule, under the standing rule this file's
+ * whole existence argues for. Without it the duplicate rule would have shipped
+ * exactly as the other two did: neither corpus contains a single same-product
+ * same-date pair, because nobody writing the grid thought to put one there.
+ *
+ *   PCV20 twice on one day       the plain double entry.
+ *   PCV20 + an unnamed product   the same dose written down twice, once with
+ *                                the brand and once without — which is why
+ *                                `duplicateEntry` treats a blank product as a
+ *                                match rather than as a different vaccine.
+ *
+ * Two DIFFERENT named products on one day is deliberately NOT here: it is not a
+ * record problem, it keeps its ordinary verdict plus a sentence, and the main
+ * grid already carries it as `[['PCV15', 730], ['PCV20', 730]]`.
+ */
+export const GRID_DUPLICATE_PCV_HISTORIES = [
+  [],
+  [['PCV20', 365], ['PCV20', 365]],
+  [['PCV20', 365], ['', 365]],
+];
+
+/** The same, for PPSV23 — one product, so only the plain double entry exists. */
+export const GRID_DUPLICATE_PPSV23_HISTORIES = [
+  [],
+  [365, 365],
+];
+
 const caseKey = (ageMonths, riskIds, pcvPattern, ppsvPattern) => key([
   `a${ageMonths}`,
   `r:${riskIds.join('+')}`,
@@ -384,8 +415,9 @@ const caseInput = (ageMonths, dob, riskIds, pcvPattern, ppsvPattern, today) => (
  * exactly what that function skips. Written as the same condition negated, not
  * as a hand-listed set, so the two can never fall out of step.
  *
- * Part 2 crosses the future-dated shapes. The empty/empty pair is dropped: it
- * contains no future dose and would duplicate a case the main grid already owns.
+ * Parts 2 and 3 cross the future-dated and double-entry shapes. The empty/empty
+ * pair is dropped from each: it contains no impossible entry and would duplicate
+ * a case the main grid already owns.
  */
 export function buildRecordProblemCases({ today = CORPUS_TODAY } = {}) {
   const cases = [];
@@ -403,14 +435,21 @@ export function buildRecordProblemCases({ today = CORPUS_TODAY } = {}) {
           });
         }
       }
-      // Part 2 — dates after today.
-      for (const pcvPattern of GRID_FUTURE_PCV_HISTORIES) {
-        for (const ppsvPattern of GRID_FUTURE_PPSV23_HISTORIES) {
-          if (!pcvPattern.length && !ppsvPattern.length) continue;
-          cases.push({
-            key: caseKey(ageMonths, riskIds, pcvPattern, ppsvPattern),
-            input: caseInput(ageMonths, dob, riskIds, pcvPattern, ppsvPattern, today),
-          });
+      // Parts 2 and 3 — dates after today, and one shot on two rows. Both are
+      // "cross these shapes and drop the pair that contains neither", so they
+      // share one loop rather than two copies of it.
+      for (const [pcvShapes, ppsvShapes] of [
+        [GRID_FUTURE_PCV_HISTORIES, GRID_FUTURE_PPSV23_HISTORIES],
+        [GRID_DUPLICATE_PCV_HISTORIES, GRID_DUPLICATE_PPSV23_HISTORIES],
+      ]) {
+        for (const pcvPattern of pcvShapes) {
+          for (const ppsvPattern of ppsvShapes) {
+            if (!pcvPattern.length && !ppsvPattern.length) continue;
+            cases.push({
+              key: caseKey(ageMonths, riskIds, pcvPattern, ppsvPattern),
+              input: caseInput(ageMonths, dob, riskIds, pcvPattern, ppsvPattern, today),
+            });
+          }
         }
       }
     }
