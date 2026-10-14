@@ -115,7 +115,9 @@ Each row declares **`rulebook`** (child / adult / any — which schedule states 
 ⚠️ **EVERY adult floor is an OWNER CLINICAL DETERMINATION dated 2026-10-11 — never cite ACIP or CDC for one.** The *intervals* are ACIP's (rr7203a1 keys both PCV13→PPSV23 and PCV15→PPSV23 at 8 weeks for an immunocompromising condition / cochlear implant / CSF leak and 1 year otherwise); treating them as floors is not. Watch ACIP's vocabulary: "**minimum recommended** interval" is the shortest *recommended* spacing, **not** the General Best Practices "minimum interval" that voids a dose. rr7203a1's 8 weeks is explicitly something that "can be considered… to minimize the time of risk" — permission to vaccinate sooner. CDSI v4.64 sets `absMinInt = 0 days` for every adult pneumococcal interval and the current adult MMWRs never say a short gap means repeat the dose; the owner was shown that and reaffirmed. Rows carry `authority: 'OWNER'` and the app's own per-dose text says so. Full evidence and the enumerated rows: `CLINICAL_SPEC.md` §K.
 
 ### dateUtils.js Is Mirror-Synced
-`dateUtils.js` is byte-for-byte identical across PneumoVax and MeningoVax. If you change it here, apply the same change to MeningoVax.
+`dateUtils.js` is identical across PneumoVax and MeningoVax **apart from the `L2 MIRROR NOTE` comment, which exists only in PneumoVax's copy** (measured 2026-10-13: that comment is the only difference; zero lines of code differ). If you change it here, apply the same change to MeningoVax.
+
+Since S6-4 a test enforces this: `regression-s6-4-avg-days-per-month-one-home.test.js` compares the two files comment-stripped and fails on any code divergence. It is **skipped, not failed**, when the sibling repo is not checked out, because CI clones only this repo — so a local run is what catches drift. Note the two apps *use* the shared file differently and that is fine: PneumoVax calls only `DAYS.weeks`, while MeningoVax uses `DAYS.months` (17×) and `DAYS.years` (12×). PneumoVax deliberately moved its month/year comparisons onto the calendar-exact helpers.
 
 ## Testing Expectations
 
