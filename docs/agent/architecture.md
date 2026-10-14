@@ -187,14 +187,15 @@ citation names a ref that does not exist.
 
 ## Schedule Boundary Constants (`scheduleConstants.js`)
 
-**Two named constants — never collapse:**
+**Three named constants — never collapse:**
 
 | Constant | Value | Meaning |
 |---|---|---|
 | `ADULT_SCHED_MIN_M` | 228 (19y) | Adult vs peds SCHEDULE routing boundary |
 | `PCV21_MIN_AGE_M` | 216 (18y) | PCV21 (Capvaxive) PRODUCT min-age only |
+| `ROUTINE_ADULT_MIN_M` | 600 (50y) | Where ROUTINE (age-based) adult eligibility begins |
 
-`recommend.js` uses `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js` use `PCV21_MIN_AGE_M` for the PCV21 gate. `doseIntervalRules.js` uses `ADULT_SCHED_MIN_M` in exactly one place — `rulebookOf()`, which picks which schedule's row applies — and a test fails if a second comparison appears. StepRisks imports the shared constant for the `adultOnly` risk gate.
+`recommend.js` uses `ADULT_SCHED_MIN_M` (= 228). `validate.js` and `brands.js` use `PCV21_MIN_AGE_M` for the PCV21 gate. `doseIntervalRules.js` uses `ADULT_SCHED_MIN_M` in exactly one place — `rulebookOf()`, which picks which schedule's row applies — and a test fails if a second comparison appears. StepRisks imports the shared constant for the `adultOnly` risk gate. `ROUTINE_ADULT_MIN_M` has exactly two readers — `recommend.js`'s `M.y50` and `format.js`'s `ageGroup()` — and `regression-s6-1-routine-adult-age-one-home.test.js` fails if either writes `600` out by hand again (S6-1).
 
 ## Counting Policy
 

@@ -48,7 +48,7 @@
 
 - When changing a rule: update `CLINICAL_SPEC.md`, the engine (`recommend.js`), and the test.
 - **At least one test per `CLINICAL_SPEC.md` § sub-section** — every Table 4 row, both HSCT pathways, every adult history branch × interval.
-- When changing `scheduleConstants.js`: verify the two constants (`ADULT_SCHED_MIN_M` and `PCV21_MIN_AGE_M`) remain distinct and that all consumers import the right one.
+- When changing `scheduleConstants.js`: verify the three constants (`ADULT_SCHED_MIN_M`, `PCV21_MIN_AGE_M` and `ROUTINE_ADULT_MIN_M`) remain distinct and that all consumers import the right one.
 - When changing `dateUtils.js`: apply the same change to MeningoVax (mirror-synced).
 - **When changing any row of `doseIntervalRules.js`: update the table in `CLINICAL_SPEC.md` §K in the same commit.** `rule-docs-match-code.test.js` fails until you do, and names the row and the field.
 - **When the suite reports moved verdicts, do not regenerate the corpus until you can say why they moved.** `npm run sweep:update` is for a change you meant to make; the count it prints goes in the pull request description. This gate exists because two changes (peds `P0-2` and `ANCHOR-1`) each moved thousands of verdicts past byte-identical harnesses.

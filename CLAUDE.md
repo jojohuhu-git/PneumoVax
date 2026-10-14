@@ -42,12 +42,17 @@ ACIP/CDC/AAP/immunize.org over FDA package inserts. Sources per topic are in `CL
 
 Within that group, AAP is a tiebreak, not a ranking (owner decision, 2026-08-10): where ACIP/CDC and AAP agree, cite either; where they disagree, AAP governs; never adopt a CDC revision recommending fewer doses or narrower eligibility than AAP; where AAP is silent, CDC/MMWR stands.
 
-### Two Boundary Constants — Never Collapse
-`src/logic/scheduleConstants.js` exports two distinct constants:
+### Three Schedule Constants — Never Collapse
+`src/logic/scheduleConstants.js` exports three distinct constants:
 - **`ADULT_SCHED_MIN_M = 228` (19y)** — schedule routing boundary (peds vs adult rulebook)
 - **`PCV21_MIN_AGE_M = 216` (18y)** — PCV21 (Capvaxive) product min-age only
+- **`ROUTINE_ADULT_MIN_M = 600` (50y)** — where routine (age-based) adult eligibility
+  begins, whatever the risk factors; ACIP lowered it 65→50 eff. 2024-10-23 (mm7401a1).
+  Added by S6-1 (2026-10-13) because `recommend.js` and `format.js` each held their own
+  copy of `600`, so the engine could route a patient one way while the screen described
+  them another.
 
-These are separate clinical concepts. Never merge them back into one constant.
+These are separate clinical concepts. Never merge any of them into one constant.
 
 ### All Clinical Logic in the Engine
 Product validity, the PCV15→PPSV23 requirement, the prior-vaccine matrix, and the PCV7-not-counted rule are computed in `recommend.js`. UI consumes pre-built recs. Do NOT re-derive clinical logic in components.

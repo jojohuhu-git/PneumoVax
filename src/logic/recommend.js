@@ -35,14 +35,17 @@ import { dobToAgeMonths } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { pcvNextDoseMinIntervalDays } from './intervals.js';
-import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
+import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
 // y18 is the ADULT SCHEDULE boundary (228 = 19y), not the PCV21 product gate (216 = 18y).
 // See scheduleConstants.js for the authoritative values and distinction.
+// S6-1 (2026-10-13): y50 is shared too — format.js's displayed age band had its own
+// copy of 600. y65 (780) stays a literal here because this table is its only home in
+// the app; give it a second reader and it belongs in scheduleConstants.js as well.
 const M = {
   m2: 2, m7: 7, m12: 12, m16: 16, m24: 24, m60: 60, m72: 72,
-  y2: 24, y5: 60, y6: 72, y18: ADULT_SCHED_MIN_M, y50: 600, y65: 780,
+  y2: 24, y5: 60, y6: 72, y18: ADULT_SCHED_MIN_M, y50: ROUTINE_ADULT_MIN_M, y65: 780,
 };
 
 const WK8 = DAYS.weeks(8);   // 56
