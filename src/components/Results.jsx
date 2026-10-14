@@ -4,6 +4,7 @@ import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
+import { PCV21_MIN_AGE_M } from '../logic/scheduleConstants.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
 import RiskAgeNote from './RiskAgeNote.jsx';
@@ -186,10 +187,17 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     onChange?.({ dob: null, ageMonths: am, ageGroup: ageGroup(am) });
   }
 
-  const isAdult = (ageMonths ?? 0) >= 216;
+  // S6-2 (2026-10-13): this gate is Capvaxive's PRODUCT licence floor — 18y
+  // (PCV21_MIN_AGE_M), per the FDA label and ACIP mm7336a3. It is NOT an
+  // adult/child test: the adult SCHEDULE begins a year later, at 19y
+  // (ADULT_SCHED_MIN_M), and an 18-year-old is still on the child/adolescent
+  // rulebook while being eligible for this product. It used to be a bare 216
+  // called `isAdult` in both editors, which is how an 18-year-old would end up
+  // routed down the adult schedule by the next person who reused the flag.
+  const meetsPcv21MinAge = (ageMonths ?? 0) >= PCV21_MIN_AGE_M;
   const pcvOptions = PCV_HISTORY_PRODUCTS.filter(p => {
     if (p.key === '') return true;
-    if (p.key === 'PCV21' && !isAdult) return false;
+    if (p.key === 'PCV21' && !meetsPcv21MinAge) return false;
     return true;
   });
 
