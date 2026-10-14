@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import DoseDateProblem from './DoseDateProblem.jsx';
+import React, { useState, useEffect } from 'react';
 import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
@@ -16,6 +17,40 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   const maxDate = todayISO(today);
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
+
+  // S11 (2026-10-12): see StepHistory.jsx — the same labels, the same fix. The
+  // two prefixes differ because `useId` is per component instance, so these ids
+  // cannot collide with the history step's even if both were ever on screen.
+  const uid = React.useId();
+
+  // S11 / P5-5 (2026-10-12): Escape closes whichever panel is open. Both
+  // panels could be opened and neither could be closed from the keyboard
+  // without tabbing back to the toggle that opened it; Escape is what people
+  // press.
+  //
+  // The dose panel goes first — it is the more specific, more nested edit
+  // surface. It closes through `closeDosePanel`, the same function the toggle
+  // calls, so Escape cannot take a different path from the mouse and leave the
+  // never-typed rows behind that closing by mouse sweeps away.
+  //
+  // `pcvDoses` / `ppsv23Doses` are dependencies because `closeDosePanel` reads
+  // them: without that, the listener would close over the dose list as it was
+  // before the clinician's most recent edit.
+  //
+  // It sits HERE, above the `if (excluded)` early return below, because a hook
+  // has to run on every render. Placed after that return it would be skipped
+  // for an excluded patient and React would throw "rendered fewer hooks than
+  // expected". `closeDosePanel` is a hoisted function declaration, so calling
+  // it from above its definition is fine.
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key !== 'Escape') return;
+      if (editingDoses) closeDosePanel();
+      else if (editingAge) setEditingAge(false);
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [editingAge, editingDoses, pcvDoses, ppsv23Doses]);
 
   const result = recommend({
     // P3-1 (S10): the date of birth goes to the engine, which uses it to
@@ -48,9 +83,9 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
         <Disclaimer />
         <div className="results-actions">
           {onBack && (
-            <button className="btn btn-outline" onClick={onBack}>Edit risk factors</button>
+            <button type="button" className="btn btn-outline" onClick={onBack}>Edit risk factors</button>
           )}
-          <button className="btn btn-outline" onClick={onReset}>Start Over</button>
+          <button type="button" className="btn btn-outline" onClick={onReset}>Start Over</button>
         </div>
       </div>
     );
@@ -195,6 +230,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     }
   }
 
+
   // Same tick as the history step. Shown only while the row is otherwise
   // empty, which is the only case where "not typed yet" and "a dose was
   // given, details unknown" differ.
@@ -300,8 +336,8 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
               {pcvDoses.map((dose, i) => (
                 <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
-                    <label>Product</label>
-                    <select value={dose.product || ''}
+                    <label htmlFor={`${uid}-pcv-product-${i}`}>Product</label>
+                    <select id={`${uid}-pcv-product-${i}`} value={dose.product || ''}
                       onChange={e => updatePcv(i, 'product', e.target.value)}>
                       {pcvOptions.map(p => (
                         <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
@@ -309,13 +345,14 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                     </select>
                   </div>
                   <div className="dose-field">
-                    <label>Date (optional)</label>
-                    <input type="date" value={dose.date || ''}
+                    <label htmlFor={`${uid}-pcv-date-${i}`}>Date (optional)</label>
+                    <input type="date" id={`${uid}-pcv-date-${i}`} value={dose.date || ''}
                       max={maxDate}
                       onChange={e => updatePcv(i, 'date', e.target.value)} />
                   </div>
-                  <button className="dose-remove" onClick={() => removePcv(i)}
+                  <button type="button" className="dose-remove" onClick={() => removePcv(i)}
                     aria-label={`Remove PCV dose ${i + 1}`}>×</button>
+                  <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
                   {!dose.date && !dose.product && (
                     <UnknownDoseTick
                       checked={dose.detailsUnknown}
@@ -324,7 +361,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   )}
                 </div>
               ))}
-              <button className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
+              <button type="button" className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
             </div>
 
             {/* PPSV23 doses */}
@@ -338,18 +375,20 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
               {ppsv23Doses.map((dose, i) => (
                 <div key={i} className="dose-row dose-row-compact">
                   <div className="dose-field">
-                    <label>Product</label>
-                    <input type="text" value="PPSV23 (Pneumovax 23)" disabled
+                    <label htmlFor={`${uid}-ppsv-product-${i}`}>Product</label>
+                    <input type="text" id={`${uid}-ppsv-product-${i}`}
+                      value="PPSV23 (Pneumovax 23)" disabled
                       className="dose-field-disabled" />
                   </div>
                   <div className="dose-field">
-                    <label>Date (optional)</label>
-                    <input type="date" value={dose.date || ''}
+                    <label htmlFor={`${uid}-ppsv-date-${i}`}>Date (optional)</label>
+                    <input type="date" id={`${uid}-ppsv-date-${i}`} value={dose.date || ''}
                       max={maxDate}
                       onChange={e => updatePpsv(i, e.target.value)} />
                   </div>
-                  <button className="dose-remove" onClick={() => removePpsv(i)}
+                  <button type="button" className="dose-remove" onClick={() => removePpsv(i)}
                     aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
+                  <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
                   {!dose.date && (
                     <UnknownDoseTick
                       checked={dose.detailsUnknown}
@@ -358,7 +397,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                   )}
                 </div>
               ))}
-              <button className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
+              <button type="button" className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
             </div>
 
             <span className="age-edit-hint">Changes update recommendations immediately.</span>
@@ -433,9 +472,9 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
 
       <div className="results-actions">
         {onBack && (
-          <button className="btn btn-outline" onClick={onBack}>Edit history</button>
+          <button type="button" className="btn btn-outline" onClick={onBack}>Edit history</button>
         )}
-        <button className="btn btn-outline" onClick={onReset}>Start Over</button>
+        <button type="button" className="btn btn-outline" onClick={onReset}>Start Over</button>
       </div>
     </div>
   );

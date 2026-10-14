@@ -211,6 +211,136 @@ function futureDated(dose, today) {
   );
 }
 
+// The same shot recorded on two rows (MeningoVax's G7, ported by owner decision
+// 2026-10-12, then narrowed by a second owner decision the same day — see
+// `sameDayDifferentBrandNote` below for why).
+//
+// Two doses of the same pneumococcal vaccine are never given on the same day,
+// so a date that already sits on a COUNTED row of this stream, under the SAME
+// product, means the row was typed twice — the commonest slip when a paper
+// record is being copied in.
+//
+// The grading was already right: the second row did not count. The EXPLANATION
+// was wrong. The interval rule got there first and said "Given 0 days after the
+// previous dose — the minimum interval is 8 weeks", then offered a date the
+// next dose was due — sending a clinician to look at spacing, with a due date
+// in hand, for a problem that exists only in the typing.
+//
+// A row whose product is blank ("Unknown PCV product") counts as a match: a
+// clinician copying a record who names the brand on one line and not on the
+// other has written one dose twice, not two.
+//
+// Two things this deliberately does NOT catch, both of them real pneumococcal
+// records:
+//   • A PCV and a PPSV23 on one day. Ordinary co-administration. Safe because
+//     `kept` is ONE stream's counted doses and the two streams are walked
+//     separately — asserted, not assumed, in this rule's regression test.
+//   • A row sharing a date with a row that did not itself count — a PCV7, or a
+//     row already refused for being under age. Matching against `kept` rather
+//     than every row walked is what makes that row the first REAL one on its
+//     date rather than a duplicate of a dose the patient never effectively had.
+//     Measured: 84 cases in the impossible-entry grid take exactly that path.
+//
+// Undated rows share no date and are never duplicates: two undated rows on a
+// paper record with no dates are two real doses.
+function duplicateEntry(dose, kept) {
+  if (!dose?.date) return null;
+  const twin = (kept ?? []).find((k) => k?.date === dose.date
+    && (!k.product || !dose.product || k.product === dose.product));
+  if (!twin) return null;
+
+  const reasons = [
+    `The same date is already recorded on an earlier row (${fmtDate(dose.date)}), so this looks like one dose entered twice. It is not counted. Two doses of the same pneumococcal vaccine are never given on the same day — if the patient really did receive another dose, correct its date; otherwise remove this row.`,
+  ];
+  if (!twin.product || !dose.product) {
+    reasons.push('One of the two rows does not name a product, so this is most likely the same dose written down twice — once with the brand and once without.');
+  }
+  return recordProblem('duplicate', reasons, `Same date as a dose already recorded: ${fmtDate(dose.date)}.`);
+}
+
+// TWO DIFFERENT products on one day — a sentence, not a verdict.
+//
+// Owner decision, 2026-10-12, taken against a conflict the sweep gate caught.
+// MeningoVax's G7 calls ANY same-date pair in a stream a row typed twice, and
+// that is sound there: each of its streams holds ONE vaccine family, so a
+// same-day pair can only be a double entry. PneumoVax's PCV stream holds five
+// products, so a same-day pair might instead be a real — if pointless —
+// co-administration, and S14-4C (2026-10-12) had already settled what to say
+// about one: "Given at the same visit as the PCV20 dose, which completes the
+// adult series on its own: this dose does not add to the series."
+//
+// Importing G7 whole would have overwritten that sentence for 792 of the
+// 16,250 sweep patients. The owner chose BOTH: the verdict and its existing
+// wording stand, and this sentence is ADDED to them. Nothing is reclassified
+// and nothing is discarded — the clinician keeps the clinical answer and is
+// also told to go and look at the record.
+//
+// It is appended at every push site in the walk rather than inside one branch,
+// because the two same-day shapes reach the clinician down different paths and
+// only one of them is S14-4C's:
+//
+//   adult, PCV20 + PCV21     the earlier dose completes the series, so the
+//                            extra-dose branch grades it and S14-4C speaks.
+//   child, PCV13 + PCV15     nothing is completed, so the INTERVAL rule speaks
+//                            — "0 days after the previous dose… due on or after
+//                            2024-04-22" — which is the more misleading of the
+//                            two, and which S14-4C never reached.
+//
+// Worded over "pneumococcal vaccines" rather than "conjugates" because the
+// walk is shared: PPSV23 has a single product today, so this cannot fire in
+// that stream, but the sentence should not become false if one is ever added.
+function sameDayDifferentBrandNote(dose, kept) {
+  if (!dose?.date || !dose.product) return null;
+  const twin = (kept ?? []).find((k) => k?.date === dose.date
+    && k.product && k.product !== dose.product);
+  if (!twin) return null;
+  return `Two different pneumococcal vaccines are recorded on the same day (${productLabel(twin.product)} and ${productLabel(dose.product)}). They are not given together at one visit, so check the record — a mistyped date or a mistyped brand on one of the rows is the usual cause.`;
+}
+
+// ── The same two refusals, said in one line, for the history step ────────
+//
+// Owner decision, 2026-10-12. Typing 05/01/2030 into a dose row used to show
+// nothing at all — no warning, "View Results" fully enabled — while the AGE
+// step already stopped you dead on the identical slip ("That date of birth is
+// in the future. Check the year"). The two date fields disagreed about the same
+// mistake. The step now says so under the row as the date is typed, and the
+// results card keeps its fuller explanation.
+//
+// WARN, do not trap: "View Results" stays enabled (owner decision). A clinician
+// who means it can still see the rest of the record.
+//
+// This lives here, not in the component, because the component must not decide
+// what an impossible entry IS — CLAUDE.md's rule, and the reason the PCV21
+// licence check once got the blame for a date before birth. It calls the very
+// same `futureDated` and `isBeforeBirth` the engine grades with, so only the
+// WORDING is specific to the step, and the two wordings sit beside each other
+// in one file so an edit to either is made looking at the other.
+// `regression-history-step-warns-on-impossible-dates` asserts that the kind
+// returned here equals the `recordProblem` the engine reports for the same row.
+//
+// Returns null when the row is fine (including an undated row — there is no
+// date to be wrong), so the caller can render nothing.
+export function dateEntryWarning(dose, { ageMonths, today, dob } = {}) {
+  if (!dose?.date) return null;
+  const ref = todayISO(today);
+  if (futureDated(dose, ref)) {
+    return {
+      kind: 'future',
+      text: `This date is in the future — today is ${fmtDate(ref)}. Check the year; a dose cannot have been given yet.`,
+    };
+  }
+  const ageAtDose = ageAtDoseFromDate(dose, ageMonths, ref, dob);
+  if (isBeforeBirth(dose, ageAtDose, dob)) {
+    return {
+      kind: 'before-birth',
+      text: dob
+        ? `This date is before the patient was born (${fmtDate(dob)}). Check the year.`
+        : 'This date is before the patient was born, going by the age entered. Check the year.',
+    };
+  }
+  return null;
+}
+
 // Every record problem, settled in ONE place for both vaccines before any
 // vaccine-specific rule runs. Nothing here is vaccine-specific, and a second
 // copy is how rules drift — the before-birth test used to sit inside each of
@@ -227,12 +357,15 @@ function futureDated(dose, today) {
 //
 // Returns null when the row has no record problem, so the caller falls through
 // to the real grading.
-function recordProblemFor(dose, { ageMonths, today, dob }) {
+function recordProblemFor(dose, { ageMonths, today, dob, kept }) {
   const future = futureDated(dose, today);
   if (future) return future;
   const ageAtDose = dose?.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
   if (isBeforeBirth(dose, ageAtDose, dob)) return beforeBirth(dose, dob);
-  return null;
+  // Last of the three, matching MeningoVax. A row that is BOTH a duplicate and
+  // dated impossibly reports the impossible date, which is the more useful
+  // thing to say: correcting the year usually makes the duplication vanish too.
+  return duplicateEntry(dose, kept);
 }
 
 // ── What to say about a dose the series did not need ─────────────────────
@@ -557,10 +690,20 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const ctxParts = vaccine === 'PCV'
       ? { priorPcv: kept, priorPpsv23: crossStream, riskIds }
       : { priorPcv: crossStream, priorPpsv23: kept, riskIds };
+    // Two different products on one day. A SENTENCE added to whatever verdict
+    // this dose gets, never a verdict of its own (owner decision, 2026-10-12)
+    // — computed here, once, and appended at every push below, because the
+    // shapes it covers are graded down three different branches. `addNote` is
+    // the only way it reaches a dose: a hand-typed second copy in one branch is
+    // exactly the drift this file keeps warning about.
+    const sameDayNote = sameDayDifferentBrandNote(dose, kept);
+    const addNote = (entry) => (sameDayNote
+      ? { ...entry, reasons: [...(entry.reasons ?? []), sameDayNote] }
+      : entry);
     // A record problem — an impossible ENTRY — is settled before any
     // vaccine-specific rule runs: there is no dose to GRADE when the date
     // itself is wrong, whatever the schedule says.
-    const result = recordProblemFor(dose, { ageMonths, today, dob })
+    const result = recordProblemFor(dose, { ageMonths, today, dob, kept })
       || (vaccine === 'PCV'
         ? validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts)
         : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts));
@@ -583,18 +726,18 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         : result.intervalRuleId
           ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.earliestValidDate}.`
           : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
-      perDose.push({
+      perDose.push(addNote({
         ...result,
         effectiveDoseNum: null,
         doesNotCount: true,
         reasons: closingSentence ? [...result.reasons, closingSentence] : result.reasons,
-      });
+      }));
       anchorOn(dose);
       return;
     }
     if (result.status === 'noncounting') {
       // PCV7 — recorded but not added to the effective list.
-      perDose.push({ ...result, effectiveDoseNum: null, doesNotCount: true });
+      perDose.push(addNote({ ...result, effectiveDoseNum: null, doesNotCount: true }));
       return;
     }
 
@@ -685,7 +828,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // "does not extend the series".
       const { earlyAdvisory, intervalRuleId, reasons: resultReasons, ...rest } = result;
       const reasons = earlyAdvisory ? resultReasons.slice(0, -1) : resultReasons;
-      perDose.push({
+      perDose.push(addNote({
         ...rest,
         effectiveDoseNum: null,
         extraDose: true,
@@ -699,7 +842,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
             ...reasons,
             extraDoseSentence(priorCompletingDose, dose, vaccine),
           ],
-      });
+      }));
       // Validly given, with a real date — worth anchoring the next dose's gap
       // check, same as an invalid dose does.
       anchorOn(dose);
@@ -707,7 +850,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     }
 
     st.effectiveCount++;
-    perDose.push({ ...result, effectiveDoseNum: st.effectiveCount });
+    perDose.push(addNote({ ...result, effectiveDoseNum: st.effectiveCount }));
     kept.push(dose);
     anchorOn(dose);
   }

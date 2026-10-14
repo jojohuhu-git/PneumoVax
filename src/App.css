@@ -77,8 +77,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* S11 / P5-4 (2026-10-12): buttons, checkboxes, selects and citation links had
+   no :focus-visible rule at all, so tabbing through the wizard fell back to
+   whatever ring each browser draws by default — different on Chrome, Safari and
+   Firefox, and easy to lose track of. :focus-visible (not :focus) shows the ring
+   for keyboard users only, leaving mouse clicks exactly as they were.
+   Ported from MeningoVax's K5 (60aa8d1); same rule, same tokens. */
+:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: 2px;
+  border-radius: var(--rads);
+}
+
 /* ── App shell ─────────────────────────────────────────────────── */
 .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+/* S11 / P5-1: the <form> sits between .app-shell and .app-main, so it has to
+   take over main's place in the shell's flex column — otherwise `.app-main`'s
+   `flex: 1` has nothing to grow against and the page stops filling the window.
+   No visual change today (the background is painted by body), but leaving the
+   column broken would be a trap for the next layout change. */
+.app-form { display: flex; flex-direction: column; flex: 1; }
 
 /* ── Header ────────────────────────────────────────────────────── */
 .app-header {
@@ -190,10 +208,14 @@ body {
 .risk-text { flex: 1; min-width: 0; }
 .risk-label { font-size: var(--fs-md); font-weight: 500; color: var(--gy); overflow-wrap: anywhere; }
 .risk-sublabel { font-size: var(--fs-sm); color: var(--gy3); margin-top: 2px; overflow-wrap: anywhere; }
+/* S11 / P5-6: this is a <button> now, not a <label>, so it needs the four
+   resets that stop it looking like a browser button — full width, no chrome,
+   the app's own font, left-aligned text. Same four MeningoVax's rule carries. */
 .risk-none {
   display: flex; align-items: center; gap: var(--sp-12); padding: var(--sp-12); margin-top: var(--sp-8);
   border-radius: var(--rads); border: 1.5px dashed var(--gy5); cursor: pointer;
   color: var(--gy3); font-size: var(--fs-md);
+  width: 100%; background: none; font-family: inherit; text-align: left;
 }
 .risk-none:hover { background: var(--gy6); }
 .risk-none.selected { border-color: var(--cmd); background: var(--clt); color: var(--c); }
@@ -240,6 +262,34 @@ body {
 }
 .dose-row-unknown-hint { display: block; color: var(--gy3); }
 
+/* An impossible dose date, said under the row as it is typed (owner decision,
+   2026-10-12: warn, do not trap). Deliberately the SAME presentation as
+   `.age-error`, which is the app's existing answer to the identical mistake one
+   step earlier ("That date of birth is in the future. Check the year") — plain
+   --r text, no background, no border, no icon. A second visual treatment for
+   one kind of message is how a palette stops meaning anything.
+
+   `flex-basis: 100%` puts it on its own line under the date and product fields
+   of the wrapping .dose-row, the same way .dose-row-unknown above does. */
+/* PARITY-1 (2026-10-12): declaration-for-declaration the same rule as
+   MeningoVax's `.dose-row-problem`, which says the identical thing about the
+   identical field. It used to be bare `--r` text, which sat on the dose row's
+   own grey background with nothing to mark it off. Owner decision: PneumoVax
+   matches MeningoVax, not the other way around — the standing design-parity
+   rule's direction too. Every token here is defined identically in both apps.
+   `regression-parity-1-dose-date-problem-box` compares the two rules and fails
+   if either side drifts. */
+.dose-row-date-problem {
+  flex-basis: 100%;
+  margin-top: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+  border-radius: var(--rads);
+  background: var(--rlt);
+  border-left: 3px solid var(--r);
+  font-size: var(--fs-base);
+  color: var(--r);
+}
+
 .dose-field { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 130px; }
 .dose-field label { font-size: var(--fs-sm); color: var(--gy3); font-weight: 500; }
 .dose-field input[type="date"],
@@ -249,7 +299,14 @@ body {
   border-radius: var(--rads); font-size: var(--fs-base); color: var(--gy);
   background: var(--wh); width: 100%;
 }
-.dose-field input:focus, .dose-field select:focus { outline: none; border-color: var(--c); }
+/* S11 / P5-4: the age field already got a 3px halo on focus; the dose fields got
+   a border-colour change only, which read as two different apps. Same treatment
+   here (MeningoVax K5). */
+.dose-field input:focus, .dose-field select:focus {
+  outline: none;
+  border-color: var(--c);
+  box-shadow: 0 0 0 3px var(--clt);
+}
 .dose-remove {
   min-height: 40px; width: 36px; border: none; border-radius: var(--rads);
   background: transparent; color: var(--gy4); font-size: var(--fs-xl); cursor: pointer;

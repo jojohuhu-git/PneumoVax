@@ -20,7 +20,13 @@ src/
                         Age → Risks → History → Results.
   main.jsx              React entry.
   App.css               All styles + CSS custom properties (:root tokens).
-  test-grid.js          The SHARED synthetic patient grid: ~16,250 cases of age x risk
+  test-grid.js          The SHARED synthetic patient grids. Real patients: ~16,250 cases
+                        of age x risk x PCV history x PPSV23 history. Impossible entries
+                        (buildRecordProblemCases): ~17,485 cases whose record holds a dose
+                        dated before birth or after today — the complement of the first grid
+                        plus GRID_FUTURE_* shapes, in its own corpus so the 16,250 count
+                        keeps meaning "patients a clinician could really enter". Each of
+                        age x risk
                         profile x PCV history x PPSV23 history, on a clock pinned to
                         2026-10-11, plus verdictOf() / corpusLines(). Test-only — nothing
                         in the app imports it, so it is not in the shipped bundle
@@ -37,6 +43,16 @@ src/
     Results.jsx          Output. Calls recommend(); renders HSCT advisory card, PCV21 geo
                          note, standard rec cards. Inline "Adjust age" + "Recorded doses ▾"
                          editors. "← Edit history" back button at bottom.
+    DoseDateProblem.jsx  The one-line "this date is impossible" warning shown under a dose
+                         row as the date is typed (owner decision, 2026-10-12: WARN, do not
+                         trap — "View Results" stays enabled). Used by BOTH dose editors,
+                         StepHistory.jsx and the inline one in Results.jsx, because the
+                         editor is duplicated (open S9 / P4-1) and a warning written into
+                         one of them is a surface the other silently lacks. It decides
+                         nothing: `dateEntryWarning()` in validate.js calls the same
+                         futureDated / isBeforeBirth predicates the engine grades with, and
+                         regression-history-step-warns-on-impossible-dates asserts the kind
+                         it shows equals the engine's own recordProblem for that row.
     RecCard.jsx          Single rec card (status shading, brands, note, citations).
     citations.jsx        [c] -> numbered superscript links. Shared by RecCard and
                          RiskAgeNote; numbering is per-card, in reading order.

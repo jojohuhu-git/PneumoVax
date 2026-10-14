@@ -83,12 +83,24 @@ test fails if any doc names a function or constant deleted from `src/` — the t
 all four stale copies of the pre-A-P1-1 adult interval.
 
 ### A Verdict That Moves Must Be Explained
-`sweep-verdict-corpus.test.js` re-runs the engine over 16,250 synthetic patients
-(`src/test-grid.js`) and fails if any answer differs from the committed corpus. **Do not run
-`npm run sweep:update` until you can say why those patients should get a different answer**,
-then put the moved count in the PR. This exists because peds `P0-2` and `ANCHOR-1` each moved
-thousands of verdicts while all three PneumoRecs harnesses stayed byte-identical. New sweeps
-build on `src/test-grid.js` — never a second case list.
+TWO corpora, both built from `src/test-grid.js`, both gates. `sweep-verdict-corpus.test.js`
+re-runs the engine over **16,250 patients a clinician could really enter**;
+`sweep-record-problem-corpus.test.js` re-runs it over **17,485 impossible ones** — a dose
+dated before the patient was born, or dated after today. Either fails if an answer differs
+from its committed corpus. **Do not run `npm run sweep:update` (which regenerates both) until
+you can say why those patients should get a different answer**, then put both moved counts in
+the PR. This exists because peds `P0-2` and `ANCHOR-1` each moved thousands of verdicts while
+all three PneumoRecs harnesses stayed byte-identical. New sweeps build on `src/test-grid.js`
+— never a second case list.
+
+**Why the impossible entries are a second FILE and not more rows in the first** (owner
+decision, 2026-10-12): so 16,250 keeps meaning "real patients", and a clinical change that
+moves 300 of them reads as 300 lines rather than 300 lost among 23,000 impossible records.
+The main grid *discards* 15,340 before-birth combinations on one line and cannot express a
+future date at all, so both record-problem rules were guarded by nothing: deleting
+`isBeforeBirth()` left the main sweep green 12/12, and so did disabling `futureDated()`.
+Against the second corpus the same two mutations move **14,304** and **1,980** of 17,485.
+**Add a rule to `recordProblemFor()` → add its shape to `GRID_FUTURE_*` in the same commit.**
 
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.

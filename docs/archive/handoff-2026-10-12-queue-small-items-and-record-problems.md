@@ -1,3 +1,11 @@
+> **SUPERSEDED (2026-10-12) by `handoff-2026-10-12-impossible-entries-coverage-and-warnings.md`.**
+> Do not resume the queue below. Its **remaining item 1** (the sweep blind spot) is DONE — the
+> conversation the owner asked for was had, and it produced a second corpus of 18,460 impossible
+> entries. Its **item 2** is DONE in full: the future-dose chip is fixed in BOTH apps, the
+> duplicate-entry port was taken and then narrowed by a second owner decision, and its "a date of
+> birth in the FUTURE is not rejected" finding was simply **WRONG** — the age step already rejects
+> it. Its **item 3** is still open and is carried forward verbatim in the new file.
+
 # PneumoVax — Handoff after the small-item queue and two record-entry problems (2026-10-12)
 
 > **Supersedes `handoff-2026-10-12-p0-p1-3-merged.md`.** Its "Loose end — PR #37" is DONE

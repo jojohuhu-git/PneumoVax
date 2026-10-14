@@ -1,5 +1,6 @@
 import { todayISO } from '../logic/dateUtils.js';
 import { newDoseRow } from '../logic/doseIdentity.js';
+import DoseDateProblem from './DoseDateProblem.jsx';
 import React from 'react';
 
 // Vaccination history for PneumoVax — two product streams in one step:
@@ -9,7 +10,7 @@ import React from 'react';
 // Both lists are always visible and start empty — no auto-added rows.
 export default function StepHistory({
   ageMonths, pcvDoses, ppsv23Doses, onChangePcv, onChangePpsv, pcvProducts,
-  today,
+  today, dob,
 }) {
   // queue P1-1 / P3-7 (S10): the clinician's LOCAL today, read once in App and
   // passed down. `new Date().toISOString()` is the UTC date, which is already
@@ -17,6 +18,13 @@ export default function StepHistory({
   // then correctly refused as being in the future.
   const maxDate = todayISO(today);
   const isAdult = (ageMonths ?? 0) >= 216;
+
+  // S11 (2026-10-12): every dose-row label is attached to its own box.
+  // `useId` gives this component instance a prefix nothing else in the document
+  // can repeat — which matters because the inline editor in Results.jsx renders
+  // the same fields, and because two rows sharing one id would silently point
+  // every label at the FIRST row's box, a bug that looks like it works.
+  const uid = React.useId();
 
   function addPcv() { onChangePcv([...pcvDoses, newDoseRow()]); }
   function removePcv(i) { onChangePcv(pcvDoses.filter((_, idx) => idx !== i)); }
@@ -89,22 +97,23 @@ export default function StepHistory({
         {pcvDoses.map((dose, i) => (
           <div key={i} className="dose-row">
             <div className="dose-field">
-              <label>Date (optional)</label>
-              <input type="date" value={dose.date || ''}
+              <label htmlFor={`${uid}-pcv-date-${i}`}>Date (optional)</label>
+              <input type="date" id={`${uid}-pcv-date-${i}`} value={dose.date || ''}
                 max={maxDate}
                 onChange={e => updatePcv(i, 'date', e.target.value)} />
             </div>
             <div className="dose-field">
-              <label>Product</label>
-              <select value={dose.product || ''}
+              <label htmlFor={`${uid}-pcv-product-${i}`}>Product</label>
+              <select id={`${uid}-pcv-product-${i}`} value={dose.product || ''}
                 onChange={e => updatePcv(i, 'product', e.target.value)}>
                 {pcvOptions.map(p => (
                   <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
                 ))}
               </select>
             </div>
-            <button className="dose-remove" onClick={() => removePcv(i)}
+            <button type="button" className="dose-remove" onClick={() => removePcv(i)}
               aria-label={`Remove PCV dose ${i + 1}`}>×</button>
+            <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
             {!dose.date && !dose.product && (
               <UnknownDoseTick
                 checked={dose.detailsUnknown}
@@ -114,7 +123,7 @@ export default function StepHistory({
           </div>
         ))}
       </div>
-      <button className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
+      <button type="button" className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
 
       {/* ── PPSV23 stream ── */}
       <div className="history-section-title history-section-title-spaced">PPSV23 (Pneumovax 23) doses</div>
@@ -122,18 +131,20 @@ export default function StepHistory({
         {ppsv23Doses.map((dose, i) => (
           <div key={i} className="dose-row">
             <div className="dose-field">
-              <label>Date (optional)</label>
-              <input type="date" value={dose.date || ''}
+              <label htmlFor={`${uid}-ppsv-date-${i}`}>Date (optional)</label>
+              <input type="date" id={`${uid}-ppsv-date-${i}`} value={dose.date || ''}
                 max={maxDate}
                 onChange={e => updatePpsv(i, e.target.value)} />
             </div>
             <div className="dose-field">
-              <label>Product</label>
-              <input type="text" value="PPSV23 (Pneumovax 23)" disabled
+              <label htmlFor={`${uid}-ppsv-product-${i}`}>Product</label>
+              <input type="text" id={`${uid}-ppsv-product-${i}`}
+                value="PPSV23 (Pneumovax 23)" disabled
                 className="dose-field-disabled" />
             </div>
-            <button className="dose-remove" onClick={() => removePpsv(i)}
+            <button type="button" className="dose-remove" onClick={() => removePpsv(i)}
               aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
+            <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
             {!dose.date && (
               <UnknownDoseTick
                 checked={dose.detailsUnknown}
@@ -143,7 +154,7 @@ export default function StepHistory({
           </div>
         ))}
       </div>
-      <button className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
+      <button type="button" className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
 
       <div className="family-note family-note-neutral">
         Unknown / undocumented history is treated as unvaccinated. PCV7 doses are recorded for
