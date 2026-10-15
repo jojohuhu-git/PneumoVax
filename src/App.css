@@ -575,7 +575,13 @@ body {
 }
 /* Dose history edit panel */
 .dose-edit-empty { font-size: 0.82rem; color: var(--gy4); margin-bottom: var(--sp-4); }
-.dose-row-compact { margin-bottom: var(--sp-4); }
+/* S9 (2026-10-15): the Results panel's dose list is denser than the wizard's.
+   It used to say so with `margin-bottom` on every ROW (`.dose-row-compact`),
+   which only worked because that panel rendered its rows as bare siblings
+   while the wizard wrapped its in `.dose-list`. The two surfaces now render
+   the same structure from the shared `DoseEditor`, so the density is one class
+   on the LIST and the gap stays the flex `gap` it already was elsewhere. */
+.dose-list-compact { gap: var(--sp-4); }
 .dose-field-disabled { background: var(--gy6); color: var(--gy3); }
 .history-edit-summary {
   cursor: pointer;

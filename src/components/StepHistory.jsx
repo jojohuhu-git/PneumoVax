@@ -1,94 +1,34 @@
-import { todayISO } from '../logic/dateUtils.js';
-import { newDoseRow } from '../logic/doseIdentity.js';
-import { PCV21_MIN_AGE_M } from '../logic/scheduleConstants.js';
-import DoseDateProblem from './DoseDateProblem.jsx';
-import React from 'react';
+import { PPSV23_PRODUCT, pcvHistoryProductsFor } from '../data/brands.js';
+import DoseEditor from './DoseEditor.jsx';
 
 // Vaccination history for PneumoVax — two product streams in one step:
 //   • PCV doses (product dropdown: PCV7/13/15/20/21 + Unknown)
 //   • PPSV23 doses (date only)
 // Each dose is { date?, product? }. Both optional; counting works without dates.
 // Both lists are always visible and start empty — no auto-added rows.
+//
+// S9 / P4-1 (2026-10-15): the rows themselves are `DoseEditor.jsx`, shared with
+// the inline editor on the Results page. This step used to hand-write them, and
+// so did `Results.jsx`, which is how three separate fixes (`S6-2`, `P1-3`,
+// `S11`) each had to be made twice and how the two copies came to render their
+// fields in different orders. What is left here is what genuinely belongs to
+// this step: the headings, the wording, and the "no previous doses" link.
+// S9 also dropped the `pcvProducts` prop. The catalogue used to reach this
+// step as a prop from App.jsx while `Results.jsx` imported it directly — the
+// same list arriving two different ways on the two surfaces, and each copy
+// then applying its own age filter. Both now ask `brands.js` the one question
+// ("which PCV products may a patient of this age have recorded?"), so neither
+// the catalogue nor the gate can differ between the screens.
 export default function StepHistory({
-  ageMonths, pcvDoses, ppsv23Doses, onChangePcv, onChangePpsv, pcvProducts,
+  ageMonths, pcvDoses, ppsv23Doses, onChangePcv, onChangePpsv,
   today, dob,
 }) {
-  // queue P1-1 / P3-7 (S10): the clinician's LOCAL today, read once in App and
-  // passed down. `new Date().toISOString()` is the UTC date, which is already
-  // tomorrow after ~17:00 Pacific, so the picker offered a date validate.js
-  // then correctly refused as being in the future.
-  const maxDate = todayISO(today);
-  // S6-2 (2026-10-13): this gate is Capvaxive's PRODUCT licence floor — 18y
-  // (PCV21_MIN_AGE_M), per the FDA label and ACIP mm7336a3. It is NOT an
-  // adult/child test: the adult SCHEDULE begins a year later, at 19y
-  // (ADULT_SCHED_MIN_M), and an 18-year-old is still on the child/adolescent
-  // rulebook while being eligible for this product. It used to be a bare 216
-  // called `isAdult` in both editors, which is how an 18-year-old would end up
-  // routed down the adult schedule by the next person who reused the flag.
-  const meetsPcv21MinAge = (ageMonths ?? 0) >= PCV21_MIN_AGE_M;
-
-  // S11 (2026-10-12): every dose-row label is attached to its own box.
-  // `useId` gives this component instance a prefix nothing else in the document
-  // can repeat — which matters because the inline editor in Results.jsx renders
-  // the same fields, and because two rows sharing one id would silently point
-  // every label at the FIRST row's box, a bug that looks like it works.
-  const uid = React.useId();
-
-  function addPcv() { onChangePcv([...pcvDoses, newDoseRow()]); }
-  function removePcv(i) { onChangePcv(pcvDoses.filter((_, idx) => idx !== i)); }
-  function updatePcv(i, field, val) {
-    onChangePcv(pcvDoses.map((d, idx) => idx === i ? { ...d, [field]: val } : d));
-  }
-  // The product is stamped on at creation because the recommendation card
-  // prints the product of every recorded dose; `isBlankDoseRow` knows it is a
-  // label rather than an answer, so an untouched row is still not a dose.
-  function addPpsv() { onChangePpsv([...ppsv23Doses, newDoseRow({ product: 'PPSV23' })]); }
-  function removePpsv(i) { onChangePpsv(ppsv23Doses.filter((_, idx) => idx !== i)); }
-  function updatePpsv(i, val) {
-    onChangePpsv(ppsv23Doses.map((d, idx) => idx === i ? { ...d, date: val } : d));
-  }
-  function updatePpsvField(i, field, val) {
-    onChangePpsv(ppsv23Doses.map((d, idx) => idx === i ? { ...d, [field]: val } : d));
-  }
-
-  // P1-3 (2026-10-12): an empty row means two things — "I have not typed yet"
-  // and "a dose was given, but I have no card". The app cannot tell them
-  // apart, and it used to guess the second, so a row nobody had touched was
-  // graded as a dose of unknown date. The clinician now says which it is.
-  // The tick appears only while the row is otherwise empty, because that is
-  // the only case where the two readings differ.
-  function UnknownDoseTick({ checked, onToggle }) {
-    return (
-      <label className="dose-row-unknown">
-        <input
-          type="checkbox"
-          className="risk-checkbox"
-          checked={!!checked}
-          onChange={e => onToggle(e.target.checked)}
-        />
-        <span>
-          A dose was given, but the date and product are unknown.
-          <span className="dose-row-unknown-hint">
-            Tick this to keep the dose on the record. An empty row is removed
-            when you continue.
-          </span>
-        </span>
-      </label>
-    );
-  }
-
   function clearAll() {
     onChangePcv([]);
     onChangePpsv([]);
   }
 
-  // PCV product options: hide PCV21 below its licence floor (18y, PCV21_MIN_AGE_M),
-  // but allow recording it at or above it. Always include the "Unknown" sentinel.
-  const pcvOptions = pcvProducts.filter(p => {
-    if (p.key === '') return true;               // unknown sentinel
-    if (p.key === 'PCV21' && !meetsPcv21MinAge) return false;
-    return true;
-  });
+  const shared = { ageMonths, today, dob };
 
   return (
     <div className="step-card">
@@ -101,68 +41,27 @@ export default function StepHistory({
 
       {/* ── PCV stream ── */}
       <div className="history-section-title">PCV (conjugate) doses</div>
-      <div className="dose-list">
-        {pcvDoses.map((dose, i) => (
-          <div key={i} className="dose-row">
-            <div className="dose-field">
-              <label htmlFor={`${uid}-pcv-date-${i}`}>Date (optional)</label>
-              <input type="date" id={`${uid}-pcv-date-${i}`} value={dose.date || ''}
-                max={maxDate}
-                onChange={e => updatePcv(i, 'date', e.target.value)} />
-            </div>
-            <div className="dose-field">
-              <label htmlFor={`${uid}-pcv-product-${i}`}>Product</label>
-              <select id={`${uid}-pcv-product-${i}`} value={dose.product || ''}
-                onChange={e => updatePcv(i, 'product', e.target.value)}>
-                {pcvOptions.map(p => (
-                  <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-            <button type="button" className="dose-remove" onClick={() => removePcv(i)}
-              aria-label={`Remove PCV dose ${i + 1}`}>×</button>
-            <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
-            {!dose.date && !dose.product && (
-              <UnknownDoseTick
-                checked={dose.detailsUnknown}
-                onToggle={(v) => updatePcv(i, 'detailsUnknown', v)}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-      <button type="button" className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
+      <DoseEditor
+        {...shared}
+        doses={pcvDoses}
+        onChange={onChangePcv}
+        product={{ kind: 'select', options: pcvHistoryProductsFor(ageMonths) }}
+        addDoseLabel="+ Add PCV dose"
+        removeLabel={(i) => `Remove PCV dose ${i + 1}`}
+        unknownHint="An empty row is removed when you continue."
+      />
 
       {/* ── PPSV23 stream ── */}
       <div className="history-section-title history-section-title-spaced">PPSV23 (Pneumovax 23) doses</div>
-      <div className="dose-list">
-        {ppsv23Doses.map((dose, i) => (
-          <div key={i} className="dose-row">
-            <div className="dose-field">
-              <label htmlFor={`${uid}-ppsv-date-${i}`}>Date (optional)</label>
-              <input type="date" id={`${uid}-ppsv-date-${i}`} value={dose.date || ''}
-                max={maxDate}
-                onChange={e => updatePpsv(i, e.target.value)} />
-            </div>
-            <div className="dose-field">
-              <label htmlFor={`${uid}-ppsv-product-${i}`}>Product</label>
-              <input type="text" id={`${uid}-ppsv-product-${i}`}
-                value="PPSV23 (Pneumovax 23)" disabled
-                className="dose-field-disabled" />
-            </div>
-            <button type="button" className="dose-remove" onClick={() => removePpsv(i)}
-              aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
-            <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
-            {!dose.date && (
-              <UnknownDoseTick
-                checked={dose.detailsUnknown}
-                onToggle={(v) => updatePpsvField(i, 'detailsUnknown', v)}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-      <button type="button" className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
+      <DoseEditor
+        {...shared}
+        doses={ppsv23Doses}
+        onChange={onChangePpsv}
+        product={{ kind: 'fixed', key: PPSV23_PRODUCT.key, label: PPSV23_PRODUCT.label }}
+        addDoseLabel="+ Add PPSV23 dose"
+        removeLabel={(i) => `Remove PPSV23 dose ${i + 1}`}
+        unknownHint="An empty row is removed when you continue."
+      />
 
       <div className="family-note family-note-neutral">
         Unknown / undocumented history is treated as unvaccinated. PCV7 doses are recorded for

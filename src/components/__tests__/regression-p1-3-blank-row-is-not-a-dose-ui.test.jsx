@@ -38,7 +38,6 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import Results from '../Results.jsx';
 import StepHistory from '../StepHistory.jsx';
-import { PCV_HISTORY_PRODUCTS } from '../../data/brands.js';
 
 const TODAY = '2026-10-12';
 
@@ -63,7 +62,6 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] } }) {
       ppsv23Doses={state.ppsv23Doses}
       onChangePcv={(pcvDoses) => setState((s) => ({ ...s, pcvDoses }))}
       onChangePpsv={(ppsv23Doses) => setState((s) => ({ ...s, ppsv23Doses }))}
-      pcvProducts={PCV_HISTORY_PRODUCTS}
       today={TODAY}
     />
   );
@@ -114,7 +112,6 @@ describe('P1-3 UI — the history step', () => {
           ppsv23Doses={state.ppsv23Doses}
           onChangePcv={(pcvDoses) => setState((s) => ({ ...s, pcvDoses }))}
           onChangePpsv={(ppsv23Doses) => setState((s) => ({ ...s, ppsv23Doses }))}
-          pcvProducts={PCV_HISTORY_PRODUCTS}
           today={TODAY}
         />
       );

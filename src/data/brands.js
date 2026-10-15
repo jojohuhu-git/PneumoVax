@@ -170,6 +170,45 @@ export const PCV_HISTORY_PRODUCTS = [
 
 export const PPSV23_HISTORY_PRODUCTS = [PPSV23_PRODUCT];
 
+/**
+ * The PCV products the history dropdown offers a patient of this age.
+ *
+ * S9 (2026-10-15): one home. This filter was written out in BOTH dose editors
+ * — `StepHistory.jsx` and the inline editor in `Results.jsx` — which is how
+ * `S6-2` came to be: the age it keys on was a bare `216` called `isAdult` in
+ * each copy, and the fix had to be made twice. The shared `DoseEditor` is
+ * deliberately ignorant of pneumococcal rules, so the gate lives here, beside
+ * the catalogue it filters and the constant it reads.
+ *
+ * ── Why only PCV21 ───────────────────────────────────────────────────────
+ *
+ * Every other PCV in the catalogue carries `minAgeM = PCV_MIN_AGE_M` (6
+ * weeks), and they are NOT gated: a dose given too early is a real thing that
+ * happened, and the engine's job is to record it and then grade it invalid —
+ * not to make it untypeable. PCV21 is the one exception, and this function
+ * preserves that exception exactly as the two copies had it rather than
+ * quietly generalising the rule in a refactor.
+ *
+ * The asymmetry is a real open question — a Capvaxive dose given off-label to
+ * a 17-year-old cannot be entered at all today, which is the app dropping
+ * clinician input rather than flagging it. That is logged as a finding, not
+ * changed here.
+ *
+ * The age used is `PCV21_MIN_AGE_M` (18y), Capvaxive's PRODUCT licence floor
+ * per the FDA label and ACIP mm7336a3. It is NOT the adult SCHEDULE boundary,
+ * which is a year later at `ADULT_SCHED_MIN_M` (19y) — an 18-year-old is
+ * eligible for this product while still on the child/adolescent rulebook.
+ * CLAUDE.md names never collapsing those two numbers as non-negotiable.
+ */
+export function pcvHistoryProductsFor(ageMonths) {
+  const meetsPcv21MinAge = (ageMonths ?? 0) >= PCV21_MIN_AGE_M;
+  return PCV_HISTORY_PRODUCTS.filter((p) => {
+    if (p.key === '') return true;              // unknown sentinel, always offered
+    if (p.key === 'PCV21' && !meetsPcv21MinAge) return false;
+    return true;
+  });
+}
+
 // Recommendation-facing brand option strings ----------------------------
 // Engine emits these as `brands` arrays. PCV21 only when adult.
 export function pcvRecBrands({ adult, includePCV21 = true } = {}) {

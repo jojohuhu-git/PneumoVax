@@ -27,7 +27,6 @@ import StepHistory from '../StepHistory.jsx';
 import Results from '../Results.jsx';
 import { fireEvent } from '@testing-library/react';
 import { dateEntryWarning, analyzeBoth } from '../../logic/validate.js';
-import { PCV_HISTORY_PRODUCTS } from '../../data/brands.js';
 
 const TODAY = '2026-10-12';
 const DOB = '2020-01-01';
@@ -42,7 +41,6 @@ function renderStep({ pcvDoses = [], ppsv23Doses = [], dob = DOB, ageMonths = 81
       ppsv23Doses={ppsv23Doses}
       onChangePcv={() => {}}
       onChangePpsv={() => {}}
-      pcvProducts={PCV_HISTORY_PRODUCTS}
     />
   );
 }

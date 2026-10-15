@@ -81,7 +81,6 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
           ppsv23Doses={ONE_PPSV}
           onChangePcv={() => {}}
           onChangePpsv={() => {}}
-          pcvProducts={PCV_PRODUCTS}
         />
       );
     }
@@ -159,7 +158,6 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
         ppsv23Doses={ONE_PPSV}
         onChangePcv={() => {}}
         onChangePpsv={() => {}}
-        pcvProducts={PCV_PRODUCTS}
       />
     );
     const orphans = [...container.querySelectorAll('.dose-field label')]

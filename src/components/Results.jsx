@@ -1,16 +1,15 @@
-import DoseDateProblem from './DoseDateProblem.jsx';
 import React, { useState, useEffect } from 'react';
 import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
-import { PCV_HISTORY_PRODUCTS } from '../data/brands.js';
-import { PCV21_MIN_AGE_M } from '../logic/scheduleConstants.js';
+import { PPSV23_PRODUCT, pcvHistoryProductsFor } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
 import RiskAgeNote from './RiskAgeNote.jsx';
+import DoseEditor from './DoseEditor.jsx';
 import { Chevron } from './icons.jsx';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
-import { newDoseRow, dropBlankDoseRows } from '../logic/doseIdentity.js';
+import { dropBlankDoseRows } from '../logic/doseIdentity.js';
 
 export default function Results({ state, onReset, onChange, onBack, today }) {
   const { ageMonths, dob, riskIds, pcvDoses, ppsv23Doses } = state;
@@ -18,11 +17,6 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   const maxDate = todayISO(today);
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
-
-  // S11 (2026-10-12): see StepHistory.jsx — the same labels, the same fix. The
-  // two prefixes differ because `useId` is per component instance, so these ids
-  // cannot collide with the history step's even if both were ever on screen.
-  const uid = React.useId();
 
   // S11 / P5-5 (2026-10-12): Escape closes whichever panel is open. Both
   // panels could be opened and neither could be closed from the keyboard
@@ -187,43 +181,12 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     onChange?.({ dob: null, ageMonths: am, ageGroup: ageGroup(am) });
   }
 
-  // S6-2 (2026-10-13): this gate is Capvaxive's PRODUCT licence floor — 18y
-  // (PCV21_MIN_AGE_M), per the FDA label and ACIP mm7336a3. It is NOT an
-  // adult/child test: the adult SCHEDULE begins a year later, at 19y
-  // (ADULT_SCHED_MIN_M), and an 18-year-old is still on the child/adolescent
-  // rulebook while being eligible for this product. It used to be a bare 216
-  // called `isAdult` in both editors, which is how an 18-year-old would end up
-  // routed down the adult schedule by the next person who reused the flag.
-  const meetsPcv21MinAge = (ageMonths ?? 0) >= PCV21_MIN_AGE_M;
-  const pcvOptions = PCV_HISTORY_PRODUCTS.filter(p => {
-    if (p.key === '') return true;
-    if (p.key === 'PCV21' && !meetsPcv21MinAge) return false;
-    return true;
-  });
-
   // P1-3 (2026-10-12): what the "Recorded doses (N)" button counts. Rows the
   // clinician has not typed in are not doses, and the engine does not count
   // them, so the button must not either — a button reading "(1)" above a card
   // showing no doses is the app contradicting itself.
   const recordedDoseCount =
     dropBlankDoseRows(pcvDoses).length + dropBlankDoseRows(ppsv23Doses).length;
-
-  // ── Recorded-dose editors (live re-render via onChange) ──
-  function addPcv() { onChange?.({ pcvDoses: [...pcvDoses, newDoseRow()] }); }
-  function removePcv(i) { onChange?.({ pcvDoses: pcvDoses.filter((_, idx) => idx !== i) }); }
-  function updatePcv(i, field, val) {
-    onChange?.({ pcvDoses: pcvDoses.map((d, idx) => idx === i ? { ...d, [field]: val } : d) });
-  }
-  // The product is stamped on at creation so the card can print it;
-  // `isBlankDoseRow` treats that stamp as a label, not an answer.
-  function addPpsv() { onChange?.({ ppsv23Doses: [...ppsv23Doses, newDoseRow({ product: 'PPSV23' })] }); }
-  function removePpsv(i) { onChange?.({ ppsv23Doses: ppsv23Doses.filter((_, idx) => idx !== i) }); }
-  function updatePpsv(i, val) {
-    onChange?.({ ppsv23Doses: ppsv23Doses.map((d, idx) => idx === i ? { ...d, date: val } : d) });
-  }
-  function updatePpsvField(i, field, val) {
-    onChange?.({ ppsv23Doses: ppsv23Doses.map((d, idx) => idx === i ? { ...d, [field]: val } : d) });
-  }
 
   // P1-3 (2026-10-12): rows the clinician added and never typed in are swept
   // when the panel CLOSES, never while it is open — a half-typed row must not
@@ -239,28 +202,20 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   }
 
 
-  // Same tick as the history step. Shown only while the row is otherwise
-  // empty, which is the only case where "not typed yet" and "a dose was
-  // given, details unknown" differ.
-  function UnknownDoseTick({ checked, onToggle }) {
-    return (
-      <label className="dose-row-unknown">
-        <input
-          type="checkbox"
-          className="risk-checkbox"
-          checked={!!checked}
-          onChange={e => onToggle(e.target.checked)}
-        />
-        <span>
-          A dose was given, but the date and product are unknown.
-          <span className="dose-row-unknown-hint">
-            Tick this to keep the dose on the record. An empty row is removed
-            when you close this panel.
-          </span>
-        </span>
-      </label>
-    );
-  }
+  // S9 / P4-1 (2026-10-15): the rows below are `DoseEditor.jsx`, shared with
+  // the wizard's History step. This panel used to hand-write them, and so did
+  // StepHistory — two copies, which is how `S6-2`, `P1-3` and `S11` each had
+  // to be fixed twice, and how this panel came to render Product before Date
+  // while the wizard rendered Date before Product. `onChange` here sends a
+  // patch to the app's state; the wizard has a setter per stream. The editor
+  // knows about neither: it hands back the whole next list.
+  const doseEditorShared = {
+    ageMonths,
+    today,
+    dob,
+    listClassName: 'dose-list-compact',
+    unknownHint: 'An empty row is removed when you close this panel.',
+  };
 
   return (
     <div>
@@ -336,76 +291,29 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             {/* PCV doses */}
             <div className="dose-history-block">
               <div className="history-edit-section-title">PCV (conjugate) doses</div>
-              {pcvDoses.length === 0 && (
-                <div className="dose-edit-empty">
-                  No PCV doses recorded.
-                </div>
-              )}
-              {pcvDoses.map((dose, i) => (
-                <div key={i} className="dose-row dose-row-compact">
-                  <div className="dose-field">
-                    <label htmlFor={`${uid}-pcv-product-${i}`}>Product</label>
-                    <select id={`${uid}-pcv-product-${i}`} value={dose.product || ''}
-                      onChange={e => updatePcv(i, 'product', e.target.value)}>
-                      {pcvOptions.map(p => (
-                        <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="dose-field">
-                    <label htmlFor={`${uid}-pcv-date-${i}`}>Date (optional)</label>
-                    <input type="date" id={`${uid}-pcv-date-${i}`} value={dose.date || ''}
-                      max={maxDate}
-                      onChange={e => updatePcv(i, 'date', e.target.value)} />
-                  </div>
-                  <button type="button" className="dose-remove" onClick={() => removePcv(i)}
-                    aria-label={`Remove PCV dose ${i + 1}`}>×</button>
-                  <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
-                  {!dose.date && !dose.product && (
-                    <UnknownDoseTick
-                      checked={dose.detailsUnknown}
-                      onToggle={(v) => updatePcv(i, 'detailsUnknown', v)}
-                    />
-                  )}
-                </div>
-              ))}
-              <button type="button" className="add-dose-btn" onClick={addPcv}>+ Add PCV dose</button>
+              <DoseEditor
+                {...doseEditorShared}
+                doses={pcvDoses}
+                onChange={(next) => onChange?.({ pcvDoses: next })}
+                product={{ kind: 'select', options: pcvHistoryProductsFor(ageMonths) }}
+                addDoseLabel="+ Add PCV dose"
+                removeLabel={(i) => `Remove PCV dose ${i + 1}`}
+                emptyMessage="No PCV doses recorded."
+              />
             </div>
 
             {/* PPSV23 doses */}
             <div className="dose-history-block">
               <div className="history-edit-section-title">PPSV23 (Pneumovax 23) doses</div>
-              {ppsv23Doses.length === 0 && (
-                <div className="dose-edit-empty">
-                  No PPSV23 doses recorded.
-                </div>
-              )}
-              {ppsv23Doses.map((dose, i) => (
-                <div key={i} className="dose-row dose-row-compact">
-                  <div className="dose-field">
-                    <label htmlFor={`${uid}-ppsv-product-${i}`}>Product</label>
-                    <input type="text" id={`${uid}-ppsv-product-${i}`}
-                      value="PPSV23 (Pneumovax 23)" disabled
-                      className="dose-field-disabled" />
-                  </div>
-                  <div className="dose-field">
-                    <label htmlFor={`${uid}-ppsv-date-${i}`}>Date (optional)</label>
-                    <input type="date" id={`${uid}-ppsv-date-${i}`} value={dose.date || ''}
-                      max={maxDate}
-                      onChange={e => updatePpsv(i, e.target.value)} />
-                  </div>
-                  <button type="button" className="dose-remove" onClick={() => removePpsv(i)}
-                    aria-label={`Remove PPSV23 dose ${i + 1}`}>×</button>
-                  <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
-                  {!dose.date && (
-                    <UnknownDoseTick
-                      checked={dose.detailsUnknown}
-                      onToggle={(v) => updatePpsvField(i, 'detailsUnknown', v)}
-                    />
-                  )}
-                </div>
-              ))}
-              <button type="button" className="add-dose-btn" onClick={addPpsv}>+ Add PPSV23 dose</button>
+              <DoseEditor
+                {...doseEditorShared}
+                doses={ppsv23Doses}
+                onChange={(next) => onChange?.({ ppsv23Doses: next })}
+                product={{ kind: 'fixed', key: PPSV23_PRODUCT.key, label: PPSV23_PRODUCT.label }}
+                addDoseLabel="+ Add PPSV23 dose"
+                removeLabel={(i) => `Remove PPSV23 dose ${i + 1}`}
+                emptyMessage="No PPSV23 doses recorded."
+              />
             </div>
 
             <span className="age-edit-hint">Changes update recommendations immediately.</span>
