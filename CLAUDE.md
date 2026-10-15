@@ -90,7 +90,7 @@ all four stale copies of the pre-A-P1-1 adult interval.
 ### A Verdict That Moves Must Be Explained
 TWO corpora, both built from `src/test-grid.js`, both gates. `sweep-verdict-corpus.test.js`
 re-runs the engine over **16,250 patients a clinician could really enter**;
-`sweep-record-problem-corpus.test.js` re-runs it over **17,485 impossible ones** — a dose
+`sweep-record-problem-corpus.test.js` re-runs it over **18,460 impossible ones** — a dose
 dated before the patient was born, or dated after today. Either fails if an answer differs
 from its committed corpus. **Do not run `npm run sweep:update` (which regenerates both) until
 you can say why those patients should get a different answer**, then put both moved counts in
@@ -104,7 +104,7 @@ moves 300 of them reads as 300 lines rather than 300 lost among 23,000 impossibl
 The main grid *discards* 15,340 before-birth combinations on one line and cannot express a
 future date at all, so both record-problem rules were guarded by nothing: deleting
 `isBeforeBirth()` left the main sweep green 12/12, and so did disabling `futureDated()`.
-Against the second corpus the same two mutations move **14,304** and **1,980** of 17,485.
+Against the second corpus the same two mutations move **14,304** and **1,980** of 18,460.
 **Add a rule to `recordProblemFor()` → add its shape to `GRID_FUTURE_*` in the same commit.**
 
 ### Every Interval Rule Lives In One Table
