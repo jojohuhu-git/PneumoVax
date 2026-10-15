@@ -39,16 +39,32 @@ src/
     StepRisks.jsx        Risk-factor checklist, grouped IC / cochlear-CSF / non-IC / HSCT.
     StepHistory.jsx      TWO product streams: PCV doses (product dropdown) + PPSV23 doses.
                          Each dose {date?, product?}. No auto-add — always needs explicit
-                         "+ Add dose" click.
+                         "+ Add dose" click. Since S9 it owns only the headings, the
+                         wording and the "no previous doses" link; the rows themselves are
+                         DoseEditor.jsx.
+    DoseEditor.jsx       THE recorded-dose editor — one component, used by BOTH surfaces
+                         (StepHistory.jsx and the "Recorded doses" panel in Results.jsx).
+                         Extracted by S9 / P4-1 (2026-10-15) after the two copies had
+                         drifted to different field orders and three separate items
+                         (S6-2, P1-3, S11) each had to be fixed twice. Shared: the field
+                         set and ORDER (Date then Product), label-to-box association, the
+                         remove button, the impossible-date warning, and when the
+                         details-unknown tick shows. Per-surface via props: heading,
+                         button wording, empty-list message, list density, and the hint's
+                         last line. `onChange` is handed the COMPLETE next array, which is
+                         what lets the wizard (a setter per stream) and Results (a patch
+                         to app state) store it differently. It knows NO pneumococcal
+                         rules — the PCV21 dropdown gate is pcvHistoryProductsFor() in
+                         brands.js.
     Results.jsx          Output. Calls recommend(); renders HSCT advisory card, PCV21 geo
                          note, standard rec cards. Inline "Adjust age" + "Recorded doses ▾"
                          editors. "← Edit history" back button at bottom.
     DoseDateProblem.jsx  The one-line "this date is impossible" warning shown under a dose
                          row as the date is typed (owner decision, 2026-10-12: WARN, do not
-                         trap — "View Results" stays enabled). Used by BOTH dose editors,
-                         StepHistory.jsx and the inline one in Results.jsx, because the
-                         editor is duplicated (open S9 / P4-1) and a warning written into
-                         one of them is a surface the other silently lacks. It decides
+                         trap — "View Results" stays enabled). Rendered by DoseEditor.jsx,
+                         so both surfaces get it by construction. It predates S9, when the
+                         editor WAS duplicated and a warning written into one copy was a
+                         surface the other silently lacked. It decides
                          nothing: `dateEntryWarning()` in validate.js calls the same
                          futureDated / isBeforeBirth predicates the engine grades with, and
                          regression-history-step-warns-on-impossible-dates asserts the kind

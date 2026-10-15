@@ -4,7 +4,6 @@ import StepAge from './components/StepAge.jsx';
 import StepRisks from './components/StepRisks.jsx';
 import StepHistory from './components/StepHistory.jsx';
 import Results from './components/Results.jsx';
-import { PCV_HISTORY_PRODUCTS } from './data/brands.js';
 import { dropBlankDoseRows } from './logic/doseIdentity.js';
 import { hasExclusion } from './data/riskFactors.js';
 import { patientAgeMonths } from './logic/patientAge.js';
@@ -176,7 +175,6 @@ export default function App() {
             ppsv23Doses={state.ppsv23Doses}
             onChangePcv={pcvDoses => update({ pcvDoses })}
             onChangePpsv={ppsv23Doses => update({ ppsv23Doses })}
-            pcvProducts={PCV_HISTORY_PRODUCTS}
           />
         )}
         {state.step === 3 && (

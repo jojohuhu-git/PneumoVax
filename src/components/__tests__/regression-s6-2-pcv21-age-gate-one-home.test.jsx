@@ -35,13 +35,20 @@
 // Capvaxive's floor, changing `PCV21_MIN_AGE_M` moves these tests with it and
 // a stale hand-typed copy is what fails.
 //
-// Both surfaces are tested because the dose editor exists twice
-// (`StepHistory.jsx` and the inline editor in `Results.jsx` — the open
-// S9 / P4-1 duplication). A fix to one is the single-surface fix CLAUDE.md
-// forbids.
+// Both surfaces are tested because the dose editor USED to exist twice
+// (`StepHistory.jsx` and the inline editor in `Results.jsx`). A fix to one
+// was the single-surface fix CLAUDE.md forbids, and this gate is the example:
+// the same line had to be written into both copies.
+//
+// S9 (2026-10-15) merged the two into `DoseEditor.jsx` and moved this gate
+// into `brands.js`. Both surfaces are STILL asserted, deliberately — they are
+// now expected to agree for a structural reason rather than by coincidence,
+// and a future change that gives either screen its own dropdown again is
+// exactly what should fail here.
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import React from 'react';
 import StepHistory from '../StepHistory.jsx';
 import Results from '../Results.jsx';
@@ -49,14 +56,11 @@ import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from '../../logic/scheduleConstant
 
 const TODAY = '2026-10-13';
 
-// The catalogue the app passes down, including PCV21 and the unknown sentinel.
-const PCV_PRODUCTS = [
-  { key: 'PCV13', label: 'PCV13 (Prevnar 13)' },
-  { key: 'PCV15', label: 'PCV15 (Vaxneuvance)' },
-  { key: 'PCV20', label: 'PCV20 (Prevnar 20)' },
-  { key: 'PCV21', label: 'PCV21 (Capvaxive)' },
-  { key: '', label: 'Unknown PCV product' },
-];
+// S9 removed the `pcvProducts` prop this test used to inject. The catalogue
+// reached the wizard as a prop while Results imported it directly, and each
+// copy then applied its own filter; both now ask `brands.js` the one question.
+// So these assertions run against the REAL catalogue, which is stricter: a
+// product quietly added or dropped there now shows up here.
 
 // One undated PCV row, so there is a product dropdown to inspect. An undated
 // row needs no extra flag: a PCV row's product is what makes it a dose.
@@ -104,7 +108,6 @@ describe('S6-2 — the PCV21 age gate has one home', () => {
           ppsv23Doses={[]}
           onChangePcv={() => {}}
           onChangePpsv={() => {}}
-          pcvProducts={PCV_PRODUCTS}
         />
       );
     }
@@ -172,19 +175,52 @@ describe('S6-2 — the PCV21 age gate has one home', () => {
     });
   });
 
+  // ── The source guards ─────────────────────────────────────────────────
+  //
+  // S9 (2026-10-15) moved the gate, so these moved with it. They used to say
+  // "each editor names `PCV21_MIN_AGE_M` and types no bare 216", which was the
+  // strongest statement available while the filter was written out in BOTH
+  // editors. It is now written once, in `brands.js`'s
+  // `pcvHistoryProductsFor`, beside the catalogue it filters — so the guard
+  // can say the stronger thing: the components do not know this rule at all.
+  //
+  // Every behavioural test above is unchanged and still passes on both
+  // surfaces, which is what says the extraction did not move the gate's
+  // ANSWER — only where it is computed.
   describe('the source guards', () => {
-    it.each(EDITORS)('%s reads the shared constant instead of typing 216', (rel) => {
-      const code = codeOnly(readFileSync(new URL(rel, import.meta.url), 'utf8'));
-      expect(code).not.toMatch(/\b216\b/);
+    it.each([...EDITORS, '../DoseEditor.jsx'])(
+      '%s does not type the product floor at all, as a number or a name',
+      (rel) => {
+        const code = codeOnly(readFileSync(new URL(rel, import.meta.url), 'utf8'));
+        expect(code).not.toMatch(/\b216\b/);
+        // Not even the constant: a component that reads it is a component
+        // deciding a product's licence floor, which is the shape S9 removed.
+        // Scoped to the CONSTANT, not the bare word "PCV21" — Results.jsx
+        // prints "PCV21 geographic note:" in an advisory banner, which is
+        // prose about the product, not a copy of its licence floor.
+        expect(code).not.toContain('PCV21_MIN_AGE_M');
+      }
+    );
+
+    it('the gate is computed in exactly one place, from the constant', () => {
+      const code = codeOnly(
+        readFileSync(resolve(process.cwd(), 'src/data/brands.js'), 'utf8')
+      );
       expect(code).toContain('PCV21_MIN_AGE_M');
+      expect(code).toContain('pcvHistoryProductsFor');
+      // Derived from the constant, never a hand-typed 216.
+      expect(code).not.toMatch(/\b216\b/);
     });
 
     // The naming hazard in its own right: a component-level flag called
     // `isAdult` that actually holds the 18y product floor is how an
     // 18-year-old ends up on the adult schedule a year early.
-    it.each(EDITORS)('%s does not call the product floor an adult test', (rel) => {
-      const code = codeOnly(readFileSync(new URL(rel, import.meta.url), 'utf8'));
-      expect(code).not.toMatch(/\bisAdult\b/);
-    });
+    it.each([...EDITORS, '../DoseEditor.jsx', '../../data/brands.js'])(
+      '%s does not call the product floor an adult test',
+      (rel) => {
+        const code = codeOnly(readFileSync(new URL(rel, import.meta.url), 'utf8'));
+        expect(code).not.toMatch(/\bisAdult\b/);
+      }
+    );
   });
 });
