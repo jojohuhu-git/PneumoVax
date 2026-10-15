@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED (2026-10-15) by `handoff-2026-10-15-s6-and-s9-merged.md`.** Do not resume
+> from this file. Everything it leaves open is now closed: PR #42 merged (`eda91f7`), the
+> MeningoVax decision was taken and shipped as PR #71 (`f0ec86d`), and `S9` is merged
+> (PR #43, `0a64391`). The remaining queue has been reordered and added to in the newer file.
+
 # PneumoVax — Handoff after S6's safe half (2026-10-13)
 
 > **Supersedes `handoff-2026-10-12-parity-1-and-s11-keyboard.md`.** Its PR **#41 is MERGED**
