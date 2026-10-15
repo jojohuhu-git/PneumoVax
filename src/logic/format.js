@@ -1,4 +1,5 @@
 import { calendarMonthsBetween, todayISO } from './dateUtils.js';
+import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 
 // format.js — UI display helpers (not clinical logic)
 
@@ -94,14 +95,22 @@ export function fmtDate(iso) {
  * FIX L1: the old boundary `am < 120` for "Child" excluded ages 120–131mo
  * (the 10th year) which should still be "Child". A 10-year-old is 120–131.9mo.
  * Fixed to `am < 132` so "Child (2–10y)" covers the full 2–10y range inclusive.
- * StepAge chips are aligned to the same boundary (see AGE_GROUP_CHIPS).
+ * There is no separate chip table to keep in step: StepAge, Results and App all
+ * derive the displayed band from THIS function. (A comment here used to point
+ * at an `AGE_GROUP_CHIPS` constant; no such name exists anywhere in src/.)
+ *
+ * S6-1 (2026-10-13): the two upper boundaries used to be typed out here as bare
+ * `228` and `600`, independently of the engine's own copies. They now read the
+ * shared constants, so the band a clinician sees cannot describe a patient the
+ * engine is routing differently. `24` and `132` stay literal: they are display
+ * boundaries only, with no second copy anywhere to drift from.
  */
 export function ageGroup(am) {
   if (am == null) return null;
   if (am < 24) return 'Infant (<2y)';
   if (am < 132) return 'Child (2–10y)';
-  if (am < 228) return 'Adolescent (11–18y)';
-  if (am < 600) return 'Adult (19–49y)';
+  if (am < ADULT_SCHED_MIN_M) return 'Adolescent (11–18y)';
+  if (am < ROUTINE_ADULT_MIN_M) return 'Adult (19–49y)';
   return 'Older adult (≥50y)';
 }
 

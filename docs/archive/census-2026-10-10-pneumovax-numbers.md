@@ -1,5 +1,17 @@
 # PneumoVax number census — every age, interval and series total
 
+> **PARTLY CLOSED (2026-10-13) by S6-1 and S6-2.** Re-measure before trusting any count
+> below; several moved in this document's favour. Closed so far:
+> **`600`** (routine adult age) now has one home, `ROUTINE_ADULT_MIN_M` — census step 3.
+> **`216`** no longer has a hand-typed copy in either dose editor — census step 2's
+> component half, and the misleading `isAdult` name is gone with it.
+> **`24`** (PPSV23 min age) was already closed earlier by queue `P2-12`, not by S6 —
+> census step 4 needs no work. **`30.4375`** is down to **3** live copies, not the 6 this
+> document claims; the rest are comments about past bugs.
+> Still open: the `30.4375` export (step 1), the `M`-table aliases and dead `m16`
+> (step 5), and the ~58 interval prose strings (step 6, deliberately deferred by the
+> owner on 2026-10-13 so a verdict change cannot hide behind a tidy-up).
+
 **Written:** 2026-10-10 (S2) · **Repo state:** `main` @ `beec94b`
 **Purpose:** S6's input — the "one number, one home" refactor. For every clinical number in
 the app: what it means, where it lives, and **how many independent copies exist**.
@@ -44,13 +56,17 @@ Canonical home: `src/logic/scheduleConstants.js:29` → `export const PCV21_MIN_
 |---|---|---|
 | `src/logic/validate.js:39` | `const Y18_MONTHS = PCV21_MIN_AGE_M` | ✅ imports |
 | `src/data/brands.js:113` | `minAgeM: PCV21_MIN_AGE_M` | ✅ imports |
-| `src/components/StepHistory.jsx:11` | `const isAdult = (ageMonths ?? 0) >= 216` | ❌ **literal, no import** |
-| `src/components/Results.jsx:128` | `const isAdult = (ageMonths ?? 0) >= 216` | ❌ **literal, no import** |
+| `src/components/StepHistory.jsx` | `meetsPcv21MinAge = ... >= PCV21_MIN_AGE_M` | ✅ imports (S6-2) |
+| `src/components/Results.jsx` | `meetsPcv21MinAge = ... >= PCV21_MIN_AGE_M` | ✅ imports (S6-2) |
 
-Neither component imports from `scheduleConstants.js` at all. Both literals are **correct**
-today (they gate the PCV21 option in the dose-entry dropdown, which is a product-licence
-question, so `216` is the right number) — but `scheduleConstants.js`'s header names
-"StepHistory/Results PCV21 age gate" as consumers of the constant, and they are not.
+**Closed by S6-2 (2026-10-13).** Both literals were **correct** (they gate the PCV21
+option in the dose-entry dropdown, a product-licence question, so `216` was the right
+number) — but neither component imported from `scheduleConstants.js` at all, while that
+file's header already named "StepHistory/Results PCV21 age gate" as consumers. Both now
+import it, and the gate is called `meetsPcv21MinAge`: the old name `isAdult` described a
+different clinical number entirely, since the adult SCHEDULE begins a year later at 228.
+That was the live hazard — the next person needing an adult/child test would have reused
+the flag and routed every 18-year-old down the adult schedule.
 
 ### `228` — adult schedule boundary (19 years)
 

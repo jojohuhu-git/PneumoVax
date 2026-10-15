@@ -320,7 +320,9 @@ Routine for ALL adults ≥50 regardless of risk.
 >
 > These two thresholds are kept as separate named constants (`PCV21_MIN_AGE_M = 216` and
 > `ADULT_SCHED_MIN_M = 228`) in `src/logic/scheduleConstants.js`. Never collapse them
-> into a single value — they govern different gates.
+> into a single value — they govern different gates. That file also owns a third,
+> equally distinct age: `ROUTINE_ADULT_MIN_M = 600` (50y), where routine age-based adult
+> eligibility begins (§H; mm7401a1).
 
 - Option for **any patient ≥18y** who qualifies for a PCV. **Not for children** (<18y).
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal

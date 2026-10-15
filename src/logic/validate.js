@@ -36,7 +36,7 @@
 // completesSeries) to drive the matrix.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { daysBetween, todayISO } from './dateUtils.js';
+import { daysBetween, todayISO, AVG_DAYS_PER_MONTH } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS, fmtDate } from './format.js';
 import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS, PPSV23_PRODUCT } from '../data/brands.js';
@@ -107,7 +107,7 @@ function fmtMinAge(minAgeM) {
   }
   // Sub-2-month minimums (e.g. the 6-week PCV floor) read better in weeks.
   if (minAgeM < 2) {
-    const w = Math.round((minAgeM * 30.4375) / 7);
+    const w = Math.round((minAgeM * AVG_DAYS_PER_MONTH) / 7);
     return `${w} week${w === 1 ? '' : 's'}`;
   }
   return `${minAgeM} month${minAgeM === 1 ? '' : 's'}`;

@@ -26,6 +26,7 @@
 
 // Import PCV21 product min age constant — see scheduleConstants.js.
 import { PCV21_MIN_AGE_M } from '../logic/scheduleConstants.js';
+import { AVG_DAYS_PER_MONTH } from '../logic/dateUtils.js';
 
 export { PCV21_MIN_AGE_M };
 
@@ -36,14 +37,14 @@ export const VAX = {
 
 // ACIP minimum age for all conjugate PCVs is 6 weeks (42 days), NOT the 2-month
 // routine start. Expressed in months for the validator's float-month comparison.
-// (42 / 30.4375 ≈ 1.38mo.) Using the routine 2-month start as the minimum wrongly
+// (42 / AVG_DAYS_PER_MONTH ≈ 1.38mo.) Using the routine 2-month start wrongly
 // rejects a dose given at the recommended 2-month visit (56–62 days < 60.9 days).
 // ACIP's PCV floor is 6 weeks, and weeks are EXACT day counts ("4 weeks = 28
 // days", CDC schedule notes). 42 is therefore the real number and the months
 // form is the derived one — stated here once so the two can never drift (S10;
 // see also the number census in docs/archive/).
 export const PCV_MIN_AGE_DAYS = 42;
-export const PCV_MIN_AGE_M = PCV_MIN_AGE_DAYS / 30.4375;
+export const PCV_MIN_AGE_M = PCV_MIN_AGE_DAYS / AVG_DAYS_PER_MONTH;
 
 // PCV product catalog. `key` matches the value stored in history doses.
 export const PCV_PRODUCTS = [

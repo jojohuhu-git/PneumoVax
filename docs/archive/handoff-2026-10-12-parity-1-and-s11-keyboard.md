@@ -1,3 +1,12 @@
+> **SUPERSEDED (2026-10-13) by `handoff-2026-10-13-s6-safe-half.md`.**
+> Do not resume the queue below. Its **PR #41 is MERGED** (`ade789c`) and deployed; `S11`
+> and `PARITY-1` are shipped. Its next item **`S6` is now HALF DONE** — the
+> behaviour-preserving half is PR #42, and the owner deliberately deferred the interval-prose
+> half, so starting "S6" from this file would redo finished work. `S9`, `S5`, `S12` and `S7`
+> are carried forward to the new file unchanged. Two of this file's premises were also
+> measured wrong: `dateUtils.js` is not byte-identical across the apps (one comment differs),
+> and the impossible-record corpus is 18,460, not 17,485.
+
 # PneumoVax — Handoff after PARITY-1 and all of S11 (2026-10-12)
 
 > **Supersedes `handoff-2026-10-12-impossible-entries-coverage-and-warnings.md`.** Its two

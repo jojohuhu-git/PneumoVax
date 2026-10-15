@@ -1,5 +1,6 @@
 import { todayISO } from '../logic/dateUtils.js';
 import { newDoseRow } from '../logic/doseIdentity.js';
+import { PCV21_MIN_AGE_M } from '../logic/scheduleConstants.js';
 import DoseDateProblem from './DoseDateProblem.jsx';
 import React from 'react';
 
@@ -17,7 +18,14 @@ export default function StepHistory({
   // tomorrow after ~17:00 Pacific, so the picker offered a date validate.js
   // then correctly refused as being in the future.
   const maxDate = todayISO(today);
-  const isAdult = (ageMonths ?? 0) >= 216;
+  // S6-2 (2026-10-13): this gate is Capvaxive's PRODUCT licence floor — 18y
+  // (PCV21_MIN_AGE_M), per the FDA label and ACIP mm7336a3. It is NOT an
+  // adult/child test: the adult SCHEDULE begins a year later, at 19y
+  // (ADULT_SCHED_MIN_M), and an 18-year-old is still on the child/adolescent
+  // rulebook while being eligible for this product. It used to be a bare 216
+  // called `isAdult` in both editors, which is how an 18-year-old would end up
+  // routed down the adult schedule by the next person who reused the flag.
+  const meetsPcv21MinAge = (ageMonths ?? 0) >= PCV21_MIN_AGE_M;
 
   // S11 (2026-10-12): every dose-row label is attached to its own box.
   // `useId` gives this component instance a prefix nothing else in the document
@@ -74,11 +82,11 @@ export default function StepHistory({
     onChangePpsv([]);
   }
 
-  // PCV product options: hide PCV21 for children (not licensed <18y), but allow
-  // recording it for adults. Always include the "Unknown PCV product" sentinel.
+  // PCV product options: hide PCV21 below its licence floor (18y, PCV21_MIN_AGE_M),
+  // but allow recording it at or above it. Always include the "Unknown" sentinel.
   const pcvOptions = pcvProducts.filter(p => {
     if (p.key === '') return true;               // unknown sentinel
-    if (p.key === 'PCV21' && !isAdult) return false;
+    if (p.key === 'PCV21' && !meetsPcv21MinAge) return false;
     return true;
   });
 
