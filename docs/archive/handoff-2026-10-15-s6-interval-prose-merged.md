@@ -22,9 +22,17 @@ is a clinician, not a coder — explain every what and why in plain English, in 
 ## Owner decisions this session
 
 1. **Merge #49** (done — merged, deployed, live site checked).
-2. No clinical decision was required. The change was a refactor with **zero** output change,
-   proved rather than assumed (see below), plus a documentation correction applying rules the
-   owner had **already** settled (A-P1-1, 2026-10-10 and S14-7, 2026-10-11).
+2. #49 itself needed no clinical decision: a refactor with **zero** output change, proved
+   rather than assumed, plus a documentation correction applying rules already settled
+   (A-P1-1, 2026-10-10 and S14-7, 2026-10-11).
+3. ⚠️ **NEW AND IMPORTANT — the adult PCV→PPSV23 recommended interval goes back to being
+   keyed on risk class.** Taken after the owner questioned #49's explanation and ACIP
+   rr7203a1 was fetched live: its Tables 2, 3 and 4 print **≥8 weeks** as the schedule for an
+   immunocompromising condition / CSF leak / cochlear implant, at **both** age bands, and
+   **≥1 year** otherwise. This **reverses the interval half of A-P1-1**. The owner also
+   instructed that the whole adult interval surface be audited, not just the PCV15 row.
+   **NOT STARTED — deliberately not worked on in that session.** Planned in full in
+   `plan-2026-10-15-adult-interval-risk-class-audit.md`; it is now queue item **0**.
 
 ## What's done
 
@@ -103,7 +111,44 @@ S14-7 floor wording).
 
 ## What's NOT done — the remaining queue, in recommended priority order
 
-Numbering continues from the previous handoff; items 1–4 are done.
+Numbering continues from the previous handoff; items 1–4 are done. **Item 0 is new and
+outranks everything else.**
+
+**0. ⚠️ ADULT DOSING-INTERVAL RECOMMENDATIONS ARE WRONG FOR IMMUNOCOMPROMISED ADULTS.**
+**Owner decision taken 2026-10-15. Full plan, verified ACIP source table and measured current
+behaviour: `plan-2026-10-15-adult-interval-risk-class-audit.md`. PLANNED, NOT STARTED.**
+
+In one line: **ACIP says 8 weeks and the app says 1 year.** For an adult with an
+immunocompromising condition, CSF leak or cochlear implant, ACIP rr7203a1 Tables 2/3/4 give
+PCV15 → PPSV23 at **≥8 weeks**; the app recommends **≥1 year** to every adult regardless of
+risk, and puts a date twelve months out in the due field. ACIP's stated reason for the
+shorter interval is "to minimize the time of risk for IPD caused by serotypes unique to
+PPSV23 in these groups at increased risk".
+
+Measured on `main` @ `2983d41`: the recommended interval is **flat across risk class** in
+every history row, at both age bands — not one of ACIP's 8-week cells is reflected.
+
+**The app already contains the split, on the other side of the question.** The validator
+(`doseIntervalRules.js`) keys on risk class in four rows (`shorterMinimum: true/false`, 8
+weeks vs 1 year, for PCV15→PPSV23 **and** PCV13→PPSV23); the recommender (`recommend.js`)
+keys on nothing. `adultPpsvShorterMinimumApplies()` is already imported and called there —
+today only to append the "8 weeks may be considered" sentence, never to pick the number.
+
+**Five further findings, which is why this is an audit and not a one-line fix:**
+PCV13→PPSV23 is 8-week keyed too and the recommender never says so; **cochlear implant / CSF
+leak are NOT IC-equivalent for the second PPSV23** (rr7203a1 says so explicitly) and the app
+treats them as one class; the adult pathway only ever offers ACIP's Schedule option A, which
+makes option B's 8-week cells unreachable; "PPSV23 only → ≥1 year" is the **control that must
+not move**; and rr7203a1's "review at 65" is **stale** against mm7401a1's routine-at-50 and
+must not be imported while fixing its intervals. Each is written up with its source quote.
+
+**Parity checked: MeningoVax does NOT have this asymmetry** — it keys MenB intervals on risk
+status in both `recommend.js` and `validate.js`, from the same shared constants. PneumoVax-only
+bug class, and MeningoVax is the reference for the SHAPE of the fix (risk-keyed constant in the
+shared interval module, imported by both sides). No parity PR owed.
+
+**Three owner sub-questions are listed in the plan's §8 — ask, do not default.**
+**This WILL move verdicts** (unlike #49). Both corpus counts go in the PR. Opus 5, high effort.
 
 **5. `P4-4` — the history step never asks the yes/no question.** An untouched step is
 ambiguous: no doses, or not asked? **Owner decision already recorded (2026-10-10): Option B**
@@ -200,18 +245,23 @@ thing owed back to MeningoVax is N4, which is latent.
 
 ## Why this is a good stopping point
 
-Both repos are on `main`, clean and green, with nothing of this session's open. #49 is merged,
-the deploy succeeded, and the change was confirmed on the live site rather than assumed.
-Nothing is half-built. The handoff chain is repaired — it was two PRs stale. The only open
-owner decision (N1) blocks nothing; every remaining queue item can start cold.
+Both repos are on `main`, clean and green, with no code half-built and nothing of this
+session's in progress. #49 is merged, the deploy succeeded, and the change was confirmed on
+the live site rather than assumed. The handoff chain is repaired — it was two PRs stale.
+
+**But do not read "green" as "correct".** Queue item **0** is a live clinical defect: the app
+recommends a 1-year interval where ACIP gives 8 weeks for immunocompromised adults. It is
+planned in full and deliberately not started, at the owner's instruction. **Start there.**
 
 ## Resuming
 
 1. `cd ~/Downloads/PneumoVax && git checkout main && git pull`. Branch fresh from there.
 2. Confirm the suite: **918 passing / 83 files, 0 failing.** Stop and diagnose any mismatch.
-3. **No decision gates the next item.** Items 5–8 can all start cold. If she wants a decision
-   settled first, N1 is the one waiting — **ask, do not default**, and bring worked engine
-   output, not a rule quote.
+3. **Start with queue item 0** and read
+   `plan-2026-10-15-adult-interval-risk-class-audit.md` before touching anything. Its §8 has
+   three owner sub-questions — **ask, do not default**, and bring worked engine output, not a
+   rule quote. Items 5–8 can start cold if she wants something smaller first. N1 is still
+   waiting and still blocks nothing.
 4. Per item: reproduce → failing test first (**confirm it fails, and for the right reason**)
    → fix → full suite green → **live-verify in the running app** → one commit per item ID.
 5. **A new guard is not done until you have broken the code on purpose and quoted the count.**
