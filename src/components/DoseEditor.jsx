@@ -253,7 +253,14 @@ export default function DoseEditor({
                   onChange={(e) => updateDose(i, 'detailsUnknown', e.target.checked)}
                 />
                 <span>
-                  A dose was given, but the date and product are unknown.
+                  {/* P4-4 item 6 (2026-10-16): a PPSV23 row's product is
+                      never unknown — it is `kind: 'fixed'` and shown, greyed
+                      out, right beside this tick. Saying "and product" there
+                      told the clinician something untrue. Only a
+                      select-product row (PCV) can have an unknown product. */}
+                  {productIsFixed
+                    ? 'A dose was given, but the date is unknown.'
+                    : 'A dose was given, but the date and product are unknown.'}
                   <span className="dose-row-unknown-hint">
                     Tick this to keep the dose on the record. {unknownHint}
                   </span>
