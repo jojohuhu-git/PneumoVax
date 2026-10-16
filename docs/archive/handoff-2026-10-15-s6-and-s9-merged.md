@@ -1,3 +1,9 @@
+> **SUPERSEDED (2026-10-15) by `handoff-2026-10-15-pcv21-offlabel-merged.md`.** This file's
+> queue item 1 (`PCV21-OFFLABEL`) is DONE and MERGED as PR #45 (`9861f4d`); items 2-8 are
+> carried forward there with their numbering preserved. Two of its "carried forward" notes
+> are corrected in the new file (the stale corpus count is in `testing.md`, not `CLAUDE.md`;
+> and MeningoVax does NOT share the dropdown-gate bug). **Do not resume from this file.**
+
 # PneumoVax — Handoff after S6's safe half and S9 both merged (2026-10-15)
 
 > **Supersedes `handoff-2026-10-13-s6-safe-half.md`.** Everything that file left open is
