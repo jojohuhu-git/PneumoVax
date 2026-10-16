@@ -995,9 +995,6 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   })];
 }
 
-// Whether the patient needs the ≥8wk (IC) interval (IC or cochlear/CSF).
-
-
 // Most recent dose date across PCV + PPSV23 effective lists.
 function lastDoseDate(pcv, ppsv) {
   const dates = [];

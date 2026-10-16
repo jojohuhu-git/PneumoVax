@@ -432,6 +432,104 @@ describe('P2-7: no document names a function or constant the code no longer has'
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────
+// S6-6 (2026-10-15) — the superseded adult interval, by its WORDS this time.
+//
+// The guard above catches a stale rule by the stale IDENTIFIER beside it, and
+// that is how S8 found four copies of the pre-A-P1-1 adult interval: each one
+// named `adultPpsvIntervalClass()`. A fifth copy had no identifier in it at
+// all, so nothing objected, and it sat in the header of `riskFactors.js` —
+// the file that owns ADULT_PPSV23_INTERVAL_MONTHS — stating two hundred lines
+// above those constants that the adult interval is keyed on the risk class:
+//
+//   "• IC adult interval = >=8 weeks; non-IC chronic adult interval = >=1 year."
+//
+// The rulebook itself carried it in three more places, contradicting its own
+// A-P1-1 bullet ten paragraphs later, and `recommend.js` kept a comment with
+// no code under it saying the same thing.
+//
+// So this checks for the RULE, not the name: any sentence that keys the adult
+// PCV15->PPSV23 interval on the risk class must sit next to words framing it
+// as history. The correct statement is unaffected — ">=1 year for every adult,
+// with 8 weeks named as an option" keys the OPTION on the class, not the
+// interval, and the validity floor (S14-7) says "floor" or "minimum".
+describe('S6-6: no file states the amended risk-class-keyed adult interval as current', () => {
+  // Each pattern is a shape the superseded rule actually took, in a real file.
+  const SUPERSEDED = [
+    /IC\s+adult\s+interval\s*=/i,
+    /non-?IC\s+chronic\s+(adult\s+)?interval\s*(is|=)/i,
+    /interval\s+differs\s+by\s+risk\s+class/i,
+    /shorter\s+PCV(15)?\s*(→|->)\s*PPSV23\s*=/i,
+    /(use|uses|needs)\s+the\s+IC\s*\(≥8wk\)\s+interval/i,
+    /the\s+≥8wk\s*\(IC\)\s+interval/i,
+    /Chronic\s+conditions\s*\(≥1y\s+interval\)/i,
+    /IC\/cochlear\/CSF\s*=\s*≥8/i,
+  ];
+
+  const FRAMED_AS_HISTORY = /no longer|used to|previously read|previously|deleted|removed|superseded|amended|corrected|stale|before the owner|the rule BEFORE|pre-A-P1-1|outlived/i;
+
+  // Documents and the three source files that carried it.
+  const SCANNED = [
+    SPEC_PATH,
+    CLINICAL_PATH,
+    'CLAUDE.md',
+    'docs/agent/architecture.md',
+    'docs/agent/testing.md',
+    'src/data/riskFactors.js',
+    'src/logic/recommend.js',
+    'src/logic/doseIntervalRules.js',
+  ];
+
+  for (const path of SCANNED) {
+    it(`${path} does not present the risk-class-keyed interval as the rule`, () => {
+      const text = readFileSync(new URL(`../../../${path}`, import.meta.url), 'utf8');
+      const lines = text.split('\n');
+      const unframed = [];
+      lines.forEach((line, i) => {
+        for (const pat of SUPERSEDED) {
+          if (!pat.test(line)) continue;
+          // A match is allowed only where the surrounding lines say it is past.
+          const around = lines.slice(Math.max(0, i - 8), i + 9).join('\n');
+          if (!FRAMED_AS_HISTORY.test(around)) {
+            unframed.push(`${i + 1}: ${line.trim().slice(0, 130)}`);
+          }
+        }
+      });
+      expect(
+        unframed,
+        `${path} states the adult PCV15->PPSV23 interval as keyed on the risk class, with `
+        + 'nothing nearby saying that rule was amended. The owner amended it on 2026-10-10 '
+        + '(A-P1-1): >=1 year is the recommendation for EVERY adult, and the 8 weeks is '
+        + 'named as an option, never substituted. If you mean the S14-7 VALIDITY FLOOR, say '
+        + '"floor" or "minimum" — that one really is keyed on the class.\n\n'
+        + unframed.join('\n'),
+      ).toEqual([]);
+    });
+  }
+
+  // The control: the guard must actually fire on the sentence that escaped.
+  it('fires on the exact sentence that survived in riskFactors.js', () => {
+    const escaped = '//   • IC adult interval = ≥8 weeks; non-IC chronic adult interval = ≥1 year.';
+    expect(SUPERSEDED.some((p) => p.test(escaped))).toBe(true);
+    // ...and on the rulebook's two headings.
+    expect(SUPERSEDED.some((p) => p.test('**Immunocompromising (shorter PCV→PPSV23 = ≥8wk):** chronic renal failure'))).toBe(true);
+    expect(SUPERSEDED.some((p) => p.test('**Chronic conditions (≥1y interval):** chronic heart disease'))).toBe(true);
+    expect(SUPERSEDED.some((p) => p.test('PCV15→PPSV23 interval differs by risk class:'))).toBe(true);
+  });
+
+  // ...and must NOT fire on the correct statement, or on the validity floor.
+  it('passes the rule as it now stands, and the S14-7 floor', () => {
+    for (const ok of [
+      'The PCV15→PPSV23 recommendation is ≥1 year for every adult, whatever the risk class',
+      'the 8-week minimum is named as an option for an immunocompromising condition',
+      'Validity floor for a dose already given: 8 weeks for IC / cochlear implant / CSF leak',
+      '8 weeks for IC / cochlear implant / CSF leak, the year for every other adult',
+    ]) {
+      expect(SUPERSEDED.some((p) => p.test(ok)), `false positive on: ${ok}`).toBe(false);
+    }
+  });
+});
+
 describe('P2-7: both documents say when they were last checked against the code', () => {
   for (const [path, doc] of [[SPEC_PATH, spec], [CLINICAL_PATH, clinical]]) {
     it(`${path} carries a dated "verified against code" stamp`, () => {
