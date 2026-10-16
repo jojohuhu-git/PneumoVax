@@ -50,8 +50,26 @@ const KNOWN_UNCITED = {
     + 'page a clinician can actually navigate. Kept as the primary-source record.',
   mmwr7137a3:
     'ACIP PCV15-in-adults MMWR (2022). Superseded for citation purposes by '
-    + 'mmwr7203a1 (the 2023 adult recommendations), which IS cited. Kept as the '
-    + 'primary-source record of where PCV15 came from.',
+    + 'mmwr7203a1 (the 2023 adult recommendations), itself now uncited — see '
+    + 'below. Kept as the primary-source record of where PCV15 came from.',
+  mmwr7203a1:
+    'ACIP adult pneumococcal recommendations (2023), Kobayashi et al. Uncited '
+    + 'since N5 (OWNER DECISION 2026-10-16, option A) and deliberately kept. '
+    + 'TWO separate claims rested on it and both have moved on:\n'
+    + '  • The adult PCV15->PPSV23 INTERVAL. S15 (2026-10-16) replaced it with '
+    + 'mm7401a1 and the CDC Adult Timing Job Aid. CLAUDE.md: "rr7203a1 is '
+    + 'superseded. Never cite it for an adult interval again."\n'
+    + '  • The adult RISK-FACTOR LIST. Four risk conditions (asplenia, '
+    + 'immunosuppression, alcohol use disorder, cigarette smoking) listed it '
+    + 'while the other thirteen listed no MMWR at all, so the sources at the '
+    + 'foot of an adult card changed with which box was ticked — the 2023 '
+    + 'paper appeared for a smoker and not for HIV. Not wrong, just '
+    + 'inconsistent: the CDC Adult Notes (already cited on every adult card) '
+    + 'enumerate all four by name, read live 2026-10-16, and mm7401a1 prints '
+    + 'the same list and says the 19-49 risk recommendations "have not changed '
+    + 'from previous recommendations". The owner chose to drop the link.\n'
+    + 'Kept as the primary-source record: it is the document the adult risk '
+    + 'list came from, and mm7401a1 points back to it.',
 };
 
 const SRC = resolve(process.cwd(), 'src');

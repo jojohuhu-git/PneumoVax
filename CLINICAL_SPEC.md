@@ -32,7 +32,7 @@ Sources fetched live and read 2026-06-06.
 | `cdcPneumoIndex` | CDC HCP pneumococcal recommendations index | general |
 | `mmwr7401a1` | MMWR mm7401a1 — adult ≥50 expansion (eff. 2024-10-23) | routine age lowered 65→50 |
 | `mmwr7336a3` | MMWR mm7336a3 — PCV21 (Capvaxive) adults | PCV21 eligibility, serotype-4 geo note |
-| `mmwr7203a1` | MMWR rr7203a1 — comprehensive adult ≥19 | adult risk catalog |
+| `mmwr7203a1` | MMWR rr7203a1 — comprehensive adult ≥19 | **UNCITED since N5 (2026-10-16).** Kept as the primary-source record of where the adult risk list came from; superseded for the interval by `mmwr7401a1` (S15) and dropped from the risk list for consistency (§J). |
 | `mmwr7239a5` | MMWR mm7239a5 — PCV20 in children | peds PCV20 |
 | `mmwr7137a3` | MMWR mm7137a3 — PCV15 in adults | adult PCV15 |
 | `p2016` | immunize.org p2016 (Tables 1–5) | **peds dose-count grids + child HSCT (Table 5)** |
@@ -409,7 +409,51 @@ Routine for ALL adults ≥50 regardless of risk.
 
 ---
 
-## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7203a1`)
+## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`)
+
+### A card cites the schedule it was written from, and never the other one
+
+**N6 (owner-reported 2026-10-16) + N5 (OWNER DECISION 2026-10-16, option A).**
+
+Every entry in `refs.js` declares a **`rulebook`** — `'child'`, `'adult'` or `'any'` —
+and `collectRefs()` in `recommend.js` keeps only the sources written for the card being
+built, plus the age-neutral ones. A card's **own defaults are never filtered**: a card
+that asks for a source has already decided it belongs there.
+
+**What this fixed.** A risk condition's `refs` list used to be merged into the card
+whole. Most conditions exist at every age and therefore list **both** CDC schedule
+pages, so both reached whichever card was being built. Measured over every risk
+condition on 2026-10-16:
+
+| | before | after |
+|---|---|---|
+| risk conditions putting a **child** source on an **adult** card | 13 of 17 | **0** |
+| risk conditions putting an **adult** source on a **child** card | 12 of 17 | **0** |
+| adult HSCT card citing the **paediatric** HSCT table (`p3086Table5`) | yes | **no** |
+
+Over the 16,250-patient grid: **15,604 citation chips removed, 0 added**, and **not one
+of them was a source belonging to the card's own schedule** — measured, not asserted.
+
+**This is the second escape of one bug.** P3-9b had fixed the child direction only, by
+stripping `adultOnly` ticks, and left a comment in `recommend.js` claiming the other
+direction was impossible. It was not: a condition present at every age is not
+`adultOnly`. Routing and citation are different questions and are now answered
+separately — **never add a third age test at a call site; declare the rulebook on the
+source.**
+
+**N5 — the adult risk list no longer cites `rr7203a1`.** Four conditions (asplenia,
+immunosuppression, alcohol use disorder, cigarette smoking) listed the 2023 adult ACIP
+paper while the other thirteen listed no MMWR at all, so the sources under an adult card
+changed with which box was ticked — the paper appeared for a smoker and not for HIV. It
+was not wrong, just inconsistent. Every adult card already cites the **CDC Adult Notes**,
+which enumerate all four by name (read live 2026-10-16), plus the **Adult Timing Job
+Aid** and **mm7401a1**, which prints the same list and says the 19–49 risk
+recommendations "have not changed from previous recommendations". `rr7203a1` stays in
+`refs.js` as the uncited primary-source record, logged in `citation-orphans.test.js`.
+
+Guarded by `src/data/__tests__/regression-n6-citations-follow-the-rulebook.test.js`.
+
+### What the risk class decides
 
 What the class decides on the adult pathway — **four separate questions**. Since S15
 (2026-10-16) the recommended interval IS one of them, but **only together with the age

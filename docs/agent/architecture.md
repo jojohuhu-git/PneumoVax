@@ -148,6 +148,12 @@ src/
                          pcvRecBrands. Counting flags per product. PCV_MIN_AGE_M = 42/30.4375 (6 wks).
     riskFactors.js       RISK_FACTORS catalog + IC/nonIC/special/hsct class helpers.
     refs.js              REFS citation map + resolveRefs(). HSCT sources segregated.
+                         Every entry declares `rulebook`: 'child' | 'adult' | 'any' —
+                         which schedule the source speaks for. collectRefs() in
+                         recommend.js keeps only the sources written for the card being
+                         built, so a risk condition can never put the CHILD schedule on
+                         an adult's card or the reverse (N6, 2026-10-16). Declare it on
+                         the source; never add an age test at a call site.
   components/__tests__/App.test.jsx   Wizard render/flow tests.
 CLINICAL_SPEC.md         Every clinical rule with source citations. Read first when changing any rule.
 HANDOFF.md               Author-review checklist, source-vs-p2016 reconciliation, ambiguities.
