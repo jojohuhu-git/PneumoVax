@@ -424,6 +424,55 @@ function withMarker(text, cites) {
   return cites ? `${text}[c]` : text;
 }
 
+// ── PCV21's second age ───────────────────────────────────────────────────
+//
+// N1 (OWNER DECISION 2026-10-16). PCV21 (Capvaxive) carries TWO ages a year
+// apart, and until N1 the app only knew the lower one:
+//
+//   PCV21_MIN_AGE_M    216 (18y)  the FDA licence — the PRODUCT floor. Below
+//                                 it a dose is invalid (validateOnePCV).
+//   ADULT_SCHED_MIN_M  228 (19y)  where ACIP's recommendation begins, because
+//                                 that is where the adult rulebook begins.
+//
+// Both from MMWR mm7336a3, read live 2026-10-16: FDA licensed it "for adults
+// aged >=18 years"; ACIP recommended "PCV21 as an option for adults aged >=19
+// years who are currently recommended to receive a dose of PCV".
+//
+// A dose in that one-year gap is validly licensed but ahead of the schedule.
+// Measured before the fix: an 18-year-old's dose and a 19-year-old's dose were
+// indistinguishable — green "Dose 1 of 1", `reasons: []`, in total silence.
+// The owner ruled: COUNT it, SAY it was early, and say it does NOT need
+// repeating.
+//
+// It is an advisory on a VALID result (S14-3's `advise`), never a status of
+// its own, so nothing downstream that counts doses can mistake it for a
+// dropped one — and the chip stays "Dose 1 of 1" per S14-2, which put timing
+// in the sentence and not in the chip.
+//
+// Both numbers are read from the two constants. Typing either as a literal is
+// how a sentence starts telling the clinician a number the engine no longer
+// uses (S6-1, S15), and CLAUDE.md forbids collapsing these two in particular.
+function adviseIfBeforeRecommendedAge(result, prod, ageAtDose, ageMonths) {
+  if (!prod || prod.key !== 'PCV21') return result;
+  // With a date, the age AT THE DOSE decides (S10-N1: the age today sent a
+  // clinician to the wrong field). Without one, today's age is an UPPER BOUND
+  // on the age at administration — so a patient who is still below the
+  // recommended age cannot have been vaccinated at or above it, and the note
+  // is certain even with no date. Above it, nothing can be known: stay quiet.
+  const dated = ageAtDose != null;
+  const age = dated ? ageAtDose : ageMonths;
+  if (age >= ADULT_SCHED_MIN_M) return result;
+  const licensed = fmtMinAge(PCV21_MIN_AGE_M);
+  const recommended = fmtMinAge(ADULT_SCHED_MIN_M);
+  const when = dated
+    ? `This dose was given at ~${fmtAgeM(ageAtDose)}`
+    : `The patient is currently ~${fmtAgeM(ageMonths)}, so this dose was given`;
+  return advise(
+    result,
+    `PCV21 (Capvaxive) is FDA-licensed from ${licensed}, but ACIP recommends it from ${recommended}. ${when} — before the recommended starting age. It counts and does not need repeating.`
+  );
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
@@ -532,9 +581,12 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
         ageCites
       );
     }
-    return unknown([
-      withMarker(`No date recorded — cannot verify age or interval. Counted in the series (must have been given at ≥${fmtMinAge(minAgeM)} to be valid).`, ageCites),
-    ], ageCites);
+    return adviseIfBeforeRecommendedAge(
+      unknown([
+        withMarker(`No date recorded — cannot verify age or interval. Counted in the series (must have been given at ≥${fmtMinAge(minAgeM)} to be valid).`, ageCites),
+      ], ageCites),
+      prod, null, ageMonths
+    );
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
@@ -556,7 +608,10 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   }
 
   // Age is settled; now the dose's timing, against the one rule table.
-  const result = key ? valid() : unknown(['Product not recorded — counted as a generic PCV dose.']);
+  const result = adviseIfBeforeRecommendedAge(
+    key ? valid() : unknown(['Product not recorded — counted as a generic PCV dose.']),
+    prod, ageAtDose, ageMonths
+  );
   return applyIntervalRules(result, {
     vaccine: 'PCV',
     product: key,

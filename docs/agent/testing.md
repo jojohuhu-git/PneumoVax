@@ -170,3 +170,51 @@ So for any test whose assertion is "nothing is wrong" — an empty-array expecta
 `queryBy*` returning null, a sweep over generated cases — **introduce the fault on purpose
 and watch it go red** before trusting it. Where a sweep counts what it visited, count each
 *kind* separately: a combined total lets one kind fall to zero unnoticed.
+
+## N1, N5 and N6 (2026-10-16) — the counts, and what each mutation caught
+
+**N1 — a PCV21 dose given between 18 and 19.** `regression-n1-pcv21-recommended-age-note`
+(12 tests). Suite 1001 → 1013. Verdict corpora: **108 of 16,250** real patients moved,
+**0 of 18,460** impossible; in every one of the 108 only the `earlyAdvisory` flag and the
+reason count changed, with `status`, `effectiveDoseNum` and `doesNotCount` byte-identical,
+so no dose started or stopped counting. Rendered prose over both corpora: **108 lines
+added, 0 removed, 0 changed**.
+
+Mutations, each run against the full suite and restored from the scratchpad (never
+`git checkout`):
+
+| mutation | failed |
+|---|---|
+| the note never fires | 5 |
+| the boundary is collapsed onto the product constant (18y) | 5 |
+| the dose is rejected instead of noted | 7 |
+| it fires for every product, not just PCV21 | 3 |
+| the boundary is off by one (`>` for `>=`) | 1 |
+| the dateless path loses the note | 1 |
+| an age is hand-typed instead of read from its constant | 1 |
+
+**N5 + N6 — citations follow the rulebook.**
+`regression-n6-citations-follow-the-rulebook` (14 tests). Suite 1013 → 1027. No verdict
+moved in either corpus — citations are not verdicts, which is exactly why they needed
+their own measurement: **15,604 citation chips removed and 0 added** across the
+16,250-patient grid, with **zero** removals of a source belonging to the card's own
+schedule.
+
+| mutation | failed |
+|---|---|
+| the rulebook filter is removed (the original bug restored) | 5 |
+| the filter is inverted (keeps the other schedule) | 5 |
+| an adult card asks for the child rulebook | 3 |
+| the 2023 paper is put back on a risk condition | 3 |
+| one ref loses its `rulebook` declaration | 1 |
+| a card's own defaults are filtered too | 1 |
+| age-neutral (`'any'`) sources are dropped instead of kept | 1 |
+
+**The one worth knowing.** That last mutation first scored **0 of 1026** — the whole
+suite stayed green while the `'any'` branch was deleted. No risk condition shipping today
+carries an age-neutral source that reaches a card (the only one that lists one is the
+B-cell/CAR-T **exclusion**, which builds no card at all), so the branch is unreachable
+end-to-end. The branch was kept rather than deleted — the day someone adds an age-neutral
+source to a risk condition it must not vanish — and `collectRefs` is now exported and
+tested directly, with the reason written at both ends. An untested branch that "obviously
+works" is the same shape as the comment N6 came from.

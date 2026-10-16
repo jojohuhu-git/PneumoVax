@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED 2026-10-16 by `handoff-2026-10-16-n1-n5-n6.md`.** PR #52 merged
+> (`0556991`). The two owner decisions this file left open — **N1** (PCV21's counting
+> floor) and **N5** (the `rr7203a1` citation on the risk list) — are **both now decided
+> and implemented**, in PR #53. Do not resume the queue below; read the newer file.
+
 # PneumoVax — Handoff after S15, the adult interval (2026-10-16)
 
 > **SUPERSEDED by `handoff-2026-10-16-p4-4-s7-n2-prosediff.md`** (from `main`'s side — a

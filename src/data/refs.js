@@ -10,8 +10,35 @@
 //   • Children <19y HSCT → immunize.org p3086 Table 5 (SOLE source).
 //   • Adults ≥19y HSCT   → Fred Hutch LTFU §IX (SOLE source).
 //
-// Each entry: url, label (full title), short (chip text), lastVerified, and —
-// for sentence-level keys only — quote.
+// Each entry: rulebook, url, label (full title), short (chip text),
+// lastVerified, and — for sentence-level keys only — quote.
+//
+// ── `rulebook` — which schedule this source speaks for (N6, 2026-10-16) ──
+//
+//   'child'  the CDC child & adolescent schedule and the paediatric sources
+//            beside it. Belongs on a card built for a patient under
+//            ADULT_SCHED_MIN_M (19y), and must never appear on an adult's.
+//   'adult'  the CDC adult schedule and the adult MMWRs. The mirror.
+//   'any'    genuinely age-neutral: General Best Practice guidance, the
+//            product-level MMWRs, the landing pages. Belongs on either.
+//
+// WHY IT IS DECLARED HERE and not filtered at the call site. A source's
+// rulebook is a property OF THE SOURCE, so it is written down once, where the
+// source is — the same shape `doseIntervalRules.js` uses, where each rule row
+// declares its own `rulebook` rather than letting a caller's age test decide.
+//
+// The bug this closes (owner-reported 2026-10-16): `collectRefs()` merged each
+// selected risk condition's whole refs list into the card, and a condition
+// that exists at both ages lists both CDC pages — so a 55-year-old smoker's
+// card cited the CHILD schedule, and a 5-year-old's cited the ADULT one.
+// Measured over every risk condition: 13 of 17 one way, 12 of 17 the other.
+// P3-9b had fixed one direction only, by stripping `adultOnly` ticks, and its
+// comment claimed the other direction was impossible. It was not: a condition
+// present at every age is not `adultOnly`, so nothing stripped it.
+//
+// Every entry must declare one — `regression-n6-citations-follow-the-rulebook`
+// fails if a new ref is added without it, which is what stops this gate from
+// quietly acquiring the hole P3-9b's had.
 //
 // ── What `lastVerified` attests to (P2-8, 2026-10-12) ────────────────────
 //
@@ -52,12 +79,14 @@
 export const REFS = {
   // CDC schedule notes ----------------------------------------------------
   cdcChildPneumo: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child/Adolescent Immunization Schedule — Pneumococcal notes',
     short: 'CDC Child/Adolescent Notes',
     lastVerified: '2026-10-12',
   },
   cdcAdultPneumo: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Immunization Schedule — Pneumococcal notes',
     short: 'CDC Adult Notes',
@@ -80,6 +109,7 @@ export const REFS = {
   // re-verification must use textContent and keep a positive control, or a
   // "0 matches" result means nothing.)
   cdcAdultRiskFactorList: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Immunization Schedule — pneumococcal, the risk-factor footnote to "Age 19–49 years with certain underlying medical conditions or other risk factors"',
     short: 'CDC Adult Notes',
@@ -87,6 +117,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   cdcChildSpecialSituations: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Immunization Schedule — pneumococcal "Special situations", the non-immunocompromising risk group (CDC\'s complete paediatric enumeration; names neither smoking nor alcohol)',
     short: 'CDC Child/Adolescent Notes',
@@ -114,6 +145,7 @@ export const REFS = {
   // `adultPcv15ThenPpsvShort` below, not to the sentence here — a card must
   // never show a quote that states a different number from the card.
   adultRoutine50: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, routine vaccination at age 50+ with no prior PCV or unknown history',
     short: 'CDC Adult Notes',
@@ -121,6 +153,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   adultPcv15ThenPpsv: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, the PCV15 -> PPSV23 interval of >=1 year, with 8 weeks named as a minimum that MAY be considered for an immunocompromising condition, cochlear implant or CSF leak. This is the citation for the YEAR: every adult 50+, and 19-49 with chronic conditions only',
     short: 'CDC Adult Notes',
@@ -138,6 +171,7 @@ export const REFS = {
   // with an immunocompromising condition, a CSF leak, or a cochlear implant /
   // None or PCV7 only at any age". The canonical cdc.gov URL is used here.
   adultPcv15ThenPpsvShort: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — for adults aged 19-49 years with an immunocompromising condition, a CSF leak, or a cochlear implant, PPSV23 follows PCV15 by >=8 weeks. CDC\'s March 2025 Adult Pneumococcal Vaccine Timing Job Aid prints the same >=8 weeks on its 19-49 immunocompromising (p.2) and cochlear implant / CSF leak (p.3) pages',
     short: 'MMWR ≥50 expansion',
@@ -145,6 +179,7 @@ export const REFS = {
     lastVerified: '2026-10-16',
   },
   adultPcv13Only: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PCV13',
     short: 'CDC Adult Notes',
@@ -152,6 +187,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   adultPpsvOnly: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PPSV23',
     short: 'CDC Adult Notes',
@@ -159,6 +195,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   adultBothNotAt65: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, PCV13 + PPSV23 where no PPSV23 was given at 65+',
     short: 'CDC Adult Notes',
@@ -166,6 +203,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   adultBothAt65: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, PCV13 + PPSV23 with PPSV23 given at 65+ (shared clinical decision-making)',
     short: 'CDC Adult Notes',
@@ -173,6 +211,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   adultPcv20or21Complete: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, a series containing PCV20 or PCV21 is complete',
     short: 'CDC Adult Notes',
@@ -180,6 +219,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   adultPcv7Only: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, a PCV7-only history is treated as no PCV history',
     short: 'CDC Adult Notes',
@@ -196,6 +236,7 @@ export const REFS = {
   // than once because CDC repeats the same row under the immunocompromising
   // and non-immunocompromising groups; the deep link lands on the first.
   pedsRoutine4Dose: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, routine infant 4-dose PCV series',
     short: 'CDC Child/Adolescent Notes',
@@ -203,6 +244,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsHealthyCatchup: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, catch-up for healthy children 2-4 years',
     short: 'CDC Child/Adolescent Notes',
@@ -210,6 +252,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsNoPcv20IfComplete: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, PCV20 not indicated for a child without risk conditions who already completed an age-appropriate series',
     short: 'CDC Child/Adolescent Notes',
@@ -217,6 +260,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsRisk6to18NoPcv: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk 6-18 years with no prior PCV13/15/20 (and the 8-week PCV15 -> PPSV23 interval)',
     short: 'CDC Child/Adolescent Notes',
@@ -224,6 +268,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsRiskPcv20Complete: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", a prior PCV20 completes an at-risk child\'s series',
     short: 'CDC Child/Adolescent Notes',
@@ -231,6 +276,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsRiskPcv13At6: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk child who received PCV13 only at or after age 6',
     short: 'CDC Child/Adolescent Notes',
@@ -238,6 +284,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsRiskDone: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", PCV13 + PPSV23 at or after age 6 completes the series',
     short: 'CDC Child/Adolescent Notes',
@@ -255,6 +302,7 @@ export const REFS = {
   // nobody; the moment P6-3c put it on a verdict it would have been a dead
   // link. The parenthetical alone is one <p> and does match.
   pedsMinAge: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal minimum ages (6 weeks for PCV15/PCV20; 2 years for PPSV23)',
     short: 'CDC Child/Adolescent Notes',
@@ -268,6 +316,7 @@ export const REFS = {
   // The 5-year sentence occurs twice — CDC prints it under both the 2-5y and
   // the 6-18y groups — so the deep link lands on the first.
   pedsSecondPpsv5y: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
     label: 'CDC Risk-based Pneumococcal Recommendations — when PPSV23 is used for an at-risk child, a further pneumococcal vaccine follows at least 5 years later',
     short: 'CDC Risk-based Pneumococcal',
@@ -275,6 +324,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsBefore6NoPcv20: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
     label: 'CDC Risk-based Pneumococcal Recommendations — the 6-18y row for a child who received PCV13 or PCV15 before age 6 and never PCV20',
     short: 'CDC Risk-based Pneumococcal',
@@ -284,6 +334,7 @@ export const REFS = {
 
   // (continued) Child & adolescent sentences, verified the same way.
   pedsRiskIncompleteCatchup: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk 2-5y with fewer than 3 prior PCV doses',
     short: 'CDC Child/Adolescent Notes',
@@ -291,6 +342,7 @@ export const REFS = {
     lastVerified: '2026-10-10',
   },
   pedsRiskPcv20orPpsv23: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk child who completed the PCV series without PCV20 and without PPSV23',
     short: 'CDC Child/Adolescent Notes',
@@ -300,24 +352,28 @@ export const REFS = {
 
   // CDC job aids ----------------------------------------------------------
   cdcCatchupJobAid: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
     label: 'CDC PCV Catch-Up Job Aid — Healthy Children 4 months–4 years (Jan 2025)',
     short: 'CDC PCV Catch-up Job Aid',
     lastVerified: '2026-10-12',
   },
   cdcAdultTimingJobAid: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
     label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid',
     short: 'CDC Adult Timing Job Aid',
     lastVerified: '2026-10-12',
   },
   cdcPneumoIndex: {
+    rulebook: 'any',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/index.html',
     label: 'CDC — Pneumococcal Vaccine Recommendations (HCP)',
     short: 'CDC Pneumococcal Recommendations',
     lastVerified: '2026-10-12',
   },
   cdcRiskIndications: {
+    rulebook: 'any',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
     // 2026-10-10 (S13): this label used to claim the page contains the phrase
     // "received PCV only before age 6 years". Fetched live — it does not. The
@@ -331,30 +387,35 @@ export const REFS = {
 
   // ACIP MMWRs ------------------------------------------------------------
   mmwr7401a1: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 — Expanded routine pneumococcal vaccination of adults aged ≥50 years (MMWR mm7401a1)',
     short: 'MMWR ≥50 expansion',
     lastVerified: '2026-10-12',
   },
   mmwr7336a3: {
+    rulebook: 'any',
     url: 'https://www.cdc.gov/mmwr/volumes/73/wr/mm7336a3.htm',
     label: 'ACIP 2024 — Use of 21-valent pneumococcal conjugate vaccine (PCV21/Capvaxive) in adults (MMWR mm7336a3)',
     short: 'PCV21 MMWR',
     lastVerified: '2026-10-12',
   },
   mmwr7203a1: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/72/rr/rr7203a1.htm',
     label: 'ACIP — Use of pneumococcal vaccines among U.S. adults ≥19 years (MMWR rr7203a1)',
     short: 'Adult Pneumococcal MMWR',
     lastVerified: '2026-10-12',
   },
   mmwr7239a5: {
+    rulebook: 'child',
     url: 'https://www.cdc.gov/mmwr/volumes/72/wr/mm7239a5.htm',
     label: 'ACIP 2023 — Use of PCV20 among children (MMWR mm7239a5)',
     short: 'PCV20 Children MMWR',
     lastVerified: '2026-10-12',
   },
   mmwr7137a3: {
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
     label: 'ACIP 2022 — Use of PCV15 and PCV20 among adults (MMWR mm7137a3)',
     short: 'PCV15 Adults MMWR',
@@ -363,6 +424,7 @@ export const REFS = {
 
   // immunize.org ----------------------------------------------------------
   p2016: {
+    rulebook: 'child',
     // 2026-09-13 fix: label previously claimed "Tables 1-5" — verified live
     // that p2016.pdf, as it exists now, is a 2-page document with only
     // Tables 1-4. Table 5 (the HSCT schedule) lives in p3086.pdf instead
@@ -392,6 +454,7 @@ export const REFS = {
   // The clinician is shown the sentence verbatim and can judge it. If a future
   // source states the rule without the risk qualifier, cite that instead.
   immPCV7: {
+    rulebook: 'any',
     url: 'https://www.immunize.org/ask-experts/how-do-we-account-for-the-history-of-pcv7-vaccination-when-determining-the-pneumococcal-vaccination-needs-of-an-older-teen-or-young-adult-with-a-high-risk-condition/',
     label: 'immunize.org Ask the Experts — PCV7 history is ignored; treat high-risk patient as PCV-naïve',
     short: 'immunize.org PCV7 rule',
@@ -399,6 +462,7 @@ export const REFS = {
     lastVerified: '2026-10-12',
   },
   immPneumo: {
+    rulebook: 'any',
     url: 'https://www.immunize.org/ask-experts/topic/pneumococcal/',
     label: 'immunize.org Ask the Experts — Pneumococcal',
     short: 'immunize.org Ask the Experts',
@@ -413,6 +477,7 @@ export const REFS = {
   // Pneumococcal Vaccines to Children and Teens"), page 4 of 5 — verified
   // its text matches this app's hardcoded advisory note verbatim.
   p3086Table5: {
+    rulebook: 'child',
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p3086.pdf',
     label: 'immunize.org Standing Orders for Administering Pneumococcal Vaccines to Children and Teens — Table 5: Pneumococcal schedule for children <19y following HSCT (SOLE peds-HSCT source)',
     short: 'Immunize.org Table 5 (HSCT)',
@@ -424,6 +489,7 @@ export const REFS = {
   // LTFU is retained below only as a superseded/historical entry (kept for
   // any archived references pointing at it) — no active rec cites it.
   ascoAdultCancer2024: {
+    rulebook: 'adult',
     url: 'https://ascopubs.org/doi/10.1200/JCO.24.00032',
     label: 'ASCO Guideline: Vaccination of Adults With Cancer (J Clin Oncol 2024)',
     short: 'ASCO Vaccination of Adults With Cancer (2024)',
@@ -433,6 +499,7 @@ export const REFS = {
   // Superseded 2026-09-14 — institution-specific, titer-guided, not ACIP.
   // Kept for historical reference only; no active rec cites this.
   fredHutchLTFU: {
+    rulebook: 'adult',
     url: 'https://www.fredhutch.org/content/dam/www/research/patient-treatment-and-support/ltfu/LTFU_HSCT_guidelines_physicians.pdf',
     label: 'Fred Hutch Long-Term Follow-Up Guidelines for Referring Physicians, §IX Vaccinations, Tables IX.A1/A2 (adult HSCT — institution-specific, titer-guided, not ACIP; superseded by ASCO 2024)',
     short: 'Fred Hutch LTFU §IX (superseded)',
@@ -441,6 +508,7 @@ export const REFS = {
 
   // CAR-T / B-cell malignancy / B-cell-depleting therapy hard stop -------
   cdcAlteredImmunocompetence: {
+    rulebook: 'any',
     // P2-8 (2026-10-12): the old path
     // `/vaccines/hcp/acip-recs/general-recs/immunocompetence.html` still
     // works, but only through a CDC redirect — the page has moved to

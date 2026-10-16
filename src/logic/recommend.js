@@ -16,7 +16,7 @@
 // components.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { resolveRefs, cite } from '../data/refs.js';
+import { resolveRefs, cite, REFS } from '../data/refs.js';
 import {
   RISK_BY_ID,
   hasHSCT,
@@ -126,10 +126,41 @@ function rec(o) {
 }
 
 // Merge risk-driven ref keys with defaults, de-duplicated, preserving order.
-function collectRefs(riskIds, defaults) {
+//
+// N6 (owner-reported 2026-10-16). `rulebook` is the schedule the CARD is
+// written from — 'child' or 'adult' — and a risk condition only contributes
+// the sources written for that schedule, plus the age-neutral ones. Each
+// source declares where it belongs in `refs.js`; this function never decides
+// it, so a new source cannot be added without saying.
+//
+// WHY. Most risk conditions exist at every age and so list BOTH CDC pages.
+// Without this filter the whole list reached whichever card was being built,
+// and a 55-year-old smoker's card cited the child schedule (13 of 17
+// conditions did it one way; 12 of 17 did the mirror). The `defaults` are the
+// card's own choice and are never filtered — a card that asks for a source
+// has already decided it belongs there.
+//
+// This is NOT P3-9b's filter and does not replace it. That one strips
+// `adultOnly` ticks so an adult-only condition cannot route a child to the
+// wrong PATHWAY; it is the right answer to a different question, and it left
+// this hole because a condition present at every age is not `adultOnly`.
+//
+// EXPORTED FOR TEST, and here is the honest reason. No risk condition shipping
+// today carries an 'any' source that reaches a card: the only one that lists
+// an age-neutral source is B-cell depleting / CAR-T therapy, which is an
+// EXCLUSION and builds no standard card at all. So the `'any'` branch below
+// cannot be reached end-to-end, and a mutation that deletes it leaves the
+// whole suite green (measured: 1026/1026). It is kept, not deleted, because
+// the day someone adds an age-neutral source to a risk condition it must not
+// vanish — so the branch is tested directly instead of pretended about.
+export function collectRefs(riskIds, defaults, rulebook) {
   const out = [];
   for (const id of riskIds) {
-    for (const k of RISK_BY_ID[id]?.refs ?? []) if (!out.includes(k)) out.push(k);
+    for (const k of RISK_BY_ID[id]?.refs ?? []) {
+      const book = REFS[k]?.rulebook;
+      if (rulebook && book && book !== 'any' && book !== rulebook) continue;
+      if (!out.includes(k)) out.push(k);
+    }
   }
   for (const k of defaults) if (!out.includes(k)) out.push(k);
   return out;
@@ -497,7 +528,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
 function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   const rowClass = pedsRiskRowClass(riskIds); // 'IC' | 'nonIC'
   const isIC = rowClass === 'IC';
-  const refs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016']);
+  const refs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016'], 'child');
   const anchorPcv = pcv.lastDate;
   // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
   const anchorPneumo = mostRecent(pcv.lastDate, ppsv.effective.find((d) => d.date)?.date || null);
@@ -601,7 +632,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         detail: 'All conjugate doses on record were given before age 6 (72 months) and PPSV23 has been received, which completes the series. Verified against CDC PneumoRecs VaxAdvisor: "only received PCV before age 72 months" plus PPSV23 received → complete. PCV7 doses are never counted toward the series.',
       },
       noteCites: [cite('pedsBefore6NoPcv20')],
-      refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', 'p2016']),
+      refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', 'p2016'], 'child'),
     }));
     return out;
   }
@@ -816,7 +847,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // covers every adult row this file uses. Do not reinstate rr7203a1 here.
   const refs = collectRefs(riskIds, [
     'cdcAdultPneumo', 'cdcAdultTimingJobAid', 'mmwr7401a1',
-  ]);
+  ], 'adult');
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
   // SAME number the card states, so it follows the same predicate.
   const ppsvIntervalCite = ppsvIntervalDays != null
@@ -1204,9 +1235,22 @@ export function recommend(input) {
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
     // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an
-    // adult-only tick cannot route the child here, and cannot drag an adult
-    // citation (cdcAdultPneumo / mmwr7203a1) into a child's card via
-    // collectRefs either.
+    // adult-only tick cannot route the child here.
+    //
+    // ⚠️ This comment used to go on: "and cannot drag an adult citation
+    // (cdcAdultPneumo / mmwr7203a1) into a child's card via collectRefs
+    // either." THAT WAS FALSE, and it stood for four days. Measured
+    // 2026-10-16: 12 of 17 risk conditions did exactly that. `pedsRiskIds`
+    // strips ticks flagged `adultOnly` — the right filter for ROUTING, which
+    // is what P3-9b was about — but a condition that exists at every age
+    // (asplenia, HIV, diabetes) is not `adultOnly`, lists both CDC pages, and
+    // sailed straight through. Citations are now filtered by the SOURCE's own
+    // declared rulebook instead (N6; see collectRefs and refs.js), which is a
+    // different question from routing and is answered separately.
+    //
+    // The lesson, written where the claim was: a comment asserting that
+    // something cannot happen is a test that does not run. This one is now
+    // `regression-n6-citations-follow-the-rulebook.test.js`.
     const pedsIds = pedsRiskIds(riskIds);
     if (pedsRiskRowClass(pedsIds)) {
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today);

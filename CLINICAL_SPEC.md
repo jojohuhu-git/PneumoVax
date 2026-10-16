@@ -32,7 +32,7 @@ Sources fetched live and read 2026-06-06.
 | `cdcPneumoIndex` | CDC HCP pneumococcal recommendations index | general |
 | `mmwr7401a1` | MMWR mm7401a1 — adult ≥50 expansion (eff. 2024-10-23) | routine age lowered 65→50 |
 | `mmwr7336a3` | MMWR mm7336a3 — PCV21 (Capvaxive) adults | PCV21 eligibility, serotype-4 geo note |
-| `mmwr7203a1` | MMWR rr7203a1 — comprehensive adult ≥19 | adult risk catalog |
+| `mmwr7203a1` | MMWR rr7203a1 — comprehensive adult ≥19 | **UNCITED since N5 (2026-10-16).** Kept as the primary-source record of where the adult risk list came from; superseded for the interval by `mmwr7401a1` (S15) and dropped from the risk list for consistency (§J). |
 | `mmwr7239a5` | MMWR mm7239a5 — PCV20 in children | peds PCV20 |
 | `mmwr7137a3` | MMWR mm7137a3 — PCV15 in adults | adult PCV15 |
 | `p2016` | immunize.org p2016 (Tables 1–5) | **peds dose-count grids + child HSCT (Table 5)** |
@@ -370,17 +370,90 @@ Routine for ALL adults ≥50 regardless of risk.
     as valid doses and should be repeated as age appropriate" — and the FDA approval for
     ages ≥18 (`mmwr7336a3`). It is **not** a record problem: the patient really received
     it, so the "repeat as age appropriate" advice is correct here.
-  - **Open question, logged not decided:** **CDSI v4.64** sets PCV21's *allowable* age at
-    **"19 years − 4 days"**, a year stricter than the licence floor this app uses, and
-    ACIP's recommendation itself begins at 19y. The counting floor stays **18y** until the
-    owner rules on worked examples of an 18- and a 19-year-old.
+- **A PCV21 dose given at 18–19 COUNTS, and says it was given before the recommended
+  starting age.** **OWNER DECISION 2026-10-16 (N1), implemented.** PCV21 carries two ages
+  a year apart, both from `mmwr7336a3` (read live 2026-10-16):
+
+  | | Age | Constant | What the source says |
+  |---|---|---|---|
+  | FDA licence | **18y** | `PCV21_MIN_AGE_M` | licensed "for adults aged ≥18 years" |
+  | ACIP recommendation | **19y** | `ADULT_SCHED_MIN_M` | "PCV21 as an option for adults aged ≥19 years who are currently recommended to receive a dose of PCV" |
+
+  The counting floor **stays at 18y** — the dose is validly licensed, counts, and is
+  **never repeated**. What changed is that the app no longer says this in silence: a dose
+  in that one-year gap carries a note naming both ages. Before N1, a dose given the day
+  the patient turned 18 and one given the day they turned 19 were **indistinguishable** —
+  both a green "Dose 1 of 1" with `reasons: []` (measured on four patients through
+  `analyzeBoth`, 2026-10-16).
+
+  Mechanics: `adviseIfBeforeRecommendedAge()` in `validate.js`, reached through S14-3's
+  `advise()` — a flag on a **valid** result, never a status of its own, so a dose that
+  counts cannot stop counting. **The chip does not move**: it stays "Dose 1 of 1" per
+  S14-2, which put timing in the sentence below the chip and not in the chip. Both ages
+  are read from the two constants; neither is typed as a literal.
+
+  With a date, the age **at the dose** decides (S10-N1). Without one, today's age is an
+  upper bound on the age at administration, so a patient still under 19 today cannot have
+  been vaccinated at 19 — the note is certain and is given. Over 19 with no date, nothing
+  can be known and the app stays quiet.
+
+  **CDSI v4.64 is noted and not followed.** It sets PCV21's *allowable* age at
+  **"19 years − 4 days"**, which would make an 18-year-old's dose invalid. The owner
+  ruled otherwise, and the authority rule agrees: an `allowableVaccine beginAge` derived
+  from the recommendation is a CDSI *preferable* window, which yields to the FDA licence
+  for the product floor — and the clinical content of the 19y boundary is carried as the
+  note instead of as a rejection.
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.
 
 ---
 
-## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7203a1`)
+## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`)
+
+### A card cites the schedule it was written from, and never the other one
+
+**N6 (owner-reported 2026-10-16) + N5 (OWNER DECISION 2026-10-16, option A).**
+
+Every entry in `refs.js` declares a **`rulebook`** — `'child'`, `'adult'` or `'any'` —
+and `collectRefs()` in `recommend.js` keeps only the sources written for the card being
+built, plus the age-neutral ones. A card's **own defaults are never filtered**: a card
+that asks for a source has already decided it belongs there.
+
+**What this fixed.** A risk condition's `refs` list used to be merged into the card
+whole. Most conditions exist at every age and therefore list **both** CDC schedule
+pages, so both reached whichever card was being built. Measured over every risk
+condition on 2026-10-16:
+
+| | before | after |
+|---|---|---|
+| risk conditions putting a **child** source on an **adult** card | 13 of 17 | **0** |
+| risk conditions putting an **adult** source on a **child** card | 12 of 17 | **0** |
+| adult HSCT card citing the **paediatric** HSCT table (`p3086Table5`) | yes | **no** |
+
+Over the 16,250-patient grid: **15,604 citation chips removed, 0 added**, and **not one
+of them was a source belonging to the card's own schedule** — measured, not asserted.
+
+**This is the second escape of one bug.** P3-9b had fixed the child direction only, by
+stripping `adultOnly` ticks, and left a comment in `recommend.js` claiming the other
+direction was impossible. It was not: a condition present at every age is not
+`adultOnly`. Routing and citation are different questions and are now answered
+separately — **never add a third age test at a call site; declare the rulebook on the
+source.**
+
+**N5 — the adult risk list no longer cites `rr7203a1`.** Four conditions (asplenia,
+immunosuppression, alcohol use disorder, cigarette smoking) listed the 2023 adult ACIP
+paper while the other thirteen listed no MMWR at all, so the sources under an adult card
+changed with which box was ticked — the paper appeared for a smoker and not for HIV. It
+was not wrong, just inconsistent. Every adult card already cites the **CDC Adult Notes**,
+which enumerate all four by name (read live 2026-10-16), plus the **Adult Timing Job
+Aid** and **mm7401a1**, which prints the same list and says the 19–49 risk
+recommendations "have not changed from previous recommendations". `rr7203a1` stays in
+`refs.js` as the uncited primary-source record, logged in `citation-orphans.test.js`.
+
+Guarded by `src/data/__tests__/regression-n6-citations-follow-the-rulebook.test.js`.
+
+### What the risk class decides
 
 What the class decides on the adult pathway — **four separate questions**. Since S15
 (2026-10-16) the recommended interval IS one of them, but **only together with the age

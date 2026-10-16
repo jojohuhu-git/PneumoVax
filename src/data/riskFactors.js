@@ -77,7 +77,7 @@ export const RISK_FACTORS = [
     label: 'Asplenia or splenic dysfunction / sickle cell disease',
     sublabel: 'congenital or acquired asplenia, sickle cell disease or other hemoglobinopathies',
     class: 'IC', group: 'IC',
-    refs: ['cdcChildPneumo', 'cdcAdultPneumo', 'mmwr7203a1'],
+    refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'immunodeficiency',
@@ -90,7 +90,7 @@ export const RISK_FACTORS = [
     label: 'Immunosuppressive drugs or radiation therapy',
     sublabel: 'incl. long-term systemic corticosteroids; generalized malignancy, leukemia, lymphoma, Hodgkin, multiple myeloma',
     class: 'IC', group: 'IC',
-    refs: ['cdcAdultPneumo', 'mmwr7203a1'],
+    refs: ['cdcAdultPneumo'],
   },
   {
     id: 'hiv',
@@ -185,7 +185,7 @@ export const RISK_FACTORS = [
     sublabel: 'adult risk condition',
     class: 'nonIC', group: 'nonIC',
     adultOnly: true,
-    refs: ['cdcAdultPneumo', 'mmwr7203a1'],
+    refs: ['cdcAdultPneumo'],
   },
   {
     id: 'smoking',
@@ -193,7 +193,7 @@ export const RISK_FACTORS = [
     sublabel: 'adult risk condition',
     class: 'nonIC', group: 'nonIC',
     adultOnly: true,
-    refs: ['cdcAdultPneumo', 'mmwr7203a1'],
+    refs: ['cdcAdultPneumo'],
   },
 ];
 
