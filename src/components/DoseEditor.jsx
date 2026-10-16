@@ -1,5 +1,5 @@
 import React from 'react';
-import { newDoseRow } from '../logic/doseIdentity.js';
+import { newDoseRow, isBlankDoseRow } from '../logic/doseIdentity.js';
 import { todayISO } from '../logic/dateUtils.js';
 import DoseDateProblem from './DoseDateProblem.jsx';
 
@@ -110,6 +110,50 @@ export default function DoseEditor({
 
   const productIsFixed = product.kind === 'fixed';
 
+  // P4-3 (2026-10-15). Ported from MeningoVax K6/Item-1 (`d608c14`): since S9
+  // this editor already has one home on every surface, so the fix lands once
+  // instead of twice. `S11` made the wizard a real `<form>`, so Enter in a
+  // dose field used to submit the whole step instead of finishing the row.
+  const listRef = React.useRef(null);
+  const prevLengthRef = React.useRef(doses.length);
+
+  React.useEffect(() => {
+    if (doses.length > prevLengthRef.current) {
+      const inputs = listRef.current?.querySelectorAll('input[type="date"]');
+      inputs?.[inputs.length - 1]?.focus();
+    }
+    prevLengthRef.current = doses.length;
+  }, [doses.length]);
+
+  // "Enter finishes the row you are in." Scoped to the date box and the
+  // product dropdown — not the "×" remove button (its own Enter already
+  // removes the row, natively) and not the details-unknown checkbox.
+  //   - Row has something in it, and it's the last row -> add a new row (the
+  //     effect above focuses its date box, so that isn't duplicated here).
+  //   - Row has something in it, and there's a row after -> move to that
+  //     row's date box.
+  //   - Row is empty, and it's the last row -> do nothing here; the
+  //     browser's native Enter behaviour (submit the enclosing form) is what
+  //     "you're done" means.
+  function handleRowKeyDown(e, i) {
+    if (e.key !== 'Enter') return;
+    const isDateOrProduct = (e.target.tagName === 'INPUT' && e.target.type === 'date')
+      || e.target.tagName === 'SELECT';
+    if (!isDateOrProduct) return;
+
+    const isLastRow = i === doses.length - 1;
+    if (!isLastRow) {
+      e.preventDefault();
+      const inputs = listRef.current?.querySelectorAll('input[type="date"]');
+      inputs?.[i + 1]?.focus();
+      return;
+    }
+    if (!isBlankDoseRow(doses[i])) {
+      e.preventDefault();
+      addDose();
+    }
+  }
+
   function addDose() {
     // A fixed-product stream stamps its product on at creation, because the
     // recommendation card prints the product of every recorded dose and a row
@@ -146,9 +190,9 @@ export default function DoseEditor({
         <div className="dose-edit-empty">{emptyMessage}</div>
       )}
 
-      <div className={`dose-list${listClassName ? ` ${listClassName}` : ''}`}>
+      <div className={`dose-list${listClassName ? ` ${listClassName}` : ''}`} ref={listRef}>
         {doses.map((dose, i) => (
-          <div key={i} className="dose-row">
+          <div key={i} className="dose-row" onKeyDown={(e) => handleRowKeyDown(e, i)}>
             {/* Date before product, on every surface. The wizard already did
                 this; MeningoVax's shared editor does it too, and the design
                 parity rule sends its layout decisions here. */}
