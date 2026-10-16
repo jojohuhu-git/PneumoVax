@@ -36,6 +36,7 @@ function toHistoryStep() {
   fireEvent.click(getNextBtn()); // Age → Risks
   fireEvent.click(getNextBtn()); // Risks → History
   expect(screen.getByText('Vaccination History')).toBeDefined();
+  fireEvent.click(screen.getByRole('button', { name: /yes, record doses/i }));
 }
 
 function enterOn(el) {
@@ -100,6 +101,7 @@ describe('P4-3 — Enter in a dose row gives you the next row, not the next step
     setAgeYears(55);
     fireEvent.click(getNextBtn()); // → Risks
     fireEvent.click(getNextBtn()); // → History
+    fireEvent.click(screen.getByRole('button', { name: /no previous doses/i }));
     fireEvent.click(screen.getByRole('button', { name: /view results/i })); // → Results
 
     fireEvent.click(screen.getByRole('button', { name: /Recorded doses/ }));

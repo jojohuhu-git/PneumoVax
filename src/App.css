@@ -326,10 +326,10 @@ body {
 }
 .family-note-neutral { background: var(--gy6); border-left-color: var(--gy4); color: var(--gy3); }
 .history-section-title-spaced { margin-top: 18px; }
-.history-clear-link {
-  margin-top: var(--sp-12); background: none; border: none; color: var(--gy3);
-  text-decoration: underline; cursor: pointer; font-size: var(--fs-base); padding: 0;
-}
+/* P4-4 (2026-10-16): replaces `.history-clear-link` — "no previous doses" is
+   now one of the two yes/no toggle buttons above, not a separate link. */
+.history-select-hint { color: var(--gy3); font-size: var(--fs-base); font-style: italic; margin-top: var(--sp-4); }
+.history-detail-sub { margin-top: var(--sp-12); margin-bottom: var(--sp-16); }
 .step-toggle-row { display: flex; gap: var(--sp-8); margin-bottom: 14px; }
 .step-toggle-btn { flex: none; min-height: 36px; padding: 0 14px; font-size: var(--fs-base); }
 #dob-input { width: auto; }

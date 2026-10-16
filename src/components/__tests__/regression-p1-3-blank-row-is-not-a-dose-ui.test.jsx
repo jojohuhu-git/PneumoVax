@@ -57,6 +57,7 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] } }) {
   const [state, setState] = useState(initial);
   return (
     <StepHistory
+      historyAnswered={true}
       ageMonths={24}
       pcvDoses={state.pcvDoses}
       ppsv23Doses={state.ppsv23Doses}
@@ -69,6 +70,10 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] } }) {
 
 const unknownTicks = () =>
   screen.queryAllByRole('checkbox', { name: /a dose was given, but the date and product are unknown/i });
+// P4-4 item 6 (2026-10-16): PPSV23's tick wording dropped "and product" —
+// its product is never unknown, it is fixed and shown beside the tick.
+const unknownTicksPpsv23 = () =>
+  screen.queryAllByRole('checkbox', { name: /a dose was given, but the date is unknown/i });
 
 describe('P1-3 UI — the history step', () => {
   it('a new, untouched row offers the tick', () => {
@@ -97,7 +102,7 @@ describe('P1-3 UI — the history step', () => {
     // half of P1-3 that a naive "is every field empty?" check would miss.
     render(<HistoryHarness />);
     fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
-    expect(unknownTicks()).toHaveLength(1);
+    expect(unknownTicksPpsv23()).toHaveLength(1);
   });
 
   it('ticking it records the dose', () => {
@@ -107,6 +112,7 @@ describe('P1-3 UI — the history step', () => {
       latest = state;
       return (
         <StepHistory
+          historyAnswered={true}
           ageMonths={24}
           pcvDoses={state.pcvDoses}
           ppsv23Doses={state.ppsv23Doses}

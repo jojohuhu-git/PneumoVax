@@ -92,6 +92,7 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] }, ageMonths
   const [state, setState] = useState(initial);
   return (
     <StepHistory
+      historyAnswered={true}
       ageMonths={ageMonths}
       dob={null}
       today={TODAY}
@@ -151,9 +152,18 @@ const ONE_OF_EACH = {
   ppsv23Doses: [{ date: '2020-01-01', product: 'PPSV23' }],
 };
 
+// P4-4 item 6 (2026-10-16): the tick's wording now differs per stream — a
+// PPSV23 row's product is never unknown (it is `kind: 'fixed'` and shown
+// beside the tick), so only the PCV wording still says "and product".
+// CLAUDE.md names this exact split: find the checkbox by its own stream's
+// text, do not loosen the query to match both.
 const unknownTicks = () =>
   screen.queryAllByRole('checkbox', {
     name: /a dose was given, but the date and product are unknown/i,
+  });
+const unknownTicksPpsv23 = () =>
+  screen.queryAllByRole('checkbox', {
+    name: /a dose was given, but the date is unknown/i,
   });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -280,16 +290,16 @@ describe('S9 — the dose editor has one home', () => {
     it.each(SURFACES)('%s offers it on an untouched PPSV23 row', (which) => {
       renderSurface(which, { pcvDoses: [], ppsv23Doses: [] });
       fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
-      expect(unknownTicks()).toHaveLength(1);
+      expect(unknownTicksPpsv23()).toHaveLength(1);
     });
 
     it.each(SURFACES)('%s withdraws it once a PPSV23 date is entered', (which) => {
       renderSurface(which, { pcvDoses: [], ppsv23Doses: [{ date: '', product: 'PPSV23' }] });
-      expect(unknownTicks()).toHaveLength(1);
+      expect(unknownTicksPpsv23()).toHaveLength(1);
       fireEvent.change(screen.getByLabelText('Date (optional)'), {
         target: { value: '2020-01-01' },
       });
-      expect(unknownTicks()).toHaveLength(0);
+      expect(unknownTicksPpsv23()).toHaveLength(0);
     });
   });
 

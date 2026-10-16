@@ -34,6 +34,7 @@ const DOB = '2020-01-01';
 function renderStep({ pcvDoses = [], ppsv23Doses = [], dob = DOB, ageMonths = 81 } = {}) {
   return render(
     <StepHistory
+      historyAnswered={true}
       ageMonths={ageMonths}
       today={TODAY}
       dob={dob}

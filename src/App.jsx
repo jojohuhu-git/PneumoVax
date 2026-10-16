@@ -24,6 +24,11 @@ const INITIAL_STATE = {
   riskIds: [],
   pcvDoses: [],
   ppsv23Doses: [],
+  // P4-4 (2026-10-16): tri-state — null = not yet asked, false = "no previous
+  // doses", true = "yes, record doses". Lifted here (not local to
+  // StepHistory) because `goNext` must refuse to leave the History step while
+  // this is null, and `goNext` lives in App.jsx.
+  historyAnswered: null,
 };
 
 export default function App() {
@@ -60,10 +65,13 @@ export default function App() {
       // The age step offers two modes; `#dob-input` exists only in the first.
       state.step === 0 ? main.querySelector('#dob-input, #age-years') :
       state.step === 1 ? main.querySelector('input[type="checkbox"]') :
-      // History: the first date box once doses are recorded, otherwise the
-      // "+ Add PCV dose" button, which is the only control on an empty step.
+      // History: the first date box once doses are recorded, the "+ Add PCV
+      // dose" button on an empty-but-answered step, or — P4-4 — the "No
+      // previous doses" toggle button when the yes/no question is still
+      // unanswered, which is now the step's first real control.
       (main.querySelector('.dose-field input[type="date"]') ||
-       main.querySelector('.add-dose-btn'));
+       main.querySelector('.add-dose-btn') ||
+       main.querySelector('.history-toggle-btn'));
     target?.focus();
   }, [state.step]);
 
@@ -98,6 +106,12 @@ export default function App() {
       setState(prev => ({ ...prev, step: 3 }));
       return;
     }
+    // P4-4 (2026-10-16): an untouched History step used to look identical to
+    // one the clinician answered "no previous doses" for — both left the
+    // dose lists empty. Refuse to leave until the yes/no question is
+    // answered; the "Select yes or no above" hint already on screen explains
+    // why, so no second error message is added here.
+    if (state.step === 2 && state.historyAnswered == null) return;
     setState(prev => ({ ...sweepHistory(prev), step: Math.min(prev.step + 1, STEPS.length - 1) }));
   }
 
@@ -175,6 +189,8 @@ export default function App() {
             ppsv23Doses={state.ppsv23Doses}
             onChangePcv={pcvDoses => update({ pcvDoses })}
             onChangePpsv={ppsv23Doses => update({ ppsv23Doses })}
+            historyAnswered={state.historyAnswered}
+            onAnswerChange={historyAnswered => update({ historyAnswered })}
           />
         )}
         {state.step === 3 && (
