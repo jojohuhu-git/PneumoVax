@@ -325,6 +325,24 @@ Routine for ALL adults ≥50 regardless of risk.
 > eligibility begins (§H; mm7401a1).
 
 - Option for **any patient ≥18y** who qualifies for a PCV. **Not for children** (<18y).
+- **A PCV21 dose given off-label under 18 is always RECORDABLE, and never COUNTS.**
+  Two different questions, and the app answers them separately (`PCV21-OFFLABEL`, owner
+  decision 2026-10-15).
+  - *Recordable:* the history dropdown offers PCV21 at **every** age. It used to hide the
+    product below 18, which did not prevent an off-label dose — it only prevented the
+    clinician from recording one, so the dose vanished with no warning. Every other PCV
+    has always been ungated for the same reason: record what happened, then grade it.
+  - *Does not count:* graded `invalid` against the product's own `minAgeM`
+    (`PCV21_MIN_AGE_M`), with CDC's 4-day grace, saying so in plain words and naming the
+    age at the dose. Per **CDC General Best Practices** — "Doses of any vaccine
+    administered ≥5 days earlier than the minimum interval or age should not be counted
+    as valid doses and should be repeated as age appropriate" — and the FDA approval for
+    ages ≥18 (`mmwr7336a3`). It is **not** a record problem: the patient really received
+    it, so the "repeat as age appropriate" advice is correct here.
+  - **Open question, logged not decided:** **CDSI v4.64** sets PCV21's *allowable* age at
+    **"19 years − 4 days"**, a year stricter than the licence floor this app uses, and
+    ACIP's recommendation itself begins at 19y. The counting floor stays **18y** until the
+    owner rules on worked examples of an 18- and a 19-year-old.
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.

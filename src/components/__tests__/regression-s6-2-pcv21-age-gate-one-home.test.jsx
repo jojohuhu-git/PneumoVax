@@ -28,12 +28,32 @@
 //      two numbers as a non-negotiable rule, and a variable called `isAdult`
 //      holding the product floor collapses them in spirit already.
 //
-// ── What these tests hold ────────────────────────────────────────────────
+// ── The dropdown gate this file used to guard is GONE ────────────────────
 //
-// The dropdown gate is asserted on BOTH editors, derived from the constant
-// rather than from the number 216 — so if ACIP or the FDA ever moves
-// Capvaxive's floor, changing `PCV21_MIN_AGE_M` moves these tests with it and
-// a stale hand-typed copy is what fails.
+// PCV21-OFFLABEL (owner decision, 2026-10-15): the history dropdown no longer
+// filters by age at all. Hiding PCV21 under 18 did not prevent an off-label
+// dose, it only prevented the clinician from recording one, and the dose then
+// vanished with no warning. The licence age does its work in `validate.js`
+// instead, which already graded such a dose "it does not count".
+//
+// So the two tests that asserted the dropdown HIDES PCV21 one month below the
+// floor — one per surface — have been DELETED, not loosened. They described
+// the behaviour of the day correctly; that behaviour was the bug.
+// `regression-pcv21-offlabel-recordable.test.jsx` now asserts the opposite,
+// with the sources, and goes further: the offered list must be identical at
+// every age, so no gate can come back under a different number.
+//
+// ── What these tests still hold ──────────────────────────────────────────
+//
+// Everything about the NUMBER 216 and what it is called, which is the hazard
+// S6-2 was really about and which the above does not touch:
+//
+//   * PCV21 is offered at and above its product floor, on BOTH editors (the
+//     18-year-old case especially — licensed for the product, still on the
+//     child/adolescent rulebook).
+//   * The two numbers stay a year apart.
+//   * No component hand-types 216, names `PCV21_MIN_AGE_M`, or calls the
+//     product floor an "adult" test.
 //
 // Both surfaces are tested because the dose editor USED to exist twice
 // (`StepHistory.jsx` and the inline editor in `Results.jsx`). A fix to one
@@ -117,15 +137,11 @@ describe('S6-2 — the PCV21 age gate has one home', () => {
       expect(offeredProducts()).toContain('PCV21');
     });
 
-    it('hides PCV21 one month below the product floor', () => {
-      renderAt(PCV21_MIN_AGE_M - 1);
-      const offered = offeredProducts();
-      expect(offered).not.toContain('PCV21');
-      // Not vacuous: the other products are still there.
-      expect(offered).toContain('PCV13');
-    });
+    // ("hides PCV21 one month below the product floor" was here. Deleted by
+    // PCV21-OFFLABEL — see the header. The dropdown is now ungated, and
+    // `regression-pcv21-offlabel-recordable.test.jsx` holds that.)
 
-    // The gate must be the PRODUCT floor, not the schedule boundary. A patient
+    // The floor must be the PRODUCT licence age, not the schedule boundary. A patient
     // between the two — 18y0m to 18y11m — may be given Capvaxive while still
     // being scheduled as an adolescent.
     it('offers PCV21 to an 18-year-old, who is not yet on the adult schedule', () => {
@@ -162,12 +178,9 @@ describe('S6-2 — the PCV21 age gate has one home', () => {
       expect(offeredProducts()).toContain('PCV21');
     });
 
-    it('hides PCV21 one month below the product floor', () => {
-      openEditorAt(PCV21_MIN_AGE_M - 1);
-      const offered = offeredProducts();
-      expect(offered).not.toContain('PCV21');
-      expect(offered).toContain('PCV13');
-    });
+    // ("hides PCV21 one month below the product floor" was here too. Deleted
+    // by PCV21-OFFLABEL, on both surfaces together — a single-surface change
+    // to this dropdown is the thing CLAUDE.md forbids.)
 
     it('offers PCV21 to an 18-year-old, who is not yet on the adult schedule', () => {
       openEditorAt(ADULT_SCHED_MIN_M - 1);
@@ -202,14 +215,23 @@ describe('S6-2 — the PCV21 age gate has one home', () => {
       }
     );
 
-    it('the gate is computed in exactly one place, from the constant', () => {
+    // PCV21-OFFLABEL rewrote this one. It used to also require
+    // `pcvHistoryProductsFor` to exist in `brands.js`, which was the dropdown
+    // gate — now deleted, so requiring it would force the bug back.
+    //
+    // What survives is the part S6-2 was actually about: PCV21's licence age
+    // is named ONCE, as the product's own `minAgeM` in the catalogue, and
+    // never hand-typed. That is the copy `validate.js` reads to grade a dose,
+    // so a stale duplicate here is still the H1 bug waiting to happen.
+    it("PCV21's licence age is named once in the catalogue, never hand-typed", () => {
       const code = codeOnly(
         readFileSync(resolve(process.cwd(), 'src/data/brands.js'), 'utf8')
       );
       expect(code).toContain('PCV21_MIN_AGE_M');
-      expect(code).toContain('pcvHistoryProductsFor');
-      // Derived from the constant, never a hand-typed 216.
       expect(code).not.toMatch(/\b216\b/);
+      // And it reaches the engine as the product's minimum age, which is what
+      // makes the "does not count" verdict derive from this one number.
+      expect(code).toMatch(/minAgeM:\s*PCV21_MIN_AGE_M/);
     });
 
     // The naming hazard in its own right: a component-level flag called
