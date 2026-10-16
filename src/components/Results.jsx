@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
-import { PPSV23_PRODUCT, pcvHistoryProductsFor } from '../data/brands.js';
+import { PPSV23_PRODUCT, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
 import RiskAgeNote from './RiskAgeNote.jsx';
@@ -295,7 +295,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                 {...doseEditorShared}
                 doses={pcvDoses}
                 onChange={(next) => onChange?.({ pcvDoses: next })}
-                product={{ kind: 'select', options: pcvHistoryProductsFor(ageMonths) }}
+                product={{ kind: 'select', options: PCV_HISTORY_PRODUCTS }}
                 addDoseLabel="+ Add PCV dose"
                 removeLabel={(i) => `Remove PCV dose ${i + 1}`}
                 emptyMessage="No PCV doses recorded."

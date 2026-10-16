@@ -1,4 +1,4 @@
-import { PPSV23_PRODUCT, pcvHistoryProductsFor } from '../data/brands.js';
+import { PPSV23_PRODUCT, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import DoseEditor from './DoseEditor.jsx';
 
 // Vaccination history for PneumoVax — two product streams in one step:
@@ -45,7 +45,7 @@ export default function StepHistory({
         {...shared}
         doses={pcvDoses}
         onChange={onChangePcv}
-        product={{ kind: 'select', options: pcvHistoryProductsFor(ageMonths) }}
+        product={{ kind: 'select', options: PCV_HISTORY_PRODUCTS }}
         addDoseLabel="+ Add PCV dose"
         removeLabel={(i) => `Remove PCV dose ${i + 1}`}
         unknownHint="An empty row is removed when you continue."

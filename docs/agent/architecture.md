@@ -54,8 +54,12 @@ src/
                          last line. `onChange` is handed the COMPLETE next array, which is
                          what lets the wizard (a setter per stream) and Results (a patch
                          to app state) store it differently. It knows NO pneumococcal
-                         rules — the PCV21 dropdown gate is pcvHistoryProductsFor() in
-                         brands.js.
+                         rules — it is handed `PCV_HISTORY_PRODUCTS` from brands.js, which
+                         is EVERY PCV at EVERY age. There is no dropdown age gate: the one
+                         that hid PCV21 under 18 was deleted by PCV21-OFFLABEL
+                         (2026-10-15) because it dropped a real dose silently. The licence
+                         age does its work in validate.js, which grades such a dose
+                         "does not count".
     Results.jsx          Output. Calls recommend(); renders HSCT advisory card, PCV21 geo
                          note, standard rec cards. Inline "Adjust age" + "Recorded doses ▾"
                          editors. "← Edit history" back button at bottom.
