@@ -306,3 +306,96 @@ export function ageMeetsMinimumDays(ageAtDoseDays, minAgeDays) {
   if (ageAtDoseDays == null) return false;
   return intervalMeetsMinimum(ageAtDoseDays, minAgeDays);
 }
+
+// ── The WORDS for an interval, derived from the number ───────────────────
+//
+// S6 second half (census step 6, 2026-10-15). Every interval a clinician
+// reads used to be hand-typed beside the constant that computes the date, so
+// the two could drift apart — and they did, silently, in the one direction
+// that matters. Measured on `main` at 999393b by setting
+// ADULT_PPSV23_INTERVAL_MONTHS to 6 and asking the engine for a 60-year-old
+// with diabetes and a PCV15 on record:
+//
+//   doseLabel        : PPSV23 (≥1 year after PCV15) — completes the series
+//   minIntervalMonths: 6
+//   earliestNextDate : 2027-04-10
+//
+// The card said "≥1 year" while its own eligible-on date was six months out.
+// Nothing in the app reconciled the sentence with the arithmetic, because the
+// sentence was a string literal and the date came from the constant.
+//
+// So this is the single place an interval turns into words, and every label
+// and note is fed from the same constant that drives its date.
+//
+// WHAT THIS IS NOT FOR. Verbatim source quotes keep their own wording —
+// `refs.js`'s `quote` fields and `doseIntervalRules.js`'s `source` provenance
+// are transcriptions of ACIP/CDC sentences, and a transcription that silently
+// followed one of our constants would stop being a quote. Those are left
+// hand-typed on purpose.
+
+/**
+ * An interval as a clinician reads it — "8 weeks", "1 year", "5 years".
+ *
+ * Takes the interval the way its own rule states it, because the two are not
+ * interchangeable in this app: week-based gaps are exact day counts and
+ * month-based gaps are calendar months (A-P2-11; CDC's "4 weeks = 28 days.
+ * Intervals of >=4 months are determined by calendar months"). Pass whichever
+ * unit the governing constant is written in and the words follow it.
+ *
+ * Deliberately returns the bare phrase with no "≥" and no "at least" — the
+ * callers differ on which of those they use, and some sit mid-sentence.
+ *
+ * @param {{days?: number, months?: number}} spec exactly one of days/months
+ */
+export function intervalPhrase({ days, months } = {}) {
+  const [n, unit] = intervalParts({ days, months });
+  return `${n} ${unit}${n === 1 ? '' : 's'}`;
+}
+
+/**
+ * The same interval as an ADJECTIVE — "8-week", "1-year", "5-year".
+ *
+ * Needed because clinical sentences use both forms and they are not
+ * interchangeable: "PPSV23 is given at least 8 weeks after PCV15" (noun) but
+ * "the 8-week minimum interval applies only to…" (adjective). S6's first pass
+ * fed intervalPhrase() into both and produced "the 8 weeks minimum interval"
+ * on 511 of the 16,250 swept patients — caught by diffing the rendered prose,
+ * not by the suite, because no test asserted that clause.
+ *
+ * Always singular, as English adjectives are: "a 5-year gap", never
+ * "a 5-years gap".
+ */
+export function intervalPhraseAdj({ days, months } = {}) {
+  const [n, unit] = intervalParts({ days, months });
+  return `${n}-${unit}`;
+}
+
+/**
+ * "a" or "an" for an interval phrase, so the article follows the number too.
+ *
+ * Without this, "names an 8-week minimum" silently becomes "names an 1-year
+ * minimum" the day the constant moves — the same drift this file exists to
+ * stop, one word to the left.
+ *
+ * Only the leading digit decides it, and only 8 (eight, eighty, eight
+ * hundred…), 11 (eleven) and 18 (eighteen) are pronounced vowel-initially.
+ */
+export function intervalArticle({ days, months } = {}) {
+  const [n] = intervalParts({ days, months });
+  const vowelSound = String(n).startsWith('8') || n === 11 || n === 18;
+  return vowelSound ? 'an' : 'a';
+}
+
+/** The number and singular unit behind a phrase, shared by the formatters. */
+function intervalParts({ days, months }) {
+  if (days != null && months != null) {
+    throw new Error('intervalPhrase: pass days OR months, not both');
+  }
+  if (days != null) {
+    return days % 7 === 0 ? [days / 7, 'week'] : [days, 'day'];
+  }
+  if (months != null) {
+    return months % 12 === 0 ? [months / 12, 'year'] : [months, 'month'];
+  }
+  throw new Error('intervalPhrase: pass days or months');
+}

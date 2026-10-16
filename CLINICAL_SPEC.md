@@ -7,7 +7,9 @@
 > rule changes, this file changes in the same pull request — and for the interval rules that
 > is no longer an honour system: see §K "The rule table, row by row".
 >
-> **Verified against code: 2026-10-11.**
+> **Verified against code: 2026-10-15.** §C and §J were found stating the risk-class-keyed
+> adult PCV15→PPSV23 interval the owner amended on 2026-10-10 (A-P1-1), contradicting §K
+> ten paragraphs later. Corrected, and guarded by `rule-docs-match-code.test.js`.
 
 Every rule below is traceable to a source listed in §Sources. This document is the
 authority the engine (`src/logic/recommend.js`) and validator (`src/logic/validate.js`)
@@ -256,14 +258,23 @@ Prior pneumococcal history nullified → full re-vaccination.
 
 ## §G — Adults 19–49 y WITH a risk condition (`cdcAdultPneumo`, `cdcAdultTimingJobAid`)
 
-Routine starts at 50; 19–49 is **risk-only**. PCV15→PPSV23 interval differs by risk class:
-**chronic conditions = ≥1 year; immunocompromising / cochlear implant / CSF leak = ≥8 weeks.**
+Routine starts at 50; 19–49 is **risk-only**. The PCV15→PPSV23 **recommendation is ≥1 year
+for every adult**, whatever the risk class; the 8-week minimum is **named as an option** for
+an immunocompromising condition, cochlear implant or CSF leak, never substituted for the
+year. See §K's A-P1-1 bullet for the CDC quote and the owner decision.
+
+> **Corrected 2026-10-15.** These two lines previously read "PCV15→PPSV23 interval differs
+> by risk class: chronic conditions = ≥1 year; immunocompromising / cochlear implant / CSF
+> leak = ≥8 weeks" — the rule the owner **amended on 2026-10-10 (A-P1-1)**, still stated
+> here as current while §K ten paragraphs later stated the amendment. Where the risk class
+> *does* decide an 8-week number is the **validity floor** for a dose already given (S14-7),
+> which is a different question; §K keeps the two apart and so must this section.
 
 Prior-vaccine branches:
-- **None / unknown / PCV7-only:** 1 dose PCV15, PCV20, or PCV21. PCV15 → PPSV23 (≥1y, or
-  ≥8wk if IC/cochlear/CSF). PCV20/PCV21 → complete.
-- **PCV15 only (PPSV23 pending) → INCOMPLETE:** PPSV23 (≥1y or ≥8wk per risk); may
-  substitute PCV20/PCV21 if PPSV23 unavailable.
+- **None / unknown / PCV7-only:** 1 dose PCV15, PCV20, or PCV21. PCV15 → PPSV23 (≥1y; the
+  8-week minimum named as an option for IC/cochlear/CSF). PCV20/PCV21 → complete.
+- **PCV15 only (PPSV23 pending) → INCOMPLETE:** PPSV23 ≥1y (8-week option named for
+  IC/cochlear/CSF); may substitute PCV20/PCV21 if PPSV23 unavailable.
 - **PPSV23 only:** PCV15/20/21 ≥1y after PPSV23 (PCV15 → no further PPSV23).
 - **PCV13 only:** PCV20 or PCV21 ≥1y after PCV13 → complete.
 - **PCV13 + 1 PPSV23:** PCV20 or PCV21 ≥5y after last pneumo → complete (IC/cochlear/CSF);
@@ -351,14 +362,30 @@ Routine for ALL adults ≥50 regardless of risk.
 
 ## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7203a1`)
 
-**Immunocompromising (shorter PCV→PPSV23 = ≥8wk):** chronic renal failure, nephrotic
+What the class decides on the adult pathway — **three separate questions**, and the
+recommended interval is **not** one of them (that is ≥1 year for every adult; §K, A-P1-1):
+
+| | IC / cochlear implant / CSF leak | Chronic conditions only |
+|---|---|---|
+| The 8-week option is **named** on the PCV15→PPSV23 recommendation | yes | no |
+| **Validity floor** for a dose already given (S14-7; **owner determination 2026-10-11**, never ACIP) | 8 weeks | 1 year |
+| The 19–49 **PCV13+PPSV23** row | PCV20/PCV21 ≥5 years | no dose now, review at 50 |
+
+**Immunocompromising:** chronic renal failure, nephrotic
 syndrome, HIV, congenital/acquired asplenia, sickle cell / hemoglobinopathies,
 immunodeficiency, generalized malignancy, leukemia, lymphoma, Hodgkin, multiple myeloma,
 iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ transplant.
-**Cochlear implant** and **CSF leak** use the IC (≥8wk) interval.
+**Cochlear implant** and **CSF leak** are treated as IC for all three questions above (CDC
+adult notes), while p2016 Table 3 lists them under non-IC, so they stay nonIC for the **peds
+catch-up row**.
 
-**Chronic conditions (≥1y interval):** chronic heart disease, chronic lung disease
+**Chronic conditions:** chronic heart disease, chronic lung disease
 (COPD/emphysema/asthma), chronic liver disease, diabetes, alcohol use, cigarette smoking.
+
+> **Corrected 2026-10-15.** The two headings above read "Immunocompromising (shorter
+> PCV→PPSV23 = ≥8wk)" and "Chronic conditions (≥1y interval)" — the pre-A-P1-1 keying,
+> stated as the recommendation. Three of the app's own files said it too; `riskFactors.js`'s
+> header was the worst, carrying it two hundred lines above the correct constants.
 
 ---
 
@@ -372,7 +399,10 @@ iatrogenic immunosuppression (incl. long-term steroids/radiation), solid organ t
   from `'invalid'`: PCV7 was validly given, it just never counts.
 - **Unknown / undocumented history → treat as unvaccinated** (CDC).
 - **Multiple risk conditions:** apply all relevant pathways; most protective wins;
-  **IC precedence over non-IC** (the ≥8wk interval and the IC catch-up rows win).
+  **IC precedence over non-IC** — the IC catch-up rows win, the 8-week option is named, and
+  the 8-week validity floor applies. (It does **not** mean a shorter *recommended* interval:
+  that is ≥1 year for every adult, per the A-P1-1 bullet below. Corrected 2026-10-15, where
+  this bullet read "the ≥8wk interval and the IC catch-up rows win".)
 - **A series containing PCV20 (or PCV21 in adults) ⇒ no PPSV23.**
 - **PCV15 (without a later PCV20/21) ⇒ a PPSV23 follow-up is required to be complete.**
 - **Adult PCV15→PPSV23 interval = ≥1 year, at EVERY adult age** (owner decision 2026-10-10,

@@ -7,23 +7,53 @@
 // conditions" (owner decision, 2026-09-13) but keep their own `class` values
 // so recommend.js's hasHSCT()/hasExclusion() checks are unaffected.
 //
+// ── What the class does NOT decide: the recommended adult interval ──────
+//
+// This header stated, until 2026-10-15, that the adult PCV15→PPSV23 interval
+// is keyed on the risk class — "IC adult interval = ≥8 weeks; non-IC chronic
+// adult interval = ≥1 year". That is the rule the owner AMENDED on 2026-10-10
+// (A-P1-1), and it had survived here, in the very file that owns the two
+// constants, two hundred lines above their correct explanation. It was the
+// fifth stale copy of that rule found; four earlier ones were fixed in S8.
+//
+// What is actually true, in two parts that must not be run together
+// (CLAUDE.md: "Recommendation and floor are different questions; do not let
+// one answer stand in for the other"):
+//
+//   • The RECOMMENDATION is ≥1 year for EVERY adult 19+, whatever the class.
+//     The 8-week minimum is NAMED as an option for an immunocompromising
+//     condition, cochlear implant or CSF leak — never substituted for the
+//     year. ADULT_PPSV23_INTERVAL_MONTHS and
+//     ADULT_PPSV23_SHORTER_MINIMUM_WEEKS below, with the CDC quote.
+//   • The VALIDITY FLOOR, for a dose already given, IS keyed on the class: 8
+//     weeks for IC / cochlear implant / CSF leak, the year for every other
+//     adult. Added by S14-7 (2026-10-11). Every adult floor is an OWNER
+//     CLINICAL DETERMINATION of that date — never cite ACIP or CDC for one.
+//     Lives in logic/doseIntervalRules.js; see CLINICAL_SPEC.md §K.
+//
+// So what the class below decides, on the adult pathway, is which option gets
+// NAMED, which floor applies, and which 19–49 prior-vaccine row the patient is
+// on — not what the app recommends.
+//
 // Each entry declares its risk class:
-//   class: 'IC'  — immunocompromising. Shorter PCV15→PPSV23 interval (≥8 weeks
-//                  for adults; peds uses the IC catch-up rows of p2016 Table 4
-//                  which add a 5-year-later PCV20/2nd-PPSV23 step). IC also gets
-//                  the ≥8wk adult interval.
-//   class: 'nonIC' — non-immunocompromising chronic condition. Adult PCV15→PPSV23
-//                  interval is ≥1 year.
-//   class: 'special' — cochlear implant / CSF leak: use the IC (≥8wk) interval
-//                  per CDC adult notes, but are listed under non-IC in p2016
-//                  Table 3 for the peds grid. Modeled as nonIC for the peds
-//                  catch-up ROW but as IC-interval for the adult interval.
+//   class: 'IC'  — immunocompromising. Gets the 8-week option named and the
+//                  8-week validity floor; on the 19–49 PCV13+PPSV23 row it
+//                  means PCV20/21 ≥5 years rather than "review at 50". Peds
+//                  uses the IC catch-up rows of p2016 Table 4, which add a
+//                  5-year-later PCV20 / 2nd-PPSV23 step.
+//   class: 'nonIC' — non-immunocompromising chronic condition. No shorter
+//                  option named, the 1-year floor, and "review at 50" on the
+//                  19–49 PCV13+PPSV23 row.
+//   class: 'special' — cochlear implant / CSF leak: treated as IC for all
+//                  three adult questions above (CDC adult notes), but listed
+//                  under non-IC in p2016 Table 3, so modelled as nonIC for the
+//                  peds catch-up ROW.
 //   class: 'hsct' — hematopoietic stem cell transplant: advisory pathway,
 //                  relative-to-transplant, no calendar due dates.
 //
-// Sources (CLINICAL_SPEC §C, §J): p2016 Table 3, CDC adult notes, rr7203a1.
-//   • IC adult interval = ≥8 weeks; non-IC chronic adult interval = ≥1 year.
-//   • Cochlear implant + CSF leak use the IC interval (CDC adult notes).
+// Sources (CLINICAL_SPEC §C, §J, §K): p2016 Table 3, CDC adult notes, rr7203a1.
+//   • Adult PCV15→PPSV23 RECOMMENDATION = ≥1 year at every adult age (A-P1-1).
+//   • Cochlear implant + CSF leak are treated as IC for the adult questions.
 //   • IC precedence over non-IC when both present.
 // ─────────────────────────────────────────────────────────────────────────
 
