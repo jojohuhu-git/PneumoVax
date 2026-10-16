@@ -92,6 +92,7 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] }, ageMonths
   const [state, setState] = useState(initial);
   return (
     <StepHistory
+      historyAnswered={true}
       ageMonths={ageMonths}
       dob={null}
       today={TODAY}

@@ -51,6 +51,7 @@ describe('P3-1 — a date of birth survives the whole wizard', () => {
     enterDob('1958-01-10');
     fireEvent.click(screen.getByRole('button', { name: /next/i }));   // → Risks
     fireEvent.click(screen.getByRole('button', { name: /next/i }));   // → History
+    fireEvent.click(screen.getByRole('button', { name: /no previous doses/i }));
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
     // The patient is an older adult; the Results header prints their age band.
     expect(screen.getByText(/older adult/i)).toBeDefined();
@@ -63,6 +64,7 @@ describe('P3-1 — a date of birth survives the whole wizard', () => {
     enterDob('1958-01-10');                                            // ~68y
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /no previous doses/i }));
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
     expect(screen.getByText(/older adult/i)).toBeDefined();
 

@@ -57,6 +57,7 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] } }) {
   const [state, setState] = useState(initial);
   return (
     <StepHistory
+      historyAnswered={true}
       ageMonths={24}
       pcvDoses={state.pcvDoses}
       ppsv23Doses={state.ppsv23Doses}
@@ -107,6 +108,7 @@ describe('P1-3 UI — the history step', () => {
       latest = state;
       return (
         <StepHistory
+          historyAnswered={true}
           ageMonths={24}
           pcvDoses={state.pcvDoses}
           ppsv23Doses={state.ppsv23Doses}

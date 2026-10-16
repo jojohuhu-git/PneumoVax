@@ -48,6 +48,7 @@ describe('queue P1-1 — every date picker caps at the local date', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /yes, record doses/i }));
     fireEvent.click(screen.getByRole('button', { name: /add pcv dose/i }));
     fireEvent.click(screen.getByRole('button', { name: /add ppsv23 dose/i }));
 
@@ -64,6 +65,7 @@ describe('queue P1-1 — every date picker caps at the local date', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /no previous doses/i }));
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
     fireEvent.click(screen.getByRole('button', { name: /recorded doses/i }));
     fireEvent.click(screen.getByRole('button', { name: /add pcv dose/i }));

@@ -121,6 +121,7 @@ describe('S6-2 — the PCV21 age gate has one home', () => {
     function renderAt(ageMonths) {
       render(
         <StepHistory
+          historyAnswered={true}
           ageMonths={ageMonths}
           today={TODAY}
           dob={null}

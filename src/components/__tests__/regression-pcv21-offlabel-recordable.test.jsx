@@ -73,6 +73,7 @@ function offeredProducts() {
 function renderHistoryAt(ageMonths) {
   render(
     <StepHistory
+      historyAnswered={true}
       ageMonths={ageMonths}
       today={TODAY}
       dob={null}
