@@ -258,17 +258,37 @@ Prior pneumococcal history nullified → full re-vaccination.
 
 ## §G — Adults 19–49 y WITH a risk condition (`cdcAdultPneumo`, `cdcAdultTimingJobAid`)
 
-Routine starts at 50; 19–49 is **risk-only**. The PCV15→PPSV23 **recommendation is ≥1 year
-for every adult**, whatever the risk class; the 8-week minimum is **named as an option** for
-an immunocompromising condition, cochlear implant or CSF leak, never substituted for the
-year. See §K's A-P1-1 bullet for the CDC quote and the owner decision.
+Routine starts at 50; 19–49 is **risk-only**. In THIS age band the PCV15→PPSV23
+**recommendation is keyed on the risk class**:
 
-> **Corrected 2026-10-15.** These two lines previously read "PCV15→PPSV23 interval differs
-> by risk class: chronic conditions = ≥1 year; immunocompromising / cochlear implant / CSF
-> leak = ≥8 weeks" — the rule the owner **amended on 2026-10-10 (A-P1-1)**, still stated
-> here as current while §K ten paragraphs later stated the amendment. Where the risk class
-> *does* decide an 8-week number is the **validity floor** for a dose already given (S14-7),
-> which is a different question; §K keeps the two apart and so must this section.
+| 19–49 adult | PCV15 → PPSV23 |
+|---|---|
+| Immunocompromising condition, cochlear implant or CSF leak | **≥8 weeks** |
+| Chronic conditions only | **≥1 year** |
+
+The 8 weeks is the **advice** here, not an option, so the "may be considered" sentence is
+**not** shown at this age. Source: `mm7401a1`'s clinical guidance table, row "Adults aged
+19–49 years with an immunocompromising condition, a CSF leak, or a cochlear implant" —
+"If PCV15 is used, **administer** a single dose of PPSV23 **≥8 weeks** after the PCV15
+dose." The job aid prints the same ≥8 weeks on p.2 (immunocompromising) and p.3 (cochlear
+implant / CSF leak), and ≥1 year on p.4 (chronic). See §K's S15 bullet.
+
+Other 19–49 rows, which are **NOT** keyed on risk class and did not move:
+- **PPSV23 only:** PCV15/20/21 **≥1 year** after PPSV23, every class.
+- **PCV13 only:** PCV20 or PCV21 **≥1 year**. There is **no PPSV23 route** — the job aid
+  prints "NO OPTION B" on all four pages.
+- **PCV13 + 1 PPSV23:** IC / cochlear implant / CSF leak → PCV20 or PCV21 **≥5 years**
+  (not a second PPSV23); chronic only → nothing now, **review at 50**.
+
+> **Corrected 2026-10-16 (S15).** This section said the recommendation was "≥1 year for
+> every adult, whatever the risk class". That was A-P1-1 (2026-10-10), taken from one
+> summary sentence in the CDC adult schedule notes. `mm7401a1` (January 2025) — the ACIP
+> recommendation those notes summarise — splits it by age band, and the owner ruled on
+> 2026-10-16 that ACIP's wording governs. An earlier correction here (2026-10-15) replaced
+> a risk-class-keyed rule that had **no age term**; this one restores the risk-class key
+> **at 19–49 only**. The ≥50 band is unchanged and is in §H.
+> The **validity floor** for a dose already given (S14-7) is a different question again and
+> is unchanged; §K keeps the two apart and so must this section.
 
 Prior-vaccine branches:
 - **None / unknown / PCV7-only:** 1 dose PCV15, PCV20, or PCV21. PCV15 → PPSV23 (≥1y; the
@@ -286,7 +306,7 @@ Prior-vaccine branches:
 ## §H — Adults ≥50 y (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`; routine lowered 65→50 eff. 2024-10-23)
 
 Routine for ALL adults ≥50 regardless of risk.
-- **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 **≥1 year** (8-week minimum may be *considered* for IC / cochlear implant / CSF leak — named, never substituted; A-P1-1).
+- **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 **≥1 year** (8-week minimum may be *considered* for IC / cochlear implant / CSF leak — named, never substituted). `mm7401a1`, ≥50 row: "a single dose of PPSV23 should be administered ≥1 year after the PCV15 dose. A minimum interval of 8 weeks **can be considered** if PCV15 is used in adults with an immunocompromising condition, cochlear implant, or CSF leak." **S15 (2026-10-16): this card now carries that option sentence.** It did not before — the option appeared only once the PCV15 had been recorded, i.e. after the booking decision was made. Unlike §G, the ≥50 band is **not** keyed on risk class.
 - **PPSV23 only:** PCV15/20/21 ≥1y after PPSV23 (PCV15 → no further PPSV23).
 - **PCV13 only:** PCV20 or PCV21 ≥1y → complete.
 - **PCV13 + PPSV23, and NO PPSV23 was received at ≥65:** PCV20 or PCV21 **≥5y** after the
@@ -295,7 +315,7 @@ Routine for ALL adults ≥50 regardless of risk.
   decision-making" for both rows, which is the documentation half of A-P0-1.)
 - **PCV13 + PPSV23, AND PPSV23 was received at ≥65:** **shared clinical decision-making** —
   PCV20/PCV21 ≥5y, or nothing.
-- **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 **≥1 year** (or substitute PCV20/21). Series complete once given.
+- **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 **≥1 year** (or substitute PCV20/21), with the 8-week option named for IC / cochlear implant / CSF leak. Series complete once given. At **19–49** that same row is **≥8 weeks** for those conditions — see §G.
 - **PCV15 & PPSV23, or PCV20, or PCV21 (any age):** complete.
 
 > Implementation note on `PCV13+PPSV23 at ≥65` (rewritten 2026-10-10, S10 — A-P0-1).
@@ -362,14 +382,22 @@ Routine for ALL adults ≥50 regardless of risk.
 
 ## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7203a1`)
 
-What the class decides on the adult pathway — **three separate questions**, and the
-recommended interval is **not** one of them (that is ≥1 year for every adult; §K, A-P1-1):
+What the class decides on the adult pathway — **four separate questions**. Since S15
+(2026-10-16) the recommended interval IS one of them, but **only together with the age
+band**: the class alone does not decide it, and neither does age alone.
 
 | | IC / cochlear implant / CSF leak | Chronic conditions only |
 |---|---|---|
-| The 8-week option is **named** on the PCV15→PPSV23 recommendation | yes | no |
-| **Validity floor** for a dose already given (S14-7; **owner determination 2026-10-11**, never ACIP) | 8 weeks | 1 year |
+| **Recommended** PCV15→PPSV23 interval, **19–49** | **8 weeks** | 1 year |
+| **Recommended** PCV15→PPSV23 interval, **50+** | 1 year | 1 year |
+| The 8-week option is **named** as a choice (50+ only — at 19–49 it is the advice above) | yes | no |
+| **Validity floor** for a dose already given (S14-7; **owner determination 2026-10-11**, never ACIP) — **no age term** | 8 weeks | 1 year |
 | The 19–49 **PCV13+PPSV23** row | PCV20/PCV21 ≥5 years | no dose now, review at 50 |
+
+Read the first two rows together: an adult with HIV is told 8 weeks at 30 and a year at 55.
+Read rows 1 and 4 together: at 19–49 the recommendation and the floor coincide at 8 weeks;
+at 50+ they differ, and that is deliberate — the app recommends the year and still counts a
+dose given at 8 weeks.
 
 **Immunocompromising:** chronic renal failure, nephrotic
 syndrome, HIV, congenital/acquired asplenia, sickle cell / hemoglobinopathies,
@@ -400,25 +428,54 @@ catch-up row**.
 - **Unknown / undocumented history → treat as unvaccinated** (CDC).
 - **Multiple risk conditions:** apply all relevant pathways; most protective wins;
   **IC precedence over non-IC** — the IC catch-up rows win, the 8-week option is named, and
-  the 8-week validity floor applies. (It does **not** mean a shorter *recommended* interval:
-  that is ≥1 year for every adult, per the A-P1-1 bullet below. Corrected 2026-10-15, where
-  this bullet read "the ≥8wk interval and the IC catch-up rows win".)
+  the 8-week validity floor applies. At **19–49** it DOES also mean the shorter
+  *recommended* interval (S15, 2026-10-16); at **50+** it does not — see the S15 bullet
+  below. (Corrected twice: 2026-10-15, where this bullet read "the ≥8wk interval and the IC
+  catch-up rows win" with no age term at all; and 2026-10-16, where it read "≥1 year for
+  every adult".)
 - **A series containing PCV20 (or PCV21 in adults) ⇒ no PPSV23.**
 - **PCV15 (without a later PCV20/21) ⇒ a PPSV23 follow-up is required to be complete.**
-- **Adult PCV15→PPSV23 interval = ≥1 year, at EVERY adult age** (owner decision 2026-10-10,
-  A-P1-1). CDC Adult Schedule Notes, fetched live 2026-10-10 — the sentence appears twice on
-  that page, identically, under "Age 50 years or older" **and** under "Age 19–49 years with
-  certain underlying medical conditions":
-  > "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use
-  > minimum interval of 8 weeks for adults with an immunocompromising condition, cochlear
-  > implant, or cerebrospinal fluid leak)."
+- **Adult PCV15→PPSV23 interval = ≥8 weeks at 19–49 for IC / cochlear implant / CSF leak,
+  ≥1 year otherwise** (owner decision **2026-10-16, S15**). This supersedes A-P1-1
+  (2026-10-10), which flattened it to ≥1 year for every adult, and the 2026-10-15 plan,
+  which would have keyed it on risk class with no age term.
 
-  So ≥1 year is the **recommendation** and 8 weeks a minimum that may be **considered** for
-  IC / cochlear implant / CSF leak, at any adult age. The app prints the year and **names** the
-  8-week option; it never substitutes one for the other. The series is complete once the
-  PPSV23 is given. (CDC's Timing Job Aid prints a flat "8 weeks" on its 19–49 pages — a
-  per-page simplification; the schedule notes govern.) Single source:
-  `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()`.
+  **Governing sources, both read live 2026-10-16** — `mm7401a1` (ACIP, **January 2025**,
+  https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm) and CDC's **Adult Pneumococcal
+  Vaccine Timing Job Aid** (NCIRD, **March 2025**). **`rr7203a1` (2023) is superseded and
+  must never be cited for an adult interval.** mm7401a1's clinical guidance table, verbatim
+  — note the verb, which is the whole rule:
+  > ≥50: "If PCV15 is administered, a single dose of PPSV23 **should be administered ≥1
+  > year** after the PCV15 dose. A minimum interval of 8 weeks **can be considered** if
+  > PCV15 is used in adults with an immunocompromising condition, cochlear implant, or CSF
+  > leak."
+
+  > 19–49 with an immunocompromising condition, a CSF leak, or a cochlear implant:
+  > "If PCV15 is used, **administer** a single dose of PPSV23 **≥8 weeks** after the PCV15
+  > dose."
+
+  > 19–49 with chronic medical conditions: "If PCV15 is administered, a single dose of
+  > PPSV23 should be administered **≥1 year** after the PCV15 dose."
+
+  The job aid renders the same split: ≥8 weeks inline on p.2 and p.3, ≥1 year on p.4 and on
+  p.1, where p.1 carries the 8 weeks only as footnote †. **This also retires A-P1-1's claim
+  that the job aid's 19–49 "8 weeks" was a "per-page simplification" — it is mm7401a1's own
+  19–49 row.** The CDC adult schedule notes still print one sentence for both bands; they
+  summarise mm7401a1, and where they differ in register the recommendation document governs.
+
+  The owner was shown both readings — follow ACIP's wording, or flatten to 8 weeks for that
+  class at every adult age — with the patient count for each, and chose the wording. **Do
+  not extend the 8 weeks to 50+, and do not re-flatten it, without a new owner decision.**
+  The series is complete once the PPSV23 is given. Single source:
+  `adultPpsvRecommendedInterval()` + `adultPpsvShorterMinimumOffered()` in `riskFactors.js`,
+  with the age boundary read from `ROUTINE_ADULT_MIN_M`.
+- **Two 2026-10-15 plan findings are OBSOLETE, and the app was already right on both.**
+  Both came from rr7203a1; the current sources contradict them. Do not "fix" either.
+  (a) *PCV13→PPSV23 is 8-week keyed* — no: PCV13 only → PCV20 or PCV21 at **≥1 year**, and
+  the job aid prints **"NO OPTION B"** on all four pages, so there is no PPSV23-after-PCV13
+  route at any adult age. (b) *cochlear implant / CSF leak are not IC-equivalent for the
+  second PPSV23* — no: current guidance groups all three and gives **PCV20/PCV21 at ≥5
+  years**, not a second PPSV23.
 - **The 19–49 PCV13+PPSV23 row split is a SEPARATE rule** from the interval above, even though
   both name IC / cochlear implant / CSF leak. Cochlear implant, CSF leak or an
   immunocompromising condition → PCV20/PCV21 **≥5 years**; chronic conditions only → no dose
@@ -572,6 +629,7 @@ catch-up row**.
   | `ADULT-PPSV23-AFTER-PPSV23` | adult | PPSV23 | `prevSameStream` | >=5 years | floor | OWNER |
   | `ADULT-PCV20-21-AFTER-PCV15-NO-INTERVAL` | adult | PCV | `lastPcv15` | none stated | none | CDC |
   | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` | adult | PPSV23 | `lastPcv15` | >=1 year | recommendation | CDC |
+  | `ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE` | adult | PPSV23 | `lastPcv15` | none stated | none | CDC |
   | `ADULT-PCV-AFTER-PCV-CATCH-ALL` | adult | PCV | `prevSameStream` | >=1 year | recommendation | CDC |
   | `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` | adult | PPSV23 | `lastPcv` | >=1 year | recommendation | CDC |
 
@@ -685,10 +743,22 @@ catch-up row**.
   CDC's rule for whether a dose that missed a *minimum* still counts, and nothing is being
   voided here, so a day short of the year is a day short.
 
-  1. `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` — an adult with an immunocompromising
-     condition, cochlear implant or CSF leak who used the 8-week option instead of waiting
-     the recommended year. The dose met the minimum CDC names for them, so it counts; the
-     note states that, which is information rather than second-guessing.
+  1. `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` — an adult **aged 50+** with an
+     immunocompromising condition, cochlear implant or CSF leak who used the 8-week option
+     instead of waiting the recommended year. The dose met the minimum CDC names for them,
+     so it counts; the note states that, which is information rather than second-guessing.
+
+     **S15 (2026-10-16) added `shorterIsTheAdvice: false` to this row, and a sibling for the
+     other age band.** At **19–49** the 8 weeks is the *recommendation*, so a dose at or past
+     it has met the advice in full and there is nothing to report — that is
+     `ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE`, `enforcement: 'none'`, which states no
+     interval and takes no grace. Before the split, a 30-year-old with HIV whose PPSV23 came
+     at 10 weeks was told "CDC recommends PPSV23 at least 1 year after PCV15" beside a card
+     reading "≥8 weeks" — the A-P1-1 self-contradiction, one surface along, and exactly what
+     the comment in `evaluateDoseInterval()` warns about. **The floor is untouched**: a dose
+     under 8 weeks is still voided by `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM`, whose own
+     message now states the year or the 8 weeks according to the patient instead of
+     hardcoding "the recommended interval is 1 year".
   2. `ADULT-PCV-AFTER-PCV-CATCH-ALL` and `ADULT-PPSV23-AFTER-PCV-CATCH-ALL` — any adult pair
      the enumerated rows do not name (PCV13→PCV15, or a PPSV23 after a PCV20). Keyed on
      ≥1 year, the *shortest* adult gap CDC states, so they under-flag rather than over-flag.

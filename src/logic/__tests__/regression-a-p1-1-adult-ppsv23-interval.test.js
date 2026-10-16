@@ -57,19 +57,42 @@ function afterPcv15({ ageMonths, dob, riskIds }) {
 const SIXTY = { ageMonths: 725, dob: '1966-05-01' };
 const THIRTY = { ageMonths: 365, dob: '1996-05-01' };
 
-describe('A-P1-1 — >=1 year is the recommendation for every adult', () => {
-  for (const [label, who] of [['60y (>=50)', SIXTY], ['30y (19-49)', THIRTY]]) {
-    for (const risk of ['hiv', 'cochlear_implant', 'csf_leak', 'diabetes']) {
-      it(`${label} + ${risk} is told >=1 year`, () => {
-        const r = afterPcv15({ ...who, riskIds: [risk] });
-        expect(r).toBeDefined();
-        expect(r.minIntervalMonths).toBe(12);
-        expect(r.minIntervalDays).toBe(null);
-        expect(r.doseLabel).toMatch(/1 year/);
-        expect(r.doseLabel).not.toMatch(/8 weeks/);
-      });
-    }
+// ─────────────────────────────────────────────────────────────────────────
+// AMENDED BY S15 (owner decision 2026-10-16).
+//
+// The blocks above describe A-P1-1 as it was taken, and the comment header is
+// left intact as the record of WHY the flattening happened. The INTERVAL half
+// of it has since been amended at 19–49 only: ACIP mm7401a1 (January 2025)
+// and CDC's March 2025 Timing Job Aid — neither of which existed when A-P1-1
+// was taken from the schedule-notes sentence alone — print >=8 weeks as the
+// instruction for a 19–49 adult with an immunocompromising condition,
+// cochlear implant or CSF leak. Adults 50+ are UNCHANGED and are asserted as
+// such below, because they are the half of A-P1-1 that still stands.
+//
+// A-P1-1's real finding — that the app must not contradict itself one step
+// apart — is untouched and still asserted, here and in the S15 file.
+// Full cell-by-cell coverage: regression-s15-adult-ppsv23-interval-19-49.test.js
+// ─────────────────────────────────────────────────────────────────────────
+
+describe('A-P1-1 (as amended by S15) — >=1 year at 50+, and for chronic at any age', () => {
+  for (const risk of ['hiv', 'cochlear_implant', 'csf_leak', 'diabetes']) {
+    it(`60y (>=50) + ${risk} is told >=1 year`, () => {
+      const r = afterPcv15({ ...SIXTY, riskIds: [risk] });
+      expect(r).toBeDefined();
+      expect(r.minIntervalMonths).toBe(12);
+      expect(r.minIntervalDays).toBe(null);
+      expect(r.doseLabel).toMatch(/1 year/);
+      expect(r.doseLabel).not.toMatch(/8 weeks/);
+    });
   }
+
+  it('30y (19-49) + a chronic condition only is still told >=1 year', () => {
+    const r = afterPcv15({ ...THIRTY, riskIds: ['diabetes'] });
+    expect(r.minIntervalMonths).toBe(12);
+    expect(r.minIntervalDays).toBe(null);
+    expect(r.doseLabel).toMatch(/1 year/);
+    expect(r.doseLabel).not.toMatch(/8 weeks/);
+  });
 
   it('the earliest date is the real 1-year anniversary', () => {
     const r = afterPcv15({ ...SIXTY, riskIds: ['hiv'] });
@@ -77,17 +100,17 @@ describe('A-P1-1 — >=1 year is the recommendation for every adult', () => {
   });
 });
 
-describe('A-P1-1 — the 8-week minimum is NAMED, never silently substituted', () => {
-  it('is offered to an immunocompromised adult, at either age', () => {
-    for (const who of [SIXTY, THIRTY]) {
-      const r = afterPcv15({ ...who, riskIds: ['hiv'] });
-      expect(noteLead(r)).toMatch(/8 weeks/);
-      expect(noteLead(r)).toMatch(/minimum/i);
-      expect(noteLead(r)).toMatch(/immunocompromising|cochlear|cerebrospinal/i);
-    }
+describe('A-P1-1 (as amended by S15) — at 50+ the 8 weeks is NAMED, never substituted', () => {
+  it('is offered to an immunocompromised adult aged 50+', () => {
+    const r = afterPcv15({ ...SIXTY, riskIds: ['hiv'] });
+    expect(noteLead(r)).toMatch(/8 weeks/);
+    expect(noteLead(r)).toMatch(/minimum/i);
+    expect(noteLead(r)).toMatch(/immunocompromising|cochlear|cerebrospinal/i);
+    // Named as an option — the recommendation itself is still the year.
+    expect(r.minIntervalMonths).toBe(12);
   });
 
-  it('is offered for cochlear implant and CSF leak', () => {
+  it('is offered for cochlear implant and CSF leak at 50+', () => {
     for (const risk of ['cochlear_implant', 'csf_leak']) {
       expect(noteLead(afterPcv15({ ...SIXTY, riskIds: [risk] }))).toMatch(/8 weeks/);
     }
@@ -96,6 +119,12 @@ describe('A-P1-1 — the 8-week minimum is NAMED, never silently substituted', (
   it('is NOT offered for a chronic, non-immunocompromising condition', () => {
     const r = afterPcv15({ ...SIXTY, riskIds: ['diabetes'] });
     expect(noteLead(r)).not.toMatch(/8 weeks/);
+  });
+
+  it('at 19-49 the 8 weeks is the RECOMMENDATION, so it is not also offered', () => {
+    const r = afterPcv15({ ...THIRTY, riskIds: ['hiv'] });
+    expect(r.minIntervalDays).toBe(56);
+    expect(noteLead(r)).not.toMatch(/may be considered/i);
   });
 });
 

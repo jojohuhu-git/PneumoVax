@@ -24,7 +24,7 @@
 | **Peds HSCT (<19y)** | **immunize.org p2016 Table 5 — SOLE source** (NOT CDC child notes) |
 | PCV7-not-counted | immunize.org Ask the Experts |
 | Adult routine ≥50 + 19–49 risk matrix | CDC adult schedule notes + mm7401a1 |
-| Adult PCV15→PPSV23 interval | CDC adult notes — **≥1 year at every adult age**, 8 weeks *may be considered* for IC/cochlear/CSF (A-P1-1; see below) |
+| Adult PCV15→PPSV23 interval | **mm7401a1 + CDC Adult Timing Job Aid (Mar 2025)** — **≥8 weeks at 19–49** for IC/cochlear/CSF, **≥1 year** otherwise; at 50+ the 8 weeks is *named as an option* (S15; see below) |
 | PCV21 eligibility + serotype-4 geo note | CDC MMWR mm7336a3 |
 | ≥50 expansion | CDC MMWR mm7401a1 |
 | **Adult HSCT (≥19y)** | **Fred Hutch LTFU §IX Tables IX.A1/A2 — SOLE source** |
@@ -84,23 +84,36 @@ NEVER counts. Records as `noncounting`, dropped from effective series. High-risk
 ### PCV15
 Requires a PPSV23 follow-up to complete the series (encoded as `requiresPPSV23: true` in `brands.js`).
 
-## Adult PCV15 → PPSV23 Interval — ≥1 Year at Every Adult Age
+## Adult PCV15 → PPSV23 Interval — ≥8 Weeks at 19–49 for IC / Cochlear / CSF
 
-**Corrected 2026-10-11 (S3).** This section still described the rule from BEFORE the
-owner's A-P1-1 amendment ("risk-class keyed: IC/cochlear/CSF = ≥8 weeks; non-IC chronic =
-≥1 year") and named `adultPpsvIntervalClass()`, which no longer exists anywhere in `src/`.
-S13 corrected the same stale rule in `testing.md` but missed this copy, so a session
-reading this file would have implemented the superseded rule. See `CLAUDE.md` and
-`CLINICAL_SPEC.md` §K for the governing wording.
+**Rewritten 2026-10-16 (S15), owner decision.** This section has now been wrong twice, in
+opposite directions, so read the table rather than any sentence:
 
-PCV15 is followed by PPSV23 **≥1 year later, for every adult 19+**, and the series is then
-complete. The **8-week minimum may be *considered*** for an immunocompromising condition,
-cochlear implant or CSF leak — the app **names** that option and never silently substitutes
-it. Single source: `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in
-`riskFactors.js`. Never hardcode the interval in the engine.
+| Adult | PCV15 → PPSV23 |
+|---|---|
+| **19–49** with an immunocompromising condition, cochlear implant or CSF leak | **≥8 weeks** |
+| 19–49 with chronic conditions only | ≥1 year |
+| **50+**, any risk class | ≥1 year, with 8 weeks **named as an option** |
 
-`adultPpsvShorterMinimumApplies()` answers the **interval** question only — do not reuse it
-to decide which CDC *row* a patient is on.
+Governing sources, read live 2026-10-16: **mm7401a1** (ACIP, January 2025) and CDC's
+**Adult Pneumococcal Vaccine Timing Job Aid** (March 2025). **`rr7203a1` (2023) is
+superseded — never cite it for an adult interval.** mm7401a1 uses a different verb per age
+band and that is the rule: 19–49 IC/CSF/cochlear "**administer** … ≥8 weeks"; ≥50 "should
+be administered ≥1 year … 8 weeks **can be considered**".
+
+Single source: `adultPpsvRecommendedInterval()` and `adultPpsvShorterMinimumOffered()` in
+`riskFactors.js`, with the age boundary from `ROUTINE_ADULT_MIN_M`. Never hardcode the
+interval in the engine, and never add a second age test.
+
+**Do not re-flatten it to one number for all adults** (that was A-P1-1, 2026-10-10 to
+2026-10-16), **and do not extend the 8 weeks to 50+** without a new owner decision — ACIP
+prints it there as an option, not as advice. Full history and quotes: `CLINICAL_SPEC.md`
+§K; the earlier correction note for this section is in the S3 (2026-10-11) entry of
+`docs/archive/agent-session-log.md`.
+
+`adultPpsvShorterMinimumApplies()` answers the **risk-class half of the interval question**
+only — do not reuse it to decide which CDC *row* a patient is on, and do not use it alone
+for the interval: it has no age term.
 
 ## Minimum Intervals Between RECORDED Doses (S3, queue P1-0)
 

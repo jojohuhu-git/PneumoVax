@@ -305,11 +305,23 @@ describe('§G Adults 19–49 with risk', () => {
   // EVERY adult, with 8 weeks NAMED as a minimum that may be considered for an
   // immunocompromising condition, cochlear implant or CSF leak. This test
   // previously asserted the 8-week minimum as the recommendation itself.
-  it('PCV15 only (IC) → PPSV23 ≥1 year, with the 8-week minimum offered', () => {
+  // S15 (2026-10-16): at 19–49, IC / cochlear implant / CSF leak is told >=8
+  // weeks outright — mm7401a1's 19–49 block says "administer a single dose of
+  // PPSV23 >=8 weeks after the PCV15 dose". It is no longer offered as an
+  // option here, because it IS the recommendation. 50+ keeps the year plus the
+  // option, asserted in regression-a-p1-1-adult-ppsv23-interval.test.js.
+  it('PCV15 only (IC, 19–49) → PPSV23 ≥8 weeks, not offered as an option', () => {
     const r = run({ ageMonths: 360, riskIds: ['hiv'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
+    expect(ppsv(r).minIntervalDays).toBe(56);
+    expect(ppsv(r).minIntervalMonths).toBe(null);
+    expect(ppsv(r).doseLabel).toMatch(/8 weeks/);
+    expect(noteLead(ppsv(r))).not.toMatch(/may be considered/);
+  });
+
+  it('PCV15 only (chronic, 19–49) → PPSV23 ≥1 year', () => {
+    const r = run({ ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
     expect(ppsv(r).minIntervalMonths).toBe(12);
     expect(ppsv(r).minIntervalDays).toBe(null);
-    expect(noteLead(ppsv(r))).toMatch(/8 weeks may be considered/);
   });
 
   it('PPSV23 only → PCV ≥1y after PPSV23', () => {

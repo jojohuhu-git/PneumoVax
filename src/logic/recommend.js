@@ -24,8 +24,8 @@ import {
   hasIC,
   hasAnyRisk,
   hasSpecial,
-  adultPpsvShorterMinimumApplies,
-  ADULT_PPSV23_INTERVAL_MONTHS,
+  adultPpsvRecommendedInterval,
+  adultPpsvShorterMinimumOffered,
   ADULT_PPSV23_SHORTER_MINIMUM_WEEKS,
   pedsRiskRowClass,
   pedsRiskIds,
@@ -779,27 +779,49 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
 function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   const isOlderAdult = am >= M.y50;
   const anyRisk = hasAnyRisk(riskIds);
-  // A-P1-1 (owner decision 2026-10-10): >=1 year is the recommendation for
-  // EVERY adult. The 8-week minimum is named as an option for IC / cochlear
-  // implant / CSF leak rather than substituted for the recommendation.
-  const shorterMinimumApplies = adultPpsvShorterMinimumApplies(riskIds);
-  const ppsvIntervalMonths = ADULT_PPSV23_INTERVAL_MONTHS;
-  // S6: the words come from the same constant as the date. `ppsvIntervalDays`
-  // sat here as a permanently-null third branch — a leftover of the
-  // risk-class-keyed interval A-P1-1 amended away, which made every caller
-  // test a condition that could not be true. Removed rather than left looking
-  // load-bearing (the same call S6-3 and A-P0-1 made).
-  const ppsvIntervalLabel = intervalPhrase({ months: ppsvIntervalMonths });
-  // A-P1-1: NAMED as an option, never substituted. Its wording now comes from
-  // ADULT_PPSV23_SHORTER_MINIMUM_WEEKS, which until S6 was exported from
-  // riskFactors.js and read by nothing at all — the number it documents was
-  // hand-typed into this sentence, so the constant could not have kept it true.
-  const shorterMinimumNote = shorterMinimumApplies
+  // S15 (owner decision 2026-10-16): the recommended PCV15→PPSV23 interval
+  // takes BOTH the age band and the risk class, per mm7401a1 (ACIP, Jan 2025)
+  // and CDC's March 2025 Timing Job Aid — >=8 weeks for a 19–49 adult with an
+  // immunocompromising condition / cochlear implant / CSF leak, >=1 year for
+  // every other adult. `adultPpsvRecommendedInterval()` in riskFactors.js is
+  // the ONLY place that is decided; this file must never re-derive it.
+  //
+  // It returns `{days}` or `{months}` — the shape intervalPhrase() and the
+  // due-date helpers both take — so the words, the number and the date cannot
+  // drift apart (S6). `ppsvIntervalDays` once sat here as a permanently-null
+  // branch left over from the rule A-P1-1 amended away; it is a real branch
+  // again now, and this time it is fed from one function rather than an
+  // inline condition.
+  const ppsvInterval = adultPpsvRecommendedInterval(am, riskIds);
+  const ppsvIntervalDays = ppsvInterval.days ?? null;
+  const ppsvIntervalMonths = ppsvInterval.months ?? null;
+  const ppsvIntervalLabel = intervalPhrase(ppsvInterval);
+  // The 8-week option is named only where ACIP names it as a choice: at 50+
+  // for that same class. At 19–49 it IS the recommendation above, so repeating
+  // it as an option would offer the patient the number just recommended.
+  // Wording comes from ADULT_PPSV23_SHORTER_MINIMUM_WEEKS so the constant
+  // keeps the sentence true (S6).
+  const shorterMinimumNote = adultPpsvShorterMinimumOffered(am, riskIds)
     ? ` A minimum interval of ${intervalPhrase({ days: ADULT_PPSV23_SHORTER_MINIMUM_WEEKS * 7 })} may be considered for an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak.`
     : '';
+  // One helper for either unit, so a caller cannot pick the wrong one.
+  const ppsvDueState = (anchor) => (ppsvIntervalDays != null
+    ? dueState(anchor, ppsvIntervalDays, today)
+    : dueStateMonths(anchor, ppsvIntervalMonths, today));
+  // S15 (2026-10-16): mm7401a1 at BOTH age bands. The 19–49 card used to link
+  // rr7203a1 (2023), which the owner identified as out of date — it is the
+  // document whose stale rows produced two findings in the S15 plan that the
+  // current sources contradict. mm7401a1's clinical guidance table carries all
+  // three adult blocks (>=50, 19–49 IC/CSF/cochlear, 19–49 chronic), so it
+  // covers every adult row this file uses. Do not reinstate rr7203a1 here.
   const refs = collectRefs(riskIds, [
-    'cdcAdultPneumo', 'cdcAdultTimingJobAid', isOlderAdult ? 'mmwr7401a1' : 'mmwr7203a1',
+    'cdcAdultPneumo', 'cdcAdultTimingJobAid', 'mmwr7401a1',
   ]);
+  // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
+  // SAME number the card states, so it follows the same predicate.
+  const ppsvIntervalCite = ppsvIntervalDays != null
+    ? 'adultPcv15ThenPpsvShort'
+    : 'adultPcv15ThenPpsv';
   const adultBrands = pcvRecBrands({ adult: true });
 
   // 19–49 with NO risk → not indicated (routine starts at 50).
@@ -839,18 +861,18 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
 
   // ── PCV15 only, no PPSV23 → INCOMPLETE: give PPSV23 ─────────────────
   if (pcv.hasPCV15 && !ppsvGiven) {
-    const { dueToday, earliestNextDate } = dueStateMonths(pcv.lastDate, ppsvIntervalMonths, today);
+    const { dueToday, earliestNextDate } = ppsvDueState(pcv.lastDate);
     return [rec({
       vaccine: 'PPSV23', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: `PPSV23 (≥${ppsvIntervalLabel} after PCV15) — completes the series`,
       dueToday, earliestNextDate,
-      minIntervalDays: null, minIntervalMonths: ppsvIntervalMonths,
+      minIntervalDays: ppsvIntervalDays, minIntervalMonths: ppsvIntervalMonths,
       brands: ['PPSV23 (Pneumovax 23)'],
       note: {
         lead: `Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose [c] — the series is INCOMPLETE until then.${shorterMinimumNote}`,
         detail: 'PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.',
       },
-      noteCites: [cite('adultPcv15ThenPpsv')],
+      noteCites: [cite(ppsvIntervalCite)],
       refs,
     })];
   }
@@ -979,15 +1001,25 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     brands: adultBrands,
     note: isOlderAdult
       ? {
-        lead: `Give 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥${ppsvIntervalLabel} later [c].`,
+        // S15: the 8-week option belongs here too. mm7401a1's >=50 "None or
+        // PCV7 only" row names it in the same breath as the year — "A minimum
+        // interval of 8 weeks can be considered if PCV15 is used in adults
+        // with an immunocompromising condition, cochlear implant, or CSF leak"
+        // — and this card was the one >=50 surface that left it out, so an
+        // IC adult saw the option only after the PCV15 was recorded.
+        lead: `Give 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥${ppsvIntervalLabel} later [c].${shorterMinimumNote}`,
         detail: 'Routine pneumococcal vaccination for adults ≥50 with no, unknown, or PCV7-only history. A PCV7-only history counts as no PCV history [c]. PCV20 and PCV21 each complete the series alone [c].',
       }
       : {
-        lead: `Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later [c].${shorterMinimumNote}`,
+        // No shorterMinimumNote here: at 19–49 the 8 weeks is already the
+        // interval in `ppsvIntervalLabel` for this class, so the sentence
+        // could only ever be empty. S6-3's rule — do not leave a branch that
+        // cannot fire looking load-bearing.
+        lead: `Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later [c].`,
         detail: 'This is an adult 19–49 with a qualifying risk condition and no, unknown, or PCV7-only pneumococcal history; the series is complete once the PPSV23 follow-up is given. A PCV7-only history counts as no PCV history [c]. PCV20 and PCV21 each complete the series alone [c].',
       },
     noteCites: [
-      cite(isOlderAdult ? 'adultRoutine50' : 'adultPcv15ThenPpsv'),
+      cite(isOlderAdult ? 'adultRoutine50' : ppsvIntervalCite),
       cite('adultPcv7Only'),
       cite('adultPcv20or21Complete'),
     ],

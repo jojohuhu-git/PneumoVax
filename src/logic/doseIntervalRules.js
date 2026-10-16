@@ -98,7 +98,11 @@ import {
   ADULT_ADVISED_PCV_GAP_MONTHS,
   GRACE_DAYS,
 } from './intervals.js';
-import { ADULT_PPSV23_INTERVAL_MONTHS, adultPpsvShorterMinimumApplies } from '../data/riskFactors.js';
+import {
+  ADULT_PPSV23_INTERVAL_MONTHS,
+  adultPpsvShorterMinimumApplies,
+  adultPpsvShorterIntervalIsTheAdvice,
+} from '../data/riskFactors.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // ── Plain-English gap formatting ─────────────────────────────────────────
@@ -235,6 +239,16 @@ function lastOf(list) {
 //   shorterMinimum  true  → only when the 8-week option applies to this adult
 //                   false → only when it does not
 //                   undefined → regardless
+//   shorterIsTheAdvice
+//                 true  → only when the 8 weeks is this adult's RECOMMENDATION
+//                         (19–49 with an immunocompromising condition, cochlear
+//                         implant or CSF leak — S15, 2026-10-16)
+//                 false → only when it is not (50+, or chronic only)
+//                 undefined → regardless
+//                 A DECLARED selector, read once in ruleApplies() exactly like
+//                 shorterMinimum. It is NOT an inline age test deciding whether
+//                 a rule may bite — that was the S14-RC root cause. A row that
+//                 needs to speak only to one age band declares it here.
 //   interval      { days } | { months } | { daysFrom: fn(anchor) }
 //   grace         does CDC's 4-day grace apply? (floors: yes. recommendations:
 //                 no — the grace governs whether a dose that missed a MINIMUM
@@ -435,9 +449,25 @@ export const DOSE_INTERVAL_RULES = [
       + 'rr7203a1 says "should be repeated" 0 times and "not be counted" 0 times (positive control: '
       + '"interval", 64 hits). So the 8 weeks is the shortest RECOMMENDED gap for these patients, and '
       + 'treating it as a floor is the owner\'s determination, like every other adult floor.',
+    // S15 (2026-10-16): this message used to end "and the recommended interval
+    // is 1 year", hardcoded. That clause had to go, for two reasons:
+    //
+    //   1. It was wrong at 19–49, where 8 weeks IS the recommendation.
+    //   2. Making it age-aware made it worse, not better. This row judges a
+    //      dose by `ctx.ageAtDose` — the patient's age WHEN THE DOSE WAS
+    //      GIVEN, which is right for a validity question. The recommendation
+    //      card keys on their age NOW. For a 50-year-old whose PCV15 was given
+    //      at 45 those differ, and the note then said "for an adult 19–49..."
+    //      beside a card computed for a 50-year-old. Measured: 15 of the
+    //      16,250 swept patients.
+    //
+    // So the floor states the floor, and says nothing about what is
+    // recommended — that number has one home, the recommendation card, which
+    // the clinician is already looking at. Duplicating it here is what let
+    // this rule contradict itself three times.
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}, and the recommended interval is 1 year.`],
-      detail: `Previous PCV15: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the shortest interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is 1 year. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}.`],
+      detail: `Previous PCV15: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the shortest interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is on the recommendation card above. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -455,8 +485,9 @@ export const DOSE_INTERVAL_RULES = [
     source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. CDC states "at least 1 year '
       + 'after the PCV15 dose" and names NO minimum for an adult without an immunocompromising '
       + 'condition, cochlear implant or CSF leak. The owner determined the year is the floor for them. '
-      + 'A-P1-1 is untouched: ≥1 year remains what the app RECOMMENDS at every adult age, and the '
-      + '8-week option is still named rather than substituted. See CLINICAL_SPEC.md §K.',
+      + 'This row is for an adult WITHOUT those conditions, so the year is what the app recommends '
+      + 'them too (S15, 2026-10-16: the 8 weeks is the recommendation only at 19-49, and only for '
+      + 'an immunocompromising condition, cochlear implant or CSF leak). See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor, min) => ({
       reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — PPSV23 is given at least ${min.words} after PCV15.`],
       detail: `Previous PCV15: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} minimum interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
@@ -585,21 +616,60 @@ export const DOSE_INTERVAL_RULES = [
   // a day short of the year is a day short.
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED',
-    what: 'An adult PPSV23 that used the 8-week option rather than waiting the recommended year',
+    what: 'An adult aged 50+ whose PPSV23 used the 8-week option rather than waiting the recommended year',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
     from: 'lastPcv15',
     shorterMinimum: true,
+    // S15 (2026-10-16): 50+ only. At 19-49 the 8 weeks IS the recommendation,
+    // so this note told those patients they had fallen short of a year that
+    // was never recommended to them — the A-P1-1 self-contradiction, one
+    // surface along, exactly as the comment in evaluateDoseInterval() warns.
+    shorterIsTheAdvice: false,
     interval: { months: ADULT_PPSV23_INTERVAL_MONTHS },
     grace: false,
     enforcement: 'recommendation',
     authority: 'CDC',
-    source: 'CDC Adult Immunization Schedule Notes (see ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM). '
-      + '≥1 year is the recommendation for every adult; 8 weeks is a minimum that MAY BE CONSIDERED '
-      + 'for an immunocompromising condition, cochlear implant or CSF leak. A-P1-1: the app names the '
-      + 'option, and never substitutes it for the recommendation.',
+    source: 'mm7401a1 (ACIP, January 2025), >=50 row: PPSV23 "should be administered >=1 year after '
+      + 'the PCV15 dose. A minimum interval of 8 weeks CAN BE CONSIDERED if PCV15 is used in adults '
+      + 'with an immunocompromising condition, cochlear implant, or CSF leak." So for an adult 50+ '
+      + 'the year is the advice and the 8 weeks is a choice; the app names the option and never '
+      + 'substitutes it. The 19-49 band is a different row, below.',
     message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose. CDC recommends PPSV23 at least ${min.words} after PCV15 and names ${SHORTER_MINIMUM_ARTICLE} ${SHORTER_MINIMUM_ADJ} minimum that may be considered for an immunocompromising condition, cochlear implant or CSF leak — this dose met that minimum, so it counts.`,
+  },
+  // S15 (2026-10-16). The 19-49 half of the row above. For an adult 19-49 with
+  // an immunocompromising condition, cochlear implant or CSF leak, mm7401a1
+  // says "administer a single dose of PPSV23 >=8 weeks after the PCV15 dose" —
+  // 8 weeks is the RECOMMENDATION, not a shortcut from one. A dose at or past
+  // 8 weeks has met the advice in full, so there is nothing to tell the
+  // clinician and this row is never flagged.
+  //
+  // It exists as a ROW rather than an age test inside the row above, per
+  // CLAUDE.md: "Never add an age test that decides whether a rule may bite —
+  // add a row instead."
+  {
+    id: 'ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE',
+    what: 'An adult 19-49 with an immunocompromising condition, cochlear implant or CSF leak whose PPSV23 came >=8 weeks after PCV15 — the recommended interval for them',
+    rulebook: 'adult',
+    vaccine: 'PPSV23',
+    products: null,
+    from: 'lastPcv15',
+    shorterMinimum: true,
+    shorterIsTheAdvice: true,
+    // Never-flagged rows state NO interval and NO grace — both fields would
+    // only mislead a reader into thinking this row judges something. The
+    // floor that does judge these doses is
+    // ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM, and it is unchanged.
+    interval: null,
+    grace: false,
+    enforcement: 'none',
+    authority: 'CDC',
+    source: 'mm7401a1 (ACIP, January 2025), row "Adults aged 19-49 years with an immunocompromising '
+      + 'condition, a CSF leak, or a cochlear implant": "If PCV15 is used, administer a single dose '
+      + 'of PPSV23 >=8 weeks after the PCV15 dose." Never flagged because the dose met the '
+      + 'recommendation; a shorter gap is still caught by the floor row '
+      + 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM, which this row does not weaken.',
   },
   {
     id: 'ADULT-PCV-AFTER-PCV-CATCH-ALL',
@@ -671,6 +741,9 @@ function ruleApplies(rule, ctx, book) {
   if (rule.needsNoPriorPpsv23 && ctx.priorPpsv23.length > 0) return false;
   if (rule.shorterMinimum !== undefined
     && rule.shorterMinimum !== adultPpsvShorterMinimumApplies(ctx.riskIds)) return false;
+  if (rule.shorterIsTheAdvice !== undefined
+    && rule.shorterIsTheAdvice
+      !== adultPpsvShorterIntervalIsTheAdvice(ctx.ageAtDose, ctx.riskIds)) return false;
   return true;
 }
 

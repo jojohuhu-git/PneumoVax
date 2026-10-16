@@ -449,10 +449,22 @@ describe('P2-7: no document names a function or constant the code no longer has'
 // no code under it saying the same thing.
 //
 // So this checks for the RULE, not the name: any sentence that keys the adult
-// PCV15->PPSV23 interval on the risk class must sit next to words framing it
-// as history. The correct statement is unaffected — ">=1 year for every adult,
-// with 8 weeks named as an option" keys the OPTION on the class, not the
-// interval, and the validity floor (S14-7) says "floor" or "minimum".
+// PCV15->PPSV23 interval on the risk class ALONE must sit next to words
+// framing it as history. The validity floor (S14-7) says "floor" or "minimum".
+//
+// ── UPDATED BY S15 (2026-10-16) ─────────────────────────────────────────
+// The rule has now drifted THREE times, in both directions, so the guard
+// tracks the hazard rather than one wrong answer. The hazard is a statement
+// that names only ONE of the two terms:
+//
+//   • risk class with no age band  — the shape the SUPERSEDED patterns catch.
+//     Still wrong, because the 8 weeks applies at 19-49 only.
+//   • age-free flattening (">=1 year for every adult") — A-P1-1's shape,
+//     correct from 2026-10-10 to 2026-10-16 and wrong since. Caught by the
+//     FLATTENED patterns added below.
+//
+// A correct statement names BOTH: ">=8 weeks at 19-49 for IC / cochlear
+// implant / CSF leak, >=1 year otherwise".
 describe('S6-6: no file states the amended risk-class-keyed adult interval as current', () => {
   // Each pattern is a shape the superseded rule actually took, in a real file.
   const SUPERSEDED = [
@@ -519,14 +531,104 @@ describe('S6-6: no file states the amended risk-class-keyed adult interval as cu
   });
 
   // ...and must NOT fire on the correct statement, or on the validity floor.
+  // S15: the first entry used to read ">=1 year for every adult, whatever the
+  // risk class" — i.e. this control asserted as correct the very rule that is
+  // now superseded. Replaced rather than deleted, so the list keeps doing its
+  // job of pinning what a RIGHT sentence looks like.
   it('passes the rule as it now stands, and the S14-7 floor', () => {
     for (const ok of [
-      'The PCV15→PPSV23 recommendation is ≥1 year for every adult, whatever the risk class',
+      'The PCV15→PPSV23 recommendation is ≥8 weeks at 19–49 for an immunocompromising condition, cochlear implant or CSF leak, and ≥1 year otherwise',
       'the 8-week minimum is named as an option for an immunocompromising condition',
       'Validity floor for a dose already given: 8 weeks for IC / cochlear implant / CSF leak',
       '8 weeks for IC / cochlear implant / CSF leak, the year for every other adult',
     ]) {
       expect(SUPERSEDED.some((p) => p.test(ok)), `false positive on: ${ok}`).toBe(false);
+    }
+  });
+});
+
+// S15 (2026-10-16): the mirror-image guard. A-P1-1's flattened rule — ">=1
+// year for EVERY adult, whatever the risk class" — was correct for six days
+// and is now the stale one. It escaped into four documents last time it
+// changed, so it gets a tripwire of its own rather than a promise to be
+// careful. Same shape as the guard above: fire on the sentence, allow it when
+// it is framed as history.
+describe('S15: no file states the flattened age-free adult interval as current', () => {
+  const FLATTENED = [
+    // `[^.]{0,40}?` so the two halves may be separated by a few words
+    // (\"≥1 year later, for every adult 19+\" — mutation M9b slipped a bare
+    // [,;\s]* version) without ever crossing a sentence boundary.
+    /(≥|>=)\s*1\s*year\b[^.]{0,40}?\b(for|at|to)\s+(every|all|any)\s+adult/i,
+    /one\s+interval\s+at\s+every\s+adult\s+age/i,
+    /per-page\s+simplification/i,
+    // NOT /(no|without) age (distinction|split|term)/ — tried, and dropped.
+    // It fired on four CORRECT sentences: the S14-7 validity floor genuinely
+    // has no age term, and saying so is the right thing to write. A guard that
+    // flags the true statement teaches the next reader to delete it.
+  ];
+  // Deliberately NARROW, and checked on the SAME line plus one either side.
+  // A first pass allowed "A-P1-1", "S15" and the date, with a +/-8 line window
+  // — and mutation M9 (reinstating the flattened sentence in CLINICAL_SPEC.md)
+  // was caught by nothing, because those tokens appear on almost every page of
+  // these documents. A framing word has to sit against the sentence itself.
+  const FRAMED = /no longer|used to|previously|deleted|removed|supersed|amended|corrected|stale|flattened|retired|outlived|which it is not|it is not|it is mm7401a1|replaced|was the rule|until 2026/i;
+
+  // The same nine files the S6-6 guard scans.
+  const SCANNED_S15 = [
+    SPEC_PATH,
+    CLINICAL_PATH,
+    'CLAUDE.md',
+    'docs/agent/architecture.md',
+    'docs/agent/testing.md',
+    'docs/agent/clinical-rules.md',
+    'src/data/riskFactors.js',
+    'src/logic/recommend.js',
+    'src/logic/doseIntervalRules.js',
+  ];
+
+  for (const path of SCANNED_S15) {
+    it(`${path} does not state the flattened interval as current`, () => {
+      const text = readFileSync(new URL(`../../../${path}`, import.meta.url), 'utf8');
+      const lines = text.split('\n');
+      const unframed = [];
+      lines.forEach((line, i) => {
+        if (!FLATTENED.some((pat) => pat.test(line))) return;
+        const around = lines.slice(Math.max(0, i - 1), i + 2).join('\n');
+        if (!FRAMED.test(around)) unframed.push(`${i + 1}: ${line.trim().slice(0, 130)}`);
+      });
+      expect(
+        unframed,
+        `${path} states the adult PCV15->PPSV23 interval as >=1 year for every adult, with `
+        + 'nothing nearby saying that rule was superseded. The owner superseded it on '
+        + '2026-10-16 (S15): >=8 weeks at 19-49 for an immunocompromising condition, '
+        + 'cochlear implant or CSF leak; >=1 year for every other adult. See mm7401a1 and '
+        + "CDC's March 2025 Adult Timing Job Aid.\n\n"
+        + unframed.join('\n'),
+      ).toEqual([]);
+    });
+  }
+
+  it('fires on the sentences A-P1-1 left behind', () => {
+    for (const stale of [
+      'The PCV15→PPSV23 recommendation is ≥1 year for every adult, whatever the risk class',
+      'Adult PCV15→PPSV23 interval = ≥1 year, at EVERY adult age',
+      'that is a per-page simplification of the sentence above, which governs',
+    ]) {
+      expect(FLATTENED.some((p) => p.test(stale)), `missed: ${stale}`).toBe(true);
+    }
+  });
+
+  it('does not fire on the rule as it now stands, nor on the >=50 half of it', () => {
+    for (const ok of [
+      '≥8 weeks at 19–49 for IC / cochlear implant / CSF leak, ≥1 year otherwise',
+      'Adults 50+ keep ≥1 year, with 8 weeks named as an option',
+      'PPSV23 only: PCV15/20/21 ≥1 year after PPSV23, every class',
+      'PCV13 only: PCV20 or PCV21 at ≥1 year',
+      // The floor really does have no age term. Saying so must stay sayable.
+      'Validity floor for a dose already given, keyed on risk class with no age term',
+      'the validity floors key on the class with NO age term, 8 weeks for IC',
+    ]) {
+      expect(FLATTENED.some((p) => p.test(ok)), `false positive on: ${ok}`).toBe(false);
     }
   });
 });
