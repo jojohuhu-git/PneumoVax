@@ -74,6 +74,7 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
     function renderStep() {
       return render(
         <StepHistory
+          historyAnswered={true}
           ageMonths={141}
           today={TODAY}
           dob="2015-01-01"
@@ -151,6 +152,7 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
   it('no label in a dose row is left decorative', () => {
     const { container } = render(
       <StepHistory
+        historyAnswered={true}
         ageMonths={141}
         today={TODAY}
         dob="2015-01-01"

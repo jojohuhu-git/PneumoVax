@@ -51,8 +51,11 @@ const CASES = buildCases({ today: CORPUS_TODAY });
 describe('P0 — orderedDoses[i] is the dose perDose[i] was computed for', () => {
   it('the grid is the real one, not an empty sweep', () => {
     // The no-vacuous-assertion guard: every test below iterates CASES, so an
-    // empty grid would make all of them pass while proving nothing.
-    expect(CASES.length).toBe(16250);
+    // empty grid would make all of them pass while proving nothing. Pinned to
+    // the grid's current size (17,342 since S7, 2026-10-16, added a 4-dose
+    // infant PCV history) rather than just ">0", so a grid that shrank back
+    // toward empty would be caught before it got there.
+    expect(CASES.length).toBe(17342);
   });
 
   it('every patient gets exactly one dose beside every verdict', () => {

@@ -198,8 +198,6 @@ export const PCV_HISTORY_PRODUCTS = [
   { key: '', label: 'Unknown PCV product' },
 ];
 
-export const PPSV23_HISTORY_PRODUCTS = [PPSV23_PRODUCT];
-
 // Recommendation-facing brand option strings ----------------------------
 // Engine emits these as `brands` arrays. PCV21 only when adult.
 export function pcvRecBrands({ adult, includePCV21 = true } = {}) {

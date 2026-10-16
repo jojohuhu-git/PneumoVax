@@ -14,6 +14,16 @@ function setAgeYears(years) {
   fireEvent.change(screen.getByLabelText('Years'), { target: { value: String(years) } });
 }
 
+// P4-4: the History step now needs the yes/no question answered before
+// Next will advance. Most tests here care about Results, not history —
+// they take the "no previous doses" branch.
+function sayNoHistory() {
+  fireEvent.click(screen.getByRole('button', { name: /no previous doses/i }));
+}
+function sayYesHistory() {
+  fireEvent.click(screen.getByRole('button', { name: /yes, record doses/i }));
+}
+
 describe('App wizard', () => {
   it('renders the Age step on load', () => {
     render(<App />);
@@ -53,6 +63,7 @@ describe('App wizard', () => {
     expect(screen.getByText('Risk Factors')).toBeDefined();
     fireEvent.click(getNextBtn());           // → History (no risks)
     expect(screen.getByText('Vaccination History')).toBeDefined();
+    sayNoHistory();
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
 
     const cards = screen.getAllByTestId('rec-card');
@@ -68,6 +79,7 @@ describe('App wizard', () => {
     const hsct = screen.getByLabelText(/hematopoietic stem cell transplant/i, { exact: false });
     fireEvent.click(hsct);
     fireEvent.click(getNextBtn());           // → History
+    sayNoHistory();
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
     expect(document.querySelector('[data-testid="hsct-card"]')).not.toBeNull();
   });
@@ -77,6 +89,7 @@ describe('App wizard', () => {
     setAgeYears(55);
     fireEvent.click(getNextBtn());
     fireEvent.click(getNextBtn());
+    sayNoHistory();
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
     const startOver = screen.getByRole('button', { name: /start over/i });
     fireEvent.click(startOver);
@@ -88,6 +101,7 @@ describe('App wizard', () => {
     setAgeYears(6);
     fireEvent.click(getNextBtn());
     fireEvent.click(getNextBtn());           // no risks → History
+    sayNoHistory();
     fireEvent.click(screen.getByRole('button', { name: /view results/i }));
     const cards = screen.getAllByTestId('rec-card');
     const texts = cards.map(c => c.textContent).join(' ');
@@ -103,6 +117,7 @@ describe('App wizard', () => {
     fireEvent.click(getNextBtn());           // → Risks
     fireEvent.click(screen.getByLabelText(/chronic lung disease/i, { exact: false }));
     fireEvent.click(getNextBtn());           // → History
+    sayYesHistory();
     fireEvent.click(screen.getByRole('button', { name: /\+ add pcv dose/i }));
     fireEvent.click(screen.getByRole('button', { name: /\+ add pcv dose/i }));
     const dateInputs = document.querySelectorAll('input[type="date"]');

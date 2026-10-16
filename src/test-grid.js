@@ -139,6 +139,23 @@ export const GRID_PCV_HISTORIES = [
   [['PCV7', 3650], ['PCV13', 1825], ['PCV20', 365]],
   [['PCV15', 1825], ['PCV15', 1797]],
   [['PCV13', 224], ['PCV13', 168], ['PCV13', 112]],   // 8-week infant spacing
+  // S7 (2026-10-16): FOUR 28-day-spaced infant doses, all under 7 months old
+  // at the earliest offset — the exact shape of P1-2's "PCV dose 5 of 4"
+  // (a <7mo band where `target` is a flat 4, not a formula that already
+  // accounts for extra prior doses the way the 7-11mo and 12-23mo bands do).
+  // The grid had no 4-dose infant history before this — only up to three —
+  // so it never reached `prior >= target && !boosterGiven` in that specific
+  // band. Offsets chosen to fit GRID_AGES_MONTHS' youngest age (6mo = exactly
+  // 183 days of life here) AND clear PCV20's 6-week minimum age at the
+  // earliest dose. Two earlier attempts were silently invalid: 200/172/144/116
+  // days ago fell before birth at every age under 7mo (so it only ever
+  // exercised the 7-11mo and 12-23mo bands, where the target formula already
+  // self-corrects and the bug does not reproduce); 170/142/114/86 cleared
+  // birth but put the earliest dose at 13 days old, under PCV20's 6-week
+  // floor, so it was REJECTED and only 3 of the 4 doses ever counted as
+  // prior. 141/113/85/57 puts the earliest dose at exactly 42 days —
+  // confirmed by manually reproducing against the un-fixed branch first.
+  [['PCV20', 141], ['PCV20', 113], ['PCV20', 85], ['PCV20', 57]],
   [['PCV13', 140], ['PCV13', 112]],
   [['PCV15', 112], ['PCV15', 84]],
   // "Unknown PCV product" — a real option on the history step, for a dose the

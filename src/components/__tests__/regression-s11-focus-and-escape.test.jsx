@@ -65,13 +65,19 @@ describe('S11 / P5-3 — the cursor lands when a step opens', () => {
     fireEvent.submit(container.querySelector('form')); // Risks -> History
     expect(container.querySelector('.step-title').textContent)
       .toBe('Vaccination History');
-    expect(document.activeElement).toBe(container.querySelector('.add-dose-btn'));
+    // P4-4: the yes/no question is unanswered on arrival, so its first toggle
+    // button ("No previous doses") is the step's first real control — not
+    // `.add-dose-btn`, which only exists once "Yes, record doses" is picked.
+    expect(document.activeElement).toBe(container.querySelector('.history-toggle-btn'));
   });
 
   it('does NOT steal focus on the Results step', () => {
     const { container } = render(<App />);
     advanceFromAge(container);
     fireEvent.submit(container.querySelector('form')); // -> History
+    // P4-4: Next now refuses to leave History until the yes/no question is
+    // answered.
+    fireEvent.click(screen.getByRole('button', { name: /no previous doses/i }));
     fireEvent.submit(container.querySelector('form')); // -> Results
     // The history step's button is gone from the document, so focus falls back
     // to the body. What matters is that nothing on the results page grabbed it:

@@ -361,9 +361,33 @@ describe('P2-7: no document names a function or constant the code no longer has'
     // Deleted when the owner amended the adult PCV15->PPSV23 interval (A-P1-1,
     // 2026-10-10). Its risk-class-keyed rule outlived it in four documents.
     'adultPpsvIntervalClass',
+    // N2 (2026-10-16): the first real catch from fixing this guard's own two
+    // holes. `pcvHistoryProductsFor` was removed by `PCV21-OFFLABEL`
+    // (2026-10-15); its only mentions left in `src/` are comments explaining
+    // that it is gone, which hole (b) — comments counting toward "still
+    // exists" — had been treating as proof it was still there. testing.md's
+    // S6-2 row describes it entirely in the past tense already.
+    'pcvHistoryProductsFor',
   ]);
 
   const HISTORY_FRAMING = /no longer|used to|deleted|removed|superseded|replaced|before (the|it|this)|which no longer exists|stale|the rule from BEFORE/i;
+
+  // N2 (2026-10-16): comments stripped before a source file joins `srcText`,
+  // the same shape as the `codeOnly()` helper several component tests already
+  // use. Without this, a tombstone comment left behind when a function is
+  // deleted — "// adultPpsvIntervalClass() used to..." — kept that name
+  // "existing" in `src/` by this guard's own loose `.includes()` check, which
+  // is hole (b): this session's own S7 work left exactly that shape behind
+  // (a mutation's "// MUTATED for S7 guard proof" comment, restored before
+  // commit, but the pattern is the same one that let the pre-A-P1-1 adult
+  // interval's tombstone comment count as "still in the code").
+  const codeOnly = (src) => {
+    const blank = (m) => m.replace(/[^\n]/g, '');
+    return src
+      .replace(/\/\*[\s\S]*?\*\//g, blank)
+      .replace(/^\s*\/\/.*$/gm, blank)
+      .replace(/\s+\/\/.*$/gm, '');
+  };
 
   const srcText = (() => {
     // Read every source file once; an identifier "exists" if it appears
@@ -381,7 +405,7 @@ describe('P2-7: no document names a function or constant the code no longer has'
         if (entry.name === '__corpus__') continue;
         const child = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, dirUrl);
         if (entry.isDirectory()) out.push(...walk(child));
-        else if (/\.(js|jsx|mjs)$/.test(entry.name)) out.push(readFileSync(child, 'utf8'));
+        else if (/\.(js|jsx|mjs)$/.test(entry.name)) out.push(codeOnly(readFileSync(child, 'utf8')));
       }
       return out;
     };
@@ -394,9 +418,21 @@ describe('P2-7: no document names a function or constant the code no longer has'
   for (const path of DOCS) {
     it(`${path} names no identifier that has been deleted from src/`, () => {
       const doc = read(path);
+      // N2 (2026-10-16), hole (a): these used to require backticks —
+      // `` `name()` `` / `` `NAME` `` — so a bare mention named nothing to
+      // this guard. Backticks are no longer required for the function-call
+      // shape (a word immediately followed by `()` is essentially always a
+      // real identifier, quoted or not). The ALL-CAPS shape instead now
+      // requires an underscore when bare: PneumoVax's own constants
+      // (`ADULT_SCHED_MIN_M`, `PCV21_MIN_AGE_M`, `ROUTINE_ADULT_MIN_M`, …)
+      // all have one, while the plain clinical acronyms these documents are
+      // full of (PCV21, HSCT, ACIP, CDC, CSF) never do — so this still
+      // cannot fire on ordinary prose. A bare ALL-CAPS name with NO
+      // underscore stays backtick-only, same as before.
       const named = new Set([
-        ...[...doc.matchAll(/`([a-z][a-zA-Z0-9_]{3,})\(\)`/g)].map((m) => m[1]),
+        ...[...doc.matchAll(/\b([a-z][a-zA-Z0-9_]{3,})\(\)/g)].map((m) => m[1]),
         ...[...doc.matchAll(/`([A-Z][A-Z0-9_]{4,})`/g)].map((m) => m[1]),
+        ...[...doc.matchAll(/\b([A-Z][A-Z0-9]*_[A-Z0-9_]*)\b/g)].map((m) => m[1]),
       ]);
 
       const gone = [...named].filter((n) => !srcText.includes(n));

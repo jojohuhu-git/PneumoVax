@@ -1,5 +1,10 @@
 # PneumoVax — Handoff after S15, the adult interval (2026-10-16)
 
+> **SUPERSEDED by `handoff-2026-10-16-p4-4-s7-n2-prosediff.md`** (from `main`'s side — a
+> parallel branch not yet merged, `handoff-2026-10-16-n1-n5-n6.md`, also supersedes this
+> file; read whichever PR merged first). Items 5–8 below, plus N2 and N7, are the ones that
+> moved — read the newer file rather than resuming from here.
+
 > **Supersedes `handoff-2026-10-15-s6-interval-prose-merged.md`.** Its queue item **0** is
 > now **done** as PR #52 — but **not in the form that handoff and the plan described**. Two
 > of the plan's six findings turned out to be built on a superseded source and were
