@@ -68,6 +68,22 @@ Recorded as `noncounting`, dropped from effective series. High-risk patients tre
 `requiresPPSV23: true` in `brands.js`. Never emit a PCV15 rec without the PPSV23 follow-up path.
 
 ### Adult PCV15→PPSV23 Interval Is ≥1 Year, With 8 Weeks Named As An Option
+> ⚠️ **THE INTERVAL HALF OF THIS RULE IS REVERSED, PENDING IMPLEMENTATION (owner decision
+> 2026-10-15).** ACIP rr7203a1 Tables 2, 3 and 4 print **≥8 weeks** as the schedule for an
+> immunocompromising condition / CSF leak / cochlear implant at **both** age bands, and ≥1 year
+> otherwise — so the recommendation goes back to being keyed on the risk class. The code still
+> does what this section describes; **the code is what is wrong**. Do not "correct" the plan to
+> match this section, and do not re-flatten the interval once it is keyed.
+> **Read `docs/archive/plan-2026-10-15-adult-interval-risk-class-audit.md` before touching any
+> adult interval.** It carries the verified source table, the measured current behaviour, five
+> further findings, and three open owner sub-questions.
+> Two claims in the paragraphs below are **unsafe** and the plan says why: the Timing Job Aid's
+> flat "8 weeks" is **not** a per-page simplification (it agrees with Tables 3 and 4), and "there
+> is no age split" answers a question nobody asked — rr7203a1 splits by **condition**.
+> **Still true and still binding:** the ≥1 year vs 8 weeks **validity floors** (S14-7, owner
+> determination 2026-10-11) are unchanged, recommendation and floor remain different questions,
+> and the interval must never be hardcoded.
+
 **Amended 2026-10-10 by owner decision (A-P1-1).** The previous rule ("risk-class-keyed: IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year") had no age term and substituted the minimum *for* the recommendation.
 
 When PCV15 is used it is followed by PPSV23 **≥1 year later**, for **every adult (19+)**, and the series is then complete. The **8-week minimum may be *considered*** for an immunocompromising condition, cochlear implant, or CSF leak — the app **names** that option in the note and never silently substitutes it. Single source: `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in `riskFactors.js`. Never hardcode the interval.
