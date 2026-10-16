@@ -1,3 +1,9 @@
+> ⚠️ **SUPERSEDED 2026-10-16 by `handoff-2026-10-16-s15-adult-interval.md`.** Its queue
+> item **0** is done (PR #52) — but **not as described below or in the plan it points to**.
+> Two of that plan's findings rested on ACIP rr7203a1 (2023), which the owner identified as
+> out of date; the current sources contradict them and the app was already correct on both.
+> **Do not resume from this file.** Items 5–8 and N1–N4 are carried forward in the new one.
+
 # PneumoVax — Handoff after S6's second half merged (2026-10-15)
 
 > **Supersedes `handoff-2026-10-15-pcv21-offlabel-merged.md`.** That file's queue items

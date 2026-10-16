@@ -67,32 +67,51 @@ Recorded as `noncounting`, dropped from effective series. High-risk patients tre
 ### PCV15 Always Requires PPSV23
 `requiresPPSV23: true` in `brands.js`. Never emit a PCV15 rec without the PPSV23 follow-up path.
 
-### Adult PCV15→PPSV23 Interval Is ≥1 Year, With 8 Weeks Named As An Option
-> ⚠️ **THE INTERVAL HALF OF THIS RULE IS REVERSED, PENDING IMPLEMENTATION (owner decision
-> 2026-10-15).** ACIP rr7203a1 Tables 2, 3 and 4 print **≥8 weeks** as the schedule for an
-> immunocompromising condition / CSF leak / cochlear implant at **both** age bands, and ≥1 year
-> otherwise — so the recommendation goes back to being keyed on the risk class. The code still
-> does what this section describes; **the code is what is wrong**. Do not "correct" the plan to
-> match this section, and do not re-flatten the interval once it is keyed.
-> **Read `docs/archive/plan-2026-10-15-adult-interval-risk-class-audit.md` before touching any
-> adult interval.** It carries the verified source table, the measured current behaviour, five
-> further findings, and three open owner sub-questions.
-> Two claims in the paragraphs below are **unsafe** and the plan says why: the Timing Job Aid's
-> flat "8 weeks" is **not** a per-page simplification (it agrees with Tables 3 and 4), and "there
-> is no age split" answers a question nobody asked — rr7203a1 splits by **condition**.
-> **Still true and still binding:** the ≥1 year vs 8 weeks **validity floors** (S14-7, owner
-> determination 2026-10-11) are unchanged, recommendation and floor remain different questions,
-> and the interval must never be hardcoded.
+### Adult PCV15→PPSV23 Interval: ≥8 Weeks At 19–49 For IC / Cochlear / CSF, Else ≥1 Year
 
-**Amended 2026-10-10 by owner decision (A-P1-1).** The previous rule ("risk-class-keyed: IC/cochlear/CSF = ≥8 weeks; non-IC chronic = ≥1 year") had no age term and substituted the minimum *for* the recommendation.
+**OWNER DECISION 2026-10-16 (S15). Implemented.** This replaces both A-P1-1 (2026-10-10)
+and the 2026-10-15 reversal banner that stood here.
 
-When PCV15 is used it is followed by PPSV23 **≥1 year later**, for **every adult (19+)**, and the series is then complete. The **8-week minimum may be *considered*** for an immunocompromising condition, cochlear implant, or CSF leak — the app **names** that option in the note and never silently substitutes it. Single source: `ADULT_PPSV23_INTERVAL_MONTHS` + `adultPpsvShorterMinimumApplies()` in `riskFactors.js`. Never hardcode the interval.
+| Adult | Recommended PCV15 → PPSV23 interval |
+|---|---|
+| **19–49** with an immunocompromising condition, cochlear implant or CSF leak | **≥8 weeks** |
+| 19–49 with chronic conditions only | ≥1 year |
+| **50+**, any risk class | ≥1 year, with 8 weeks **named as an option** |
 
-CDC's adult schedule notes print this sentence identically under *both* "Age 50 years or older" and "Age 19–49 years…", so there is no age split. CDC's Timing Job Aid shows a flat "8 weeks" on its 19–49 pages; that is a per-page simplification and the schedule notes govern.
+**The governing sources are `mm7401a1` (ACIP, January 2025) and CDC's Adult Pneumococcal
+Vaccine Timing Job Aid (NCIRD, March 2025).** Both read live 2026-10-16.
+**`rr7203a1` (2023) is superseded — never cite it for an adult interval again.**
 
-`adultPpsvShorterMinimumApplies()` answers the **interval** question only. Do not reuse it to decide which CDC *row* a patient is on — the predicate it replaced did both jobs, and that coupling is why flattening the interval nearly moved 19–49 cochlear/CSF patients off the "≥5 years" row onto "review at 50".
+mm7401a1's clinical guidance table uses a **different verb per age band, and that
+difference is the rule**: 19–49 IC/CSF/cochlear reads "If PCV15 is used, **administer** a
+single dose of PPSV23 **≥8 weeks** after the PCV15 dose"; ≥50 reads "should be administered
+**≥1 year** … A minimum interval of 8 weeks **can be considered**". The job aid renders the
+same split — inline on pp. 2–3, as footnote † on p. 1.
 
-**S14-7 (2026-10-11) added a second, separate job for the same two numbers: validity.** The ≥1 year above is still what the app **recommends**, unchanged. A dose that was *already given* inside the interval is now judged against a **floor** — 8 weeks for IC / cochlear implant / CSF leak (CDC's own words), the year for every other adult (owner determination). Recommendation and floor are different questions; do not let one answer stand in for the other.
+The owner was shown both readings — follow ACIP's wording, or flatten to 8 weeks for that
+risk class at every adult age — with the patient count for each, and chose the wording.
+**Do not extend the 8 weeks to 50+ without a new owner decision**: ACIP prints it as an
+option there, so the app would state as advice what its own citation offers as a choice.
+**Do not re-flatten it either.** Single source: `adultPpsvRecommendedInterval()` and
+`adultPpsvShorterMinimumOffered()` in `riskFactors.js`. Never hardcode the interval, and
+never add a second age test — the boundary is `ROUTINE_ADULT_MIN_M`.
+
+**Two findings in `docs/archive/plan-2026-10-15-adult-interval-risk-class-audit.md` are
+OBSOLETE** — both came from rr7203a1, and the current sources contradict them. The app was
+already right on both; **do not "fix" either**:
+- *"PCV13→PPSV23 is 8-week keyed too"* — no. Every current source gives PCV13 only →
+  PCV20 or PCV21 at ≥1 year, and the job aid prints **"NO OPTION B"** on all four pages.
+- *"cochlear implant / CSF leak are NOT IC-equivalent for the second PPSV23"* — no. Current
+  guidance groups all three and gives **PCV20/PCV21 at ≥5 years**, not a second PPSV23.
+
+**S14-7's separation of recommendation from validity still stands, unchanged.** The
+**floors** for a dose *already given* key on risk class with **no age term** — 8 weeks for
+IC / cochlear implant / CSF leak, the year for every other adult — and remain an **OWNER
+CLINICAL DETERMINATION of 2026-10-11**, reconfirmed 2026-10-16. Recommendation and floor
+are different questions; do not let one answer stand in for the other. Also confirmed
+already correct and not to be changed: a dose given too early is rejected and the next one
+is anchored to the **last valid dose**, not to the rejected one.
+
 
 ### The Rulebook Is `CLINICAL_SPEC.md`, And A Test Holds It To The Code
 `CLINICAL_SPEC.md` is the rulebook (owner decision, S8, 2026-10-11) — the one document

@@ -7,33 +7,42 @@
 // conditions" (owner decision, 2026-09-13) but keep their own `class` values
 // so recommend.js's hasHSCT()/hasExclusion() checks are unaffected.
 //
-// ── What the class does NOT decide: the recommended adult interval ──────
+// ── What the class decides about the adult interval, and what AGE decides ──
 //
 // This header stated, until 2026-10-15, that the adult PCV15→PPSV23 interval
-// is keyed on the risk class — "IC adult interval = ≥8 weeks; non-IC chronic
-// adult interval = ≥1 year". That is the rule the owner AMENDED on 2026-10-10
-// (A-P1-1), and it had survived here, in the very file that owns the two
-// constants, two hundred lines above their correct explanation. It was the
-// fifth stale copy of that rule found; four earlier ones were fixed in S8.
+// is keyed on the risk class alone — "IC adult interval = ≥8 weeks; non-IC
+// chronic adult interval = ≥1 year", with no age term. That was wrong twice
+// over: it was the rule A-P1-1 amended on 2026-10-10, and it had survived
+// here, in the very file that owns the two constants, two hundred lines above
+// their explanation. It was the fifth stale copy found; S8 fixed four others.
 //
-// What is actually true, in two parts that must not be run together
-// (CLAUDE.md: "Recommendation and floor are different questions; do not let
-// one answer stand in for the other"):
+// What is true since S15 (OWNER DECISION 2026-10-16), in three parts that must
+// not be run together (CLAUDE.md: "Recommendation and floor are different
+// questions; do not let one answer stand in for the other"):
 //
-//   • The RECOMMENDATION is ≥1 year for EVERY adult 19+, whatever the class.
-//     The 8-week minimum is NAMED as an option for an immunocompromising
-//     condition, cochlear implant or CSF leak — never substituted for the
-//     year. ADULT_PPSV23_INTERVAL_MONTHS and
-//     ADULT_PPSV23_SHORTER_MINIMUM_WEEKS below, with the CDC quote.
-//   • The VALIDITY FLOOR, for a dose already given, IS keyed on the class: 8
-//     weeks for IC / cochlear implant / CSF leak, the year for every other
-//     adult. Added by S14-7 (2026-10-11). Every adult floor is an OWNER
-//     CLINICAL DETERMINATION of that date — never cite ACIP or CDC for one.
+//   • The RECOMMENDATION takes BOTH the age band and the class —
+//     `adultPpsvRecommendedInterval()` below is its only home. ≥8 weeks for a
+//     19–49 adult with an immunocompromising condition, cochlear implant or
+//     CSF leak; ≥1 year for every other adult, at either age band.
+//   • The 8-week OPTION is still NAMED, but only where ACIP names it: at 50+
+//     for that same class — `adultPpsvShorterMinimumOffered()`. At 19–49 it is
+//     no longer an option, it is the advice, so the sentence is dropped there.
+//   • The VALIDITY FLOOR, for a dose already given, is keyed on the class with
+//     NO age term: 8 weeks for IC / cochlear implant / CSF leak, the year for
+//     every other adult. Added by S14-7 (2026-10-11) and UNCHANGED by S15 —
+//     the owner reconfirmed it on 2026-10-16. Every adult floor is an OWNER
+//     CLINICAL DETERMINATION of 2026-10-11 — never cite ACIP or CDC for one.
 //     Lives in logic/doseIntervalRules.js; see CLINICAL_SPEC.md §K.
 //
-// So what the class below decides, on the adult pathway, is which option gets
+// So what the class below decides, on the adult pathway, is one half of the
+// recommended interval (age is the other half), whether the 8-week option gets
 // NAMED, which floor applies, and which 19–49 prior-vaccine row the patient is
-// on — not what the app recommends.
+// on.
+//
+// S15 imports ROUTINE_ADULT_MIN_M rather than writing 600 here, so the age the
+// interval turns on is the SAME 50 that routine eligibility uses — one home,
+// per CLAUDE.md's "Three Schedule Constants" rule. scheduleConstants.js
+// imports nothing, so there is no cycle.
 //
 // Each entry declares its risk class:
 //   class: 'IC'  — immunocompromising. Gets the 8-week option named and the
@@ -51,11 +60,15 @@
 //   class: 'hsct' — hematopoietic stem cell transplant: advisory pathway,
 //                  relative-to-transplant, no calendar due dates.
 //
-// Sources (CLINICAL_SPEC §C, §J, §K): p2016 Table 3, CDC adult notes, rr7203a1.
-//   • Adult PCV15→PPSV23 RECOMMENDATION = ≥1 year at every adult age (A-P1-1).
+// Sources (CLINICAL_SPEC §C, §J, §K): p2016 Table 3, mm7401a1 + the CDC adult
+// Timing Job Aid for every adult interval, CDC adult notes for the rest.
+//   • Adult PCV15→PPSV23 RECOMMENDATION = ≥8 weeks at 19–49 for IC / cochlear
+//     implant / CSF leak, ≥1 year for every other adult (S15, 2026-10-16).
 //   • Cochlear implant + CSF leak are treated as IC for the adult questions.
 //   • IC precedence over non-IC when both present.
 // ─────────────────────────────────────────────────────────────────────────
+
+import { ROUTINE_ADULT_MIN_M } from '../logic/scheduleConstants.js';
 
 export const RISK_FACTORS = [
   // ── Immunocompromising (IC) ──────────────────────────────────────────
@@ -122,14 +135,14 @@ export const RISK_FACTORS = [
   {
     id: 'cochlear_implant',
     label: 'Cochlear implant',
-    sublabel: 'uses the immunocompromising (≥8-week) PCV15→PPSV23 interval (CDC adult notes)',
+    sublabel: 'treated as immunocompromising for the adult PCV15→PPSV23 interval — ≥8 weeks at 19–49, ≥1 year at 50+ (mm7401a1)',
     class: 'special', group: 'special',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'csf_leak',
     label: 'Cerebrospinal fluid (CSF) leak',
-    sublabel: 'uses the immunocompromising (≥8-week) PCV15→PPSV23 interval (CDC adult notes)',
+    sublabel: 'treated as immunocompromising for the adult PCV15→PPSV23 interval — ≥8 weeks at 19–49, ≥1 year at 50+ (mm7401a1)',
     class: 'special', group: 'special',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
@@ -221,39 +234,93 @@ export function hasAnyRisk(riskIds = []) {
   });
 }
 
-// The PCV15→PPSV23 interval for ADULTS — one recommendation, at every adult age.
+// ── The PCV15→PPSV23 interval for ADULTS: age band AND risk class ────────
 //
-// OWNER DECISION 2026-10-10 (A-P1-1), amending the CLAUDE.md rule "Adult PPSV23
-// Interval Is Risk-Class-Keyed", which keyed the interval on risk class with no
-// age term and substituted the 8-week minimum FOR the recommendation:
+// OWNER DECISION 2026-10-16 (S15). The owner rejected the premise of
+// plan-2026-10-15-adult-interval-risk-class-audit.md, which was built on ACIP
+// **rr7203a1 (2023)**, and named two newer sources as governing. Both were
+// read live on 2026-10-16:
 //
-//   "When PCV15 is used, it should be followed by a dose of PPSV23 at least
-//    1 year later. The minimum interval (8 weeks) can be considered in adults
-//    with an immunocompromising condition, cochlear implant, or cerebrospinal
-//    fluid leak. Their pneumococcal vaccinations are then complete."
+//   • **mm7401a1** — ACIP, January 2025, the recommendation that lowered
+//     routine adult PCV to ≥50. https://pmc.ncbi.nlm.nih.gov/articles/PMC11709131/
+//   • CDC **Pneumococcal Vaccine Timing for Adults** job aid, NCIRD, March 2025.
+//     https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf
 //
-// Source, CDC Adult Immunization Schedule Notes, fetched live 2026-10-10. The
-// sentence appears EXACTLY TWICE on that page, identically — once under
-// "Routine vaccination / Age 50 years or older" and once under "Special
-// situations / Age 19–49 years with certain underlying medical conditions":
+// **rr7203a1 is superseded. Never cite it for an adult interval again.**
 //
-//   "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15
-//    dose (may use minimum interval of 8 weeks for adults with an
-//    immunocompromising condition,* cochlear implant, or cerebrospinal fluid
-//    leak)."
+// mm7401a1's clinical guidance table, verbatim. The VERB differs between the
+// two age bands, and that difference IS the rule:
 //
-// So the primary source carries NO age distinction. ≥1 year is the
-// recommendation for every adult; 8 weeks is a minimum that MAY BE CONSIDERED
-// for IC / cochlear implant / CSF leak, at any adult age. The app states the
-// year and NAMES the option — it never silently substitutes one for the other.
-// (CDC's Timing Job Aid prints a flat "8 weeks" on its 19–49 pages; that is a
-// per-page simplification of the sentence above, which governs.)
+//   Adults aged ≥50 years / None or PCV7 only at any age:
+//     "If PCV15 is administered, a single dose of PPSV23 SHOULD BE
+//      ADMINISTERED ≥1 year after the PCV15 dose. A minimum interval of 8
+//      weeks CAN BE CONSIDERED if PCV15 is used in adults with an
+//      immunocompromising condition, cochlear implant, or CSF leak."
+//
+//   Adults aged 19–49 years with an immunocompromising condition, a CSF leak,
+//   or a cochlear implant / None or PCV7 only at any age:
+//     "If PCV15 is used, ADMINISTER a single dose of PPSV23 ≥8 weeks after the
+//      PCV15 dose."
+//
+//   Adults aged 19–49 years with chronic medical conditions / None or PCV7:
+//     "If PCV15 is administered, a single dose of PPSV23 should be
+//      administered ≥1 year after the PCV15 dose."
+//
+// The job aid renders the same split: ≥8 weeks inline on p.2 (19–49
+// immunocompromising) and p.3 (19–49 cochlear implant / CSF leak); ≥1 year on
+// p.4 (19–49 chronic) and on p.1 (≥50), where the 8 weeks appears only as
+// footnote †, "Consider minimum interval (8 weeks) for adults with an
+// immunocompromising condition, cochlear implant, or cerebrospinal fluid leak".
+//
+// The owner was shown both readings — follow ACIP's wording, or flatten to 8
+// weeks for the risk class at EVERY adult age — with the count of patients each
+// would move, and chose the wording. **Do not extend the 8 weeks to 50+ without
+// a new owner decision**: ACIP prints it as an option there, so the app would
+// be stating as advice what its own citation offers as a choice.
+//
+// This also CORRECTS the paragraph A-P1-1 left here, which called the job
+// aid's 19–49 "8 weeks" a "per-page simplification". It is not a
+// simplification — it is mm7401a1's own 19–49 row.
 
-/** The recommended PCV15→PPSV23 interval for any adult, in calendar months. */
+/** The recommended PCV15→PPSV23 interval, in calendar months, where the year applies. */
 export const ADULT_PPSV23_INTERVAL_MONTHS = 12;
 
-/** The shorter minimum that may be considered, in weeks. */
+/** The shorter interval, in weeks — the advice at 19–49, an option at 50+. */
 export const ADULT_PPSV23_SHORTER_MINIMUM_WEEKS = 8;
+
+/**
+ * The recommended PCV15→PPSV23 interval for ONE adult — the only place this
+ * is decided. Returns the shape `intervalPhrase()` and the due-date helpers
+ * take, so the words, the number and the date can never disagree (S6).
+ *
+ * @param {number} ageMonths patient age in months
+ * @param {string[]} riskIds selected risk condition ids
+ * @returns {{days: number} | {months: number}} exactly one of days/months
+ */
+export function adultPpsvRecommendedInterval(ageMonths, riskIds = []) {
+  return adultPpsvShorterIntervalIsTheAdvice(ageMonths, riskIds)
+    ? { days: ADULT_PPSV23_SHORTER_MINIMUM_WEEKS * 7 }
+    : { months: ADULT_PPSV23_INTERVAL_MONTHS };
+}
+
+/**
+ * Is the 8 weeks this adult's RECOMMENDATION (rather than an option)?
+ * True only for 19–49 with an immunocompromising condition, cochlear implant
+ * or CSF leak — mm7401a1's second block.
+ */
+export function adultPpsvShorterIntervalIsTheAdvice(ageMonths, riskIds = []) {
+  return ageMonths < ROUTINE_ADULT_MIN_M && adultPpsvShorterMinimumApplies(riskIds);
+}
+
+/**
+ * Should the card NAME the 8 weeks as something that may be considered?
+ * True only at 50+ for that same class — the one place mm7401a1 phrases it as
+ * a choice. At 19–49 it is the advice, so naming it as an option would have
+ * the card offer the patient the number it has just recommended.
+ */
+export function adultPpsvShorterMinimumOffered(ageMonths, riskIds = []) {
+  return ageMonths >= ROUTINE_ADULT_MIN_M && adultPpsvShorterMinimumApplies(riskIds);
+}
 
 /**
  * May the 8-week minimum be considered for this adult?

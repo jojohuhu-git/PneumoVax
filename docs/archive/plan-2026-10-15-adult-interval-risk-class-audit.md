@@ -1,3 +1,22 @@
+> ⚠️ **PARTLY WITHDRAWN AND SUPERSEDED, 2026-10-16.** Implemented as PR #52 — but **not as
+> written**. This plan was built on **ACIP rr7203a1 (2023)**, which the owner identified as
+> out of date on 2026-10-16. The governing sources are **mm7401a1** (ACIP, January 2025) and
+> CDC's **Adult Pneumococcal Vaccine Timing Job Aid** (March 2025).
+>
+> **What changed from this plan:**
+> - §1's decision was refined: the 8 weeks applies at **19–49 only**, not "at both age
+>   bands". mm7401a1 prints it as the instruction at 19–49 and as an option at ≥50.
+> - **§5.1 and §5.2 are WITHDRAWN.** Both came from rr7203a1; current guidance contradicts
+>   them and **the app was already right on both**. Implementing either would introduce a
+>   bug. See `CLINICAL_SPEC.md` §K and `CLAUDE.md`.
+> - **§5.3 is moot** (there is no Option B for PCV13-only in current guidance) and the owner
+>   declined it.
+> - §5.4, §5.5 and §5.6 stand, and are asserted as controls in
+>   `regression-s15-adult-ppsv23-interval-19-49.test.js`.
+>
+> **Read `handoff-2026-10-16-s15-adult-interval.md` instead.** Kept for the record of how the
+> decision was reached, not as instructions.
+
 # PLAN — Adult dosing-interval recommendations, audited cell by cell against ACIP
 
 > **STATUS: PLANNED, NOT STARTED.** Nothing in this document has been implemented. No code

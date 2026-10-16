@@ -100,11 +100,19 @@ export const REFS = {
   // `page`) while each links and hovers its own sentence.
   //
   // All fetched live 2026-10-10 (browser pane, `textContent`) and checked for
-  // exact presence. Three of them — adultPcv15ThenPpsv, adultPcv13Only and
-  // adultPcv7Only — occur TWICE on the page, because CDC prints them
-  // identically under "Age 50 years or older" and under "Age 19-49 years".
-  // That duplication is the evidence behind this app's no-age-split interval
-  // rule (CLAUDE.md, A-P1-1); the deep link lands on the first occurrence.
+  // exact presence; re-read live 2026-10-16 and still exact. Three of them —
+  // adultPcv15ThenPpsv, adultPcv13Only and adultPcv7Only — occur TWICE on the
+  // page, because CDC prints them identically under "Age 50 years or older"
+  // and under "Age 19-49 years"; the deep link lands on the first occurrence.
+  //
+  // S15 (2026-10-16): that duplication used to be cited as the evidence for a
+  // single adult interval at every age. It is not sufficient evidence, and
+  // this comment no longer claims it is. The schedule notes summarise;
+  // mm7401a1 (January 2025) is the recommendation, and ITS table splits the
+  // PCV15->PPSV23 interval by age band. A 19-49 adult with an
+  // immunocompromising condition / cochlear implant / CSF leak is now cited to
+  // `adultPcv15ThenPpsvShort` below, not to the sentence here — a card must
+  // never show a quote that states a different number from the card.
   adultRoutine50: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, routine vaccination at age 50+ with no prior PCV or unknown history',
@@ -114,10 +122,27 @@ export const REFS = {
   },
   adultPcv15ThenPpsv: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
-    label: 'CDC Adult Schedule Notes — pneumococcal, the PCV15 -> PPSV23 interval (>=1 year, with 8 weeks named as a minimum that MAY be considered). Printed identically under BOTH "Age 50 years or older" and "Age 19-49 years" — which is why this app applies one interval at every adult age (CLAUDE.md, A-P1-1)',
+    label: 'CDC Adult Schedule Notes — pneumococcal, the PCV15 -> PPSV23 interval of >=1 year, with 8 weeks named as a minimum that MAY be considered for an immunocompromising condition, cochlear implant or CSF leak. This is the citation for the YEAR: every adult 50+, and 19-49 with chronic conditions only',
     short: 'CDC Adult Notes',
     quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
-    lastVerified: '2026-10-10',
+    lastVerified: '2026-10-16',
+  },
+  // S15 (2026-10-16). The citation for the OTHER half of the rule: a 19-49
+  // adult with an immunocompromising condition, cochlear implant or CSF leak
+  // is told >=8 weeks, so the quote beside that card has to be the sentence
+  // that says 8 weeks — not the schedule-notes sentence that says a year.
+  //
+  // Source read live 2026-10-16 at the PMC mirror the owner supplied,
+  // https://pmc.ncbi.nlm.nih.gov/articles/PMC11709131/ — the quote below is
+  // from mm7401a1's clinical guidance table, row "Adults aged 19-49 years
+  // with an immunocompromising condition, a CSF leak, or a cochlear implant /
+  // None or PCV7 only at any age". The canonical cdc.gov URL is used here.
+  adultPcv15ThenPpsvShort: {
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — for adults aged 19-49 years with an immunocompromising condition, a CSF leak, or a cochlear implant, PPSV23 follows PCV15 by >=8 weeks. CDC\'s March 2025 Adult Pneumococcal Vaccine Timing Job Aid prints the same >=8 weeks on its 19-49 immunocompromising (p.2) and cochlear implant / CSF leak (p.3) pages',
+    short: 'MMWR ≥50 expansion',
+    quote: 'If PCV15 is used, administer a single dose of PPSV23* ≥8 weeks after the PCV15 dose.',
+    lastVerified: '2026-10-16',
   },
   adultPcv13Only: {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
