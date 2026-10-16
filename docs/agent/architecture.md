@@ -115,6 +115,19 @@ src/
                          apply the grace. The RULES that use them live in
                          doseIntervalRules.js; recommend.js reads the numbers directly for
                          its forward-looking scheduler.
+                         ALSO the one place an interval becomes WORDS (S6, 2026-10-15):
+                         intervalPhrase({days|months}) -> "8 weeks" / "1 year",
+                         intervalPhraseAdj -> "8-week" (English needs both forms, and
+                         feeding the noun form into an adjectival clause printed "the 8
+                         weeks minimum interval" to 843 of 16,250 swept patients), and
+                         intervalArticle -> "a"/"an" so the article follows the number
+                         too. Every clinician-visible interval in recommend.js and
+                         doseIntervalRules.js reads from the constant that governs it;
+                         a source guard in
+                         regression-s6-5-interval-prose-one-home.test.js refuses a new
+                         hand-typed one. NOT for refs.js quotes or doseIntervalRules.js
+                         `source:` strings: those transcribe published ACIP/CDC
+                         sentences and stay hand-typed.
     doseIdentity.js      newDoseRow / isBlankDoseRow / dropBlankDoseRows (P1-3). What
                          makes a row of the history a recorded DOSE. A row the
                          clinician added and never typed in is not one; a row they

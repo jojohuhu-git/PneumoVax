@@ -475,6 +475,7 @@ describe('S6-6: no file states the amended risk-class-keyed adult interval as cu
     'CLAUDE.md',
     'docs/agent/architecture.md',
     'docs/agent/testing.md',
+    'docs/agent/clinical-rules.md',
     'src/data/riskFactors.js',
     'src/logic/recommend.js',
     'src/logic/doseIntervalRules.js',
