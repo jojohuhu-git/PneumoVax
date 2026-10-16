@@ -1,3 +1,11 @@
+> **SUPERSEDED (2026-10-15) by `handoff-2026-10-15-s6-interval-prose-merged.md`.**
+> This file's queue items **2, 3 and 4 are all DONE and MERGED** — item 3 (`P4-3`) as PR #47
+> (`7b1a1e5`), item 4 (`S5`/`P2-1`+`P2-13`) as PR #48 (`999393b`), and item 2 (`S6`'s second
+> half) as PR #49 (`9b4d321`). Items **3 and 4 merged without a handoff being written**, so
+> this file was two PRs stale by the time a session resumed from it. Items 5-8 and N1-N2 are
+> carried forward in the new file, numbering preserved, with MeningoVax parity checked for
+> each. **Do not resume from this file.**
+
 # PneumoVax — Handoff after PCV21-OFFLABEL merged (2026-10-15)
 
 > **Supersedes `handoff-2026-10-15-s6-and-s9-merged.md`.** That file's queue item 1
