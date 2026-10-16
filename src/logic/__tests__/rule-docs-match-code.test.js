@@ -367,19 +367,28 @@ describe('P2-7: no document names a function or constant the code no longer has'
 
   const srcText = (() => {
     // Read every source file once; an identifier "exists" if it appears
-    // anywhere in src/, which is deliberately loose — this test is hunting
-    // names that are entirely gone, not auditing export lists.
+    // anywhere in src/ or scripts/, which is deliberately loose — this test
+    // is hunting names that are entirely gone, not auditing export lists.
+    //
+    // P2-13 (2026-10-15): `scripts/` was added after `HSCT_CASES` — exported
+    // the same session, and genuinely current — read as deleted, because the
+    // walk only ever covered `src/`. `docs/agent/testing.md` documents the
+    // comparison harnesses in `scripts/` by name now, so the identifiers this
+    // guard checks against have to include that folder too.
     const walk = (dirUrl) => {
       const out = [];
       for (const entry of readdirSync(dirUrl, { withFileTypes: true })) {
         if (entry.name === '__corpus__') continue;
         const child = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, dirUrl);
         if (entry.isDirectory()) out.push(...walk(child));
-        else if (/\.(js|jsx)$/.test(entry.name)) out.push(readFileSync(child, 'utf8'));
+        else if (/\.(js|jsx|mjs)$/.test(entry.name)) out.push(readFileSync(child, 'utf8'));
       }
       return out;
     };
-    return walk(new URL('../../', import.meta.url)).join('\n');
+    return [
+      ...walk(new URL('../../', import.meta.url)),
+      ...walk(new URL('../../../scripts/', import.meta.url)),
+    ].join('\n');
   })();
 
   for (const path of DOCS) {
