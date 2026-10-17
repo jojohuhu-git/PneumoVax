@@ -150,10 +150,37 @@ describe('ANCHOR-1 Case B — no child verdict moves', () => {
     expect(v.ppsv23[0].status).toBe('valid');
   });
 
-  it('reads as a complete series', () => {
+  // UPDATED 2026-10-17 (IC-1). This assertion used to read "reads as a complete
+  // series", and it was asserting a clinical answer that was wrong rather than
+  // anything about ANCHOR-1. This child is immunocompromised (asplenia), their
+  // conjugate doses were all before age 6, and they have had exactly ONE PPSV23
+  // and no PCV20 — the patient p2016's Table 4 footnote || and CDC's IC rows
+  // both give a further dose to: "options are (a) give one dose of PCV20 at
+  // least 8 weeks after most recent pneumococcal vaccination, or (b) give a
+  // second dose of PPSV23 five years after the first dose of PPSV23."
+  //
+  // So the verdict has moved, deliberately and for a reason recorded in
+  // `regression-2026-10-17-ic-child-with-ppsv23-is-not-complete.test.js`. The
+  // tripwire this describe block exists to be did exactly its job: it noticed.
+  // What it must keep guarding is ANCHOR-1's own subject — that the PPSV23 is
+  // measured from the PCV13 that COUNTED — which the test above still asserts
+  // and which has not changed.
+  it('offers the immunocompromising follow-on rather than calling it complete', () => {
     const v = verdictsFor(CASE_B);
-    expect(v.recs.some((r) => r.status === 'complete')).toBe(true);
+    expect(v.recs.some((r) => r.status === 'complete')).toBe(false);
+    // Both of CDC's options are on the card.
+    expect(v.recs.some((r) => (r.brands ?? []).some((b) => String(b).includes('PCV20')))).toBe(true);
+    expect(v.recs.some((r) => r.vaccine === 'PPSV23')).toBe(true);
   });
+
+  // The matching control — that a SECOND PPSV23 does finish the schedule, so
+  // the fix did not simply make every IC child incomplete — cannot live here:
+  // this child is 6, and two PPSV23 doses five years apart are impossible
+  // before age 7 (PPSV23's minimum age is 2). It is asserted on an older child
+  // in `regression-2026-10-17-ic-child-with-ppsv23-is-not-complete.test.js`,
+  // and by the real 18y9m sickle-cell patient in
+  // `late-and-ambiguous-window.test.js`, who has three PPSV23 doses and is
+  // complete.
 });
 
 describe('ANCHOR-1 Case G — a PPSV23 behind a rejected PCV already counted', () => {
