@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-10-17** by `docs/archive/handoff-2026-10-17-findings-a-and-b-merged.md`.
+> Its queue has moved on — do not resume from this file.
+
 > ## ⛔ SUPERSEDED — 2026-10-17
 >
 > Replaced by **`handoff-2026-10-17-ic-children-clinical-gap.md`**, written later the same
