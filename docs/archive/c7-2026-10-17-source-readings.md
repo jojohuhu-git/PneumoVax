@@ -1,6 +1,6 @@
 # C7 — live source readings for the citation work (2026-10-17)
 
-**STATUS: IN PROGRESS. 2 of 6 documents read.** This file is the record C7 exists to
+**STATUS: IN PROGRESS. 3 of 6 documents read.** This file is the record C7 exists to
 produce: each quoted source read live, with the sentence and the heading it sits under,
 so C8 can credit a statement without re-deriving the rule from scratch.
 
@@ -331,11 +331,236 @@ test (`CLAUDE.md`, "Never add an age test that decides whether a rule may bite")
 
 ---
 
+---
+
+## Document 3 — immunize.org p2016
+
+- **URL:** https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf
+- **Edition, read off the document itself:** `www.immunize.org/catg.d/p2016.pdf / Item #P2016
+  (2/16/2024)`, page 2 footer. 2 pages, 211,252 bytes.
+- **Read:** 2026-10-17. Downloaded straight from the address above by command line
+  (HTTP 200) — unlike the CDC PDFs, immunize.org does not block it. Read with
+  `scripts/pdfLayout.py`, so every table cell is tied to its row and column.
+- **What it is:** *Recommendations for Pneumococcal Vaccines Use in Children and Teens.*
+
+### ⚠ Two corrections to what the app records about this document
+
+**1. It has FIVE tables, not four.** `refs.js` labels it "(Tables 1–4)" and carries a
+comment dated 2026-09-13 stating it was "verified live" that the document "as it exists now,
+is a 2-page document with only Tables 1–4", and that Table 5 "lives in p3086.pdf". **Read
+live today, p2016 contains Table 5**, printed at the foot of page 2:
+
+> "Table 5. Recommended schedule for administering pneumococcal conjugate vaccine to any
+> child younger than age 19 years following a hematopoietic stem cell transplant (HSCT)"
+
+The document's item date is **2/16/2024**, which is *earlier* than that 2026-09-13 check, so
+this is not immunize.org having republished — the earlier verification was simply wrong, most
+likely read with a tool that truncated page 2 or flattened it. The label and the comment both
+need correcting.
+
+**This changes NOTHING about the transplant hard stop.** Table 5 is a post-transplant
+schedule, and `CLAUDE.md` is explicit that ticking the transplant box stops the engine and
+that no post-transplant schedule is ever to be re-added (OWNER DECISION 2026-10-16). Finding
+that a cited document still contains such a table is *more* evidence for that decision, not
+less: it is the fifth time in six weeks that a post-transplant source statement has been
+found misdescribed. **Do not propose re-adding Table 5's schedule.** The only action here is
+to stop the app describing this document inaccurately.
+
+**2. p2016 never mentions PCV21.** Every option it gives is PCV15 or PCV20. Checked against
+the engine: **0** child cards offer PCV21 while listing p2016, so nothing is wrong today —
+but a future change that offers PCV21 under 19 would silently create an unsupported citation.
+
+### What the document contains
+
+| Table | Covers |
+|---|---|
+| 1 | PCV for **all** children (healthy and at-risk) age 2–23 months, by age now × previous doses |
+| 2 | PCV for **healthy** children 24 months–18 years |
+| 3 | The risk-condition list, split **non-IC** / **IC** |
+| 4 | Children 24 months–18 years **with risk conditions** — Option A / Option B, split non-IC vs IC |
+| 5 | Post-HSCT (see correction 1 — not used by this app, and must not be) |
+
+### Sentences verified, with the table and row each sits in
+
+**(A) Table 1, footnote `†`** — the source of both infant interval variants the app states:
+
+> "Minimum interval between doses: for children younger than age 12 months = 4 weeks; for
+> children age 12 months or older = 8 weeks"
+
+**(B) Table 1, footnote `*`** (also printed under Table 2):
+
+> "If only PCV13 is available when the child is scheduled to receive PCV, PCV13 may be given
+> as previously recommended."
+
+**(C) Table 2, row `5 through 18 years` / `No previous doses or any incomplete PCV schedule
+by 24 months`:**
+
+> "No additional doses"
+
+**(D) Table 2, row `24 through 59 months` / `No previous doses, or any incomplete PCV
+schedule by age 24 months`:**
+
+> "1 additional dose, at least 8 wks after most recent PCV dose"
+
+**(E) Table 4, row `2 through 18 years (any risk condition)` / `Completed PCV series before
+age 6 years, including one or more doses of PCV20`:**
+
+> "No additional doses"
+
+**(F) Table 4, row `24 through 71 months (any risk condition)` / `Any incomplete schedule of
+0, 1, or 2 PCV doses by age 24 months`, Option A:**
+
+> "2 doses of PCV20 or PCV15,‡ given at least 8 weeks apart"
+
+**(G) Table 4, row `24 through 71 months (any risk condition)` / `3 doses of PCV, all before
+12 months`, Option A:**
+
+> "1 dose of PCV20 or PCV15‡"
+
+**(H) Table 4, rows `6 through 18 years (non-IC)` and `6 through 18 years (IC)` / `No
+previous dose of PCV13, PCV15, or PCV20`, Option B:**
+
+> "1 dose of PCV15 at least 8 weeks after most recent pneumococcal vaccination. At least 8
+> weeks later, give 1 dose of PPSV23, if PPSV23 not previously given. If PPSV23 previously
+> given, do not give another dose of PPSV23."
+
+**(I) Table 4, row `6 through 18 years (IC)` / `PCV13 only, given at or after age 6 years`,
+Option B** — note the 5-year follow-on, which the **non-IC** row of the same history does
+**not** have:
+
+> "1 dose of PPSV23 at least 8 weeks after most recent PCV13 dose; at least 5 years after the
+> first PPSV23 dose, give 1 dose of PCV20 or a second dose of PPSV23"
+
+**(J) Table 4, footnote `§`** — attached to the **non-IC** row's `no PPSV23§`:
+
+> "If PPSV23 previously given, then child is complete."
+
+**(K) Table 4, footnote `ǁ`** — attached to the **IC** row's `no PPSV23ǁ`:
+
+> "If PPSV23 previously given, options are (a) give one dose of PCV20 at least 8 weeks after
+> most recent pneumococcal vaccination, or (b) give a second dose of PPSV23 five years after
+> the first dose of PPSV23."
+
+**(L) Table 4, footnote `‡`:**
+
+> "If PCV15 is used, one or two additional pneumococcal vaccine doses will be needed."
+
+### Patient population each sentence was written about (C6's note)
+
+| Quote | Ages | Risk class |
+|---|---|---|
+| (A), (B) | 2–23 months (A); any child (B) | any, healthy included |
+| (C) | **5–18 years** | **healthy only** — Table 2's title |
+| (D) | **24–59 months** | **healthy only** |
+| (E) | 2–18 years | any risk condition |
+| (F), (G) | **24–71 months** | any risk condition |
+| (H) | **6–18 years** | either, the wording is identical in both rows |
+| (I) | **6–18 years** | **IC only** |
+| (J) | 2–18 years | **non-IC only** |
+| (K) | 2–18 years | **IC only** |
+| (L) | 24 months–18 years | any risk condition |
+
+⚠ **(J) and (K) are the pair to be most careful with.** They answer the same question — *what
+if PPSV23 has already been given?* — and give **opposite** answers depending on risk class:
+non-IC is finished, IC still has two doses available to it. Attaching (J) to an
+immunocompromised child is both a wrong-population citation and clinically short of the
+source. That is not hypothetical here — see finding 1 below.
+
+### Disposition for this document's 34 statements
+
+**30 → CITE.** The match is unusually good: this is the document the paediatric engine was
+built from, and many card sentences are near-verbatim. Highlights:
+
+| # | Cards | Quote it earns | Population checked |
+|---|---|---|---|
+| 1 | 1,494 | **(C)** | healthy 5–18 ✓ |
+| 2 | 960 | **(E)** | any risk ✓ |
+| 3 | 896 | **(F)** + **(L)** for the PCV15 half | 24–71 mo, any risk ✓ |
+| 5 | 528 | **(H)** — verbatim, including "if PPSV23 not previously given" | 6–18 ✓ |
+| 6 | 456 | **(K)** | **456 IC, 0 non-IC** ✓ exactly footnote ǁ |
+| 7 | 408 | **(K)** | IC ✓ |
+| 13, 15, 20, 16, 22, 29, 9 | 1,064 | **(A)** for the 4-week vs 8-week split; Table 1's own rows for the dose counts | 2–23 mo ✓ |
+| 18 | 153 | **(I)** — verbatim, and the card correctly calls it "the immunocompromising row" | IC ✓ |
+| 19 | 132 | **(D)** | healthy 24–59 mo ✓ |
+| 21 | 96 | **(H)**'s second sentence | 6–18 ✓ |
+| 23 | 80 | **(J)** | **0 IC, 80 non-IC** ✓ exactly footnote § |
+| 31–34 | 80 | Table 4's `Completed PCV series before age 6` rows, non-IC and IC taken separately | ✓ |
+
+**4 → HELD. Each is a finding beyond citation, and each needs the owner.** Set out in full
+below rather than buried in this table.
+
+### ⚠ Finding 1 — 69 immunocompromised children are told "complete" where p2016 gives two more options
+
+Statement **#12** (208 cards) reads:
+
+> "No further PCV or PPSV23 is needed — the paediatric high-risk series is complete. All
+> conjugate doses on record were given before age 6 (72 months) and PPSV23 has been received,
+> which completes the series."
+
+Measured, that card fires for **78 immunocompromised children** as well as 130 non-IC ones.
+Splitting the IC group by whether a PCV20 is on record:
+
+| IC children getting "complete" | Cards | p2016's answer |
+|---|---|---|
+| a PCV20 or PCV21 **is** on record | **9** | **(E)** — "No additional doses". The app is right. |
+| **no PCV20** on record, PPSV23 given | **69** | **(K)** — "options are (a) give one dose of PCV20 at least 8 weeks after most recent pneumococcal vaccination, or (b) give a second dose of PPSV23 five years after the first dose of PPSV23" |
+
+So for **69 cards** — e.g. a 6-year-old with asplenia, one PCV15 at age 4, PPSV23 since —
+the app says the series is complete and p2016 says the child still has PCV20 or a second
+PPSV23 available. The app is applying footnote **(J)**, the non-IC rule, to an IC child.
+
+**The engine already knows this rule** — statement #26 states exactly (K) for an IC child,
+and fires on 48 cards. The branch that is missing it is specifically **IC + series completed
+before age 6 + PPSV23 already given**. Nearby cases are handled correctly: #33/#34 give an
+IC child who completed before 6 **without** PPSV23 both options, and #26 covers an IC child
+whose PCV13 was given **at or after** 6.
+
+**This is a clinical gap, not a citation defect, and it is not C8's to fix on its own
+initiative.** It needs the `verify-clinical-source` procedure against CDC's child schedule
+(document 5, not yet read) before any code moves, since `CLAUDE.md`'s authority rule puts
+ACIP/CDC and AAP above immunize.org.
+
+### ⚠ Finding 2 — 110 cards state a 5-dose infant series; p2016's Table 1 tops out at 4
+
+Statements **#24** and **#27** say "Catch-up infant PCV (PCV15 or PCV20): **5 doses in
+total** for this child [c]", with the marker crediting p2016. Totals the infant cards state,
+measured:
+
+| Stated total | Cards | In p2016 Table 1? |
+|---|---|---|
+| 2 doses | 264 | yes |
+| 3 doses | 297 | yes |
+| **5 doses** | **110** | **no — Table 1's largest is 4** |
+
+What produces it: a 6-month-old with **four** PCV20 doses already given, 4 weeks apart, all
+before age 7 months. None of them is the ≥12-month booster, so a fifth is still owed. Table
+1's rows stop at "3" previous doses, so the document has no row for this record at all.
+
+**The app's reasoning is sound** — Table 1 does require the last dose "at age 12–15 months",
+and (A) supplies the 4-week minimum these doses were given at. What is wrong is only that
+the marker credits p2016 for the number **5**, which p2016 never states. This is the "card
+states a figure its quote never says" class the plan counts separately (1,039 cards).
+
+### ⚠ Finding 3 — 32 cards cite a row whose label describes a different history
+
+Statement **#30** says "This is the at-risk catch-up for a child 24–71 months who had **3 PCV
+doses before 24 months**". p2016's row (G) is labelled "3 doses of PCV, all **before 12
+months**". Measured, all 32 cards are children whose three doses were given at roughly **16,
+18 and 20 months** — i.e. all *after* 12 months, so (G)'s row does not describe them, and
+neither does (F), which is for "0, 1, or 2 PCV doses". **p2016's Table 4 has no row for this
+history.**
+
+The advice itself is defensible — three doses after 12 months is at least as well primed as
+three before 12 months, and the app gives the same single dose (G) gives — but the card
+describes itself in words p2016 does not use for that history, which is the wrong-row
+cousin of a wrong-population quote.
+
+---
+
 ## Documents still to read
 
 | # | Document | Why it matters |
 |---|---|---|
-| 3 | immunize.org p2016 (PDF) | The largest by far: 34 statements, 8,678 cards. The paediatric default. |
 | 4 | CDC PCV Catch-up Job Aid (PDF) | 2 statements, 1,626 cards — the children's 8-week catch-up gap. |
 | 5 | CDC Child/Adolescent Notes | 3 statements, 712 cards. |
 | 6 | CDC Adult Notes | 1 statement, 25 cards. |
