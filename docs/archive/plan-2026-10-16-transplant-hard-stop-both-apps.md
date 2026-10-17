@@ -4,8 +4,12 @@
 
 | | |
 |---|---|
-| **PR 1 — MeningoVax** | branch `feature/2026-10-16-transplant-hard-stop`, 2 commits, PR #72 — **open, not yet merged** |
-| **PR 2 — PneumoVax** | branch `feature/2026-10-16-transplant-hard-stop`, 3 commits — see the PR for the measured counts |
+| **PR 1 — MeningoVax** | PR #72, 2 commits — **squash-merged to `main`** |
+| **PR 2 — PneumoVax** | PR #56, 4 commits — **squash-merged to `main`**; see the PR for the measured counts |
+
+Merged in that order, which is the order this plan prescribes. Suites at merge: MeningoVax
+**1,630 passing in 135 files**, PneumoVax **1,046 passing in 91 files** — both run locally,
+not taken from CI alone.
 
 Originally approved by the owner 2026-10-16 with no code written; both repos were clean when
 it was filed (PneumoVax `main` at 836502a, then 452ce89 after this plan itself was filed).

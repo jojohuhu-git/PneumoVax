@@ -3,11 +3,16 @@
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Dev server: `.claude/launch.json`
 ("PneumoVax dev server"), served at `/PneumoVax/`.
 
-Branch: `feature/2026-10-16-transplant-hard-stop`, off `main` at `452ce89`. **Pushed, PR
-[#56](https://github.com/jojohuhu-git/PneumoVax/pull/56) open** — `main` is protected and
-requires the `test` check, so this repo's rule is branch → PR → `gh pr merge --squash`.
-Baseline was 1,041 passing tests in 89 files; now **1,046 passing in 91 files**, all green,
-working tree clean at commit `6030abb`.
+**MERGED to `main`** via squash of PR
+[#56](https://github.com/jojohuhu-git/PneumoVax/pull/56) (branch
+`feature/2026-10-16-transplant-hard-stop`, off `main` at `452ce89`, `test` check green).
+MeningoVax PR 1 ([#72](https://github.com/jojohuhu-git/MeningoVax/pull/72)) was squash-merged
+immediately before it, which is the order its plan prescribes. Run `git log main --oneline -3`
+for the squash shas.
+
+Baseline was 1,041 passing tests in 89 files; now **1,046 passing in 91 files**, all green.
+MeningoVax after PR 1: **1,630 passing in 135 files** (run locally before merging, not just
+taken from CI).
 
 ## What's done — PR 2 of `plan-2026-10-16-transplant-hard-stop-both-apps.md`
 
@@ -62,14 +67,13 @@ and were blinding the guard. Replaced with the property that is actually true.
 **Nothing is left in the transplant plan.** Both PRs are written. The one outstanding item is
 not code:
 
-- **MeningoVax PR 1 is [#72](https://github.com/jojohuhu-git/MeningoVax/pull/72), open and
-  NOT merged.** The two should land together. MeningoVax's `main` is unprotected, so a direct
-  merge is allowed there, but the branch + PR already exists — merge the PR.
+- **Both PRs are merged** — MeningoVax #72 then PneumoVax #56. Nothing in the transplant
+  plan is outstanding.
 - **The mirror test reads MeningoVax's files from disk** at
-  `/Users/joannehuang/Downloads/MeningoVax-main/src/...`, and that checkout is currently on
-  the feature branch. It passes today and is *skipped* in CI either way. If MeningoVax is
-  switched back to `main` before #72 merges, the three sibling-reading assertions will fail
-  locally — that is the guard working, not a bug.
+  `/Users/joannehuang/Downloads/MeningoVax-main/src/...`. Now that #72 is on `main`, it passes
+  from either branch there; it is *skipped* in CI either way, since CI clones only one repo. If
+  it ever fails locally, check which branch the MeningoVax checkout is on before assuming
+  drift — and if the two really have diverged, that is the guard working, not a bug.
 
 **Next queue: `docs/archive/plan-2026-10-16-citations-which-chip-did-this-come-from.md`**
 (items C1–C8, checks G1–G5). Its own §11 says it starts only once the transplant work has
@@ -94,8 +98,7 @@ half-finished second front.
 2. Run `npm test` — confirm **1,046 passing in 91 files** before any new work.
 3. Start the dev server with `preview_start` (`.claude/launch.json`). Note: its reported port
    has been wrong before — read the real one from `preview_logs`.
-4. **Ask the owner, do not default:** whether to merge PneumoVax #56 and MeningoVax #72 now
-   (and in which order), and whether the dead `advisory` flag + its unreachable "Advisory"
+4. **Ask the owner, do not default:** whether the dead `advisory` flag + its unreachable "Advisory"
    pill in `RecCard.jsx` + the `advisory` corpus column should be removed as their own change
    — it was deliberately left in place so it would not bury commit 1's 1,334 moved patients.
    A background task was filed for it.
