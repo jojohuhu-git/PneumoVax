@@ -61,7 +61,15 @@ describe('P0 — orderedDoses[i] is the dose perDose[i] was computed for', () =>
     // one profile's 1,334 cases with them. The two profiles had produced
     // identical answers since the transplant tick became a hard stop, so this
     // removed duplicate coverage, not real coverage.
-    expect(CASES.length).toBe(16008);
+    //
+    // 17,016 from FINDING D/E (2026-10-17), which added the four-dose PCV13
+    // infant history: the grid's only completed infant series was four doses
+    // of PCV20, a child who needs nothing further at any age, so it could not
+    // express an at-risk baby whose finished series still owes a dose at age
+    // 2. +1,008 real patients and +612 impossible entries; zero existing
+    // patients' answers changed (checked key by key, not by the "moved" count
+    // the update script prints).
+    expect(CASES.length).toBe(17016);
   });
 
   it('every patient gets exactly one dose beside every verdict', () => {

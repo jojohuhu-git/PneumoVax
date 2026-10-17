@@ -156,7 +156,9 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
   const cases = buildCases();
 
   it('the grid is the committed one', () => {
-    expect(cases).toHaveLength(16008);
+    // 17,016 since FINDING D/E added the four-dose PCV13 infant history in the
+    // same session; it was 16,008 when FINDING C was measured.
+    expect(cases).toHaveLength(17016);
     expect(CORPUS_TODAY).toBe(TODAY);
   });
 
@@ -175,7 +177,7 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     expect(offenders).toEqual([]);
   });
 
-  it('175 cards carry the new citation — the measured count that moved', () => {
+  it('210 cards carry the new citation — the measured count that moved', () => {
     let moved = 0;
     for (const c of cases) {
       const out = recommend(c.input);
@@ -187,7 +189,12 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     // Every one of them is 19y in the grid: 228 months is the only adult age
     // below 50 the grid carries, so this count is the one age's worth. If the
     // grid gains another 19-49 age this number must go UP, never down.
-    expect(moved).toBe(175);
+    //
+    // It did, in this same session: 175 when FINDING C was measured against
+    // the 16,008-row grid, 210 once FINDING D/E added the four-dose PCV13
+    // history (which gives 19-year-olds another way to arrive here). Both
+    // numbers are real; neither replaces the other.
+    expect(moved).toBe(210);
   });
 
   it('the new sentence never reaches a 50+ or a paediatric card', () => {
