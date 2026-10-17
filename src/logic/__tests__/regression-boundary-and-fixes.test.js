@@ -63,14 +63,14 @@ describe('H1/H2 – ADULT_SCHED_MIN_M and PCV21_MIN_AGE_M constants', () => {
   // where this app has historically gone wrong, and a future age branch would
   // most likely reappear exactly here.
   it('Required scenario 2a: 18y6m transplant → the hard stop, no peds branch', () => {
-    const r = run({ ageMonths: 222, riskIds: ['hsct'], pcvDoses: [] });
+    const r = run({ ageMonths: 222, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [] });
     expect(r.excluded).toBe(true);
     expect(r.recs).toEqual([]);
   });
 
   it('Required scenario 2b: 19y0m transplant → the same stop, word for word', () => {
-    const younger = run({ ageMonths: 222, riskIds: ['hsct'], pcvDoses: [] });
-    const older = run({ ageMonths: 228, riskIds: ['hsct'], pcvDoses: [] });
+    const younger = run({ ageMonths: 222, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [] });
+    const older = run({ ageMonths: 228, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [] });
     expect(older.excluded).toBe(true);
     expect(older.recs).toEqual([]);
     expect(older.exclusionMessage).toBe(younger.exclusionMessage);

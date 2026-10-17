@@ -129,12 +129,12 @@ describe('N6 — a card never cites the other schedule', () => {
     // adult HSCT is its own source. The HSCT ADVISORY block already got this
     // right per age; the leak was into the ordinary PCV card beside it.
     for (const age of ADULT_AGES) {
-      expect(citedKeys(age, ['hsct'])).not.toContain('p3086Table5');
+      expect(citedKeys(age, ['hct_cart_bcell_exclude'])).not.toContain('p3086Table5');
     }
     // And the mirror: a child's cards never cite the adult HSCT source.
     for (const age of CHILD_AGES) {
-      expect(citedKeys(age, ['hsct'])).not.toContain('fredHutchLTFU');
-      expect(citedKeys(age, ['hsct'])).not.toContain('ascoAdultCancer2024');
+      expect(citedKeys(age, ['hct_cart_bcell_exclude'])).not.toContain('fredHutchLTFU');
+      expect(citedKeys(age, ['hct_cart_bcell_exclude'])).not.toContain('ascoAdultCancer2024');
     }
   });
 });
@@ -190,9 +190,9 @@ describe('N5/N6 — the controls: what every card must STILL cite', () => {
     // untested branch that becomes a silent bug the day it matters.
     expect(REFS.cdcAlteredImmunocompetence.rulebook).toBe('any');
 
-    const anySource = collectRefs(['bcell_car_t_therapy'], [], 'adult');
+    const anySource = collectRefs(['hct_cart_bcell_exclude'], [], 'adult');
     expect(anySource).toContain('cdcAlteredImmunocompetence');
-    expect(collectRefs(['bcell_car_t_therapy'], [], 'child')).toContain('cdcAlteredImmunocompetence');
+    expect(collectRefs(['hct_cart_bcell_exclude'], [], 'child')).toContain('cdcAlteredImmunocompetence');
 
     // And the filter still bites on a schedule-bound source either way round.
     expect(collectRefs(['asplenia'], [], 'adult')).not.toContain('cdcChildPneumo');

@@ -55,7 +55,7 @@ describe('2026-10-16 — the transplant tick is a hard stop, not an advisory', (
   });
 
   it.each(PATIENTS)('%s with the transplant tick gets the stop and no cards', (_label, patient) => {
-    const r = recommend({ ...patient, riskIds: ['hsct'], pcvDoses: [], ppsv23Doses: [], today: TODAY });
+    const r = recommend({ ...patient, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [], ppsv23Doses: [], today: TODAY });
     expect(r.excluded).toBe(true);
     expect(r.recs).toEqual([]);
     // Matched loosely on purpose — the whole string is frozen byte-for-byte
@@ -69,20 +69,26 @@ describe('2026-10-16 — the transplant tick is a hard stop, not an advisory', (
   });
 
   it('the advisory block is gone from the result shape entirely', () => {
-    const r = recommend({ ageMonths: 400, riskIds: ['hsct'], pcvDoses: [], ppsv23Doses: [], today: TODAY });
+    const r = recommend({ ageMonths: 400, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [], ppsv23Doses: [], today: TODAY });
     // Not `null` — absent. A consumer that still reads `result.hsct` should
-    // fail loudly in review, not read a quiet `null` forever.
+    // fail loudly in review, not read a quiet `null` forever. (That is the
+    // RESULT FIELD's old name, not a risk id: the engine used to hang the
+    // whole advisory block off `result.hsct`.)
     expect('hsct' in r).toBe(false);
   });
 
   it('hasExclusion() reads the `exclude` flag, so one flag has one meaning', () => {
     // Before today `hasExclusion()` tested `class === 'exclude'` while the
     // red checkbox styling tested `exclude: true` — two flags for one idea,
-    // and the transplant row is now the second row to carry it.
-    expect(hasExclusion(['hsct'])).toBe(true);
-    expect(hasExclusion(['bcell_car_t_therapy'])).toBe(true);
+    // and a row could have carried either without the other.
+    expect(hasExclusion(['hct_cart_bcell_exclude'])).toBe(true);
     expect(hasExclusion(['asplenia'])).toBe(false);
     expect(hasExclusion([])).toBe(false);
+    // The two ids this row replaced must no longer match anything. A stored
+    // risk id from before the merge is not silently honoured — and more to
+    // the point, a test still passing one would be testing nothing.
+    expect(hasExclusion(['hsct'])).toBe(false);
+    expect(hasExclusion(['bcell_car_t_therapy'])).toBe(false);
   });
 
   // Decision 2, stated as a test: the stop wins over a risk factor that would
@@ -95,7 +101,7 @@ describe('2026-10-16 — the transplant tick is a hard stop, not an advisory', (
     expect(withRisk.recs.length).toBeGreaterThan(0);
 
     const stopped = recommend({
-      ageMonths: 400, riskIds: ['asplenia', 'hsct'], pcvDoses: [], ppsv23Doses: [], today: TODAY,
+      ageMonths: 400, riskIds: ['asplenia', 'hct_cart_bcell_exclude'], pcvDoses: [], ppsv23Doses: [], today: TODAY,
     });
     expect(stopped.excluded).toBe(true);
     expect(stopped.recs).toEqual([]);
@@ -108,7 +114,7 @@ describe('2026-10-16 — the transplant tick is a hard stop, not an advisory', (
   it('typed doses are not graded, and the verdict shape stays iterable', () => {
     const r = recommend({
       ageMonths: 400,
-      riskIds: ['hsct'],
+      riskIds: ['hct_cart_bcell_exclude'],
       pcvDoses: [{ product: 'PCV13', date: '2020-01-15' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2021-03-20' }],
       today: TODAY,

@@ -4,10 +4,10 @@
 // `group` is DISPLAY ONLY (which StepRisks.jsx section a checkbox renders
 // under) and is separate from `class` (the clinical logic engine reads).
 //
-// The transplant tick and the CAR-T/B-cell tick both display under
-// "Immunocompromising conditions" (owner decision, 2026-09-13), and since
-// 2026-10-16 they also do the same thing: both carry `exclude: true` and stop
-// the engine. `exclude` is the ONE flag — it drives `hasExclusion()`, the
+// The transplant tick and the CAR-T/B-cell tick used to be two checkboxes,
+// both displaying under "Immunocompromising conditions" (owner decision,
+// 2026-09-13). They are ONE row since 2026-10-16: `hct_cart_bcell_exclude`,
+// carrying `exclude: true`. `exclude` is the ONE flag — it drives `hasExclusion()`, the
 // engine's hard stop and the red checkbox styling alike. Until 2026-10-16 the
 // engine tested `class === 'exclude'` while the styling tested `exclude: true`:
 // two flags for one idea, and a row could have carried one without the other.
@@ -118,23 +118,24 @@ export const RISK_FACTORS = [
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
 
-  // ── Hard stop: transplant (OWNER DECISION 2026-10-16 — this row used to
-  //    print a four-dose advisory recipe; see the plan for the five wrong
-  //    clinical statements that bought that decision) — displays under
-  //    Immunocompromising conditions, styled distinctly via `exclude: true` ──
+  // ── The hard stop. ONE row (owner decision 2026-10-16, decision 1): these
+  //    were two checkboxes until today, and from the moment the transplant
+  //    tick stopped printing its own advisory the two said the same thing and
+  //    did the same thing. Transplant is named FIRST because it is the common
+  //    tick.
+  //
+  //    `exclude: true` is the single flag driving the engine's stop
+  //    (`hasExclusion()`), the red checkbox styling, and App.jsx skipping the
+  //    History step. Displays under Immunocompromising conditions.
+  //
+  //    MIRRORED: this row's id, label, sublabel and flag are byte-identical to
+  //    MeningoVax's, frozen by
+  //    regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js. The
+  //    id is MeningoVax's existing one; PneumoVax renamed onto it rather than
+  //    the reverse, so MeningoVax's stored risk ids did not have to move. ──
   {
-    id: 'hsct',
-    label: 'Hematopoietic stem cell transplant (HSCT)',
-    sublabel: 'this tool does not apply — needs an individualized, specialist-guided schedule',
-    group: 'IC', exclude: true,
-    refs: ['cdcAlteredImmunocompetence'],
-  },
-
-  // ── Hard stop: too heterogeneous for one safe recipe — displays under
-  //    Immunocompromising conditions, styled distinctly via `exclude: true` ──
-  {
-    id: 'bcell_car_t_therapy',
-    label: 'CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy',
+    id: 'hct_cart_bcell_exclude',
+    label: 'Hematopoietic cell transplant (HCT/HSCT), CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy',
     sublabel: 'this tool does not apply — needs an individualized, specialist-guided schedule',
     group: 'IC', exclude: true,
     refs: ['cdcAlteredImmunocompetence'],

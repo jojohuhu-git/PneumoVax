@@ -37,7 +37,7 @@ describe('proseDiff.mjs stays runnable across every answer shape', () => {
   // one. Each is checked at a child's age and an adult's precisely because
   // that distinction USED to matter here, and the test should fail if an age
   // branch ever creeps back in.
-  const STOP_TICKS = ['bcell_car_t_therapy', 'hsct'];
+  const STOP_TICKS = ['hct_cart_bcell_exclude', 'hct_cart_bcell_exclude'];
 
   it.each(STOP_TICKS)('the hard-stop exclusion via %s, peds and adult', (riskId) => {
     const peds = proseOf({ ageMonths: 120, today: TODAY, riskIds: [riskId], pcvDoses: [], ppsv23Doses: [] });

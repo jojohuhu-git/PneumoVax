@@ -473,8 +473,8 @@ describe('§K Cross-cutting rules', () => {
 describe('hard-stop exclusion', () => {
   // Both ticks, both age bands — four patients, one answer.
   it.each([
-    ['CAR-T/B-cell', 'bcell_car_t_therapy'],
-    ['transplant', 'hsct'],
+    ['CAR-T/B-cell', 'hct_cart_bcell_exclude'],
+    ['transplant', 'hct_cart_bcell_exclude'],
   ])('%s risk id ⇒ excluded, no recs', (_label, riskId) => {
     for (const ageMonths of [120, 480]) {
       const r = run({ ageMonths, riskIds: [riskId], pcvDoses: [] });
@@ -486,7 +486,7 @@ describe('hard-stop exclusion', () => {
   });
 
   it('both ticked together ⇒ one stop, not two', () => {
-    const r = run({ ageMonths: 120, riskIds: ['hsct', 'bcell_car_t_therapy'], pcvDoses: [] });
+    const r = run({ ageMonths: 120, riskIds: ['hct_cart_bcell_exclude', 'hct_cart_bcell_exclude'], pcvDoses: [] });
     expect(r.excluded).toBe(true);
     expect(r.recs).toEqual([]);
   });
@@ -495,8 +495,8 @@ describe('hard-stop exclusion', () => {
   // the result, not set to null — so a consumer still reading it fails loudly
   // in review instead of reading a quiet null forever.
   it('the result carries no advisory field at all', () => {
-    for (const riskIds of [['bcell_car_t_therapy'], ['hsct'], []]) {
-      expect('hsct' in run({ ageMonths: 120, riskIds, pcvDoses: [] })).toBe(false);
+    for (const riskIds of [['hct_cart_bcell_exclude'], ['hct_cart_bcell_exclude'], []]) {
+      expect('hct_cart_bcell_exclude' in run({ ageMonths: 120, riskIds, pcvDoses: [] })).toBe(false);
     }
   });
 });

@@ -74,7 +74,7 @@ describe('P6-5 — one walk of the dose history, not two', () => {
     // so the shape cannot drift back.
     const stopped = recommend({
       ageMonths: 840, dob: '1956-04-02',
-      riskIds: ['bcell_car_t_therapy'],
+      riskIds: ['hct_cart_bcell_exclude'],
       pcvDoses: [{ product: 'PCV13', date: '2020-01-01' }],
       ppsv23Doses: [],
       today: '2026-06-07',
@@ -87,7 +87,7 @@ describe('P6-5 — one walk of the dose history, not two', () => {
   it('a hard-stopped patient still renders, with no dose chips', () => {
     render(<Harness initial={{
       ...PCV7_CASE,
-      riskIds: ['bcell_car_t_therapy'],
+      riskIds: ['hct_cart_bcell_exclude'],
       pcvDoses: [{ product: 'PCV13', date: '2020-01-01' }],
     }} />);
     expect(screen.getByTestId('exclusion-stop')).toBeTruthy();
