@@ -215,6 +215,28 @@ export const REFS = {
     quote: 'Previously received both PCV13 and PPSV23, AND PPSV23 was received at age 65 years or older: Based on shared clinical decision',
     lastVerified: '2026-10-10',
   },
+  // FINDING C (2026-10-17). CDC's 19-49 "Special situations" block splits the
+  // PCV13 + 1 PPSV23 patient in two: cochlear implant / CSF leak / an
+  // immunocompromising condition get PCV20 or PCV21 at >=5 years, and chronic
+  // conditions get nothing now with a re-check at 50. The app gave both halves
+  // the right ADVICE and quoted `adultBothNotAt65` for both — a sentence from
+  // the Routine 50+ block that instructs a dose. On the chronic-only card that
+  // quote contradicted the card it sat on, for 175 of the grid's 16,008
+  // patients. This is the sentence that card rests on.
+  //
+  // Read live 2026-10-17 (browser pane, accordions expanded; pneumococcal note
+  // 4,785 chars, "Special situations" present at offset 1,764 as the positive
+  // control that both blocks were in the fetched text). It appears exactly
+  // ONCE on the page, in the 19-49 block — which is the whole point: it has no
+  // 50+ twin, because at 50 the answer changes.
+  adultChronicOnlyReviewAt50: {
+    rulebook: 'adult',
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal "Special situations", an adult aged 19-49 with chronic conditions only who has had PCV13 and one PPSV23: no further dose now, re-check at age 50',
+    short: 'CDC Adult Notes',
+    quote: 'Alcoholism, chronic heart/liver/lung disease, cigarette smoking, or diabetes mellitus: no additional PCV or PPSV23 doses recommended at this time. Review pneumococcal recommendations when age 50 years or older.',
+    lastVerified: '2026-10-17',
+  },
   adultPcv20or21Complete: {
     rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',

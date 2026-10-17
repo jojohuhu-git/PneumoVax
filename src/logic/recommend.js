@@ -1295,11 +1295,18 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       return [rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: 'No dose now — review at age 50',
+        // FINDING C (2026-10-17): one citation per claim, each to the sentence
+        // that states THAT claim. The lead says no dose is due now — CDC says
+        // that in its 19–49 block, and `adultChronicOnlyReviewAt50` is it. The
+        // detail says what happens at 50, which is the 50+ row, so
+        // `adultBothNotAt65` stays and moves to the half it supports. Before
+        // this, the 50+ row was the lead's only citation: a quote instructing
+        // a dose beside a sentence saying none is due, on 175 grid patients.
         note: {
           lead: 'No additional pneumococcal dose now — re-evaluate at age 50 [c].',
-          detail: `This is an adult aged 19–49 with a chronic (non-immunocompromising) condition who has already received PCV13 and PPSV23. At age 50, a dose of PCV20 or PCV21 is recommended, ≥${LONG_GAP_WORDS} after the last pneumococcal dose.`,
+          detail: `This is an adult aged 19–49 with a chronic (non-immunocompromising) condition who has already received PCV13 and PPSV23. At age 50, a dose of PCV20 or PCV21 is recommended, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c].`,
         },
-        noteCites: [cite('adultBothNotAt65')],
+        noteCites: [cite('adultChronicOnlyReviewAt50'), cite('adultBothNotAt65')],
         refs,
       })];
     }
