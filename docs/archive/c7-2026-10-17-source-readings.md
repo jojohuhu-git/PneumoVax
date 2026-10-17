@@ -1006,3 +1006,90 @@ Both were written for document 2 and verified to reproduce the plan's committed 
 normalisations that are documented in the script's own header — a `{ lead, detail }` note
 counts as one statement, and **only** calendar dates are masked. Masking numbers as well
 collapses 68 to 45; masking nothing at all inflates it past 5,300.
+
+---
+
+# FINDING B closed: the 25 CITED quotes, all re-read live (2026-10-17)
+
+**Owner decided 2026-10-17: yes, C7 must re-read the sources it already cites.**
+
+C7's six documents were chosen by `scripts/uncreditedSources.mjs`, which lists sources a
+card **names but never quotes**. A document that IS quoted therefore could never appear in
+its scope — the blind spot a measurement cannot see about itself. This closes it by going
+the other way: take every stored `quote` in `refs.js` and check it against the live page.
+
+## Scope — the whole of it, not a sample
+
+**25 stored quotes across 5 documents.** All 25 were checked, by exact string match after
+normalising whitespace and dash characters, against the page fetched live on 2026-10-17.
+
+| Document | Quotes | Verbatim? |
+|---|---|---|
+| CDC Child & Adolescent Schedule Notes (pneumococcal) | 11 | 11/11 ✓ |
+| CDC Adult Schedule Notes (pneumococcal) | 9 | 9/9 ✓ |
+| CDC Summary of Risk-based Pneumococcal Recommendations | 3 | 3/3 ✓ |
+| ACIP MMWR mm7401a1 | 1 | 1/1 ✓ |
+| immunize.org Ask the Experts (PCV7) | 1 | 1/1 ✓ |
+
+**Result: 25 of 25 are verbatim accurate. Zero mis-citations.** The stored text is the
+source's text.
+
+⚠ Both CDC schedule-notes pages are accordions, **shut by default**. A plain fetch of the
+child notes returns 8,409 characters of table of contents and not one word of the
+pneumococcal rulebook. Expanded, the page is 62,265 characters. Any future check must
+expand them or it will "verify" nothing and report success.
+
+## What the re-read DID find
+
+### 1. A rule the app had recorded as an inference, which CDC states outright
+
+Finding A shipped branch 4 of the paediatric engine — PCV13 at/after age 6, PPSV23 already
+given — with a comment saying **no source states that history** and that its five years was
+read across from p2016. CDC's child notes state it, in the immunocompromising list:
+
+> "Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: administer 1 dose PCV20
+> or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose **and at least 5 years
+> after dose 1 PPSV23**."
+
+It **conjoins** the two conditions — which is exactly what `icPostPpsv23DueState()`
+computes. Finding A reasoned its way to a "later of the two" gate that was quotable all
+along. Corrected in the code, cited as `pedsIcPcv13AndPpsvAt6`, and held by a test that
+fails (verified by deliberately swapping the citation) if the card is ever cited to the
+non-IC twin instead.
+
+### 2. Six quotes that are accurate and still ambiguous — OPEN, not fixed
+
+A quote can be word-perfect and still fail to say **which patient it was written about**.
+Six of the 25 appear **more than once on their own source page**, once in each half of a
+split the app's own logic turns on:
+
+| Citation | Times on page | The split it straddles |
+|---|---|---|
+| `pedsRiskPcv20Complete` | 3 | non-IC ×2 and IC |
+| `pedsRiskPcv13At6` | 2 | non-IC and IC |
+| `pedsRiskIncompleteCatchup` | 2 | non-IC and IC |
+| `adultPcv15ThenPpsv` | 2 | Routine (50+) and Special situations (19–49) |
+| `adultPcv13Only` | 2 | Routine (50+) and Special situations (19–49) |
+| `adultPcv7Only` | 2 | Routine (50+) and Special situations (19–49) |
+
+`pedsRiskPcv13At6` is the sharp one: in the IC list that sentence is **followed** by "If
+PPSV23 is used, administer 1 dose of PCV20 or dose 2 PPSV23 at least 5 years after dose 1
+PPSV23", and the stored quote is the shared prefix with the IC tail cut off. A clinician
+shown it cannot tell which list it came from.
+
+**Nothing in the suite can see this.** `regression-n6-citations-follow-the-rulebook.test.js`
+checks a citation's `rulebook` (child / adult / any), which separates a child's sources from
+an adult's — it cannot separate IC from non-IC, or 19–49 from 50+, and those are the two
+splits that actually matter here.
+
+**The remedy is the patient-population field, and it is NOT started.** Deliberately: it is
+a field on every ref plus a test, and guessing at its shape mid-session is how half-applied
+rules happen. Recorded with its measured scope — 6 of 25 — so the next session can size it.
+
+## Method, so this is repeatable
+
+1. `refs.js` → every entry carrying a `quote`, grouped by URL.
+2. Open each URL in the browser pane (cdc.gov returns 403 to curl), expand every
+   `.collapse` and `[aria-expanded="false"]`.
+3. Slice the pneumococcal section, normalise, and `indexOf` each quote — recording the
+   **occurrence count**, not just found/not-found. The count is what surfaced finding 2.
