@@ -328,6 +328,32 @@ export const REFS = {
     quote: 'When PPSV23 is used, they need another pneumococcal vaccine at least 5 years later.',
     lastVerified: '2026-10-10',
   },
+  // FINDING A (2026-10-17). The sentence CDC writes for a child who has
+  // ALREADY had one PPSV23 -- not for one who is about to get their first.
+  // `pedsSecondPpsv5y` below carries the right NUMBER but is written about the
+  // other patient ("When PPSV23 is used, they need another pneumococcal
+  // vaccine at least 5 years later" sits under CDC's "Never received PPSV23"
+  // branch), and a right-sounding quote about a different patient is the exact
+  // fault C6/G4 exist to catch. Read live in the browser 2026-10-17 from the
+  // page dated MAY 8, 2026; cdc.gov refuses curl, so this was copied from the
+  // rendered page, not transcribed from a note.
+  //
+  // CDC prints it twice, word for word, under "Children 2 through 5 years old"
+  // and under "Children 6 through 18 years old". The quote below is the 6-18
+  // instance; the 2-5 instance differs only in the heading above it.
+  //
+  // It is also the sentence that overrules immunize.org P2016's footnote || --
+  // see the OWNER DECISION of 2026-10-17 in CLAUDE.md and the full argument in
+  // regression-2026-10-17-finding-a-ic-ppsv23-five-year-wait.test.js.
+  pedsIcPpsvWaitFiveYears: {
+    rulebook: 'child',
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC Risk-based Pneumococcal Recommendations — an immunocompromised child who has already received one PPSV23 waits 5 years from that dose, then gets PCV20 or PPSV23',
+    short: 'CDC Risk-based Pneumococcal',
+    quote: 'Then no pneumococcal vaccines are recommended at this time. Wait until at least 5 years have passed since they received their first PPSV23 dose. Then give 1 dose of PCV20 or PPSV23.',
+    lastVerified: '2026-10-17',
+  },
+
   pedsBefore6NoPcv20: {
     rulebook: 'child',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',

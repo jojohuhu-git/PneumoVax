@@ -43,6 +43,13 @@ See `CLINICAL_SPEC.md` §III for the full 9-row grid. Key invariants:
 - Completeness for non-IC at 24–71m requires age-appropriate count (`enoughAt24mo`), not just "has any PCV20"
 - 24–71m catch-up counts only `band.ge24` doses toward progress (not infant doses)
 - A completed 4-dose infant series → fall through to Option A (PCV20) / Option B (PPSV23), not a 5th plain PCV
+- **An IC child who has ALREADY had one PPSV23 waits ≥5 years from that first PPSV23 —
+  then PCV20 *or* a 2nd PPSV23, both at the same five-year mark.** Not 8 weeks. CDC's
+  risk-indications page (May 8, 2026) over immunize.org P2016's footnote ‖ (2/16/2024);
+  FINDING A, owner decision 2026-10-17. Full argument and both quotes:
+  `CLINICAL_SPEC.md` §D-note. One source: `icPostPpsv23DueState()`.
+  The child who has **never** had a conjugate vaccine is the exception CDC states outright
+  — 8 weeks, "regardless of whether the child has previously received PPSV23 or PCV7".
 
 
 ## Adult Schedule (≥19y = `ADULT_SCHED_MIN_M`)

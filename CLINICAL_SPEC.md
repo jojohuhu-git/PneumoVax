@@ -215,7 +215,9 @@ gets a recommendation at all.
    (If PPSV23 already given → complete.)
 5. 2–18 y **IC**, completed series before 6y with PCV13/15 (no PCV20, no PPSV23):
    A) 1 PCV20 ≥8wk; **or** B) 1 PPSV23 ≥8wk, then **≥5y later** 1 PCV20 **or** a 2nd PPSV23.
-   (If PPSV23 already given: A) 1 PCV20 ≥8wk, or B) 2nd PPSV23 ≥5y after first.)
+   (**If PPSV23 already given: nothing is due until ≥5 years after that first PPSV23;
+   then 1 PCV20 *or* a 2nd PPSV23 — both options at the SAME five-year mark.**
+   FINDING A, OWNER DECISION 2026-10-17 — see §D-note below.)
 6. 6–18 y **non-IC**, no prior PCV13/15/20: A) 1 PCV20 ≥8wk after last pneumo; **or**
    B) 1 PCV15 ≥8wk, then ≥8wk later PPSV23 (if PPSV23 not previously given).
 7. 6–18 y **IC**, no prior PCV13/15/20: same A/B as non-IC.
@@ -223,8 +225,66 @@ gets a recommendation at all.
    B) 1 PPSV23 ≥8wk after PCV13.
 9. 6–18 y **IC**, **PCV13 only at/after age 6**: A) 1 PCV20 ≥8wk; **or** B) 1 PPSV23 ≥8wk,
    then ≥5y after first PPSV23 give 1 PCV20 or a 2nd PPSV23.
+   (**If PPSV23 already given: ≥5 years after that first PPSV23, then 1 PCV20 *or* a 2nd
+   PPSV23.** No source states this history with a PPSV23 already given; it is read across
+   from this row's own Option B. FINDING A, 2026-10-17 — see §D-note.)
 
-All peds intervals = **≥8 weeks** (Table 4 uses 8wk throughout for ≥24mo).
+Peds intervals are **≥8 weeks** throughout Table 4 for ≥24mo — with ONE exception, below.
+
+### §D-note — FINDING A: an IC child who has ALREADY had a PPSV23 waits five years
+
+**OWNER DECISION 2026-10-17. Implemented; four branches of `recommend.js`.**
+
+An immunocompromised child or teenager who has already received one PPSV23 gets **no
+pneumococcal vaccine until 5 years after that first PPSV23**, and at that point either
+PCV20 **or** a 2nd PPSV23. Before this decision the app offered the PCV20 at **8 weeks**
+while offering the 2nd PPSV23 at 5 years, on one card headed "choose ONE option" — a
+choice between a dose available today and a dose available in 2029. **225 of the 16,008
+grid patients were told PCV20 was due today when it was not**; 228 more were correctly due
+(their first PPSV23 was over 5 years ago), and that split on the five-year line is what
+makes this a real finding rather than a blanket misreading.
+
+**The sources disagree, and they were published two and a half years apart.**
+
+- **CDC, "Summary of Risk-based Pneumococcal Vaccination Recommendations"**, page dated
+  **MAY 8, 2026**, read live 2026-10-17
+  (`https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html`).
+  Stated **twice**, word for word — once under "Children 2 through 5 years old" and once
+  under "Children 6 through 18 years old":
+  > "Then no pneumococcal vaccines are recommended at this time. Wait until at least 5
+  > years have passed since they received their first PPSV23 dose. Then give 1 dose of
+  > PCV20 or PPSV23."
+- **immunize.org P2016**, Item #P2016, dated **2/16/2024**, PDF downloaded live
+  2026-10-17. Table 4 footnote ‖ — the only place in that sheet addressing a child who
+  has already had PPSV23, since its table columns only count conjugate doses:
+  > "If PPSV23 previously given, options are (a) give one dose of PCV20 at least 8 weeks
+  > after most recent pneumococcal vaccination, or (b) give a second dose of PPSV23 five
+  > years after the first dose of PPSV23."
+
+**Why CDC governs, beyond being newer: P2016 contradicts itself on this patient.** Row 5's
+own Option B reads "1 dose of PPSV23 at least 8 weeks after most recent PCV dose; **at
+least 5 years later**, give 1 dose of PCV20 or a second dose of PPSV23". Follow that Option
+B and the child **is** this patient — conjugates before age 6, one PPSV23, no PCV20 — and
+P2016 itself says the next dose is five years away. Its footnote ‖ says 8 weeks for the
+identical child. The two differ only in whether the PPSV23 was given inside P2016's own
+plan or before it. So this is not two credible sources disagreeing; it is a 2024 footnote
+disagreeing with the May 2026 CDC page **and** with the rest of its own sheet.
+
+**What did NOT change, and must not.** CDC's 6–18 section, for a child who has never had
+any conjugate vaccine: *"Give 1 dose of PCV15 or PCV20 at least 8 weeks after the most
+recent pneumococcal vaccine dose. **Give it regardless of whether the child has previously
+received PPSV23 or PCV7.**"* That is an explicit instruction to ignore a prior PPSV23 and
+vaccinate at 8 weeks (rows 6 and 7 above). A test holds that card at 8 weeks so the
+five-year rule cannot creep onto it.
+
+**The 8-week floor is kept, not dropped.** The gate is the **later** of (5 years after the
+first PPSV23) and (8 weeks after the most recent pneumococcal dose) — a conjugate dose can
+fall after the PPSV23. Measured: 0 of the 228 patients already past five years are also
+inside 8 weeks, so the floor moves no committed verdict; it has its own test.
+
+Single source: `icPostPpsv23DueState()` in `recommend.js`. Citation:
+`pedsIcPpsvWaitFiveYears` in `refs.js`. Test:
+`regression-2026-10-17-finding-a-ic-ppsv23-five-year-wait.test.js`.
 
 ---
 

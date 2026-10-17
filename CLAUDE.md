@@ -42,6 +42,15 @@ ACIP/CDC/AAP/immunize.org over FDA package inserts. Sources per topic are in `CL
 
 Within that group, AAP is a tiebreak, not a ranking (owner decision, 2026-08-10): where ACIP/CDC and AAP agree, cite either; where they disagree, AAP governs; never adopt a CDC revision recommending fewer doses or narrower eligibility than AAP; where AAP is silent, CDC/MMWR stands.
 
+**CDC vs immunize.org (owner decision, 2026-10-17).** Where a **current CDC page** and an
+**older immunize.org handout** disagree and AAP is silent, **CDC governs** — and say both
+documents' dates in the commit, the spec and the code comment, because the gap between
+them is usually the explanation. Until today this was unranked and decided case by case;
+FINDING A is what forced it (CDC's May 2026 risk-indications page against immunize.org
+P2016 of 2/16/2024 — `CLINICAL_SPEC.md` §D-note). Before applying it, **check the older
+document against itself**: P2016 turned out to contradict its own Table 4 row, which
+settled the question far better than the date did.
+
 ### Three Schedule Constants — Never Collapse
 `src/logic/scheduleConstants.js` exports three distinct constants:
 - **`ADULT_SCHED_MIN_M = 228` (19y)** — schedule routing boundary (peds vs adult rulebook)
@@ -146,8 +155,8 @@ all four stale copies of the pre-A-P1-1 adult interval.
 
 ### A Verdict That Moves Must Be Explained
 TWO corpora, both built from `src/test-grid.js`, both gates. `sweep-verdict-corpus.test.js`
-re-runs the engine over **16,250 patients a clinician could really enter**;
-`sweep-record-problem-corpus.test.js` re-runs it over **18,460 impossible ones** — a dose
+re-runs the engine over **16,008 patients a clinician could really enter**;
+`sweep-record-problem-corpus.test.js` re-runs it over **17,652 impossible ones** — a dose
 dated before the patient was born, or dated after today. Either fails if an answer differs
 from its committed corpus. **Do not run `npm run sweep:update` (which regenerates both) until
 you can say why those patients should get a different answer**, then put both moved counts in
@@ -156,12 +165,15 @@ all three PneumoRecs harnesses stayed byte-identical. New sweeps build on `src/t
 — never a second case list.
 
 **Why the impossible entries are a second FILE and not more rows in the first** (owner
-decision, 2026-10-12): so 16,250 keeps meaning "real patients", and a clinical change that
+decision, 2026-10-12): so 16,008 keeps meaning "real patients", and a clinical change that
 moves 300 of them reads as 300 lines rather than 300 lost among 23,000 impossible records.
 The main grid *discards* 15,340 before-birth combinations on one line and cannot express a
 future date at all, so both record-problem rules were guarded by nothing: deleting
 `isBeforeBirth()` left the main sweep green 12/12, and so did disabling `futureDated()`.
-Against the second corpus the same two mutations move **14,304** and **1,980** of 18,460.
+Against the second corpus the same two mutations moved **14,304** and **1,980** when that
+was measured, of the 18,460 rows the corpus held then. (Both corpus SIZES above were
+re-counted from the committed files on 2026-10-17 and corrected here — they had drifted.
+The two mutation figures are left as measured and not rescaled.)
 **Add a rule to `recordProblemFor()` → add its shape to `GRID_FUTURE_*` in the same commit.**
 
 ### Every Interval Rule Lives In One Table
