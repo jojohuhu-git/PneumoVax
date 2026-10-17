@@ -58,14 +58,26 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     today,
   });
 
-  const { recs, hsct, pcv21Geo, excluded, exclusionMessage, exclusionCitations } = result;
+  const { recs, pcv21Geo, excluded, exclusionMessage, exclusionCitations } = result;
 
   if (excluded) {
+    // Decision 3 of the 2026-10-16 hard-stop plan: typed doses stay in memory
+    // (going back a step still shows them) but are not evaluated, and the
+    // screen says so in one line. Conditional, deliberately — a CAR-T patient
+    // skips the history step entirely, so saying it unconditionally would
+    // report on doses nobody was ever asked for.
+    const hasRecordedDoses =
+      dropBlankDoseRows(pcvDoses).length > 0 || dropBlankDoseRows(ppsv23Doses).length > 0;
     return (
       <div>
         <div className="advisory-banner advisory-banner-exclude" data-testid="exclusion-stop">
-          <div className="advisory-banner-title">Does not apply to this patient</div>
+          <div className="advisory-banner-title">Individualized revaccination schedule required</div>
           <div className="advisory-note">{exclusionMessage}</div>
+          {hasRecordedDoses && (
+            <div className="advisory-banner-flag" data-testid="exclusion-doses-kept">
+              Recorded doses are kept but not evaluated here.
+            </div>
+          )}
           {exclusionCitations && exclusionCitations.length > 0 && (
             <div className="rec-citations">
               {exclusionCitations.map((c, i) => (
@@ -93,9 +105,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   // same time -- "due" alone reads as mandatory. Split required vs. optional
   // so the summary never calls an optional dose flatly "due."
   let summaryLine;
-  if (hsct) {
-    summaryLine = 'HSCT advisory series applies. See details below.';
-  } else {
+  {
     const activeRecs = recs.filter(r => r.dueToday && !r.advisory);
     const requiredVaccines = [...new Set(activeRecs.filter(r => r.status !== 'shared-decision').map(r => r.vaccine))];
     const optionalVaccines = [...new Set(activeRecs.filter(r => r.status === 'shared-decision').map(r => r.vaccine))]
@@ -327,30 +337,6 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             decode it. */}
       </div>
 
-      {/* HSCT advisory block — alert banner, prominent at top */}
-      {hsct && (
-        <div className="advisory-banner advisory-banner-hsct" data-testid="hsct-card">
-          <div className="advisory-banner-title">
-            Advisory: {hsct.title}
-          </div>
-          <div className="advisory-banner-flag">{hsct.coordinateFlag}</div>
-          {hsct.recs.map((r, i) => (
-            <div key={i}>
-              <div className="advisory-dose-line">{r.doseLabel}</div>
-              {r.note && <div className="advisory-note">{r.note}</div>}
-              {r.citations && r.citations.length > 0 && (
-                <div className="rec-citations">
-                  {r.citations.map((c, j) => (
-                    <a key={j} href={c.url} target="_blank" rel="noopener noreferrer"
-                      className="citation-chip" title={c.label}>{c.short || c.label}</a>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* PCV21 geographic advisory — blue info banner */}
       {pcv21Geo && (
         <div className="advisory-banner advisory-banner-info" data-testid="pcv21-geo-note">
@@ -369,20 +355,14 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
         </div>
       )}
 
-      {/* Standard recommendations — collapsed under HSCT when HSCT active */}
-      {hsct ? (
-        <details className="rec-section">
-          <summary className="history-edit-summary">
-            Standard age/history schedule (reference, applies after completing the HSCT series above)
-          </summary>
-          {buildCards(recs)}
-        </details>
-      ) : (
-        <div className="rec-section">
-          <div className="rec-section-title">Recommendation</div>
-          {buildCards(recs)}
-        </div>
-      )}
+      {/* Standard recommendations. One arm only since 2026-10-16: the
+          transplant tick used to fold these into a collapsed "reference"
+          <details> beneath its advisory banner, and now it never reaches this
+          line at all — those patients return at the hard stop above. */}
+      <div className="rec-section">
+        <div className="rec-section-title">Recommendation</div>
+        {buildCards(recs)}
+      </div>
 
       <Disclaimer />
 

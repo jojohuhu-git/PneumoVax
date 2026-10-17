@@ -359,54 +359,30 @@ const HAND_TYPED_GAP = new RegExp(
 /** The lines that carry text to a clinician's screen. */
 const VISIBLE_KEY = /^\s*(doseLabel|lead|detail|note|reasons|message)\s*:/;
 
-// ── The one exemption, with its reason written down ──────────────────────
+// ── No exemptions any more (2026-10-16) ──────────────────────────────────
 //
-// recommend.js's hsctAdvisory() states the post-HSCT series entirely in prose,
-// and there is no constant anywhere for its words to drift away from: the recs
-// carry `dueToday: false, earliestNextDate: null` because the schedule is
-// relative to transplant and the app computes no date for it at all.
+// There used to be exactly one. recommend.js's hsctAdvisory() stated the
+// post-transplant series entirely in prose — "3-6 months after HSCT", "4
+// weeks apart", "at least 6 months after dose 3" — with no constant anywhere
+// for those words to drift away from, because the schedule was relative to
+// the transplant and the app computed no date for it at all. The exemption
+// carried its own reason and a standing instruction: if those rows ever gained
+// computed dates, delete the exemption in the same commit.
 //
-// So the S6 premise is already satisfied there in the only way it can be —
-// exactly one home, which is the sentence. Minting HSCT_START_MIN_MONTHS = 3
-// to feed intervalPhrase() straight back into the same sentence would add a
-// layer that guards nothing, and the sentences are compound ranges ("3-6
-// months", "~1-month intervals") that a single-number formatter cannot state.
-//
-// If a future change gives the HSCT rows computed dates, delete this exemption
-// in the same commit — at that point the words and the arithmetic can part.
-const EXEMPT = {
-  '../recommend.js': [{
-    fn: 'hsctAdvisory',
-    why: 'advisory, relative to transplant: earliestNextDate is null and no constant exists',
-  }],
-};
-
-/** The [start, end) line range of a named function, 1-indexed. */
-function fnLineRange(src, name) {
-  const lines = src.split('\n');
-  const start = lines.findIndex((l) => l.includes(`function ${name}(`));
-  expect(start, `${name}() not found`).toBeGreaterThan(-1);
-  let depth = 0;
-  for (let i = start; i < lines.length; i += 1) {
-    for (const ch of lines[i]) {
-      if (ch === '{') depth += 1;
-      else if (ch === '}') depth -= 1;
-    }
-    if (depth === 0 && i > start) return [start + 1, i + 2];
-  }
-  throw new Error(`${name}() never closes`);
-}
+// What happened instead is that the rows themselves were deleted. The
+// transplant tick became a hard stop (owner decision 2026-10-16), the function
+// is gone, and so every clinician-visible interval in both files now goes
+// through intervalPhrase() with nothing excused. Do not re-add an exemption
+// list to make a new hand-typed interval pass; add the constant.
 
 describe('no hand-typed interval survives in a clinician-visible string', () => {
   for (const file of ['../recommend.js', '../doseIntervalRules.js']) {
     it(`${file} states every interval through intervalPhrase()`, () => {
       const src = read(file);
-      const exempt = (EXEMPT[file] ?? []).map((e) => fnLineRange(src, e.fn));
       const offenders = [];
       src.split('\n').forEach((line, i) => {
         const ln = i + 1;
         if (!VISIBLE_KEY.test(line)) return;
-        if (exempt.some(([a, b]) => ln >= a && ln < b)) return;
         // A `${...}` is already derived from something — only bare text counts.
         const bare = line.replace(/\$\{[^}]*\}/g, '@');
         const hits = [...bare.matchAll(HAND_TYPED_GAP)].map((m) => m[0]);
@@ -416,15 +392,14 @@ describe('no hand-typed interval survives in a clinician-visible string', () => 
     });
   }
 
-  // The exemption must stay honest: if the HSCT rows ever gain a computed
-  // date, the reason above has expired and the exemption has to go.
-  it('the HSCT exemption still has no computed dates to contradict', () => {
+  // The guard above is only worth anything if it has nothing excused. The one
+  // exemption it used to carry was for hsctAdvisory(); this is the successor
+  // to the "the exemption is still honest" test, asserting that the function
+  // the exemption was written for really is gone. If it comes back, the
+  // exemption question comes back with it and has to be answered again.
+  it('the exempted function is gone, not merely renamed around', () => {
     const src = read('../recommend.js');
-    const [a, b] = fnLineRange(src, 'hsctAdvisory');
-    const body = src.split('\n').slice(a - 1, b - 1).join('\n');
-    const assigned = [...body.matchAll(/earliestNextDate:\s*([^,\n}]+)/g)].map((m) => m[1].trim());
-    expect(assigned.length).toBeGreaterThan(0);
-    expect(assigned.every((v) => v === 'null')).toBe(true);
-    expect(body).not.toMatch(/dueState/);
+    expect(src).not.toMatch(/hsctAdvisory/);
+    expect(src).not.toMatch(/function hsct/i);
   });
 });

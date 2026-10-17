@@ -6,9 +6,13 @@
 // 2026-06-06. Prefer ACIP/CDC/immunize.org over FDA package inserts (FDA-labeled
 // ages are often more restrictive than current ACIP guidance).
 //
-// HSCT sources are intentionally segregated:
-//   • Children <19y HSCT → immunize.org p3086 Table 5 (SOLE source).
-//   • Adults ≥19y HSCT   → Fred Hutch LTFU §IX (SOLE source).
+// There are no post-transplant sources here any more. The three that were
+// (immunize.org p3086 Table 5, Fred Hutch LTFU §IX and the 2024 ASCO adult
+// cancer guideline) were deleted on 2026-10-16 when the transplant tick
+// became a hard stop: the app no longer states a post-transplant schedule, so
+// it no longer cites one. They are recorded verbatim in
+// docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md.
+// The stop names ASCO, NCCN, IDSA and CDC in words and links none of them.
 //
 // Each entry: rulebook, url, label (full title), short (chip text),
 // lastVerified, and — for sentence-level keys only — quote.
@@ -62,11 +66,12 @@
 //
 // Verification depth on 2026-10-12, recorded honestly: the 12 HTML pages were
 // loaded live and checked for title, canonical URL, section anchor and
-// expected content; the 5 PDFs (both job aids, p2016, p3086, Fred Hutch LTFU)
-// were confirmed to return HTTP 200 as `application/pdf` at those URLs with
-// no redirect, but their text was NOT re-read. That is the right depth for a
-// quote-free document reference and the wrong depth for a quoted one — so if
-// a quote is ever added to one of those five, it must be re-verified by
+// expected content; the PDFs (both job aids and p2016 — p3086 and the Fred
+// Hutch LTFU guideline were deleted on 2026-10-16 with the transplant
+// pathway) were confirmed to return HTTP 200 as `application/pdf` at those
+// URLs with no redirect, but their text was NOT re-read. That is the right
+// depth for a quote-free document reference and the wrong depth for a quoted
+// one — so if a quote is ever added to one of them, it must be re-verified by
 // reading the PDF, not by copying this date forward.
 //
 // CDC pages must be read with `textContent`, never `innerText`: innerText
@@ -427,9 +432,11 @@ export const REFS = {
     rulebook: 'child',
     // 2026-09-13 fix: label previously claimed "Tables 1-5" — verified live
     // that p2016.pdf, as it exists now, is a 2-page document with only
-    // Tables 1-4. Table 5 (the HSCT schedule) lives in p3086.pdf instead
-    // (see p3086Table5 below). URL itself was already correct for these
-    // Tables 1-4 call sites.
+    // Tables 1-4. Table 5 (the post-transplant schedule) lives in p3086.pdf;
+    // that entry was deleted on 2026-10-16 when the transplant pathway became
+    // a hard stop, and is recorded in
+    // docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md.
+    // The URL here was always correct for these Tables 1-4 call sites.
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
     label: 'immunize.org — Recommendations for Pneumococcal Vaccines Use in Children and Teens (Tables 1–4)',
     short: 'immunize.org p2016',
@@ -466,43 +473,6 @@ export const REFS = {
     url: 'https://www.immunize.org/ask-experts/topic/pneumococcal/',
     label: 'immunize.org Ask the Experts — Pneumococcal',
     short: 'immunize.org Ask the Experts',
-    lastVerified: '2026-10-12',
-  },
-
-  // HSCT sources (segregated) --------------------------------------------
-  // Children <19y HSCT — p3086 Table 5 is the SOLE source.
-  // 2026-09-13 fix: this used to point to p2016.pdf, which (verified live)
-  // is a 2-page document with only Tables 1-4 — no Table 5, no HSCT content.
-  // The real Table 5 lives in p3086.pdf ("Standing Orders for Administering
-  // Pneumococcal Vaccines to Children and Teens"), page 4 of 5 — verified
-  // its text matches this app's hardcoded advisory note verbatim.
-  p3086Table5: {
-    rulebook: 'child',
-    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p3086.pdf',
-    label: 'immunize.org Standing Orders for Administering Pneumococcal Vaccines to Children and Teens — Table 5: Pneumococcal schedule for children <19y following HSCT (SOLE peds-HSCT source)',
-    short: 'Immunize.org Table 5 (HSCT)',
-    lastVerified: '2026-10-12',
-  },
-  // Adults ≥19y HSCT — 2026-09-14 (P0-A): ASCO 2024 replaces Fred Hutch LTFU
-  // as the adult source, per owner decision in
-  // docs/archive/fix-queue-2026-09-13-crossapp-hct-cart-parity.md. Fred Hutch
-  // LTFU is retained below only as a superseded/historical entry (kept for
-  // any archived references pointing at it) — no active rec cites it.
-  ascoAdultCancer2024: {
-    rulebook: 'adult',
-    url: 'https://ascopubs.org/doi/10.1200/JCO.24.00032',
-    label: 'ASCO Guideline: Vaccination of Adults With Cancer (J Clin Oncol 2024)',
-    short: 'ASCO Vaccination of Adults With Cancer (2024)',
-    quote: 'the current US recommendation is to revaccinate all HSCT recipients with the first dose of PCV-20 at 4-6 months after transplant... The subsequent two doses are given at 1-month intervals, followed by the fourth dose administered 6 months later... Earlier revaccination of HSCT recipients starting after 3 months is the preferred approach in combination with a fourth conjugate vaccine dose administered at 1 year.',
-    lastVerified: '2026-09-14',
-  },
-  // Superseded 2026-09-14 — institution-specific, titer-guided, not ACIP.
-  // Kept for historical reference only; no active rec cites this.
-  fredHutchLTFU: {
-    rulebook: 'adult',
-    url: 'https://www.fredhutch.org/content/dam/www/research/patient-treatment-and-support/ltfu/LTFU_HSCT_guidelines_physicians.pdf',
-    label: 'Fred Hutch Long-Term Follow-Up Guidelines for Referring Physicians, §IX Vaccinations, Tables IX.A1/A2 (adult HSCT — institution-specific, titer-guided, not ACIP; superseded by ASCO 2024)',
-    short: 'Fred Hutch LTFU §IX (superseded)',
     lastVerified: '2026-10-12',
   },
 

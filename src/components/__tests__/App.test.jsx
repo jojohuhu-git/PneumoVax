@@ -72,16 +72,27 @@ describe('App wizard', () => {
     expect(links.length).toBeGreaterThan(0);
   });
 
-  it('shows HSCT advisory card when HSCT selected (adult)', () => {
+  // Until 2026-10-16 this test walked an adult transplant patient through the
+  // History step and then asserted a red advisory card carrying a four-dose
+  // PCV20 recipe. The tick is now a hard stop: History is skipped (nothing is
+  // graded, so nothing is asked), and the stop screen is what renders. The
+  // owner's reason is in
+  // docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md.
+  it('the transplant checkbox skips History and shows the stop, not an advisory card', () => {
     render(<App />);
     setAgeYears(30);
     fireEvent.click(getNextBtn());           // → Risks
-    const hsct = screen.getByLabelText(/hematopoietic stem cell transplant/i, { exact: false });
-    fireEvent.click(hsct);
-    fireEvent.click(getNextBtn());           // → History
-    sayNoHistory();
-    fireEvent.click(screen.getByRole('button', { name: /view results/i }));
-    expect(document.querySelector('[data-testid="hsct-card"]')).not.toBeNull();
+    fireEvent.click(screen.getByLabelText(/hematopoietic/i, { exact: false }));
+    fireEvent.click(getNextBtn());           // → skips History, straight to Results
+
+    expect(screen.queryByText('Vaccination History')).toBeNull();
+    expect(screen.getByTestId('exclusion-stop')).toBeTruthy();
+    expect(screen.queryAllByTestId('rec-card')).toHaveLength(0);
+    // The deleted advisory banner had its own test id; nothing renders it now.
+    expect(document.querySelector('[data-testid="hsct-card"]')).toBeNull();
+    // No collapsed "standard age/history schedule" section underneath either
+    // — decision 2: the stop hides everything.
+    expect(screen.queryByText(/standard age\/history schedule/i)).toBeNull();
   });
 
   it('Start Over resets to Age step', () => {
@@ -144,7 +155,7 @@ describe('App wizard', () => {
 
     expect(screen.queryByText('Vaccination History')).toBeNull();
     expect(screen.getByTestId('exclusion-stop')).toBeTruthy();
-    expect(screen.getAllByText(/does not apply to this patient/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/follows a transplant. or therapy.specific protocol/i).length).toBeGreaterThan(0);
     expect(screen.queryAllByTestId('rec-card')).toHaveLength(0);
   });
 

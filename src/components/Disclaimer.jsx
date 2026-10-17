@@ -9,10 +9,8 @@ export default function Disclaimer() {
         ACIP/CDC immunization schedules
       </a>{' '}
       before administering vaccines. Each recommendation includes a citation link to its source
-      (CDC schedule notes, ACIP MMWR, or immunize.org). Post-HSCT guidance is advisory and
-      relative to transplant. Coordinate with the transplant/ID team, as your center may use
-      its own protocol. Age eligibility and dose intervals reflect ACIP guidance, which may
-      differ from FDA package insert labeling.
+      (CDC schedule notes, ACIP MMWR, or immunize.org). Age eligibility and dose intervals
+      reflect ACIP guidance, which may differ from FDA package insert labeling.
       {' '}
       {/* P6-7 (S13, 2026-10-10): the app asks for risk factors as they are TODAY
           and then grades doses recorded years ago against them. That assumption

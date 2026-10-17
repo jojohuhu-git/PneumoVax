@@ -1,15 +1,20 @@
 // P2-13 (2026-10-15) — the PneumoRecs comparison harnesses are wired into the
 // suite.
 //
-// `adultCases.mjs`, `pedsCases.mjs` and `hsctCases.mjs` (CLAUDE.md's "PneumoRecs
-// comparison harnesses, dev-only") are case matrices clinicians and this app's
-// own sessions compare against CDC's PneumoRecs VaxAdvisor by eye, running each
+// `adultCases.mjs` and `pedsCases.mjs` (CLAUDE.md's "PneumoRecs comparison
+// harnesses, dev-only") are case matrices clinicians and this app's own
+// sessions compare against CDC's PneumoRecs VaxAdvisor by eye, running each
 // one by hand with `node scripts/<name>.mjs`. Nothing ran them as part of
 // `npm test`, so a case could rot — an id typo'd into a duplicate, a dose shape
 // `recommend()` no longer accepts, a file that stopped exporting its array at
 // all — and the suite would stay green while the harness silently went dark.
-// `scripts/check-root-notes.sh` already had this kind of test; these three
-// files did not.
+// `scripts/check-root-notes.sh` already had this kind of test; these files did
+// not.
+//
+// There was a third, `hsctCases.mjs`, deleted 2026-10-16. Its cases all
+// returned a post-transplant dose recipe, and the app now hard-stops those
+// patients instead — which the assertion below (every case returns a NON-EMPTY
+// `recs` array) cannot express, and should not have to.
 //
 // This is deliberately a SMOKE test, not a parity check: nobody has typed in
 // what PneumoRecs itself returns for each case (several entries say so in
@@ -25,12 +30,10 @@ import { describe, it, expect } from 'vitest';
 import { recommend } from '../../src/logic/recommend.js';
 import { ADULT_CASES } from '../adultCases.mjs';
 import { PEDS_CASES } from '../pedsCases.mjs';
-import { HSCT_CASES } from '../hsctCases.mjs';
 
 const SUITES = [
   ['adultCases.mjs', 'ADULT_CASES', ADULT_CASES, /^A\d+$/],
   ['pedsCases.mjs', 'PEDS_CASES', PEDS_CASES, /^P\d+$/],
-  ['hsctCases.mjs', 'HSCT_CASES', HSCT_CASES, /^H\d+$/],
 ];
 
 describe('P2-13 — PneumoRecs comparison harnesses stay runnable', () => {

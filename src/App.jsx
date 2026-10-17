@@ -100,8 +100,10 @@ export default function App() {
       }
       setAgeError('');
     }
-    // The hard-stop exclusion (CAR-T/B-cell) needs no vaccination history to
-    // show its stop message, so skip the History step straight to Results.
+    // The hard-stop exclusion (transplant / CAR-T / B-cell) needs no
+    // vaccination history to show its stop message, so skip the History step
+    // straight to Results. Since 2026-10-16 that includes the transplant tick,
+    // which used to walk the clinician through a history it then set aside.
     if (state.step === 1 && hasExclusion(state.riskIds)) {
       setState(prev => ({ ...prev, step: 3 }));
       return;

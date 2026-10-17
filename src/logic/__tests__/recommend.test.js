@@ -206,67 +206,23 @@ describe('§D At-risk children — Table 4 rows', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
-// §E — HSCT, children <19y (immunize.org p3086 Table 5)
+// §E and §F — post-transplant schedules: DELETED 2026-10-16.
+//
+// These two sections held eleven tests across both age bands, asserting the
+// peds advisory row (immunize.org p3086 Table 5) and the adult one (ASCO
+// 2024) each produced "4 doses of PCV20, beginning 3-6 months after HSCT…",
+// not dueToday, with the standard age schedule still shown below. CLINICAL_SPEC
+// §E and §F are gone with them, and the schedules themselves are recorded
+// verbatim in
+// docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md.
+//
+// What replaces them is one assertion in the hard-stop section below (ticking
+// transplant returns `excluded: true` with no recs) plus
+// regression-2026-10-16-transplant-is-a-hard-stop.test.js, which states the
+// decision and its reasons in full. The owner's reason for deleting rather
+// than correcting: the clinical content of those eleven assertions was wrong
+// or half-updated five times in five weeks across the two apps.
 // ════════════════════════════════════════════════════════════════════════
-describe('§E HSCT children <19y (immunize.org p3086 Table 5)', () => {
-  it('5yo HSCT → advisory PCV20 ×4, relative to transplant, not dueToday', () => {
-    const r = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.hsct).toBeTruthy();
-    expect(r.hsct.title).toMatch(/child/i);
-    const a = r.hsct.recs[0];
-    expect(a.advisory).toBe(true);
-    expect(a.dueToday).toBe(false);
-    expect(a.earliestNextDate).toBeNull();
-    expect(a.doseLabel).toMatch(/4 doses of PCV20/);
-    expect(noteText(a)).toMatch(/3–6 months after HSCT/);
-    // P1-C (2026-09-14): GVHD is unmodeled in all three apps per owner
-    // decision — no checkbox, no conditional text anywhere.
-    expect(noteText(a)).not.toMatch(/GVHD/);
-  });
-
-  it('child HSCT cites immunize.org Table 5 (SOLE peds-HSCT source), not CDC child notes', () => {
-    const r = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
-    const cites = r.hsct.recs[0].citations.map((c) => c.short);
-    expect(cites.some((s) => /Table 5/.test(s))).toBe(true);
-  });
-
-  it('standard recs still shown below HSCT advisory', () => {
-    const r = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.recs.length).toBeGreaterThan(0);
-  });
-});
-
-// ════════════════════════════════════════════════════════════════════════
-// §F — HSCT, adults ≥19y (ASCO 2024 — P0-A, 2026-09-14: replaces Fred Hutch,
-// matches the pediatric row; owner decision in
-// docs/archive/fix-queue-2026-09-13-crossapp-hct-cart-parity.md)
-// ════════════════════════════════════════════════════════════════════════
-describe('§F HSCT adults ≥19y (ASCO 2024, matches pediatric row)', () => {
-  it('40yo HSCT → advisory PCV20 ×4 beginning 3–6mo, matching the pediatric row', () => {
-    const r = run({ ageMonths: 480, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.hsct.title).toMatch(/adult/i);
-    const a = r.hsct.recs[0];
-    expect(a.advisory).toBe(true);
-    expect(a.doseLabel).toMatch(/4 doses of PCV20/);
-    expect(noteText(a)).toMatch(/3–6 months after HSCT/);
-    expect(noteText(a)).not.toMatch(/PCV20 ×3/);
-    expect(noteText(a)).not.toMatch(/titer/i);
-    expect(noteText(a)).not.toMatch(/NO PPSV23/i);
-  });
-
-  it('adult HSCT cites ASCO 2024, not Fred Hutch', () => {
-    const r = run({ ageMonths: 480, riskIds: ['hsct'], pcvDoses: [] });
-    const cites = r.hsct.recs[0].citations.map((c) => c.short);
-    expect(cites.some((s) => /ASCO/.test(s))).toBe(true);
-    expect(cites.some((s) => /Fred Hutch/.test(s))).toBe(false);
-  });
-
-  it('adult and pediatric HSCT rows now state the identical PCV20 plan', () => {
-    const child = run({ ageMonths: 60, riskIds: ['hsct'], pcvDoses: [] });
-    const adult = run({ ageMonths: 480, riskIds: ['hsct'], pcvDoses: [] });
-    expect(adult.hsct.recs[0].doseLabel).toBe(child.hsct.recs[0].doseLabel);
-  });
-});
 
 // ════════════════════════════════════════════════════════════════════════
 // §G — Adults 19–49y WITH a risk condition, each history branch × interval
@@ -510,30 +466,38 @@ describe('§K Cross-cutting rules', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
-// Hard-stop exclusion: CAR-T / B-cell malignancy / B-cell-depleting therapy
+// Hard-stop exclusion: transplant / CAR-T / B-cell malignancy / B-cell-
+// depleting therapy. Transplant joined this stop on 2026-10-16 (owner
+// decision) — see regression-2026-10-16-transplant-is-a-hard-stop.test.js.
 // ════════════════════════════════════════════════════════════════════════
 describe('hard-stop exclusion', () => {
-  it('CAR-T/B-cell risk id ⇒ excluded, no recs, no HSCT advisory', () => {
-    const r = run({ ageMonths: 120, riskIds: ['bcell_car_t_therapy'], pcvDoses: [] });
-    expect(r.excluded).toBe(true);
-    expect(r.exclusionMessage).toMatch(/does not apply to this patient/);
-    expect(r.recs).toEqual([]);
-    expect(r.hsct).toBeNull();
-    expect(r.exclusionCitations.length).toBeGreaterThan(0);
+  // Both ticks, both age bands — four patients, one answer.
+  it.each([
+    ['CAR-T/B-cell', 'bcell_car_t_therapy'],
+    ['transplant', 'hsct'],
+  ])('%s risk id ⇒ excluded, no recs', (_label, riskId) => {
+    for (const ageMonths of [120, 480]) {
+      const r = run({ ageMonths, riskIds: [riskId], pcvDoses: [] });
+      expect(r.excluded).toBe(true);
+      expect(r.exclusionMessage).toMatch(/follows a transplant. or therapy.specific protocol/);
+      expect(r.recs).toEqual([]);
+      expect(r.exclusionCitations.length).toBeGreaterThan(0);
+    }
   });
 
-  it('HSCT alone (no exclusion id) still returns the unchanged HSCT advisory', () => {
-    const r = run({ ageMonths: 120, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.excluded).toBeUndefined();
-    expect(r.hsct).not.toBeNull();
-    expect(r.hsct.recs.length).toBeGreaterThan(0);
-  });
-
-  it('both HSCT and CAR-T/B-cell ticked together ⇒ hard stop wins, HSCT advice hidden', () => {
+  it('both ticked together ⇒ one stop, not two', () => {
     const r = run({ ageMonths: 120, riskIds: ['hsct', 'bcell_car_t_therapy'], pcvDoses: [] });
     expect(r.excluded).toBe(true);
-    expect(r.hsct).toBeNull();
     expect(r.recs).toEqual([]);
+  });
+
+  // The field that carried the deleted post-transplant advisory is GONE from
+  // the result, not set to null — so a consumer still reading it fails loudly
+  // in review instead of reading a quiet null forever.
+  it('the result carries no advisory field at all', () => {
+    for (const riskIds of [['bcell_car_t_therapy'], ['hsct'], []]) {
+      expect('hsct' in run({ ageMonths: 120, riskIds, pcvDoses: [] })).toBe(false);
+    }
   });
 });
 

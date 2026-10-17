@@ -159,12 +159,26 @@ describe('S8 sweep: the grid cannot pass by sweeping nothing', () => {
     expect(distinct.size).toBeGreaterThan(100);
   });
 
-  it('the grid actually reaches a hard-stop exclusion', () => {
-    expect(verdicts.some((v) => v === 'EXCLUDED')).toBe(true);
-  });
-
-  it('the grid actually reaches the HSCT pathway', () => {
-    expect(verdicts.some((v) => v.includes('HSCT=') && !v.includes('HSCT=-'))).toBe(true);
+  // Both hard-stop ticks, counted separately. There used to be a second test
+  // here for the post-transplant advisory pathway ("the grid actually reaches
+  // the HSCT pathway", asserting some verdict carried an `HSCT=` field with a
+  // value); the transplant tick became a hard stop on 2026-10-16 and that
+  // pathway no longer exists. Counting the two ticks apart is what keeps this
+  // honest — a single `some(v === 'EXCLUDED')` would still pass if the
+  // transplant row silently stopped excluding, since the CAR-T row would
+  // carry the assertion on its own.
+  it('the grid actually reaches a hard-stop exclusion from each tick', () => {
+    const stopped = cases.filter((c, i) => verdicts[i] === 'EXCLUDED');
+    expect(stopped.length).toBeGreaterThan(0);
+    for (const id of ['hsct', 'bcell_car_t_therapy']) {
+      const n = stopped.filter((c) => (c.input.riskIds ?? []).includes(id)).length;
+      expect(n, `no EXCLUDED verdict came from ${id}`).toBeGreaterThan(0);
+    }
+    // And nothing else stops: a verdict of EXCLUDED must trace to one of the
+    // two ticks, never to an ordinary risk factor.
+    const strays = stopped.filter((c) => !(c.input.riskIds ?? [])
+      .some((id) => id === 'hsct' || id === 'bcell_car_t_therapy'));
+    expect(strays.map((c) => c.key)).toEqual([]);
   });
 
   it('the grid actually produces doses that do not count', () => {

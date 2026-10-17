@@ -532,12 +532,6 @@ body {
   padding: var(--sp-16);
   margin-bottom: var(--sp-16);
 }
-.advisory-banner-hsct {
-  background: var(--hsctlt);
-  border: 1.5px solid var(--hsctmd);
-  border-left: 4px solid var(--hsct);
-}
-.advisory-banner-hsct .advisory-banner-title { color: var(--hsct); }
 .advisory-banner-info {
   background: var(--blt);
   border: 1.5px solid var(--bmd);
