@@ -1,5 +1,11 @@
 # PneumoVax — Handoff after P4-4, item 6, S7, N2, and the prose-diff harness (2026-10-16)
 
+> ⚠️ **SUPERSEDED 2026-10-16 by `handoff-2026-10-16-transplant-hard-stop-pr2.md`.**
+> Its queue is finished and its PR has merged into `main`. The transplant hard stop has
+> since landed on a branch (PR #56), which deleted the `hsct` risk row, three `refs.js`
+> entries and both post-transplant schedules — so anything in this file touching those is
+> no longer actionable. Read the newer handoff first.
+
 > **Two PRs are open against `main` right now, independently.** This session's branch
 > (`p4-4-history-yes-no`, below) was built off `main` — it does **not** contain N1/N5/N6
 > (PR [#53](https://github.com/jojohuhu-git/PneumoVax/pull/53), still open, unmerged,
