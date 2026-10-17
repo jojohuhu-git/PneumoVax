@@ -1,4 +1,9 @@
 import React from 'react';
+// C1 (2026-10-17): the hover text's wording. It lives beside `cite()` in
+// refs.js, not here, because it is a pure function of a citation's fields and
+// MeningoVax — which has no citations.jsx — keeps its copy in the same file.
+// Same name, same file, in both repos.
+import { citeTitle } from '../data/refs.js';
 
 // ── P6-3 (S13, 2026-10-10): numbered inline citations ────────────────────
 //
@@ -51,7 +56,7 @@ export function renderNoteWithCites(text, cites, numberFor = makeCiteNumberer())
         target="_blank"
         rel="noopener noreferrer"
         className="note-cite"
-        title={c.label}
+        title={citeTitle(c)}
       >
         {`[${numberFor(c.page ?? c.key)}]`}
       </a>

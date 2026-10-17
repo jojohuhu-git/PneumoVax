@@ -532,9 +532,18 @@ export function highlightUrl(url, quote) {
 //               keys quoting different sentences of the same document share
 //               one visible [N], while each keeps its own link and hover text.
 //   • `url`   — deep-links to the quoted sentence when there is a quote.
-//   • `label` — the quoted sentence, else the ref's full title. Shown on
-//               hover, because #:~:text= does not visibly scroll in every
-//               browser.
+//   • `label` — the quoted sentence, else the ref's full title. The sentence
+//               itself, kept as its own field because `proseDiff.mjs` records
+//               it as the citation's wording: a document name added for
+//               display must not read there as a changed quote.
+//   • `doc`   — the document's short name ("CDC Adult Notes"), the SAME text
+//               the grey chip at the foot of the card prints. C1 (2026-10-17):
+//               this is what lets a reader match a `[1]` to a chip, and it is
+//               taken from `short` rather than re-typed so the two can never
+//               disagree.
+//   • `quote` — present only when this key cites one sentence. Whether it is
+//               set is what `citeTitle()` keys on, instead of comparing
+//               `label` against `REFS[key].label` to guess.
 //
 // Refs without a `quote` yet degrade to the page URL and the title: still a
 // working, numbered link, just not scrolled to a sentence. S8/P2-8 owns the
@@ -546,5 +555,35 @@ export function cite(key) {
     page: c?.url,
     url: highlightUrl(c?.url, c?.quote),
     label: c?.quote ?? c?.label,
+    doc: c?.short,
+    quote: c?.quote,
   };
+}
+
+// ── C1 (2026-10-17): the hover text names the document, then quotes it ───
+//
+// Owner-reported: "I always see a '1' where you can hover over to see the
+// language cited verbatim, but there are multiple source chips under it and I
+// do not know where it came from." The hover text showed the sentence and never
+// said which document the sentence came from, so knowing the words still did
+// not tell you which grey chip to click.
+//
+// The first line is `cite()`'s `doc`, which is the ref's `short` — the SAME
+// string the chip prints, so the two can only ever agree. The sentence follows
+// on its own line.
+//
+// Why a line break and not "Document — sentence": em dashes are banned from
+// user-visible strings in both apps (owner decision 2026-07-16, D7 — the most
+// recognisable "written by an AI" tell; code comments keep them). A `title`
+// attribute honours "\n" in current browsers and degrades to a space where it
+// does not, which still reads correctly.
+//
+// A quote-free ref is a whole-document reference with no sentence to show. Its
+// `label` is already the full title, which names the document, so it is left
+// exactly as it was: composing a blank quote onto it would present a source
+// that appears to say nothing.
+export function citeTitle(c) {
+  if (!c) return undefined;
+  if (c.quote && c.doc) return `${c.doc}\n“${c.quote}”`;
+  return c.label;
 }
