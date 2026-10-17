@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-10-17** by `docs/archive/handoff-2026-10-17-findings-a-and-b-merged.md`.
+> Its queue has moved on — do not resume from this file.
+
 # PneumoVax — Handoff after a clinical gap found mid-citation-work (2026-10-17)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
