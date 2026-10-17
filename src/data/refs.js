@@ -215,6 +215,28 @@ export const REFS = {
     quote: 'Previously received both PCV13 and PPSV23, AND PPSV23 was received at age 65 years or older: Based on shared clinical decision',
     lastVerified: '2026-10-10',
   },
+  // FINDING C (2026-10-17). CDC's 19-49 "Special situations" block splits the
+  // PCV13 + 1 PPSV23 patient in two: cochlear implant / CSF leak / an
+  // immunocompromising condition get PCV20 or PCV21 at >=5 years, and chronic
+  // conditions get nothing now with a re-check at 50. The app gave both halves
+  // the right ADVICE and quoted `adultBothNotAt65` for both — a sentence from
+  // the Routine 50+ block that instructs a dose. On the chronic-only card that
+  // quote contradicted the card it sat on, for 175 of the grid's 16,008
+  // patients. This is the sentence that card rests on.
+  //
+  // Read live 2026-10-17 (browser pane, accordions expanded; pneumococcal note
+  // 4,785 chars, "Special situations" present at offset 1,764 as the positive
+  // control that both blocks were in the fetched text). It appears exactly
+  // ONCE on the page, in the 19-49 block — which is the whole point: it has no
+  // 50+ twin, because at 50 the answer changes.
+  adultChronicOnlyReviewAt50: {
+    rulebook: 'adult',
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal "Special situations", an adult aged 19-49 with chronic conditions only who has had PCV13 and one PPSV23: no further dose now, re-check at age 50',
+    short: 'CDC Adult Notes',
+    quote: 'Alcoholism, chronic heart/liver/lung disease, cigarette smoking, or diabetes mellitus: no additional PCV or PPSV23 doses recommended at this time. Review pneumococcal recommendations when age 50 years or older.',
+    lastVerified: '2026-10-17',
+  },
   adultPcv20or21Complete: {
     rulebook: 'adult',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
@@ -400,13 +422,41 @@ export const REFS = {
     quote: 'Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after the most recent dose and administered at least 8 weeks apart)',
     lastVerified: '2026-10-10',
   },
+  // FINDING D (2026-10-17). The IC twin of `pedsRiskPcv20orPpsv23` below.
+  //
+  // CDC prints this row in BOTH at-risk lists and the two are not the same
+  // sentence. The non-IC one stops at the 8 weeks (and repeats the word
+  // "administer" — CDC's typo, kept verbatim, and the tell for which block a
+  // quote came from). The IC one goes on to require the five-year follow-on
+  // dose. Until this entry existed only the non-IC sentence had a key, so an
+  // immunocompromised child's card quoted the sentence that omits the dose
+  // their own row owes them.
+  //
+  // Read live 2026-10-17 (browser pane, accordions expanded; pneumococcal note
+  // 5,021 chars, both at-risk block headers found at offsets 398 and 1,972 as
+  // the positive control). Appears exactly ONCE, in the immunocompromising
+  // list's "Age 2-5 years" section — confirmed by the text that follows it on
+  // the page being the "Age 6-18 years" heading. No trailing full stop in the
+  // source; it is quoted as printed.
+  pedsIcPcv20orPpsv23: {
+    rulebook: 'child',
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 2-5: a child who completed the PCV series without PCV20 and without PPSV23, including the second dose owed five years later',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV dose. If PPSV23 is used, administer 1 dose of PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23',
+    lastVerified: '2026-10-17',
+  },
+  // The NON-immunocompromising twin. Its label said only "at-risk child",
+  // which is what let it be used for both classes; it now says which list it
+  // is from. The quote is unchanged and still verbatim (re-counted live
+  // 2026-10-17: once, in the non-IC list).
   pedsRiskPcv20orPpsv23: {
     rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
-    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk child who completed the PCV series without PCV20 and without PPSV23',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the NON-immunocompromising "Special situations" list: a child who completed the PCV series without PCV20 and without PPSV23',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most recent PCV dose.',
-    lastVerified: '2026-10-10',
+    lastVerified: '2026-10-17',
   },
 
   // CDC job aids ----------------------------------------------------------

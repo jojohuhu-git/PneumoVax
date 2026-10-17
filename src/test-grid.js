@@ -155,6 +155,17 @@ export const GRID_PCV_HISTORIES = [
   // prior. 141/113/85/57 puts the earliest dose at exactly 42 days —
   // confirmed by manually reproducing against the un-fixed branch first.
   [['PCV20', 141], ['PCV20', 113], ['PCV20', 85], ['PCV20', 57]],
+  // FINDING D/E (2026-10-17): the same four-dose infant series WITHOUT PCV20.
+  // The grid's only completed infant series was the PCV20 one above, and a
+  // child whose series contains PCV20 needs nothing further at any age — so
+  // the grid could not express the case that matters: an AT-RISK baby whose
+  // finished PCV13 series still owes a dose on their second birthday. All 32
+  // at-risk infants the grid could previously reach were right by luck, and
+  // deleting the age-2 sentence from `pcvInfant` left every sweep green.
+  // Same offsets as the PCV20 row above, for the same reasons recorded there
+  // (clears PCV13's 6-week minimum age at the earliest dose, and fits the
+  // youngest grid age that can carry four doses).
+  [['PCV13', 141], ['PCV13', 113], ['PCV13', 85], ['PCV13', 57]],
   [['PCV13', 140], ['PCV13', 112]],
   [['PCV15', 112], ['PCV15', 84]],
   // "Unknown PCV product" — a real option on the history step, for a dose the

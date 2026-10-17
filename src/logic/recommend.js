@@ -347,8 +347,21 @@ function pcvSeriesShape(pcv, am, total) {
 }
 
 // Snapshot model: compute doses still needed + the next dose's min interval.
-function pcvInfant(am, pcv, today) {
+//
+// FINDING D (2026-10-17): `riskIds` was added. This function used to take none,
+// so the under-2 pathway could not tell a baby with asplenia from a healthy
+// one and gave both the healthy child's citation — a sentence that opens "For
+// children WITHOUT RISK CONDITIONS". The risk class does not change a single
+// dose or date before age 2 (CDC's at-risk rows begin at "Age 2-5 years");
+// it changes which sentence is true of this child, and what happens next.
+// The caller passes `pedsRiskIds(riskIds)`, so an adult-only tick cannot reach
+// here, exactly as it cannot reach `pcvRiskChild`.
+function pcvInfant(am, riskIds, pcv, today) {
+  const rowClass = pedsRiskRowClass(riskIds);   // 'IC' | 'nonIC' | null
   const prior = pcv.count;
+  // Left as the plain key list it has always been. The grey chips at the foot
+  // of an infant card are not what this finding is about, and widening them to
+  // collectRefs() here would change every infant card's chips as a side effect.
   const refs = ['cdcChildPneumo', 'p2016'];
   const brands = pcvRecBrands({ adult: false });
   const anchor = pcv.lastDate;
@@ -475,12 +488,49 @@ function pcvInfant(am, pcv, today) {
   if (prior >= target && !boosterGiven) target = prior + 1;
 
   if (prior >= target && boosterGiven) {
+    // FINDING D + E (2026-10-17). Three different children reach this line and
+    // CDC says three different things about them, so the card now says which
+    // one it is talking to instead of giving all three the healthy sentence.
+    //
+    //   healthy          nothing further, ever. `pedsNoPcv20IfComplete` is
+    //                    written about exactly this child ("For children
+    //                    without risk conditions...").
+    //   at risk, PCV20   nothing further either — a series containing PCV20
+    //     in the series  completes an at-risk child too.
+    //   at risk, no      complete TODAY, and a further dose falls due on the
+    //     PCV20          child's second birthday, because CDC's at-risk rows
+    //                    start at "Age 2-5 years". Saying nothing here left a
+    //                    clinician reading "complete" with no reason to
+    //                    re-check; the adult pathway has said "review at age
+    //                    50" for the mirror-image patient all along.
+    //
+    // The IC and non-IC sentences are NOT the same sentence — only the IC one
+    // carries the five-year follow-on — so each class quotes its own.
+    const atRisk = rowClass !== null;
+    const pcv20Done = pcv.hasPCV20;
+    const nextDoseCite = rowClass === 'IC' ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23';
+    const note = !atRisk
+      ? 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).'
+      : pcv20Done
+        ? {
+          lead: 'The age-appropriate PCV series appears complete [c].',
+          detail: 'This child has a risk condition, and the series already includes PCV20, so no further pneumococcal dose is needed at age 2 years or later [c].',
+        }
+        : {
+          lead: 'The age-appropriate PCV series appears complete [c].',
+          // The interval comes from `intervalPhrase` like every other one in
+          // this file — a hand-typed "8 weeks" here was caught by
+          // regression-s6-5-interval-prose-one-home before it ever ran.
+          detail: `This child has a risk condition. The series is complete for their age now, and one further dose falls due at age 2 years: 1 dose of PCV20, or 1 dose of PPSV23 given ≥${PNEUMO_GAP_WORDS} after the most recent PCV dose [c]. Re-check at the 2-year visit.`,
+        };
     return [rec({
       vaccine: 'PCV', status: 'complete',
       ...pcvSeriesShape(pcv, am, target),
       doseLabel: `PCV series complete (${prior} dose${prior === 1 ? '' : 's'})`,
-      note: 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).',
-      noteCites: [cite('pedsNoPcv20IfComplete')],
+      note,
+      noteCites: !atRisk
+        ? [cite('pedsNoPcv20IfComplete')]
+        : [cite('pedsRoutine4Dose'), cite(pcv20Done ? 'pedsRiskPcv20Complete' : nextDoseCite)],
       refs,
     })];
   }
@@ -1295,11 +1345,18 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       return [rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: 'No dose now — review at age 50',
+        // FINDING C (2026-10-17): one citation per claim, each to the sentence
+        // that states THAT claim. The lead says no dose is due now — CDC says
+        // that in its 19–49 block, and `adultChronicOnlyReviewAt50` is it. The
+        // detail says what happens at 50, which is the 50+ row, so
+        // `adultBothNotAt65` stays and moves to the half it supports. Before
+        // this, the 50+ row was the lead's only citation: a quote instructing
+        // a dose beside a sentence saying none is due, on 175 grid patients.
         note: {
           lead: 'No additional pneumococcal dose now — re-evaluate at age 50 [c].',
-          detail: `This is an adult aged 19–49 with a chronic (non-immunocompromising) condition who has already received PCV13 and PPSV23. At age 50, a dose of PCV20 or PCV21 is recommended, ≥${LONG_GAP_WORDS} after the last pneumococcal dose.`,
+          detail: `This is an adult aged 19–49 with a chronic (non-immunocompromising) condition who has already received PCV13 and PPSV23. At age 50, a dose of PCV20 or PCV21 is recommended, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c].`,
         },
-        noteCites: [cite('adultBothNotAt65')],
+        noteCites: [cite('adultChronicOnlyReviewAt50'), cite('adultBothNotAt65')],
         refs,
       })];
     }
@@ -1498,7 +1555,11 @@ export function recommend(input) {
   // ── Standard (age/history/risk) recommendations ──────────────────────
   let recs;
   if (am < M.m24) {
-    recs = pcvInfant(am, pcv, today);
+    // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
+    // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
+    // does below — a tick that does not apply to a child must not reach a
+    // child's card, by any route.
+    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today);
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
     // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an
