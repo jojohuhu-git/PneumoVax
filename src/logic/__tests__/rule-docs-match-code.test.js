@@ -368,6 +368,43 @@ describe('P2-7: no document names a function or constant the code no longer has'
     // exists" — had been treating as proof it was still there. testing.md's
     // S6-2 row describes it entirely in the past tense already.
     'pcvHistoryProductsFor',
+    // 2026-10-16, hole (c)'s first catches. Both appear in `src/` only inside
+    // comments, which `codeOnly()` strips, so both read as deleted -- and for
+    // `offWindow` that is exactly right.
+    //
+    // `offWindow` was never shipped: S14-3 (owner decision 2026-10-11) chose
+    // `earlyAdvisory` instead, and three documents plus two source comments
+    // record the rejection so nobody renames it back. A name discussed as the
+    // road not taken is history in the sense that matters here.
+    'offWindow',
+    // The three post-transplant citation keys, deleted from refs.js on
+    // 2026-10-16 when the transplant tick became a hard stop and the app
+    // stopped stating a schedule to cite. They are named in
+    // `docs/agent/testing.md` and in this file's own hole-(c) comment as the
+    // precise miss that widening the regex was meant to catch, and in
+    // `docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md`
+    // with the schedules themselves. Every mention frames them as gone, which
+    // the HISTORY_FRAMING check below enforces.
+    'fredHutchLTFU',
+    'p3086Table5',
+    'ascoAdultCancer2024',
+  ]);
+
+  /**
+   * Names that are not this repo's to own: browser and platform APIs. They
+   * will never appear in `src/` as code, so without this they read as
+   * "deleted" forever -- the one false-positive class hole (c)'s backticked
+   * camelCase shape introduced. Keep it to genuine platform APIs; anything
+   * this repo wrote belongs in RETIRED_IDENTIFIERS with its history, or in the
+   * code.
+   */
+  const PLATFORM_IDENTIFIERS = new Set([
+    // refs.js's verification procedure turns on the difference between these
+    // two: CDC pages must be read with `textContent`, because `innerText`
+    // silently omits collapsed accordion content and makes a live-read
+    // citation check pass or fail on invisible text.
+    'innerText',
+    'textContent',
   ]);
 
   const HISTORY_FRAMING = /no longer|used to|deleted|removed|superseded|replaced|before (the|it|this)|which no longer exists|stale|the rule from BEFORE/i;
@@ -429,14 +466,30 @@ describe('P2-7: no document names a function or constant the code no longer has'
       // full of (PCV21, HSCT, ACIP, CDC, CSF) never do — so this still
       // cannot fire on ordinary prose. A bare ALL-CAPS name with NO
       // underscore stays backtick-only, same as before.
+      //
+      // 2026-10-16, hole (c): a BACKTICKED camelCase name with no `()` named
+      // nothing either — not a function call, not ALL-CAPS. That is the shape
+      // of every `refs.js` key, and it is exactly how this guard missed the
+      // transplant deletion: `CLINICAL_SPEC.md` went on naming
+      // `` `fredHutchLTFU` `` and `` `p3086Table5` `` after both were deleted
+      // from refs.js, with the whole suite green. Backticks are required for
+      // this shape (unlike the `()` one) because unbackticked camelCase in
+      // prose is ordinary English — "riskIds", yes, but also any camelCase a
+      // sentence happens to contain — and the backticks are what mark it as a
+      // code identifier. Three characters minimum, and at least one inner
+      // capital, so a backticked ordinary word (`` `note` ``, `` `adult` ``)
+      // is not treated as an identifier.
       const named = new Set([
         ...[...doc.matchAll(/\b([a-z][a-zA-Z0-9_]{3,})\(\)/g)].map((m) => m[1]),
         ...[...doc.matchAll(/`([A-Z][A-Z0-9_]{4,})`/g)].map((m) => m[1]),
         ...[...doc.matchAll(/\b([A-Z][A-Z0-9]*_[A-Z0-9_]*)\b/g)].map((m) => m[1]),
+        ...[...doc.matchAll(/`([a-z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]*)`/g)].map((m) => m[1]),
       ]);
 
       const gone = [...named].filter((n) => !srcText.includes(n));
-      const unexplained = gone.filter((n) => !RETIRED_IDENTIFIERS.has(n));
+      const unexplained = gone
+        .filter((n) => !RETIRED_IDENTIFIERS.has(n))
+        .filter((n) => !PLATFORM_IDENTIFIERS.has(n));
 
       expect(
         unexplained,
@@ -450,7 +503,9 @@ describe('P2-7: no document names a function or constant the code no longer has'
       ).toEqual([]);
 
       // A retired name may only appear in a sentence that frames it as retired.
-      for (const name of gone) {
+      // Platform APIs are exempt: `innerText` is not retired, it is simply not
+      // ours, and demanding that a sentence call it "deleted" would be a lie.
+      for (const name of gone.filter((n) => !PLATFORM_IDENTIFIERS.has(n))) {
         const n = norm(doc);
         for (let i = n.indexOf(name); i !== -1; i = n.indexOf(name, i + 1)) {
           const around = n.slice(Math.max(0, i - 400), i + name.length + 400);

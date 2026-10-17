@@ -22,12 +22,17 @@ current pneumococcal recommendation:
 - Healthy and at-risk children 24mo–18y (p2016 Tables 2 & 4).
 - Adults 19–49 (risk-based) and ≥50 (routine), with the full prior-vaccine matrix.
 - **PCV15 → PPSV23 follow-up** vs **PCV20/PCV21 = complete** logic.
-- **HSCT advisory blocks** (peds: p2016 Table 5; adults: Fred Hutch LTFU) shown
-  relative to transplant.
 - **PCV7 is never counted**; **PCV21 is adults-only**; unknown history = unvaccinated.
 
-Every recommendation carries a citation link to its source (CDC schedule notes,
-ACIP MMWR, immunize.org p2016, or the Fred Hutch LTFU guideline).
+**It deliberately refuses one group.** For a patient after hematopoietic cell transplant,
+CAR-T therapy, B-cell malignancy or B-cell-depleting therapy, the app stops and says the
+schedule has to be individualized by a specialist — it gives no recommendation at all, not
+even the ordinary age-based one. It used to print a post-transplant dose recipe; that
+advice was wrong or out of date five times in five weeks, and wrong advice on a clinical
+screen is worse than none.
+
+Every recommendation carries a citation link to its source (CDC schedule notes, ACIP MMWR,
+or immunize.org p2016).
 
 ## Documentation
 - **`CLINICAL_SPEC.md`** — every clinical rule with its source citation.
@@ -36,5 +41,4 @@ ACIP MMWR, immunize.org p2016, or the Fred Hutch LTFU guideline).
 
 ## Disclaimer
 Clinical decision support only — not a substitute for clinical judgment. Verify
-against current ACIP/CDC immunization schedules before administering. Post-HSCT
-guidance is advisory; coordinate with the transplant/ID team.
+against current ACIP/CDC immunization schedules before administering.
