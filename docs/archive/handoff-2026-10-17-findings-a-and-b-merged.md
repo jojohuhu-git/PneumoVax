@@ -1,3 +1,10 @@
+> **SUPERSEDED 2026-10-17 (evening)** by
+> `docs/archive/handoff-2026-10-17-findings-c-d-e-and-the-population-field.md`.
+> Its queue has moved on: PR #61 is **closed** (owner decision), findings C, D and E are
+> done and open as PR #64, and the patient-population field it lists as "not started" now
+> has its shape decided by the owner and its scope re-measured — including one row this
+> file's successor had to correct. Do not resume from this file.
+
 # PneumoVax — Handoff after Findings A and B shipped (2026-10-17, late)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
