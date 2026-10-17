@@ -299,6 +299,36 @@ nothing new. That is also why the app already has a re-evaluate card (#7) for th
 conditions, which gains PCV20/21 at ≥5 years. The distinction the engine draws is sound.
 What is wrong is only **which document is credited to whom.**
 
+### ✅ OWNER DECISIONS 2026-10-17 — document 2 is settled, ready for C8
+
+Both brought to the owner with the quotes and the measured card counts above, and both
+decided. **Nothing is applied to code yet** — C8 applies all six documents' dispositions as
+one mechanism change, because the root cause is one mechanism (`recommend.js:859`).
+
+**1. Statement #8 (171 cards) — REMOVE the job aid.** *"Yes, remove it."* The job aid never
+states "routine pneumococcal vaccination begins at age 50" in prose; only its page headings
+imply it. The card keeps `adultRoutine50` (CDC Adult Notes) and `cdcAdultRiskFactorList`,
+both already cited, so no clinician-visible wording changes.
+
+**2. Statements #1 and #4 (3,524 cards) — CITE at 50+, REMOVE at 19–49.** The job aid is
+credited on the **2,589** cards aged 50+, where page 1's **(D)** genuinely says "schedule is
+complete", and comes **off** the **935** cards aged 19–49, where the same row says **(E)**
+instead. This applies the cite-or-remove rule exactly and changes no card prose.
+
+> The rejected third option, recorded so it is not re-proposed: change what those 935 cards
+> *say* to CDC's own "review again when your patient turns 50 years old" and cite pp.2–4
+> there. It is the most faithful to the source, but it rewrites clinical text on 935 cards,
+> which is a different decision from fixing a citation and should not ride inside one. It
+> remains available as its own item if the owner ever wants it.
+
+**What this requires of C8, and it is new:** a card's source list currently cannot vary by
+age band — `collectRefs()` hands every adult card the same three defaults. Decision 2 needs
+`cdcAdultTimingJobAid` present on the 50+ half of two statements and absent on the 19–49
+half. So C8 is not only "delete entries"; it needs sources attached **per card**, which is
+the structural fix for the root cause rather than a patch over it. Note that the engine
+already has the predicate it needs — `ROUTINE_ADULT_MIN_M` — and must not grow a second age
+test (`CLAUDE.md`, "Never add an age test that decides whether a rule may bite").
+
 ---
 
 ## Documents still to read
