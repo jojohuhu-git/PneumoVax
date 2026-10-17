@@ -25,6 +25,20 @@ const baseRec = {
   dueToday: true,
 };
 
+// C2 (2026-10-17): the grey buttons now print the SAME "[N]" the sentence
+// does — that is the whole point of the item — so a bare text query for "[1]"
+// now matches the marker and its button both. These helpers scope every query
+// below to the inline marker, which is what each assertion here is about. The
+// button row has its own tests in regression-c2-c3-numbered-sources.
+const isMarker = (el) => String(el.className).includes('note-cite');
+const markers = (text) => screen.getAllByText(text).filter(isMarker);
+const marker = (text) => {
+  const found = markers(text);
+  expect(found, `expected exactly one inline marker reading ${text}`).toHaveLength(1);
+  return found[0];
+};
+const queryMarker = (text) => screen.queryAllByText(text).filter(isMarker)[0] ?? null;
+
 describe('P6-4 — note lead, with detail behind a disclosure', () => {
   it('shows the lead and hides the detail until asked', () => {
     render(<RecCard rec={{
@@ -61,11 +75,11 @@ describe('P6-4 — note lead, with detail behind a disclosure', () => {
     }} />);
     // Shut: only the lead's marker is on screen, and it is [1] — the detail's
     // source has not stolen the number.
-    expect(screen.getByText('[1]').getAttribute('href')).toBe('https://example.test/lead#x');
-    expect(screen.queryByText('[2]')).toBeNull();
+    expect(marker('[1]').getAttribute('href')).toBe('https://example.test/lead#x');
+    expect(queryMarker('[2]')).toBeNull();
     fireEvent.click(screen.getByTestId('rec-note-toggle'));
-    expect(screen.getByText('[2]').getAttribute('href')).toBe('https://example.test/detail#y');
-    expect(screen.getByText('[2]').getAttribute('title')).toBe('Detail source');
+    expect(marker('[2]').getAttribute('href')).toBe('https://example.test/detail#y');
+    expect(marker('[2]').getAttribute('title')).toBe('Detail source');
   });
 
   it('a lead with no marker leaves the whole citation list to the detail', () => {
@@ -74,9 +88,9 @@ describe('P6-4 — note lead, with detail behind a disclosure', () => {
       note: { lead: 'The lead makes no cited claim.', detail: 'The detail does [c].' },
       noteCites: [{ key: 'only', page: 'https://example.test/only', url: 'https://example.test/only#z', label: 'Detail only' }],
     }} />);
-    expect(screen.queryByText('[1]')).toBeNull();
+    expect(queryMarker('[1]')).toBeNull();
     fireEvent.click(screen.getByTestId('rec-note-toggle'));
-    expect(screen.getByText('[1]').getAttribute('href')).toBe('https://example.test/only#z');
+    expect(marker('[1]').getAttribute('href')).toBe('https://example.test/only#z');
   });
 
   it('a source cited in BOTH halves keeps one number across the disclosure', () => {
@@ -89,11 +103,11 @@ describe('P6-4 — note lead, with detail behind a disclosure', () => {
         { key: 'b', page, url: `${page}#two`, label: 'Sentence two' },
       ],
     }} />);
-    expect(screen.getByText('[1]')).toBeTruthy();
+    expect(marker('[1]')).toBeTruthy();
     fireEvent.click(screen.getByTestId('rec-note-toggle'));
     // Same document, so still [1] in both halves — never a stray [2].
-    expect(screen.getAllByText('[1]')).toHaveLength(2);
-    expect(screen.queryByText('[2]')).toBeNull();
+    expect(markers('[1]')).toHaveLength(2);
+    expect(queryMarker('[2]')).toBeNull();
   });
 
   it('the toggle reports its open/shut state for screen readers', () => {

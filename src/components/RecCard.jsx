@@ -5,7 +5,7 @@ import { productLabel } from '../data/brands.js';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { Chevron } from './icons.jsx';
 // P6-3: numbered inline citations, shared with RiskAgeNote.
-import { renderNoteWithCites, cardCiteNumberer } from './citations.jsx';
+import { renderNoteWithCites, cardSources, reasonCiteSlices, noteCiteSlices } from './citations.jsx';
 // S14-1: the chip's wording and CSS class live in one module — see its header.
 import { doseChipLabel, doseChipClass } from './doseChipLabel.js';
 
@@ -85,17 +85,15 @@ function DoseValidation({ result, seriesTotal, numberFor }) {
               slice matching its own marker count, so reasons the walk appends
               afterwards — which carry no marker — never disturb the pairing. */}
           {(() => {
-            let consumed = 0;
-            return reasons.map((r, i) => {
-              const markers = String(r).split('[c]').length - 1;
-              const cites = markers > 0 ? (reasonCites ?? []).slice(consumed, consumed + markers) : null;
-              consumed += markers;
-              return (
-                <span key={i} className="dose-val-reason">
-                  {cites && cites.length ? renderNoteWithCites(r, cites, numberFor) : r}
-                </span>
-              );
-            });
+            // C2: the slicing is `reasonCiteSlices`, the same function the
+            // card's numbering walks, so a reason cannot be rendered against
+            // one cite and numbered against another.
+            const slices = reasonCiteSlices(reasons, reasonCites);
+            return reasons.map((r, i) => (
+              <span key={i} className="dose-val-reason">
+                {slices[i]?.length ? renderNoteWithCites(r, slices[i], numberFor) : r}
+              </span>
+            ));
           })()}
           {detail && <span className="dose-val-detail">{detail}</span>}
         </div>
@@ -181,13 +179,14 @@ function RecNote({ note, noteCites, numberFor }) {
   const detail = typeof note === 'string' ? null : note.detail;
   if (!lead && !detail) return null;
 
-  const leadCiteCount = String(lead ?? '').split('[c]').length - 1;
-  const cites = noteCites ?? [];
+  // C2: shared with the card's numbering, so the lead/detail split cannot be
+  // computed one way to render and another way to number.
+  const slices = noteCiteSlices(note, noteCites);
 
   return (
     <div className="rec-note">
       <div className="rec-note-lead">
-        {renderNoteWithCites(lead, cites.slice(0, leadCiteCount), numberFor)}
+        {renderNoteWithCites(lead, slices.lead, numberFor)}
       </div>
       {detail && (
         <>
@@ -202,7 +201,7 @@ function RecNote({ note, noteCites, numberFor }) {
           </button>
           {open && (
             <div className="rec-note-detail">
-              {renderNoteWithCites(detail, cites.slice(leadCiteCount), numberFor)}
+              {renderNoteWithCites(detail, slices.detail, numberFor)}
             </div>
           )}
         </>
@@ -226,8 +225,15 @@ function timingClass(status, dueToday) {
 
 export default function RecCard({ rec, doses = [], doseValidations = [], ageMonths = 0, dob = null, today = null, otherHistory = null }) {
   const { vaccine, status, doseLabel, seriesTotal, primaryTotal, dueToday, earliestNextDate, brands, note, noteCites, citations, advisory } = rec;
-  // P6-3: one numbering sequence for the whole card, seeded in reading order.
-  const numberFor = cardCiteNumberer(doseValidations, otherHistory?.doseValidations, noteCites);
+  // P6-3 + C2: one numbering sequence for the whole card AND the button row it
+  // belongs to, worked out together in `cardSources` so they cannot disagree.
+  const { numberFor, sources } = cardSources({
+    doseValidations,
+    otherValidations: otherHistory?.doseValidations,
+    note,
+    noteCites,
+    citations,
+  });
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
   // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due
@@ -325,12 +331,19 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
 
         <RecNote note={note} noteCites={noteCites} numberFor={numberFor} />
 
-        {citations && citations.length > 0 && (
+        {/* C2: the numbered source list. Each button carries the number the
+            text uses for that document, so a `[2]` in a sentence names the
+            button marked [2]. The heading says what the row is — the plan's
+            second owner-reported question was "why there are multiple source
+            chips listed if its only citing one of them". */}
+        {sources.length > 0 && (
           <div className="rec-citations">
-            {citations.map((c, i) => (
-              <a key={i} href={c.url} target="_blank" rel="noopener noreferrer"
-                className="citation-chip" title={c.label}>
-                {c.short || c.label}
+            <span className="rec-citations-heading">Sources</span>
+            {sources.map((src) => (
+              <a key={src.url} href={src.url} target="_blank" rel="noopener noreferrer"
+                className="citation-chip" title={src.title}>
+                <span className="citation-chip-num">[{src.n}]</span>
+                {src.short}
               </a>
             ))}
           </div>

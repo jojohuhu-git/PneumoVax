@@ -37,6 +37,19 @@ const KNOWN_UNCITED = {
   // (2026-10-12). They are deliberately NOT replaced with a softer excuse:
   // they are now cited on the per-dose verdicts in validate.js, so if either
   // key stops appearing in src/ this test will fail, which is the point.
+  immPCV7Page:
+    'C3 (2026-10-17). The WHOLE-PAGE entry for the immunize.org PCV7 page that '
+    + '`immPCV7` quotes one sentence of. It is named by no source file because '
+    + 'nothing names it by KEY: `documentRefFor()` finds it by URL, which is how '
+    + 'a card turns a cited sentence into the grey button for its document. So '
+    + 'this is a reachable entry the regex cannot see, not a lost citation.\n'
+    + 'Deleting it is NOT silently safe, which is what this allowlist must never '
+    + 'be used to hide: `regression-c2-c3-numbered-sources.test.jsx` asserts every '
+    + 'document the app cites has exactly one whole-page entry, and fails naming '
+    + 'this URL if it goes. Proved by deleting the entry on 2026-10-17: 4 tests '
+    + 'fail across 2 files — 3 in that file (the PCV7 button, the whole-page '
+    + 'totality property, and the all-cards sweep) and this file\'s own '
+    + '"allowlist does not outlive its entries".',
   cdcPneumoIndex:
     'CDC\'s pneumococcal landing page. Kept as the general "where this all comes '
     + 'from" pointer; every specific rule cites the schedule notes or an MMWR '
