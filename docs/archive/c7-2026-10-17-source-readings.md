@@ -1,6 +1,6 @@
 # C7 — live source readings for the citation work (2026-10-17)
 
-**STATUS: IN PROGRESS. 3 of 6 documents read.** This file is the record C7 exists to
+**STATUS: IN PROGRESS. 4 of 6 documents read.** This file is the record C7 exists to
 produce: each quoted source read live, with the sentence and the heading it sits under,
 so C8 can credit a statement without re-deriving the rule from scratch.
 
@@ -557,12 +557,196 @@ cousin of a wrong-population quote.
 
 ---
 
+---
+
+## Document 5 — CDC Child & Adolescent Immunization Schedule, pneumococcal notes
+
+- **URL:** https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo
+- **Read live:** 2026-10-17 in the browser pane, with the page's collapsed "Special
+  situations" sections **expanded** — they are shut by default, and a reader who does not
+  expand them sees only the section titles. This is the whole of the paediatric risk-based
+  rulebook and it is invisible until you click.
+- **Edition, read off the page:** *Recommendations for Ages 18 Years or Younger, United
+  States, 2025*, **July 2, 2025**.
+- ⚠ **Read and record the page's own legal banner**, because it determines which edition is
+  current:
+
+> "Pursuant to the preliminary order issued on March 16, 2026, in American Academy of
+> Pediatrics et al. v. Kennedy et al., No. 1:25-cv-11916 (D. Mass.), which stayed all votes
+> taken by the ACIP during its June, September and December 2025 meetings, and further
+> stayed the Acting CDC Director's January 5, 2026 Decision Memo revising the CDC's
+> childhood immunization schedule, the July 2, 2025 immunization schedule posted here is the
+> current CDC Child and Adolescent Immunization Schedule by Age for Healthcare
+> Professionals."
+
+So the **July 2, 2025** schedule is current, and the later ACIP votes and the January 2026
+decision memo are stayed. Any future session tempted to "update to the newest CDC child
+schedule" must read this banner first.
+
+### Sentences verified
+
+**(A) "Routine vaccination with PCV":**
+
+> "4-dose series at 2, 4, 6, 12–15 months"
+
+**(B) "Catch-up vaccination with PCV":**
+
+> "Healthy children ages 2–4 years with any incomplete* PCV series: 1 dose PCV"
+
+**(C) Special situations, the NON-IC list** (CSF leak; chronic heart; chronic kidney
+excluding dialysis/nephrotic; chronic liver; chronic lung incl. moderate/severe persistent
+asthma; **cochlear implant**; diabetes), **Age 2–5 years:**
+
+> "Completed recommended PCV series but have not received PPSV23 — Previously received at
+> least 1 dose of PCV20: no further PCV or PPSV23 doses needed — Not previously received
+> PCV20: administer 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most
+> recent PCV dose."
+
+**(D) Same NON-IC list, Age 6–18 years:**
+
+> "Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: no further doses of any
+> PCV or PPSV23 indicated."
+
+**(E) Special situations, the **IC** list** (maintenance dialysis, nephrotic syndrome,
+asplenia or splenic dysfunction, congenital or acquired immunodeficiencies, immunosuppressive
+drugs or radiation therapy incl. malignant neoplasms / leukaemias / lymphomas / Hodgkin /
+solid organ transplant, HIV, sickle cell or other haemoglobinopathies), **Age 2–5 years:**
+
+> "Completed recommended PCV series but have not received PPSV23 — Previously received at
+> least 1 dose of PCV20: no further PCV or PPSV23 doses needed — Not previously received
+> PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV
+> dose. **If PPSV23 is used, administer 1 dose of PCV20 or dose 2 PPSV23 at least 5 years
+> after dose 1 PPSV23**"
+
+**(F) Same IC list, Age 6–18 years:**
+
+> "Received PCV before age 6 years but have not received PPSV23 — Previously received at
+> least 1 dose of PCV20: no additional dose of PCV or PPSV23 — Not previously received
+> PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV
+> dose. **If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after
+> dose 1 PPSV23.**"
+
+**(G) Same IC list, Age 6–18 years:**
+
+> "Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: administer 1 dose PCV20
+> or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose and at least 5 years
+> after dose 1 PPSV23."
+
+**(H) Footnote `**`:**
+
+> "When both PCV15 and PPSV23 are indicated, administer all doses of PCV15 first. PCV15 and
+> PPSV23 should not be administered during the same visit."
+
+**(I) "Additional information":**
+
+> "For calculating intervals between doses, 4 weeks = 28 days."
+
+### Patient population each sentence was written about (C6's note)
+
+| Quote | Ages | Risk class |
+|---|---|---|
+| (A) | infants | any, healthy included |
+| (B) | **2–4 years** | **healthy only** |
+| (C) | **2–5 years** | **non-IC special situations only** |
+| (D) | **6–18 years** | **non-IC only** |
+| (E) | **2–5 years** | **IC only** |
+| (F), (G) | **6–18 years** | **IC only** |
+| (H), (I) | any child | any |
+
+⚠ **(C) vs (E), and (D) vs (G), are the same question answered differently by risk class** —
+the same trap as p2016's footnotes § and ǁ, and CDC draws it in the same place. The IC
+version always carries a **further dose at 5 years** that the non-IC version does not.
+
+### Disposition for this document's 3 statements
+
+| # | Cards | Statement | Disposition |
+|---|---|---|---|
+| 1 | 456 | "Alternative to the PCV20 above: a 2nd PPSV23 ≥5 years after the first PPSV23. Choose ONE option (PCV20 or 2nd PPSV23), not both." | **CITE (E)/(F)** — near-verbatim, and measured **456 IC / 0 non-IC**, so it is correctly confined to the risk class those sentences were written about. |
+| 2 | 208 | "No further PCV or PPSV23 is needed — the paediatric high-risk series is complete…" | **HELD — this is finding 1.** The same card as p2016 #12. |
+| 3 | 48 | "At-risk child 24–71 months who has already received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months — complete. If PCV15 was used, ensure a PPSV23 follow-up." | **HELD — findings 4a and 4b.** Note it carries **no `[c]` marker at all**, so it is an uncited statement outright. |
+
+Also worth noting for C8: **(A) is the true source for the "4-dose series at 2, 4, 6, and
+12–15 months" wording** in statements #13/#15/#20, which currently credit p2016 — p2016
+states "4 doses … last dose at age 12–15 months" but never prints the 2/4/6 months. And
+**(B) is the source for "CDC's catch-up row covers healthy children only through age 4"** in
+statement #1.
+
+---
+
+## ⛔ FINDING 1 — ADJUDICATED, AND CONFIRMED BY BOTH SOURCES
+
+`CLAUDE.md`'s authority rule puts ACIP/CDC above immunize.org, so finding 1 was held until
+CDC's own child schedule could be read. **It has been, and CDC says the same thing as
+p2016.** The finding stands.
+
+**The patients:** an immunocompromised child (asplenia, HIV) who completed PCV13/PCV15
+before age 6, has had PPSV23, and has **no PCV20** on record. **69 cards.**
+
+| Source | What it says for exactly this patient |
+|---|---|
+| CDC child notes **(F)**, IC, 6–18 y | "Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 … **If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23.**" |
+| CDC child notes **(E)**, IC, 2–5 y | "…**If PPSV23 is used, administer 1 dose of PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23**" |
+| immunize.org p2016 footnote **ǁ** | "If PPSV23 previously given, options are (a) give one dose of PCV20 at least 8 weeks after most recent pneumococcal vaccination, or (b) give a second dose of PPSV23 five years after the first dose of PPSV23." |
+| **The app** | "No further PCV or PPSV23 is needed — the paediatric high-risk series is complete." |
+
+**The control check that makes this a real gap and not a reading error.** Every one of those
+69 patients was re-run and **every card they see** was listed. Each sees exactly **one**
+card — `PCV/complete: PCV series complete (PCV before age 6 + PPSV23)` — and no PPSV23 or
+PCV20 recommendation anywhere else. Nothing is recovered on another card.
+
+The engine **already states the correct rule elsewhere** (statement #26, 48 cards, for an IC
+child whose PCV13 came at or after age 6), and handles the neighbouring cases correctly
+(#33/#34 give an IC child who completed before 6 **without** PPSV23 both options). The branch
+that is wrong is specifically **IC + completed before age 6 + PPSV23 already given**, where
+it applies the **non-IC** rule.
+
+## ⛔ FINDING 4 — the same root cause, two more branches, 23 more cards
+
+Found while dispositioning document 5's statement #3. Same control check applied: each of
+these patients also sees **exactly one card**, saying complete.
+
+**4a — 8 cards. An at-risk child 24–71 months, PCV13 only, NO PPSV23, no PCV20.**
+e.g. age 5, asplenia or cochlear implant, three PCV13 doses given at ≥24 months.
+
+| Source | For this patient |
+|---|---|
+| CDC **(C)** non-IC / **(E)** IC, 2–5 y | "Not previously received PCV20: **administer 1 dose PCV20 or 1 dose PPSV23** at least 8 weeks after the most recent PCV dose." |
+| **The app** | "complete. If PCV15 was used, ensure a PPSV23 follow-up." — and PCV15 was *not* used, so nothing is offered. |
+
+**4b — 15 cards. An IC child 24–71 months, PCV13 only, PPSV23 given five years ago, no
+PCV20.** Same root as finding 1: CDC **(E)** gives "1 dose of PCV20 or dose 2 PPSV23 at
+least 5 years after dose 1 PPSV23", which is now due; the app says complete.
+
+The 25 remaining cards under that statement are **non-IC with PPSV23 already given**, and
+for those "complete" is right — CDC **(C)** has no 5-year follow-on. The app is not
+uniformly wrong; it is wrong exactly where the IC/non-IC split falls.
+
+### Total exposure, measured
+
+| Finding | Patients | Who they are | What is missed |
+|---|---|---|---|
+| 1 | **69** | IC child, PCV completed before 6, PPSV23 given | PCV20 now, or 2nd PPSV23 at ≥5 y |
+| 4a | **8** | At-risk child 24–71 mo, PCV13 only, no PPSV23 | PCV20 **or** PPSV23 at ≥8 weeks |
+| 4b | **15** | IC child 24–71 mo, PCV13 only, PPSV23 given | PCV20, or 2nd PPSV23 at ≥5 y |
+| | **92** | | |
+
+**Why no test caught it.** Both verdict corpora record `status` and `brands` — a card that
+says `complete` with no brands is a committed, green line. Neither corpus asks whether
+`complete` is the *right* answer for the risk class, and no test compares an IC branch to
+its non-IC twin. This is the same blind spot as "verdict corpora do not record prose",
+one level up: the corpora do not record **clinical adequacy**, only stability.
+
+**These are not C8's to fix.** C8 adds and removes citations. Changing what 92 children are
+recommended is a clinical change, needs its own failing tests, and needs the owner's
+decision — brought to her 2026-10-17, together with the quotes above.
+
+---
+
 ## Documents still to read
 
 | # | Document | Why it matters |
 |---|---|---|
 | 4 | CDC PCV Catch-up Job Aid (PDF) | 2 statements, 1,626 cards — the children's 8-week catch-up gap. |
-| 5 | CDC Child/Adolescent Notes | 3 statements, 712 cards. |
 | 6 | CDC Adult Notes | 1 statement, 25 cards. |
 
 **The PDF obstacle is solved** (2026-10-17) and is not four documents but three — the
