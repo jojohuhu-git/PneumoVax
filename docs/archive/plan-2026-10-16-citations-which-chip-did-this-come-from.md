@@ -7,7 +7,37 @@ Every number below comes from actually running the app, not from reading its cod
 C5): `MeningoVax-main/docs/archive/plan-2026-10-16-citations-which-chip-did-this-come-from--SEE-PNEUMOVAX.md`.
 Edit this file; never re-create a second full copy (owner decision 2026-10-16).
 
-> ### ⚠ Every count in this document was measured BEFORE the transplant hard stop
+> ### ✅ RE-MEASURED 2026-10-17 — use the numbers in this block, not the ones below
+>
+> The §2 banner below asked for this and it is now done, against `main` + C1 + C2/C3,
+> after the transplant hard stop. **Every count in the body of this document is stale;
+> these are the live ones.** Measured by running the engine over `test-grid.js`, and
+> validated against the running app on the owner's own card.
+>
+> | What | Document said | Measured 2026-10-17 |
+> |---|---|---|
+> | Recommendation cards the app can produce | 17,536 | **16,202** |
+> | Cards where every raised number reads the same | 16,844 | **14,343** |
+> | Cards with 2+ numbers that all read `[1]` | 2,462 | **3,218** |
+> | Grey buttons no raised number points at | 29,192 of 46,340 | **26,028 of 41,762** |
+> | Cards quoting a document with no button (C3) | 1,080 | **2,268** |
+> | Cards where `[1]` is not the first button | 644 | **248** |
+> | Cards stating a figure their quote never says | 1,305 | **1,039** |
+> | Child source on an adult card, or the reverse (§7) | 0 | **0 — re-confirmed clean** |
+> | Quoted sources to read for C7 | 25 (→22 predicted) | **24** |
+>
+> **Three corrections to this document's findings, from that re-measurement:**
+> 1. **C3 is TWO documents, not one.** §6 says "It's always the same CDC risk-based
+>    page." The CDC risk-based page is still exactly 1,080 cards — it did not grow — and
+>    a **second** document accounts for the rest: the immunize.org PCV7 rule, 1,188
+>    cards. Both are fixed by C2/C3's commit.
+> 2. **C7's pile is slightly bigger, not smaller.** The banner predicted 22 quoted
+>    sources after the three transplant deletions; there are **24**, because quotes were
+>    added between 2026-10-16 and now.
+> 3. **A fault this plan never asked about, checked and clean:** no card has a gap in its
+>    numbering (no `[2]` with no `[1]` anywhere on the card), 0 of 16,202.
+>
+> ### ⚠ The original banner — every count below was measured BEFORE the transplant hard stop
 > Measured 2026-10-16 against PneumoVax `main` at 836502a, when a patient who ticked the
 > transplant box still got a recommendation card. `plan-2026-10-16-transplant-hard-stop-both-apps.md`
 > retires that card, and it lands **first** (see §11). So before any of these numbers go in
@@ -134,6 +164,29 @@ aimed at the one page that was easiest to quote. Give those statements their own
 quotes and the 70-year-old's card becomes `[1] [2] [3]` over three numbered buttons.
 
 ## 5. Decisions made 2026-10-16
+
+> **6. Added 2026-10-17 — numbering order. The SENTENCES decide.** The first document a
+> sentence cites is `[1]`, and the button row is printed in that order: *"2 makes more
+> sense than 1 since this is how citations are normally ordered. The sentences dictate the
+> order the references are listed out."* The owner was shown all three candidates rendered
+> from a real card before choosing. Implemented in `cardSources()`, which records the two
+> rejected designs so they are not re-proposed.
+>
+> **7. Added 2026-10-17 — a listed source that holds up nothing on the card comes OFF
+> that card.** The owner, on seeing the numbered row: *"in the current work I see only
+> citation 1 cited, but there are still references 2 and 3 listed"*, and then: **"all
+> sources need to be cited in the explanations if it will be listed as a source."** This
+> confirms decision 5.2 and settles what to do in the second case: not "keep it as
+> background reading" — remove it. The reading that decides which case each pair is in is
+> `c7-2026-10-17-source-readings.md`.
+>
+> **The root cause, found 2026-10-17 and not recorded anywhere in this plan:** the extra
+> buttons are not per-card choices at all. `recommend.js` merges a fixed default set into
+> every card of a pathway (`recommend.js:859` for adults: the Adult Notes, the Timing Job
+> Aid and mm7401a1; `['cdcChildPneumo', 'p2016']` for children). That is why 68 distinct
+> (source, statement) pairs exist over just 6 documents, and it is the literal answer to
+> the owner's second question about why multiple chips are listed.
+
 
 1. **One number per document stays as it is.** `[1]` means "CDC Adult Notes" everywhere on
    that card. (This was already decided on 2026-07-24 — not reopened.) Once hovering tells
