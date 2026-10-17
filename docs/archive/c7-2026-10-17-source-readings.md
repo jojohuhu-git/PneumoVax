@@ -1,6 +1,6 @@
 # C7 — live source readings for the citation work (2026-10-17)
 
-**STATUS: IN PROGRESS. 4 of 6 documents read.** This file is the record C7 exists to
+**STATUS: IN PROGRESS. 5 of 6 documents read.** Only document 4 (the PDF) is left. This file is the record C7 exists to
 produce: each quoted source read live, with the sentence and the heading it sits under,
 so C8 can credit a statement without re-deriving the rule from scratch.
 
@@ -20,7 +20,9 @@ the buttons (C2) made the gap visible rather than creating it.
 
 ## The measured scope (2026-10-17, post-transplant, post-C2/C3)
 
-**68 distinct (uncredited source, statement) pairs**, over 6 documents:
+**68 distinct (uncredited source, statement) pairs**, over 6 documents.
+⚠ **Re-measured 2026-10-17 after the IC-children fix: now 71.** The current table is in
+document 6's section below; the figures here are the ones the plan was written against:
 
 | Document | Card instances | Distinct statements |
 |---|---|---|
@@ -742,12 +744,121 @@ decision — brought to her 2026-10-17, together with the quotes above.
 
 ---
 
+## Document 6 — CDC Adult Immunization Schedule, pneumococcal notes
+
+- **URL:** https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo
+- **Read live:** 2026-10-17 in the browser pane. Unlike the child notes, this page's
+  pneumococcal section was **already expanded** — both "Routine vaccination" and "Special
+  situations" were in the page text without a click. 4,774 characters between the
+  "Pneumococcal vaccination" heading and the next vaccine's, extracted by document range so
+  the two age blocks could not be interleaved.
+- **Edition, read off the page:** *Recommendations for Ages 19 Years or Older, United
+  States, 2025*, **July 2, 2025**.
+- The page's legal banner is the adult twin of document 5's, with one addition — an
+  amendment this file had not recorded:
+
+> "Pursuant to the preliminary order issued on March 16, 2026, in American Academy of
+> Pediatrics et al. v. Kennedy et al., No. 1:25-cv-11916 (D. Mass.), which stayed all votes
+> taken by the ACIP during its June, September and December 2025 meetings, and further
+> stayed the Acting CDC Director's January 5, 2026 Decision Memo revising the CDC's
+> childhood immunization schedule, the July 2, 2025 immunization schedule (as amended on
+> April 27, 2026 to add the ACIP's April 2025 RSV recommendation as adopted by HHS) posted
+> here is the current CDC Adult Immunization Schedule by Age for Healthcare Professionals."
+
+### Which 25 cards these are
+
+One statement, and it is the adult **"PCV15 given, PPSV23 still pending"** card
+(`recommend.js:1097`). The card's interval sentence cites whichever document states the
+number the card states — `adultPcv15ThenPpsv` (CDC Adult Notes) for the year,
+`adultPcv15ThenPpsvShort` (mm7401a1) for the 8 weeks. So on the **19–49
+immunocompromising / cochlear implant / CSF leak** cards the interval points at mm7401a1,
+and the listed "CDC Adult Notes" button is left with nothing pointing at it. That is the
+25.
+
+### The statement, and the sentence that holds it up
+
+The uncredited statement, as the engine renders it:
+
+> "Give PPSV23 ≥8 weeks after the PCV15 dose [c] — the series is INCOMPLETE until then.
+> PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it
+> is given. **If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to
+> complete.**"
+
+The bolded sentence carries **no `[c]` at all** today, and CDC's Adult Notes states it
+almost word for word, under "Special situations":
+
+> "PPSV23 not available: adults aged 19 years or older who received PCV15 but have not yet
+> completed PPSV23 series, can complete the series with either 1 dose of PCV20 or 1 dose of
+> PCV21 if they no longer have access to PPSV23."
+
+| Statement | Cards | Disposition |
+|---|---|---|
+| "If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete." | 25 | **CITE (C).** Quote above. Give the sentence its own inline `[c]` → `cdcAdultPneumo`. |
+
+**Document 6 produces no removals.** It is the only one of the six so far that does not,
+and the reason is worth stating: its button was uncredited not because the page is
+irrelevant to the card, but because the one sentence it *does* support had never been
+given a marker.
+
+**The population matches exactly**, which is the test this item exists to apply. CDC's
+sentence is written about "adults aged 19 years or older who received PCV15 but have not
+yet completed PPSV23 series" — which is this card's gate (`pcv.hasPCV15 && !ppsvGiven`),
+not a near neighbour. The 25 cards are 19–49, and CDC's sentence says "19 years or older",
+so it covers them.
+
+### Checked and NOT a finding: the interval wording
+
+The Adult Notes word the PCV15→PPSV23 interval **identically in both age blocks** — under
+"Routine vaccination" (≥50) and under "Special situations" (19–49):
+
+> "If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use
+> minimum interval of 8 weeks for adults with an immunocompromising condition,* cochlear
+> implant, or cerebrospinal fluid leak)."
+
+So on **this page** the 8 weeks is an option at 19–49, where mm7401a1's clinical guidance
+table says "administer a single dose of PPSV23 ≥8 weeks after the PCV15 dose". That
+difference is the S15 decision's subject matter and **the app already handles it
+correctly** — it is not a new finding and must not be reopened here:
+
+- `refs.js` stores this sentence verbatim as `adultPcv15ThenPpsv`, and its label already
+  says *"This is the citation for the YEAR: every adult 50+, and 19-49 with chronic
+  conditions only"*. Read live today, the stored quote matches the page **word for word**.
+- The 8-week claim therefore never rests on this page: it cites `adultPcv15ThenPpsvShort`
+  (mm7401a1 + the March 2025 Timing Job Aid). No card quotes the Adult Notes for a number
+  the Adult Notes calls optional.
+
+This is the same shape as document 2's split disposition, already decided, and it needs no
+second decision.
+
+### Re-measured counts (2026-10-17, post-IC-fix)
+
+`npx vite-node scripts/uncreditedSources.mjs` re-run on this branch. **The totals in
+"The measured scope" above are out of date**: the IC-children fix added cards and
+statements, so the figure is now **71 pairs, not 68**.
+
+| Document | Card instances | Distinct statements | Change since the first measurement |
+|---|---|---|---|
+| immunize.org p2016 | 8,789 | 37 | +111 cards, **+3 statements** (the new IC cards) |
+| CDC Adult Timing Job Aid | 7,524 | 15 | unchanged |
+| MMWR ≥50 expansion | 7,479 | 13 | unchanged |
+| CDC PCV Catch-up Job Aid | 1,626 | 2 | unchanged |
+| CDC Child/Adolescent Notes | 742 | 3 | +30 cards, same 3 statements |
+| CDC Adult Notes | 25 | 1 | unchanged |
+| **Total pairs** | | **71** | **+3** |
+
+⚠ **The tool cannot run on `main`.** `scripts/uncreditedSources.mjs` imports
+`noteCiteSlices` from `citations.jsx`, which exists only on the held C2/C3 branch — the
+script was cherry-picked to `main` with the reading commits but its dependency was not. On
+`main` it dies with `noteCiteSlices is not a function`. Run it from the C2/C3 branch until
+that work merges.
+
+---
+
 ## Documents still to read
 
 | # | Document | Why it matters |
 |---|---|---|
 | 4 | CDC PCV Catch-up Job Aid (PDF) | 2 statements, 1,626 cards — the children's 8-week catch-up gap. |
-| 6 | CDC Adult Notes | 1 statement, 25 cards. |
 
 **The PDF obstacle is solved** (2026-10-17) and is not four documents but three — the
 Child/Adolescent Notes and the Adult Notes are ordinary web pages.
