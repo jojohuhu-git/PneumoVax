@@ -1,3 +1,19 @@
+> ## ⛔ SUPERSEDED — 2026-10-17
+>
+> Replaced by **`handoff-2026-10-17-ic-children-clinical-gap.md`**, written later the same
+> day. Do not resume this queue: three of its statements are now out of date.
+>
+> - Its "⛔ The one thing blocking C7" section is **wrong**. The PDF obstacle is three
+>   documents, not four, and two of the three were readable all along — the adult job aid
+>   was already in `~/Downloads` (the browser-pane attempt this file records as a failure
+>   had in fact succeeded), and p2016 downloads by command line. Only the CDC catch-up job
+>   aid still needs a click.
+> - C1's two PRs are **merged** in both apps.
+> - C7 is **4 of 6 documents read**, not 1, and reading them turned up a clinical gap in
+>   the engine that is now fixed and under review as PR #58.
+>
+> Its note about the wrong test count baked into commit `628b5d7` still stands.
+
 # PneumoVax — Handoff after C1, C2 + C3, and the start of C7 (2026-10-17)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
