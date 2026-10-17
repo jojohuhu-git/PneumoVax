@@ -1,3 +1,12 @@
+> ## ⚠ SUPERSEDED 2026-10-17 — do not resume from this file
+>
+> Its queue is finished. Both PRs it was waiting on (MeningoVax #72, PneumoVax #56) are
+> merged, and the citations plan it points to has since had C1, C2 and C3 done and C7
+> started. **Resume from `handoff-2026-10-17-c1-c2-c3-and-c7-started.md` instead.** Note
+> that this file's "Ask the owner" item about the dead `advisory` flag was answered on
+> 2026-10-17 — remove it as its own small change — and is carried forward in the new
+> handoff.
+
 # PneumoVax — Handoff after PR 2 of the transplant hard-stop plan (2026-10-16)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Dev server: `.claude/launch.json`
