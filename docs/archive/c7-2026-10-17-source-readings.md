@@ -1,6 +1,7 @@
 # C7 — live source readings for the citation work (2026-10-17)
 
-**STATUS: IN PROGRESS. 5 of 6 documents read.** Only document 4 (the PDF) is left. This file is the record C7 exists to
+**STATUS: ALL 6 DOCUMENTS READ (2026-10-17).** The reading phase of C7 is complete.
+One disposition is open and needs the owner: document 4's statement 1, below. This file is the record C7 exists to
 produce: each quoted source read live, with the sentence and the heading it sits under,
 so C8 can credit a statement without re-deriving the rule from scratch.
 
@@ -854,11 +855,130 @@ that work merges.
 
 ---
 
-## Documents still to read
+## Document 4 — CDC PCV Catch-up Job Aid (PDF)
 
-| # | Document | Why it matters |
+- **URL:** https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf
+- **Read:** 2026-10-17 from `~/Downloads/pneumococcal.pdf` — the owner had already saved it,
+  so the one click this file recorded as the blocker was spent in an earlier session. 3
+  pages, 93,006 bytes. Read with `python3 scripts/pdfLayout.py`, page by page, **positional
+  not flat**, because every page is one wide table and a flat dump interleaves the columns.
+- **Edition, read off every page footer:** **Revised January 2025**. Publisher mark
+  `NCIRDWT`, pages numbered "1 of 3" … "3 of 3".
+- `refs.js` describes it as *"CDC PCV Catch-Up Job Aid — Healthy Children 4 months–4 years
+  (Jan 2025)"*. **That description is accurate** — checked against the document, unlike the
+  p2016 "Tables 1–4" label that document 3 found wrong.
+
+### What the document actually contains
+
+One table, continued across three pages, keyed on **current age**:
+
+| Page | Age band in the "IF current age is" column |
+|---|---|
+| 1 | 4 through 6 months; 7 through 11 months |
+| 2 | 12 through 23 months |
+| 3 | **24 through 59 months** — and the table ends here |
+
+**There is no row past 59 months.** Every page carries the same footnote 1, which is the
+document telling you what it is not:
+
+> "Refer to the notes of the Recommended Child and Adolescent Immunization Schedule for Ages
+> 18 Years or Younger–United States, 2025, for immunization guidance for children at
+> increased risk for pneumococcal disease."
+
+So: **healthy children only, 4 months through 4 years 11 months.** At-risk children are
+handed to document 5. The intro sentence adds the precondition the app's validator already
+enforces — "previous doses must be documented and must meet minimum age requirements and
+minimum intervals between doses".
+
+### Statement 2 of 2 — CITE, and it closes a real mismatch
+
+The card (`recommend.js:509`, healthy child 24–59 months, PCV schedule incomplete):
+
+> "Give 1 dose of PCV15 or PCV20, **≥8 weeks** after the most recent PCV [c]. This is the
+> catch-up for a healthy child 24–59 months whose PCV schedule was not complete by 24
+> months. If PCV15 is used, a PPSV23 follow-up is NOT routine for a healthy child — PPSV23
+> here is risk-based only."
+
+That `[c]` currently points at `pedsHealthyCatchup`, whose quote is from the Child/
+Adolescent Notes:
+
+> "Healthy children ages 2–4 years with any incomplete* PCV series: 1 dose PCV"
+
+**That quote contains no interval at all.** The card states ≥8 weeks and its citation is
+silent on the number — the same class of fault as a quote about the wrong patient, one step
+sideways. The job aid states it verbatim, in the 24-through-59-months rows:
+
+> "It has been at least 8 weeks since Dose 1" → "Give Dose 2 (Final Dose) today"
+> "It has not been at least 8 weeks since Dose 1" → "Give Dose 2 (Final Dose) at least 8
+> weeks after Dose 1"
+
+and the same "at least 8 weeks" phrasing runs through the Dose 3 and Dose 4 rows. The app's
+constant is `WK8 = DAYS.weeks(8)` = 56 days, rendered "≥8 weeks" — the **same number in the
+same words**.
+
+**Population match:** the job aid's row is keyed "IF current age is 24 through 59 months",
+for a healthy child (footnote 1), with an incomplete series. That is this card's gate
+exactly, not a near neighbour.
+
+| Statement | Cards | Disposition |
 |---|---|---|
-| 4 | CDC PCV Catch-up Job Aid (PDF) | 2 statements, 1,626 cards — the children's 8-week catch-up gap. |
+| "Give 1 dose of PCV15 or PCV20, ≥8 weeks after the most recent PCV." | 132 | **CITE (C).** Attach the job aid to the **≥8-week interval**. The product names (PCV15/PCV20) are NOT in this document — the job aid says only "Dose" — so they keep resting on the Notes. One claim, one source. |
+
+### Statement 1 of 2 — an OWNER DECISION, not a disposition I can take
+
+The card (`recommend.js:524`, healthy 5–18 years), **1,494 cards — the largest single block
+in C7**:
+
+> "No PCV is indicated — healthy children 5–18 years are not routinely caught up [c].
+> CDC's catch-up row covers healthy children only through age 4. PCV is recommended at this
+> age only if a risk condition is present [c]."
+
+Its two markers point at `pedsHealthyCatchup` (Child/Adolescent Notes) and
+`cdcChildSpecialSituations`. The job aid is listed on the card and credited by neither.
+
+The problem is that the card makes **two different kinds of claim** and the job aid holds up
+only one of them:
+
+| The card's claim | Is it in this document? |
+|---|---|
+| "CDC's catch-up row covers healthy children only through age 4" | **Yes — this is a claim about the document itself**, and the document says it twice over: its age column stops at "24 through 59 months", and its own title is "Healthy Children 4 months–4 years". |
+| "healthy children 5–18 years are not routinely caught up" | **No. Not in any words.** The document has no row past 59 months, and that is all. |
+| "PCV is recommended at this age only if a risk condition is present" | **No** — and it already cites `cdcChildSpecialSituations`, which is right. |
+
+**This is document 2 statement 8's shape, with one difference that matters.** There the
+rejected claim was *clinical* ("routine vaccination begins at age 50") inferred from a
+document's structure, and it was removed. Here the supportable sentence is *bibliographic* —
+it describes what the job aid covers — and that is readable from the table rather than
+guessed from it.
+
+**The finding underneath, which is bigger than the citation question:** *no document read in
+this file states, in words, that healthy children 5–18 are not caught up.* Every source's
+catch-up table simply stops at age 4 — the job aid at "24 through 59 months", the Child/
+Adolescent Notes at "ages 2–4 years". The app's sentence is a sound clinical inference that
+nothing quotes, so **no re-citation makes it quotable**. Recorded here, not fixed.
+
+**The two readings, both defensible:**
+
+| | What lands on the 1,494 cards |
+|---|---|
+| **(a) Cite the scope sentence** | Give "CDC's catch-up row covers healthy children only through age 4" its own `[c]` → the job aid, quoting the title and the final row. The button becomes credited; nothing is removed; the clinical sentence keeps resting on the Notes. |
+| **(b) Remove the job aid** | Take the button off these 1,494 cards, consistent with document 2 statement 8. It stays on the 132 catch-up cards, where it earns its place. The clinical sentence is then backed by the Notes alone — which, per the finding above, does not state it in words either. |
+
+Either way the *clinical* sentence gains no new source, because none exists. The choice is
+only whether the job aid is credited for describing its own scope, or taken off the card.
+
+**Not implemented. Awaiting the owner.**
+
+---
+
+## Documents still to read — none
+
+All six are read. What is left is not reading but deciding and applying:
+
+| Open | Where |
+|---|---|
+| Document 4 statement 1 — reading (a) or (b) | this file, document 4 above. **1,494 cards.** |
+| Apply all six documents' dispositions | item **C8** in the parent plan. |
 
 **The PDF obstacle is solved** (2026-10-17) and is not four documents but three — the
 Child/Adolescent Notes and the Adult Notes are ordinary web pages.
@@ -867,7 +987,7 @@ Child/Adolescent Notes and the Adult Notes are ordinary web pages.
 |---|---|
 | Adult Timing Job Aid | **in `~/Downloads`**, saved 2026-10-17 10:31. Read. |
 | immunize.org `p2016.pdf` | **downloads normally by command line** (211,252 bytes, HTTP 200). |
-| CDC PCV Catch-up Job Aid | cdc.gov's CDN returns **403** to every non-browser client. The browser pane raises a save dialog that only the owner can accept — one click, and it lands in `~/Downloads` like the adult job aid did. |
+| CDC PCV Catch-up Job Aid | **in `~/Downloads/pneumococcal.pdf`**. Read 2026-10-17. cdc.gov's CDN returns **403** to every non-browser client, so a fresh copy still needs a browser save — but the owner had already saved this one, and the block this file recorded was therefore already spent. Check `~/Downloads` before asking for the click. |
 
 Read them with **positional** text extraction, not a flat dump: these documents are tables,
 and a flat dump interleaves the columns so you cannot tell which interval belongs to which
