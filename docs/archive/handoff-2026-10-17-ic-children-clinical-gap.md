@@ -1,3 +1,11 @@
+> ## ⛔ SUPERSEDED — 2026-10-17 (evening)
+>
+> Replaced by **`handoff-2026-10-17-c7-read-and-a-pcv20-timing-finding.md`**. Do not resume
+> this queue. Its PR #58 is **merged**, C7 is **6 of 6 documents read**, and the open
+> question it lists as "whether IC-1 needs mirroring in MeningoVax" is **answered: no**,
+> with reasons. The newer file also carries two findings this one does not know about, one
+> of them clinical and live.
+
 # PneumoVax — Handoff after a clinical gap found mid-citation-work (2026-10-17)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
