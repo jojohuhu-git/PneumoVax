@@ -30,9 +30,10 @@
 //     and every citation LABEL (not URL — a URL changing is not a wording
 //     change a clinician would notice) from `citations` and `noteCites`.
 //   • per recorded dose: status, detail, and every reason sentence.
-//   • the hard-stop exclusion message, when excluded.
-//   • the HSCT advisory block's title, coordinate-care flag, and its own
-//     rec cards (by the same per-rec rule above).
+//   • the hard-stop exclusion message, when excluded — which since
+//     2026-10-16 is what a transplant patient gets. This file used to also
+//     render that patient's post-transplant advisory block (its title, its
+//     coordinate-care flag and its own rec cards); the app no longer has one.
 //   • the PCV21 geographic advisory note, when present.
 //
 // Deliberately NOT included: dueToday, earliestNextDate, seriesTotal,
@@ -98,10 +99,6 @@ export function proseOf(input) {
     `PCV=[${(r.perDose?.pcv ?? []).map(doseProse).join(';;')}]`,
     `S23=[${(r.perDose?.ppsv23 ?? []).map(doseProse).join(';;')}]`,
   ];
-  if (r.hsct) {
-    parts.push(`HSCT=[${r.hsct.title ?? ''}¦${r.hsct.coordinateFlag ?? ''}¦`
-      + `${(r.hsct.recs ?? []).map(recProse).join(';;')}]`);
-  }
   if (r.pcv21Geo) parts.push(`GEO=[${r.pcv21Geo.note ?? ''}]`);
   return parts.join(' ').replace(/\t/g, ' ').replace(/\n/g, ' ');
 }
@@ -170,7 +167,8 @@ function cmdDiff(beforePath, afterPath) {
   }
 }
 
-// Gated the same way `hsctCases.mjs` was fixed in P2-13: `proseOf` is
+// Gated the same way `hsctCases.mjs` was fixed in P2-13 (that file is gone
+// now, deleted with the advisory it exercised): `proseOf` is
 // exported for a smoke test to import, and importing this file must not
 // also run the CLI dispatch below (an un-gated `process.exit(1)` on an
 // unrecognised/empty argv would take the whole test runner down with it).

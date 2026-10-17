@@ -2,14 +2,19 @@
 // recommend.js — the PneumoVax recommendation engine.
 //
 // Pure function. Given a patient (age, risks, PCV history, PPSV23 history),
-// returns the current pneumococcal recommendations (PCV and PPSV23 streams),
-// plus an HSCT advisory block when the HSCT risk factor is selected.
+// returns the current pneumococcal recommendations (PCV and PPSV23 streams).
+//
+// It returns NO recommendations at all for one group: transplant / CAR-T /
+// B-cell patients, who get `excluded: true` and the stop message. That is the
+// 2026-10-16 owner decision; until then the transplant tick printed a
+// four-dose advisory recipe of its own, which was corrected five times across
+// the two apps in five weeks. See
+// docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md.
 //
 // Every clinical rule is traceable to a citation key in src/data/refs.js and to
 // a section of CLINICAL_SPEC.md. Verified live 2026-06-06 against CDC child &
 // adult schedule notes, immunize.org p2016 (Tables 1–5), the PCV7-not-counted
-// article, mm7401a1 (≥50 expansion), mm7336a3 (PCV21), and the Fred Hutch LTFU
-// guideline (adult HSCT, SOLE source).
+// article, mm7401a1 (≥50 expansion), and mm7336a3 (PCV21).
 //
 // Design rule (ported from vaxapp/MeningoVax): all clinical logic and product
 // validity live HERE; the UI consumes pre-built recs. No clinical logic in
@@ -19,7 +24,6 @@
 import { resolveRefs, cite, REFS } from '../data/refs.js';
 import {
   RISK_BY_ID,
-  hasHSCT,
   hasExclusion,
   hasIC,
   hasAnyRisk,
@@ -114,7 +118,14 @@ function rec(o) {
     // assigns the visible [N] at render time, so nothing here hardcodes a
     // number. A note with no "[c]" leaves this empty and renders as before.
     noteCites: o.noteCites ?? [],
-    advisory: !!o.advisory,             // HSCT relative-to-transplant block
+    // DEAD since 2026-10-16: the deleted post-transplant advisory was the one
+    // caller that ever set this, so it is now always false. Left in place on
+    // purpose rather than ripped out in the same commit as a clinical change:
+    // `test-grid.js` prints it into both corpora, so deleting it would move
+    // every row and bury the 1,334 patients this commit is measuring. Its
+    // "Advisory" pill in RecCard.jsx is likewise unreachable. Remove the flag,
+    // the pill and the corpus column together, as their own change.
+    advisory: !!o.advisory,
     // Series shape for the recorded-dose list's "Primary series" / "Boosters"
     // headings (owner decision 2026-09-15). Both null on cards whose total
     // counts a DIFFERENT set of doses than the list displays -- the list then
@@ -1068,49 +1079,6 @@ function lastDoseDate(pcv, ppsv) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  HSCT advisory block (peds <19y = p2016 Table 5; adults ≥19y = Fred Hutch)
-// ═══════════════════════════════════════════════════════════════════════════
-function hsctAdvisory(am) {
-  const adult = am >= M.y18;
-  if (adult) {
-    // P0-A (2026-09-14): adult row replaced Fred Hutch LTFU with ASCO 2024,
-    // matching the pediatric row (both apps agree; see
-    // docs/archive/fix-queue-2026-09-13-crossapp-hct-cart-parity.md). ASCO's
-    // "clinical interpretation" (preferred, earlier-start) approach is used:
-    // start after 3 months, 3 doses at ~1-month intervals, 4th dose 6 months
-    // after dose 3 and by 1 year post-transplant — same shape as the peds row.
-    return {
-      title: 'Post-HSCT pneumococcal series (adult) — advisory',
-      coordinateFlag: 'Coordinate with the transplant/ID team — your center may use its own post-HSCT protocol. Timing below is relative to transplant (no calendar due-dates).',
-      recs: [
-        rec({
-          vaccine: 'PCV', status: 'risk-based', advisory: true,
-          doseLabel: '4 doses of PCV20, beginning 3–6 months after HSCT: give 3 doses 4 weeks apart, then a 4th dose at least 6 months after dose 3 and at least 12 months after HSCT',
-          dueToday: false, earliestNextDate: null,
-          brands: ['PCV20 (Prevnar 20)'],
-          note: 'Adult post-HSCT (prior pneumococcal history is nullified — full re-vaccination): 4 doses of PCV20 beginning 3–6 months after HSCT. Give 3 doses 4 weeks apart, then a 4th dose ≥6 months after dose 3 AND ≥12 months after HSCT. This matches ASCO\'s preferred earlier-start approach; ASCO also describes an alternative starting later, at 4-6 months, with the 2nd and 3rd doses 1 month apart.',
-          refs: ['ascoAdultCancer2024'],
-        }),
-      ],
-    };
-  }
-  return {
-    title: 'Post-HSCT pneumococcal series (child <19y) — advisory',
-    coordinateFlag: 'Coordinate with the transplant/ID team — your center may use its own post-HSCT protocol. Timing below is relative to transplant (no calendar due-dates).',
-    recs: [
-      rec({
-        vaccine: 'PCV', status: 'risk-based', advisory: true,
-        doseLabel: '4 doses of PCV20, beginning 3–6 months after HSCT: give 3 doses 4 weeks apart, then a 4th dose at least 6 months after dose 3 and at least 12 months after HSCT',
-        dueToday: false, earliestNextDate: null,
-        brands: ['PCV20 (Prevnar 20)'],
-        note: 'Child post-HSCT (prior pneumococcal history is nullified — full re-vaccination): 4 doses of PCV20 beginning 3–6 months after HSCT. Give 3 doses 4 weeks apart, then a 4th dose ≥6 months after dose 3 AND ≥12 months after HSCT. If PCV20 is unavailable: 3 doses of PCV15 (4 weeks apart) starting 3–6 months post-HSCT, then PPSV23 ≥12 months after HSCT.',
-        refs: ['p3086Table5'],
-      }),
-    ],
-  };
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 //  PCV21 geographic advisory (adults only)
 // ═══════════════════════════════════════════════════════════════════════════
 function pcv21GeoNote(am, recs) {
@@ -1125,19 +1093,33 @@ function pcv21GeoNote(am, recs) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Hard-stop exclusion (CAR-T therapy / B-cell malignancy / B-cell-depleting
-//  therapy) — too heterogeneous for one safe recipe. Verified live against
-//  CDC's ACIP General Best Practice Guidelines, "Altered Immunocompetence"
-//  page, 2026-09-12.
+//  Hard-stop exclusion (hematopoietic cell transplant / CAR-T therapy /
+//  B-cell malignancy / B-cell-depleting therapy) — too heterogeneous for one
+//  safe recipe. Verified live against CDC's ACIP General Best Practice
+//  Guidelines, "Altered Immunocompetence" page, 2026-09-12.
+//
+//  Transplant joined this stop on 2026-10-16 (owner decision). It had its own
+//  advisory pathway printing a four-dose PCV20 recipe; that recipe's clinical
+//  content was wrong or half-updated five times across the two apps in five
+//  weeks. See docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md.
+//
+//  MIRRORED: MeningoVax's EXCLUSION_MESSAGE is byte-identical to this one, and
+//  regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js compares
+//  the two files. The non-breaking hyphens (U+2011) are load-bearing twice
+//  over — they stop "CAR-T" and "B-cell" breaking mid-term on a phone, and the
+//  mirror test compares bytes.
+//
+//  The four authorities are named in WORDS, not linked (decision 6 of the
+//  plan): a sentence naming ASCO, NCCN, IDSA and CDC is still true in 2030,
+//  while a URL to the 2024 ASCO guideline is not — and every refs.js entry is
+//  an annual re-read enforced by citation-freshness.test.js.
 // ═══════════════════════════════════════════════════════════════════════════
-const EXCLUSION_MESSAGE = 'This tool does not apply to this patient. Standard '
-  + 'age-based immunization logic is not valid for recipients of hematopoietic '
-  + 'cell transplant (HCT) or CAR‑T therapy, or for patients with a '
-  + 'B‑cell malignancy or recent B‑cell–depleting therapy. These '
-  + 'patients need an individualized, transplant/therapy‑specific '
-  + 'revaccination schedule, and certain live vaccines may be contraindicated. '
-  + 'Follow institutional protocols or current national guidance (e.g., ASCO, '
-  + 'NCCN, IDSA, CDC).';
+const EXCLUSION_MESSAGE = 'Revaccination after hematopoietic cell transplant, '
+  + 'CAR‑T therapy, or B‑cell–depleting therapy follows a '
+  + 'transplant‑ or therapy‑specific protocol, not age‑based '
+  + 'scheduling, and some live vaccines may be contraindicated. Follow your '
+  + 'institutional protocol or current national guidance (ASCO, NCCN, IDSA, '
+  + 'CDC).';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  PUBLIC API
@@ -1156,16 +1138,21 @@ export function recommend(input) {
   // silently land on age 0 and be routed to the infant schedule.
   const am = input.ageMonths ?? (dob ? dobToAgeMonths(dob, today) : null) ?? 0;
 
-  // ── Hard-stop exclusion wins over everything, including HSCT (both boxes
-  //    can be ticked; owner decision 2026-09-12: the stop wins, transplant
-  //    advice is hidden rather than shown underneath a "does not apply" notice).
+  // ── Hard-stop exclusion wins over everything, and since 2026-10-16 the
+  //    transplant tick IS one of these rows rather than a separate advisory.
+  //
+  //    It also wins over a risk factor the clinician ticked alongside it that
+  //    would have produced a card on its own (decision 2 of the hard-stop
+  //    plan, which deliberately retires the 2026-09-19 C2-6 fix). The reason
+  //    is that there is no way to say "this half of your answer is safe" on a
+  //    screen whose whole point is that this patient's schedule cannot be
+  //    computed here.
   if (hasExclusion(riskIds)) {
     return {
       excluded: true,
       exclusionMessage: EXCLUSION_MESSAGE,
       exclusionCitations: resolveRefs(['cdcAlteredImmunocompetence']),
       recs: [],
-      hsct: null,
       pcv21Geo: null,
       // P6-5 (S13, 2026-10-10): ARRAYS, not `{}`. Every other return path
       // sets these to the walk's perDose, which is an array, so the
@@ -1261,15 +1248,11 @@ export function recommend(input) {
     recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob);
   }
 
-  // ── HSCT advisory block (prominent at top; standard recs still shown) ──
-  const hsct = hasHSCT(riskIds) ? hsctAdvisory(am) : null;
-
   // ── PCV21 geographic advisory ─────────────────────────────────────────
   const pcv21Geo = pcv21GeoNote(am, recs);
 
   return {
     recs,
-    hsct,
     pcv21Geo,
     perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was

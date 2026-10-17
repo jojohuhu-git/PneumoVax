@@ -52,10 +52,16 @@ describe('P0 — orderedDoses[i] is the dose perDose[i] was computed for', () =>
   it('the grid is the real one, not an empty sweep', () => {
     // The no-vacuous-assertion guard: every test below iterates CASES, so an
     // empty grid would make all of them pass while proving nothing. Pinned to
-    // the grid's current size (17,342 since S7, 2026-10-16, added a 4-dose
-    // infant PCV history) rather than just ">0", so a grid that shrank back
-    // toward empty would be caught before it got there.
-    expect(CASES.length).toBe(17342);
+    // the grid's exact size rather than just ">0", so a grid shrinking back
+    // toward empty is caught before it gets there.
+    //
+    // 17,342 from S7 (2026-10-16, which added a 4-dose infant PCV history)
+    // until later the same day, when the transplant and CAR-T checkboxes
+    // merged into one row: 13 single-risk profiles became 12, taking exactly
+    // one profile's 1,334 cases with them. The two profiles had produced
+    // identical answers since the transplant tick became a hard stop, so this
+    // removed duplicate coverage, not real coverage.
+    expect(CASES.length).toBe(16008);
   });
 
   it('every patient gets exactly one dose beside every verdict', () => {
@@ -178,7 +184,7 @@ describe('P0 — orderedDoses[i] is the dose perDose[i] was computed for', () =>
     const stopped = recommend({
       ageMonths: 840,
       dob: '1956-04-02',
-      riskIds: ['bcell_car_t_therapy'],
+      riskIds: ['hct_cart_bcell_exclude'],
       pcvDoses: [{ product: 'PCV13', date: '2020-01-01' }],
       ppsv23Doses: [],
       today: '2026-06-07',

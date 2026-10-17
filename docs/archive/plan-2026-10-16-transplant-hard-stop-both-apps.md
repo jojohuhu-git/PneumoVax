@@ -1,8 +1,36 @@
-# PLAN — APPROVED, NOT YET IMPLEMENTED
+# PLAN — BOTH PRs IMPLEMENTED
 
-**Status:** approved by the owner 2026-10-16. **No code has been written.** Both repos were
-clean and untouched when this was filed (PneumoVax `main` at 836502a; MeningoVax `main` clean).
-Work starts with PR 1 (MeningoVax). See "Owner decisions" below for the six decisions this
+**Status (2026-10-16):** implemented in both repos.
+
+| | |
+|---|---|
+| **PR 1 — MeningoVax** | PR #72, 2 commits — **squash-merged to `main`** |
+| **PR 2 — PneumoVax** | PR #56, 4 commits — **squash-merged to `main`**; see the PR for the measured counts |
+
+Merged in that order, which is the order this plan prescribes. Suites at merge: MeningoVax
+**1,630 passing in 135 files**, PneumoVax **1,046 passing in 91 files** — both run locally,
+not taken from CI alone.
+
+Originally approved by the owner 2026-10-16 with no code written; both repos were clean when
+it was filed (PneumoVax `main` at 836502a, then 452ce89 after this plan itself was filed).
+
+**What differed from the plan as written, recorded honestly:**
+- The stop message is **307** characters, not the 318 this plan states — that figure counted
+  the markdown line wraps in the block below. Both repos' engines were run and the strings
+  compared: byte-identical at 307.
+- It has **five** non-breaking hyphens, not the four a first draft of the mirror test
+  asserted (CAR‑T, B‑cell, transplant‑, therapy‑specific, age‑based). The test caught it.
+- The corpus counts were **exactly** as predicted: 1,334 of 17,342 and 1,471 of 19,123.
+- PneumoVax's commit 1 carried the `hasExclusion()` realignment and the doc edits that
+  `rule-docs-match-code.test.js` demanded, so that no commit in the branch is red.
+- **The plan assumed `rule-docs-match-code.test.js` would catch all three stale refs keys.
+  It caught one.** Its identifier regexes read `name()` and `ALL_CAPS_WITH_UNDERSCORE`, and
+  a backticked camelCase name like `` `fredHutchLTFU` `` matched neither — which is the shape
+  of every `refs.js` key. The guard was widened in PR 2's commit 3 and proved by replanting
+  that exact mention (fails 1 of 64 with the widening, 0 of 64 without). It also exposed that
+  a test asserting a name is ABSENT keeps that name present for the guard.
+- An **in-repo** behaviour guard was folded into the same file as the cross-repo mirror
+  rather than given its own, so the two halves of one decision sit together. See "Owner decisions" below for the six decisions this
 records, and `~/.claude/skills/vaccine-parity/SKILL.md:31` +
 `~/.claude/skills/design-review/SKILL.md:47` for the 2026-07 decision it reverses.
 

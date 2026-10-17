@@ -35,14 +35,15 @@ Sources fetched live and read 2026-06-06.
 | `mmwr7203a1` | MMWR rr7203a1 — comprehensive adult ≥19 | **UNCITED since N5 (2026-10-16).** Kept as the primary-source record of where the adult risk list came from; superseded for the interval by `mmwr7401a1` (S15) and dropped from the risk list for consistency (§J). |
 | `mmwr7239a5` | MMWR mm7239a5 — PCV20 in children | peds PCV20 |
 | `mmwr7137a3` | MMWR mm7137a3 — PCV15 in adults | adult PCV15 |
-| `p2016` | immunize.org p2016 (Tables 1–5) | **peds dose-count grids + child HSCT (Table 5)** |
+| `p2016` | immunize.org p2016 (Tables 1–4) | **peds dose-count grids** |
 | `immPCV7` | immunize.org Ask the Experts — PCV7 not counted | PCV7-ignored rule |
 | `immPneumo` | immunize.org Ask the Experts — pneumococcal topic | edge cases |
-| `fredHutchLTFU` | Fred Hutch LTFU Guidelines §IX (Tables IX.A1/A2) | **adult HSCT (SOLE source)** |
 
 **Precedence:** CDC schedule notes are primary for routine + at-risk peds/adult logic.
-p2016 is the detailed companion for the peds dose-count grids. **HSCT peds = p2016 Table 5
-SOLE source; HSCT adult = Fred Hutch LTFU SOLE source.**
+p2016 is the detailed companion for the peds dose-count grids. **There are no
+post-transplant sources in this table any more** — three were deleted on 2026-10-16
+(immunize.org p3086 Table 5, Fred Hutch LTFU §IX, ASCO 2024) when the app stopped stating
+a post-transplant schedule. See §E/§F below.
 
 ---
 
@@ -227,32 +228,44 @@ All peds intervals = **≥8 weeks** (Table 4 uses 8wk throughout for ≥24mo).
 
 ---
 
-## §E — HSCT, children <19 y (p2016 Table 5 — SOLE source)
+## §E and §F — Transplant / CAR-T / B-cell: the app STOPS (owner decision 2026-10-16)
 
-Prior pneumococcal history is nullified → full re-vaccination.
-- **4 doses PCV20**, beginning 3–6 mo after HSCT: 3 doses 4 weeks apart, then a 4th ≥6 mo
-  after dose 3 **and** ≥12 mo after HSCT.
-- If PCV20 unavailable: 3 doses PCV15 (4 wk apart) beginning 3–6 mo post-HSCT, then PPSV23
-  ≥12 mo after HSCT. With **chronic GVHD**: give a 4th PCV15 ≥12 mo after HSCT instead of PPSV23.
+These two sections used to state a post-transplant pneumococcal schedule — §E for
+children under 19 (immunize.org Table 5), §F for adults (Fred Hutch LTFU §IX). **The app
+no longer states one.** Ticking the transplant box hard-stops the engine: `excluded:
+true`, `recs: []`, no advisory banner, and not even the ordinary age-based schedule the
+patient would get if the box were unticked.
 
-**Design rule:** the app does NOT capture an HSCT date → present **relative to transplant**
-(advisory), no calendar due-dates, status `risk-based`, `dueToday: false`, no
-`earliestNextDate`. Show "coordinate with transplant/ID team" flag.
+| | |
+|---|---|
+| Risk id | `hct_cart_bcell_exclude` (one row; transplant and CAR-T/B-cell merged) |
+| Engine | `hasExclusion()` → the early return in `recommend()`; `exclude: true` is the only flag |
+| UI | `Results.jsx`'s `if (excluded)` arm; `App.jsx` skips the History step entirely |
+| Citation shown | `cdcAlteredImmunocompetence`, and nothing else |
 
----
+**What the screen says.** Title: *"Individualized revaccination schedule required."* Then
+the 307-character message in `recommend.js`'s `EXCLUSION_MESSAGE`, naming ASCO, NCCN,
+IDSA and CDC **in words, linked to nothing** (owner decision 6). Plus, only when doses
+were typed, one italic line: *"Recorded doses are kept but not evaluated here."*
 
-## §F — HSCT, adults ≥19 y (Fred Hutch LTFU Tables IX.A1/A2 — SOLE source)
+**Why there is no schedule here any more.** Not because the advice was low value —
+because it could not be kept true. The adult row had been ASCO 2024 in the code since
+2026-09-14 while §F here, `CLAUDE.md` and the checkbox's own citation chip all still said
+Fred Hutch **32 days later** — and those are not the same schedule (four doses from three
+months, versus three titer-gated doses from six). MeningoVax's equivalent advisory was
+corrected four times in five weeks. Full evidence:
+[docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md](docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md).
 
-Prior pneumococcal history nullified → full re-vaccination.
-- **PCV20 ×3** at **≥6, ≥8, ≥10 months** after HSCT (per Tables IX.A1 "before 12 months"
-  and IX.A2 "standard": Prevnar 20 at >6m, >8m, >10m). **No PPSV23** in the adult row.
-- **Titer-guided:** check baseline *S. pneumoniae* IgG (23 serotypes) **before** PCV20;
-  recheck IgG 1–2 mo **after each** PCV20. A positive response — seroprotective IgG to
-  **≥15 of 20 PCV20 serotypes** — means **no further PCV20**. (Footnotes 8 & 9.)
-- ⚠️ Institution-specific (Fred Hutch), **not ACIP**, titer-gated.
+**The retired schedules, verbatim with their citations**, so nobody has to reconstruct
+them from memory:
+[docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md](docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md).
 
-**Design rule:** same as §E — advisory block relative to HSCT, titer steps as notes,
-"coordinate with transplant/ID team; your center's protocol may differ" flag.
+**Two guards hold this in place.** `regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js`
+freezes the row and every word of the stop byte-for-byte against MeningoVax's copy
+(skipped, not failed, when the sibling repo is absent — CI clones only this repo).
+`regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js`'s in-repo half sweeps
+`GRID_RISK_PROFILES` and asserts the exclude id returns `excluded: true` with `recs: []`
+at every age and with every history.
 
 ---
 
@@ -345,8 +358,10 @@ Routine for ALL adults ≥50 regardless of risk.
 > - **PCV21 product minimum age = 18 years (216 months)** — Capvaxive is FDA-approved
 >   and ACIP-recommended from age 18. A patient aged 18y may receive PCV21.
 > - **Adult schedule routing boundary = 19 years (228 months)** — the adult prior-vaccine
->   matrix (§G/§H), HSCT adult pathway (§F), and adult-only risk gate in StepRisks all
->   apply from 19y. Patients aged 18 use the child/adolescent rulebook (§B–§E) for
+>   matrix (§G/§H) and the adult-only risk gate in StepRisks all apply from 19y. (The
+>   adult post-transplant pathway used to be a third consumer of this boundary — and used
+>   18, not 19, so its own title said "child <19y" for an 18y6m patient; it was deleted on
+>   2026-10-16.) Patients aged 18 use the child/adolescent rulebook (§B–§D) for
 >   schedule routing even though PCV21 is a valid product choice for them.
 >
 > These two thresholds are kept as separate named constants (`PCV21_MIN_AGE_M = 216` and
@@ -429,7 +444,7 @@ condition on 2026-10-16:
 |---|---|---|
 | risk conditions putting a **child** source on an **adult** card | 13 of 17 | **0** |
 | risk conditions putting an **adult** source on a **child** card | 12 of 17 | **0** |
-| adult HSCT card citing the **paediatric** HSCT table (`p3086Table5`) | yes | **no** |
+| adult transplant card citing the **paediatric** transplant table | yes | **no** (both cards deleted 2026-10-16 — the app now stops instead) |
 
 Over the 16,250-patient grid: **15,604 citation chips removed, 0 added**, and **not one
 of them was a source belonging to the card's own schedule** — measured, not asserted.
@@ -750,9 +765,11 @@ catch-up row**.
 
   **The determination:** an interval is an interval. An adult dose given inside one was not
   validly given, does not count, and is owed a repeat — with CDC's 4-day grace. The owner
-  was shown all of the evidence below, which disagrees, and reaffirmed. Recorded the same
-  way the Fred Hutch HSCT pathway is (`CLAUDE.md`: "label as institution-specific in UI
-  copy").
+  was shown all of the evidence below, which disagrees, and reaffirmed. It is recorded
+  the way any non-ACIP rule in this app must be: labelled, in the app's own words, as the
+  owner's determination rather than a guideline's. (The precedent for that was the Fred
+  Hutch post-transplant pathway, labelled institution-specific in UI copy — deleted
+  2026-10-16, but the labelling practice is the point and it stands.)
 
   **What the published sources actually say, all checked live 2026-10-11:**
   - **CDSI v4.64** (CDC's own machine-readable rule set; local copy). Each interval carries

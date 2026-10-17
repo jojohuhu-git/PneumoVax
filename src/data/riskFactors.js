@@ -3,9 +3,15 @@
 //
 // `group` is DISPLAY ONLY (which StepRisks.jsx section a checkbox renders
 // under) and is separate from `class` (the clinical logic engine reads).
-// HSCT and the CAR-T/B-cell exclusion both display under "Immunocompromising
-// conditions" (owner decision, 2026-09-13) but keep their own `class` values
-// so recommend.js's hasHSCT()/hasExclusion() checks are unaffected.
+//
+// The transplant tick and the CAR-T/B-cell tick used to be two checkboxes,
+// both displaying under "Immunocompromising conditions" (owner decision,
+// 2026-09-13). They are ONE row since 2026-10-16: `hct_cart_bcell_exclude`,
+// carrying `exclude: true`. `exclude` is the ONE flag — it drives `hasExclusion()`, the
+// engine's hard stop and the red checkbox styling alike. Until 2026-10-16 the
+// engine tested `class === 'exclude'` while the styling tested `exclude: true`:
+// two flags for one idea, and a row could have carried one without the other.
+// See docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md.
 //
 // ── What the class decides about the adult interval, and what AGE decides ──
 //
@@ -57,8 +63,8 @@
 //                  three adult questions above (CDC adult notes), but listed
 //                  under non-IC in p2016 Table 3, so modelled as nonIC for the
 //                  peds catch-up ROW.
-//   class: 'hsct' — hematopoietic stem cell transplant: advisory pathway,
-//                  relative-to-transplant, no calendar due dates.
+//   (A row with `exclude: true` has NO class — it stops the engine before any
+//    of the questions above is asked. See the transplant / CAR-T row.)
 //
 // Sources (CLINICAL_SPEC §C, §J, §K): p2016 Table 3, mm7401a1 + the CDC adult
 // Timing Job Aid for every adult interval, CDC adult notes for the rest.
@@ -112,22 +118,26 @@ export const RISK_FACTORS = [
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
 
-  // ── HSCT (advisory pathway) — displays under Immunocompromising conditions ──
+  // ── The hard stop. ONE row (owner decision 2026-10-16, decision 1): these
+  //    were two checkboxes until today, and from the moment the transplant
+  //    tick stopped printing its own advisory the two said the same thing and
+  //    did the same thing. Transplant is named FIRST because it is the common
+  //    tick.
+  //
+  //    `exclude: true` is the single flag driving the engine's stop
+  //    (`hasExclusion()`), the red checkbox styling, and App.jsx skipping the
+  //    History step. Displays under Immunocompromising conditions.
+  //
+  //    MIRRORED: this row's id, label, sublabel and flag are byte-identical to
+  //    MeningoVax's, frozen by
+  //    regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js. The
+  //    id is MeningoVax's existing one; PneumoVax renamed onto it rather than
+  //    the reverse, so MeningoVax's stored risk ids did not have to move. ──
   {
-    id: 'hsct',
-    label: 'Hematopoietic stem cell transplant (HSCT)',
-    sublabel: 'full re-vaccination; advisory, coordinate with the transplant/ID team',
-    class: 'hsct', group: 'IC',
-    refs: ['p3086Table5', 'fredHutchLTFU'],
-  },
-
-  // ── Hard stop: too heterogeneous for one safe recipe — displays under
-  //    Immunocompromising conditions, styled distinctly via `exclude: true` ──
-  {
-    id: 'bcell_car_t_therapy',
-    label: 'CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy',
+    id: 'hct_cart_bcell_exclude',
+    label: 'Hematopoietic cell transplant (HCT/HSCT), CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy',
     sublabel: 'this tool does not apply — needs an individualized, specialist-guided schedule',
-    class: 'exclude', group: 'IC', exclude: true,
+    group: 'IC', exclude: true,
     refs: ['cdcAlteredImmunocompetence'],
   },
 
@@ -199,15 +209,16 @@ export const RISK_FACTORS = [
 
 export const RISK_BY_ID = Object.fromEntries(RISK_FACTORS.map((r) => [r.id, r]));
 
-// Any HSCT selected?
-export function hasHSCT(riskIds = []) {
-  return riskIds.includes('hsct');
-}
-
-// CAR-T therapy / B-cell malignancy / B-cell-depleting therapy selected?
-// This hard-stops the whole engine — too heterogeneous for one safe recipe.
+// Transplant / CAR-T therapy / B-cell malignancy / B-cell-depleting therapy
+// selected? This hard-stops the whole engine — too heterogeneous for one safe
+// recipe.
+//
+// It reads `r.exclude`, the same flag StepRisks.jsx styles the checkbox red
+// from and the same test MeningoVax's copy uses. It tested `class ===
+// 'exclude'` until 2026-10-16, which meant a row could carry the red styling
+// without stopping the engine, or the reverse.
 export function hasExclusion(riskIds = []) {
-  return riskIds.some((id) => RISK_BY_ID[id]?.class === 'exclude');
+  return riskIds.some((id) => RISK_BY_ID[id]?.exclude === true);
 }
 
 // Any immunocompromising condition selected (true IC, NOT cochlear/CSF)?
@@ -225,8 +236,9 @@ export function hasNonIC(riskIds = []) {
   return riskIds.some((id) => RISK_BY_ID[id]?.class === 'nonIC');
 }
 
-// Any risk condition at all that indicates pneumococcal vaccine (excludes HSCT,
-// which is handled by its own advisory pathway)?
+// Any risk condition at all that indicates pneumococcal vaccine? The
+// hard-stop rows carry no class, so they cannot answer yes here — and the
+// engine never gets this far for them anyway.
 export function hasAnyRisk(riskIds = []) {
   return riskIds.some((id) => {
     const c = RISK_BY_ID[id]?.class;

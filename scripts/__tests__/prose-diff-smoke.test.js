@@ -7,8 +7,8 @@
 // would be slow and would duplicate what `sweep-verdict-corpus.test.js`
 // already proves about the grid itself. This only checks the RENDERER: given
 // a result from each of the engine's distinct shapes (ordinary peds/adult,
-// the hard-stop exclusion, the HSCT advisory pathway, the PCV21 geographic
-// advisory), it returns a non-empty string and never lets an unset optional
+// the hard-stop exclusion, the PCV21 geographic advisory), it returns a
+// non-empty string and never lets an unset optional
 // field leak through as the literal text "undefined" — the usual symptom of
 // a renderer field added to the engine but not to this tool, or vice versa.
 import { describe, it, expect } from 'vitest';
@@ -30,23 +30,24 @@ describe('proseDiff.mjs stays runnable across every answer shape', () => {
     expect(text).toMatch(/^R=/);
   });
 
-  it('the hard-stop exclusion (CAR-T / B-cell)', () => {
-    const text = proseOf({
-      ageMonths: 360, today: TODAY, riskIds: ['bcell_car_t_therapy'], pcvDoses: [], ppsv23Doses: [],
-    });
-    expect(text.length).toBeGreaterThan(0);
-    expect(text).not.toMatch(/undefined/);
-    expect(text).toMatch(/^EXCLUDED/);
-  });
+  // Three ticks, one shape since 2026-10-16: the CAR-T/B-cell box and the
+  // transplant box both hard-stop, at every age. The transplant rows used to
+  // render an advisory block of their own — a peds title and an adult title,
+  // two more answer shapes this test covered — and both now collapse to this
+  // one. Each is checked at a child's age and an adult's precisely because
+  // that distinction USED to matter here, and the test should fail if an age
+  // branch ever creeps back in.
+  const STOP_TICKS = ['hct_cart_bcell_exclude', 'hct_cart_bcell_exclude'];
 
-  it('the HSCT advisory pathway, peds and adult', () => {
-    const peds = proseOf({ ageMonths: 120, today: TODAY, riskIds: ['hsct'], pcvDoses: [], ppsv23Doses: [] });
-    const adult = proseOf({ ageMonths: 400, today: TODAY, riskIds: ['hsct'], pcvDoses: [], ppsv23Doses: [] });
+  it.each(STOP_TICKS)('the hard-stop exclusion via %s, peds and adult', (riskId) => {
+    const peds = proseOf({ ageMonths: 120, today: TODAY, riskIds: [riskId], pcvDoses: [], ppsv23Doses: [] });
+    const adult = proseOf({ ageMonths: 400, today: TODAY, riskIds: [riskId], pcvDoses: [], ppsv23Doses: [] });
     for (const text of [peds, adult]) {
       expect(text.length).toBeGreaterThan(0);
       expect(text).not.toMatch(/undefined/);
-      expect(text).toMatch(/HSCT=\[/);
+      expect(text).toMatch(/^EXCLUDED/);
     }
+    expect(peds).toBe(adult);
   });
 
   it('a before-birth recorded dose (the impossible-entry shape)', () => {

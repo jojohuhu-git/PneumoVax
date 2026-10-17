@@ -21,13 +21,12 @@
 | Healthy 24mo–18y (Table 2) | immunize.org p2016 Table 2 + CDC catch-up job aid |
 | At-risk 24mo–18y (Table 4 rows 1–9) | immunize.org p2016 Table 4 + CDC child notes |
 | IC vs non-IC condition lists | immunize.org p2016 Table 3 |
-| **Peds HSCT (<19y)** | **immunize.org p2016 Table 5 — SOLE source** (NOT CDC child notes) |
 | PCV7-not-counted | immunize.org Ask the Experts |
 | Adult routine ≥50 + 19–49 risk matrix | CDC adult schedule notes + mm7401a1 |
 | Adult PCV15→PPSV23 interval | **mm7401a1 + CDC Adult Timing Job Aid (Mar 2025)** — **≥8 weeks at 19–49** for IC/cochlear/CSF, **≥1 year** otherwise; at 50+ the 8 weeks is *named as an option* (S15; see below) |
 | PCV21 eligibility + serotype-4 geo note | CDC MMWR mm7336a3 |
 | ≥50 expansion | CDC MMWR mm7401a1 |
-| **Adult HSCT (≥19y)** | **Fred Hutch LTFU §IX Tables IX.A1/A2 — SOLE source** |
+| **Transplant / CAR-T / B-cell** | **No source — the app STOPS.** See "Transplant Is A Hard Stop" below |
 
 ## Pediatric Schedule
 
@@ -45,11 +44,6 @@ See `CLINICAL_SPEC.md` §III for the full 9-row grid. Key invariants:
 - 24–71m catch-up counts only `band.ge24` doses toward progress (not infant doses)
 - A completed 4-dose infant series → fall through to Option A (PCV20) / Option B (PPSV23), not a 5th plain PCV
 
-### Peds HSCT (<19y) — Advisory Only
-- 4 doses PCV20 at: 3 months / 4 months / 6 months / 12 months after HSCT
-- Fallback: PCV15 ×4 + PPSV23, or PCV15 ×4 with GVHD modification
-- Source: immunize.org p2016 Table 5 ONLY — do not use CDC child notes for this path
-- No dates in the UI; shown as advisory with coordinate-with-team note
 
 ## Adult Schedule (≥19y = `ADULT_SCHED_MIN_M`)
 
@@ -65,11 +59,24 @@ Per CDC adult notes: prior PCV type and PPSV23 history determine which doses rem
 - PCV20 or PCV21 → complete
 - PCV15 without PCV20/21 → PPSV23 follow-up required
 
-### Adult HSCT (≥19y) — Advisory Only
-- Source: Fred Hutch LTFU §IX Tables IX.A1/A2 ONLY (institutional, NOT ACIP)
-- PCV20 ×3 at ≥6/≥8/≥10 months after HSCT; no PPSV23
-- Titer-guided: baseline + after each dose; ≥15/20 serotypes = stop
-- Label prominently as institution-specific in all UI copy
+## Transplant Is A Hard Stop (OWNER DECISION 2026-10-16)
+
+There is no post-transplant pneumococcal schedule in this app. Ticking
+`hct_cart_bcell_exclude` — hematopoietic cell transplant, CAR-T therapy, B-cell malignancy
+or B-cell-depleting therapy, **one row** — returns `excluded: true` with `recs: []`, skips
+the History step, and shows one message naming ASCO, NCCN, IDSA and CDC **in words, linked
+to nothing**. It hides everything, including the ordinary age-based schedule and including
+a card a *different* ticked risk factor would produce on its own.
+
+There used to be two advisory pathways here (peds: immunize.org p2016/p3086 Table 5; adult:
+Fred Hutch LTFU §IX, later ASCO 2024). They were deleted because the rule could not be kept
+true — wrong or half-applied five times in five weeks across the two apps. The schedules
+themselves, verbatim with their citations:
+`docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md`.
+
+Byte-identical to MeningoVax and frozen by
+`regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js`. Change the wording in
+both repos or neither.
 
 ## Product Rules
 

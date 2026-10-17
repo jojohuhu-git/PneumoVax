@@ -102,8 +102,7 @@ export const GRID_RISK_PROFILES = [
   ['diabetes'],                     // non-IC chronic
   ['smoking'],                      // adult-only (P3-9b's trap)
   ['alcoholism'],                   // adult-only
-  ['hsct'],                         // the transplant pathway
-  ['bcell_car_t_therapy'],          // the hard stop, which wins over HSCT
+  ['hct_cart_bcell_exclude'],       // the hard stop (two rows until 2026-10-16)
   ['asplenia', 'cochlear_implant'], // IC + special
   ['chronic_heart', 'diabetes'],    // two non-IC
 ];
@@ -301,7 +300,10 @@ function verdictFromResult(r) {
     `R=${(r.recs ?? []).map(recVerdict).join(';')}`,
     `PCV=${(r.perDose?.pcv ?? []).map(doseVerdict).join(',')}`,
     `S23=${(r.perDose?.ppsv23 ?? []).map(doseVerdict).join(',')}`,
-    `HSCT=${r.hsct ? `${nn(r.hsct.pathway ?? r.hsct.status ?? 'y')}/${(r.hsct.recs ?? []).length}` : '-'}`,
+    // An `HSCT=` column stood here until 2026-10-16, carrying the
+    // post-transplant advisory's pathway and rec count. The transplant tick
+    // became a hard stop, the field it read is gone from the engine, and the
+    // column had been printing a literal `HSCT=-` on every remaining row.
     `GEO=${bool(r.pcv21Geo)}`,
   ].join(' ');
 }

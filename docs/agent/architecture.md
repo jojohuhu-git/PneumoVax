@@ -36,7 +36,7 @@ src/
     Stepper.jsx          Top progress indicator (4 steps).
     StepAge.jsx          Age entry: group chips + precise (years/months) + DOB.
                          Chips PREFILL the editable years/months fields.
-    StepRisks.jsx        Risk-factor checklist, grouped IC / cochlear-CSF / non-IC / HSCT.
+    StepRisks.jsx        Risk-factor checklist, grouped IC / cochlear-CSF / non-IC.
     StepHistory.jsx      TWO product streams: PCV doses (product dropdown) + PPSV23 doses.
                          Each dose {date?, product?}. No auto-add — always needs explicit
                          "+ Add dose" click. Since S9 it owns only the headings, the
@@ -60,7 +60,7 @@ src/
                          (2026-10-15) because it dropped a real dose silently. The licence
                          age does its work in validate.js, which grades such a dose
                          "does not count".
-    Results.jsx          Output. Calls recommend(); renders HSCT advisory card, PCV21 geo
+    Results.jsx          Output. Calls recommend(); renders the hard stop, PCV21 geo
                          note, standard rec cards. Inline "Adjust age" + "Recorded doses ▾"
                          editors. "← Edit history" back button at bottom.
     DoseDateProblem.jsx  The one-line "this date is impossible" warning shown under a dose
@@ -81,7 +81,7 @@ src/
                          BOTH StepRisks and the Results header.
     Disclaimer.jsx       Clinical disclaimer footer.
   logic/
-    recommend.js         THE engine. recommend(input) → { recs[], hsct, pcv21Geo, perDose,
+    recommend.js         THE engine. recommend(input) → { recs[], pcv21Geo, perDose,
                          orderedDoses, meta }.
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
                          and the cited sentence that does it. Keyed to
@@ -146,8 +146,9 @@ src/
   data/
     brands.js            PCV_PRODUCTS, PPSV23_PRODUCT, ALL_PRODUCTS, productByKey,
                          pcvRecBrands. Counting flags per product. PCV_MIN_AGE_M = 42/30.4375 (6 wks).
-    riskFactors.js       RISK_FACTORS catalog + IC/nonIC/special/hsct class helpers.
-    refs.js              REFS citation map + resolveRefs(). HSCT sources segregated.
+    riskFactors.js       RISK_FACTORS catalog + IC/nonIC/special class helpers and
+                         hasExclusion() (the hard stop, read off `exclude: true`).
+    refs.js              REFS citation map + resolveRefs().
                          Every entry declares `rulebook`: 'child' | 'adult' | 'any' —
                          which schedule the source speaks for. collectRefs() in
                          recommend.js keeps only the sources written for the card being
@@ -163,7 +164,6 @@ HANDOFF.md               Author-review checklist, source-vs-p2016 reconciliation
 
 `recommend({ ageMonths, riskIds, pcvDoses, ppsv23Doses, today })` is a **pure function**. Returns:
 - `recs` — array of rec objects (PCV and/or PPSV23 streams; Option A/B pairs for peds at-risk rows)
-- `hsct` — `{ title, coordinateFlag, recs[] }` advisory block, or `null`
 - `pcv21Geo` — `{ note, citations }` serotype-4 advisory, or `null`
 - `perDose` — `{ pcv:[...], ppsv23:[...] }` per-dose validation results. **Always arrays, on every path including the hard stop** (P6-5) — `Results.jsx` renders its dose chips from these rather than walking the history a second time.
 - `orderedDoses` — `{ pcv:[...], ppsv23:[...] }` the doses themselves, **index-for-index with `perDose`** (P0, 2026-10-12). The walk sorts into date order before grading, so `perDose` is NOT in input order; anything rendering a verdict beside its dose must take the dose from here, never from its own input array. Both are built in the same `stepStream` call, so they cannot disagree. Also always arrays, including on the hard stop. Guarded over all 16,250 grid patients by `regression-p0-ordered-doses-pair-with-verdicts.test.js`.
@@ -283,17 +283,28 @@ Encoded as `completesSeries` / `requiresPPSV23` flags in `brands.js`. Never cont
 - **IC** — immunocompromising: asplenia/SCD, immunodeficiency, immunosuppression, HIV, solid-organ transplant, advanced CKD/dialysis/nephrotic.
 - **special** — cochlear implant, CSF leak. Non-IC row in the peds grid; for adults they are among the conditions for which the 8-week PCV15→PPSV23 minimum may be *considered*. `pedsRiskRowClass()` maps them to nonIC; `adultPpsvShorterMinimumApplies()` returns true for them. **These are two separate questions** — the predicate answers the interval one only, never which CDC row a patient is on (A-P1-1).
 - **nonIC** — chronic heart/lung/liver, diabetes, chronic CKD, alcohol, smoking (last two adultOnly).
-- **hsct** — advisory pathway only (no calendar dates).
+- **(no class)** — `exclude: true` rows stop the engine before any of the above is asked.
 - **IC precedence over non-IC** when both present.
 
-## HSCT — Design Rule (Advisory, No Dates)
+## Transplant / CAR-T / B-cell — Design Rule (Hard Stop, 2026-10-16)
 
-The app does NOT capture an HSCT date. HSCT pathway is informational:
-- `dueToday: false`, no `earliestNextDate`; timing lives in `note`.
-- Shown prominently at TOP of Results; standard recs shown below in a collapsed `<details>`.
-- "Coordinate with transplant/ID team — your center may use its own protocol."
-- **Peds <19y HSCT = immunize.org p2016 Table 5 SOLE source** (4 doses PCV20; NOT CDC child notes).
-- **Adult ≥19y HSCT = Fred Hutch LTFU SOLE source** (PCV20 ×3 at ≥6/≥8/≥10mo, no PPSV23, titer-guided). Institution-specific, NOT ACIP — say so.
+One risk row, `hct_cart_bcell_exclude`, carrying `exclude: true`. That single flag drives
+three things, with no second test anywhere: `hasExclusion()` → `recommend()`'s early return,
+the red checkbox styling in `StepRisks.jsx`, and `App.jsx` skipping the History step.
+
+- Returns `excluded: true`, `exclusionMessage`, `exclusionCitations`, **`recs: []`**, and
+  empty-but-iterable `perDose` / `orderedDoses` (P6-5, P0 — arrays on every path).
+- `Results.jsx` returns early: the title, the message, one CDC chip, the disclaimer, and
+  the two buttons. **No cards, no banner, no collapsed `<details>` schedule** — the stop
+  hides everything, including what a *different* ticked risk factor would have produced.
+- One extra line, only when doses were typed: *"Recorded doses are kept but not evaluated
+  here."* Typed doses stay in state; going back a step still shows them.
+- This pathway used to print a four-dose post-transplant PCV20 recipe at the top of Results
+  with the standard schedule collapsed below it. Deleted 2026-10-16 — the rule could not be
+  kept true (five wrong or half-applied statements in five weeks across the two apps). See
+  `docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md`.
+- **Byte-identical to MeningoVax**, frozen by
+  `regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js`.
 
 ## PCV21 (Capvaxive)
 

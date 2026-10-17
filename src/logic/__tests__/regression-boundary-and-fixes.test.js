@@ -38,14 +38,12 @@ describe('H1/H2 – ADULT_SCHED_MIN_M and PCV21_MIN_AGE_M constants', () => {
     expect(labels.some((l) => /not indicated.*50y/i.test(l))).toBe(false);
   });
 
-  it('Required scenario 2: 18y6m + HSCT → peds Table 5 (4× PCV20), NOT adult 3-dose', () => {
-    const r = run({ ageMonths: 222, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.hsct).not.toBeNull();
-    expect(r.hsct.title).toMatch(/child/i);
-    expect(r.hsct.recs[0].doseLabel).toMatch(/4 doses/i);
-    // Adult HSCT says "×3" — must not appear
-    expect(r.hsct.recs[0].doseLabel).not.toMatch(/×3/);
-  });
+  // Required scenario 2 USED to check that an 18y6m transplant patient got the
+  // paediatric post-transplant row (4 doses of PCV20, immunize.org Table 5)
+  // rather than the adult one. Since 2026-10-16 the transplant tick is a hard
+  // stop with no age branch at all, which is what the 2a/2b pair below now
+  // asserts — so this scenario's whole question, "which side of 19 is this
+  // patient on", no longer has an answer to get wrong.
 
   it('Required scenario 3: 19y0m + asplenia → adult path', () => {
     const r = run({ ageMonths: 228, riskIds: ['asplenia'], pcvDoses: [] });
@@ -57,17 +55,25 @@ describe('H1/H2 – ADULT_SCHED_MIN_M and PCV21_MIN_AGE_M constants', () => {
     expect(pcv(r).brands.some((b) => /PCV21/.test(b))).toBe(true);
   });
 
-  it('Required scenario 2a: 18y6m HSCT → peds advisory title says "child <19y"', () => {
-    const r = run({ ageMonths: 222, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.hsct.title).toMatch(/<19y/i);
+  // 2a/2b were the two halves of an age branch inside the post-transplant
+  // advisory: at 18y6m its title had to read "child <19y" and at 19y0m
+  // "adult". The branch is gone, and these now guard the opposite property —
+  // that the stop is identical on both sides of ADULT_SCHED_MIN_M. Kept as a
+  // pair rather than merged into one test because the 228-month boundary is
+  // where this app has historically gone wrong, and a future age branch would
+  // most likely reappear exactly here.
+  it('Required scenario 2a: 18y6m transplant → the hard stop, no peds branch', () => {
+    const r = run({ ageMonths: 222, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [] });
+    expect(r.excluded).toBe(true);
+    expect(r.recs).toEqual([]);
   });
 
-  it('Required scenario 2b: 19y0m HSCT → adult advisory title says "adult"', () => {
-    const r = run({ ageMonths: 228, riskIds: ['hsct'], pcvDoses: [] });
-    expect(r.hsct.title).toMatch(/adult/i);
-    // P0-A (2026-09-14): adult HSCT plan now matches the pediatric plan
-    // (4 doses of PCV20, ASCO 2024) — the old "×3" Fred Hutch plan is gone.
-    expect(r.hsct.recs[0].doseLabel).toMatch(/4 doses of PCV20/);
+  it('Required scenario 2b: 19y0m transplant → the same stop, word for word', () => {
+    const younger = run({ ageMonths: 222, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [] });
+    const older = run({ ageMonths: 228, riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [] });
+    expect(older.excluded).toBe(true);
+    expect(older.recs).toEqual([]);
+    expect(older.exclusionMessage).toBe(younger.exclusionMessage);
   });
 });
 

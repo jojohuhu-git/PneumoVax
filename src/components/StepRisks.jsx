@@ -33,8 +33,7 @@ export default function StepRisks({ ageMonths, riskIds, onChange }) {
     <div className="step-card">
       <div className="step-title">Risk Factors</div>
       <div className="step-sub">
-        Select all that apply. These drive the pneumococcal pathway, the PCV15→PPSV23 interval,
-        and (for HSCT) the advisory series.
+        Select all that apply. These drive the pneumococcal pathway and the PCV15→PPSV23 interval.
       </div>
 
       <div className="risk-list" role="group" aria-label="Risk factors">

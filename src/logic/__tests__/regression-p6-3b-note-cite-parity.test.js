@@ -61,7 +61,7 @@ const RISK_SETS = [
   ['cochlear_implant', 'csf_leak'],
   ['smoking', 'alcoholism'],
   ['smoking', 'diabetes'],
-  ['hsct', 'diabetes'],
+  ['hct_cart_bcell_exclude', 'diabetes'],
   ['chronic_heart', 'chronic_lung', 'chronic_liver'],
 ];
 

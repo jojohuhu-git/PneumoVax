@@ -134,8 +134,16 @@ describe('P2-8: every citation has been verified recently', () => {
   it('the tripwire is actually watching every reference, not a subset', () => {
     // Anti-vacuity. If REFS is ever restructured and this test starts reading
     // an empty or tiny object, every check above passes for free.
+    //
+    // The floor was 40 until 2026-10-16, when three post-transplant sources
+    // (immunize.org p3086 Table 5, Fred Hutch LTFU §IX and the 2024 ASCO adult
+    // cancer guideline) were deleted along with the schedule they supported.
+    // That is the only reason this number has ever gone DOWN, and lowering it
+    // is not a routine edit: it is the floor that stops a gutted REFS passing
+    // every freshness check for free. Lower it only alongside deliberately
+    // deleted entries, and say which in the commit message.
     const n = Object.keys(REFS).length;
-    expect(n).toBeGreaterThanOrEqual(40);
+    expect(n).toBeGreaterThanOrEqual(37);
     expect(Object.values(REFS).every((r) => typeof r.url === 'string' && r.url)).toBe(true);
   });
 });

@@ -110,7 +110,11 @@ describe('P3-9b — an adult-only risk does not create a paediatric at-risk row'
     expect(pedsRiskIds(['smoking', 'diabetes'])).toEqual(['diabetes']);
     expect(pedsRiskIds(['diabetes'])).toEqual(['diabetes']);
     expect(pedsRiskIds([])).toEqual([]);
-    expect(pedsRiskIds(['hsct', 'smoking'])).toEqual(['hsct']);
+    // A non-adult-only id survives the filter: `asplenia` here, because the
+    // id that used to make this point (`hsct`) was merged into
+    // `hct_cart_bcell_exclude` on 2026-10-16, and that row never reaches this
+    // filter at all — it hard-stops the engine first.
+    expect(pedsRiskIds(['asplenia', 'smoking'])).toEqual(['asplenia']);
   });
 
   it('does NOT narrow the shared helpers, which the adult pathway depends on', () => {

@@ -60,9 +60,31 @@ Product validity, the PCV15→PPSV23 requirement, the prior-vaccine matrix, and 
 ### PCV7 Never Counts
 Recorded as `noncounting`, dropped from effective series. High-risk patients treated as PCV-naïve. Source: immunize.org Ask the Experts.
 
-### HSCT Sources Are Fixed
-- Peds HSCT (<19y): **immunize.org p2016 Table 5 ONLY** — not CDC child notes.
-- Adult HSCT (≥19y): **Fred Hutch LTFU §IX ONLY** — label as institution-specific in UI copy.
+### Transplant Is A Hard Stop — Never Re-Add A Post-Transplant Schedule
+Ticking `hct_cart_bcell_exclude` (hematopoietic cell transplant, CAR-T, B-cell malignancy or
+B-cell-depleting therapy) **stops the engine**: `excluded: true`, `recs: []`, History step
+skipped, and **not even the ordinary age-based schedule** the patient would get otherwise —
+including one a *different* ticked risk factor would produce on its own. One row, one
+`exclude: true` flag, one message naming ASCO/NCCN/IDSA/CDC **in words, linked to nothing**.
+OWNER DECISION 2026-10-16; it retires the 2026-09-19 C2-6 fix and reverses the 2026-07
+"standalone apps are advisory for HSCT pathways" decision.
+
+**The reason is not that the advice was low value — it is that it could not be kept true.**
+Across the two apps the post-transplant rule was wrong or half-applied **five times in five
+weeks**. PneumoVax's own worst case: the adult row was ASCO 2024 in the code from 2026-09-14
+while `CLINICAL_SPEC.md` §F, this file and the checkbox's citation chip all still said Fred
+Hutch **32 days later** — and those are different schedules (4 doses from 3 months vs. 3
+titer-gated doses from 6). Nothing in the suite could see it, because no test compares a
+document's prose to a card's prose.
+
+The retired schedules, verbatim with their citations:
+`docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md`. The decision and
+its evidence: `docs/archive/plan-2026-10-16-transplant-hard-stop-both-apps.md`.
+
+**Byte-identical to MeningoVax**, frozen by
+`regression-2026-10-16-transplant-stop-mirrors-meningovax.test.js` — the row's id, label,
+sublabel and flag, the whole message, the banner title, the recorded-doses line. Change the
+wording in **both repos or neither**; never loosen that test to let one side move.
 
 ### PCV15 Always Requires PPSV23
 `requiresPPSV23: true` in `brands.js`. Never emit a PCV15 rec without the PPSV23 follow-up path.

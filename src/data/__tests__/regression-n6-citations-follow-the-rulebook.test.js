@@ -66,7 +66,6 @@ function citedKeys(ageMonths, riskIds) {
   const out = recommend({ ageMonths, today: TODAY, dob: null, riskIds, pcvDoses: [], ppsv23Doses: [] });
   const keys = new Set();
   for (const r of out.recs ?? []) for (const c of r.citations ?? []) keys.add(keyOf(c));
-  for (const r of out.hsct?.recs ?? []) for (const c of r.citations ?? []) keys.add(keyOf(c));
   return [...keys];
 }
 
@@ -124,17 +123,28 @@ describe('N6 — a card never cites the other schedule', () => {
     expect(citedKeys(60, many).filter((k) => rulebookOf(k) === 'adult')).toEqual([]);
   });
 
-  it('HSCT: an adult\'s cards never cite the paediatric HSCT table', () => {
-    // CLAUDE.md, non-negotiable: peds HSCT is immunize.org p2016 Table 5 ONLY,
-    // adult HSCT is its own source. The HSCT ADVISORY block already got this
-    // right per age; the leak was into the ordinary PCV card beside it.
-    for (const age of ADULT_AGES) {
-      expect(citedKeys(age, ['hsct'])).not.toContain('p3086Table5');
-    }
-    // And the mirror: a child's cards never cite the adult HSCT source.
-    for (const age of CHILD_AGES) {
-      expect(citedKeys(age, ['hsct'])).not.toContain('fredHutchLTFU');
-      expect(citedKeys(age, ['hsct'])).not.toContain('ascoAdultCancer2024');
+  // This test used to assert that an adult's cards never cited the PAEDIATRIC
+  // post-transplant table and vice versa -- a real leak when the transplant
+  // tick built cards of its own, with a different source per age band. On
+  // 2026-10-16 the tick became a hard stop: it builds no cards at all, and all
+  // three of those sources were deleted from refs.js. Asserting that three
+  // non-existent keys do not appear is not a test, and worse, naming them in
+  // live code kept `rule-docs-match-code.test.js` from noticing when the same
+  // names went stale in CLINICAL_SPEC.md -- a test that a name is ABSENT is
+  // enough to make that guard read the name as still present.
+  //
+  // What replaces it is the property that is actually true now and would
+  // actually break: the stop screen cites ONE source, the same one at every
+  // age, and builds no card to carry a second.
+  it('the hard stop cites one source, the same at every age', () => {
+    for (const age of [...CHILD_AGES, ...ADULT_AGES]) {
+      const out = recommend({
+        ageMonths: age, today: TODAY, dob: null,
+        riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [], ppsv23Doses: [],
+      });
+      expect(out.excluded).toBe(true);
+      expect(citedKeys(age, ['hct_cart_bcell_exclude'])).toEqual([]);
+      expect((out.exclusionCitations ?? []).map(keyOf)).toEqual(['cdcAlteredImmunocompetence']);
     }
   });
 });
@@ -190,9 +200,9 @@ describe('N5/N6 — the controls: what every card must STILL cite', () => {
     // untested branch that becomes a silent bug the day it matters.
     expect(REFS.cdcAlteredImmunocompetence.rulebook).toBe('any');
 
-    const anySource = collectRefs(['bcell_car_t_therapy'], [], 'adult');
+    const anySource = collectRefs(['hct_cart_bcell_exclude'], [], 'adult');
     expect(anySource).toContain('cdcAlteredImmunocompetence');
-    expect(collectRefs(['bcell_car_t_therapy'], [], 'child')).toContain('cdcAlteredImmunocompetence');
+    expect(collectRefs(['hct_cart_bcell_exclude'], [], 'child')).toContain('cdcAlteredImmunocompetence');
 
     // And the filter still bites on a schedule-bound source either way round.
     expect(collectRefs(['asplenia'], [], 'adult')).not.toContain('cdcChildPneumo');
