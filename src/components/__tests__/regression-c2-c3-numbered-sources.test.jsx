@@ -121,14 +121,32 @@ const markerNumbers = () =>
 // Everything here therefore scopes to `.rec-card`, which is the only surface
 // with both systems on it.
 
-/** The button row of the recommendation cards: [{ n, name }], in order. */
+/** One button as [{ n, name }]. */
+const chipOf = (a) => ({
+  n: a.querySelector('.citation-chip-num')?.textContent.trim(),
+  name: a.textContent.replace(/^\[\d+\]/, '').trim(),
+  title: a.getAttribute('title'),
+  href: a.getAttribute('href'),
+});
+
+/** Every button on screen, flattened across cards: [{ n, name }], in order. */
 const buttonRow = () =>
-  [...document.querySelectorAll('.rec-card a.citation-chip')].map((a) => ({
-    n: a.querySelector('.citation-chip-num')?.textContent.trim(),
-    name: a.textContent.replace(/^\[\d+\]/, '').trim(),
-    title: a.getAttribute('title'),
-    href: a.getAttribute('href'),
-  }));
+  [...document.querySelectorAll('.rec-card a.citation-chip')].map(chipOf);
+
+/**
+ * The Sources row of EACH card separately, cards with no row dropped.
+ *
+ * The numbering restarts at [1] on every card, so an assertion about "the row
+ * runs 1..n with no gaps" has to be made per card. `buttonRow()` flattens the
+ * page, which silently turned into the wrong question on 2026-10-17: the IC
+ * children's fix made ASPLENIA_SIX emit TWO recs (the PCV20 option and the
+ * 2nd-PPSV23 alternative), so the flat query asked for [1]..[6] across two
+ * independent rows and failed on a correctly-numbered screen.
+ */
+const buttonRowsByCard = () =>
+  [...document.querySelectorAll('.rec-card')]
+    .map((card) => [...card.querySelectorAll('a.citation-chip')].map(chipOf))
+    .filter((row) => row.length > 0);
 
 describe('C2 — the buttons carry the number the text uses', () => {
   it("the owner's card prints a numbered, headed Sources row", () => {
@@ -166,15 +184,20 @@ describe('C2 — the buttons carry the number the text uses', () => {
     render(<Harness initial={ASPLENIA_SIX} />);
     openEveryCard();
 
-    const row = buttonRow();
-    // The row is printed in numeric order, with no gaps, on every card.
-    expect(row.map((b) => b.n)).toEqual(row.map((_, i) => `[${i + 1}]`));
+    const rows = buttonRowsByCard();
+    // This patient emits more than one card, and each card numbers its own
+    // row from [1] — so assert it of every row, not of the page.
+    expect(rows.length).toBeGreaterThan(1);
+    rows.forEach((row) => {
+      // The row is printed in numeric order, with no gaps, on every card.
+      expect(row.map((b) => b.n)).toEqual(row.map((_, i) => `[${i + 1}]`));
+    });
 
     // And the document the text cites first is the one numbered [1] — it is
     // NOT the button the engine happened to list first.
     const firstMarker = markerNumbers()[0];
     expect(firstMarker).toBe('[1]');
-    expect(row[0].name).toBe('CDC Risk-based Pneumococcal');
+    expect(rows[0][0].name).toBe('CDC Risk-based Pneumococcal');
   });
 
   it('a card with no citations at all prints no Sources row', () => {
