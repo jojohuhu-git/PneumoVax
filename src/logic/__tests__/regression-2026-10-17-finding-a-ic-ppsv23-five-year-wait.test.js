@@ -273,3 +273,47 @@ describe('Finding A — the five-year rule does NOT spread to the never-vaccinat
     expect(due.length).toBeGreaterThan(0);
   });
 });
+
+// ── FINDING B (2026-10-17) ─────────────────────────────────────────────────
+//
+// Finding A shipped branch 4 with a comment calling its five years an
+// INFERENCE, read across from p2016's Option B because "no source states this
+// history with a PPSV23 already given". That was wrong. Re-reading CDC's child
+// notes -- a page the app already cites, and therefore one the citation audit's
+// own tool could never surface, since it lists only sources a card names but
+// never quotes -- found the sentence stated outright in the IMMUNOCOMPROMISING
+// list:
+//
+//   "Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years:
+//    administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most
+//    recent PCV13 dose and at least 5 years after dose 1 PPSV23."
+//
+// It CONJOINS 8 weeks and 5 years, which is what icPostPpsv23DueState() does.
+//
+// Three lines earlier on the same page, the NON-IC list opens with the same
+// nine words and ends the opposite way: "no further doses of any PCV or PPSV23
+// indicated." Those two sentences are one accordion apart and differ only in
+// which list they sit under. This test holds each to its own patient.
+describe('Finding B — branch 4 cites the IC sentence, not its non-IC twin', () => {
+  const history = {
+    dob: '2016-10-17',
+    ageMonths: 120,
+    pcv: [['PCV13', '2023-10-17']],
+    ppsv: ['2024-10-17'],
+  };
+
+  it('the IC child is cited to the IC sentence', () => {
+    const quotes = run({ ...history, riskIds: ['asplenia'] })
+      .recs.flatMap((x) => (x.noteCites ?? []).map((c) => c.quote ?? '')).join(' || ');
+    expect(quotes).toContain('at least 5 years after dose 1 PPSV23');
+    expect(quotes).not.toContain('no further doses of any PCV or PPSV23 indicated');
+  });
+
+  it('the non-IC twin of the same patient is cited to the non-IC sentence', () => {
+    const r = run({ ...history, riskIds: ['cochlear_implant'] });
+    const quotes = r.recs.flatMap((x) => (x.noteCites ?? []).map((c) => c.quote ?? '')).join(' || ');
+    expect(r.recs.some((x) => x.status === 'complete')).toBe(true);
+    expect(quotes).toContain('no further doses of any PCV or PPSV23 indicated');
+    expect(quotes).not.toContain('at least 5 years after dose 1 PPSV23');
+  });
+});

@@ -288,6 +288,34 @@ export const REFS = {
     quote: 'Received PCV13 only at or after age 6 years: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose.',
     lastVerified: '2026-10-10',
   },
+  // FINDING B (2026-10-17). Found by RE-READING a source the app already cites
+  // -- which is the whole point of Finding B: the tool that picked C7's six
+  // documents lists only sources a card names but never quotes, so a document
+  // that IS cited could never appear in its scope.
+  //
+  // `recommend.js`'s branch for "PCV13 at/after age 6, PPSV23 already given"
+  // carried a comment saying no source states that history and that its five
+  // years was read across from p2016's Option B. CDC states it outright, in
+  // the IC list, and had done all along. Read live 2026-10-17 with the
+  // accordions expanded (they are shut by default, which is how the whole
+  // paediatric risk rulebook stays invisible to a plain page fetch).
+  //
+  // Note what it CONJOINS: 8 weeks from the last PCV13 *and* 5 years from dose
+  // 1 PPSV23. That is the "later of the two" gate `icPostPpsv23DueState()`
+  // implements, which Finding A had reasoned its way to rather than quoted.
+  //
+  // Its non-IC twin, three lines earlier on the same page, is `pedsRiskDone`
+  // below -- same opening words, opposite instruction ("no further doses of
+  // any PCV or PPSV23 indicated"). Do not let the two swap places.
+  pedsIcPcv13AndPpsvAt6: {
+    rulebook: 'child',
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", IMMUNOCOMPROMISING list: PCV13 + PPSV23 at or after age 6 still owes a dose, at 8 weeks AND 5 years',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose and at least 5 years after dose 1 PPSV23.',
+    lastVerified: '2026-10-17',
+  },
+
   pedsRiskDone: {
     rulebook: 'child',
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',

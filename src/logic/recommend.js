@@ -985,16 +985,28 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     }
     // Finding A (2026-10-17): the five-year date, not 8 weeks.
     //
-    // Note what this branch is: PCV13 given at or AFTER age 6, plus a PPSV23.
-    // Neither source states that combination outright. CDC's 6-18 section has
-    // only two history rows ("never received PCV13, PCV15 or PCV20" and
-    // "received PCV13 or PCV15 before age 6 years"), and P2016's matching row
-    // carries no footnote for a PPSV23 already given. The five years is read
-    // across from the Option B of P2016's own row for this history -- "at
-    // least 5 years after the first PPSV23 dose, give 1 dose of PCV20 or a
-    // second dose of PPSV23" -- which agrees with every CDC row that does
-    // speak to a prior PPSV23. Recorded here because it is an inference, not
-    // a quotation, and a future reader should know which it is.
+    // ⚠ CORRECTED SAME DAY by Finding B. This comment first said no source
+    // states this history with a PPSV23 already given, and that the five years
+    // was an INFERENCE read across from p2016's Option B. That was wrong, and
+    // re-reading a source the app already cites is what found it. CDC's child
+    // notes state this row outright, in the IMMUNOCOMPROMISING list:
+    //   "Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years:
+    //    administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the
+    //    most recent PCV13 dose AND at least 5 years after dose 1 PPSV23."
+    // It CONJOINS the two conditions -- which is exactly what
+    // `icPostPpsv23DueState()` computes, so Finding A's "later of the two"
+    // gate turns out to be quoted rather than reasoned.
+    //
+    // The matching NON-IC sentence three lines earlier on the same page says
+    // the opposite ("no further doses of any PCV or PPSV23 indicated") and is
+    // `pedsRiskDone`, used by the non-IC branch above. Same opening words,
+    // opposite instruction.
+    //
+    // One edge this sentence does not settle: a child whose PCV13 was at/after
+    // 6 but whose PPSV23 was BEFORE 6. CDC's "at or after age 6 years" reads
+    // as covering both doses. The answer is the same either way here -- every
+    // CDC row for a prior PPSV23 gives five years -- so the branch is not
+    // split on it.
     const icState = icPostPpsv23DueState(ppsv, anchorPneumo, today);
     out.push(rec({
       vaccine: 'PCV', status: 'risk-based', doseLabel: '1 dose PCV20 (immunocompromising)',
@@ -1004,9 +1016,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       brands: ['PCV20 (Prevnar 20)'],
       note: {
         lead: IC_POST_PPSV23_LEAD,
-        detail: `This applies to an immunocompromising at-risk child whose only conjugate dose was PCV13 given at or after age 6, and who has already received PPSV23. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen.`,
+        detail: `This applies to an immunocompromising at-risk child whose only conjugate dose was PCV13 given at or after age 6, and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen.`,
       },
-      noteCites: [cite('pedsIcPpsvWaitFiveYears')],
+      noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv13AndPpsvAt6')],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }));
     const ppsv2 = dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today);
