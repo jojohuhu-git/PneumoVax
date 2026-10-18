@@ -176,6 +176,39 @@ rr7203a1 was "still reachable" via risk conditions — was stale and is correcte
 The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
 CITE, still unwritten. Do not let one quote cover both halves.
 
+### ✅ OWNER DECISION 2026-10-18 — the last 45, and mm7401a1 reaches zero
+
+The document's final uncredited statement was a **19–49 adult with chronic conditions only,
+PCV13 and two effective PPSV23 doses** (45 cards): "No additional pneumococcal dose now —
+re-evaluate at age 50." mm7401a1's chronic block prints one row for a PCV13 + PPSV23
+history, headed **"PCV13 and 1 dose of PPSV23"**, and no second-dose row, so this file left
+the 45 uncredited and took "remove it, or leave it" to the owner.
+
+She chose a third answer — **cite the one-dose row**:
+
+> *"for chronic condition with PCV13 and 2 doses of PPSV23 I would use the citation covering
+> PCV13 and 1 dose of PPSV23 in patients 19-49 with chronic conditions: The pneumococcal
+> vaccination recommendations should be reviewed again when the person reaches age 50
+> years."*
+
+**Why the count cannot change the row.** In the chronic block a second PPSV23 is never
+*offered*. ACIP offers one only inside the immunocompromising block — mm7336a2 states the
+same row as "When a second PPSV23 dose is used instead of PCV21 or PCV20, it should be
+administered ≥8 weeks after the PCV13 dose and ≥5 years after the first PPSV23 dose" — while
+the chronic 1-dose row offers nothing but the review at 50. So there is no second-dose
+disposition for an extra dose to select; the row is the block's whole answer to "PCV13 and
+PPSV23", and a chronic patient with two doses received one ACIP's chronic pathway never
+recommended. **Checked in both papers:** neither mm7401a1 (Jan 2025) nor mm7336a2 (Sept
+2024) has a chronic two-dose row, so the silence is the schedule's shape, not one document's
+omission.
+
+**Applied 2026-10-18.** `mmwrBothPcv13PpsvKey()`'s chronic branch returns the row
+unconditionally; the IC branch still splits on `ppsv.count` and is now guarded by its own
+test. Measured after: mm7401a1 **2,564 cards list it, 0 uncredited** — the first of the six
+documents to finish. Total (source, statement) pairs over all documents **46 → 45**. Prose
+over both grids: **45 of 35,280 lines differ, and on every one the only change is one added
+`[c]` marker plus the new quote in the source list** — no advice moved.
+
 ---
 
 ---

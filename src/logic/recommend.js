@@ -1278,13 +1278,25 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M predicate — never
   // a second age test here.
   //
-  // Returns null where the document is SILENT: a 19-49 adult with chronic
-  // conditions only and two PPSV23 doses has no row in mm7401a1's chronic
-  // block, which stops at one dose. Those 45 cards keep the grey button and
-  // gain no number, pending the owner's decision on whether to remove it.
+  // The CHRONIC block does not split on the count (OWNER DECISION 2026-10-18).
+  // mm7401a1 prints one row there for a PCV13 + PPSV23 history, headed "PCV13
+  // and 1 dose of PPSV23", and the owner ruled that it speaks for a patient
+  // with two doses as well: *"for chronic condition with PCV13 and 2 doses of
+  // PPSV23 I would use the citation covering PCV13 and 1 dose of PPSV23 …"*.
+  // The clinical reason the count cannot move the row: in the chronic block a
+  // second PPSV23 is never OFFERED. ACIP offers one only inside the
+  // immunocompromising block ("When a second PPSV23 dose is used instead of
+  // PCV21 or PCV20…"), and the chronic 1-dose row offers nothing but the
+  // review at 50 — so there is no second-dose disposition for an extra dose
+  // to land on. This retired the 45 deliberately-uncredited cards.
+  //
+  // ⚠ The IMMUNOCOMPROMISING block below still splits on the count and must
+  // keep splitting: one dose reads "the series is complete", two doses reads
+  // "reviewed again … Alternatively, … >=5 years". Those are different
+  // sentences about different dispositions. Never collapse THAT pair.
   const mmwrBothPcv13PpsvKey = (icRow) => {
     if (isOlderAdult) return 'mmwrBothPcv13Ppsv50plus';
-    if (!icRow) return ppsv.count === 1 ? 'mmwrChronic1949ReviewAt50' : null;
+    if (!icRow) return 'mmwrChronic1949ReviewAt50';
     if (ppsv.count === 1) return 'mmwrIc1949OnePpsv';
     if (ppsv.count === 2) return 'mmwrIc1949TwoPpsv';
     return null;
@@ -1513,11 +1525,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
           // in CDC's own words, and page 4 is the 19-49 chronic page — the
           // only one of the four whose PCV13 + PPSV23 row has no Option A.
           cite('jobAidChronic1949ReviewAt50'),
-          // C8, document 1's CITE — present only where ACIP has a row. Its
-          // chronic block states "reviewed again … at age 50" for a patient
-          // with ONE PPSV23 dose and says nothing about a second, so the
-          // 45 two-dose cards credit nothing here rather than borrow the
-          // immunocompromising block's row, which is a different patient.
+          // C8, document 1's CITE. ACIP's chronic block states "reviewed
+          // again … at age 50" for a patient with PCV13 and PPSV23, and the
+          // owner ruled 2026-10-18 that the row speaks whether one dose or
+          // two are on record — it is the block's only disposition for that
+          // history. It is NOT the immunocompromising block's row, which is a
+          // different patient and still splits on the count.
           ...mmwrBothPcv13PpsvCites(false),
           // A declared cross-reference (2026-10-17): the detail half says what
           // happens AT 50, so it quotes the 50+ row — about a patient this one
