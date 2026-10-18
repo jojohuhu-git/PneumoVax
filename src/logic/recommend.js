@@ -912,10 +912,15 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // a row that asks for a dose is not read as still owing one.
       //
       // p2016 prints a parallel row ("PCV13 only, given at or after age 6
-      // years | Option A: 1 dose of PCV20 ...") and is deliberately NOT re-added
-      // here: admitting it means widening the all-columns guard to accept a
-      // patient who HAS a PCV20, and that `!hasCompletingProduct` is what
-      // FINDING J rests on. Recorded as a judgement call rather than taken.
+      // years | Option A: 1 dose of PCV20 ...") with the same instruction,
+      // satisfied by the same dose, and stays OFF this card -- OWNER DECISION
+      // 2026-10-18, now settled rather than queued. She was shown the 17-year-old
+      // with chronic lung disease (PCV13 at 8, PCV20 at 17), both rows side by
+      // side, and the cost of admitting p2016: the all-columns guard would have to
+      // accept a patient who HAS a PCV20, and that `!hasCompletingProduct` is what
+      // FINDING J rests on. She chose the single CDC row over a second confirming
+      // source bought with a weaker guard. No dose, date or verdict was in question
+      // either way -- only which grey buttons the 576 cards show. Do not re-raise.
       //
       // CDC's Risk-based chip comes off: neither of its two prior-conjugate
       // branches reaches a conjugate first given at or after age 6.

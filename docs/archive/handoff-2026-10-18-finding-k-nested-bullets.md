@@ -75,7 +75,7 @@ from a log.
 | **P1** | **C8 — CDC Child/Adolescent Notes** | Now **8** statements, 1,107 cards (was 7/1,067). The +40 is FINDING K's group B: the card cites only p2016, while the notes chip is still there via the **risk-condition list** (`cdcChildSpecialSituations` shares a page, so one chip serves two roles). Not a wrong-patient citation — decide whether a risk-condition chip needs its own number, uniformly. |
 | **P1** | **C8 — Catch-up Job Aid** | Statement 1 (1,584 cards) is the decision she asked **not** to be re-raised. Statement 2 (144 cards) is a clean CITE. |
 | **P1** | **C8 — CDC Adult Notes** | 1 statement, 25 cards. Same card as FINDING L's `adultPcv15ThenPpsvShort`; do them together. |
-| **P2** | **Should p2016 go back on FINDING K's 576?** | **A judgement call recorded, not taken.** p2016 prints a parallel row ("6 through 18 years | PCV13 only, given at or after age 6 years | Option A: 1 dose of PCV20 …") with the same instruction, satisfied by the same dose. Admitting it means widening the all-columns guard to accept a patient who HAS a PCV20, and that `!hasCompletingProduct` is what FINDING J rests on. Owner's call. |
+| ~~P2~~ **SETTLED** | **Should p2016 go back on FINDING K's 576?** | **ANSWERED 2026-10-18: NO.** Owner shown the 17-year-old with chronic lung disease (PCV13 at 8, PCV20 at 17) with both documents' rows side by side, and the cost — the all-columns guard would have to accept a patient who HAS a PCV20, which is what FINDING J rests on. She chose the single CDC Child Notes row. The code already did this; the comment in `recommend.js` now records the decision. **Do not re-raise.** |
 | **P2** | **The wrong-ROW gap the all-columns guard cannot close** | Unchanged: it asks whether *some* p2016 row fits, not whether the row the card *used* fits. |
 | **P2** | **Grid gap, recorded not fixed** | `buildCases()` cannot express p2016 row 2's patient. Moves both corpora; needs the owner. |
 | **P2** | **Dead `advisory` flag** | Owner approved removal as its own change; needs a field-level corpus diff to show 0 real verdict moves. |
@@ -101,8 +101,8 @@ session, and the one new finding (L) is fully enumerated rather than vaguely fla
    (or `main` once both PRs are merged — **#71 must merge first**, this branch is stacked on it).
 2. Run `npm test` — confirm **1,285 passing in 113 files**, no skips, before any new work.
 3. `npx vite-node scripts/uncreditedSources.mjs` — confirm **50** pairs.
-4. **The open owner decision is the P2 above: does p2016 go back on FINDING K's 576?**
-   Ask, do not default. Her standing instruction: *"If you need other citation decisions, I
+4. **No owner decision is open.** The p2016/576 question was SETTLED on 2026-10-18 (no).
+   Her standing instruction for the next one: *"If you need other citation decisions, I
    need the age, risk factors and vaccine history to find them for you."* Her 2026-10-18
    process rule: decide alone when every candidate document gives the same dose and only the
    citation is in question; escalate on (a) no document has a row, (b) two documents give
