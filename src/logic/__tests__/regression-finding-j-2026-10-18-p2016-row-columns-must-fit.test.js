@@ -164,11 +164,30 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
       // >=8 weeks after the last PCV completes an at-risk 6-18 child's series.
       expect(card.status).toBe('complete');
       expect(chipShorts(card)).not.toContain('immunize.org p2016');
-      expect(chipShorts(card)).toContain('CDC Risk-based Pneumococcal');
-      // The numbered citation is unchanged: CDC's own row, whose words carry no
-      // age condition ("Previously received at least 1 dose of PCV20: no
-      // further PCV or PPSV23 doses needed").
-      expect((card.noteCites ?? []).map((x) => x.key)).toEqual(['pedsRiskPcv20Complete']);
+      // UPDATED BY FINDING K (2026-10-18), later the same day, and NOT loosened
+      // -- the assertion is stronger than the one it replaces.
+      //
+      // This commit put the CDC Risk-based chip here and left the numbered
+      // citation as `pedsRiskPcv20Complete`, on the stated ground that CDC's
+      // sentence "carries no age condition in its own words". It does not carry
+      // one, but its PARENT bullet does: CDC prints it under "Received PCV
+      // before age 6 years but have not received PPSV23", and this patient's
+      // only pre-PCV20 conjugate was at age 8. Nor does the Risk-based page
+      // have a branch for a conjugate first given at or after age 6 -- its two
+      // are "Never received PCV13, PCV15, or PCV20" and "Received PCV13 or
+      // PCV15 before age 6 years, never received PCV20".
+      //
+      // So the chip this commit added comes off, and the citation becomes the
+      // row the PCV20 SATISFIED -- CDC's "Received PCV13 only at or after age 6
+      // years: administer 1 dose PCV20 ..." -- by OWNER DECISION 2026-10-18,
+      // taken after she was shown this patient. Full account in
+      // `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
+      expect(chipShorts(card)).not.toContain('CDC Risk-based Pneumococcal');
+      expect(chipShorts(card)).toContain('CDC Child/Adolescent Notes');
+      expect((card.noteCites ?? []).map((x) => x.key)).toEqual(['pedsRiskPcv13At6']);
+      // And the card must SAY the dose has been given, or a row that asks for a
+      // PCV20 reads as still owing one.
+      expect(noteOf(card)).toMatch(/that dose has been given/);
     });
 
     it('6y, asplenia, PCV20 at age 5: p2016\'s row fits, so it stays', () => {

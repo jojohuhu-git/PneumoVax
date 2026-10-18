@@ -410,15 +410,123 @@ export const REFS = {
     quote: 'Not previously received any dose of PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or PCV20. If PCV15 is used and no previous receipt of PPSV23, administer 1 dose of PPSV23 at least 8 weeks after the PCV15 dose.',
     lastVerified: '2026-10-10',
   },
+  // FINDING K (2026-10-18) — THESE THREE ENTRIES WERE ONE, AND THE ONE WAS
+  // CITED TO THE WRONG PATIENT 904 TIMES.
+  //
+  // CDC does not print "Previously received at least 1 dose of PCV20: no
+  // further PCV or PPSV23 doses needed" as a rule. It prints it as a SUB-BULLET,
+  // four times, and each parent carries conditions of its own:
+  //
+  //   Age 6-18 years
+  //     - Received PCV before age 6 years but have not received PPSV23
+  //         - ... no further PCV or PPSV23 doses needed             [non-IC]
+  //         - ... no additional dose of PCV or PPSV23                   [IC]
+  //   Age 2-5 years
+  //     - Completed recommended PCV series but have not received PPSV23
+  //         - ... no further PCV or PPSV23 doses needed    [both, same words]
+  //
+  // One entry held the non-IC wording with `population: ['child-nonIC',
+  // 'child-IC']` and the comment "printed in both at-risk lists, same
+  // instruction". Read as a flat sentence that is nearly true. Read in its
+  // nesting it is wrong twice over: the IC instance at 6-18 uses DIFFERENT
+  // words, and the parent restricts the patient by both age at the prior dose
+  // and PPSV23 history. `population` cannot see either — it records the patient
+  // GROUP, and this is a split on vaccine history.
+  //
+  // So the quotes stay verbatim and contiguous (a joined parent + sub-bullet
+  // string exists nowhere on the page, which is exactly how `pedsMinAge`'s deep
+  // link came to match nothing), the LABEL names the branch the sentence sits
+  // under so a clinician hovering sees the condition, and the engine is held to
+  // citing each one only inside its own branch by
+  // `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
+  //
+  // Read live 2026-10-18 with the accordion expanded. All three are in
+  // `accordion-panel-pneumo-situations`, which a plain page fetch never returns.
   pedsRiskPcv20Complete: {
     rulebook: 'child',
-    // Patients this sentence is about: printed in both at-risk lists, same instruction
-    population: ['child-nonIC', 'child-IC'],
+    // Patients this sentence is about: non-IC list, Age 6-18, under the parent
+    // "Received PCV before age 6 years but have not received PPSV23"
+    population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
-    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", a prior PCV20 completes an at-risk child\'s series',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 6-18 who received PCV before age 6 and no PPSV23: a prior PCV20 completes the series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
-    lastVerified: '2026-10-10',
+    lastVerified: '2026-10-18',
+  },
+  pedsIcPcv20Complete: {
+    rulebook: 'child',
+    // Patients this sentence is about: IC list, Age 6-18, under the same parent.
+    // Its WORDS differ from the non-IC twin above; do not let the two swap places.
+    population: ['child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 6-18 who received PCV before age 6 and no PPSV23: a prior PCV20 completes the series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Previously received at least 1 dose of PCV20: no additional dose of PCV or PPSV23',
+    lastVerified: '2026-10-18',
+  },
+  pedsRiskPcv20CompleteAt2: {
+    rulebook: 'child',
+    // Patients this sentence is about: the Age 2-5 instance, printed in both
+    // lists in the SAME words, under "Completed recommended PCV series but have
+    // not received PPSV23". Cited by the under-2 card whose own sentence says
+    // "at age 2 years or later" — the age this quote is about.
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 2-5 who completed the PCV series and has no PPSV23: a prior PCV20 completes the series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
+    lastVerified: '2026-10-18',
+  },
+  // FINDING K. CDC's Risk-based page states the completion in words for the one
+  // history its 6-18 section does cover without an at-or-before-6 condition: a
+  // child whose PCV20 was their FIRST conjugate ever. Read live 2026-10-18; the
+  // sentence occurs exactly once as a leaf element on the page (checked, because
+  // the page states a completion several times and only this instance sits under
+  // a branch heading these patients match), under the H3 "Never received PCV13,
+  // PCV15, or PCV20" inside "Children 6 through 18 years old".
+  //
+  // The branch's own first line is what makes it fit a child who already had a
+  // PPSV23: "Give it regardless of whether the child has previously received
+  // PPSV23 or PCV7."
+  pedsRiskPcv20FirstConjugate: {
+    rulebook: 'child',
+    // Patients this sentence is about: at-risk 6-18, printed once, in a section
+    // that does not split by risk class — CDC's two 6-18 branches below it do
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC Risk-based Pneumococcal Recommendations — at-risk child 6-18 who had never received PCV13, PCV15 or PCV20: a PCV20 completes the series with no PPSV23 follow-up',
+    short: 'CDC Risk-based Pneumococcal',
+    quote: "It doesn't need to be followed by a dose of PPSV23. Their pneumococcal vaccinations are complete.",
+    lastVerified: '2026-10-18',
+  },
+  // FINDING K. p2016 Table 4's row for a child who completed before age 6 WITH a
+  // PCV20 — quoted here for the first time, because it is the only document with
+  // a row that fits a 6-18 year old who did that AND has since had a PPSV23
+  // (CDC's notes bullet for them is the one above, whose parent says "but have
+  // not received PPSV23"). The row states no PPSV23 condition at all, so a prior
+  // PPSV23 does not break it.
+  //
+  // Transcribed cell by cell from a live download 2026-10-18 (HTTP 200, 211,252
+  // bytes, Item #P2016 of 2/16/2024) laid out with `scripts/pdfLayout.py`, which
+  // keeps each cell tied to its own row and column. The row, in full:
+  //   Child's age now            | 2 through 18 years (any risk condition)
+  //   Number of previous PCV13,  | Completed PCV series before age 6 years,
+  //     PCV15, or PCV20 doses    |   including one or more doses of PCV20
+  //   Option A                   | No additional doses
+  //   Option B (if applicable)   | (blank)
+  // The quote joins the history column to Option A, which is how the table is
+  // read across; the PDF deep-links by page, so no text fragment depends on it.
+  p2016CompletedBefore6WithPcv20: {
+    rulebook: 'child',
+    // Patients this cell is about: both risk classes — the row is headed
+    // "(any risk condition)" — age 2 through 18
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — a child 2-18 with any risk condition who completed the PCV series before age 6 including a PCV20: no additional doses',
+    short: 'immunize.org p2016',
+    quote: 'Completed PCV series before age 6 years, including one or more doses of PCV20 — No additional doses',
+    pdfPage: 2,
+    lastVerified: '2026-10-18',
   },
   pedsRiskPcv13At6: {
     rulebook: 'child',
