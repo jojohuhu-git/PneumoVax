@@ -1,3 +1,8 @@
+> **SUPERSEDED 2026-10-17 (late evening)** by
+> `docs/archive/handoff-2026-10-17-population-field-done.md`. The patient-population field
+> this file lists as the next item is **done** and open as PR #65, and PR #64 (findings C,
+> D and E) is **merged**. Do not resume from this file.
+
 # PneumoVax — Handoff after three citation findings (2026-10-17, evening)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

@@ -176,6 +176,29 @@ re-counted from the committed files on 2026-10-17 and corrected here — they ha
 The two mutation figures are left as measured and not rescaled.)
 **Add a rule to `recordProblemFor()` → add its shape to `GRID_FUTURE_*` in the same commit.**
 
+### Every Quote Names The Patient It Was Written About
+`rulebook` (child / adult / any) keeps a child's source off an adult's card. It cannot see
+the two splits CDC's pages — and this engine — actually turn on: a child's
+**immunocompromising** list vs the one that is not, and an adult's **Routine 50+** vs
+**Special situations 19–49**. So every QUOTED entry in `refs.js` also declares
+**`population`**, and `regression-2026-10-17-every-quote-names-its-patient.test.js` fails if
+a card shows a quote to anyone else. Quote-free entries declare none — a document has no
+patient.
+
+**It records who the sentence is ABOUT, not which block it was printed in** (owner decision
+2026-10-17). The two usually agree; where they differ the sentence wins, and the entry's
+comment says why. Recording provenance instead would have marked **4,639 correct showings
+wrong** — `adultPcv20or21Complete` is printed under Special situations and says "Adults aged
+19 years and older"; CDC's at-risk rows start at age 2, so `pedsRoutine4Dose` is an at-risk
+baby's series too.
+
+A card may quote another group's rule **deliberately** — to state a boundary, or to say what
+the patient is not — via `cite(key, { aboutAnotherGroup: 'why' })`. There are exactly four
+(`adultRoutine50`, `adultBothNotAt65`, `cdcChildSpecialSituations`, `immPCV7`) and the set is
+pinned by name, as is the set of sources spanning more than one group. **Never widen a
+source's `population` to make a wrong quote legal** — that is the one mutation that made the
+sweep go quiet, which is why both lists are pinned. Fix the call site instead.
+
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
 
