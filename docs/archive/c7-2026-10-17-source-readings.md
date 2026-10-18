@@ -302,7 +302,31 @@ nothing new. That is also why the app already has a re-evaluate card (#7) for th
 conditions, which gains PCV20/21 at ≥5 years. The distinction the engine draws is sound.
 What is wrong is only **which document is credited to whom.**
 
-### ✅ OWNER DECISIONS 2026-10-17 — document 2 is settled, ready for C8
+### ✅✅ APPLIED 2026-10-17 — document 2 is the only document C8 has landed
+
+**`03570ac` on `feature/2026-10-17-c8-per-card-sources`.** Both decisions below are now in
+`recommend.js`, held by `regression-c8-doc2-job-aid-only-where-it-speaks.test.js` (15 tests;
+9 passing / 6 failing before the fix, 15 after). Suite 1,157 passing in 100 files.
+
+**The mechanism change the decisions needed is done and is reusable.** The adult pathway no
+longer computes one source list and spreads it over all ten cards: `ADULT_DEFAULT_REFS` is
+the default and a card asks for its own list through `adultRefs(...)`. A card that does not
+ask is byte-identical to before, so **documents 1, 3, 5 and 6 need no further plumbing** —
+only the owner's sign-off on their removals.
+
+**Counts re-measured before applying, and they had moved.** The table below was measured
+over 16,202 cards; the grid is now 17,334 after the IC-children fix. Statement #8 is **180
+cards, not 171**; #1 (2,610 = 630 under 50 + 1,980 at 50+) and #4 (914 = 305 + 609) were
+unchanged, so decision 2 moves **2,589 keep / 935 lose**, as decided. Measured effect on the
+whole grid: grey buttons 45,841 → 44,726, unpointed buttons 26,651 → 25,536, the job aid's
+own unpointed count 7,920 → 6,805 — all three exactly −1,115 — and "cards citing a document
+with no button" stayed at 0.
+
+**Checked live**, one patient with only the age changed: 35y with diabetes and a PCV20 on
+record shows `[1]` CDC Adult Notes, `[2]` MMWR; at 55y the same card shows `[1]` CDC Adult
+Notes, `[2]` CDC Adult Timing Job Aid, `[3]` MMWR — same sentence, word for word.
+
+### ✅ OWNER DECISIONS 2026-10-17 — the two decisions, as made
 
 Both brought to the owner with the quotes and the measured card counts above, and both
 decided. **Nothing is applied to code yet** — C8 applies all six documents' dispositions as
