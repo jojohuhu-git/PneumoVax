@@ -302,10 +302,19 @@ nothing new. That is also why the app already has a re-evaluate card (#7) for th
 conditions, which gains PCV20/21 at ≥5 years. The distinction the engine draws is sound.
 What is wrong is only **which document is credited to whom.**
 
-### ✅✅ APPLIED 2026-10-17 — document 2 is the only document C8 has landed
+### ⬖ PARTLY APPLIED 2026-10-17 — the two owner DECISIONS are in; the 12 CITEs are NOT
+
+**Read this heading literally.** Document 2's disposition has two halves and only one of them
+has landed. The REMOVE and the cite-or-remove split — the two things the owner decided — are
+in the code. The **12 CITE statements are untouched**: each one still needs its inline `[c]`
+marker pointed at the job aid's own sentence, with the quote recorded.
+
+Measured on the combined tree (C2/C3 + this), **the job aid is still an uncredited button on
+6,805 cards across 14 distinct statements.** That number falling is what finishing the CITEs
+looks like; the 1,115 below is only the removals.
 
 **Branch `feature/2026-10-17-c8-per-card-sources`, off `main` at `5bffe00`.** Both decisions
-below are now in `recommend.js`, held by
+below — and only those two — are now in `recommend.js`, held by
 `regression-c8-doc2-job-aid-only-where-it-speaks.test.js` (15 tests; 9 passing / 6 failing
 before the fix, 15 after). Suite **1,143 passing in 99 files**, up 16 from main's 1,127 —
 15 for the new guard and 1 for the widened age-literal guard it turned up.
