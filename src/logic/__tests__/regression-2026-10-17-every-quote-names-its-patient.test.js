@@ -146,6 +146,17 @@ describe('the field itself', () => {
       // be: the rows in the lower two blocks are NOT cited here.
       'pedsInfantLastDose1215mo', // Table 2's "All children" block, above both risk blocks
       'pedsMinAge',               // the section heading, above every block
+      // FINDING H (2026-10-18). ACIP's interchangeability sentence, added so a
+      // PCV13-worded row can be cited to a child whose dose was a PCV15 --
+      // the only documents stating a conjugate dose at/after age 6 all name
+      // PCV13, so without it that card had no row at all. Its own paragraph
+      // scopes THIS DOCUMENT's 6-18 recommendations to IC / CSF leak /
+      // cochlear implant, which would exclude a non-IC teenager; it is listed
+      // here anyway because the field records who the SENTENCE is about, and
+      // "For all recommendations, PCV13 and PCV15 can be used interchangeably"
+      // is about the two PRODUCTS wherever either is recommended. Owner
+      // confirmed the scope 2026-10-18. Full argument in refs.js.
+      'pedsPcv13Pcv15Interchangeable', // about the two products, in every recommendation
       'pedsRiskIncompleteCatchup',// printed in both at-risk lists
       'pedsRiskPcv13At6',         // printed in both at-risk lists
       'pedsRiskPcv20Complete',    // printed in both at-risk lists

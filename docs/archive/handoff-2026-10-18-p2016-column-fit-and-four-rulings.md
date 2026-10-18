@@ -1,3 +1,14 @@
+> **SUPERSEDED (2026-10-18)** — every P0 item in this document is DONE; see
+> `handoff-2026-10-18-p0-cards-name-the-history.md`. Do not resume the queue below.
+>
+> This file had only ever existed on the branch `docs/2026-10-18-p2016-column-fit-handoff`,
+> which was never merged, so `main` never had it — the exact failure this repo has hit
+> before. It reached `main` as PR #70 while the work that consumed it was still in review,
+> so it is superseded here rather than silently dropped. Two of its numbers are corrected by
+> that work: FINDING I is **64** cards that make a false claim (96 counts the whole
+> mis-routed branch), and its stated FINDING I reproduction patient does not reproduce the
+> bug at all — the third dose is one month after the second, so the engine rejects it.
+
 # PneumoVax — Handoff after the p2016 column-fit audit and four owner rulings (2026-10-18)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

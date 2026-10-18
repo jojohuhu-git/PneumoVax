@@ -921,7 +921,22 @@ export const REFS = {
     // row it means is headed "Received PCV13 or PCV15 before age 6 years,
     // never received PCV20". Corrected rather than left as a citation that
     // promises wording the source never used.
-    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations (incl. the row "Received PCV13 or PCV15 before age 6 years, never received PCV20")',
+    //
+    // FINDING J (2026-10-18): the corrected parenthetical naming that row is
+    // now GONE too, and for the reason the population rule gives — this is a
+    // quote-free whole-document chip, so it declares no population, "because a
+    // document has no patient, only a sentence does". A chip that advertises
+    // one row makes the document look like that row. Measured before the
+    // change: the chip was on 1,351 cards, and on 1,008 of them a counted dose
+    // had been given at or after age 6 — which the named row excludes. FINDING
+    // J then needed to put this chip on 864 cards whose patient HAS a PCV20,
+    // against a label reading "never received PCV20", which would have swapped
+    // one wrong-patient citation for another.
+    //
+    // Nothing is lost: the row's own wording is quoted verbatim by
+    // `pedsBefore6NoPcv20`, which declares the patients it is about and is
+    // cited on the cards that row actually governs.
+    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations',
     short: 'CDC Risk-based Pneumococcal',
     lastVerified: '2026-10-12',
   },
@@ -992,6 +1007,56 @@ export const REFS = {
     short: 'PCV15 Children MMWR',
     lastVerified: '2026-10-18',
   },
+  // THE INTERCHANGEABILITY SENTENCE (owner ruling, 2026-10-18): "PCV13 and
+  // PCV15 are interchangeable when assessing how to move forward in the
+  // schedule."
+  //
+  // WHY THE APP NEEDS IT IN WORDS. Every document that states a conjugate dose
+  // given AT OR AFTER age 6 names PCV13 and only PCV13. Checked live
+  // 2026-10-18, all three:
+  //   - CDC child & adolescent notes, both at-risk lists, Age 6-18 years:
+  //     "Received PCV13 only at or after age 6 years ..." and "Received 1 dose
+  //     PCV13 and 1 dose PPSV23 at or after age 6 years ..."
+  //   - CDC risk-indications (MAY 8, 2026): no at/after-6 branch AT ALL -- its
+  //     only prior-conjugate branch is headed "before age 6 years".
+  //   - immunize.org p2016 Table 4: "PCV13 only, given at or after age 6 years".
+  // So for a child whose dose at that age was a PCV15, NO document has a row --
+  // the "no row for this history" shape, which is an escalation and was
+  // escalated. This sentence is the owner's answer, and it is ACIP's own.
+  //
+  // Read live 2026-10-18 from the MMWR page (44,208 chars; "interchangeably"
+  // appears EXACTLY ONCE -- the positive control that this is the sentence
+  // itself and not a paraphrase of it). It is the fourth sentence of
+  // "Recommendations for Use of PCV", printed above every population block.
+  //
+  // (!) WHY `population` IS ALL THREE PAEDIATRIC GROUPS, said plainly because
+  // the paragraph's own words can be read against it. The three sentences
+  // before it scope THIS DOCUMENT's recommendations: "all children aged 2-59
+  // months ... children aged 60-71 months with risk conditions, and persons
+  // aged 6-18 years with an immunocompromising condition, cerebrospinal fluid
+  // leak, or cochlear implant". An 18-year-old with chronic heart disease is
+  // NOT in that list, and the app recommends for that child on CDC's current
+  // authority, not on ACIP 2022's.
+  //
+  // It is still all three, for the reason the population rule gives: the field
+  // records who the SENTENCE is about, not which block it was printed in.
+  // "For all recommendations, PCV13 and PCV15 can be used interchangeably" is a
+  // claim about the two PRODUCTS wherever either is recommended -- it names no
+  // patient and excludes none -- and the owner confirmed on 2026-10-18 that it
+  // applies to every paediatric risk class. Same shape as
+  // `adultPcv20or21Complete`, whose own words outrun the block it sits under.
+  pedsPcv13Pcv15Interchangeable: {
+    rulebook: 'child',
+    // Patients this sentence is about: the two products, in every
+    // recommendation this document makes -- so every paediatric risk class.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
+    label: 'ACIP 2022 — MMWR mm7137a3, "Recommendations for Use of PCV": PCV13 and PCV15 are interchangeable for all recommendations',
+    short: 'PCV15 Children MMWR',
+    quote: 'For all recommendations, PCV13 and PCV15 can be used interchangeably.',
+    lastVerified: '2026-10-18',
+  },
+
   // The SENTENCE this app rests on, from Table 2 of the document above.
   pedsInfantLastDose1215mo: {
     rulebook: 'child',

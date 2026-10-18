@@ -658,6 +658,70 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   })];
 }
 
+/**
+ * How to NAME the conjugate doses on record, for the sentence that tells the
+ * clinician WHO the advice in front of them is for.
+ *
+ * FINDING H + the 112 residue (2026-10-18). Four statements in the at-risk
+ * child block used to say "PCV13" unconditionally, because the p2016 and CDC
+ * rows they come from do. Measured over the committed grid, 976 card instances
+ * said it to a child who had no PCV13 dose on record -- a PCV15, or a dose
+ * whose product the clinician could not name.
+ *
+ * OWNER RULINGS, both 2026-10-18, and the reason the DOSE is untouched:
+ *   - "PCV13 and PCV15 are interchangeable when assessing how to move forward
+ *     in the schedule" -- which is ACIP's own sentence, and is cited as
+ *     `pedsPcv13Pcv15Interchangeable` wherever this helper substitutes.
+ *   - a dose of unrecorded product "cannot be assumed" to have been a PCV20;
+ *     whichever of PCV13/PCV15 it was, the row and the dose are the same.
+ *
+ * So the row is unchanged and only the description of the patient moves. What
+ * this must never do is name a product for a clinician who declined to:
+ * "Unknown PCV product" is a real option on the history step, and naming it
+ * PCV20 would be the one guess that ends the series.
+ *
+ * `phrase` fits a slot that wants "... only" ("with PCV15 only (at/after age
+ * 6)"); `label` fits one that wants a bare name ("Complete (PCV15 + PPSV23
+ * ...)"). `needsBridge` is true exactly when the governing row names a product
+ * other than the one on record -- the only place the interchangeability
+ * sentence belongs.
+ */
+const UNRECORDED_PCV_WORDS = 'a PCV of unrecorded product';
+function pcvProductWords(pcv) {
+  // `pcv.products` is built from the EFFECTIVE list, so a PCV7 and a rejected
+  // same-day PCV20 are both already gone; `pcv.count` includes the doses whose
+  // product is blank, which `products` does not.
+  const named = [...new Set(pcv.products)].sort();
+  const unrecorded = pcv.count - pcv.products.length;
+  if (!named.length) {
+    return { phrase: UNRECORDED_PCV_WORDS, label: UNRECORDED_PCV_WORDS, needsBridge: true, unrecorded: true };
+  }
+  const list = named.join(' and ');
+  if (unrecorded > 0) {
+    const both = `${list} and ${UNRECORDED_PCV_WORDS}`;
+    return { phrase: both, label: both, needsBridge: true, unrecorded: true };
+  }
+  return {
+    phrase: `${list} only`,
+    label: list,
+    needsBridge: !(named.length === 1 && named[0] === 'PCV13'),
+    unrecorded: false,
+  };
+}
+
+/**
+ * The sentence that says why a row worded for PCV13 governs this child, plus
+ * the cite that backs it. Empty strings when the row already names what the
+ * patient got, so a PCV13 child's card is untouched.
+ */
+function pcvInterchangeableBridge(words) {
+  if (!words.needsBridge) return { sentence: '', cites: [] };
+  const sentence = words.unrecorded
+    ? ' The product of at least one dose on record was not entered, so it is counted as a generic PCV and is not assumed to have been PCV20. PCV13 and PCV15 can be used interchangeably for all recommendations, so this row governs whichever was given [c].'
+    : ' The row for this history is worded for PCV13. PCV13 and PCV15 can be used interchangeably for all recommendations, so it governs this child too [c].';
+  return { sentence, cites: [cite('pedsPcv13Pcv15Interchangeable')] };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  AT-RISK CHILDREN 24 months – 18 years — p2016 Table 4
 // ═══════════════════════════════════════════════════════════════════════════
@@ -672,6 +736,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   const rowClass = pedsRiskRowClass(riskIds); // 'IC' | 'nonIC'
   const isIC = rowClass === 'IC';
   const refs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016'], 'child');
+  // FINDING H / the 112 residue (2026-10-18). Computed once here so every
+  // sentence in this block names the same history — the shape S6-1 exists to
+  // enforce for numbers, applied to words.
+  const words = pcvProductWords(pcv);
+  const bridge = pcvInterchangeableBridge(words);
   const anchorPcv = pcv.lastDate;
   // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
   const anchorPneumo = mostRecent(pcv.lastDate, ppsv.effective.find((d) => d.date)?.date || null);
@@ -709,6 +778,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // not "is this child immunocompromised" but "has the dose that follows the
   // PPSV23 been given", and only the second one is answerable in one place.
   const pedsPostSeriesDoseDone = isIC ? ppsv.count >= 2 : ppsv.count >= 1;
+  // Every counting PCV dose is DATED and was given before age 6 (72 months).
+  // See the long note at its first use below for why an undated dose fails it.
+  const allCountingPcvBefore72mo =
+    pcv.count >= 1 && pcv.band.ge72 === 0 && pcv.band.undated === 0;
   const out = [];
 
   // Row 3: completed series before 6y including ≥1 PCV20 → no additional doses.
@@ -729,8 +802,24 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       vaccine: 'PCV', status: 'complete',
       doseLabel: 'PCV complete (includes PCV20)',
       note: 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed [c].',
+      // The numbered citation is unchanged. CDC's row -- "Previously received
+      // at least 1 dose of PCV20: no further PCV or PPSV23 doses needed" --
+      // carries no age condition in its own words, which is what the population
+      // rule asks about, so it speaks for this patient at either age.
       noteCites: [cite('pedsRiskPcv20Complete')],
-      refs,
+      // FINDING J (2026-10-18), the owner's all-columns rule. p2016's ONLY row
+      // whose history column mentions a previous PCV20 is "2 through 18 years
+      // (any risk condition) | Completed PCV series before age 6 years,
+      // including one or more doses of PCV20 | No additional doses". The age
+      // column fits; the prior-dose column demands the PCV20 was given BEFORE
+      // AGE 6. Of 960 card instances, 96 fit and 864 do not -- the PCV20 was
+      // given at 17 or 18. All five of p2016's tables were read cell by cell
+      // before removing it (FINDING F's lesson); no other row reaches this
+      // history. CDC's page takes its place on the 864, and p2016 stays on the
+      // 96 it speaks for.
+      refs: allCountingPcvBefore72mo
+        ? refs
+        : collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }));
     return out;
   }
@@ -939,8 +1028,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // Requires all counting PCV doses to be DATED and before 72mo: an undated dose cannot be
   // confirmed pre-72mo, so it falls through to the standard rows (matches "PPSV23 already
   // given → PCV20/2nd-PPSV23" for undated-history IC cases).
-  const allCountingPcvBefore72mo =
-    pcv.count >= 1 && pcv.band.ge72 === 0 && pcv.band.undated === 0;
+  //
+  // Defined once at the top of this function since FINDING J (2026-10-18) —
+  // p2016's row 3 asks the same question of a PCV20 history that rows 4/5 ask
+  // of a PCV13/15 one ("Completed PCV series before age 6 years"), and a second
+  // copy of the predicate could answer it differently. Same reason as S6-1.
   // IC-1 (2026-10-17): `&& !isIC`. This shortcut used to fire for either risk
   // class — its comment above says "IC or non-IC" — and it is right only for
   // non-IC. Measured before the fix: 69 cards where an immunocompromised child
@@ -1044,7 +1136,21 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // `>= 3` is kept rather than replaced so a three-dose history with an
   // undated dose — which `allCountingPcvBefore72mo` deliberately excludes —
   // lands exactly where it did before.
-  if (pcv.count >= 3 || allCountingPcvBefore72mo) {
+  //
+  // FINDING I (2026-10-18): `&& pcv.band.ge72 === 0` is the condition the kept
+  // half was missing. `pcv.count >= 3` on its own also caught a fully DATED
+  // three-dose history given at or after age 6 — a teenager with three PCV13
+  // doses at 16 was told they "completed PCV13/15 before age 6". 64 cards made
+  // that claim; another 32 were routed here without claiming anything about
+  // age. The undated case the `>= 3` exists for is untouched, because
+  // `band.ge72` counts DATED doses only.
+  //
+  // Not written as the shorter `pcv.count >= 1 && pcv.band.ge72 === 0`, which
+  // reads better and is wrong: it would pull a child with one or two UNDATED
+  // doses out of rows 8/9 and into rows 4/5, asserting "completed before age 6"
+  // about doses whose dates nobody knows. Neither row describes that child;
+  // this change does not pretend to settle them and leaves them where they are.
+  if ((pcv.count >= 3 && pcv.band.ge72 === 0) || allCountingPcvBefore72mo) {
     // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
     if (ppsvGiven) {
       // non-IC: PPSV23 already given → complete.
@@ -1067,7 +1173,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         brands: ['PCV20 (Prevnar 20)'],
         note: {
           lead: IC_POST_PPSV23_LEAD,
-          detail: `This applies to an immunocompromising at-risk child who completed PCV13/15 and has already received PPSV23. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen.`,
+          detail: `This applies to an immunocompromising at-risk child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} and has already received PPSV23. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen.`,
         },
         noteCites: [cite('pedsIcPpsvWaitFiveYears')],
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
@@ -1089,7 +1195,17 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: ['PCV20 (Prevnar 20)'],
-      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed PCV13/15 before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV (completes the series) [c].`,
+      // "PCV13/15" is a fair description of a PCV13 or a PCV15 — it is p2016's
+      // own row wording, "with PCV13 and/or PCV15" — but not of a dose nobody
+      // recorded. CDC's matching row is product-agnostic ("Received PCV before
+      // age 6 years"), so that is the wording an unrecorded dose gets.
+      // No interchangeability bridge here, and that is deliberate: unlike the
+      // at/after-6 rows below, CDC's before-6 row is already product-agnostic
+      // ("Received PCV before age 6 years ... at least 8 weeks after the most
+      // recent PCV dose", read live 2026-10-18), and its risk-indications twin
+      // names both products. Nothing is being substituted, so nothing needs
+      // explaining.
+      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV (completes the series) [c].`,
       noteCites: [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
       refs,
     }));
@@ -1120,9 +1236,12 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     if (!isIC) {
       out.push(rec({
         vaccine: 'PCV', status: 'complete',
-        doseLabel: 'Complete (PCV13 + PPSV23 at/after age 6)',
-        note: 'Non-immunocompromising at-risk child with PCV13 at/after age 6 who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated [c].',
-        noteCites: [cite('pedsRiskDone')],
+        doseLabel: `Complete (${words.label} + PPSV23 at/after age 6)`,
+        // FINDING H, the 380. This said "PCV13" to 230 children whose dose was
+        // a PCV15, 80 with a PCV15 plus a rejected same-day PCV20, and 70 whose
+        // product was never recorded.
+        note: `Non-immunocompromising at-risk child with ${words.label} at/after age 6 who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated [c].${bridge.sentence}`,
+        noteCites: [cite('pedsRiskDone'), ...bridge.cites],
         refs,
       }));
       return out;
@@ -1160,9 +1279,12 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       brands: ['PCV20 (Prevnar 20)'],
       note: {
         lead: IC_POST_PPSV23_LEAD,
-        detail: `This applies to an immunocompromising at-risk child whose only conjugate dose was PCV13 given at or after age 6, and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen.`,
+        // The IC twin of FINDING H, 228 of its 456 cards product-wrong. Found
+        // by sweeping the whole class rather than the one card reported — the
+        // spot-check was a sample.
+        detail: `This applies to an immunocompromising at-risk child whose conjugate ${pcv.count === 1 ? 'dose was' : 'doses were'} ${words.label}, given at or after age 6, and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen.${bridge.sentence}`,
       },
-      noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv13AndPpsvAt6')],
+      noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv13AndPpsvAt6'), ...bridge.cites],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }));
     const ppsv2 = dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today);
@@ -1186,12 +1308,18 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     brands: ['PCV20 (Prevnar 20)'],
     note: noPriorPcv
       ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine [c].`
-      : `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with PCV13 only (at/after age 6): Option A — 1 dose of PCV20 ≥8 weeks after the most recent PCV13 [c].`,
+      // The 112 residue. "the most recent PCV13" is replaced by the
+      // product-agnostic phrase p2016's own Option A cell uses ("at least 8
+      // weeks after most recent PCV dose"), so the anchor cannot name a product
+      // the patient has not had either.
+      : `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with ${words.phrase} (at/after age 6): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].${bridge.sentence}`,
     // Population field (2026-10-17): the IC and non-IC lists print this row
     // with different wording, so each class quotes its own. `pedsRiskPcv13At6`
     // stays shared on purpose — that sentence IS identical in both lists, and
     // the IC card cites its five-year tail separately below.
-    noteCites: [cite(noPriorPcv ? (isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv') : 'pedsRiskPcv13At6')],
+    noteCites: noPriorPcv
+      ? [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')]
+      : [cite('pedsRiskPcv13At6'), ...bridge.cites],
     refs,
   }));
 
@@ -1221,16 +1349,16 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   } else {
     // PCV13-only at/after 6y. Option B: PPSV23 ≥8wk (IC: then ≥5y → PCV20 or 2nd PPSV23).
     out.push(rec({
-      vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks after PCV13)',
+      vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks after the last PCV)',
       dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
       brands: ['PPSV23 (Pneumovax 23)'],
       note: isIC
         ? {
-          lead: `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV13 [c]; then ≥${LONG_GAP_WORDS} after the first PPSV23, give 1 dose of PCV20 or a 2nd PPSV23 [c].`,
+          lead: `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; then ≥${LONG_GAP_WORDS} after the first PPSV23, give 1 dose of PCV20 or a 2nd PPSV23 [c].`,
           detail: 'This is the immunocompromising row: the 5-year follow-on dose is part of the plan, not optional. Choose Option A or B, not both.',
         }
         : {
-          lead: `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV13 [c].`,
+          lead: `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].`,
           detail: 'Choose Option A or B, not both.',
         },
       noteCites: isIC

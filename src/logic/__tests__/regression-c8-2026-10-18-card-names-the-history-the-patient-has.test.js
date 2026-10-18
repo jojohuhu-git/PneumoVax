@@ -283,26 +283,31 @@ describe('FINDING G - every card names the history its patient actually has', ()
     });
   });
 
-  // PART D. The residue, pinned as a number rather than left implicit.
+  // PART D. The residue — now CLOSED, and kept as a zero rather than deleted.
   //
-  // FINDING G fixed the AGE half of rows 8/9's label. The PRODUCT half is still
-  // open. Measured 2026-10-18, over this grid:
+  // FINDING G fixed the AGE half of rows 8/9's label and left the PRODUCT half
+  // open, pinned at 112. Measured 2026-10-18, over this grid:
   //
   //   cards whose text says "PCV13 only (at/after age 6)"   448 before -> 224 after
   //     of those, the history really is PCV13 only at/after 6   112 -> 112
   //     of those, the history is something else                 336 -> 112
   //
-  // Every one of the remaining 112 is now age-correct and product-wrong: the
-  // dose given at or after age 6 was PCV15 (64 cards), an unknown product (32),
-  // or PCV15 with a same-day PCV20 the engine rejected (16). p2016 rows 8/9 are
-  // labelled "PCV13 only, given at or after age 6 years", so the document has
-  // no row for a child whose only dose at that age was PCV15 — the same "no row
-  // for this history" shape as the two patients the owner ruled on, and an OPEN
-  // OWNER DECISION, not something to reword on this session's initiative.
+  // Each of those 112 was age-correct and product-wrong: the dose at or after
+  // age 6 was PCV15 (64 cards), of unrecorded product (32), or PCV15 with a
+  // same-day PCV20 the engine rejected (16). The owner settled it the same day
+  // — "PCV13 and PCV15 are interchangeable when assessing how to move forward
+  // in the schedule", and an unrecorded product "cannot be assumed" to be a
+  // PCV20 — so FINDING H names the product the patient actually got and cites
+  // ACIP's interchangeability sentence where a PCV13-worded row is being used.
+  // 112 -> 0.
   //
-  // Pinned so it cannot drift unnoticed: if a later change moves it, this test
-  // fails and the author has to say which way and why.
-  it('pins the 112 cards that still name a product the patient did not receive', () => {
+  // This assertion stays at 0 instead of being removed. `toBe(0)` is a real
+  // guard here and not a tautology, because part A's needle and this one differ:
+  // part A asks whether the AGE claim is true, this one whether the PRODUCT
+  // claim is. The sweep in
+  // `regression-finding-h-2026-10-18-card-names-the-product-given.test.js`
+  // covers the whole class; this keeps FINDING G's own number honest.
+  it('the 112 cards that named a product the patient did not receive are now 0', () => {
     let mismatched = 0;
     for (const c of buildCases()) {
       let result;
@@ -313,6 +318,6 @@ describe('FINDING G - every card names the history its patient actually has', ()
         if (!counting(c.input).every((d) => d.product === 'PCV13')) mismatched += 1;
       }
     }
-    expect(mismatched).toBe(112);
+    expect(mismatched).toBe(0);
   });
 });
