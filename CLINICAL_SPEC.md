@@ -528,6 +528,74 @@ recommendations "have not changed from previous recommendations". `rr7203a1` sta
 
 Guarded by `src/data/__tests__/regression-n6-citations-follow-the-rulebook.test.js`.
 
+### A card credits the documents it rests on — the Adult Timing Job Aid, quoted
+
+**C8, document 2 (OWNER DECISION 2026-10-17: a (document, statement) pair is either
+cited or taken off that card, never left listed-but-unexplained).** The removals landed
+first; this is the crediting half.
+
+The **CDC Adult Pneumococcal Vaccine Timing Job Aid** (NCIRD, **March 2025**) was a grey
+button on **6,805** cards that no raised number pointed at — the whole of the owner's
+report, *"I forget why there are multiple source chips listed if its only citing one of
+them"*. Eleven of its fourteen statements now quote the document's own sentence, so
+**6,805 → 3,189** and **14 distinct statements → 3**. **3,616 cards gained a citation;
+no advice moved and no card's wording changed** beyond the superscript numbers
+themselves.
+
+| The sentence the card now quotes | Where it sits | Shown to |
+|---|---|---|
+| "No vaccines recommended; schedule is complete." | p.1, the `PCV15 & PPSV23 OR PCV20 OR PCV21` row | **50+ only** |
+| "Together, with the patient, vaccine providers may choose to administer PCV20 or PCV21 to adults ≥65 years old…" | p.1, shared clinical decision-making | 50+ |
+| "No vaccines are recommended at this time. Review pneumococcal vaccine recommendations again when your patient turns 50 years old." | **p.4**, the `PCV13† and PPSV23` row | **19–49 only** |
+| "Consider minimum interval (8 weeks) for adults with an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak (CSF) leak" | p.1, footnote † | **50+ only** |
+| "Also applies to people who received PCV7 at any age and no other pneumococcal vaccines" | footnote `*`, all four pages | either |
+| "If PPSV23 is not available, PCV20 or PCV21 may be used" | footnote `¶`, all four pages | either |
+
+**The page is part of the citation.** The four pages state different rules for different
+patients — p.1 *Adults ≥50*, p.2 *19–49 immunocompromising*, p.3 *19–49 cochlear implant
+or CSF leak*, p.4 *19–49 chronic* — and **the same table row answers "schedule is
+complete" on p.1 and "review again at 50" on pp.2–4.** So each quoted entry declares a
+`pdfPage`, and every `population` was checked page by page. The 50+/19–49 split is the
+engine's existing `isOlderAdult` (i.e. `ROUTINE_ADULT_MIN_M`) — **never a second age
+test**; a hand-typed `am >= 600` there fails `regression-s6-1`.
+
+**A quoted PDF deep-links to its page, not to a sentence.** `#:~:text=` is an HTML text
+fragment and no PDF viewer honours it, so `highlightUrl()` emits `#page=N` for a PDF
+instead. These are the app's first quoted PDF citations; before them every quoted source
+was a web page. A quoted PDF with no `pdfPage` is a dead link that still looks live, so
+`refs.test.js` fails on one.
+
+⚠ **The ligature trap, and why a quote here must not be copied from a text dump.** The
+job aid's embedded font maps the fi/fl ligature to a bare `f`, so **every** extractor
+drops the following character: the document's *fluid* comes out *fuid*, *specified* as
+*specifed*, *deficiency* as *defciency*. Measured 2026-10-17 with two independent
+extractors: the letter pair **"fi" occurs zero times in all four pages**, and
+U+FB01/U+FB02 zero times — impossible for a document containing "specified
+immunocompromising conditions". `docs/archive/c7-2026-10-17-source-readings.md` recorded
+"fuid" as *"the document's own typo"*; **it is not**, and the quotes above are written as
+the document reads. (The doubled "leak" in "fluid leak (CSF) leak" **is** the document's
+own and stays.) A second trap: read this document **positionally** — a flat dump splices
+the row's left-hand cells into the middle of the shared-decision sentence, assembling a
+quote out of two unrelated patients.
+
+**Three statements are deliberately still uncredited (3,189 cards), pending the owner.**
+Each rests only on a table **cell** — `≥5 years`, `≥1 year`, `NO OPTION B` — which this
+document states in **no prose anywhere**:
+
+| Cards | The statement |
+|---|---|
+| 1,512 | PCV13 + PPSV23 given → PCV20/21 at ≥5 years |
+| 1,154 | PPSV23 given → a PCV at ≥1 year |
+| 523 | PCV13 given → PCV20/21 at ≥1 year, no PPSV23 needed |
+
+Under the cite-or-remove rule these are a clinical decision (quote the cell, or take the
+job aid off those cards) and so are the owner's, not a session's. All three are pinned as
+uncredited by `regression-c8-doc2-job-aid-cites-its-own-sentences.test.js`, so inventing
+a sentence the document does not contain fails a test.
+
+Guarded by `src/logic/__tests__/regression-c8-doc2-job-aid-cites-its-own-sentences.test.js`
+(23 tests; **13 failing / 10 passing before the fix**).
+
 ### What the risk class decides
 
 What the class decides on the adult pathway — **four separate questions**. Since S15

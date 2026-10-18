@@ -174,13 +174,34 @@ describe('C2 — the buttons carry the number the text uses', () => {
     const row = buttonRow();
     expect(row.map((b) => `${b.n} ${b.name}`)).toEqual([
       '[1] CDC Adult Notes',
-      '[2] CDC Adult Timing Job Aid',
-      '[3] MMWR ≥50 expansion',
+      '[2] MMWR ≥50 expansion',
+      '[3] CDC Adult Timing Job Aid',
     ]);
 
-    // All three of this card's markers cite the one document, so all three
-    // read [1] — correct, and now legible, because [1] names a button.
-    expect(markerNumbers()).toEqual(['[1]', '[1]', '[1]']);
+    // C8, document 2's CITEs (2026-10-17) landed here, on the owner's own
+    // card. It used to read ['[1]','[1]','[1]'] — every marker citing the one
+    // document, with buttons [2] and [3] printed below and nothing pointing at
+    // either. The job aid's footnote * now carries the "A PCV7-only history
+    // counts as no PCV history" sentence, so [2] appears IN THE TEXT and that
+    // button is no longer a number the reader cannot account for.
+    //
+    // C8, document 1's CITEs (2026-10-17) finished this card. mm7401a1 now
+    // carries the lead's own sentence — its ">=50 / None or PCV7 only at any
+    // age" row — so it is cited BEFORE the job aid and the numbers shift: the
+    // MMWR takes [2] and the job aid [3]. Nothing the card SAYS changed; one
+    // marker was added to the lead and two buttons swapped numbers.
+    //
+    // Reading order: the lead's ≥50 routine sentence [1] then ACIP's row [2];
+    // in the detail the PCV7 claim twice — Adult Notes [1] and the job aid
+    // [3] — then "each completes the series alone" [1].
+    expect(markerNumbers()).toEqual(['[1]', '[2]', '[1]', '[3]', '[1]']);
+
+    // EVERY button on the owner's own card is now pointed at — the whole of
+    // her original report ("I forget why there are multiple source chips
+    // listed if its only citing one of them"), on the card she reported it
+    // from. Asserted as a set equality rather than three separate checks so
+    // that a button added later without a citation fails here.
+    expect(new Set(markerNumbers())).toEqual(new Set(row.map((b) => b.n)));
   });
 
   it('a button no number points at is kept, not dropped', () => {

@@ -87,15 +87,42 @@ describe('C1 — the hover text on a raised number names its document', () => {
     expect(links.length, 'the note renders no citation links at all')
       .toBeGreaterThan(0);
 
+    // The card's own Sources row, as a number -> document-name map. Until
+    // 2026-10-17 every marker on this card was [1] / "CDC Adult Notes" and
+    // this test matched that string literally. C8 document 1 then credited
+    // mm7401a1 here, so the card legitimately carries three documents — and
+    // the literal would have had to be relaxed to a list of names, which is
+    // weaker than what C1 actually promises.
+    //
+    // So assert the promise itself: a marker's hover names the SAME document
+    // as the grey button wearing that marker's number. That is the whole
+    // point of C1 ("this is what lets a reader match a [1] to a chip"), it
+    // cannot pass while the two disagree, and it no longer has to be edited
+    // every time a card gains a source.
+    const chipName = new Map(
+      [...container.querySelectorAll('a.citation-chip')].map((a) => [
+        a.querySelector('.citation-chip-num')?.textContent.trim(),
+        a.textContent.replace(/^\[\d+\]/, '').trim(),
+      ]),
+    );
+    expect(chipName.size, 'the card renders no source buttons').toBeGreaterThan(0);
+
     for (const a of links) {
+      const n = a.textContent.trim();
       const title = a.getAttribute('title') ?? '';
-      expect(title, `a [${a.textContent}] hover text does not name its document`)
-        .toMatch(/^CDC Adult Notes\n/);
+      const expected = chipName.get(n);
+      expect(expected, `${n} is a marker with no button of that number`).toBeTruthy();
+      expect(title, `a ${n} hover text does not name its document`)
+        .toMatch(new RegExp(`^${expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\n`));
       // The verbatim sentence is still there — C1 ADDS the document name, it
       // does not replace the quote the owner relies on.
       expect(title.split('\n').slice(1).join('\n').length,
         'the quoted sentence was lost from the hover text').toBeGreaterThan(20);
     }
+    // And this card does exercise more than one document, so the check above
+    // is not quietly comparing one name against itself.
+    expect(new Set(links.map((a) => chipName.get(a.textContent.trim()))).size)
+      .toBeGreaterThan(1);
   });
 
   it('a recorded dose\'s explanation does the same, with its own document', () => {

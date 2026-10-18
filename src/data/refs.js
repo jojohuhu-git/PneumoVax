@@ -612,6 +612,225 @@ export const REFS = {
     short: 'CDC Adult Timing Job Aid',
     lastVerified: '2026-10-12',
   },
+
+  // ── C8, document 2's CITEs (2026-10-17): the job aid's own sentences ───
+  //
+  // The six entries below are the app's FIRST quoted PDF. Every quoted source
+  // before them was a web page, and two things follow from the difference:
+  //
+  //   1. `#:~:text=` does not work in a PDF viewer, so each declares
+  //      `pdfPage` and `highlightUrl()` emits `#page=N` instead. A quoted PDF
+  //      without `pdfPage` is a dead link that looks live; `refs.test.js`
+  //      fails on one.
+  //   2. This document prints a DIFFERENT interval for a different patient on
+  //      each of its four pages, so the page IS part of the citation. The
+  //      `label` names the page and the table row; `population` names who the
+  //      sentence is about.
+  //
+  // ⚠ READ THIS BEFORE RE-VERIFYING ANY QUOTE BELOW. The embedded font maps
+  // the fi/fl ligature glyph to a bare "f" in its ToUnicode table, so EVERY
+  // extractor drops the character after the f: the document's "fluid" comes
+  // out as "fuid", "specified" as "specifed", "deficiency" as "defciency".
+  // Measured 2026-10-17 with two independent extractors (scripts/pdfLayout.py
+  // and pypdf 6.13.0): the two-letter sequence "fi" occurs ZERO times across
+  // all four pages, and U+FB01/U+FB02 zero times — impossible for a document
+  // containing "specified immunocompromising conditions". The quotes below are
+  // written as the document READS, with the dropped letters restored.
+  // `docs/archive/c7-2026-10-17-source-readings.md` recorded "fuid" as "the
+  // document's own typo"; that is wrong, and this is the correction.
+  //
+  // The duplicated "leak" in "cerebrospinal fluid leak (CSF) leak" IS the
+  // document's own, and stays — it is not a ligature case.
+  //
+  // Read positionally, never from a flat dump: pypdf reads (G) below with the
+  // row's left-hand cells spliced into the middle of the sentence, because
+  // they are a different column of the same table row. That is the exact way
+  // a right-sounding quote gets assembled out of two unrelated patients.
+  jobAidSeriesCompleteAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: it is page 1's cell, and page 1 is the >=50 page. Pages 2-4 answer the SAME history with "review again at 50" instead, which is why this quote must never be shown below 50 (document 2, decision 2)
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.1 "Adults \u226550 years old", the row "PCV15 & PPSV23 OR PCV20 OR PCV21 / at any age", spanning both Option A and Option B',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'No vaccines recommended; schedule is complete.',
+    lastVerified: '2026-10-17',
+  },
+  jobAidSharedDecision65: {
+    rulebook: 'adult',
+    // Patients this sentence is about: its own words, "adults >=65 years old". >=65 sits inside Routine 50+; the card it appears on fires only when the PPSV23 dose was given at >=65, which implies the patient is >=65
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.1, the section "Shared clinical decision-making for those who already completed the series with PCV13 and PPSV23", row "Complete series: PCV13 at any age & PPSV23 at \u226565 yrs"',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'Together, with the patient, vaccine providers may choose to administer PCV20 or PCV21 to adults \u226565 years old who have already received PCV13 (but not PCV15, PCV20, or PCV21) at any age and PPSV23 at or after the age of 65 years old.',
+    lastVerified: '2026-10-17',
+  },
+  jobAidChronic1949ReviewAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: page 4 is headed "Adults 19-49 years old with chronic health conditions", and this is its PCV13 + PPSV23 row. Note the wording differs from the same row on pp.2-3 ("No vaccines ARE recommended"), and p.4's row has no Option A at all -- pp.2-3 give PCV20/21 at >=5 years, p.4 gives nothing until 50. That split IS the engine's chronic-only branch
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 4,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.4 "Adults 19\u201349 years old with chronic health conditions", the row "PCV13\u2020 and PPSV23 at any age", which has no Option A: no dose now, review at 50',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'No vaccines are recommended at this time. Review pneumococcal vaccine recommendations again when your patient turns 50 years old.',
+    lastVerified: '2026-10-17',
+  },
+  jobAidEightWeekOptionAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: it is page 1's footnote dagger, printed against the >=50 ">=1 year" cells. This is the sentence that makes 8 weeks an OPTION at 50+ rather than the recommendation -- the distinction CLAUDE.md forbids collapsing, and the reason the app names it only here
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.1, footnote \u2020 to the "Adults \u226550 years old" table, naming 8 weeks as a minimum interval that may be CONSIDERED (not recommended) for an immunocompromising condition, cochlear implant or CSF leak',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'Consider minimum interval (8 weeks) for adults with an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak (CSF) leak',
+    lastVerified: '2026-10-17',
+  },
+  jobAidPcv7CountsAsNone: {
+    rulebook: 'adult',
+    // Patients this sentence is about: footnote * is printed on ALL FOUR pages, against every "None*" row, so it speaks to every adult the job aid covers
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — footnote * to the "None*" row, printed on all four pages: a PCV7-only history is treated as no pneumococcal history',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'Also applies to people who received PCV7 at any age and no other pneumococcal vaccines',
+    lastVerified: '2026-10-17',
+  },
+  jobAidPpsv23Unavailable: {
+    rulebook: 'adult',
+    // Patients this sentence is about: footnote pilcrow is printed on ALL FOUR pages, against every PPSV23 cell, so it speaks to every adult the job aid covers. This is the ONLY source in the app that states the substitution, and the claim carried no citation at all before C8
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — footnote \u00b6 to every PPSV23\u00b6 cell, printed on all four pages: PCV20 or PCV21 may stand in for an unavailable PPSV23',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'If PPSV23 is not available, PCV20 or PCV21 may be used',
+    lastVerified: '2026-10-17',
+  },
+  // ── C8, document 1's CITEs (2026-10-17): mm7401a1's own sentences ─────
+  //
+  // Document 1's REMOVALS landed first: mm7401a1 came off the 5,331 cards it
+  // does not speak for and kept 2,544 where it does. These seven credit those.
+  //
+  // Read live 2026-10-17 from https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm
+  // through the browser pane — cdc.gov serves curl a shell, not the body. Six
+  // are cells of the TABLE "Clinical guidance for implementing pneumococcal
+  // vaccine recommendations for adults aged >=19 years"; the seventh is body
+  // prose.
+  //
+  // ⚠ THE TRAP: the table has THREE blocks (>=50, 19-49 immunocompromising /
+  // CSF leak / cochlear implant, 19-49 chronic) and each carries a row for the
+  // SAME history, worded differently. "None or PCV7 only" is >=1 year in two
+  // blocks and >=8 weeks in the IC one (S15, already `adultPcv15ThenPpsvShort`).
+  // "PCV13 only" differs by the single word "administered". And the IC block's
+  // "PCV13 + PPSV23" splits AGAIN on the NUMBER of PPSV23 doses — a split
+  // `population` cannot see, because it is not an age band. Quoting a
+  // neighbouring row here is the exact way a right-sounding sentence lands in
+  // front of the wrong patient.
+  mmwrBothPcv13Ppsv50plus: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the >=50 block, row "PCV13 at any age and PPSV23 at age <65 years". The >=65 twin is the shared-decision path, which this card never reaches
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age <65 years"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose.',
+    lastVerified: '2026-10-17',
+  },
+  // The 19-49 twin of the entry above. Its row OPENS with the same sentence,
+  // so the second sentence is quoted too: a clinician hovering must be able to
+  // tell which of the two rows this is, and the second sentence is also what
+  // supports the card's "This completes the series".
+  mmwrIc1949OnePpsv: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the 19-49 immunocompromising / CSF leak / cochlear implant block, row "PCV13 and 1 dose of PPSV23". Reaching this card below 50 means one of those three, because the chronic-only branch is intercepted earlier
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 1 dose of PPSV23"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
+    lastVerified: '2026-10-17',
+  },
+  // The SAME patient with a second PPSV23 dose, which mm7401a1 answers in its
+  // own row. Note what that row leads with: review again at 50, with the dose
+  // this card recommends offered as the ALTERNATIVE. The app states the dose
+  // flatly. That is a difference in emphasis between the app and ACIP, not a
+  // contradiction — the "Alternatively" sentence below is verbatim permission
+  // for exactly what the card says — but it is raised for the owner rather
+  // than papered over, and the quote is the one that supports the card.
+  mmwrIc1949TwoPpsv: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the 19-49 immunocompromising / CSF leak / cochlear implant block, row "PCV13 and 2 doses of PPSV23"
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 2 doses of PPSV23"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'Alternatively, a single dose of either PCV21 or PCV20 should be administered \u22655 years after the last pneumococcal vaccine dose.',
+    lastVerified: '2026-10-17',
+  },
+  // BODY PROSE, not a table cell, and the only one of the seven that is. It
+  // says "adults aged >=19 years" in its own words, so it needs no age split —
+  // and it is the sentence behind the card's "no PPSV23 needed", a claim that
+  // carried no citation at all before this.
+  mmwrPcv13NoPpsv23ToComplete: {
+    rulebook: 'adult',
+    // Patients this sentence is about: its own words, "adults aged >=19 years" who began with PCV13 and have not completed the series
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — the section "PPSV23 Use in PCV13-Experienced Adults Who Have Not Completed the Recommended Vaccination Series"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'Among adults aged \u226519 years who have started their pneumococcal vaccination series with PCV13 but have not received all recommended doses, PPSV23 is no longer recommended as an option to complete the series. Either PCV20 or PCV21 is recommended to complete the series as previously recommended.',
+    lastVerified: '2026-10-17',
+  },
+  // The CHRONIC block's "PCV13 and 1 dose of PPSV23" row. The chronic block
+  // has FOUR rows and stops here: it states nothing about a second PPSV23
+  // dose, which is why 45 cards are left uncredited pending an owner decision.
+  mmwrChronic1949ReviewAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the 19-49 "chronic medical conditions" block, row "PCV13 and 1 dose of PPSV23"
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with chronic medical conditions", the row "PCV13 and 1 dose of PPSV23"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'The pneumococcal vaccination recommendations should be reviewed again when the person reaches age 50 years.',
+    lastVerified: '2026-10-17',
+  },
+  // The one sentence in the paper that is ABOUT 19-49 adults as a group. It
+  // supports the second half of the no-risk card — that a vaccine is
+  // recommended at this age only with a risk condition — so that card does NOT
+  // need a fifth declared cross-reference to say it.
+  mmwrRiskBased1949Unchanged: {
+    rulebook: 'adult',
+    // Patients this sentence is about: its own words, "adults aged 19-49 years"
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — the summary "What is added by this report": the October 2024 expansion covers adults aged >=50, and the 19-49 recommendation stays risk-based',
+    short: 'MMWR \u226550 expansion',
+    quote: 'The risk-based recommendation for adults aged 19\u201349 years is unchanged.',
+    lastVerified: '2026-10-17',
+  },
+  // ONE entry for TWO blocks, on purpose. The ">=50" and "19-49 chronic"
+  // versions of the "None or PCV7 only at any age" row are word-for-word
+  // identical for these two sentences (the >=50 row then adds the 8-week
+  // option, which `jobAidEightWeekOptionAt50` already carries). `population`
+  // records who a sentence is ABOUT, and this one is printed about both — so
+  // this is one entry, not twins. The 19-49 IMMUNOCOMPROMISING version is a
+  // different sentence (>=8 weeks) and stays `adultPcv15ThenPpsvShort`.
+  mmwrNoneOrPcv7Only: {
+    rulebook: 'adult',
+    // Patients this sentence is about: printed identically in the >=50 block and the 19-49 chronic block, "None or PCV7 only at any age"
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "None or PCV7 only at any age", printed identically for adults aged >=50 and for adults aged 19\u201349 with chronic medical conditions',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21, PCV20, or PCV15. If PCV15 is administered, a single dose of PPSV23* should be administered \u22651 year after the PCV15 dose.',
+    lastVerified: '2026-10-17',
+  },
   cdcPneumoIndex: {
     rulebook: 'any',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/index.html',
@@ -810,10 +1029,25 @@ export function resolveRefs(keys = []) {
 // dedupe identity use. MeningoVax hit this on its one anchored citation
 // (2026-09-17); here BOTH of the most-cited refs are anchored, so it is the
 // normal case rather than an edge one.
-export function highlightUrl(url, quote) {
+//
+// ⚠ The PDF rule (C8, document 2's CITEs, 2026-10-17). A `#:~:text=` fragment
+// is an HTML text fragment: PDF viewers do not honour it, so on a PDF it is a
+// DEAD anchor that still looks like a working deep link. The job aid is the
+// app's first QUOTED PDF — every quoted source before it was a web page — and
+// quoting a 4-page document without saying which page is most of the way to
+// the "right-sounding quote attached to the wrong patient" failure, because
+// this document prints a DIFFERENT interval for a different patient on each
+// page. So a quoted PDF entry declares `pdfPage` and gets `#page=N`, which
+// Chrome, Safari and Preview all honour.
+//
+// A quoted PDF entry with NO `pdfPage` would silently fall through to a text
+// fragment that cannot work, so `refs.test.js` fails if one exists.
+export function highlightUrl(url, quote, pdfPage = undefined) {
   if (!url) return undefined;
   if (!quote) return url;
-  return `${url.split('#')[0]}#:~:text=${encodeURIComponent(quote)}`;
+  const page = url.split('#')[0];
+  if (pdfPage != null) return `${page}#page=${pdfPage}`;
+  return `${page}#:~:text=${encodeURIComponent(quote)}`;
 }
 
 // One citation occurrence: keyed, but deliberately NOT numbered. Each one
@@ -848,7 +1082,7 @@ export function cite(key, opts = undefined) {
   const out = {
     key,
     page: c?.url,
-    url: highlightUrl(c?.url, c?.quote),
+    url: highlightUrl(c?.url, c?.quote, c?.pdfPage),
     label: c?.quote ?? c?.label,
     doc: c?.short,
     quote: c?.quote,

@@ -103,4 +103,21 @@ describe('S6-1 — the routine-adult age (50y) has one home', () => {
     expect(table).not.toMatch(/\b600\b/);
     expect(table).toContain('ROUTINE_ADULT_MIN_M');
   });
+
+  // WIDENED 2026-10-17 (C8 document 2). The guard above scanned the `M` table
+  // and nothing else, so a hand-typed 600 anywhere ELSE in the engine walked
+  // straight past it. That was measured, not supposed: C8 added an
+  // age-conditional source list, and replacing its `isOlderAdult` with a bare
+  // `am >= 600` left **all 1,177 tests green** — behaviourally identical code,
+  // and exactly the second age test `CLAUDE.md` forbids twice ("Never add an
+  // age test that decides whether a rule may bite", the S14-RC root cause).
+  // A behavioural test cannot catch it, because there is no behaviour to
+  // catch; only the source can. There are 0 bare 600s in the engine's code
+  // today, so this starts from a clean file.
+  it('nowhere else in the engine writes 600 out by hand either', () => {
+    const src = read('../recommend.js');
+    const mStart = src.indexOf('const M = {');
+    const outsideTheTable = src.slice(0, mStart) + src.slice(src.indexOf('};', mStart));
+    expect(outsideTheTable).not.toMatch(/\b600\b/);
+  });
 });

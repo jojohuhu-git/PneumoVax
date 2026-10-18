@@ -195,18 +195,39 @@ describe('S15 — the quote beside the card states the card\'s own number', () =
     }
   });
 
-  it('every adult card links mm7401a1, the current recommendation', () => {
-    // `refs` is resolved into `citations` by rec(); assert the resolved list,
-    // which is what the card actually renders. Before S15 a 19–49 card linked
-    // rr7203a1 (2023) and NOT mm7401a1 — so the newest ACIP recommendation was
-    // absent from exactly the age band whose rule it had changed.
-    //
-    // This deliberately does NOT assert that rr7203a1 is absent. It is still
-    // reachable here, pulled in by individual risk conditions (asplenia,
-    // immunosuppression) that cite it as the source for the adult risk-factor
-    // LIST — a different claim from the interval, which mm7401a1 itself says
-    // is unchanged for 19–49 risk conditions. Whether to re-source those
-    // entries is an open question for the owner, not something S15 decided.
+  // ── NARROWED 2026-10-17 (C8 document 1), and here is exactly why ────────
+  //
+  // This test used to assert mm7401a1 on EVERY adult card, using the
+  // PCV15-only fixture below. C7 read mm7401a1 live and found that card's
+  // claim -- the PCV15 -> PPSV23 interval -- is not in the paper at all; the
+  // CDC Adult Timing Job Aid's `PCV15 only` row prints it, confirmed cell by
+  // cell against the job aid itself. The owner approved removing mm7401a1
+  // from that card and five others on 2026-10-17 (*"Approve all six
+  // removals."*), so "every adult card" is no longer the rule and this
+  // assertion had to move with it.
+  //
+  // IT IS NARROWED TO THE RULE IT ALWAYS MEANT, NOT RELAXED TO GO GREEN.
+  // What S15 was built to prevent is named in its own comment: before S15 a
+  // 19-49 card linked rr7203a1 (2023) and NOT mm7401a1, so the newest ACIP
+  // recommendation was absent from exactly the age band whose rule it had
+  // changed. That hazard is "the superseded paper is there and the current one
+  // is not" -- and it is now asserted directly, in both directions, instead of
+  // through the proxy "mm7401a1 is on everything".
+  //
+  // CHECKED BEFORE NARROWING, because a removal could have recreated the exact
+  // state S15 exists to stop: measured over the whole grid, rr7203a1 reaches
+  // **0 of 17,334 cards both before and after document 1**, and the PCV15-only
+  // card at 19-49 is left holding the Adult Notes and the job aid -- the
+  // document that actually prints its interval. So nothing regressed.
+  //
+  // ALSO FOUND, and corrected here: the old comment claimed rr7203a1 "is still
+  // reachable here, pulled in by individual risk conditions (asplenia,
+  // immunosuppression) that cite it as the source for the adult risk-factor
+  // LIST". That is no longer true of any card -- the measurement above is 0
+  // before document 1, not merely after it. The open question it recorded for
+  // the owner ("whether to re-source those entries") is therefore already
+  // answered: no card cites it. `refs.js` still holds the entry.
+  it('no adult card links rr7203a1 — the superseded 2023 paper', () => {
     for (const ageMonths of [YOUNG, OLDER]) {
       for (const risk of [...SHORTER_AT_19_49, ...CHRONIC]) {
         const out = recommend({
@@ -214,7 +235,26 @@ describe('S15 — the quote beside the card states the card\'s own number', () =
           pcvDoses: [{ date: PCV15_ON, product: 'PCV15' }], ppsv23Doses: [],
         });
         const urls = (out.recs[0].citations ?? []).map((x) => x.url ?? '').join(' ');
-        expect(urls).toMatch(/mm7401a1/);
+        expect(urls).not.toMatch(/rr7203a1/);
+      }
+    }
+  });
+
+  it('mm7401a1 IS linked on the cards whose claim it states, at both age bands', () => {
+    // The >=50 expansion and the PCV13-experienced rule are what the paper
+    // says, so these are the cards it belongs on -- document 1 kept it here.
+    // A no-history card and a PCV13-only card, at 19-49 and at 50+: if a
+    // future change took mm7401a1 off the adult pathway altogether, this
+    // fails, which is the other half of the hazard.
+    for (const ageMonths of [YOUNG, OLDER]) {
+      for (const risk of [...SHORTER_AT_19_49, ...CHRONIC]) {
+        for (const pcvDoses of [[], [{ date: PCV15_ON, product: 'PCV13' }]]) {
+          const out = recommend({
+            ageMonths, riskIds: [risk], today: TODAY, pcvDoses, ppsv23Doses: [],
+          });
+          const urls = (out.recs[0].citations ?? []).map((x) => x.url ?? '').join(' ');
+          expect(urls, `age ${ageMonths}, ${risk}, ${pcvDoses.length} dose(s)`).toMatch(/mm7401a1/);
+        }
       }
     }
   });

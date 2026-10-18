@@ -138,7 +138,43 @@ rather than assumed.
 >
 > So mm7401a1 keeps only what it actually says — the ≥50 expansion (A)/(B) and the
 > PCV13-experienced-incomplete-series rule (C) — and the five intervals move to the job
-> aid, which prints them. None of this is applied to code yet.
+> aid, which prints them.
+
+### ✅ OWNER DECISION + APPLIED 2026-10-17 — all six removals
+
+*"Approve all six removals."* Brought to the owner as one batch with each statement's live
+quote and its re-measured card count. **Removals applied**, held by
+`regression-c8-doc1-mmwr-only-where-it-speaks.test.js` (17 tests; 10 passing / 7 failing
+before the fix, 17 after).
+
+| cards | statement | mm7401a1 |
+|---|---|---|
+| 2,610 | series includes PCV20/21 → complete | REMOVED |
+| 1,154 | ≥1 year after the PPSV23 dose | REMOVED |
+| 914 | PCV15 + PPSV23 → complete | REMOVED |
+| 440 | ≥5 years is a shared clinical decision | REMOVED |
+| 138 | PPSV23 ≥1 year after PCV15 | REMOVED |
+| 75 | …the same, plus the 8-week option | REMOVED |
+| **5,331** | **six statements** | **off** |
+| 2,544 | the seven ≥50-expansion / PCV13-experienced statements | kept |
+
+Measured on the combined tree: every mm7401a1 button **7,920 → 2,564**; the uncredited
+subset **7,875 → 2,544**; total grey buttons **45,841 → 39,395**; unpointed buttons
+**26,651 → 20,205**; cards carrying at least one unpointed button **16,878 → 15,943**; and
+**"cards citing a document with no button" still 0** — no removal orphaned a citation.
+
+⚠ **It collided with a pre-existing test, and the collision was real.** S15 asserted
+mm7401a1 on *every* adult card, using the PCV15-only fixture — one of the six removals. S15
+exists because a 19–49 card once linked the superseded **rr7203a1 (2023)** and not
+mm7401a1. **Checked before narrowing anything:** rr7203a1 reaches **0 of 17,334 cards both
+before and after** this change, and the PCV15-only card is left holding the Adult Notes and
+the job aid, the document that prints its interval. So the assertion was narrowed to the
+hazard S15 actually names, in both directions, and S15's own comment — which claimed
+rr7203a1 was "still reachable" via risk conditions — was stale and is corrected.
+
+**The two PCV13 cards keep mm7401a1 for the "PCV20 or PCV21, and NOT PPSV23" half only.**
+The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
+CITE, still unwritten. Do not let one quote cover both halves.
 
 ---
 
@@ -302,7 +338,48 @@ nothing new. That is also why the app already has a re-evaluate card (#7) for th
 conditions, which gains PCV20/21 at ≥5 years. The distinction the engine draws is sound.
 What is wrong is only **which document is credited to whom.**
 
-### ✅ OWNER DECISIONS 2026-10-17 — document 2 is settled, ready for C8
+### ⬖ PARTLY APPLIED 2026-10-17 — the two owner DECISIONS are in; the 12 CITEs are NOT
+
+**Read this heading literally.** Document 2's disposition has two halves and only one of them
+has landed. The REMOVE and the cite-or-remove split — the two things the owner decided — are
+in the code. The **12 CITE statements are untouched**: each one still needs its inline `[c]`
+marker pointed at the job aid's own sentence, with the quote recorded.
+
+Measured on the combined tree (C2/C3 + this), **the job aid is still an uncredited button on
+6,805 cards across 14 distinct statements.** That number falling is what finishing the CITEs
+looks like; the 1,115 below is only the removals.
+
+**Branch `feature/2026-10-17-c8-per-card-sources`, off `main` at `5bffe00`.** Both decisions
+below — and only those two — are now in `recommend.js`, held by
+`regression-c8-doc2-job-aid-only-where-it-speaks.test.js` (15 tests; 9 passing / 6 failing
+before the fix, 15 after). **C2/C3 merged as PR #66 while this branch was being written**,
+so the branch was rebased onto it: suite **1,178 passing in 102 files**, and the
+`uncreditedSources.mjs` smoke test's skip is gone.
+
+It never depended on C2/C3: the change is in the engine, not the renderer. Every mutation
+count here was re-measured on the merged tree rather than carried over from the pre-merge
+one, and four of them moved — documents 1 and 2 share one expression, so each other's tests
+now catch more.
+
+**The mechanism change the decisions needed is done and is reusable.** The adult pathway no
+longer computes one source list and spreads it over all ten cards: `ADULT_DEFAULT_REFS` is
+the default and a card asks for its own list through `adultRefs(...)`. A card that does not
+ask is byte-identical to before, so **documents 1, 3, 5 and 6 need no further plumbing** —
+only the owner's sign-off on their removals.
+
+**Counts re-measured before applying, and they had moved.** The table below was measured
+over 16,202 cards; the grid is now 17,334 after the IC-children fix. Statement #8 is **180
+cards, not 171**; #1 (2,610 = 630 under 50 + 1,980 at 50+) and #4 (914 = 305 + 609) were
+unchanged, so decision 2 moves **2,589 keep / 935 lose**, as decided. Measured effect on the
+whole grid: grey buttons 45,841 → 44,726, unpointed buttons 26,651 → 25,536, the job aid's
+own unpointed count 7,920 → 6,805 — all three exactly −1,115 — and "cards citing a document
+with no button" stayed at 0.
+
+**Checked live**, one patient with only the age changed: 35y with diabetes and a PCV20 on
+record shows `[1]` CDC Adult Notes, `[2]` MMWR; at 55y the same card shows `[1]` CDC Adult
+Notes, `[2]` CDC Adult Timing Job Aid, `[3]` MMWR — same sentence, word for word.
+
+### ✅ OWNER DECISIONS 2026-10-17 — the two decisions, as made
 
 Both brought to the owner with the quotes and the measured card counts above, and both
 decided. **Nothing is applied to code yet** — C8 applies all six documents' dispositions as

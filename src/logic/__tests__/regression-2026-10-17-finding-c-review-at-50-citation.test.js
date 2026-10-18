@@ -50,6 +50,7 @@ import { recommend } from '../recommend.js';
 import { REFS } from '../../data/refs.js';
 import { buildCases, CORPUS_TODAY } from '../../test-grid.js';
 import { ROUTINE_ADULT_MIN_M, ADULT_SCHED_MIN_M } from '../scheduleConstants.js';
+import { noteCiteSlices } from '../../components/citations.jsx';
 
 const TODAY = '2026-10-11';
 
@@ -97,16 +98,61 @@ describe('FINDING C — the review-at-50 card quotes the 19-49 rule, not the 50+
     expect(card.noteCites[0].quote).toMatch(/no additional PCV or PPSV23 doses recommended at this time/);
   });
 
+  // Asserted by HALF rather than by index (C8, document 2's CITEs,
+  // 2026-10-17). This test used to pin `noteCites` as a two-element list in
+  // order, which answered the right question only while the lead had exactly
+  // one citation. C8 gave the lead a second one — the job aid's page 4 row,
+  // the same "no dose now" claim in CDC's own words — and an index assertion
+  // would have failed for a change that is precisely what it wants.
+  //
+  // The hazard is unchanged and now stated directly: the sentence that
+  // INSTRUCTS a dose must sit on the detail half, and never beside "no
+  // additional pneumococcal dose now". Read through `noteCiteSlices`, which is
+  // the same function the screen uses to decide which number goes where, so
+  // the test cannot pass while the rendered card disagrees.
   it('the 50+ sentence is kept, on the half of the note it actually supports', () => {
     const card = reviewCard(chronicOnly1949());
-    // The detail half states what happens at 50; that is what adultBothNotAt65
-    // says. Two [c] markers, two cites, in order.
-    expect(card.noteCites.map((c) => c.key)).toEqual([
+    const { lead, detail } = noteCiteSlices(card.note, card.noteCites);
+
+    // The lead says no dose is due. Every citation beside it must be a
+    // sentence that says the same, about this patient's own age band.
+    expect(lead.map((c) => c.key)).toEqual([
       'adultChronicOnlyReviewAt50',
-      'adultBothNotAt65',
+      'jobAidChronic1949ReviewAt50',
+      // C8, document 1's CITE (2026-10-17): ACIP's own chronic-block row for
+      // this history. A third document now states the same claim, which is
+      // what this card is supposed to accumulate.
+      'mmwrChronic1949ReviewAt50',
     ]);
-    expect(card.note.lead.match(/\[c\]/g) ?? []).toHaveLength(1);
-    expect(card.note.detail.match(/\[c\]/g) ?? []).toHaveLength(1);
+    for (const c of lead) {
+      // THE HAZARD, stated directly instead of through one phrase. The old
+      // assertion required the words "no additional" or "no vaccines", which
+      // was a proxy for "does not instruct a dose" — and it could not express
+      // mm7401a1's row, which defers the question ("should be reviewed again
+      // … at age 50") without ever saying "no". So both shapes are allowed,
+      // and the thing actually forbidden is now forbidden by name.
+      expect(c.quote, `${c.key} sits beside "no dose now"`)
+        .toMatch(/no (additional|vaccines)|review(ed)? [^.]*again|review [^.]*when age/i);
+      expect(c.quote, `${c.key} must not instruct a dose beside "no dose now"`)
+        .not.toMatch(/\b(1 dose|a single dose|administer)/i);
+      expect(REFS[c.key].population, c.key).toEqual(['adult-19to49']);
+    }
+
+    // The detail half is the only place the 50+ instruction belongs.
+    expect(detail.map((c) => c.key)).toEqual(['adultBothNotAt65']);
+    expect(detail[0].quote).toMatch(/1 dose PCV20 or 1 dose PCV21 at least 5 years/);
+
+    // Marker counts still match the slices, so nothing is silently dropped.
+    // The lead went 2 -> 3 on 2026-10-17 when C8 document 1 credited
+    // mm7401a1's own chronic-block row; the detail is unchanged.
+    const leadMarkers = (card.note.lead.match(/\[c\]/g) ?? []).length;
+    const detailMarkers = (card.note.detail.match(/\[c\]/g) ?? []).length;
+    expect(leadMarkers).toBe(3);
+    expect(detailMarkers).toBe(1);
+    // And every marker has a citation behind it. Without this, adding a "[c]"
+    // and forgetting its cite would silently truncate the slice instead of
+    // failing — the card would print a number that points at nothing.
+    expect(card.noteCites).toHaveLength(leadMarkers + detailMarkers);
   });
 
   it('holds for every chronic-only risk condition, not just diabetes', () => {
