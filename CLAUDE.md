@@ -99,6 +99,15 @@ cannot see that — it records an age band. The engine reads `ppsv.count` (the E
 count; a rejected dose is not a dose ACIP's row is about) in exactly one place,
 `mmwrBothPcv13PpsvKey()`. **Never collapse those two IC rows into one.**
 
+Since 2026-10-18 the two IC rows differ in the **card's own words** as well as its quote
+(OWNER DECISION, *"use MMWR"*): the two-dose card leads with "Review the pneumococcal
+recommendations again at age 50" and offers the dose as the alternative, because that is
+ACIP's order; the one-dose card keeps the flat recommendation, because ACIP's one-dose row
+is flat. **The dose itself is unchanged on both** — same products, same five years, same
+status, same due date — so neither verdict corpus moves. Changing the note without the
+`doseLabel` would leave the header leading with the dose while the body leads with the
+review; the test asserts the label's order too.
+
 **Before removing a document from a card, read the document — including its TABLES.**
 FINDING F (2026-10-18): six removals were approved on 2026-10-17 on the stated ground that
 mm7401a1 "states none of these", from a reading that had recorded three sentences and never

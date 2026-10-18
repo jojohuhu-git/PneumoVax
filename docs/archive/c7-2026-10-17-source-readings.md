@@ -176,6 +176,42 @@ rr7203a1 was "still reachable" via risk conditions — was stale and is correcte
 The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
 CITE, still unwritten. Do not let one quote cover both halves.
 
+### ✅ OWNER DECISION 2026-10-18 — the 19–49 IC card with TWO PPSV23 doses: *"use MMWR"*
+
+Raised, not changed, by the previous session: ACIP's immunocompromising block answers a
+PCV13 + PPSV23 history in two rows that do not say the same thing.
+
+| ACIP's row | What it says |
+|---|---|
+| PCV13 and **1 dose** of PPSV23 | "A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete…" — a flat recommendation |
+| PCV13 and **2 doses** of PPSV23 | "The pneumococcal vaccination recommendations should be reviewed again when the person turns age 50 years. **Alternatively**, a single dose of either PCV21 or PCV20 should be administered ≥5 years…" |
+
+The app gave both patients the same card, stating the dose flatly. Not a contradiction —
+the "Alternatively" sentence is word-for-word permission — but it hid a choice ACIP prints,
+on the one card where ACIP's lead is to wait. **45 cards.**
+
+The owner answered with the full row, and it is now both what the card says and what its
+citation quotes. `mmwrIc1949TwoPpsv` was previously only the "Alternatively…" sentence,
+which showed the alternative while hiding what it was an alternative *to*.
+
+**What did not change:** the dose. Same products, same five years, same `status`, same due
+date — ACIP permits it explicitly, and the one-dose card is untouched because ACIP's
+one-dose row really is flat. Only the words changed, and **both** of them: the note and the
+`doseLabel`, because the label is the first line read and a header still leading with the
+dose would contradict the body. Both verdict corpora record prose and dose labels nowhere
+by design, so neither moved — confirmed green and unmodified on disk.
+
+⚠ **It collided with FINDING C's guard, and the collision was real.** That guard selected
+cards by the words "review at age 50" in the dose label alone, and this new card now carries
+that phrase while *offering a dose* — the opposite of FINDING C's hazard, which is a card
+saying no dose is due beside a quote instructing one. The selector was narrowed to
+"mentions the review at 50 **and offers no product**", an anti-vacuity count of 210 was
+added so it cannot pass on an empty set, and the new card is asserted **separately** rather
+than merely excluded. New file:
+`regression-c8-2026-10-18-ic-two-ppsv-follows-acip-order.test.js`.
+
+---
+
 ### ✅ OWNER DECISION 2026-10-18 — the job aid's 3 cell-only statements: *"use MMWR table"*
 
 The three statements held open at the top of document 2's section (3,189 cards) rested on

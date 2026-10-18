@@ -839,7 +839,13 @@ export const REFS = {
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 2 doses of PPSV23"',
     short: 'MMWR \u226550 expansion',
-    quote: 'Alternatively, a single dose of either PCV21 or PCV20 should be administered \u22655 years after the last pneumococcal vaccine dose.',
+    // Extended 2026-10-18 from the "Alternatively" sentence to the WHOLE row
+    // (OWNER DECISION, *"use MMWR"*). The row's first sentence is the one the
+    // card now leads with, and nothing else in the app's source set states it
+    // for this patient -- CDC's Adult Notes give only the dose and its five
+    // years. Quoting the sentence without the one before it showed the
+    // alternative while hiding what it is an alternative TO.
+    quote: 'The pneumococcal vaccination recommendations should be reviewed again when the person turns age 50 years. Alternatively, a single dose of either PCV21 or PCV20 should be administered \u22655 years after the last pneumococcal vaccine dose. If PCV21 or PCV20 is used, the series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
     lastVerified: '2026-10-17',
   },
   // BODY PROSE, not a table cell, and the only one of the seven that is. It

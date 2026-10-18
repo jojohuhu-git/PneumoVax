@@ -128,8 +128,10 @@ const QUOTES = {
     'A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose.',
   mmwrIc1949OnePpsv:
     'A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
+  // Extended 2026-10-18 to the whole row — see
+  // regression-c8-2026-10-18-ic-two-ppsv-follows-acip-order.test.js.
   mmwrIc1949TwoPpsv:
-    'Alternatively, a single dose of either PCV21 or PCV20 should be administered ≥5 years after the last pneumococcal vaccine dose.',
+    'The pneumococcal vaccination recommendations should be reviewed again when the person turns age 50 years. Alternatively, a single dose of either PCV21 or PCV20 should be administered ≥5 years after the last pneumococcal vaccine dose. If PCV21 or PCV20 is used, the series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
   mmwrPcv13NoPpsv23ToComplete:
     'Among adults aged ≥19 years who have started their pneumococcal vaccination series with PCV13 but have not received all recommended doses, PPSV23 is no longer recommended as an option to complete the series. Either PCV20 or PCV21 is recommended to complete the series as previously recommended.',
   mmwrChronic1949ReviewAt50:
@@ -214,10 +216,14 @@ describe('each card credits the row that was written about its own patient', () 
     expect(citeKeys(card)).not.toContain('mmwrIc1949TwoPpsv');
   });
 
+  // 2026-10-18: this card's lead changed to ACIP's order, so it no longer
+  // opens with "PCV13 and PPSV23 already given". The citation assertion is
+  // unchanged -- which row it quotes is still the point.
   it('S1 · 19-49 immunocompromised with TWO PPSV23 quotes the 2-dose row', () => {
     const r = run({ ...IC_19_49, pcvDoses: TWO_PCV13, ppsv23Doses: TWO_PPSV });
     expect(effectivePpsv(r)).toBe(2);
-    const card = findByNote(r, 'PCV13 and PPSV23 already given');
+    const card = findByNote(r, 'Review the pneumococcal recommendations again at age 50');
+    expect(card).toBeDefined();
     expect(citeKeys(card)).toContain('mmwrIc1949TwoPpsv');
     expect(citeKeys(card)).not.toContain('mmwrIc1949OnePpsv');
   });
@@ -264,10 +270,11 @@ describe('each card credits the row that was written about its own patient', () 
   it('S3 · the IC block still answers one dose and two doses differently', () => {
     const one = run({ ...IC_19_49, pcvDoses: PCV13, ppsv23Doses: ONE_PPSV });
     const two = run({ ...IC_19_49, pcvDoses: TWO_PCV13, ppsv23Doses: TWO_PPSV });
-    const keyOf = (r) => citeKeys(findByNote(r, 'PCV13 and PPSV23 already given'))
-      .find((k) => k.startsWith('mmwrIc1949'));
-    expect(keyOf(one)).toBe('mmwrIc1949OnePpsv');
-    expect(keyOf(two)).toBe('mmwrIc1949TwoPpsv');
+    // The two cards now differ in their lead sentence as well as their quote
+    // (2026-10-18), so each is found by its own opening.
+    const keyIn = (r, lead) => citeKeys(findByNote(r, lead)).find((k) => k.startsWith('mmwrIc1949'));
+    expect(keyIn(one, 'PCV13 and PPSV23 already given')).toBe('mmwrIc1949OnePpsv');
+    expect(keyIn(two, 'Review the pneumococcal recommendations again at age 50')).toBe('mmwrIc1949TwoPpsv');
     expect(REFS.mmwrIc1949OnePpsv.quote).not.toBe(REFS.mmwrIc1949TwoPpsv.quote);
   });
 
