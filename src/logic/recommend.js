@@ -1113,7 +1113,21 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // `>= 3` is kept rather than replaced so a three-dose history with an
   // undated dose — which `allCountingPcvBefore72mo` deliberately excludes —
   // lands exactly where it did before.
-  if (pcv.count >= 3 || allCountingPcvBefore72mo) {
+  //
+  // FINDING I (2026-10-18): `&& pcv.band.ge72 === 0` is the condition the kept
+  // half was missing. `pcv.count >= 3` on its own also caught a fully DATED
+  // three-dose history given at or after age 6 — a teenager with three PCV13
+  // doses at 16 was told they "completed PCV13/15 before age 6". 64 cards made
+  // that claim; another 32 were routed here without claiming anything about
+  // age. The undated case the `>= 3` exists for is untouched, because
+  // `band.ge72` counts DATED doses only.
+  //
+  // Not written as the shorter `pcv.count >= 1 && pcv.band.ge72 === 0`, which
+  // reads better and is wrong: it would pull a child with one or two UNDATED
+  // doses out of rows 8/9 and into rows 4/5, asserting "completed before age 6"
+  // about doses whose dates nobody knows. Neither row describes that child;
+  // this change does not pretend to settle them and leaves them where they are.
+  if ((pcv.count >= 3 && pcv.band.ge72 === 0) || allCountingPcvBefore72mo) {
     // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
     if (ppsvGiven) {
       // non-IC: PPSV23 already given → complete.
