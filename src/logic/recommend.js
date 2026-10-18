@@ -1208,9 +1208,35 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // current sources contradict. mm7401a1's clinical guidance table carries all
   // three adult blocks (>=50, 19–49 IC/CSF/cochlear, 19–49 chronic), so it
   // covers every adult row this file uses. Do not reinstate rr7203a1 here.
-  const refs = collectRefs(riskIds, [
-    'cdcAdultPneumo', 'cdcAdultTimingJobAid', 'mmwr7401a1',
-  ], 'adult');
+  //
+  // C8, document 2 (OWNER DECISIONS 2026-10-17). These three are the adult
+  // pathway's DEFAULT source list, and a card may now ask for a different one.
+  // That is the structural fix for the root cause the owner reported: one
+  // `collectRefs` call used to be computed here and spread onto all ten adult
+  // cards, so every card listed all three documents whether or not anything it
+  // said rested on them -- the whole of "I forget why there are multiple
+  // source chips listed if its only citing one of them". A card asks for its
+  // own list through `adultRefs()`; the default is unchanged, so a card that
+  // does not ask is exactly as it was.
+  const ADULT_DEFAULT_REFS = ['cdcAdultPneumo', 'cdcAdultTimingJobAid', 'mmwr7401a1'];
+  const adultRefs = (defaults = ADULT_DEFAULT_REFS) => collectRefs(riskIds, defaults, 'adult');
+  const refs = adultRefs();
+  // Document 2, decision 1: the Timing Job Aid never states in words that
+  // routine vaccination begins at 50 -- that is inferable only from its page
+  // HEADINGS. Citing a table of contents as the source of a prose claim is the
+  // "right-sounding quote that isn't there" failure, so it comes off.
+  const refsWithoutJobAid = adultRefs(
+    ADULT_DEFAULT_REFS.filter((k) => k !== 'cdcAdultTimingJobAid'),
+  );
+  // Document 2, decision 2: the job aid's page 1 row `PCV15 & PPSV23 OR PCV20
+  // OR PCV21 / at any age` answers (D) "schedule is complete" -- but page 1 is
+  // the >=50 page. On pages 2-4 the same history answers (E) "Review
+  // pneumococcal vaccine recommendations again when your patient turns 50
+  // years old", which is not what these two cards say. So the job aid is
+  // credited at 50+ and removed below it. The advice does not move; only the
+  // credit does. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M predicate -- do not
+  // grow a second age test here.
+  const refsSeriesComplete = isOlderAdult ? refs : refsWithoutJobAid;
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
   // SAME number the card states, so it follows the same predicate.
   const ppsvIntervalCite = ppsvIntervalDays != null
@@ -1235,7 +1261,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         }),
         cite('cdcAdultRiskFactorList'),
       ],
-      refs,
+      refs: refsWithoutJobAid,
     })];
   }
 
@@ -1249,7 +1275,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       doseLabel: `Complete (history includes ${pcv.hasPCV21 ? 'PCV21' : 'PCV20'})`,
       note: 'A pneumococcal series that includes PCV20 or PCV21 is complete — no PPSV23 and no further PCV needed [c].',
       noteCites: [cite('adultPcv20or21Complete')],
-      refs,
+      refs: refsSeriesComplete,
     })];
   }
   // PCV15 + PPSV23 → complete.
@@ -1259,7 +1285,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       doseLabel: 'Complete (PCV15 + PPSV23)',
       note: 'PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c].',
       noteCites: [cite('adultPcv15ThenPpsv')],
-      refs,
+      refs: refsSeriesComplete,
     })];
   }
 
