@@ -132,6 +132,46 @@ Where a disposition splits by age, the predicate is the engine's existing `isOld
 passed all 1,177 tests, so `regression-s6-1-routine-adult-age-one-home.test.js` now guards
 the whole engine's source, not just the `M` table.
 
+### A Card Carries Every Document With A Fitting Row, And None Without
+**OWNER RULE 2026-10-18:** *"If using p2016 tables, all columns need to fit patient
+criteria in order to use recommendations."* p2016 Table 4's columns are **Child's age now |
+Number of previous PCV13, PCV15, or PCV20 doses | Option A | Option B**. A row governs a
+patient only when the age column **and** the prior-dose column both fit. Matching the age
+band alone is not enough — the prior-dose column is where every 2026-10-18 finding hid.
+This also answers C7's structural question: a table CELL may be quoted as governing text,
+with that constraint.
+
+**OWNER DECISION 2026-10-18 on who decides.** Asked whether each case must be walked
+through, the owner chose: **decide without asking when every candidate document gives the
+SAME dose and the only question is which goes on the card.** Three situations still come
+back to her every time — (a) no document has a row for the history, (b) two documents give
+different doses, (c) the change would move a verdict and not just wording. Every judgement
+call goes in the PR body, grouped, so she audits them in one place. This **supersedes** the
+older "a removal goes to the owner per document" for the dose-unchanged case; it does not
+touch (a)–(c), and a removal still requires reading the document **including its tables**
+first (FINDING F).
+
+The machine guard she required is
+`regression-2026-10-18-every-p2016-card-has-a-row-that-fits.test.js`, which holds p2016's
+whole row inventory and fails if any card cites it without a fitting row (7,371 cards carry
+it, 0 unfitting). **Know its limit:** it asks whether *some* row fits, not whether the row
+the card *used* fits — so it catches a wrong DOCUMENT (FINDING J) and not a wrong ROW of a
+document that does cover the patient (FINDING I). The second is guarded per finding.
+Closing it generally needs the engine to record which row it used, which it does not do.
+
+### PCV13 And PCV15 Are Interchangeable Going Forward; An Unrecorded Product Is Not A PCV20
+**OWNER RULINGS 2026-10-18.** This matters because every document stating a conjugate dose
+given **at or after age 6** names PCV13 and only PCV13 — CDC's child notes ("Received PCV13
+only at or after age 6 years"), p2016 Table 4 rows 8/9, and CDC's risk-indications page,
+which has **no** at/after-6 branch at all. So for a PCV15 at that age no document has a row,
+and these rulings are the answer. ACIP says the first in words
+(`pedsPcv13Pcv15Interchangeable`, mm7137a3: *"For all recommendations, PCV13 and PCV15 can
+be used interchangeably"*), and the card now says so in its own words wherever a
+PCV13-worded row is used for another product. **Never print a product the record does not
+show** — that was FINDING H and the 112 residue, 720 cards. Rows 4/5 get **no** such bridge:
+CDC's before-6 row is already product-agnostic ("Received PCV before age 6 years"), so
+nothing is being substituted there.
+
 ### PCV7 Never Counts
 Recorded as `noncounting`, dropped from effective series. High-risk patients treated as PCV-naïve. Source: immunize.org Ask the Experts.
 
@@ -221,8 +261,8 @@ all four stale copies of the pre-A-P1-1 adult interval.
 
 ### A Verdict That Moves Must Be Explained
 TWO corpora, both built from `src/test-grid.js`, both gates. `sweep-verdict-corpus.test.js`
-re-runs the engine over **16,008 patients a clinician could really enter**;
-`sweep-record-problem-corpus.test.js` re-runs it over **17,652 impossible ones** — a dose
+re-runs the engine over **17,016 patients a clinician could really enter**;
+`sweep-record-problem-corpus.test.js` re-runs it over **18,264 impossible ones** — a dose
 dated before the patient was born, or dated after today. Either fails if an answer differs
 from its committed corpus. **Do not run `npm run sweep:update` (which regenerates both) until
 you can say why those patients should get a different answer**, then put both moved counts in
@@ -231,15 +271,19 @@ all three PneumoRecs harnesses stayed byte-identical. New sweeps build on `src/t
 — never a second case list.
 
 **Why the impossible entries are a second FILE and not more rows in the first** (owner
-decision, 2026-10-12): so 16,008 keeps meaning "real patients", and a clinical change that
+decision, 2026-10-12): so 17,016 keeps meaning "real patients", and a clinical change that
 moves 300 of them reads as 300 lines rather than 300 lost among 23,000 impossible records.
 The main grid *discards* 15,340 before-birth combinations on one line and cannot express a
 future date at all, so both record-problem rules were guarded by nothing: deleting
 `isBeforeBirth()` left the main sweep green 12/12, and so did disabling `futureDated()`.
 Against the second corpus the same two mutations moved **14,304** and **1,980** when that
 was measured, of the 18,460 rows the corpus held then. (Both corpus SIZES above were
-re-counted from the committed files on 2026-10-17 and corrected here — they had drifted.
-The two mutation figures are left as measured and not rescaled.)
+re-counted from the committed files on 2026-10-18 and corrected here — they had drifted
+again: this paragraph still said 16,008 and 17,652 after the 2026-10-17 pass, because that
+session flagged the drift to the owner rather than editing her rulebook. Counted with `wc -l`
+on the committed TSVs, which carry no header row: `verdict-corpus.tsv` 17,016 and
+`record-problem-corpus.tsv` 18,264. The two mutation figures are left as measured and not
+rescaled.)
 **Add a rule to `recordProblemFor()` → add its shape to `GRID_FUTURE_*` in the same commit.**
 
 ### Every Quote Names The Patient It Was Written About
