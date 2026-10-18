@@ -304,9 +304,16 @@ What is wrong is only **which document is credited to whom.**
 
 ### ✅✅ APPLIED 2026-10-17 — document 2 is the only document C8 has landed
 
-**`03570ac` on `feature/2026-10-17-c8-per-card-sources`.** Both decisions below are now in
-`recommend.js`, held by `regression-c8-doc2-job-aid-only-where-it-speaks.test.js` (15 tests;
-9 passing / 6 failing before the fix, 15 after). Suite 1,157 passing in 100 files.
+**Branch `feature/2026-10-17-c8-per-card-sources`, off `main` at `5bffe00`.** Both decisions
+below are now in `recommend.js`, held by
+`regression-c8-doc2-job-aid-only-where-it-speaks.test.js` (15 tests; 9 passing / 6 failing
+before the fix, 15 after). Suite **1,143 passing in 99 files**, up 16 from main's 1,127 —
+15 for the new guard and 1 for the widened age-literal guard it turned up.
+
+It does **not** depend on C2/C3 after all: the change is in the engine, not in the renderer,
+so this branch sits straight on `main` and the two can be merged in either order. The
+mutation counts below were measured on both trees — stacked on C2/C3 and off `main` — and
+came out identical.
 
 **The mechanism change the decisions needed is done and is reusable.** The adult pathway no
 longer computes one source list and spreads it over all ten cards: `ADULT_DEFAULT_REFS` is

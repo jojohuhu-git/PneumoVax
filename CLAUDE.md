@@ -83,7 +83,7 @@ quote a count from the log, which predates the IC-children fix and reads low.
 
 Where a disposition splits by age, the predicate is the engine's existing `isOlderAdult`
 (i.e. `ROUTINE_ADULT_MIN_M`). **Never a second age test** — a hand-typed `am >= 600` there
-passed all 1,156 tests, so `regression-s6-1-routine-adult-age-one-home.test.js` now guards
+passed all 1,142 tests, so `regression-s6-1-routine-adult-age-one-home.test.js` now guards
 the whole engine's source, not just the `M` table.
 
 ### PCV7 Never Counts
