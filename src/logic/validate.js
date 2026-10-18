@@ -541,7 +541,17 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   if (prod && prod.key === 'PCV7') {
     return noncounting([
       'PCV7 (Prevnar 7) is not counted toward the pneumococcal series. Per ACIP/immunize.org[c], PCV7 doses are ignored when determining current pneumococcal needs — treat the patient as if PCV-naïve for these doses.',
-    ], [cite('immPCV7')]);
+      // A declared cross-reference (2026-10-17). The quote is written about
+      // "an older teen or adult patient at increased risk", and this verdict
+      // is applied to EVERY patient, including a healthy child — 108 of them
+      // in the grid. That gap is deliberate and settled: OWNER DECISION
+      // 2026-10-12, PCV7 never counts, for anyone, and the engine is not to be
+      // narrowed to the citation's scope. Declaring it here keeps the known
+      // gap visible instead of widening the source's `population` until the
+      // sentence appears to say something it does not.
+    ], [cite('immPCV7', {
+      aboutAnotherGroup: 'immunize.org states the rule for an at-risk older teen or adult; the owner extended it to every patient (2026-10-12)',
+    })]);
   }
 
   // PCV21 is licensed from 18y (the PRODUCT gate — PCV21_MIN_AGE_M, NOT the

@@ -74,7 +74,7 @@
 //   • IC precedence over non-IC when both present.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { ROUTINE_ADULT_MIN_M } from '../logic/scheduleConstants.js';
+import { ROUTINE_ADULT_MIN_M, ADULT_SCHED_MIN_M } from '../logic/scheduleConstants.js';
 
 export const RISK_FACTORS = [
   // ── Immunocompromising (IC) ──────────────────────────────────────────
@@ -408,4 +408,40 @@ export function pedsRiskRowClass(riskIds = []) {
   if (hasIC(peds)) return 'IC';
   if (hasNonIC(peds) || hasSpecial(peds)) return 'nonIC';
   return null;
+}
+
+/**
+ * Which of CDC's five patient groups is this card for?
+ *
+ * The patient-side half of the patient-population field (2026-10-17). Sources
+ * declare the group(s) their sentence is ABOUT (`population` in refs.js); this
+ * says which group the patient in front of the clinician belongs to, so a
+ * quote can never be shown to someone it was not written about.
+ *
+ * The two splits are CDC's own, and they are the two the engine already turns
+ * on — which is why they are the two that matter:
+ *
+ *   children  the IMMUNOCOMPROMISING list vs the one that is not. Decided by
+ *             `pedsRiskRowClass`, NOT re-derived here: it already strips
+ *             adult-only ticks and gives IC precedence, and a second copy of
+ *             that judgement is how two rules drift apart.
+ *   adults    Routine (50+) vs Special situations (19-49), at
+ *             ROUTINE_ADULT_MIN_M.
+ *
+ * Both boundaries are the constants, never a literal, and there is no third
+ * age test — adding one is what CLAUDE.md forbids for the interval rules and
+ * the same reasoning holds here.
+ *
+ * @param {number} ageMonths patient age in months
+ * @param {string[]} riskIds selected risk condition ids
+ * @returns {'child-routine'|'child-nonIC'|'child-IC'|'adult-19to49'|'adult-50plus'}
+ */
+export function populationOf(ageMonths, riskIds = []) {
+  if (ageMonths >= ADULT_SCHED_MIN_M) {
+    return ageMonths >= ROUTINE_ADULT_MIN_M ? 'adult-50plus' : 'adult-19to49';
+  }
+  const rowClass = pedsRiskRowClass(riskIds);
+  if (rowClass === 'IC') return 'child-IC';
+  if (rowClass === 'nonIC') return 'child-nonIC';
+  return 'child-routine';
 }
