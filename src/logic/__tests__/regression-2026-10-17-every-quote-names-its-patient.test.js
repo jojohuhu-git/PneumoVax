@@ -122,6 +122,13 @@ describe('the field itself', () => {
       // at all, and names its own scope: "adults aged >=19 years".
       'mmwrNoneOrPcv7Only',       // the same row, verbatim, in the >=50 and 19-49 chronic blocks
       'mmwrPcv13NoPpsv23ToComplete', // its own words: "adults aged >=19 years"
+      // FINDING F (2026-10-18). mm7401a1's "PPSV23 only" row is printed in
+      // ALL THREE blocks -- >=50, 19-49 immunocompromising and 19-49 chronic
+      // -- character for character identical, products and interval alike.
+      // Checked row by row against the live page and the article PDF, not
+      // inferred from one block. Its twin `mmwrSharedDecision65` is pinned to
+      // one group above, because that row exists only in the >=50 block.
+      'mmwrPpsvOnlyThenPcv',      // the same row, verbatim, in all three adult blocks
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       'pedsMinAge',               // the section heading, above every block
       'pedsRiskIncompleteCatchup',// printed in both at-risk lists

@@ -176,6 +176,70 @@ rr7203a1 was "still reachable" via risk conditions — was stale and is correcte
 The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
 CITE, still unwritten. Do not let one quote cover both halves.
 
+### ⚠️ FINDING F, 2026-10-18 — this reading never read the document's table
+
+**What is wrong with the section above.** Document 1's reading records three sentences —
+**(A)** and **(B)** from the Summary box, **(C)** from the body prose under "Recommendations
+for Use of PCV". It does not mention mm7401a1's **clinical guidance table** at all. The six
+removals were dispositioned on that basis ("Nothing in mm7401a1 states this"), the owner
+approved them as a batch, and `1ec86c6` took the document off 5,356 cards.
+
+The table was first read the **following session**, which cited it seven times (`1a4d968`).
+Nobody re-checked the removals against it.
+
+**Five of the six statements are in the table, in full sentences.** Re-read 2026-10-18 from
+the live page and from the owner's PDF of the article; they agree character for character.
+
+| Cards | Removed because mm7401a1 "doesn't say it" | The table's row |
+|---|---|---|
+| **1,154** | PCV15/20/21 **≥1 year** after PPSV23 | **"PPSV23 only"**, all three blocks: *"A single dose of PCV21, PCV20, or PCV15 ≥1 year after the last PPSV23 dose."* |
+| **440** | ≥5 y is a **shared clinical decision** ("this paper does not discuss the shared-decision path") | **"PCV13 at any age and PPSV23 at age ≥65 years"**: *"Shared clinical decision-making is recommended regarding administration of either a single dose of PCV21 or PCV20 for any adult aged ≥65 years…"* |
+| 138 | PPSV23 **≥1 year** after PCV15 | *"If PCV15 is administered, a single dose of PPSV23 should be administered ≥1 year after the PCV15 dose"* — printed inside the **"None or PCV7 only"** row |
+| 75 | …plus the **8-week option** | *"A minimum interval of 8 weeks can be considered if PCV15 is used in adults with an immunocompromising condition, cochlear implant, or CSF leak"* — same row |
+| 25 | PPSV23 **≥8 weeks** after PCV15 (19–49 IC) | 19–49 IC block, same row: *"If PCV15 is used, administer a single dose of PPSV23 ≥8 weeks after the PCV15 dose."* |
+
+The remaining removal (2,610 + 914 cards, the two "series is complete" families) is correct:
+the table never says a series containing PCV20/PCV21 is complete, nor that PCV15 followed by
+PPSV23 completes one.
+
+**The recorded accounting was also 25 short.** It totals the removals at 5,331; measured on
+the current tree the document is absent from **5,356** cards in 9 prose variants. The missing
+25 are the 19–49 IC "PPSV23 ≥8 weeks after PCV15" variant of the PCV15-only card, which the
+six-row table does not list separately.
+
+#### ✅ OWNER DECISION 2026-10-18 — restore two, leave three
+
+Brought as patients, with each row quoted:
+
+- **RESTORED, 1,594 cards.** The two whose table **row heading is the patient's exact
+  history**, so the sentence cannot be about anyone else: 19–49 or 50+ with PPSV23 only
+  (1,154), and ≥65 with PCV13 and a PPSV23 given at 65 or older (440). Both now carry the
+  row as a raised number, not just a button.
+- **LEFT REMOVED, 238 cards.** PCV15 given, PPSV23 pending. The sentence fits the advice but
+  is printed inside the "None or PCV7 only" row — the instruction for a clinician *choosing*
+  PCV15, read by a patient already past that choice. Owner: *"use job aid since PCV15 isn't
+  listed in the MMWR table"*.
+
+⚠ **One wording trap, checked.** The owner's quote of the shared-decision row came from her
+PDF of **mm7336a2** (MMWR 12 Sep 2024, the PCV21 paper), which prints it with **one comma
+fewer** — "PCV21, PCV20 or PCV15". The chip links to **mm7401a1**, so mm7401a1's punctuation
+is what `refs.js` carries, and a test asserts the mm7336a2 form is *not* present.
+
+**Applied 2026-10-18.** Two new `refs.js` entries, `mmwrPpsvOnlyThenPcv` and
+`mmwrSharedDecision65`. `regression-c8-doc1-mmwr-only-where-it-speaks.test.js` corrected:
+LOSES drops from six statements to four, the two reversed assertions now assert the opposite
+(the document **is** present) rather than being deleted, and the button count moves
+**2,564 → 4,158**. Prose over both corpora: **1,637 of 35,280 lines differ**, and on every
+one the only change is the added markers, the two new quotes and the restored button label —
+**no advice moved**. New file:
+`regression-c8-2026-10-18-mmwr-table-rows-restored.test.js`.
+
+**The lesson, in one line: `scripts/uncreditedSources.mjs` can only see a document that is
+ON a card.** A document wrongly removed from a card it speaks for is invisible to it — which
+is why that script reported this work as finished while 1,594 cards were missing a source.
+
+---
+
 ### ✅ OWNER DECISION 2026-10-18 — the last 45, and mm7401a1 reaches zero
 
 The document's final uncredited statement was a **19–49 adult with chronic conditions only,

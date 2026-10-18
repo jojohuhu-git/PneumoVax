@@ -326,7 +326,10 @@ describe('over the whole grid', () => {
   // last one. mm7401a1 is now the first of the app's six documents to reach
   // zero: every card that lists it has a raised number pointing at it.
   it('every card listing mm7401a1 credits it — zero exceptions', () => {
-    expect(stats.listing).toBe(2564);
+    // 2,564 after document 1's removals; + 1,594 restored by FINDING F on
+    // 2026-10-18 (1,154 "PPSV23 only" + 440 shared-decision), each of which
+    // arrived with its own cite, so the zero below is unaffected.
+    expect(stats.listing).toBe(2564 + 1154 + 440);
     expect(stats.uncredited).toBe(0);
     expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });

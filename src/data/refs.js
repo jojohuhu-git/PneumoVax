@@ -732,6 +732,41 @@ export const REFS = {
   // `population` cannot see, because it is not an age band. Quoting a
   // neighbouring row here is the exact way a right-sounding sentence lands in
   // front of the wrong patient.
+  // ── Added 2026-10-18, FINDING F ──────────────────────────────────────
+  // The 2026-10-17 reading of mm7401a1 recorded only three sentences, all from
+  // the Summary box and the "Recommendations for Use of PCV" narrative, and
+  // SIX removals were approved on the stated ground that the document "states
+  // none of these". The clinical guidance TABLE was not read until the next
+  // session. Five of the six statements are in it, in full sentences. The two
+  // below are the ones whose ROW HEADING is the patient's exact history, so
+  // there is nothing to argue about; the owner restored both on 2026-10-18
+  // after being shown each patient and each row.
+  //
+  // Re-read 2026-10-18 from the live page AND from the owner's PDF of the same
+  // article, which agree character for character. Note the PDF of mm7336a2
+  // (MMWR 12 Sep 2024, the PCV21 paper) prints the shared-decision row with
+  // ONE COMMA FEWER — "PCV21, PCV20 or PCV15". The chip here links to
+  // mm7401a1, so mm7401a1's punctuation is what is quoted.
+  mmwrPpsvOnlyThenPcv: {
+    rulebook: 'adult',
+    // Patients this sentence is about: printed identically in all THREE blocks (>=50, 19-49 immunocompromising, 19-49 chronic), word for word, so it is about any adult with a PPSV23-only history
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "PPSV23 only" (identical in all three adult blocks)',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21, PCV20, or PCV15 \u22651 year after the last PPSV23 dose.',
+    lastVerified: '2026-10-18',
+  },
+  mmwrSharedDecision65: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the >=50 block, row "PCV13 at any age and PPSV23 at age >=65 years". The sentence names ">=65" itself, and the card is only reached when the PPSV23 dose was given at 65 or older, which implies the patient is 50+
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age >=65 years"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'Shared clinical decision-making is recommended regarding administration of either a single dose of PCV21 or PCV20 for any adult aged \u226565 years who has completed the recommended vaccination series with both PCV13 and PPSV23 (i.e., PPSV23 administered at age \u226565 years) but PCV21, PCV20, or PCV15 not yet received. If a decision to administer PCV21 or PCV20 is made, a single dose is recommended \u22655 years after the last pneumococcal vaccine dose.',
+    lastVerified: '2026-10-18',
+  },
   mmwrBothPcv13Ppsv50plus: {
     rulebook: 'adult',
     // Patients this sentence is about: the >=50 block, row "PCV13 at any age and PPSV23 at age <65 years". The >=65 twin is the shared-decision path, which this card never reaches

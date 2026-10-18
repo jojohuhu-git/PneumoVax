@@ -202,11 +202,18 @@ describe('statement #6 — shared clinical decision-making', () => {
     'is a shared clinical decision',
   );
 
-  it('the card quotes the job aid alongside the Adult Notes', () => {
+  // FINDING F (2026-10-18) added a third number: mm7401a1's own table row for
+  // this history, which had been removed from the card on the ground that the
+  // paper never discusses shared decision-making. The job aid's position in
+  // the list is what this test is about, so the assertion keeps naming every
+  // key in order rather than loosening to "contains".
+  it('the card quotes the job aid alongside the Adult Notes and ACIP', () => {
     expect(rec()).toBeDefined();
     expect(rec().status).toBe('shared-decision');
     const { lead } = noteCiteSlices(rec().note, rec().noteCites);
-    expect(lead.map((c) => c.key)).toEqual(['adultBothAt65', 'jobAidSharedDecision65']);
+    expect(lead.map((c) => c.key)).toEqual([
+      'adultBothAt65', 'jobAidSharedDecision65', 'mmwrSharedDecision65',
+    ]);
   });
 
   it('the quote is the sentence about a patient of 65 or older', () => {
