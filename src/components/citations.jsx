@@ -3,7 +3,7 @@ import React from 'react';
 // refs.js, not here, because it is a pure function of a citation's fields and
 // MeningoVax — which has no citations.jsx — keeps its copy in the same file.
 // Same name, same file, in both repos.
-import { citeTitle } from '../data/refs.js';
+import { citeTitle, documentRefFor } from '../data/refs.js';
 
 // ── P6-3 (S13, 2026-10-10): numbered inline citations ────────────────────
 //
@@ -64,24 +64,150 @@ export function renderNoteWithCites(text, cites, numberFor = makeCiteNumberer())
   });
 }
 
-// One numbering sequence per CARD, so the note and a dose verdict can never
-// show a different [1] for the same document.
+// ── How many "[c]" markers a piece of text renders ──────────────────────
+export function markerCount(text) {
+  return String(text ?? '').split('[c]').length - 1;
+}
+
+// ── C2 (2026-10-17): the slicing lives here, not in RecCard ─────────────
 //
-// The map is pre-seeded here, in the order the reader meets the citations
-// going down the card — recorded doses, then any other-vaccine history, then
-// the note — because React runs a child component's body after its parent's,
-// so seeding on first render would number the note before the verdicts above
-// it. (Same rule as MeningoVax's cardCiteNumberer, applied to this layout:
-// PneumoVax has no booster line, and its note sits below both dose lists.)
-export function cardCiteNumberer(doseValidations, otherValidations, noteCites) {
+// `reasonCites` is ONE ordered list across a dose's whole `reasons` array, and
+// `noteCites` is ONE ordered list across a note's lead and detail. Which cite
+// belongs to which sentence is therefore a slicing problem, and before C2 the
+// slicing was written twice: once in RecCard to render, and — implicitly —
+// never at all in the numberer, which seeded from the raw lists instead.
+//
+// That gap is the shape of fault C2 exists to remove. A cite present in the
+// list but matched to no "[c]" renders nothing yet consumed a number, so the
+// buttons could start at [2]. It happens not to occur today (measured
+// 2026-10-17 and again on the rebase: 0 of 17,334 cards), which is
+// precisely why it needed a
+// structural answer rather than a test alone — nothing would have told us when
+// it started. Numbering and rendering now read the same two functions.
+
+/** One entry per reason: the cites that reason renders, in order. */
+export function reasonCiteSlices(reasons, reasonCites) {
+  const slices = [];
+  let consumed = 0;
+  for (const r of reasons ?? []) {
+    const markers = markerCount(r);
+    slices.push(markers > 0 ? (reasonCites ?? []).slice(consumed, consumed + markers) : []);
+    consumed += markers;
+  }
+  return slices;
+}
+
+/**
+ * How a note's single ordered `noteCites` divides between its two halves.
+ * The detail's slice is returned whether or not the disclosure is open: a
+ * source must keep the same number when the reader expands "Why this".
+ */
+export function noteCiteSlices(note, noteCites) {
+  const lead = typeof note === 'string' ? note : note?.lead;
+  const detail = typeof note === 'string' ? null : note?.detail;
+  const cites = noteCites ?? [];
+  const leadCount = markerCount(lead);
+  return {
+    lead: cites.slice(0, leadCount),
+    detail: cites.slice(leadCount, leadCount + markerCount(detail)),
+  };
+}
+
+// ── C2 + C3 (2026-10-17): one place works out the numbers AND the list ──
+//
+// Owner-reported: "there are multiple source chips under it and I do not know
+// where it came from. I also forget why there are multiple source chips listed
+// if its only citing one of them."
+//
+// Before this, a card had two citation systems that never compared notes. The
+// raised numbers were assigned here at render time; the grey buttons were a
+// separate list built in the engine and printed unnumbered. Nothing matched
+// one to the other, and measured over the whole grid on 2026-10-17 they
+// disagreed in both directions — 26,651 buttons that no number pointed at, and
+// 1,380 cards showing a number for a document with no button at all.
+//
+// Those two figures are RE-MEASURED on the rebase (the branch was held while
+// three merges landed in `refs.js`, and the second had moved): reproduce them
+// with `npx vite-node scripts/citationMapping.mjs`, which reports the same
+// counts for whichever branch is checked out.
+//
+// `cardSources` is the single answer to both questions. It walks the card in
+// READING ORDER and hands back the numbering function and the finished list,
+// which are therefore the same computation rather than two that must agree.
+//
+// ── Order of first mention (owner decision, 2026-10-17) ─────────────────
+//
+// The sentences decide. The first document a sentence cites is [1], the next
+// new one is [2], and the button row is printed in that order — "this is how
+// citations are normally ordered", as a journal's reference list is. The owner
+// was shown all three candidates rendered from a real card (a 6-year-old with
+// asplenia, whose one marker cites what was then the second button) and chose
+// this one. The rejected alternatives, so they are not re-proposed:
+//   • buttons define the numbering — the row always reads 1,2,3 but a sentence
+//     can show [2] with no [1] above it;
+//   • buttons keep their authored order and print whatever number they got —
+//     today's behaviour extended, which printed the row out of sequence on 248
+//     cards and is the guessing the owner reported. That 248 is the one count
+//     on this branch NOT re-measured at the rebase: it describes an option
+//     that was rejected rather than anything the app does, so there is nothing
+//     for it to drift against.
+//
+// A button no sentence points at keeps its authored position at the END of the
+// list. Those are not decoration: 26,651 of them are holding up statements the
+// card makes out loud without quoting (plan §4), and giving each its own quote
+// is item C8. Until then they are numbered and last, never dropped — deleting
+// a clinical source to tidy a list is the one outcome this must not produce.
+export function cardSources({ doseValidations, otherValidations, note, noteCites, citations }) {
   const numberFor = makeCiteNumberer();
-  const seed = (validations) => {
-    for (const v of validations || []) {
-      for (const c of v?.reasonCites || []) numberFor(c.page ?? c.key);
+  const sources = new Map();   // dedupe key -> { n, url, short, title }
+
+  // A sentence's citation. Its document's whole-page entry supplies the
+  // button's title; `doc` (the ref's `short`, the same string C1 puts on the
+  // hover text) supplies the visible name.
+  const fromMarker = (c) => {
+    const key = c.page ?? c.key;
+    const n = numberFor(key);
+    if (sources.has(key)) return;
+    const document = documentRefFor(c.page);
+    sources.set(key, {
+      n,
+      url: c.page ?? c.url,
+      short: c.doc ?? document?.short,
+      title: document?.label ?? c.doc,
+    });
+  };
+
+  const seedValidations = (validations) => {
+    for (const v of validations ?? []) {
+      for (const slice of reasonCiteSlices(v?.reasons, v?.reasonCites)) {
+        for (const c of slice) fromMarker(c);
+      }
     }
   };
-  seed(doseValidations);
-  seed(otherValidations);
-  for (const c of noteCites || []) numberFor(c.page ?? c.key);
-  return numberFor;
+
+  // Reading order down the card: this vaccine's recorded doses, then any other
+  // vaccine's history shown on the same card, then the note.
+  seedValidations(doseValidations);
+  seedValidations(otherValidations);
+  const noteSlices = noteCiteSlices(note, noteCites);
+  for (const c of [...noteSlices.lead, ...noteSlices.detail]) fromMarker(c);
+
+  // Then the card's own buttons, in the order the engine lists them. One whose
+  // document a sentence already cited keeps that number, and its authored
+  // title wins — it was written for this card.
+  for (const ch of citations ?? []) {
+    const n = numberFor(ch.url);
+    const existing = sources.get(ch.url);
+    if (existing) {
+      existing.short = ch.short || existing.short;
+      existing.title = ch.label || existing.title;
+    } else {
+      sources.set(ch.url, { n, url: ch.url, short: ch.short || ch.label, title: ch.label });
+    }
+  }
+
+  return {
+    numberFor,
+    sources: [...sources.values()].sort((a, b) => a.n - b.n),
+  };
 }

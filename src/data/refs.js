@@ -712,6 +712,28 @@ export const REFS = {
     quote: 'Because of the limited number of serogroups covered by PCV7 (which was used in the United States between 2000 and 2010), CDC recommends that doses of PCV7 should be ignored for the purposes of calculating the current pneumococcal vaccination needs of an older teen or adult patient at increased risk for pneumococcal disease.',
     lastVerified: '2026-10-12',
   },
+  // C3 (2026-10-17): the DOCUMENT-level entry for the page `immPCV7` quotes.
+  //
+  // Every other document in this file has exactly one quote-free entry — the
+  // whole-page reference a grey button shows — and this page was the only one
+  // without. The consequence was measurable: on 1,188 cards a recorded PCV7
+  // dose carried a `[N]` pointing at this page while no button named it, so
+  // the reader met a number with nothing to click. The missing button and the
+  // missing entry were the same gap.
+  //
+  // Same url and same `short` as `immPCV7`, because it is the same document;
+  // C1's "one name, one document" guard reads the url, so the pair is one
+  // document under one name and passes. What differs is the absence of
+  // `quote`: that is what marks an entry as naming the whole page rather than
+  // one sentence of it (see `citeTitle`), and `documentRefFor()` below is the
+  // one reader of that distinction.
+  immPCV7Page: {
+    rulebook: 'any',
+    url: 'https://www.immunize.org/ask-experts/how-do-we-account-for-the-history-of-pcv7-vaccination-when-determining-the-pneumococcal-vaccination-needs-of-an-older-teen-or-young-adult-with-a-high-risk-condition/',
+    label: 'immunize.org Ask the Experts — How do we account for the history of PCV7 vaccination when determining pneumococcal vaccination needs?',
+    short: 'immunize.org PCV7 rule',
+    lastVerified: '2026-10-12',
+  },
   immPneumo: {
     rulebook: 'any',
     url: 'https://www.immunize.org/ask-experts/topic/pneumococcal/',
@@ -735,6 +757,35 @@ export const REFS = {
     lastVerified: '2026-10-12',
   },
 };
+
+// ── C3 (2026-10-17): the whole-page entry behind any cited sentence ──────
+//
+// A `[N]` in the text cites one SENTENCE; a grey button cites the whole
+// DOCUMENT that sentence sits in. Until C3 the two were only ever connected by
+// hand — a card listed its buttons in `refs` and its sentences in `noteCites`,
+// and nothing checked that every cited document had a button. Measured over
+// the whole grid, re-measured on the rebase: 1,380 cards showed a number for a document
+// with no button to click.
+//
+// This is the lookup that closes it. Given the page a sentence came from, it
+// returns the entry that names the whole page — the quote-free one, which is
+// exactly how `citeTitle` already tells the two kinds apart. Built once, not
+// per call: `cardSources()` asks for it on every card the app renders.
+//
+// Totality is a property, not a hope: `regression-c2-c3-numbered-sources`
+// fails if any document cited anywhere lacks a whole-page entry, which is the
+// fault `immPCV7Page` above was added to fix.
+const DOCUMENT_REF_BY_URL = (() => {
+  const byUrl = new Map();
+  for (const ref of Object.values(REFS)) {
+    if (!ref.quote && !byUrl.has(ref.url)) byUrl.set(ref.url, ref);
+  }
+  return byUrl;
+})();
+
+export function documentRefFor(url) {
+  return url ? DOCUMENT_REF_BY_URL.get(url) : undefined;
+}
 
 // Resolve an array of ref keys to {url, label, short} objects, dropping unknowns.
 // These are the whole-card chips at the foot of a recommendation: always the

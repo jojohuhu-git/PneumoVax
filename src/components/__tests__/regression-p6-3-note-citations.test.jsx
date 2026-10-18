@@ -35,6 +35,20 @@ const baseRec = {
   dueToday: true,
 };
 
+// C2 (2026-10-17): the grey buttons now print the SAME "[N]" the sentence
+// does — that is the whole point of the item — so a bare text query for "[1]"
+// now matches the marker and its button both. These helpers scope every query
+// below to the inline marker, which is what each assertion here is about. The
+// button row has its own tests in regression-c2-c3-numbered-sources.
+const isMarker = (el) => String(el.className).includes('note-cite');
+const markers = (text) => screen.getAllByText(text).filter(isMarker);
+const marker = (text) => {
+  const found = markers(text);
+  expect(found, `expected exactly one inline marker reading ${text}`).toHaveLength(1);
+  return found[0];
+};
+const queryMarker = (text) => screen.queryAllByText(text).filter(isMarker)[0] ?? null;
+
 describe('P6-3 — numbered inline note citations', () => {
   it('renders a [c] placeholder as a numbered [1] link to the cited URL', () => {
     render(<RecCard rec={{
@@ -47,7 +61,7 @@ describe('P6-3 — numbered inline note citations', () => {
         label: 'CDC Adult Notes — the quoted sentence',
       }],
     }} />);
-    const link = screen.getByText('[1]');
+    const link = marker('[1]');
     expect(link.tagName).toBe('A');
     expect(link.getAttribute('href'))
       .toBe('https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#:~:text=example');
@@ -66,8 +80,8 @@ describe('P6-3 — numbered inline note citations', () => {
         { key: 'cdcAdultPneumo', page: 'https://example.test/page-b', url: 'https://example.test/page-b#b', label: 'B' },
       ],
     }} />);
-    expect(screen.getByText('[1]').getAttribute('href')).toBe('https://example.test/page-a#a');
-    expect(screen.getByText('[2]').getAttribute('href')).toBe('https://example.test/page-b#b');
+    expect(marker('[1]').getAttribute('href')).toBe('https://example.test/page-a#a');
+    expect(marker('[2]').getAttribute('href')).toBe('https://example.test/page-b#b');
   });
 
   it('reuses one number when the same source repeats in a note', () => {
@@ -79,8 +93,8 @@ describe('P6-3 — numbered inline note citations', () => {
         { key: 'cdcAdultPneumo', page: 'https://example.test/a', url: 'https://example.test/a', label: 'A' },
       ],
     }} />);
-    expect(screen.getAllByText('[1]')).toHaveLength(2);
-    expect(screen.queryByText('[2]')).toBeNull();
+    expect(markers('[1]')).toHaveLength(2);
+    expect(queryMarker('[2]')).toBeNull();
   });
 
   it('same-page, different-sentence citations share a number but keep their own href and hover', () => {
@@ -95,9 +109,9 @@ describe('P6-3 — numbered inline note citations', () => {
         { key: 'adultPpsvInterval', page, url: `${page.split('#')[0]}#:~:text=interval`, label: 'PPSV23 one year later' },
       ],
     }} />);
-    const links = screen.getAllByText('[1]');
+    const links = markers('[1]');
     expect(links).toHaveLength(2);
-    expect(screen.queryByText('[2]')).toBeNull();
+    expect(queryMarker('[2]')).toBeNull();
     expect(links[0].getAttribute('href')).toMatch(/#:~:text=routine$/);
     expect(links[1].getAttribute('href')).toMatch(/#:~:text=interval$/);
     expect(links[0].getAttribute('title')).toBe('Routine at age 50');
@@ -107,7 +121,7 @@ describe('P6-3 — numbered inline note citations', () => {
   it('a note with no noteCites renders as plain text, with no stray links', () => {
     render(<RecCard rec={{ ...baseRec, note: 'A plain note with no citations.', noteCites: [] }} />);
     expect(screen.getByText('A plain note with no citations.')).toBeTruthy();
-    expect(screen.queryByText('[1]')).toBeNull();
+    expect(queryMarker('[1]')).toBeNull();
   });
 
   it('an extra [c] does not borrow the previous citation', () => {
@@ -123,8 +137,8 @@ describe('P6-3 — numbered inline note citations', () => {
       note: 'Sourced [c], but this second claim has none [c].',
       noteCites: [{ key: 'only', page: 'https://example.test/a', url: 'https://example.test/a', label: 'A' }],
     }} />);
-    expect(screen.getAllByText('[1]')).toHaveLength(1);
-    expect(screen.queryByText('[2]')).toBeNull();
+    expect(markers('[1]')).toHaveLength(1);
+    expect(queryMarker('[2]')).toBeNull();
     expect(document.querySelector('.rec-note').textContent).not.toContain('[c]');
   });
 
@@ -148,7 +162,7 @@ describe('P6-3 — numbered inline note citations', () => {
       }]}
       ageMonths={840}
     />);
-    expect(screen.getByText('[1]').getAttribute('href')).toBe('https://example.test/dose');
-    expect(screen.getByText('[2]').getAttribute('href')).toBe('https://example.test/note');
+    expect(marker('[1]').getAttribute('href')).toBe('https://example.test/dose');
+    expect(marker('[2]').getAttribute('href')).toBe('https://example.test/note');
   });
 });

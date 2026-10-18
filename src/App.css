@@ -460,6 +460,15 @@ body {
   text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; transition: background 0.1s;
 }
 .citation-chip:hover { background: var(--clt); border-color: var(--cmd); }
+/* C2: the row's heading, and the number each button carries. The number is
+   the same one the sentence above prints for that document. */
+.rec-citations-heading {
+  font-size: var(--fs-sm); font-weight: 600; color: var(--gy3);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  flex-basis: 100%; margin-bottom: calc(var(--sp-8) * -1 + var(--sp-4));
+}
+.citation-chip-num { color: var(--gy3); font-variant-numeric: tabular-nums; margin-right: var(--sp-4); }
+.citation-chip:hover .citation-chip-num { color: var(--cmd); }
 
 /* ── Per-dose validation chips (Recorded: block) ──────────────────
    PC1: each recorded dose row shows the dose descriptor (left) and a
