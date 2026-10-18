@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-10-17).** C8 document 1's CITEs landed after this was written
+> (`1a4d968`), which also reframed the job-aid decision this file calls "the next thing to
+> raise". Resume from **`docs/archive/handoff-2026-10-17-c8-doc1-cites.md`** instead.
+> Do not work this file's queue — its counts and its "what's next" are both out of date.
+
 # PneumoVax — Handoff after C8 document 2's CITEs (2026-10-17, late night)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
