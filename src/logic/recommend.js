@@ -1195,9 +1195,20 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // it as an option would offer the patient the number just recommended.
   // Wording comes from ADULT_PPSV23_SHORTER_MINIMUM_WEEKS so the constant
   // keeps the sentence true (S6).
-  const shorterMinimumNote = adultPpsvShorterMinimumOffered(am, riskIds)
-    ? ` A minimum interval of ${intervalPhrase({ days: ADULT_PPSV23_SHORTER_MINIMUM_WEEKS * 7 })} may be considered for an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak.`
+  //
+  // C8, document 2's CITE (2026-10-17): this sentence had NO citation at all,
+  // on all 120 cards that printed it. The job aid's page 1 footnote is where
+  // "consider" comes from, so it is now quoted here rather than left to the
+  // reader to locate among the card's buttons.
+  const offersShorterMinimum = adultPpsvShorterMinimumOffered(am, riskIds);
+  const shorterMinimumNote = offersShorterMinimum
+    ? ` A minimum interval of ${intervalPhrase({ days: ADULT_PPSV23_SHORTER_MINIMUM_WEEKS * 7 })} may be considered for an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak [c].`
     : '';
+  // One cite per marker: empty when the sentence is absent, so a caller can
+  // spread it into noteCites without an age test of its own.
+  const shorterMinimumCites = offersShorterMinimum
+    ? [cite('jobAidEightWeekOptionAt50')]
+    : [];
   // One helper for either unit, so a caller cannot pick the wrong one.
   const ppsvDueState = (anchor) => (ppsvIntervalDays != null
     ? dueState(anchor, ppsvIntervalDays, today)
@@ -1252,6 +1263,14 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   const refsSeriesComplete = isOlderAdult
     ? refsWithoutMmwr
     : adultRefsExcept('mmwr7401a1', 'cdcAdultTimingJobAid');
+  // C8, document 2's CITEs (2026-10-17) — the OTHER half of the same owner
+  // decision. Decision 2 said the job aid is credited at 50+ and removed below
+  // it; the line above does the removing, and these two do the crediting, so
+  // the button and the raised number are decided by ONE predicate and cannot
+  // drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M test — never a
+  // second age test here (the escape that passed all 1,177 tests).
+  const jobAidCompleteMarker = isOlderAdult ? ' [c]' : '';
+  const jobAidCompleteCites = isOlderAdult ? [cite('jobAidSeriesCompleteAt50')] : [];
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
   // SAME number the card states, so it follows the same predicate.
   const ppsvIntervalCite = ppsvIntervalDays != null
@@ -1288,8 +1307,8 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     return [rec({
       vaccine: 'PCV', status: 'complete',
       doseLabel: `Complete (history includes ${pcv.hasPCV21 ? 'PCV21' : 'PCV20'})`,
-      note: 'A pneumococcal series that includes PCV20 or PCV21 is complete — no PPSV23 and no further PCV needed [c].',
-      noteCites: [cite('adultPcv20or21Complete')],
+      note: `A pneumococcal series that includes PCV20 or PCV21 is complete — no PPSV23 and no further PCV needed [c]${jobAidCompleteMarker}.`,
+      noteCites: [cite('adultPcv20or21Complete'), ...jobAidCompleteCites],
       refs: refsSeriesComplete,
     })];
   }
@@ -1298,8 +1317,8 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     return [rec({
       vaccine: 'PCV', status: 'complete',
       doseLabel: 'Complete (PCV15 + PPSV23)',
-      note: 'PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c].',
-      noteCites: [cite('adultPcv15ThenPpsv')],
+      note: `PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c]${jobAidCompleteMarker}.`,
+      noteCites: [cite('adultPcv15ThenPpsv'), ...jobAidCompleteCites],
       refs: refsSeriesComplete,
     })];
   }
@@ -1315,9 +1334,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       brands: ['PPSV23 (Pneumovax 23)'],
       note: {
         lead: `Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose [c] — the series is INCOMPLETE until then.${shorterMinimumNote}`,
-        detail: 'PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.',
+        detail: 'PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete [c].',
       },
-      noteCites: [cite(ppsvIntervalCite)],
+      // C8, document 2's CITE: the substitution sentence is the job aid's
+      // footnote and NOTHING ELSE in the app's source set states it, so this
+      // claim had no citation of any kind before now.
+      noteCites: [cite(ppsvIntervalCite), ...shorterMinimumCites, cite('jobAidPpsv23Unavailable')],
       refs: refsWithoutMmwr,
     })];
   }
@@ -1406,10 +1428,13 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
         note: {
-          lead: `An additional PCV20 or PCV21, ≥${LONG_GAP_WORDS} after the last pneumococcal dose, is a shared clinical decision — it may be given or omitted [c].`,
+          lead: `An additional PCV20 or PCV21, ≥${LONG_GAP_WORDS} after the last pneumococcal dose, is a shared clinical decision — it may be given or omitted [c] [c].`,
           detail: 'PCV13 and PPSV23 have both been given, and the PPSV23 dose was received at age 65 or older. CDC places this group under shared clinical decision-making rather than a routine recommendation.',
         },
-        noteCites: [cite('adultBothAt65')],
+        // C8, document 2's CITE: both documents state this one in words, so
+        // the sentence carries both numbers. That is "cite it, or take it off
+        // that card" with the cite chosen (OWNER DECISION 2026-10-17).
+        noteCites: [cite('adultBothAt65'), cite('jobAidSharedDecision65')],
         refs: refsWithoutMmwr,
       })];
     }
@@ -1431,11 +1456,15 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         // this, the 50+ row was the lead's only citation: a quote instructing
         // a dose beside a sentence saying none is due, on 175 grid patients.
         note: {
-          lead: 'No additional pneumococcal dose now — re-evaluate at age 50 [c].',
+          lead: 'No additional pneumococcal dose now — re-evaluate at age 50 [c] [c].',
           detail: `This is an adult aged 19–49 with a chronic (non-immunocompromising) condition who has already received PCV13 and PPSV23. At age 50, a dose of PCV20 or PCV21 is recommended, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c].`,
         },
         noteCites: [
           cite('adultChronicOnlyReviewAt50'),
+          // C8, document 2's CITE. The job aid's page 4 row is the same claim
+          // in CDC's own words, and page 4 is the 19-49 chronic page — the
+          // only one of the four whose PCV13 + PPSV23 row has no Option A.
+          cite('jobAidChronic1949ReviewAt50'),
           // A declared cross-reference (2026-10-17): the detail half says what
           // happens AT 50, so it quotes the 50+ row — about a patient this one
           // is not yet. Same shape as `adultRoutine50` on the no-risk card: a
@@ -1480,7 +1509,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         // — and this card was the one >=50 surface that left it out, so an
         // IC adult saw the option only after the PCV15 was recorded.
         lead: `Give 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥${ppsvIntervalLabel} later [c].${shorterMinimumNote}`,
-        detail: 'Routine pneumococcal vaccination for adults ≥50 with no, unknown, or PCV7-only history. A PCV7-only history counts as no PCV history [c]. PCV20 and PCV21 each complete the series alone [c].',
+        detail: 'Routine pneumococcal vaccination for adults ≥50 with no, unknown, or PCV7-only history. A PCV7-only history counts as no PCV history [c] [c]. PCV20 and PCV21 each complete the series alone [c].',
       }
       : {
         // No shorterMinimumNote here: at 19–49 the 8 weeks is already the
@@ -1488,11 +1517,17 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         // could only ever be empty. S6-3's rule — do not leave a branch that
         // cannot fire looking load-bearing.
         lead: `Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later [c].`,
-        detail: 'This is an adult 19–49 with a qualifying risk condition and no, unknown, or PCV7-only pneumococcal history; the series is complete once the PPSV23 follow-up is given. A PCV7-only history counts as no PCV history [c]. PCV20 and PCV21 each complete the series alone [c].',
+        detail: 'This is an adult 19–49 with a qualifying risk condition and no, unknown, or PCV7-only pneumococcal history; the series is complete once the PPSV23 follow-up is given. A PCV7-only history counts as no PCV history [c] [c]. PCV20 and PCV21 each complete the series alone [c].',
       },
     noteCites: [
       cite(isOlderAdult ? 'adultRoutine50' : ppsvIntervalCite),
+      // Empty below 50, where the 8-week sentence is absent, so the marker
+      // count and the cite count stay equal without a second age test.
+      ...shorterMinimumCites,
       cite('adultPcv7Only'),
+      // C8, document 2's CITE: the job aid's footnote * says the same thing
+      // for the "None*" row, on all four pages.
+      cite('jobAidPcv7CountsAsNone'),
       cite('adultPcv20or21Complete'),
     ],
     refs,

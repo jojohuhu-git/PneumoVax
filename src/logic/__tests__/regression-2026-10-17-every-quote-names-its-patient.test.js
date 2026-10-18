@@ -103,6 +103,15 @@ describe('the field itself', () => {
       'adultPcv20or21Complete',   // its own words: "Adults aged 19 years and older"
       'adultPcv7Only',            // printed identically in both adult blocks
       'immPCV7',                  // "older teen or adult ... at increased risk"
+      // C8, document 2's CITEs (2026-10-17). Both are FOOTNOTES printed on all
+      // four pages of the Adult Timing Job Aid — against every "None*" row and
+      // every "PPSV23\u00b6" cell respectively — so they speak to every adult the
+      // document covers, at both age bands. Checked page by page, not inferred:
+      // the job aid's page-specific sentences (the two "complete"/"review at
+      // 50" rows and the 8-week option) are each pinned to ONE group above,
+      // because this document says different things on different pages.
+      'jobAidPcv7CountsAsNone',   // footnote * on pp.1-4, against every "None*" row
+      'jobAidPpsv23Unavailable',  // footnote pilcrow on pp.1-4, against every PPSV23 cell
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       'pedsMinAge',               // the section heading, above every block
       'pedsRiskIncompleteCatchup',// printed in both at-risk lists

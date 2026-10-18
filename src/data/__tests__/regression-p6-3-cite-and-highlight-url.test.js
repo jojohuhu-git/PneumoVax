@@ -47,12 +47,55 @@ describe('P6-3 — cite() builds a per-occurrence citation object', () => {
     ).toEqual([]);
   });
 
-  it('a quoted ref deep-links to its sentence via #:~:text=', () => {
-    const quoted = Object.keys(REFS).filter((k) => REFS[k].quote);
-    expect(quoted.length, 'expected at least one ref to carry a `quote`').toBeGreaterThan(0);
+  // C8, document 2's CITEs (2026-10-17): narrowed by DOCUMENT TYPE, not
+  // relaxed. The hazard is unchanged — a reader who clicks a number must land
+  // on the sentence, not the top of a long document — but a PDF cannot honour
+  // an HTML text fragment, so the two kinds deep-link differently and each is
+  // now asserted. Before this the rule was written as "every quoted ref gets
+  // #:~:text=", which was the same thing only while every quoted ref was a
+  // web page.
+  it('a quoted HTML ref deep-links to its sentence via #:~:text=', () => {
+    const quoted = Object.keys(REFS).filter((k) => REFS[k].quote && !REFS[k].url.endsWith('.pdf'));
+    expect(quoted.length, 'expected at least one quoted HTML ref').toBeGreaterThan(0);
     for (const k of quoted) {
       expect(cite(k).url, `${k} should deep-link to its quote`).toMatch(/#:~:text=/);
       expect(cite(k).label, `${k}'s hover text should be the quote`).toBe(REFS[k].quote);
+    }
+  });
+
+  it('a quoted PDF ref deep-links to its PAGE, because text fragments do not work in a PDF', () => {
+    const quoted = Object.keys(REFS).filter((k) => REFS[k].quote && REFS[k].url.endsWith('.pdf'));
+    expect(quoted.length, 'expected at least one quoted PDF ref').toBeGreaterThan(0);
+    for (const k of quoted) {
+      expect(cite(k).url, `${k} should deep-link to its page`).toMatch(/#page=\d+$/);
+      expect(cite(k).url, `${k} must not carry a dead text fragment`).not.toMatch(/#:~:text=/);
+      expect(cite(k).label, `${k}'s hover text should be the quote`).toBe(REFS[k].quote);
+    }
+  });
+
+  // The hole the rule above would otherwise leave. A quoted PDF with no
+  // `pdfPage` falls through to a `#:~:text=` that no PDF viewer honours: a
+  // link that looks live and silently does nothing. It also loses the page
+  // number, which for the Adult Timing Job Aid IS part of the citation — the
+  // document prints a different interval for a different patient on each of
+  // its four pages.
+  it('a quoted PDF ref must declare pdfPage', () => {
+    const missing = Object.keys(REFS)
+      .filter((k) => REFS[k].quote && REFS[k].url.endsWith('.pdf') && REFS[k].pdfPage == null);
+    expect(
+      missing,
+      'these quoted PDF refs have no `pdfPage`, so their deep link is dead: '
+      + missing.join(', '),
+    ).toEqual([]);
+  });
+
+  it('pdfPage is only meaningful on a quoted ref, and must name a real page', () => {
+    for (const [k, ref] of Object.entries(REFS)) {
+      if (ref.pdfPage == null) continue;
+      expect(ref.quote, `${k} declares pdfPage but has no quote`).toBeTruthy();
+      expect(ref.url.endsWith('.pdf'), `${k} declares pdfPage but is not a PDF`).toBe(true);
+      expect(Number.isInteger(ref.pdfPage), `${k}'s pdfPage should be an integer`).toBe(true);
+      expect(ref.pdfPage, `${k}'s pdfPage should be 1 or more`).toBeGreaterThanOrEqual(1);
     }
   });
 

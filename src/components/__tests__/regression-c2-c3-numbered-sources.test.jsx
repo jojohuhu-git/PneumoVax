@@ -178,9 +178,24 @@ describe('C2 — the buttons carry the number the text uses', () => {
       '[3] MMWR ≥50 expansion',
     ]);
 
-    // All three of this card's markers cite the one document, so all three
-    // read [1] — correct, and now legible, because [1] names a button.
-    expect(markerNumbers()).toEqual(['[1]', '[1]', '[1]']);
+    // C8, document 2's CITEs (2026-10-17) landed here, on the owner's own
+    // card. It used to read ['[1]','[1]','[1]'] — every marker citing the one
+    // document, with buttons [2] and [3] printed below and nothing pointing at
+    // either. The job aid's footnote * now carries the "A PCV7-only history
+    // counts as no PCV history" sentence, so [2] appears IN THE TEXT and that
+    // button is no longer a number the reader cannot account for.
+    //
+    // Reading order: the lead's ≥50 routine sentence [1], then in the detail
+    // the PCV7 claim twice — Adult Notes [1] and the job aid [2] — then "each
+    // completes the series alone" [1].
+    expect(markerNumbers()).toEqual(['[1]', '[1]', '[2]', '[1]']);
+
+    // [3] (the MMWR) is still unpointed on this card, and that is the honest
+    // state of the work: document 1 kept mm7401a1 here because the ≥50
+    // expansion is genuinely its subject, but no sentence quotes it yet. That
+    // is what the remaining C8 documents and check G1 are for — asserted so
+    // this card's progress is recorded rather than assumed complete.
+    expect(markerNumbers()).not.toContain('[3]');
   });
 
   it('a button no number points at is kept, not dropped', () => {

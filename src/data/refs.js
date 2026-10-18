@@ -612,6 +612,106 @@ export const REFS = {
     short: 'CDC Adult Timing Job Aid',
     lastVerified: '2026-10-12',
   },
+
+  // ── C8, document 2's CITEs (2026-10-17): the job aid's own sentences ───
+  //
+  // The six entries below are the app's FIRST quoted PDF. Every quoted source
+  // before them was a web page, and two things follow from the difference:
+  //
+  //   1. `#:~:text=` does not work in a PDF viewer, so each declares
+  //      `pdfPage` and `highlightUrl()` emits `#page=N` instead. A quoted PDF
+  //      without `pdfPage` is a dead link that looks live; `refs.test.js`
+  //      fails on one.
+  //   2. This document prints a DIFFERENT interval for a different patient on
+  //      each of its four pages, so the page IS part of the citation. The
+  //      `label` names the page and the table row; `population` names who the
+  //      sentence is about.
+  //
+  // ⚠ READ THIS BEFORE RE-VERIFYING ANY QUOTE BELOW. The embedded font maps
+  // the fi/fl ligature glyph to a bare "f" in its ToUnicode table, so EVERY
+  // extractor drops the character after the f: the document's "fluid" comes
+  // out as "fuid", "specified" as "specifed", "deficiency" as "defciency".
+  // Measured 2026-10-17 with two independent extractors (scripts/pdfLayout.py
+  // and pypdf 6.13.0): the two-letter sequence "fi" occurs ZERO times across
+  // all four pages, and U+FB01/U+FB02 zero times — impossible for a document
+  // containing "specified immunocompromising conditions". The quotes below are
+  // written as the document READS, with the dropped letters restored.
+  // `docs/archive/c7-2026-10-17-source-readings.md` recorded "fuid" as "the
+  // document's own typo"; that is wrong, and this is the correction.
+  //
+  // The duplicated "leak" in "cerebrospinal fluid leak (CSF) leak" IS the
+  // document's own, and stays — it is not a ligature case.
+  //
+  // Read positionally, never from a flat dump: pypdf reads (G) below with the
+  // row's left-hand cells spliced into the middle of the sentence, because
+  // they are a different column of the same table row. That is the exact way
+  // a right-sounding quote gets assembled out of two unrelated patients.
+  jobAidSeriesCompleteAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: it is page 1's cell, and page 1 is the >=50 page. Pages 2-4 answer the SAME history with "review again at 50" instead, which is why this quote must never be shown below 50 (document 2, decision 2)
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.1 "Adults \u226550 years old", the row "PCV15 & PPSV23 OR PCV20 OR PCV21 / at any age", spanning both Option A and Option B',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'No vaccines recommended; schedule is complete.',
+    lastVerified: '2026-10-17',
+  },
+  jobAidSharedDecision65: {
+    rulebook: 'adult',
+    // Patients this sentence is about: its own words, "adults >=65 years old". >=65 sits inside Routine 50+; the card it appears on fires only when the PPSV23 dose was given at >=65, which implies the patient is >=65
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.1, the section "Shared clinical decision-making for those who already completed the series with PCV13 and PPSV23", row "Complete series: PCV13 at any age & PPSV23 at \u226565 yrs"',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'Together, with the patient, vaccine providers may choose to administer PCV20 or PCV21 to adults \u226565 years old who have already received PCV13 (but not PCV15, PCV20, or PCV21) at any age and PPSV23 at or after the age of 65 years old.',
+    lastVerified: '2026-10-17',
+  },
+  jobAidChronic1949ReviewAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: page 4 is headed "Adults 19-49 years old with chronic health conditions", and this is its PCV13 + PPSV23 row. Note the wording differs from the same row on pp.2-3 ("No vaccines ARE recommended"), and p.4's row has no Option A at all -- pp.2-3 give PCV20/21 at >=5 years, p.4 gives nothing until 50. That split IS the engine's chronic-only branch
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 4,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.4 "Adults 19\u201349 years old with chronic health conditions", the row "PCV13\u2020 and PPSV23 at any age", which has no Option A: no dose now, review at 50',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'No vaccines are recommended at this time. Review pneumococcal vaccine recommendations again when your patient turns 50 years old.',
+    lastVerified: '2026-10-17',
+  },
+  jobAidEightWeekOptionAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: it is page 1's footnote dagger, printed against the >=50 ">=1 year" cells. This is the sentence that makes 8 weeks an OPTION at 50+ rather than the recommendation -- the distinction CLAUDE.md forbids collapsing, and the reason the app names it only here
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — p.1, footnote \u2020 to the "Adults \u226550 years old" table, naming 8 weeks as a minimum interval that may be CONSIDERED (not recommended) for an immunocompromising condition, cochlear implant or CSF leak',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'Consider minimum interval (8 weeks) for adults with an immunocompromising condition, cochlear implant, or cerebrospinal fluid leak (CSF) leak',
+    lastVerified: '2026-10-17',
+  },
+  jobAidPcv7CountsAsNone: {
+    rulebook: 'adult',
+    // Patients this sentence is about: footnote * is printed on ALL FOUR pages, against every "None*" row, so it speaks to every adult the job aid covers
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — footnote * to the "None*" row, printed on all four pages: a PCV7-only history is treated as no pneumococcal history',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'Also applies to people who received PCV7 at any age and no other pneumococcal vaccines',
+    lastVerified: '2026-10-17',
+  },
+  jobAidPpsv23Unavailable: {
+    rulebook: 'adult',
+    // Patients this sentence is about: footnote pilcrow is printed on ALL FOUR pages, against every PPSV23 cell, so it speaks to every adult the job aid covers. This is the ONLY source in the app that states the substitution, and the claim carried no citation at all before C8
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
+    pdfPage: 1,
+    label: 'CDC Adult Pneumococcal Vaccine Timing Job Aid (NCIRD, March 2025) — footnote \u00b6 to every PPSV23\u00b6 cell, printed on all four pages: PCV20 or PCV21 may stand in for an unavailable PPSV23',
+    short: 'CDC Adult Timing Job Aid',
+    quote: 'If PPSV23 is not available, PCV20 or PCV21 may be used',
+    lastVerified: '2026-10-17',
+  },
   cdcPneumoIndex: {
     rulebook: 'any',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/index.html',
@@ -810,10 +910,25 @@ export function resolveRefs(keys = []) {
 // dedupe identity use. MeningoVax hit this on its one anchored citation
 // (2026-09-17); here BOTH of the most-cited refs are anchored, so it is the
 // normal case rather than an edge one.
-export function highlightUrl(url, quote) {
+//
+// ⚠ The PDF rule (C8, document 2's CITEs, 2026-10-17). A `#:~:text=` fragment
+// is an HTML text fragment: PDF viewers do not honour it, so on a PDF it is a
+// DEAD anchor that still looks like a working deep link. The job aid is the
+// app's first QUOTED PDF — every quoted source before it was a web page — and
+// quoting a 4-page document without saying which page is most of the way to
+// the "right-sounding quote attached to the wrong patient" failure, because
+// this document prints a DIFFERENT interval for a different patient on each
+// page. So a quoted PDF entry declares `pdfPage` and gets `#page=N`, which
+// Chrome, Safari and Preview all honour.
+//
+// A quoted PDF entry with NO `pdfPage` would silently fall through to a text
+// fragment that cannot work, so `refs.test.js` fails if one exists.
+export function highlightUrl(url, quote, pdfPage = undefined) {
   if (!url) return undefined;
   if (!quote) return url;
-  return `${url.split('#')[0]}#:~:text=${encodeURIComponent(quote)}`;
+  const page = url.split('#')[0];
+  if (pdfPage != null) return `${page}#page=${pdfPage}`;
+  return `${page}#:~:text=${encodeURIComponent(quote)}`;
 }
 
 // One citation occurrence: keyed, but deliberately NOT numbered. Each one
@@ -848,7 +963,7 @@ export function cite(key, opts = undefined) {
   const out = {
     key,
     page: c?.url,
-    url: highlightUrl(c?.url, c?.quote),
+    url: highlightUrl(c?.url, c?.quote, c?.pdfPage),
     label: c?.quote ?? c?.label,
     doc: c?.short,
     quote: c?.quote,

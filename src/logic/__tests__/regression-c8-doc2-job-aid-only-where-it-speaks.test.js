@@ -160,14 +160,36 @@ describe('decision 2 — "the series is complete" keeps the job aid only at 50+'
     expect(hasJobAid(withPcv15AndPpsv(YOUNGER))).toBe(false);
   });
 
+  // "The advice" means the WORDS A CLINICIAN READS, so the comparison strips
+  // the `[c]` markers (C8, document 2's CITEs, 2026-10-17). A marker is not a
+  // word: it renders as a superscript number, and the whole point of decision
+  // 2 is that the 50+ card credits the job aid while the 19-49 card does not —
+  // which necessarily means one more number at 50+. Comparing the raw strings
+  // asserted something stronger than the decision, and stronger than is true.
+  //
+  // What must not move is the clinical sentence, and that is still pinned
+  // exactly: byte-for-byte identical at both ages once the markers are gone.
+  const advice = (rec) => noteText(rec).replace(/ ?\[c\]/g, '');
+
   it('the advice itself is untouched on both sides — only the credit moved', () => {
     for (const age of [OLDER, YOUNGER]) {
       expect(withPcv20(age).status).toBe('complete');
       expect(withPcv15AndPpsv(age).status).toBe('complete');
     }
     // The same sentence, word for word, at both ages.
-    expect(noteText(withPcv20(YOUNGER))).toBe(noteText(withPcv20(OLDER)));
-    expect(noteText(withPcv15AndPpsv(YOUNGER))).toBe(noteText(withPcv15AndPpsv(OLDER)));
+    expect(advice(withPcv20(YOUNGER))).toBe(advice(withPcv20(OLDER)));
+    expect(advice(withPcv15AndPpsv(YOUNGER))).toBe(advice(withPcv15AndPpsv(OLDER)));
+
+    // And the credit DID move, in the one direction decision 2 chose: the 50+
+    // card points a number at the job aid, the 19-49 card neither lists it nor
+    // cites it. Asserted here so "the advice is unchanged" can never be
+    // satisfied by the credit having failed to change either.
+    const citesJobAid = (rec) => (rec.noteCites ?? [])
+      .some((c) => c.key === 'jobAidSeriesCompleteAt50');
+    expect(citesJobAid(withPcv20(OLDER))).toBe(true);
+    expect(citesJobAid(withPcv20(YOUNGER))).toBe(false);
+    expect(citesJobAid(withPcv15AndPpsv(OLDER))).toBe(true);
+    expect(citesJobAid(withPcv15AndPpsv(YOUNGER))).toBe(false);
   });
 
   it('the boundary is ROUTINE_ADULT_MIN_M itself, not a number typed again', () => {
