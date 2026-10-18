@@ -136,6 +136,10 @@ describe('the field itself', () => {
       // point of this list.
       'mmwrPcv13OnlyThenPcv',     // the same row, verbatim, in the >=50 and 19-49 chronic blocks
       'mmwrPpsvOnlyThenPcv',      // the same row, verbatim, in all three adult blocks
+      // FINDING K (2026-10-18). p2016 Table 4's row is headed "(any risk
+      // condition)" in its own first column -- the document says so, where its
+      // neighbouring rows say "(non-IC only)" and "(IC only)".
+      'p2016CompletedBefore6WithPcv20', // the row's own heading: "any risk condition"
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       // FINDING 2 (2026-10-18). MMWR mm7137a3's Table 2 is divided into three
       // blocks -- "All children", "Healthy children", and "Children with
@@ -159,7 +163,21 @@ describe('the field itself', () => {
       'pedsPcv13Pcv15Interchangeable', // about the two products, in every recommendation
       'pedsRiskIncompleteCatchup',// printed in both at-risk lists
       'pedsRiskPcv13At6',         // printed in both at-risk lists
-      'pedsRiskPcv20Complete',    // printed in both at-risk lists
+      // FINDING K (2026-10-18). `pedsRiskPcv20Complete` CAME OFF this list: it
+      // is now the non-IC Age 6-18 instance only, because CDC words the IC
+      // instance differently ("no additional dose of PCV or PPSV23") and one
+      // key claiming both groups was showing 198 immunocompromised children the
+      // non-IC sentence -- the same fault as `pedsRiskPcv20orPpsv23`'s split.
+      // Its IC twin is `pedsIcPcv20Complete`, pinned to one group.
+      //
+      // The three below are genuinely printed once for every risk class:
+      'pedsRiskPcv20CompleteAt2', // the Age 2-5 instance, identical words in both at-risk lists
+      // CDC's Risk-based page states the completion under the H3 "Never
+      // received PCV13, PCV15, or PCV20", inside "Children 6 through 18 years
+      // old", ABOVE the risk-class split -- that page only splits by IC/non-IC
+      // inside its two later branches. Checked on the live page by walking the
+      // headings above the sentence, not inferred from reading order.
+      'pedsRiskPcv20FirstConjugate', // above the page's IC/non-IC split
       'pedsRoutine4Dose',         // at-risk rows start at age 2, so it is every baby's series
     ]);
   });

@@ -148,7 +148,13 @@ describe('FINDING E — the card says what falls due at age 2', () => {
     const card = completeCard(infant(['asplenia'], 'PCV20'));
     expect(allText(card)).toMatch(/includes PCV20/);
     expect(allText(card)).not.toMatch(/is due/);
-    expect(citeKeys(card)).toContain('pedsRiskPcv20Complete');
+    // FINDING K (2026-10-18): the key is now `pedsRiskPcv20CompleteAt2`, CDC's
+    // AGE 2-5 instance of that sub-bullet. `pedsRiskPcv20Complete` is the Age
+    // 6-18 instance, whose parent bullet reads "Received PCV before age 6 years
+    // but have not received PPSV23" -- not a sentence about a 15-month-old.
+    // This card's own words say "at age 2 years or later", which is exactly the
+    // patient the Age 2-5 instance is about.
+    expect(citeKeys(card)).toContain('pedsRiskPcv20CompleteAt2');
   });
 
   it('the promise is kept: the same child at 24 months is actually offered that dose', () => {

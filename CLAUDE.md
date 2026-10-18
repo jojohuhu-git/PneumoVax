@@ -108,6 +108,31 @@ status, same due date — so neither verdict corpus moves. Changing the note wit
 `doseLabel` would leave the header leading with the dose while the body leads with the
 review; the test asserts the label's order too.
 
+**A SENTENCE IS ONLY ABOUT THE PATIENT ITS PARENT BULLET DESCRIBES** (FINDING K,
+2026-10-18). CDC's child notes do not print rules as a flat list; they nest them. "Previously
+received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed" is a SUB-BULLET,
+printed four times, each under a parent carrying its own conditions — at 6–18, *"Received PCV
+before age 6 years **but have not received PPSV23**"*. One `refs.js` entry held it with
+`population: ['child-nonIC','child-IC']` and the comment "printed in both at-risk lists, same
+instruction"; `recommend.js` said it "carries no age condition in its own words". Both are
+true of the sentence alone and false of the sentence in place: **56 of 992 cards showing it
+fitted; 904 did not**, and the IC instance at 6–18 uses *different words* ("no additional dose
+of PCV or PPSV23"). `population` cannot see this — it records the patient GROUP, and a parent
+bullet splits on **vaccine history**. So: read the nesting, split the key per branch, keep each
+quote **verbatim and contiguous** (a joined parent+child string exists nowhere on the page —
+that is how `pedsMinAge`'s deep link came to match nothing), and put the branch in the entry's
+`label`. Guard: `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
+
+**A NUMBER WITH NO CHIP IS C8'S FAULT REVERSED** (FINDING L, opened 2026-10-18). A numbered
+citation whose document is not among the card's grey buttons leaves a reader clicking `[2]`
+with nothing to match. Measured over the grid: **1,310** instances. FINDING K fixed the 864 of
+them that print ACIP's interchangeability sentence (`pcvInterchangeableBridge` now returns
+`refKeys`, and **every call site using `cites` must spread `refKeys` into its refs** — never
+into the block-level `refs`, which would put a chip with no number on its neighbours). **446
+remain, enumerated in the handoff**: `pedsInfantLastDose1215mo` (220), `pedsSecondPpsv5y` (111
++ 90), `adultPcv15ThenPpsvShort` (25). `scripts/uncreditedSources.mjs` cannot see this class —
+it only looks for chips with no number.
+
 **Before removing a document from a card, read the document — including its TABLES.**
 FINDING F (2026-10-18): six removals were approved on 2026-10-17 on the stated ground that
 mm7401a1 "states none of these", from a reading that had recorded three sentences and never
