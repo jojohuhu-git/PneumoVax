@@ -80,9 +80,11 @@ the first document to reach zero uncredited (statement, card) pairs**: its last 
 adult with chronic conditions only, PCV13 and TWO PPSV23 doses) were settled by the owner on
 2026-10-18 — *"I would use the citation covering PCV13 and 1 dose of PPSV23 in patients
 19-49 with chronic conditions"*, because the chronic block offers a second PPSV23 to nobody
-and so has no other disposition for that history. What is left is the job aid's **3
-table-cell-only** statements (3,189 cards), still an OPEN OWNER DECISION: quote a bare cell,
-or remove the document from those cards. Documents 3, 5 and 6
+and so has no other disposition for that history. **The job aid is FINISHED too**: its last
+3 statements (3,189 cards) rested on table CELLS stated in no prose — its "PCV13 & PPSV23"
+cell is the two text runs "≥5 years" and "PCV20 or PCV21" at different x positions — and the
+owner ruled 2026-10-18 *"use MMWR table"*, so mm7401a1's sentences are cited and the job aid
+comes off those cards. **Two of six documents now carry zero uncredited pairs.** Documents 3, 5 and 6
 have proposed removals still waiting, and **doc 4 statement 1 is an
 open owner decision she has asked not to be re-raised.** Readings, dispositions and counts:
 `docs/archive/c7-2026-10-17-source-readings.md`. Measure with
@@ -96,6 +98,17 @@ complete"; two: "reviewed again … at age 50. Alternatively, … >=5 years"). `
 cannot see that — it records an age band. The engine reads `ppsv.count` (the EFFECTIVE
 count; a rejected dose is not a dose ACIP's row is about) in exactly one place,
 `mmwrBothPcv13PpsvKey()`. **Never collapse those two IC rows into one.**
+
+**Before removing a document from a card, read the document — including its TABLES.**
+FINDING F (2026-10-18): six removals were approved on 2026-10-17 on the stated ground that
+mm7401a1 "states none of these", from a reading that had recorded three sentences and never
+opened its clinical guidance table. **Five of the six are in that table, in full sentences**;
+1,594 cards were restored with the row cited. `scripts/uncreditedSources.mjs` cannot catch
+this — it only sees a document that is ON a card, so a document wrongly removed from a card
+it speaks for is invisible to it. The mirror guard is
+`regression-c8-2026-10-18-mmwr-table-rows-restored.test.js`, which asserts the document is
+PRESENT where it speaks. Evidence and the per-patient decision:
+`docs/archive/c7-2026-10-17-source-readings.md` §FINDING F.
 
 **The CHRONIC block does NOT split on the count** (OWNER DECISION 2026-10-18). It prints one
 row for a PCV13 + PPSV23 history, headed "PCV13 and 1 dose of PPSV23", and it speaks for a

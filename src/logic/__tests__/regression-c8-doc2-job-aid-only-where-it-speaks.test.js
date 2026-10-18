@@ -284,8 +284,11 @@ describe('swept over every patient the grid can build', () => {
 
   it('no other adult card lost its job aid button as a side effect', () => {
     // 7,920 cards carried it before this change; 1,115 were decided away, so
-    // 6,805 remain and 2,589 of those are the two statements above.
-    expect(adultCards).toBe(6805);
-    expect(jobAidElsewhere).toBe(6805 - 2589);
+    // 6,805 remained and 2,589 of those are the two statements above.
+    // 2026-10-18: a further 3,189 came off — the three statements the job aid
+    // prints only as table CELLS, replaced by mm7401a1's sentences (owner:
+    // *"use MMWR table"*). 6,805 - 3,189 = 3,616.
+    expect(adultCards).toBe(6805 - 3189);
+    expect(jobAidElsewhere).toBe(6805 - 3189 - 2589);
   });
 });

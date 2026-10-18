@@ -128,6 +128,13 @@ describe('the field itself', () => {
       // Checked row by row against the live page and the article PDF, not
       // inferred from one block. Its twin `mmwrSharedDecision65` is pinned to
       // one group above, because that row exists only in the >=50 block.
+      // 2026-10-18, the job aid's cell-only statements. mm7401a1's "PCV13
+      // only" row is word for word identical in the >=50 and 19-49 CHRONIC
+      // blocks. The 19-49 immunocompromising version inserts "administered"
+      // and is `mmwrPcv13OnlyThenPcv1949Ic`, pinned to one group -- a
+      // separate entry rather than a widened population, which is the whole
+      // point of this list.
+      'mmwrPcv13OnlyThenPcv',     // the same row, verbatim, in the >=50 and 19-49 chronic blocks
       'mmwrPpsvOnlyThenPcv',      // the same row, verbatim, in all three adult blocks
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       'pedsMinAge',               // the section heading, above every block

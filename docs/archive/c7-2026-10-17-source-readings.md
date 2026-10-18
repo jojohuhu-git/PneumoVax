@@ -176,6 +176,56 @@ rr7203a1 was "still reachable" via risk conditions — was stale and is correcte
 The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
 CITE, still unwritten. Do not let one quote cover both halves.
 
+### ✅ OWNER DECISION 2026-10-18 — the job aid's 3 cell-only statements: *"use MMWR table"*
+
+The three statements held open at the top of document 2's section (3,189 cards) rested on
+job-aid table **cells** and on no prose anywhere in that document. Pulled with coordinates,
+its page-1 `PCV13 at any age & PPSV23 at <65 yrs` row contains exactly two pieces of text:
+
+```
+y= 266.6  x= 246.1-286.9 | ≥5 years
+y= 267.5  x= 309.5-396.3 | PCV20 or PCV21
+```
+
+Two fragments at two x positions; the meaning is carried by the row label and the column
+header. A readable quote would have to be **assembled**, which is the same failure that
+already dispositioned the job aid's statement #8 (171 cards) as REMOVE for resting on page
+headings rather than words.
+
+The owner's answer was to cite ACIP instead, naming all three rows herself:
+
+| Card | mm7401a1's row, her words |
+|---|---|
+| PPSV23 only (1,154) | "A single dose of PCV21, PCV20, or PCV15 ≥1 year after the last PPSV23 dose." |
+| PCV13 only (523) | "A single dose of PCV21 or PCV20 **administered** ≥1 year after the PCV13 dose." |
+| PCV13 + PPSV23 (1,512) | "A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses." |
+
+Two of the three were already on the cards (`mmwrPpsvOnlyThenPcv` from FINDING F below, and
+`mmwrIc1949OnePpsv` / `mmwrBothPcv13Ppsv50plus` from document 1's CITEs). The third is new.
+
+⚠ **The "PCV13 only" row is printed in TWO wordings, ONE WORD apart.** The 19–49
+immunocompromising block inserts "administered"; the ≥50 and 19–49 chronic blocks do not.
+Her quote is the IC one, which matches the patient she was shown (19y, asplenia). Two
+entries, not one widened population: `mmwrPcv13OnlyThenPcv1949Ic` and
+`mmwrPcv13OnlyThenPcv`. The predicate choosing between them is the **S15 interval decision**
+(`ppsvIntervalDays != null` ⟺ 19–49 IC / cochlear / CSF), reused rather than re-derived, so
+the risk-class split keeps one home.
+
+**Applied 2026-10-18.** The job aid comes off those 3,189 cards: **6,805 → 3,616 buttons,
+and 0 uncredited** — the second document to finish. Prose over both corpora: **3,361 of
+35,280 lines differ**, and on every one the only change is the added marker, the two new
+quotes and the two button labels — **no advice moved**. New file:
+`regression-c8-2026-10-18-job-aid-cells-replaced-by-acip.test.js`.
+
+⚠ **A blind assertion caught while writing that file.** Its `JOB_AID` constant was first
+written as the job aid's `label`, but a card exposes `short` — so `not.toContain(JOB_AID)`
+passed on every card in the app, including ones that list the document. Three of five
+"failing" tests were passing vacuously. The file now asserts `short !== label` so the same
+blind spot cannot return silently. Compare the `not.toContain('deletedName')` hazard in the
+stale-identifier guard: an assertion that can never fail reads as coverage.
+
+---
+
 ### ⚠️ FINDING F, 2026-10-18 — this reading never read the document's table
 
 **What is wrong with the section above.** Document 1's reading records three sentences —

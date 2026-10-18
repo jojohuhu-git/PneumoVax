@@ -1315,6 +1315,18 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     return key ? [cite(key)] : [];
   };
   const mmwrBothPcv13PpsvMarker = (icRow) => (mmwrBothPcv13PpsvKey(icRow) ? ' [c]' : '');
+  // OWNER DECISION 2026-10-18, the job aid's three cell-only statements:
+  // *"use MMWR table"*. mm7401a1's "PCV13 only" row is printed in two
+  // wordings ONE WORD apart -- the 19-49 immunocompromising / cochlear / CSF
+  // block inserts "administered", the >=50 and 19-49 chronic blocks do not.
+  // `ppsvIntervalDays != null` IS the S15 risk-class decision (8 weeks at
+  // 19-49 for IC / cochlear / CSF, a year otherwise), reused here rather than
+  // re-derived, so the split has one home -- the same reasoning as
+  // `mmwrNoneRowCites` above. Never a second age test, and never a second
+  // risk-class test either.
+  const mmwrPcv13OnlyCite = ppsvIntervalDays != null
+    ? 'mmwrPcv13OnlyThenPcv1949Ic'
+    : 'mmwrPcv13OnlyThenPcv';
   const jobAidCompleteMarker = isOlderAdult ? ' [c]' : '';
   const jobAidCompleteCites = isOlderAdult ? [cite('jobAidSeriesCompleteAt50')] : [];
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
@@ -1440,7 +1452,11 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'),
         cite('mmwrPpsvOnlyThenPcv'),
       ],
-      refs,
+      // The job aid states this only as a table CELL -- "≥1 year" and
+      // "PCV20 or PCV21" as two text runs in its "PPSV23 only" row -- and
+      // nowhere in words. OWNER DECISION 2026-10-18: use the MMWR table, and
+      // the job aid comes off.
+      refs: refsWithoutJobAid,
     })];
   }
 
@@ -1452,13 +1468,22 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       doseLabel: `PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after PCV13 — completes the series`,
       dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
-      note: `PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after the last PCV13 dose [c]. This completes the series — no PPSV23 needed [c].`,
+      note: `PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after the last PCV13 dose [c] [c]. This completes the series — no PPSV23 needed [c].`,
       // C8, document 1's CITE. "No PPSV23 needed" carried NO citation at all
       // before this: it is mm7401a1's body prose, the paragraph that retired
       // PPSV23 as a way to finish a PCV13-started series. The sentence says
       // "adults aged >=19 years" itself, so it needs no age split.
-      noteCites: [cite('adultPcv13Only'), cite('mmwrPcv13NoPpsv23ToComplete')],
-      refs,
+      // OWNER DECISION 2026-10-18. The ≥1 year and the products are ACIP's
+      // "PCV13 only" row; "no PPSV23 needed" is its body prose, cited
+      // separately above -- one citation per claim, never one quote covering
+      // both halves. The job aid stated the interval only as a table cell, so
+      // it comes off.
+      noteCites: [
+        cite('adultPcv13Only'),
+        cite(mmwrPcv13OnlyCite),
+        cite('mmwrPcv13NoPpsv23ToComplete'),
+      ],
+      refs: refsWithoutJobAid,
     })];
   }
 
@@ -1591,7 +1616,10 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         cite(isOlderAdult ? 'adultBothNotAt65' : 'adultIc1949BothPcv13Ppsv'),
         ...mmwrBothPcv13PpsvCites(true),
       ],
-      refs,
+      // The job aid's "PCV13 & PPSV23" row is the two text runs "≥5 years"
+      // and "PCV20 or PCV21"; it says this in no sentence. OWNER DECISION
+      // 2026-10-18: use the MMWR table, already cited on the line above.
+      refs: refsWithoutJobAid,
     })];
   }
 

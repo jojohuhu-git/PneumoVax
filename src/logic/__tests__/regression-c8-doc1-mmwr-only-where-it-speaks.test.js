@@ -164,7 +164,9 @@ describe('the four statements mm7401a1 does not state have lost it, and the two 
     for (const am of [OLDER, YOUNGER]) {
       expect(ppsvOnly(am)).toBeDefined();
       expect(shorts(ppsvOnly(am))).toContain(MMWR);
-      expect(shorts(ppsvOnly(am))).toContain(JOB_AID);
+      // 2026-10-18: the job aid states this only as a table cell, so it came
+      // off this card the same day mm7401a1 came back on to it.
+      expect(shorts(ppsvOnly(am))).not.toContain(JOB_AID);
     }
   });
 
@@ -331,8 +333,8 @@ describe('swept over every patient the grid can build', () => {
     expect(mmwrCards).toBe(2564 + 1154 + 440);
   });
 
-  it("document 2's result is unchanged by this — the job aid is still on 6,805", () => {
-    expect(jobAidCards).toBe(6805);
+  it("the job aid is on 3,616 — 6,805 after document 2, minus the 3,189 cell-only", () => {
+    expect(jobAidCards).toBe(6805 - 3189);
   });
 
   it('no adult card was left with no source at all', () => {
