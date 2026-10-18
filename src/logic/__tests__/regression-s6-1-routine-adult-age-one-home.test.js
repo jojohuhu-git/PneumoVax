@@ -108,7 +108,7 @@ describe('S6-1 — the routine-adult age (50y) has one home', () => {
   // and nothing else, so a hand-typed 600 anywhere ELSE in the engine walked
   // straight past it. That was measured, not supposed: C8 added an
   // age-conditional source list, and replacing its `isOlderAdult` with a bare
-  // `am >= 600` left **all 1,142 tests green** — behaviourally identical code,
+  // `am >= 600` left **all 1,177 tests green** — behaviourally identical code,
   // and exactly the second age test `CLAUDE.md` forbids twice ("Never add an
   // age test that decides whether a rule may bite", the S14-RC root cause).
   // A behavioural test cannot catch it, because there is no behaviour to

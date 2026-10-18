@@ -74,8 +74,8 @@ documents nothing it said rested on (the owner's "I forget why there are multipl
 chips listed if its only citing one of them"). Each (document, statement) pair gets exactly
 one of two outcomes, never a third — **cite it, or take it off that card** (OWNER DECISION
 2026-10-17). **A removal is a clinical act: it goes to the owner per document before it
-lands.** Only **document 2** (the CDC Adult Timing Job Aid) is signed off and applied;
-documents 1, 3, 5 and 6 have proposed removals still waiting, and **doc 4 statement 1 is an
+lands.** **Documents 1 and 2** are signed off and their REMOVALS applied — document 2's **12 CITEs
+are still unwritten**; documents 3, 5 and 6 have proposed removals still waiting, and **doc 4 statement 1 is an
 open owner decision she has asked not to be re-raised.** Readings, dispositions and counts:
 `docs/archive/c7-2026-10-17-source-readings.md`. Measure with
 `npx vite-node scripts/uncreditedSources.mjs` and `scripts/citationMapping.mjs` — never
@@ -83,7 +83,7 @@ quote a count from the log, which predates the IC-children fix and reads low.
 
 Where a disposition splits by age, the predicate is the engine's existing `isOlderAdult`
 (i.e. `ROUTINE_ADULT_MIN_M`). **Never a second age test** — a hand-typed `am >= 600` there
-passed all 1,142 tests, so `regression-s6-1-routine-adult-age-one-home.test.js` now guards
+passed all 1,177 tests, so `regression-s6-1-routine-adult-age-one-home.test.js` now guards
 the whole engine's source, not just the `M` table.
 
 ### PCV7 Never Counts

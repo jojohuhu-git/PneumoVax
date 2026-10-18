@@ -352,13 +352,14 @@ looks like; the 1,115 below is only the removals.
 **Branch `feature/2026-10-17-c8-per-card-sources`, off `main` at `5bffe00`.** Both decisions
 below — and only those two — are now in `recommend.js`, held by
 `regression-c8-doc2-job-aid-only-where-it-speaks.test.js` (15 tests; 9 passing / 6 failing
-before the fix, 15 after). Suite **1,143 passing in 99 files**, up 16 from main's 1,127 —
-15 for the new guard and 1 for the widened age-literal guard it turned up.
+before the fix, 15 after). **C2/C3 merged as PR #66 while this branch was being written**,
+so the branch was rebased onto it: suite **1,178 passing in 102 files**, and the
+`uncreditedSources.mjs` smoke test's skip is gone.
 
-It does **not** depend on C2/C3 after all: the change is in the engine, not in the renderer,
-so this branch sits straight on `main` and the two can be merged in either order. The
-mutation counts below were measured on both trees — stacked on C2/C3 and off `main` — and
-came out identical.
+It never depended on C2/C3: the change is in the engine, not the renderer. Every mutation
+count here was re-measured on the merged tree rather than carried over from the pre-merge
+one, and four of them moved — documents 1 and 2 share one expression, so each other's tests
+now catch more.
 
 **The mechanism change the decisions needed is done and is reusable.** The adult pathway no
 longer computes one source list and spreads it over all ten cards: `ADULT_DEFAULT_REFS` is

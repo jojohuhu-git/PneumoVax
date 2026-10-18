@@ -1,3 +1,10 @@
+> **SUPERSEDED 2026-10-17 (night) by
+> [`handoff-2026-10-17-c8-documents-1-and-2.md`](handoff-2026-10-17-c8-documents-1-and-2.md).**
+> PR #65 was merged, C2/C3 was re-checked and merged as PR #66, and C8's documents 2 and 1
+> are applied and awaiting merge as PR #67. Two items this file lists as open are not: **G4
+> and G5 shipped inside PR #65** itself, and the C2/C3 branch is no longer held. Resume from
+> the newer file.
+
 # PneumoVax — Handoff after the patient-population field (2026-10-17, late evening)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
