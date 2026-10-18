@@ -57,16 +57,32 @@
 // visible to `population`, which records a patient's age band and cannot see
 // a dose count.
 //
-// ── THE 45 THAT STAY UNCREDITED, DELIBERATELY ─────────────────────────────
+// ── THE LAST 45, SETTLED 2026-10-18 (OWNER DECISION) ─────────────────────
 //
 // A 19–49 adult with CHRONIC conditions only, PCV13 and TWO effective PPSV23
 // doses. The app says "no dose now, re-evaluate at 50". mm7401a1's chronic
-// block stops at "PCV13 and 1 dose of PPSV23" — it states nothing about a
-// second PPSV23 dose for this patient. So there is no sentence to quote, and
-// taking the document off those cards is a REMOVAL, which `CLAUDE.md` makes
-// an owner decision ("a removal is a clinical act: it goes to the owner per
-// document before it lands"). They are asserted as still uncredited below so
-// this file records where the work stopped rather than implying it finished.
+// block has only one row for a PCV13 + PPSV23 history — "PCV13 and 1 dose of
+// PPSV23" — and prints no second-dose row, so this file originally left the
+// 45 cards uncredited and took the question to the owner.
+//
+// Her ruling, verbatim: *"for chronic condition with PCV13 and 2 doses of
+// PPSV23 I would use the citation covering PCV13 and 1 dose of PPSV23 in
+// patients 19-49 with chronic conditions: The pneumococcal vaccination
+// recommendations should be reviewed again when the person reaches age 50
+// years."*
+//
+// The clinical reason the count does not change the row: in the CHRONIC block
+// a second PPSV23 is never offered at all. ACIP offers one only inside the
+// immunocompromising block ("When a second PPSV23 dose is used instead of
+// PCV21 or PCV20…", mm7336a2's own wording of the same row). The chronic
+// 1-dose row offers nothing but the review at 50, so there is no second-dose
+// disposition for a second dose to land on — the row is the block's answer to
+// "PCV13 and PPSV23", and a third dose on record cannot move it.
+//
+// ⚠ THE IC BLOCK STILL SPLITS ON THE COUNT AND MUST KEEP SPLITTING. There,
+// one dose and two doses get materially different sentences ("the series is
+// complete" versus "reviewed again … Alternatively, … ≥5 years"). This
+// decision collapses the chronic side's *cite-or-nothing*, NOT that split.
 //
 // ── WHY NOTHING EXISTING COULD CATCH THIS ─────────────────────────────────
 //
@@ -112,8 +128,10 @@ const QUOTES = {
     'A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose.',
   mmwrIc1949OnePpsv:
     'A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
+  // Extended 2026-10-18 to the whole row — see
+  // regression-c8-2026-10-18-ic-two-ppsv-follows-acip-order.test.js.
   mmwrIc1949TwoPpsv:
-    'Alternatively, a single dose of either PCV21 or PCV20 should be administered ≥5 years after the last pneumococcal vaccine dose.',
+    'The pneumococcal vaccination recommendations should be reviewed again when the person turns age 50 years. Alternatively, a single dose of either PCV21 or PCV20 should be administered ≥5 years after the last pneumococcal vaccine dose. If PCV21 or PCV20 is used, the series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
   mmwrPcv13NoPpsv23ToComplete:
     'Among adults aged ≥19 years who have started their pneumococcal vaccination series with PCV13 but have not received all recommended doses, PPSV23 is no longer recommended as an option to complete the series. Either PCV20 or PCV21 is recommended to complete the series as previously recommended.',
   mmwrChronic1949ReviewAt50:
@@ -198,10 +216,14 @@ describe('each card credits the row that was written about its own patient', () 
     expect(citeKeys(card)).not.toContain('mmwrIc1949TwoPpsv');
   });
 
+  // 2026-10-18: this card's lead changed to ACIP's order, so it no longer
+  // opens with "PCV13 and PPSV23 already given". The citation assertion is
+  // unchanged -- which row it quotes is still the point.
   it('S1 · 19-49 immunocompromised with TWO PPSV23 quotes the 2-dose row', () => {
     const r = run({ ...IC_19_49, pcvDoses: TWO_PCV13, ppsv23Doses: TWO_PPSV });
     expect(effectivePpsv(r)).toBe(2);
-    const card = findByNote(r, 'PCV13 and PPSV23 already given');
+    const card = findByNote(r, 'Review the pneumococcal recommendations again at age 50');
+    expect(card).toBeDefined();
     expect(citeKeys(card)).toContain('mmwrIc1949TwoPpsv');
     expect(citeKeys(card)).not.toContain('mmwrIc1949OnePpsv');
   });
@@ -222,14 +244,38 @@ describe('each card credits the row that was written about its own patient', () 
     expect(citeKeys(card)).toContain('mmwrChronic1949ReviewAt50');
   });
 
-  it('S3 · 19-49 chronic with TWO PPSV23 credits NOTHING — ACIP has no such row', () => {
+  // OWNER DECISION 2026-10-18. Was the opposite assertion until that date:
+  // "credits NOTHING — ACIP has no such row". See the header for her ruling
+  // and the clinical reason the dose count does not change the chronic row.
+  it('S3 · 19-49 chronic with TWO PPSV23 quotes the SAME chronic review-at-50 row', () => {
     const r = run({ ...CHRONIC_19_49, pcvDoses: TWO_PCV13, ppsv23Doses: TWO_PPSV });
     expect(effectivePpsv(r)).toBe(2);
     const card = findByNote(r, 'No additional pneumococcal dose now');
-    expect(citeKeys(card)).not.toContain('mmwrChronic1949ReviewAt50');
-    // The button is still listed: taking it off is the owner's call, pending.
+    expect(citeKeys(card)).toContain('mmwrChronic1949ReviewAt50');
     expect(buttonUrls(card)).toContain(MMWR_URL);
-    expect(creditedUrls(card).has(MMWR_URL)).toBe(false);
+    // The button now has a raised number behind it — the G1 promise.
+    expect(creditedUrls(card).has(MMWR_URL)).toBe(true);
+  });
+
+  it('S3 · the chronic row is cited for ONE and TWO doses with the identical key', () => {
+    const one = run({ ...CHRONIC_19_49, pcvDoses: PCV13, ppsv23Doses: ONE_PPSV });
+    const two = run({ ...CHRONIC_19_49, pcvDoses: TWO_PCV13, ppsv23Doses: TWO_PPSV });
+    const keys = (r) => citeKeys(findByNote(r, 'No additional pneumococcal dose now'));
+    expect(keys(one)).toEqual(keys(two));
+  });
+
+  // The guard on the half the owner's ruling does NOT touch. If someone
+  // "simplifies" the chronic collapse into the immunocompromising branch too,
+  // the IC block's two different sentences become one and this fails.
+  it('S3 · the IC block still answers one dose and two doses differently', () => {
+    const one = run({ ...IC_19_49, pcvDoses: PCV13, ppsv23Doses: ONE_PPSV });
+    const two = run({ ...IC_19_49, pcvDoses: TWO_PCV13, ppsv23Doses: TWO_PPSV });
+    // The two cards now differ in their lead sentence as well as their quote
+    // (2026-10-18), so each is found by its own opening.
+    const keyIn = (r, lead) => citeKeys(findByNote(r, lead)).find((k) => k.startsWith('mmwrIc1949'));
+    expect(keyIn(one, 'PCV13 and PPSV23 already given')).toBe('mmwrIc1949OnePpsv');
+    expect(keyIn(two, 'Review the pneumococcal recommendations again at age 50')).toBe('mmwrIc1949TwoPpsv');
+    expect(REFS.mmwrIc1949OnePpsv.quote).not.toBe(REFS.mmwrIc1949TwoPpsv.quote);
   });
 
   it('S4 · the 19-49 no-risk card credits the sentence about 19-49 adults', () => {
@@ -283,16 +329,36 @@ describe('over the whole grid', () => {
     return { listing, uncredited, uncreditedNotes };
   })();
 
-  it('every card listing mm7401a1 credits it, bar the 45 awaiting the owner', () => {
-    expect(stats.listing).toBe(2564);
-    expect(stats.uncredited).toBe(45);
+  // Was `uncredited === 45` until the owner's 2026-10-18 ruling retired the
+  // last one. mm7401a1 is now the first of the app's six documents to reach
+  // zero: every card that lists it has a raised number pointing at it.
+  it('every card listing mm7401a1 credits it — zero exceptions', () => {
+    // 2,564 after document 1's removals; + 1,594 restored by FINDING F on
+    // 2026-10-18 (1,154 "PPSV23 only" + 440 shared-decision), each of which
+    // arrived with its own cite, so the zero below is unaffected.
+    expect(stats.listing).toBe(2564 + 1154 + 440);
+    expect(stats.uncredited).toBe(0);
+    expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });
 
-  it('the only uncredited statement left is the chronic 2-dose one', () => {
-    expect([...stats.uncreditedNotes.keys()]).toHaveLength(1);
-    const [only] = [...stats.uncreditedNotes.keys()];
-    expect(only).toContain('No additional pneumococcal dose now');
-    expect(only).toContain('chronic (non-immunocompromising) condition');
+  // The 45 are the cards the ruling was about, so they are counted by name
+  // rather than left to the aggregate above: a future change that credits
+  // 2,564 cards by crediting the wrong row would still pass that one.
+  it('the chronic review-at-50 card credits mm7401a1 at one dose and at two', () => {
+    const seen = { one: 0, two: 0 };
+    for (const c of buildCases()) {
+      let r;
+      try { r = recommend(c.input); } catch { continue; }
+      if (r.excluded) continue;
+      for (const rec of r.recs ?? []) {
+        if (!noteText(rec).startsWith('No additional pneumococcal dose now')) continue;
+        expect(citeKeys(rec)).toContain('mmwrChronic1949ReviewAt50');
+        expect(creditedUrls(rec).has(MMWR_URL)).toBe(true);
+        const n = (r.perDose?.ppsv23 ?? []).filter((d) => d.effectiveDoseNum != null).length;
+        if (n === 1) seen.one++; else if (n === 2) seen.two++;
+      }
+    }
+    expect(seen).toEqual({ one: 165, two: 45 });
   });
 
   it('no card shows a quote at an age band it was not written about', () => {

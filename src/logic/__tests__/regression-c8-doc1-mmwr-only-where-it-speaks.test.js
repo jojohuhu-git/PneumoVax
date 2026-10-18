@@ -82,12 +82,22 @@ const findByNote = (result, needle) =>
   (result.recs ?? []).find((r) => noteText(r).includes(needle));
 
 // The six statements losing it, and the seven keeping it.
+// ⚠ CORRECTED 2026-10-18 (FINDING F). This file was written as "the six
+// statements mm7401a1 does not state", and TWO of the six were not in that
+// class at all: the reading the removals rested on had recorded only three
+// sentences, all narrative, and had never read the document's clinical
+// guidance TABLE. The table has a row whose HEADING is each of those two
+// patients' exact history. They move to KEEPS below; the owner approved the
+// restoration on 2026-10-18 after seeing both patients and both rows. The
+// four that remain here are still correct — the table really does not say a
+// series containing PCV20/PCV21 is complete, nor that PCV15 then PPSV23
+// completes one, and its PCV15 sentence is printed inside the "None or PCV7
+// only" row (owner: *"use job aid since PCV15 isn't listed in the MMWR
+// table"*).
 const LOSES = {
   complete20or21: 'A pneumococcal series that includes PCV20 or PCV21 is complete',
   complete15plus: 'PCV15 followed by PPSV23 is a complete pneumococcal series',
-  afterPpsvOnly: 'after the PPSV23 dose',
   ppsvAfterPcv15: 'the series is INCOMPLETE until then',
-  sharedDecision: 'is a shared clinical decision',
 };
 const KEEPS = {
   pcv13AndPpsv: 'PCV13 and PPSV23 already given',
@@ -95,12 +105,15 @@ const KEEPS = {
   reEvaluateAt50: 'No additional pneumococcal dose now — re-evaluate at age 50',
   routineAt50: 'Routine pneumococcal vaccination begins at age 50',
   noHistory: 'A PCV7-only history counts as no PCV history',
+  // Restored 2026-10-18 — see the note above.
+  afterPpsvOnly: 'after the PPSV23 dose',
+  sharedDecision: 'is a shared clinical decision',
 };
 
 const OLDER = 660;     // 55y
 const YOUNGER = 420;   // 35y
 
-describe('the six statements mm7401a1 does not state have lost it', () => {
+describe('the four statements mm7401a1 does not state have lost it, and the two it does are back', () => {
   const pcv20 = (am) => findByNote(
     adult(am, { riskIds: ['diabetes'], pcvDoses: [{ date: '2024-03-01', product: 'PCV20' }] }),
     LOSES.complete20or21,
@@ -115,7 +128,7 @@ describe('the six statements mm7401a1 does not state have lost it', () => {
   );
   const ppsvOnly = (am) => findByNote(
     adult(am, { riskIds: ['diabetes'], ppsv23Doses: [{ date: '2020-03-01' }] }),
-    LOSES.afterPpsvOnly,
+    KEEPS.afterPpsvOnly,
   );
   const pcv15NoPpsv = (am) => findByNote(
     adult(am, { riskIds: ['diabetes'], pcvDoses: [{ date: '2024-03-01', product: 'PCV15' }] }),
@@ -127,7 +140,7 @@ describe('the six statements mm7401a1 does not state have lost it', () => {
       pcvDoses: [{ date: '2014-03-01', product: 'PCV13' }],
       ppsv23Doses: [{ date: '2023-03-01' }],   // age ~66 at that dose
     }),
-    LOSES.sharedDecision,
+    KEEPS.sharedDecision,
   );
 
   it('"series includes PCV20 or PCV21 is complete" — at both ages', () => {
@@ -144,11 +157,16 @@ describe('the six statements mm7401a1 does not state have lost it', () => {
     }
   });
 
-  it('the ≥1 year after PPSV23 interval — the job aid prints it, not this paper', () => {
+  // REVERSED 2026-10-18. Was `not.toContain(MMWR)`. mm7401a1's table carries a
+  // row headed "PPSV23 only" in all three adult blocks, word for word the
+  // same, giving both the products and the ≥1 year. The paper does print it.
+  it('the ≥1 year after PPSV23 interval — the paper DOES print it, in its table', () => {
     for (const am of [OLDER, YOUNGER]) {
       expect(ppsvOnly(am)).toBeDefined();
-      expect(shorts(ppsvOnly(am))).not.toContain(MMWR);
-      expect(shorts(ppsvOnly(am))).toContain(JOB_AID);
+      expect(shorts(ppsvOnly(am))).toContain(MMWR);
+      // 2026-10-18: the job aid states this only as a table cell, so it came
+      // off this card the same day mm7401a1 came back on to it.
+      expect(shorts(ppsvOnly(am))).not.toContain(JOB_AID);
     }
   });
 
@@ -168,10 +186,13 @@ describe('the six statements mm7401a1 does not state have lost it', () => {
     expect(shorts(ic)).not.toContain(MMWR);
   });
 
-  it('the shared-decision path this paper never discusses', () => {
+  // REVERSED 2026-10-18. Was `not.toContain(MMWR)`, under the title "the
+  // shared-decision path this paper never discusses". The paper gives it a
+  // table row: "PCV13 at any age and PPSV23 at age ≥65 years".
+  it('the shared-decision path — this paper gives it a row of its own', () => {
     expect(shared()).toBeDefined();
     expect(shared().status).toBe('shared-decision');
-    expect(shorts(shared())).not.toContain(MMWR);
+    expect(shorts(shared())).toContain(MMWR);
   });
 
   it('what remains on them is a document that does state the claim', () => {
@@ -287,7 +308,7 @@ describe('swept over every patient the grid can build', () => {
     }
   });
 
-  it('not one of the six statements still carries mm7401a1', () => {
+  it('not one of the four statements it does not state still carries mm7401a1', () => {
     for (const [k, v] of Object.entries(onLosers)) {
       expect(v.withMmwr, `${k} still carries it on ${v.withMmwr} cards`).toBe(0);
     }
@@ -299,7 +320,7 @@ describe('swept over every patient the grid can build', () => {
     }
   });
 
-  it('mm7401a1 is now a button on 2,564 cards, down from 7,920', () => {
+  it('mm7401a1 is a button on 4,158 cards — 2,564 after the removals, plus the 1,594 restored', () => {
     // Two different numbers, both true, and they are easy to confuse:
     //   7,920 -> 2,564  every mm7401a1 BUTTON on a card (what this sweep counts)
     //   7,875 -> 2,544  only the ones no raised number points at (what
@@ -308,11 +329,12 @@ describe('swept over every patient the grid can build', () => {
     // the combined tree (C2/C3 + C8 documents 2 and 1) with
     // `scripts/citationMapping.mjs`, which also reports "cards citing a
     // document with NO button" still **0** — no removal orphaned a citation.
-    expect(mmwrCards).toBe(2564);
+    // 2026-10-18: + 1,154 (PPSV23 only) + 440 (shared decision) = 4,158.
+    expect(mmwrCards).toBe(2564 + 1154 + 440);
   });
 
-  it("document 2's result is unchanged by this — the job aid is still on 6,805", () => {
-    expect(jobAidCards).toBe(6805);
+  it("the job aid is on 3,616 — 6,805 after document 2, minus the 3,189 cell-only", () => {
+    expect(jobAidCards).toBe(6805 - 3189);
   });
 
   it('no adult card was left with no source at all', () => {

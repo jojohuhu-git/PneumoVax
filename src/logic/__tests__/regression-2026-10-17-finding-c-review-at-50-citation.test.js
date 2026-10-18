@@ -208,19 +208,57 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     expect(CORPUS_TODAY).toBe(TODAY);
   });
 
-  it('not one review-at-50 card anywhere quotes the give-a-dose sentence first', () => {
+  // ⚠ NARROWED 2026-10-18, and narrowed to the HAZARD rather than relaxed.
+  // This used to select cards by the words "review at age 50" in the dose
+  // label alone. On 2026-10-18 a second, different card acquired that phrase:
+  // the 19-49 immunocompromising card with TWO PPSV23 doses, which now follows
+  // ACIP's order ("reviewed again ... at age 50. Alternatively, a single dose
+  // ... >=5 years"). That card DOES offer a dose, so a quote instructing one
+  // is exactly right on it -- the opposite of FINDING C's hazard.
+  //
+  // FINDING C is about a card that says NO dose is due standing beside a quote
+  // that instructs one. So the selector is now "mentions the review at 50 AND
+  // offers no product", which is what that card is, and the new card is
+  // asserted separately below rather than merely excluded.
+  const offersNoDose = (r) => (r.brands ?? []).length === 0;
+
+  it('not one review-at-50 card that offers no dose quotes the give-a-dose sentence first', () => {
     const offenders = [];
+    let seen = 0;
     for (const c of cases) {
       const out = recommend(c.input);
       if (out.excluded) continue;
       for (const r of out.recs ?? []) {
         if (!/review at age 50/i.test(r.doseLabel ?? '')) continue;
+        if (!offersNoDose(r)) continue;
+        seen++;
         if (r.noteCites?.[0]?.key !== 'adultChronicOnlyReviewAt50') {
           offenders.push(`${c.key} → ${r.noteCites?.[0]?.key}`);
         }
       }
     }
     expect(offenders).toEqual([]);
+    // Anti-vacuity: if a later change stops producing this card at all, the
+    // assertion above would pass on an empty set and say nothing.
+    expect(seen).toBe(210);
+  });
+
+  it('the review-at-50 card that DOES offer a dose leads with ACIP\u2019s two-dose row', () => {
+    const found = [];
+    for (const c of cases) {
+      const out = recommend(c.input);
+      if (out.excluded) continue;
+      for (const r of out.recs ?? []) {
+        if (!/review at age 50/i.test(r.doseLabel ?? '')) continue;
+        if (offersNoDose(r)) continue;
+        found.push(r.noteCites?.[0]?.key);
+      }
+    }
+    // The 45 two-dose 19-49 immunocompromising cards, all citing the row that
+    // states the review at 50 -- not CDC's Adult Notes, which say only the
+    // dose and its five years.
+    expect(found).toHaveLength(45);
+    expect([...new Set(found)]).toEqual(['mmwrIc1949TwoPpsv']);
   });
 
   it('210 cards carry the new citation — the measured count that moved', () => {

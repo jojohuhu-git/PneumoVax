@@ -1,3 +1,11 @@
+> ## ⚠️ SUPERSEDED — 2026-10-18
+>
+> The queue below was resumed and four of its open items were decided and implemented.
+> **Do not work from this file.** The current handoff is
+> [`handoff-2026-10-18-four-owner-decisions.md`](handoff-2026-10-18-four-owner-decisions.md).
+> In particular: the 45 chronic cards and the job aid's 3 cell-only statements are DONE,
+> and FINDING F reversed two of the six mm7401a1 removals this file treats as settled.
+
 # PneumoVax — Handoff after C8 document 1's CITEs (2026-10-17, late night)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

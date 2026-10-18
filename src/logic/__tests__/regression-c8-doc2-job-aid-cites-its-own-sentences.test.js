@@ -202,11 +202,18 @@ describe('statement #6 — shared clinical decision-making', () => {
     'is a shared clinical decision',
   );
 
-  it('the card quotes the job aid alongside the Adult Notes', () => {
+  // FINDING F (2026-10-18) added a third number: mm7401a1's own table row for
+  // this history, which had been removed from the card on the ground that the
+  // paper never discusses shared decision-making. The job aid's position in
+  // the list is what this test is about, so the assertion keeps naming every
+  // key in order rather than loosening to "contains".
+  it('the card quotes the job aid alongside the Adult Notes and ACIP', () => {
     expect(rec()).toBeDefined();
     expect(rec().status).toBe('shared-decision');
     const { lead } = noteCiteSlices(rec().note, rec().noteCites);
-    expect(lead.map((c) => c.key)).toEqual(['adultBothAt65', 'jobAidSharedDecision65']);
+    expect(lead.map((c) => c.key)).toEqual([
+      'adultBothAt65', 'jobAidSharedDecision65', 'mmwrSharedDecision65',
+    ]);
   });
 
   it('the quote is the sentence about a patient of 65 or older', () => {
@@ -353,13 +360,22 @@ describe('the three statements that are NOT cited, and why', () => {
     )],
   ];
 
+  // ✅ SETTLED 2026-10-18. The owner's answer to the three above was *"use
+  // MMWR table"* — mm7401a1 states all three in full sentences, so ACIP's rows
+  // are cited and the job aid comes off these cards. The assertion is
+  // REVERSED rather than deleted: the job aid must now be absent, and it must
+  // still quote none of these statements if it ever returns. See
+  // `regression-c8-2026-10-18-job-aid-cells-replaced-by-acip.test.js`.
   for (const [name, get] of cases) {
-    it(`${name} still lists the job aid and still quotes none of it`, () => {
+    it(`${name} no longer lists the job aid, and never quotes it`, () => {
       const rec = get();
       expect(rec, name).toBeDefined();
-      expect(buttonUrls(rec), name).toContain(JOB_AID_URL);
+      expect(buttonUrls(rec), name).not.toContain(JOB_AID_URL);
       const quoted = (rec.noteCites ?? []).filter((c) => c.page === JOB_AID_URL);
       expect(quoted.map((c) => c.key), name).toEqual([]);
+      // ...and the claim did not become sourceless: ACIP's row took its place.
+      const mmwr = (rec.noteCites ?? []).filter((c) => (c.page ?? '').includes('mm7401a1'));
+      expect(mmwr.length, name).toBeGreaterThan(0);
     });
   }
 });
@@ -398,11 +414,15 @@ describe('swept over the whole grid — the counts that moved', () => {
     return { gained, uncreditedPairs, uncreditedStatements, imbalanced };
   };
 
-  it('3,616 cards gained a job-aid citation; 3,189 are still uncredited, across 3 statements', () => {
+  // 2026-10-18: the 3,189 were the three cell-only statements. The owner chose
+  // mm7401a1's table over a quote assembled from the job aid's cells, so the
+  // job aid came off those cards and the uncredited count is now zero — the
+  // second document to finish.
+  it('3,616 cards gained a job-aid citation, and none is left uncredited', () => {
     const { gained, uncreditedPairs, uncreditedStatements } = sweep();
     expect(gained).toBe(3616);
-    expect(uncreditedPairs).toBe(3189);
-    expect(uncreditedStatements.size).toBe(3);
+    expect(uncreditedPairs).toBe(0);
+    expect(uncreditedStatements.size).toBe(0);
   });
 
   it('every card balances its markers against its cites', () => {

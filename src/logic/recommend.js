@@ -1241,16 +1241,24 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     ADULT_DEFAULT_REFS.filter((k) => !drop.includes(k)),
   );
   const refsWithoutJobAid = adultRefsExcept('cdcAdultTimingJobAid');
-  // C8, document 1 (OWNER DECISION 2026-10-17, *"Approve all six removals."*).
-  // mm7401a1 is ACIP's January 2025 paper and its subject is one thing --
-  // routine adult vaccination moving from 65 to 50 -- plus the
-  // PCV13-experienced incomplete-series rule. It states none of these:
-  // "a series including PCV20/21 is complete" and "PCV15 then PPSV23 is
-  // complete" (both the Adult Notes' sentences, already cited on those cards),
-  // the >=1 year after PPSV23 and after PCV15 intervals and the 8-week option
-  // (all the Timing Job Aid's, confirmed cell by cell against its own table
-  // rows), and the >=5 year shared-decision path (the paper never discusses
-  // it). 5,331 cards in total; it keeps the 2,544 where it does speak.
+  // C8, document 1 (OWNER DECISION 2026-10-17, *"Approve all six removals."*),
+  // NARROWED 2026-10-18 by FINDING F. mm7401a1 does not state that "a series
+  // including PCV20/21 is complete" or that "PCV15 then PPSV23 is complete" --
+  // both are the Adult Notes' sentences, already cited on those cards -- so it
+  // comes off those two families, and off the PCV15-given / PPSV23-pending
+  // cards, where the only candidate sentence is printed inside the "None or
+  // PCV7 only" row and is the instruction for CHOOSING PCV15 (owner, 18 Oct:
+  // *"use job aid since PCV15 isn't listed in the MMWR table"*).
+  //
+  // ⚠ The 2026-10-17 removals went further than that, and were wrong to. The
+  // reading they rested on had recorded only three sentences, all from the
+  // Summary box and the body prose; the clinical guidance TABLE was not read
+  // until the next session. Two of the removed statements have a table row
+  // whose HEADING is the patient's exact history -- "PPSV23 only" and "PCV13
+  // at any age and PPSV23 at age >=65 years" -- so the document does speak for
+  // them. Restored 2026-10-18 with those rows cited; see
+  // `regression-c8-2026-10-18-mmwr-table-rows-restored.test.js`. Before
+  // removing this document from anything again, read its table.
   const refsWithoutMmwr = adultRefsExcept('mmwr7401a1');
   // Document 2, decision 2: the job aid's page 1 row `PCV15 & PPSV23 OR PCV20
   // OR PCV21 / at any age` answers (D) "schedule is complete" -- but page 1 is
@@ -1278,13 +1286,25 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M predicate — never
   // a second age test here.
   //
-  // Returns null where the document is SILENT: a 19-49 adult with chronic
-  // conditions only and two PPSV23 doses has no row in mm7401a1's chronic
-  // block, which stops at one dose. Those 45 cards keep the grey button and
-  // gain no number, pending the owner's decision on whether to remove it.
+  // The CHRONIC block does not split on the count (OWNER DECISION 2026-10-18).
+  // mm7401a1 prints one row there for a PCV13 + PPSV23 history, headed "PCV13
+  // and 1 dose of PPSV23", and the owner ruled that it speaks for a patient
+  // with two doses as well: *"for chronic condition with PCV13 and 2 doses of
+  // PPSV23 I would use the citation covering PCV13 and 1 dose of PPSV23 …"*.
+  // The clinical reason the count cannot move the row: in the chronic block a
+  // second PPSV23 is never OFFERED. ACIP offers one only inside the
+  // immunocompromising block ("When a second PPSV23 dose is used instead of
+  // PCV21 or PCV20…"), and the chronic 1-dose row offers nothing but the
+  // review at 50 — so there is no second-dose disposition for an extra dose
+  // to land on. This retired the 45 deliberately-uncredited cards.
+  //
+  // ⚠ The IMMUNOCOMPROMISING block below still splits on the count and must
+  // keep splitting: one dose reads "the series is complete", two doses reads
+  // "reviewed again … Alternatively, … >=5 years". Those are different
+  // sentences about different dispositions. Never collapse THAT pair.
   const mmwrBothPcv13PpsvKey = (icRow) => {
     if (isOlderAdult) return 'mmwrBothPcv13Ppsv50plus';
-    if (!icRow) return ppsv.count === 1 ? 'mmwrChronic1949ReviewAt50' : null;
+    if (!icRow) return 'mmwrChronic1949ReviewAt50';
     if (ppsv.count === 1) return 'mmwrIc1949OnePpsv';
     if (ppsv.count === 2) return 'mmwrIc1949TwoPpsv';
     return null;
@@ -1295,6 +1315,18 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     return key ? [cite(key)] : [];
   };
   const mmwrBothPcv13PpsvMarker = (icRow) => (mmwrBothPcv13PpsvKey(icRow) ? ' [c]' : '');
+  // OWNER DECISION 2026-10-18, the job aid's three cell-only statements:
+  // *"use MMWR table"*. mm7401a1's "PCV13 only" row is printed in two
+  // wordings ONE WORD apart -- the 19-49 immunocompromising / cochlear / CSF
+  // block inserts "administered", the >=50 and 19-49 chronic blocks do not.
+  // `ppsvIntervalDays != null` IS the S15 risk-class decision (8 weeks at
+  // 19-49 for IC / cochlear / CSF, a year otherwise), reused here rather than
+  // re-derived, so the split has one home -- the same reasoning as
+  // `mmwrNoneRowCites` above. Never a second age test, and never a second
+  // risk-class test either.
+  const mmwrPcv13OnlyCite = ppsvIntervalDays != null
+    ? 'mmwrPcv13OnlyThenPcv1949Ic'
+    : 'mmwrPcv13OnlyThenPcv';
   const jobAidCompleteMarker = isOlderAdult ? ' [c]' : '';
   const jobAidCompleteCites = isOlderAdult ? [cite('jobAidSeriesCompleteAt50')] : [];
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
@@ -1402,7 +1434,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: adultBrands,
       note: {
-        lead: `Give 1 dose of PCV15, PCV20, or PCV21 ≥${ADULT_GAP_WORDS} after the PPSV23 dose [c].`,
+        lead: `Give 1 dose of PCV15, PCV20, or PCV21 ≥${ADULT_GAP_WORDS} after the PPSV23 dose [c] [c].`,
         detail: 'PPSV23 was given previously, with no prior PCV or a PCV of unknown product. If PCV15 is chosen, no further PPSV23 is needed — the PPSV23 requirement is already met.',
       },
       // Population field (2026-10-17): CDC prints this row in both adult
@@ -1410,8 +1442,21 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       // PCV21" at 50+). Same advice either way; the card quotes the block its
       // patient is in. The boundary is ROUTINE_ADULT_MIN_M via isOlderAdult —
       // never a second age test.
-      noteCites: [cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949')],
-      refs: refsWithoutMmwr,
+      // FINDING F (2026-10-18): mm7401a1's table carries a row headed "PPSV23
+      // only" in all three adult blocks, word for word identical, stating
+      // this card's whole claim -- products and interval. It had been removed
+      // from these 1,154 cards on the ground that the document does not state
+      // the interval. It does. `population` covers both bands, so there is no
+      // age split here and no second age test.
+      noteCites: [
+        cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'),
+        cite('mmwrPpsvOnlyThenPcv'),
+      ],
+      // The job aid states this only as a table CELL -- "≥1 year" and
+      // "PCV20 or PCV21" as two text runs in its "PPSV23 only" row -- and
+      // nowhere in words. OWNER DECISION 2026-10-18: use the MMWR table, and
+      // the job aid comes off.
+      refs: refsWithoutJobAid,
     })];
   }
 
@@ -1423,13 +1468,22 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       doseLabel: `PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after PCV13 — completes the series`,
       dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
-      note: `PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after the last PCV13 dose [c]. This completes the series — no PPSV23 needed [c].`,
+      note: `PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after the last PCV13 dose [c] [c]. This completes the series — no PPSV23 needed [c].`,
       // C8, document 1's CITE. "No PPSV23 needed" carried NO citation at all
       // before this: it is mm7401a1's body prose, the paragraph that retired
       // PPSV23 as a way to finish a PCV13-started series. The sentence says
       // "adults aged >=19 years" itself, so it needs no age split.
-      noteCites: [cite('adultPcv13Only'), cite('mmwrPcv13NoPpsv23ToComplete')],
-      refs,
+      // OWNER DECISION 2026-10-18. The ≥1 year and the products are ACIP's
+      // "PCV13 only" row; "no PPSV23 needed" is its body prose, cited
+      // separately above -- one citation per claim, never one quote covering
+      // both halves. The job aid stated the interval only as a table cell, so
+      // it comes off.
+      noteCites: [
+        cite('adultPcv13Only'),
+        cite(mmwrPcv13OnlyCite),
+        cite('mmwrPcv13NoPpsv23ToComplete'),
+      ],
+      refs: refsWithoutJobAid,
     })];
   }
 
@@ -1476,14 +1530,23 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
         note: {
-          lead: `An additional PCV20 or PCV21, ≥${LONG_GAP_WORDS} after the last pneumococcal dose, is a shared clinical decision — it may be given or omitted [c] [c].`,
+          lead: `An additional PCV20 or PCV21, ≥${LONG_GAP_WORDS} after the last pneumococcal dose, is a shared clinical decision — it may be given or omitted [c] [c] [c].`,
           detail: 'PCV13 and PPSV23 have both been given, and the PPSV23 dose was received at age 65 or older. CDC places this group under shared clinical decision-making rather than a routine recommendation.',
         },
         // C8, document 2's CITE: both documents state this one in words, so
         // the sentence carries both numbers. That is "cite it, or take it off
         // that card" with the cite chosen (OWNER DECISION 2026-10-17).
-        noteCites: [cite('adultBothAt65'), cite('jobAidSharedDecision65')],
-        refs: refsWithoutMmwr,
+        // FINDING F (2026-10-18): the third number is mm7401a1's own row,
+        // "PCV13 at any age and PPSV23 at age >=65 years", which states the
+        // shared decision AND the >=5 years. It had been removed from these
+        // 440 cards on the ground that "the paper never discusses it"; the
+        // paper gives it a table row.
+        noteCites: [
+          cite('adultBothAt65'),
+          cite('jobAidSharedDecision65'),
+          cite('mmwrSharedDecision65'),
+        ],
+        refs,
       })];
     }
     // chronic-only adult <50: nothing now, review at 50.
@@ -1513,11 +1576,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
           // in CDC's own words, and page 4 is the 19-49 chronic page — the
           // only one of the four whose PCV13 + PPSV23 row has no Option A.
           cite('jobAidChronic1949ReviewAt50'),
-          // C8, document 1's CITE — present only where ACIP has a row. Its
-          // chronic block states "reviewed again … at age 50" for a patient
-          // with ONE PPSV23 dose and says nothing about a second, so the
-          // 45 two-dose cards credit nothing here rather than borrow the
-          // immunocompromising block's row, which is a different patient.
+          // C8, document 1's CITE. ACIP's chronic block states "reviewed
+          // again … at age 50" for a patient with PCV13 and PPSV23, and the
+          // owner ruled 2026-10-18 that the row speaks whether one dose or
+          // two are on record — it is the block's only disposition for that
+          // history. It is NOT the immunocompromising block's row, which is a
+          // different patient and still splits on the count.
           ...mmwrBothPcv13PpsvCites(false),
           // A declared cross-reference (2026-10-17): the detail half says what
           // happens AT 50, so it quotes the 50+ row — about a patient this one
@@ -1528,6 +1592,47 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
           }),
         ],
         refs,
+      })];
+    }
+    // ── 19-49 IC / cochlear / CSF with TWO PPSV23 doses: ACIP's order ──
+    // OWNER DECISION 2026-10-18 (*"use MMWR"*). mm7401a1's immunocompromising
+    // block answers a PCV13 + PPSV23 history in two rows that do NOT say the
+    // same thing. One dose is a flat recommendation ("A single dose of PCV21
+    // or PCV20 >=5 years ... The pneumococcal vaccination series is
+    // complete"). Two doses leads with the deferral and offers the dose
+    // second ("...should be reviewed again when the person turns age 50
+    // years. Alternatively, a single dose of either PCV21 or PCV20 should be
+    // administered >=5 years..."). The app said the same thing to both, which
+    // hid a choice its own source prints.
+    //
+    // The DOSE does not change: same products, same five years, same due
+    // date, same status. Only the words do -- the note AND the dose label,
+    // because the label is the first line read and a header that still led
+    // with the dose would contradict the body. The verdict corpora record no
+    // prose and no dose labels, by design, so neither moves.
+    //
+    // `ppsv.count` is the EFFECTIVE count, read here and in
+    // `mmwrBothPcv13PpsvKey()` from the same place, so the wording and the
+    // quote cannot drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M
+    // predicate -- never a second age test.
+    if (!isOlderAdult && ppsv.count === 2) {
+      return [rec({
+        vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
+        doseLabel: `Review at age 50 — or PCV20 or PCV21 ≥${LONG_GAP_WORDS} after the last pneumococcal dose`,
+        dueToday, earliestNextDate, minIntervalMonths: MO60,
+        brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
+        note: {
+          lead: `Review the pneumococcal recommendations again at age 50 [c]. Alternatively, 1 dose of PCV20 or PCV21 may be given now, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c] — that completes the series.`,
+          detail: 'This is an adult aged 19–49 with an immunocompromising condition, a cochlear implant or a CSF leak who has already received PCV13 and two doses of PPSV23. ACIP states the review at 50 first and the further dose as the alternative; both are recommended options.',
+        },
+        // One citation per claim. The review at 50 is stated only by ACIP's
+        // two-dose row -- CDC's Adult Notes give the dose and its five years
+        // and say nothing about 50 -- so the halves do not share a number.
+        noteCites: [
+          cite('mmwrIc1949TwoPpsv'),
+          cite('adultIc1949BothPcv13Ppsv'),
+        ],
+        refs: refsWithoutJobAid,
       })];
     }
     return [rec({
@@ -1552,7 +1657,10 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         cite(isOlderAdult ? 'adultBothNotAt65' : 'adultIc1949BothPcv13Ppsv'),
         ...mmwrBothPcv13PpsvCites(true),
       ],
-      refs,
+      // The job aid's "PCV13 & PPSV23" row is the two text runs "≥5 years"
+      // and "PCV20 or PCV21"; it says this in no sentence. OWNER DECISION
+      // 2026-10-18: use the MMWR table, already cited on the line above.
+      refs: refsWithoutJobAid,
     })];
   }
 

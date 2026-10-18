@@ -176,6 +176,189 @@ rr7203a1 was "still reachable" via risk conditions — was stale and is correcte
 The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
 CITE, still unwritten. Do not let one quote cover both halves.
 
+### ✅ OWNER DECISION 2026-10-18 — the 19–49 IC card with TWO PPSV23 doses: *"use MMWR"*
+
+Raised, not changed, by the previous session: ACIP's immunocompromising block answers a
+PCV13 + PPSV23 history in two rows that do not say the same thing.
+
+| ACIP's row | What it says |
+|---|---|
+| PCV13 and **1 dose** of PPSV23 | "A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete…" — a flat recommendation |
+| PCV13 and **2 doses** of PPSV23 | "The pneumococcal vaccination recommendations should be reviewed again when the person turns age 50 years. **Alternatively**, a single dose of either PCV21 or PCV20 should be administered ≥5 years…" |
+
+The app gave both patients the same card, stating the dose flatly. Not a contradiction —
+the "Alternatively" sentence is word-for-word permission — but it hid a choice ACIP prints,
+on the one card where ACIP's lead is to wait. **45 cards.**
+
+The owner answered with the full row, and it is now both what the card says and what its
+citation quotes. `mmwrIc1949TwoPpsv` was previously only the "Alternatively…" sentence,
+which showed the alternative while hiding what it was an alternative *to*.
+
+**What did not change:** the dose. Same products, same five years, same `status`, same due
+date — ACIP permits it explicitly, and the one-dose card is untouched because ACIP's
+one-dose row really is flat. Only the words changed, and **both** of them: the note and the
+`doseLabel`, because the label is the first line read and a header still leading with the
+dose would contradict the body. Both verdict corpora record prose and dose labels nowhere
+by design, so neither moved — confirmed green and unmodified on disk.
+
+⚠ **It collided with FINDING C's guard, and the collision was real.** That guard selected
+cards by the words "review at age 50" in the dose label alone, and this new card now carries
+that phrase while *offering a dose* — the opposite of FINDING C's hazard, which is a card
+saying no dose is due beside a quote instructing one. The selector was narrowed to
+"mentions the review at 50 **and offers no product**", an anti-vacuity count of 210 was
+added so it cannot pass on an empty set, and the new card is asserted **separately** rather
+than merely excluded. New file:
+`regression-c8-2026-10-18-ic-two-ppsv-follows-acip-order.test.js`.
+
+---
+
+### ✅ OWNER DECISION 2026-10-18 — the job aid's 3 cell-only statements: *"use MMWR table"*
+
+The three statements held open at the top of document 2's section (3,189 cards) rested on
+job-aid table **cells** and on no prose anywhere in that document. Pulled with coordinates,
+its page-1 `PCV13 at any age & PPSV23 at <65 yrs` row contains exactly two pieces of text:
+
+```
+y= 266.6  x= 246.1-286.9 | ≥5 years
+y= 267.5  x= 309.5-396.3 | PCV20 or PCV21
+```
+
+Two fragments at two x positions; the meaning is carried by the row label and the column
+header. A readable quote would have to be **assembled**, which is the same failure that
+already dispositioned the job aid's statement #8 (171 cards) as REMOVE for resting on page
+headings rather than words.
+
+The owner's answer was to cite ACIP instead, naming all three rows herself:
+
+| Card | mm7401a1's row, her words |
+|---|---|
+| PPSV23 only (1,154) | "A single dose of PCV21, PCV20, or PCV15 ≥1 year after the last PPSV23 dose." |
+| PCV13 only (523) | "A single dose of PCV21 or PCV20 **administered** ≥1 year after the PCV13 dose." |
+| PCV13 + PPSV23 (1,512) | "A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses." |
+
+Two of the three were already on the cards (`mmwrPpsvOnlyThenPcv` from FINDING F below, and
+`mmwrIc1949OnePpsv` / `mmwrBothPcv13Ppsv50plus` from document 1's CITEs). The third is new.
+
+⚠ **The "PCV13 only" row is printed in TWO wordings, ONE WORD apart.** The 19–49
+immunocompromising block inserts "administered"; the ≥50 and 19–49 chronic blocks do not.
+Her quote is the IC one, which matches the patient she was shown (19y, asplenia). Two
+entries, not one widened population: `mmwrPcv13OnlyThenPcv1949Ic` and
+`mmwrPcv13OnlyThenPcv`. The predicate choosing between them is the **S15 interval decision**
+(`ppsvIntervalDays != null` ⟺ 19–49 IC / cochlear / CSF), reused rather than re-derived, so
+the risk-class split keeps one home.
+
+**Applied 2026-10-18.** The job aid comes off those 3,189 cards: **6,805 → 3,616 buttons,
+and 0 uncredited** — the second document to finish. Prose over both corpora: **3,361 of
+35,280 lines differ**, and on every one the only change is the added marker, the two new
+quotes and the two button labels — **no advice moved**. New file:
+`regression-c8-2026-10-18-job-aid-cells-replaced-by-acip.test.js`.
+
+⚠ **A blind assertion caught while writing that file.** Its `JOB_AID` constant was first
+written as the job aid's `label`, but a card exposes `short` — so `not.toContain(JOB_AID)`
+passed on every card in the app, including ones that list the document. Three of five
+"failing" tests were passing vacuously. The file now asserts `short !== label` so the same
+blind spot cannot return silently. Compare the `not.toContain('deletedName')` hazard in the
+stale-identifier guard: an assertion that can never fail reads as coverage.
+
+---
+
+### ⚠️ FINDING F, 2026-10-18 — this reading never read the document's table
+
+**What is wrong with the section above.** Document 1's reading records three sentences —
+**(A)** and **(B)** from the Summary box, **(C)** from the body prose under "Recommendations
+for Use of PCV". It does not mention mm7401a1's **clinical guidance table** at all. The six
+removals were dispositioned on that basis ("Nothing in mm7401a1 states this"), the owner
+approved them as a batch, and `1ec86c6` took the document off 5,356 cards.
+
+The table was first read the **following session**, which cited it seven times (`1a4d968`).
+Nobody re-checked the removals against it.
+
+**Five of the six statements are in the table, in full sentences.** Re-read 2026-10-18 from
+the live page and from the owner's PDF of the article; they agree character for character.
+
+| Cards | Removed because mm7401a1 "doesn't say it" | The table's row |
+|---|---|---|
+| **1,154** | PCV15/20/21 **≥1 year** after PPSV23 | **"PPSV23 only"**, all three blocks: *"A single dose of PCV21, PCV20, or PCV15 ≥1 year after the last PPSV23 dose."* |
+| **440** | ≥5 y is a **shared clinical decision** ("this paper does not discuss the shared-decision path") | **"PCV13 at any age and PPSV23 at age ≥65 years"**: *"Shared clinical decision-making is recommended regarding administration of either a single dose of PCV21 or PCV20 for any adult aged ≥65 years…"* |
+| 138 | PPSV23 **≥1 year** after PCV15 | *"If PCV15 is administered, a single dose of PPSV23 should be administered ≥1 year after the PCV15 dose"* — printed inside the **"None or PCV7 only"** row |
+| 75 | …plus the **8-week option** | *"A minimum interval of 8 weeks can be considered if PCV15 is used in adults with an immunocompromising condition, cochlear implant, or CSF leak"* — same row |
+| 25 | PPSV23 **≥8 weeks** after PCV15 (19–49 IC) | 19–49 IC block, same row: *"If PCV15 is used, administer a single dose of PPSV23 ≥8 weeks after the PCV15 dose."* |
+
+The remaining removal (2,610 + 914 cards, the two "series is complete" families) is correct:
+the table never says a series containing PCV20/PCV21 is complete, nor that PCV15 followed by
+PPSV23 completes one.
+
+**The recorded accounting was also 25 short.** It totals the removals at 5,331; measured on
+the current tree the document is absent from **5,356** cards in 9 prose variants. The missing
+25 are the 19–49 IC "PPSV23 ≥8 weeks after PCV15" variant of the PCV15-only card, which the
+six-row table does not list separately.
+
+#### ✅ OWNER DECISION 2026-10-18 — restore two, leave three
+
+Brought as patients, with each row quoted:
+
+- **RESTORED, 1,594 cards.** The two whose table **row heading is the patient's exact
+  history**, so the sentence cannot be about anyone else: 19–49 or 50+ with PPSV23 only
+  (1,154), and ≥65 with PCV13 and a PPSV23 given at 65 or older (440). Both now carry the
+  row as a raised number, not just a button.
+- **LEFT REMOVED, 238 cards.** PCV15 given, PPSV23 pending. The sentence fits the advice but
+  is printed inside the "None or PCV7 only" row — the instruction for a clinician *choosing*
+  PCV15, read by a patient already past that choice. Owner: *"use job aid since PCV15 isn't
+  listed in the MMWR table"*.
+
+⚠ **One wording trap, checked.** The owner's quote of the shared-decision row came from her
+PDF of **mm7336a2** (MMWR 12 Sep 2024, the PCV21 paper), which prints it with **one comma
+fewer** — "PCV21, PCV20 or PCV15". The chip links to **mm7401a1**, so mm7401a1's punctuation
+is what `refs.js` carries, and a test asserts the mm7336a2 form is *not* present.
+
+**Applied 2026-10-18.** Two new `refs.js` entries, `mmwrPpsvOnlyThenPcv` and
+`mmwrSharedDecision65`. `regression-c8-doc1-mmwr-only-where-it-speaks.test.js` corrected:
+LOSES drops from six statements to four, the two reversed assertions now assert the opposite
+(the document **is** present) rather than being deleted, and the button count moves
+**2,564 → 4,158**. Prose over both corpora: **1,637 of 35,280 lines differ**, and on every
+one the only change is the added markers, the two new quotes and the restored button label —
+**no advice moved**. New file:
+`regression-c8-2026-10-18-mmwr-table-rows-restored.test.js`.
+
+**The lesson, in one line: `scripts/uncreditedSources.mjs` can only see a document that is
+ON a card.** A document wrongly removed from a card it speaks for is invisible to it — which
+is why that script reported this work as finished while 1,594 cards were missing a source.
+
+---
+
+### ✅ OWNER DECISION 2026-10-18 — the last 45, and mm7401a1 reaches zero
+
+The document's final uncredited statement was a **19–49 adult with chronic conditions only,
+PCV13 and two effective PPSV23 doses** (45 cards): "No additional pneumococcal dose now —
+re-evaluate at age 50." mm7401a1's chronic block prints one row for a PCV13 + PPSV23
+history, headed **"PCV13 and 1 dose of PPSV23"**, and no second-dose row, so this file left
+the 45 uncredited and took "remove it, or leave it" to the owner.
+
+She chose a third answer — **cite the one-dose row**:
+
+> *"for chronic condition with PCV13 and 2 doses of PPSV23 I would use the citation covering
+> PCV13 and 1 dose of PPSV23 in patients 19-49 with chronic conditions: The pneumococcal
+> vaccination recommendations should be reviewed again when the person reaches age 50
+> years."*
+
+**Why the count cannot change the row.** In the chronic block a second PPSV23 is never
+*offered*. ACIP offers one only inside the immunocompromising block — mm7336a2 states the
+same row as "When a second PPSV23 dose is used instead of PCV21 or PCV20, it should be
+administered ≥8 weeks after the PCV13 dose and ≥5 years after the first PPSV23 dose" — while
+the chronic 1-dose row offers nothing but the review at 50. So there is no second-dose
+disposition for an extra dose to select; the row is the block's whole answer to "PCV13 and
+PPSV23", and a chronic patient with two doses received one ACIP's chronic pathway never
+recommended. **Checked in both papers:** neither mm7401a1 (Jan 2025) nor mm7336a2 (Sept
+2024) has a chronic two-dose row, so the silence is the schedule's shape, not one document's
+omission.
+
+**Applied 2026-10-18.** `mmwrBothPcv13PpsvKey()`'s chronic branch returns the row
+unconditionally; the IC branch still splits on `ppsv.count` and is now guarded by its own
+test. Measured after: mm7401a1 **2,564 cards list it, 0 uncredited** — the first of the six
+documents to finish. Total (source, statement) pairs over all documents **46 → 45**. Prose
+over both grids: **45 of 35,280 lines differ, and on every one the only change is one added
+`[c]` marker plus the new quote in the source list** — no advice moved.
+
 ---
 
 ---
