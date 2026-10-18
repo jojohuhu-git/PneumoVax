@@ -1,3 +1,12 @@
+> **SUPERSEDED (2026-10-18)** by
+> [`handoff-2026-10-18-finding-k-nested-bullets.md`](handoff-2026-10-18-finding-k-nested-bullets.md).
+> Two things in the queue below have changed. Its first P1 item — the CDC Risk-based
+> Pneumococcal chip on 864 cards — is **DONE**, and acting on it uncovered FINDING K: the
+> OTHER document on those same cards was showing a sub-bullet to a patient its parent bullet
+> excluded, on 904 of 960 cards. The counts in the table below are therefore stale (p2016 is
+> now 39 statements, the Child/Adolescent Notes 8, and the total 50 pairs). Also: this file
+> says PR #71 was green — it was **CONFLICTING**, fixed in `ca2023c`. Follow the newer file.
+
 # PneumoVax — Handoff after the four P0 citation findings (2026-10-18)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
