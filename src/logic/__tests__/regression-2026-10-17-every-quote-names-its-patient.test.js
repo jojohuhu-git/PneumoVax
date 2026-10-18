@@ -137,6 +137,14 @@ describe('the field itself', () => {
       'mmwrPcv13OnlyThenPcv',     // the same row, verbatim, in the >=50 and 19-49 chronic blocks
       'mmwrPpsvOnlyThenPcv',      // the same row, verbatim, in all three adult blocks
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
+      // FINDING 2 (2026-10-18). MMWR mm7137a3's Table 2 is divided into three
+      // blocks -- "All children", "Healthy children", and "Children with
+      // certain underlying medical conditions". This sentence is in the FIRST
+      // of them, printed above the other two, so it speaks to every paediatric
+      // risk class by the document's own structure, not by inference. Read
+      // live 2026-10-18 and checked block by block, the way FINDING F had to
+      // be: the rows in the lower two blocks are NOT cited here.
+      'pedsInfantLastDose1215mo', // Table 2's "All children" block, above both risk blocks
       'pedsMinAge',               // the section heading, above every block
       'pedsRiskIncompleteCatchup',// printed in both at-risk lists
       'pedsRiskPcv13At6',         // printed in both at-risk lists

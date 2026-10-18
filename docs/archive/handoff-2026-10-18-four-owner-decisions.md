@@ -1,3 +1,9 @@
+> **SUPERSEDED 2026-10-18** by [`handoff-2026-10-18-finding-g-and-finding-2.md`](handoff-2026-10-18-finding-g-and-finding-2.md).
+> PR #68 was merged before the next session began. Two of the items in the queue below
+> are now DONE — doc 3's Finding 3 (the 32 cards) was fixed as part of FINDING G, and
+> the p2016 "(Tables 1–4)" label is corrected. The counts in this file predate both
+> changes; re-measure rather than quoting them. Follow the newer file.
+
 # PneumoVax — Handoff after four owner decisions (2026-10-18)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

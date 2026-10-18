@@ -34,8 +34,9 @@ Sources fetched live and read 2026-06-06.
 | `mmwr7336a3` | MMWR mm7336a3 — PCV21 (Capvaxive) adults | PCV21 eligibility, serotype-4 geo note |
 | `mmwr7203a1` | MMWR rr7203a1 — comprehensive adult ≥19 | **UNCITED since N5 (2026-10-16).** Kept as the primary-source record of where the adult risk list came from; superseded for the interval by `mmwr7401a1` (S15) and dropped from the risk list for consistency (§J). |
 | `mmwr7239a5` | MMWR mm7239a5 — PCV20 in children | peds PCV20 |
-| `mmwr7137a3` | MMWR mm7137a3 — PCV15 in adults | adult PCV15 |
-| `p2016` | immunize.org p2016 (Tables 1–4) | **peds dose-count grids** |
+| `mmwr7137a3` | MMWR mm7137a3 — PCV15 in **children** (whole-page entry) | the grey button for the document below |
+| `pedsInfantLastDose1215mo` | MMWR mm7137a3 Table 2, "All children" block | **the infant booster at 12–15 months**, cited where the total exceeds what p2016's Table 1 prints (FINDING 2, 2026-10-18) |
+| `p2016` | immunize.org p2016 (Tables 1–5) | **peds dose-count grids** |
 | `immPCV7` | immunize.org Ask the Experts — PCV7 not counted | PCV7-ignored rule |
 | `immPneumo` | immunize.org Ask the Experts — pneumococcal topic | edge cases |
 
