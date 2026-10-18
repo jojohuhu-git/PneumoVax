@@ -921,7 +921,22 @@ export const REFS = {
     // row it means is headed "Received PCV13 or PCV15 before age 6 years,
     // never received PCV20". Corrected rather than left as a citation that
     // promises wording the source never used.
-    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations (incl. the row "Received PCV13 or PCV15 before age 6 years, never received PCV20")',
+    //
+    // FINDING J (2026-10-18): the corrected parenthetical naming that row is
+    // now GONE too, and for the reason the population rule gives — this is a
+    // quote-free whole-document chip, so it declares no population, "because a
+    // document has no patient, only a sentence does". A chip that advertises
+    // one row makes the document look like that row. Measured before the
+    // change: the chip was on 1,351 cards, and on 1,008 of them a counted dose
+    // had been given at or after age 6 — which the named row excludes. FINDING
+    // J then needed to put this chip on 864 cards whose patient HAS a PCV20,
+    // against a label reading "never received PCV20", which would have swapped
+    // one wrong-patient citation for another.
+    //
+    // Nothing is lost: the row's own wording is quoted verbatim by
+    // `pedsBefore6NoPcv20`, which declares the patients it is about and is
+    // cited on the cards that row actually governs.
+    label: 'CDC — Summary of Risk-based Pneumococcal Vaccination Recommendations',
     short: 'CDC Risk-based Pneumococcal',
     lastVerified: '2026-10-12',
   },

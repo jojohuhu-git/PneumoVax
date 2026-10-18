@@ -778,6 +778,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // not "is this child immunocompromised" but "has the dose that follows the
   // PPSV23 been given", and only the second one is answerable in one place.
   const pedsPostSeriesDoseDone = isIC ? ppsv.count >= 2 : ppsv.count >= 1;
+  // Every counting PCV dose is DATED and was given before age 6 (72 months).
+  // See the long note at its first use below for why an undated dose fails it.
+  const allCountingPcvBefore72mo =
+    pcv.count >= 1 && pcv.band.ge72 === 0 && pcv.band.undated === 0;
   const out = [];
 
   // Row 3: completed series before 6y including ≥1 PCV20 → no additional doses.
@@ -798,8 +802,24 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       vaccine: 'PCV', status: 'complete',
       doseLabel: 'PCV complete (includes PCV20)',
       note: 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed [c].',
+      // The numbered citation is unchanged. CDC's row -- "Previously received
+      // at least 1 dose of PCV20: no further PCV or PPSV23 doses needed" --
+      // carries no age condition in its own words, which is what the population
+      // rule asks about, so it speaks for this patient at either age.
       noteCites: [cite('pedsRiskPcv20Complete')],
-      refs,
+      // FINDING J (2026-10-18), the owner's all-columns rule. p2016's ONLY row
+      // whose history column mentions a previous PCV20 is "2 through 18 years
+      // (any risk condition) | Completed PCV series before age 6 years,
+      // including one or more doses of PCV20 | No additional doses". The age
+      // column fits; the prior-dose column demands the PCV20 was given BEFORE
+      // AGE 6. Of 960 card instances, 96 fit and 864 do not -- the PCV20 was
+      // given at 17 or 18. All five of p2016's tables were read cell by cell
+      // before removing it (FINDING F's lesson); no other row reaches this
+      // history. CDC's page takes its place on the 864, and p2016 stays on the
+      // 96 it speaks for.
+      refs: allCountingPcvBefore72mo
+        ? refs
+        : collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }));
     return out;
   }
@@ -1008,8 +1028,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // Requires all counting PCV doses to be DATED and before 72mo: an undated dose cannot be
   // confirmed pre-72mo, so it falls through to the standard rows (matches "PPSV23 already
   // given → PCV20/2nd-PPSV23" for undated-history IC cases).
-  const allCountingPcvBefore72mo =
-    pcv.count >= 1 && pcv.band.ge72 === 0 && pcv.band.undated === 0;
+  //
+  // Defined once at the top of this function since FINDING J (2026-10-18) —
+  // p2016's row 3 asks the same question of a PCV20 history that rows 4/5 ask
+  // of a PCV13/15 one ("Completed PCV series before age 6 years"), and a second
+  // copy of the predicate could answer it differently. Same reason as S6-1.
   // IC-1 (2026-10-17): `&& !isIC`. This shortcut used to fire for either risk
   // class — its comment above says "IC or non-IC" — and it is right only for
   // non-IC. Measured before the fix: 69 cards where an immunocompromised child
