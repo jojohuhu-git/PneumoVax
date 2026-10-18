@@ -764,7 +764,7 @@ export const REFS = {
 // DOCUMENT that sentence sits in. Until C3 the two were only ever connected by
 // hand — a card listed its buttons in `refs` and its sentences in `noteCites`,
 // and nothing checked that every cited document had a button. Measured over
-// the whole grid on 2026-10-17: 2,268 cards showed a number for a document
+// the whole grid, re-measured on the rebase: 1,380 cards showed a number for a document
 // with no button to click.
 //
 // This is the lookup that closes it. Given the page a sentence came from, it

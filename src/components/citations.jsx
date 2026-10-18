@@ -80,7 +80,8 @@ export function markerCount(text) {
 // That gap is the shape of fault C2 exists to remove. A cite present in the
 // list but matched to no "[c]" renders nothing yet consumed a number, so the
 // buttons could start at [2]. It happens not to occur today (measured
-// 2026-10-17: 0 of 16,202 cards), which is precisely why it needed a
+// 2026-10-17 and again on the rebase: 0 of 17,334 cards), which is
+// precisely why it needed a
 // structural answer rather than a test alone — nothing would have told us when
 // it started. Numbering and rendering now read the same two functions.
 
@@ -122,8 +123,13 @@ export function noteCiteSlices(note, noteCites) {
 // raised numbers were assigned here at render time; the grey buttons were a
 // separate list built in the engine and printed unnumbered. Nothing matched
 // one to the other, and measured over the whole grid on 2026-10-17 they
-// disagreed in both directions — 26,028 buttons that no number pointed at, and
-// 2,268 cards showing a number for a document with no button at all.
+// disagreed in both directions — 26,651 buttons that no number pointed at, and
+// 1,380 cards showing a number for a document with no button at all.
+//
+// Those two figures are RE-MEASURED on the rebase (the branch was held while
+// three merges landed in `refs.js`, and the second had moved): reproduce them
+// with `npx vite-node scripts/citationMapping.mjs`, which reports the same
+// counts for whichever branch is checked out.
 //
 // `cardSources` is the single answer to both questions. It walks the card in
 // READING ORDER and hands back the numbering function and the finished list,
@@ -140,11 +146,14 @@ export function noteCiteSlices(note, noteCites) {
 //   • buttons define the numbering — the row always reads 1,2,3 but a sentence
 //     can show [2] with no [1] above it;
 //   • buttons keep their authored order and print whatever number they got —
-//     today's behaviour extended, which prints the row out of sequence on 248
-//     cards and is the guessing the owner reported.
+//     today's behaviour extended, which printed the row out of sequence on 248
+//     cards and is the guessing the owner reported. That 248 is the one count
+//     on this branch NOT re-measured at the rebase: it describes an option
+//     that was rejected rather than anything the app does, so there is nothing
+//     for it to drift against.
 //
 // A button no sentence points at keeps its authored position at the END of the
-// list. Those are not decoration: 26,028 of them are holding up statements the
+// list. Those are not decoration: 26,651 of them are holding up statements the
 // card makes out loud without quoting (plan §4), and giving each its own quote
 // is item C8. Until then they are numbered and last, never dropped — deleting
 // a clinical source to tidy a list is the one outcome this must not produce.

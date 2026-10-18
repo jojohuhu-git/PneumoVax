@@ -18,10 +18,15 @@
 // at render time from `noteCites`/`reasonCites`, and a separate button list
 // built in the engine from `refs`. Swept over the whole of `test-grid.js` on
 // 2026-10-17, they disagreed in both directions:
-//   • 26,028 of 41,762 buttons that no number pointed at;
-//   • 2,268 of 16,202 cards showing a number for a document with NO button —
-//     1,080 for the CDC risk-based page and 1,188 for the immunize.org PCV7
-//     rule. (The plan predicted one document; there were two.)
+//   • 26,651 of 44,461 buttons that no number pointed at;
+//   • 1,380 of 17,334 cards showing a number for a document with NO button —
+//     1,188 for the immunize.org PCV7 rule and 192 for the CDC risk-based
+//     page. (The plan predicted one document; there were two.)
+//
+// Re-measured on the rebase with `npx vite-node scripts/citationMapping.mjs`,
+// because the branch was held while three merges landed in `refs.js`. The PCV7
+// figure was unchanged at 1,188; the CDC risk-based page fell from 1,080 to 192
+// when PR #64's citation fixes landed. After this change the second line is 0.
 // Of those, C3 fixes the second list. The first is item C8 — those buttons are
 // holding up statements the card makes out loud without quoting them, and the
 // fix is to write the missing quotes, never to delete a clinical source to
