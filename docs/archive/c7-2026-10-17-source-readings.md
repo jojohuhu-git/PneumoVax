@@ -138,7 +138,43 @@ rather than assumed.
 >
 > So mm7401a1 keeps only what it actually says — the ≥50 expansion (A)/(B) and the
 > PCV13-experienced-incomplete-series rule (C) — and the five intervals move to the job
-> aid, which prints them. None of this is applied to code yet.
+> aid, which prints them.
+
+### ✅ OWNER DECISION + APPLIED 2026-10-17 — all six removals
+
+*"Approve all six removals."* Brought to the owner as one batch with each statement's live
+quote and its re-measured card count. **Removals applied**, held by
+`regression-c8-doc1-mmwr-only-where-it-speaks.test.js` (17 tests; 10 passing / 7 failing
+before the fix, 17 after).
+
+| cards | statement | mm7401a1 |
+|---|---|---|
+| 2,610 | series includes PCV20/21 → complete | REMOVED |
+| 1,154 | ≥1 year after the PPSV23 dose | REMOVED |
+| 914 | PCV15 + PPSV23 → complete | REMOVED |
+| 440 | ≥5 years is a shared clinical decision | REMOVED |
+| 138 | PPSV23 ≥1 year after PCV15 | REMOVED |
+| 75 | …the same, plus the 8-week option | REMOVED |
+| **5,331** | **six statements** | **off** |
+| 2,544 | the seven ≥50-expansion / PCV13-experienced statements | kept |
+
+Measured on the combined tree: every mm7401a1 button **7,920 → 2,564**; the uncredited
+subset **7,875 → 2,544**; total grey buttons **45,841 → 39,395**; unpointed buttons
+**26,651 → 20,205**; cards carrying at least one unpointed button **16,878 → 15,943**; and
+**"cards citing a document with no button" still 0** — no removal orphaned a citation.
+
+⚠ **It collided with a pre-existing test, and the collision was real.** S15 asserted
+mm7401a1 on *every* adult card, using the PCV15-only fixture — one of the six removals. S15
+exists because a 19–49 card once linked the superseded **rr7203a1 (2023)** and not
+mm7401a1. **Checked before narrowing anything:** rr7203a1 reaches **0 of 17,334 cards both
+before and after** this change, and the PCV15-only card is left holding the Adult Notes and
+the job aid, the document that prints its interval. So the assertion was narrowed to the
+hazard S15 actually names, in both directions, and S15's own comment — which claimed
+rr7203a1 was "still reachable" via risk conditions — was stale and is corrected.
+
+**The two PCV13 cards keep mm7401a1 for the "PCV20 or PCV21, and NOT PPSV23" half only.**
+The ≥1 year and ≥5 years in those same sentences are the job aid's, and that is a document 2
+CITE, still unwritten. Do not let one quote cover both halves.
 
 ---
 

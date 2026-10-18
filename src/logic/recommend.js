@@ -1225,9 +1225,22 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // routine vaccination begins at 50 -- that is inferable only from its page
   // HEADINGS. Citing a table of contents as the source of a prose claim is the
   // "right-sounding quote that isn't there" failure, so it comes off.
-  const refsWithoutJobAid = adultRefs(
-    ADULT_DEFAULT_REFS.filter((k) => k !== 'cdcAdultTimingJobAid'),
+  /** The pathway defaults, minus documents that do not speak for this card. */
+  const adultRefsExcept = (...drop) => adultRefs(
+    ADULT_DEFAULT_REFS.filter((k) => !drop.includes(k)),
   );
+  const refsWithoutJobAid = adultRefsExcept('cdcAdultTimingJobAid');
+  // C8, document 1 (OWNER DECISION 2026-10-17, *"Approve all six removals."*).
+  // mm7401a1 is ACIP's January 2025 paper and its subject is one thing --
+  // routine adult vaccination moving from 65 to 50 -- plus the
+  // PCV13-experienced incomplete-series rule. It states none of these:
+  // "a series including PCV20/21 is complete" and "PCV15 then PPSV23 is
+  // complete" (both the Adult Notes' sentences, already cited on those cards),
+  // the >=1 year after PPSV23 and after PCV15 intervals and the 8-week option
+  // (all the Timing Job Aid's, confirmed cell by cell against its own table
+  // rows), and the >=5 year shared-decision path (the paper never discusses
+  // it). 5,331 cards in total; it keeps the 2,544 where it does speak.
+  const refsWithoutMmwr = adultRefsExcept('mmwr7401a1');
   // Document 2, decision 2: the job aid's page 1 row `PCV15 & PPSV23 OR PCV20
   // OR PCV21 / at any age` answers (D) "schedule is complete" -- but page 1 is
   // the >=50 page. On pages 2-4 the same history answers (E) "Review
@@ -1236,7 +1249,9 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // credited at 50+ and removed below it. The advice does not move; only the
   // credit does. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M predicate -- do not
   // grow a second age test here.
-  const refsSeriesComplete = isOlderAdult ? refs : refsWithoutJobAid;
+  const refsSeriesComplete = isOlderAdult
+    ? refsWithoutMmwr
+    : adultRefsExcept('mmwr7401a1', 'cdcAdultTimingJobAid');
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
   // SAME number the card states, so it follows the same predicate.
   const ppsvIntervalCite = ppsvIntervalDays != null
@@ -1303,7 +1318,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         detail: 'PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete.',
       },
       noteCites: [cite(ppsvIntervalCite)],
-      refs,
+      refs: refsWithoutMmwr,
     })];
   }
 
@@ -1330,7 +1345,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       // patient is in. The boundary is ROUTINE_ADULT_MIN_M via isOlderAdult —
       // never a second age test.
       noteCites: [cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949')],
-      refs,
+      refs: refsWithoutMmwr,
     })];
   }
 
@@ -1395,7 +1410,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
           detail: 'PCV13 and PPSV23 have both been given, and the PPSV23 dose was received at age 65 or older. CDC places this group under shared clinical decision-making rather than a routine recommendation.',
         },
         noteCites: [cite('adultBothAt65')],
-        refs,
+        refs: refsWithoutMmwr,
       })];
     }
     // chronic-only adult <50: nothing now, review at 50.
