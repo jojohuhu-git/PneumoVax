@@ -792,7 +792,7 @@ export const REFS = {
   // dose, which is why 45 cards are left uncredited pending an owner decision.
   mmwrChronic1949ReviewAt50: {
     rulebook: 'adult',
-    // Patients this sentence is about: the 19-49 "chronic medical conditions" block, row "PCV13 and 1 dose of PPSV23"
+    // Patients this sentence is about: the 19-49 "chronic medical conditions" block, row "PCV13 and 1 dose of PPSV23". OWNER DECISION 2026-10-18: it is also the row for a chronic patient with TWO PPSV23 doses — the block offers a second dose to nobody, so it has no other disposition for that history. The label keeps the row's real heading (provenance stays honest); `population` records who the sentence is about.
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with chronic medical conditions", the row "PCV13 and 1 dose of PPSV23"',

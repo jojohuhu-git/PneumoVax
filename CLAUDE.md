@@ -75,11 +75,14 @@ chips listed if its only citing one of them"). Each (document, statement) pair g
 one of two outcomes, never a third — **cite it, or take it off that card** (OWNER DECISION
 2026-10-17). **A removal is a clinical act: it goes to the owner per document before it
 lands.** **Documents 1 and 2 are DONE** — both signed off, both REMOVALS applied, and both
-sets of CITEs now written (doc 2 in `702d041`, doc 1 after it). What is left of them is
-statements no sentence in the document states: the job aid's **3 table-cell-only** ones
-(3,189 cards) and mm7401a1's **1** (45 cards — a 19-49 adult with chronic conditions only,
-PCV13 and TWO PPSV23 doses, which ACIP's chronic block has no row for). Both are OPEN OWNER
-DECISIONS: quote a bare cell, or remove the document from those cards. Documents 3, 5 and 6
+sets of CITEs now written (doc 2 in `702d041`, doc 1 after it). **mm7401a1 is FINISHED —
+the first document to reach zero uncredited (statement, card) pairs**: its last 45 (a 19-49
+adult with chronic conditions only, PCV13 and TWO PPSV23 doses) were settled by the owner on
+2026-10-18 — *"I would use the citation covering PCV13 and 1 dose of PPSV23 in patients
+19-49 with chronic conditions"*, because the chronic block offers a second PPSV23 to nobody
+and so has no other disposition for that history. What is left is the job aid's **3
+table-cell-only** statements (3,189 cards), still an OPEN OWNER DECISION: quote a bare cell,
+or remove the document from those cards. Documents 3, 5 and 6
 have proposed removals still waiting, and **doc 4 statement 1 is an
 open owner decision she has asked not to be re-raised.** Readings, dispositions and counts:
 `docs/archive/c7-2026-10-17-source-readings.md`. Measure with
@@ -87,11 +90,20 @@ open owner decision she has asked not to be re-raised.** Readings, dispositions 
 quote a count from the log, which predates the IC-children fix and reads low.
 
 **A disposition does not always split by AGE.** mm7401a1's table answers one history —
-PCV13 + PPSV23 — in three different rows, and below 50 which row speaks depends on how many
-PPSV23 doses actually COUNTED (one dose: "the series is complete"; two: "reviewed again … at
-age 50. Alternatively, … >=5 years"). `population` cannot see that — it records an age band.
-The engine reads `ppsv.count` (the EFFECTIVE count; a rejected dose is not a dose ACIP's row
-is about) in exactly one place, `mmwrBothPcv13PpsvKey()`. Never collapse those rows into one.
+PCV13 + PPSV23 — in three different rows, and in the **IMMUNOCOMPROMISING** block below 50
+which row speaks depends on how many PPSV23 doses actually COUNTED (one dose: "the series is
+complete"; two: "reviewed again … at age 50. Alternatively, … >=5 years"). `population`
+cannot see that — it records an age band. The engine reads `ppsv.count` (the EFFECTIVE
+count; a rejected dose is not a dose ACIP's row is about) in exactly one place,
+`mmwrBothPcv13PpsvKey()`. **Never collapse those two IC rows into one.**
+
+**The CHRONIC block does NOT split on the count** (OWNER DECISION 2026-10-18). It prints one
+row for a PCV13 + PPSV23 history, headed "PCV13 and 1 dose of PPSV23", and it speaks for a
+two-dose patient as well: a second PPSV23 is only ever *offered* inside the
+immunocompromising block ("When a second PPSV23 dose is used instead of PCV21 or PCV20…"),
+so the chronic row has no rival disposition an extra dose could select. Do not re-add the
+`ppsv.count === 1 ? … : null` that used to sit there and left 45 cards with a grey button
+and no number.
 
 Where a disposition splits by age, the predicate is the engine's existing `isOlderAdult`
 (i.e. `ROUTINE_ADULT_MIN_M`). **Never a second age test** — a hand-typed `am >= 600` there
