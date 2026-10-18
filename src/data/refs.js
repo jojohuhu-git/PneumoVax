@@ -955,26 +955,96 @@ export const REFS = {
     short: 'PCV20 Children MMWR',
     lastVerified: '2026-10-12',
   },
+  // ⚠ THIS ENTRY DESCRIBED THE WRONG DOCUMENT UNTIL 2026-10-18.
+  //
+  // It read `rulebook: 'adult'`, "Use of PCV15 and PCV20 among adults", short
+  // "PCV15 Adults MMWR". Fetched live from the URL below on 2026-10-18, the
+  // document's own title is:
+  //
+  //   "Use of 15-Valent Pneumococcal Conjugate Vaccine Among U.S. Children:
+  //    Updated Recommendations of the Advisory Committee on Immunization
+  //    Practices — United States, 2022"
+  //
+  // A CHILDREN's report, not an adult one. Nothing had gone wrong on screen,
+  // because the entry was a registered orphan — no card cited it — so the
+  // mislabel put a child's document on no adult's card. It is corrected now
+  // because FINDING 2 makes it a cited source for the first time.
+  //
+  // OWNER DECISION 2026-10-18, on a healthy 6-month-old with four PCV20 doses
+  // at 1, 2, 3 and 4 months: "downloaded MMWR 2022 states in table 2: all
+  // children 2-6 months last dose at age 12–15 mos". That is the sentence the
+  // app's fifth dose rests on, and it is this document's, not p2016's.
+  //
+  // ⚠ HONEST LIMIT, stated rather than papered over. This table ALSO stops at
+  // 3 previous doses, so it does not state the number FIVE either — nor does
+  // p2016's Table 1, whose largest total is 4. What it states is where the
+  // LAST dose goes. So the schedule claim is sourced here; the number 5 stays
+  // the app's own arithmetic on the patient's record (4 given + 1 still owed
+  // at 12–15 months), and the card says so in its own words rather than
+  // attributing the 5 to anybody.
+  // The WHOLE-PAGE entry for this document — the one the grey button is built
+  // from, so it carries no `quote` and (per the population rule) no
+  // `population`: a document has no patient, only a sentence does.
   mmwr7137a3: {
-    rulebook: 'adult',
+    rulebook: 'child',
     url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
-    label: 'ACIP 2022 — Use of PCV15 and PCV20 among adults (MMWR mm7137a3)',
-    short: 'PCV15 Adults MMWR',
-    lastVerified: '2026-10-12',
+    label: 'ACIP 2022 — Use of 15-valent pneumococcal conjugate vaccine among U.S. children (MMWR mm7137a3)',
+    short: 'PCV15 Children MMWR',
+    lastVerified: '2026-10-18',
+  },
+  // The SENTENCE this app rests on, from Table 2 of the document above.
+  pedsInfantLastDose1215mo: {
+    rulebook: 'child',
+    // Patients this sentence is about: Table 2's "All children" block, printed
+    // above its "Healthy children" and "Children with certain underlying
+    // medical conditions" blocks, so it covers every paediatric risk class.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
+    label: 'ACIP 2022 — MMWR mm7137a3, Table 2: all children 2–6 months, last dose at age 12–15 months',
+    short: 'PCV15 Children MMWR',
+    // Verbatim, Table 2, row "All children / 2–6 mos / 3 previous doses". The
+    // neighbouring 1- and 2-dose rows end in the same words, "last dose at age
+    // 12–15 mos". Read live 2026-10-18.
+    quote: '1 additional dose at age 12–15 mos',
+    lastVerified: '2026-10-18',
   },
 
   // immunize.org ----------------------------------------------------------
   p2016: {
     rulebook: 'child',
-    // 2026-09-13 fix: label previously claimed "Tables 1-5" — verified live
-    // that p2016.pdf, as it exists now, is a 2-page document with only
-    // Tables 1-4. Table 5 (the post-transplant schedule) lives in p3086.pdf;
-    // that entry was deleted on 2026-10-16 when the transplant pathway became
-    // a hard stop, and is recorded in
-    // docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md.
-    // The URL here was always correct for these Tables 1-4 call sites.
+    // ⚠ THE 2026-09-13 COMMENT HERE WAS WRONG, corrected 2026-10-18.
+    //
+    // It said the label "previously claimed Tables 1-5" and that it had been
+    // "verified live that p2016.pdf, as it exists now, is a 2-page document
+    // with only Tables 1-4", with Table 5 living in p3086.pdf. Fetched live on
+    // 2026-10-18 (HTTP 200, 211,252 bytes, "Item #P2016 (2/16/2024)") and read
+    // with scripts/pdfLayout.py, p2016 is a 2-page document containing FIVE
+    // tables. Table 5 is printed at the foot of page 2:
+    //
+    //   "Table 5. Recommended schedule for administering pneumococcal
+    //    conjugate vaccine to any child younger than age 19 years following a
+    //    hematopoietic stem cell transplant (HSCT)"
+    //
+    // The item date 2/16/2024 is EARLIER than that 2026-09-13 check, so this is
+    // not immunize.org having republished — the earlier verification was simply
+    // wrong, most likely read with a tool that truncated or flattened page 2.
+    // Same failure as FINDING F: a reading that misses part of a document is
+    // indistinguishable from a reading that found nothing there.
+    //
+    // ⚠ THIS CHANGES NOTHING ABOUT THE TRANSPLANT HARD STOP. Table 5 is a
+    // post-transplant schedule and CLAUDE.md is explicit that ticking the
+    // transplant box stops the engine and that no post-transplant schedule is
+    // ever to be re-added (OWNER DECISION 2026-10-16, recorded in
+    // docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md).
+    // Finding that a cited document still carries such a table is MORE reason
+    // for that decision, not less. The only action taken here is to stop the
+    // app describing this document inaccurately.
+    //
+    // Also checked 2026-10-18: p2016 mentions PCV21 nowhere, and no child card
+    // offers PCV21 while listing it. A future change that offered PCV21 under
+    // 19 would create an unsupported citation silently.
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
-    label: 'immunize.org — Recommendations for Pneumococcal Vaccines Use in Children and Teens (Tables 1–4)',
+    label: 'immunize.org — Recommendations for Pneumococcal Vaccines Use in Children and Teens (Tables 1–5)',
     short: 'immunize.org p2016',
     lastVerified: '2026-10-12',
   },

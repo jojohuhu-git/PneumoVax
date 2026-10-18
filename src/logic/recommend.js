@@ -560,14 +560,32 @@ function pcvInfant(am, riskIds, pcv, today) {
       // 3 doses and one starting at 12-23 months owes 2, per p2016 Table 1, so
       // the routine sentence is kept for the routine case and the child's own
       // total is stated otherwise. One [c] either way — noteCites has one cite.
+      //
+      // FINDING 2 (2026-10-18). A third case: a total ABOVE 4, which neither
+      // cited document prints. p2016's Table 1 keys its rows on 0–3 previous
+      // doses and its largest total is "4 doses"; MMWR mm7137a3's Table 2 does
+      // the same. So for a baby with four doses already given before age 7
+      // months — all of them valid, none of them the ≥12-month booster — the
+      // app's "5 doses in total" is its own arithmetic, and crediting p2016 for
+      // the number 5 was the "card states a figure its quote never says" fault.
+      //
+      // OWNER DECISION 2026-10-18: cite MMWR Table 2, which states where the
+      // LAST dose goes ("1 additional dose at age 12–15 mos"). The sentence now
+      // shows the arithmetic — doses on record, plus the booster still owed —
+      // so the [c] sits on the booster clause, which is the part the document
+      // actually supports, instead of on a total that no document states.
       lead: `${target === 4
         ? 'Routine infant PCV (PCV15 or PCV20), 4-dose series at 2, 4, 6, and 12–15 months [c].'
-        : `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child [c].`}${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
+        : target > 4
+          ? `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child — the ${pcv.count} already on record, and the booster still owed at age 12–15 months [c].`
+          : `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child [c].`}${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
       detail: `${minInterval
         ? `The next dose is due ${minInterval === 28 ? '4 weeks' : '8 weeks'} after the most recent one`
         : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
     },
-    noteCites: [cite('pedsRoutine4Dose')],
+    // FINDING 2: a total above 4 is cited to MMWR Table 2's "last dose" row,
+    // not to CDC's routine 4-dose sentence, which states a different number.
+    noteCites: [cite(target > 4 ? 'pedsInfantLastDose1215mo' : 'pedsRoutine4Dose')],
     refs,
   })];
 }

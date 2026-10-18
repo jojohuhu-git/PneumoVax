@@ -100,12 +100,23 @@ describe('P6-3 — cite() builds a per-occurrence citation object', () => {
   });
 
   it('an unquoted ref falls back to the page URL and the full title', () => {
-    // mmwr7137a3 has no `quote` (S8/P2-8 owns the full sweep). Until then the
-    // superscript must still link somewhere useful rather than to `undefined`.
-    expect(REFS.mmwr7137a3.quote).toBeUndefined();
-    const c = cite('mmwr7137a3');
-    expect(c.url).toBe(REFS.mmwr7137a3.url);
-    expect(c.label).toBe(REFS.mmwr7137a3.label);
+    // A ref with no `quote` must still send the superscript somewhere useful
+    // rather than to `undefined`.
+    //
+    // ⚠ This used to name `mmwr7137a3` outright, and went stale on 2026-10-18
+    // the moment FINDING 2 gave that entry a quote: the test then failed for a
+    // reason that had nothing to do with the behaviour it guards. The subject
+    // is now CHOSEN, not hardcoded, so giving any one ref a quote can never
+    // break this again — and if every ref were quoted the `expect` below would
+    // say so plainly instead of the test quietly asserting nothing.
+    const unquoted = Object.keys(REFS).filter((k) => !REFS[k].quote);
+    expect(unquoted.length, 'no unquoted ref left to exercise the fallback').toBeGreaterThan(0);
+
+    for (const k of unquoted) {
+      const c = cite(k);
+      expect(c.url, `${k} should fall back to its page URL`).toBe(REFS[k].url);
+      expect(c.label, `${k} should fall back to its full title`).toBe(REFS[k].label);
+    }
   });
 
   // highlightUrl is tested directly, with synthetic inputs, so the
