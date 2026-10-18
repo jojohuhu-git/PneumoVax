@@ -729,8 +729,33 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // Such children fall through to the rows-4/5 "completed before age 6" block below.
   // Source: cdc.gov/.../child-adolescent-notes.html#note-pneumo ("Completed
   // recommended PCV series but have not received PPSV23").
-  if (am < M.m72 && pcv.count < 4) {
-    const target = pcv.band.before24 >= 3 ? 1 : 2; // row 2 (1) vs row 1 (2)
+  //
+  // FINDING G (2026-10-18). These two rows key on WHEN the doses were given,
+  // not only how many, and between them they cover less than this branch used
+  // to claim. Read live from p2016 Table 4 on 2026-10-18:
+  //   row 1 — "Any incomplete schedule of 0, 1, or 2 PCV doses by age 24 months"
+  //   row 2 — "3 doses of PCV, all before 12 months"
+  // A child with three doses given BETWEEN 12 and 24 months matches neither.
+  // 32 cards were landing on row 2 anyway, because the gate below read
+  // `band.before24` where the row says before TWELVE months, and then told the
+  // clinician "3 PCV doses before 24 months" — a row label belonging to no
+  // patient.
+  //
+  // OWNER DECISION 2026-10-18, on a 24-month-old with asplenia and three PCV13
+  // doses at 16, 18 and 20 months: that child "would follow the table in
+  // immunize.org table for 2 through 18 years (IC only); Completed PCV series
+  // before age 6 years with PCV13 and/or PCV15". So they fall through to rows
+  // 4/5 below. Note those rows' age band is "2 through 18 years" — the 24–71
+  // month rows are not a ceiling, and a 24-month-old reads them too.
+  //
+  // `undated === 0` keeps undated histories on their existing path: a dose with
+  // no date cannot be placed before or after 12 months, so rerouting it would
+  // be a guess. Same reasoning as `allCountingPcvBefore72mo` below.
+  const threeByAge24mo = pcv.band.before24 >= 3;
+  const threeAllBefore12mo = pcv.band.before12 >= 3;
+  const matchesNoTable4Row = threeByAge24mo && !threeAllBefore12mo && pcv.band.undated === 0;
+  if (am < M.m72 && pcv.count < 4 && !matchesNoTable4Row) {
+    const target = threeByAge24mo ? 1 : 2; // row 2 (1) vs row 1 (2)
     const remaining = Math.max(0, target - pcv.band.ge24);
     // IC-2 / IC-3 (2026-10-17). The PCV catch-up being finished is NOT the end
     // of this child's schedule, and until today this branch said it was.
@@ -841,7 +866,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       note: target === 1
         ? {
           lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].`,
-          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses before 24 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later.`,
+          // FINDING G: "all before 12 months", which is what p2016's row says.
+          // It used to read "before 24 months" — a looser claim than the row,
+          // and one that described 32 children the row is not about.
+          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later.`,
         }
         : {
           lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} apart [c].`,
@@ -853,12 +881,36 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     return out;
   }
 
-  // Rows 4–9: 2–18y (here ≥6y by age, but rows 4/5 say "2–18y completed before 6y").
+  // Rows 4–9: 2–18y (rows 4/5 say "2–18y completed before 6y"; rows 6–9 are 6–18y).
   // Branch on whether a PCV13/15 series was completed before age 6 vs no prior PCV
-  // vs PCV13-only at/after age 6. We can't see exact ages of historical doses, so:
-  //   • prior counting PCV ≥3  → treat as "completed series before 6y with PCV13/15"
-  //   • prior counting PCV 0   → "no prior PCV13/15/20"
-  //   • prior counting PCV 1–2 (e.g. a single PCV13 at/after 6y) → "PCV13 only at/after 6y"
+  // vs PCV13-only at/after age 6:
+  //   • no counting PCV            → rows 6/7, "no previous dose of PCV13/15/20"
+  //   • counting PCV all before 6y → rows 4/5, "completed PCV series before age 6"
+  //   • a counting dose at/after 6 → rows 8/9, "PCV13 only at/after 6y"
+  //
+  // FINDING G (2026-10-18). This used to branch on the dose COUNT — "prior
+  // counting PCV ≥3 → completed before 6y; 1–2 → PCV13 only at/after 6y" —
+  // under a comment saying "we can't see exact ages of historical doses". The
+  // engine can: `pcv.band` has held the age at each dose since the bands were
+  // added, and `allCountingPcvBefore72mo` below is built from it. Branching on
+  // the count instead put 336 cards on rows 8/9's label, which told the
+  // clinician the child had "PCV13 only (at/after age 6)" when the dose on
+  // record was a PCV15 at age 4, or a PCV13 at 12 months, or an unknown
+  // product. The dose offered was the same either way — rows 4/5 and rows 8/9
+  // both give PCV20 at ≥8 weeks, or PPSV23 — so no verdict moved; only the
+  // sentence naming the patient was wrong, which no corpus records.
+  //
+  // OWNER DECISION 2026-10-18, on a 6-year-old with a cochlear implant and one
+  // PCV15 at age 4: that child "should follow ... 2 through 18 years (non-IC
+  // only); Completed PCV series before age 6 years with PCV13 and/or PCV15".
+  // So a SINGLE conjugate dose before age 6 counts as "completed" for this
+  // row's purpose; the row is not reserved for three-dose histories.
+  //
+  // `recommend.js` had already named this hazard twice without sweeping for it
+  // — once where the 24–71 month block writes its own cards rather than reuse
+  // these rows ("which would be a true sentence about somebody else"), and once
+  // in the IC fix of 2026-10-17, which rescued one group from this very row.
+  // The sweep is `regression-c8-2026-10-18-card-names-the-history-the-patient-has.test.js`.
 
   // ── PCV given ONLY before age 72 months (before age 6) + PPSV23 already given → complete ──
   // Verified against CDC PneumoRecs VaxAdvisor (2026-07-09). A high-risk patient (IC or
@@ -968,7 +1020,13 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     return out;
   }
 
-  if (pcv.count >= 3) {
+  // FINDING G: `|| allCountingPcvBefore72mo` is the fix. Rows 4/5 describe a
+  // child whose conjugate doses were all given before age 6, whatever the
+  // count; rows 8/9 below describe one with a dose at or after age 6. The
+  // `>= 3` is kept rather than replaced so a three-dose history with an
+  // undated dose — which `allCountingPcvBefore72mo` deliberately excludes —
+  // lands exactly where it did before.
+  if (pcv.count >= 3 || allCountingPcvBefore72mo) {
     // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
     if (ppsvGiven) {
       // non-IC: PPSV23 already given → complete.
