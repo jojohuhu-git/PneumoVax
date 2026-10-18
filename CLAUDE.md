@@ -74,12 +74,24 @@ documents nothing it said rested on (the owner's "I forget why there are multipl
 chips listed if its only citing one of them"). Each (document, statement) pair gets exactly
 one of two outcomes, never a third — **cite it, or take it off that card** (OWNER DECISION
 2026-10-17). **A removal is a clinical act: it goes to the owner per document before it
-lands.** **Documents 1 and 2** are signed off and their REMOVALS applied — document 2's **12 CITEs
-are still unwritten**; documents 3, 5 and 6 have proposed removals still waiting, and **doc 4 statement 1 is an
+lands.** **Documents 1 and 2 are DONE** — both signed off, both REMOVALS applied, and both
+sets of CITEs now written (doc 2 in `702d041`, doc 1 after it). What is left of them is
+statements no sentence in the document states: the job aid's **3 table-cell-only** ones
+(3,189 cards) and mm7401a1's **1** (45 cards — a 19-49 adult with chronic conditions only,
+PCV13 and TWO PPSV23 doses, which ACIP's chronic block has no row for). Both are OPEN OWNER
+DECISIONS: quote a bare cell, or remove the document from those cards. Documents 3, 5 and 6
+have proposed removals still waiting, and **doc 4 statement 1 is an
 open owner decision she has asked not to be re-raised.** Readings, dispositions and counts:
 `docs/archive/c7-2026-10-17-source-readings.md`. Measure with
 `npx vite-node scripts/uncreditedSources.mjs` and `scripts/citationMapping.mjs` — never
 quote a count from the log, which predates the IC-children fix and reads low.
+
+**A disposition does not always split by AGE.** mm7401a1's table answers one history —
+PCV13 + PPSV23 — in three different rows, and below 50 which row speaks depends on how many
+PPSV23 doses actually COUNTED (one dose: "the series is complete"; two: "reviewed again … at
+age 50. Alternatively, … >=5 years"). `population` cannot see that — it records an age band.
+The engine reads `ppsv.count` (the EFFECTIVE count; a rejected dose is not a dose ACIP's row
+is about) in exactly one place, `mmwrBothPcv13PpsvKey()`. Never collapse those rows into one.
 
 Where a disposition splits by age, the predicate is the engine's existing `isOlderAdult`
 (i.e. `ROUTINE_ADULT_MIN_M`). **Never a second age test** — a hand-typed `am >= 600` there

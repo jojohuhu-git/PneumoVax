@@ -231,6 +231,11 @@ describe('statement #7 — no dose now, review at 50', () => {
     expect(lead.map((c) => c.key)).toEqual([
       'adultChronicOnlyReviewAt50',
       'jobAidChronic1949ReviewAt50',
+      // C8, document 1's CITE (2026-10-17), added after this file was
+      // written: mm7401a1's own chronic-block row for the same history. The
+      // job aid's page-4 cite is unmoved and still second — this list grew,
+      // it did not change.
+      'mmwrChronic1949ReviewAt50',
     ]);
   });
 

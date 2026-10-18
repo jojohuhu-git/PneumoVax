@@ -174,8 +174,8 @@ describe('C2 — the buttons carry the number the text uses', () => {
     const row = buttonRow();
     expect(row.map((b) => `${b.n} ${b.name}`)).toEqual([
       '[1] CDC Adult Notes',
-      '[2] CDC Adult Timing Job Aid',
-      '[3] MMWR ≥50 expansion',
+      '[2] MMWR ≥50 expansion',
+      '[3] CDC Adult Timing Job Aid',
     ]);
 
     // C8, document 2's CITEs (2026-10-17) landed here, on the owner's own
@@ -185,17 +185,23 @@ describe('C2 — the buttons carry the number the text uses', () => {
     // counts as no PCV history" sentence, so [2] appears IN THE TEXT and that
     // button is no longer a number the reader cannot account for.
     //
-    // Reading order: the lead's ≥50 routine sentence [1], then in the detail
-    // the PCV7 claim twice — Adult Notes [1] and the job aid [2] — then "each
-    // completes the series alone" [1].
-    expect(markerNumbers()).toEqual(['[1]', '[1]', '[2]', '[1]']);
+    // C8, document 1's CITEs (2026-10-17) finished this card. mm7401a1 now
+    // carries the lead's own sentence — its ">=50 / None or PCV7 only at any
+    // age" row — so it is cited BEFORE the job aid and the numbers shift: the
+    // MMWR takes [2] and the job aid [3]. Nothing the card SAYS changed; one
+    // marker was added to the lead and two buttons swapped numbers.
+    //
+    // Reading order: the lead's ≥50 routine sentence [1] then ACIP's row [2];
+    // in the detail the PCV7 claim twice — Adult Notes [1] and the job aid
+    // [3] — then "each completes the series alone" [1].
+    expect(markerNumbers()).toEqual(['[1]', '[2]', '[1]', '[3]', '[1]']);
 
-    // [3] (the MMWR) is still unpointed on this card, and that is the honest
-    // state of the work: document 1 kept mm7401a1 here because the ≥50
-    // expansion is genuinely its subject, but no sentence quotes it yet. That
-    // is what the remaining C8 documents and check G1 are for — asserted so
-    // this card's progress is recorded rather than assumed complete.
-    expect(markerNumbers()).not.toContain('[3]');
+    // EVERY button on the owner's own card is now pointed at — the whole of
+    // her original report ("I forget why there are multiple source chips
+    // listed if its only citing one of them"), on the card she reported it
+    // from. Asserted as a set equality rather than three separate checks so
+    // that a button added later without a citation fails here.
+    expect(new Set(markerNumbers())).toEqual(new Set(row.map((b) => b.n)));
   });
 
   it('a button no number points at is kept, not dropped', () => {

@@ -112,6 +112,16 @@ describe('the field itself', () => {
       // because this document says different things on different pages.
       'jobAidPcv7CountsAsNone',   // footnote * on pp.1-4, against every "None*" row
       'jobAidPpsv23Unavailable',  // footnote pilcrow on pp.1-4, against every PPSV23 cell
+      // C8, document 1's CITEs (2026-10-17). mm7401a1's table splits into
+      // three blocks and most of its rows are pinned to ONE group above --
+      // these two are not. `mmwrNoneOrPcv7Only` is the "None or PCV7 only at
+      // any age" row, which the >=50 block and the 19-49 CHRONIC block print
+      // word for word identically (the 19-49 IMMUNOCOMPROMISING version says
+      // >=8 weeks instead and is `adultPcv15ThenPpsvShort`, pinned to one
+      // group). `mmwrPcv13NoPpsv23ToComplete` is body prose, not a table row
+      // at all, and names its own scope: "adults aged >=19 years".
+      'mmwrNoneOrPcv7Only',       // the same row, verbatim, in the >=50 and 19-49 chronic blocks
+      'mmwrPcv13NoPpsv23ToComplete', // its own words: "adults aged >=19 years"
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       'pedsMinAge',               // the section heading, above every block
       'pedsRiskIncompleteCatchup',// printed in both at-risk lists

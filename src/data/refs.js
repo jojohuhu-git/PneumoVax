@@ -712,6 +712,125 @@ export const REFS = {
     quote: 'If PPSV23 is not available, PCV20 or PCV21 may be used',
     lastVerified: '2026-10-17',
   },
+  // ── C8, document 1's CITEs (2026-10-17): mm7401a1's own sentences ─────
+  //
+  // Document 1's REMOVALS landed first: mm7401a1 came off the 5,331 cards it
+  // does not speak for and kept 2,544 where it does. These seven credit those.
+  //
+  // Read live 2026-10-17 from https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm
+  // through the browser pane — cdc.gov serves curl a shell, not the body. Six
+  // are cells of the TABLE "Clinical guidance for implementing pneumococcal
+  // vaccine recommendations for adults aged >=19 years"; the seventh is body
+  // prose.
+  //
+  // ⚠ THE TRAP: the table has THREE blocks (>=50, 19-49 immunocompromising /
+  // CSF leak / cochlear implant, 19-49 chronic) and each carries a row for the
+  // SAME history, worded differently. "None or PCV7 only" is >=1 year in two
+  // blocks and >=8 weeks in the IC one (S15, already `adultPcv15ThenPpsvShort`).
+  // "PCV13 only" differs by the single word "administered". And the IC block's
+  // "PCV13 + PPSV23" splits AGAIN on the NUMBER of PPSV23 doses — a split
+  // `population` cannot see, because it is not an age band. Quoting a
+  // neighbouring row here is the exact way a right-sounding sentence lands in
+  // front of the wrong patient.
+  mmwrBothPcv13Ppsv50plus: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the >=50 block, row "PCV13 at any age and PPSV23 at age <65 years". The >=65 twin is the shared-decision path, which this card never reaches
+    population: ['adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age <65 years"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose.',
+    lastVerified: '2026-10-17',
+  },
+  // The 19-49 twin of the entry above. Its row OPENS with the same sentence,
+  // so the second sentence is quoted too: a clinician hovering must be able to
+  // tell which of the two rows this is, and the second sentence is also what
+  // supports the card's "This completes the series".
+  mmwrIc1949OnePpsv: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the 19-49 immunocompromising / CSF leak / cochlear implant block, row "PCV13 and 1 dose of PPSV23". Reaching this card below 50 means one of those three, because the chronic-only branch is intercepted earlier
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 1 dose of PPSV23"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
+    lastVerified: '2026-10-17',
+  },
+  // The SAME patient with a second PPSV23 dose, which mm7401a1 answers in its
+  // own row. Note what that row leads with: review again at 50, with the dose
+  // this card recommends offered as the ALTERNATIVE. The app states the dose
+  // flatly. That is a difference in emphasis between the app and ACIP, not a
+  // contradiction — the "Alternatively" sentence below is verbatim permission
+  // for exactly what the card says — but it is raised for the owner rather
+  // than papered over, and the quote is the one that supports the card.
+  mmwrIc1949TwoPpsv: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the 19-49 immunocompromising / CSF leak / cochlear implant block, row "PCV13 and 2 doses of PPSV23"
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 2 doses of PPSV23"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'Alternatively, a single dose of either PCV21 or PCV20 should be administered \u22655 years after the last pneumococcal vaccine dose.',
+    lastVerified: '2026-10-17',
+  },
+  // BODY PROSE, not a table cell, and the only one of the seven that is. It
+  // says "adults aged >=19 years" in its own words, so it needs no age split —
+  // and it is the sentence behind the card's "no PPSV23 needed", a claim that
+  // carried no citation at all before this.
+  mmwrPcv13NoPpsv23ToComplete: {
+    rulebook: 'adult',
+    // Patients this sentence is about: its own words, "adults aged >=19 years" who began with PCV13 and have not completed the series
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — the section "PPSV23 Use in PCV13-Experienced Adults Who Have Not Completed the Recommended Vaccination Series"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'Among adults aged \u226519 years who have started their pneumococcal vaccination series with PCV13 but have not received all recommended doses, PPSV23 is no longer recommended as an option to complete the series. Either PCV20 or PCV21 is recommended to complete the series as previously recommended.',
+    lastVerified: '2026-10-17',
+  },
+  // The CHRONIC block's "PCV13 and 1 dose of PPSV23" row. The chronic block
+  // has FOUR rows and stops here: it states nothing about a second PPSV23
+  // dose, which is why 45 cards are left uncredited pending an owner decision.
+  mmwrChronic1949ReviewAt50: {
+    rulebook: 'adult',
+    // Patients this sentence is about: the 19-49 "chronic medical conditions" block, row "PCV13 and 1 dose of PPSV23"
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with chronic medical conditions", the row "PCV13 and 1 dose of PPSV23"',
+    short: 'MMWR \u226550 expansion',
+    quote: 'The pneumococcal vaccination recommendations should be reviewed again when the person reaches age 50 years.',
+    lastVerified: '2026-10-17',
+  },
+  // The one sentence in the paper that is ABOUT 19-49 adults as a group. It
+  // supports the second half of the no-risk card — that a vaccine is
+  // recommended at this age only with a risk condition — so that card does NOT
+  // need a fifth declared cross-reference to say it.
+  mmwrRiskBased1949Unchanged: {
+    rulebook: 'adult',
+    // Patients this sentence is about: its own words, "adults aged 19-49 years"
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — the summary "What is added by this report": the October 2024 expansion covers adults aged >=50, and the 19-49 recommendation stays risk-based',
+    short: 'MMWR \u226550 expansion',
+    quote: 'The risk-based recommendation for adults aged 19\u201349 years is unchanged.',
+    lastVerified: '2026-10-17',
+  },
+  // ONE entry for TWO blocks, on purpose. The ">=50" and "19-49 chronic"
+  // versions of the "None or PCV7 only at any age" row are word-for-word
+  // identical for these two sentences (the >=50 row then adds the 8-week
+  // option, which `jobAidEightWeekOptionAt50` already carries). `population`
+  // records who a sentence is ABOUT, and this one is printed about both — so
+  // this is one entry, not twins. The 19-49 IMMUNOCOMPROMISING version is a
+  // different sentence (>=8 weeks) and stays `adultPcv15ThenPpsvShort`.
+  mmwrNoneOrPcv7Only: {
+    rulebook: 'adult',
+    // Patients this sentence is about: printed identically in the >=50 block and the 19-49 chronic block, "None or PCV7 only at any age"
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "None or PCV7 only at any age", printed identically for adults aged >=50 and for adults aged 19\u201349 with chronic medical conditions',
+    short: 'MMWR \u226550 expansion',
+    quote: 'A single dose of PCV21, PCV20, or PCV15. If PCV15 is administered, a single dose of PPSV23* should be administered \u22651 year after the PCV15 dose.',
+    lastVerified: '2026-10-17',
+  },
   cdcPneumoIndex: {
     rulebook: 'any',
     url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/index.html',

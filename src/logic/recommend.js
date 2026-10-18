@@ -1269,6 +1269,32 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   // the button and the raised number are decided by ONE predicate and cannot
   // drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M test — never a
   // second age test here (the escape that passed all 1,177 tests).
+  // C8, document 1's CITEs (2026-10-17). mm7401a1's table answers a PCV13 +
+  // PPSV23 history in THREE different rows, and which one speaks for a card
+  // depends on the patient's age band AND — below 50 — on how many PPSV23
+  // doses actually counted. `ppsv.count` is the EFFECTIVE count (a dose the
+  // engine rejected is not a dose ACIP's row is about), and this is the one
+  // place that reads it for a citation, so the marker and the key cannot
+  // drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M predicate — never
+  // a second age test here.
+  //
+  // Returns null where the document is SILENT: a 19-49 adult with chronic
+  // conditions only and two PPSV23 doses has no row in mm7401a1's chronic
+  // block, which stops at one dose. Those 45 cards keep the grey button and
+  // gain no number, pending the owner's decision on whether to remove it.
+  const mmwrBothPcv13PpsvKey = (icRow) => {
+    if (isOlderAdult) return 'mmwrBothPcv13Ppsv50plus';
+    if (!icRow) return ppsv.count === 1 ? 'mmwrChronic1949ReviewAt50' : null;
+    if (ppsv.count === 1) return 'mmwrIc1949OnePpsv';
+    if (ppsv.count === 2) return 'mmwrIc1949TwoPpsv';
+    return null;
+  };
+  // One cite per marker, so a caller spreads both or neither.
+  const mmwrBothPcv13PpsvCites = (icRow) => {
+    const key = mmwrBothPcv13PpsvKey(icRow);
+    return key ? [cite(key)] : [];
+  };
+  const mmwrBothPcv13PpsvMarker = (icRow) => (mmwrBothPcv13PpsvKey(icRow) ? ' [c]' : '');
   const jobAidCompleteMarker = isOlderAdult ? ' [c]' : '';
   const jobAidCompleteCites = isOlderAdult ? [cite('jobAidSeriesCompleteAt50')] : [];
   // Which sentence sits beside the PCV15->PPSV23 interval. It must state the
@@ -1276,6 +1302,19 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
   const ppsvIntervalCite = ppsvIntervalDays != null
     ? 'adultPcv15ThenPpsvShort'
     : 'adultPcv15ThenPpsv';
+  // C8, document 1's CITE for mm7401a1's "None or PCV7 only at any age" row.
+  // ACIP prints that row's YEAR wording identically in two blocks — adults
+  // >=50, and 19-49 with chronic conditions only — so one entry serves both
+  // (`population` records who a sentence is about, and this one is about
+  // both). The 19-49 IMMUNOCOMPROMISING / cochlear / CSF version of the same
+  // row says 8 weeks instead, and already credits mm7401a1 through
+  // `adultPcv15ThenPpsvShort`, so it must not get a second number for the
+  // same document. Keying on `ppsvIntervalCite` ties this to the ONE
+  // interval decision (S15) rather than growing an age test of its own.
+  const mmwrNoneRowCites = ppsvIntervalCite === 'adultPcv15ThenPpsv'
+    ? [cite('mmwrNoneOrPcv7Only')]
+    : [];
+  const mmwrNoneRowMarker = mmwrNoneRowCites.length ? ' [c]' : '';
   const adultBrands = pcvRecBrands({ adult: true });
 
   // 19–49 with NO risk → not indicated (routine starts at 50).
@@ -1283,7 +1322,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     return [rec({
       vaccine: 'PCV', status: 'not-indicated',
       doseLabel: 'Not indicated (no risk, <50y)',
-      note: 'Routine pneumococcal vaccination begins at age 50 [c]. Adults 19–49 years are recommended a pneumococcal vaccine only with a qualifying risk condition [c].',
+      note: 'Routine pneumococcal vaccination begins at age 50 [c]. Adults 19–49 years are recommended a pneumococcal vaccine only with a qualifying risk condition [c] [c].',
       noteCites: [
         // A declared cross-reference (2026-10-17): the 50+ routine sentence,
         // quoted to a patient below 50 on purpose. The claim it supports is
@@ -1294,6 +1333,11 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
           aboutAnotherGroup: 'states where routine vaccination begins, which is why this younger patient is not due',
         }),
         cite('cdcAdultRiskFactorList'),
+        // C8, document 1's CITE. ACIP's own summary of what the October 2024
+        // expansion did NOT change. It is about 19-49 adults in its own
+        // words, so this card credits mm7401a1 without needing a second
+        // declared cross-reference beside `adultRoutine50`.
+        cite('mmwrRiskBased1949Unchanged'),
       ],
       refs: refsWithoutJobAid,
     })];
@@ -1379,8 +1423,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       doseLabel: `PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after PCV13 — completes the series`,
       dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
-      note: `PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after the last PCV13 dose [c]. This completes the series — no PPSV23 needed.`,
-      noteCites: [cite('adultPcv13Only')],
+      note: `PCV13 was given previously: give 1 dose of PCV20 or PCV21 ≥${ADULT_GAP_WORDS} after the last PCV13 dose [c]. This completes the series — no PPSV23 needed [c].`,
+      // C8, document 1's CITE. "No PPSV23 needed" carried NO citation at all
+      // before this: it is mm7401a1's body prose, the paragraph that retired
+      // PPSV23 as a way to finish a PCV13-started series. The sentence says
+      // "adults aged >=19 years" itself, so it needs no age split.
+      noteCites: [cite('adultPcv13Only'), cite('mmwrPcv13NoPpsv23ToComplete')],
       refs,
     })];
   }
@@ -1456,7 +1504,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         // this, the 50+ row was the lead's only citation: a quote instructing
         // a dose beside a sentence saying none is due, on 175 grid patients.
         note: {
-          lead: 'No additional pneumococcal dose now — re-evaluate at age 50 [c] [c].',
+          lead: `No additional pneumococcal dose now — re-evaluate at age 50 [c] [c]${mmwrBothPcv13PpsvMarker(false)}.`,
           detail: `This is an adult aged 19–49 with a chronic (non-immunocompromising) condition who has already received PCV13 and PPSV23. At age 50, a dose of PCV20 or PCV21 is recommended, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c].`,
         },
         noteCites: [
@@ -1465,6 +1513,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
           // in CDC's own words, and page 4 is the 19-49 chronic page — the
           // only one of the four whose PCV13 + PPSV23 row has no Option A.
           cite('jobAidChronic1949ReviewAt50'),
+          // C8, document 1's CITE — present only where ACIP has a row. Its
+          // chronic block states "reviewed again … at age 50" for a patient
+          // with ONE PPSV23 dose and says nothing about a second, so the
+          // 45 two-dose cards credit nothing here rather than borrow the
+          // immunocompromising block's row, which is a different patient.
+          ...mmwrBothPcv13PpsvCites(false),
           // A declared cross-reference (2026-10-17): the detail half says what
           // happens AT 50, so it quotes the 50+ row — about a patient this one
           // is not yet. Same shape as `adultRoutine50` on the no-risk card: a
@@ -1481,14 +1535,23 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       doseLabel: `PCV20 or PCV21 ≥${LONG_GAP_WORDS} after last pneumococcal dose — completes the series`,
       dueToday, earliestNextDate, minIntervalMonths: MO60,
       brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
-      note: `PCV13 and PPSV23 already given: give 1 dose of PCV20 or PCV21 ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c]. This completes the series.`,
+      note: `PCV13 and PPSV23 already given: give 1 dose of PCV20 or PCV21 ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c]${mmwrBothPcv13PpsvMarker(true)}. This completes the series.`,
       // Population field (2026-10-17). Reaching here below 50 means the
       // chronic-only branch above did not fire, so this patient has a cochlear
       // implant, a CSF leak or an immunocompromising condition — CDC's own
       // 19-49 row for exactly that, rather than the 50+ row this card used to
       // quote. Same five years, same products; what differs is which patient
       // the sentence was written about.
-      noteCites: [cite(isOlderAdult ? 'adultBothNotAt65' : 'adultIc1949BothPcv13Ppsv')],
+      // C8, document 1's CITE. Below 50 this card is the IC / cochlear / CSF
+      // branch (the chronic-only one returned above), and mm7401a1 splits
+      // THAT block again by PPSV23 dose count — one dose "the series is
+      // complete", two doses "reviewed again … Alternatively, … ≥5 years".
+      // The card's advice is the same either way; the sentence behind it is
+      // not, so the quote follows the count.
+      noteCites: [
+        cite(isOlderAdult ? 'adultBothNotAt65' : 'adultIc1949BothPcv13Ppsv'),
+        ...mmwrBothPcv13PpsvCites(true),
+      ],
       refs,
     })];
   }
@@ -1508,7 +1571,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         // with an immunocompromising condition, cochlear implant, or CSF leak"
         // — and this card was the one >=50 surface that left it out, so an
         // IC adult saw the option only after the PCV15 was recorded.
-        lead: `Give 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥${ppsvIntervalLabel} later [c].${shorterMinimumNote}`,
+        lead: `Give 1 dose of PCV20 or PCV21 — OR 1 dose of PCV15 followed by PPSV23 ≥${ppsvIntervalLabel} later [c]${mmwrNoneRowMarker}.${shorterMinimumNote}`,
         detail: 'Routine pneumococcal vaccination for adults ≥50 with no, unknown, or PCV7-only history. A PCV7-only history counts as no PCV history [c] [c]. PCV20 and PCV21 each complete the series alone [c].',
       }
       : {
@@ -1516,11 +1579,15 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
         // interval in `ppsvIntervalLabel` for this class, so the sentence
         // could only ever be empty. S6-3's rule — do not leave a branch that
         // cannot fire looking load-bearing.
-        lead: `Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later [c].`,
+        lead: `Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen, follow with PPSV23 ≥${ppsvIntervalLabel} later [c]${mmwrNoneRowMarker}.`,
         detail: 'This is an adult 19–49 with a qualifying risk condition and no, unknown, or PCV7-only pneumococcal history; the series is complete once the PPSV23 follow-up is given. A PCV7-only history counts as no PCV history [c] [c]. PCV20 and PCV21 each complete the series alone [c].',
       },
     noteCites: [
       cite(isOlderAdult ? 'adultRoutine50' : ppsvIntervalCite),
+      // C8, document 1's CITE. Empty for the 19-49 immunocompromising /
+      // cochlear / CSF patient, whose interval is 8 weeks and whose cite
+      // above IS mm7401a1 already.
+      ...mmwrNoneRowCites,
       // Empty below 50, where the 8-week sentence is absent, so the marker
       // count and the cite count stay equal without a second age test.
       ...shorterMinimumCites,
