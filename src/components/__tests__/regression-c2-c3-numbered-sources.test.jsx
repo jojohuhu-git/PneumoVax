@@ -23,15 +23,25 @@
 //     1,188 for the immunize.org PCV7 rule and 192 for the CDC risk-based
 //     page. (The plan predicted one document; there were two.)
 //
-// Re-measured on the rebase with `npx vite-node scripts/citationMapping.mjs`,
-// because the branch was held while three merges landed in `refs.js`. The PCV7
-// figure was unchanged at 1,188; the CDC risk-based page fell from 1,080 to 192
-// when PR #64's citation fixes landed. After this change the second line is 0.
+// Re-measured with `npx vite-node scripts/citationMapping.mjs`, because the
+// branch was held while merges landed in `refs.js`. The PCV7 figure was
+// unchanged at 1,188; the CDC risk-based page fell from 1,080 to 192 when PR
+// #64's citation fixes landed. After this change the second line is 0.
 // Of those, C3 fixes the second list. The first is item C8 — those buttons are
 // holding up statements the card makes out loud without quoting them, and the
 // fix is to write the missing quotes, never to delete a clinical source to
 // tidy the row. Check G1 ships with C8 for that reason; adding it here would
 // only pressure a future session into deleting sources.
+//
+// Re-verified on 2026-10-17, after the branch was rebased onto `main` at
+// 5bffe00 — i.e. with PR #65, the patient-population field, merged too, which
+// the figures above predate by nine minutes. All four are unchanged: 44,461
+// buttons, 26,651 of them unpointed, 1,380 cards citing a document with no
+// button (1,188 + 192). #65 changed which source four cards quote, but no
+// card's source list, so nothing here moved with it. Measured rather than
+// assumed: the tool was run once against a plain `main` checkout and once
+// against this branch, and only the button total differs — 45,841 here, the
+// 1,380 buttons C3 adds.
 //
 // ── Order of first mention (OWNER DECISION 2026-10-17) ──────────────────
 //
