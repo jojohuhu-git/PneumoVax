@@ -1,3 +1,10 @@
+> **SUPERSEDED 2026-10-17 (late night) by
+> [`handoff-2026-10-17-c8-doc2-cites.md`](handoff-2026-10-17-c8-doc2-cites.md).**
+> Document 2's 12 CITEs — the item this file names as "the next thing to do" — are done and
+> pushed to PR #67 (which is still open). The count was **14** statements, not 12, and **11**
+> are now cited: 6,805 uncredited pairs fell to **3,189**. The remaining 3 rest only on table
+> cells and are an OPEN OWNER DECISION. Resume from the newer file.
+
 # PneumoVax — Handoff after C2/C3 shipped and C8's first two documents (2026-10-17, night)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
