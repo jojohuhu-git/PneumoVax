@@ -1,3 +1,12 @@
+> **SUPERSEDED 2026-10-18** by [`handoff-2026-10-18-p2016-column-fit-and-four-rulings.md`](handoff-2026-10-18-p2016-column-fit-and-four-rulings.md).
+> PR #69 was merged, so `main` is at `a7dc1e3` and the branch in this file is gone.
+> The STRUCTURAL QUESTION listed here as blocking ~25 CITEs is **ANSWERED** (owner rule:
+> every p2016 column must fit), and the "112 residue" open decision is **settled** by the
+> owner's PCV13/PCV15 interchangeability ruling. Four further findings (H, I, J and the
+> unknown-product group) were discovered after this file was written and are not in it.
+> The uncredited count of 43 still holds; re-measure rather than trusting it. Follow the
+> newer file.
+
 # PneumoVax — Handoff after FINDING G and FINDING 2 (2026-10-18)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

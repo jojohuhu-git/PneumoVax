@@ -13,9 +13,11 @@ Baseline was 1,256 passing; now **1,277 passing in 112 files**, all green, no sk
 Working tree clean.
 
 Consumed and superseded: `handoff-2026-10-18-p2016-column-fit-and-four-rulings.md`, which
-until this PR existed **only on the unmerged branch `docs/2026-10-18-p2016-column-fit-handoff`**
-and was therefore invisible from `main`. It is committed here with a superseded banner.
-That branch can now be deleted, as can `feature/2026-10-18-c8-doc3-p2016`.
+for most of 2026-10-18 existed **only on the unmerged branch `docs/2026-10-18-p2016-column-fit-handoff`**
+and was therefore invisible from `main`. It reached `main` as PR #70 while this PR was in
+review; this branch adds its superseded banner, which is what the `origin/main` merge in
+this branch resolved. Both `docs/2026-10-18-p2016-column-fit-handoff` and
+`feature/2026-10-18-c8-doc3-p2016` can now be deleted.
 
 ## What's done (by ID)
 
