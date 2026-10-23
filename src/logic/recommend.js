@@ -612,13 +612,78 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   // is an ADULT rule — verified against CDC PneumoRecs, case P09). A healthy
   // 24–59mo child is complete only when EITHER:
   //   • the full infant series was finished (≥4 counting doses incl. a ≥12mo booster), OR
-  //   • a catch-up dose was given at ≥24mo (the single 24–59mo catch-up dose suffices).
+  //   • a catch-up dose was given at ≥24mo (the single 24–59mo catch-up dose suffices), OR
+  //   • the series was STARTED in the second year of life and two doses are on
+  //     record (FINDING M, below).
   const completedInfantSeries = prior >= 4 && (b.m12to23 >= 1 || b.undated >= 1);
   const caughtUpAt24mo = b.ge24 >= 1;
 
+  // FINDING M (2026-10-22). A series begun at 12–23 months is a TWO-dose series,
+  // and this function used to credit a 12–23 month dose as a final dose only
+  // when four doses were on record — so a child who had 2 or 3 doses, all in the
+  // second year, was told to come back for one more. Three documents say
+  // otherwise, and all three sit on that very card:
+  //
+  //   • CDC Catch-up Schedule Table 2, "Dose 3 to Dose 4": that dose "is only
+  //     necessary for children age 12 through 59 months regardless of risk, or
+  //     age 60 through 71 months with any risk, who received 3 doses before age
+  //     12 months."
+  //   • CDC PCV Catch-Up Job Aid p.3, 24–59 months: with 3 previous doses and
+  //     "1 or more doses were given at 12 months of age or older" → "No dose
+  //     today"; with 2 previous doses and "Dose 1 was given after 12 months of
+  //     age" → the same.
+  //   • immunize.org p2016 Table 2: a schedule "Completed … by 24 mos" gets "No
+  //     additional doses".
+  //
+  // OWNER RULING 2026-10-22: "Healthy children, PCV initiated at 12–23 months →
+  // 2 doses, ≥8 weeks apart is the full series. Two documented, appropriately
+  // spaced doses in this age range satisfy that requirement. … This applies to
+  // the child who had only a single 12–23 month dose. Interval validity
+  // matters."
+  //
+  // "≥8 weeks apart" needs no test here, and that was CHECKED rather than
+  // assumed: `CHILD-PCV-AFTER-PCV` in `doseIntervalRules.js` is a FLOOR keyed on
+  // the age at the previous dose, so a dose following one given at ≥12 months
+  // needs 56 days and gets CDC's 4-day grace. `b` is built from the EFFECTIVE
+  // list, so a second dose given too soon is already gone from it — measured on
+  // the engine as 51 days not counting and 52 days counting. Reading the band
+  // therefore enforces the spacing for free; adding a second interval test here
+  // would be the duplicate-source-of-truth mistake, not extra safety.
+  //
+  // HOW MANY DOSES FINISH IT depends on when the series STARTED, which is the
+  // job aid's own 2- and 3-dose split and CDC Table 2's "Dose 2 to Dose 3" cell
+  // ("8 weeks (as final dose for healthy children) … if current age is 12 months
+  // or older and at least 1 dose was administered before age 12 months"):
+  //
+  //   started at 12–23 months  → 2 doses finish it   (job aid, 2 previous doses,
+  //                              "Dose 1 was given after 12 months of age" → no
+  //                              dose today)
+  //   started before 12 months → 3 doses finish it, provided one of them came at
+  //                              ≥12 months (job aid, 3 previous doses, "1 or
+  //                              more doses were given at 12 months of age or
+  //                              older" → no dose today; where all three came
+  //                              before 12 months, Table 2 asks for a fourth)
+  //
+  // ⚠ A FIRST VERSION OF THIS WROTE `b.before12 === 0 && b.m12to23 >= 2`, i.e.
+  // only the first line. It passed every test in the suite, and it was wrong:
+  // a child dosed at 5, 14 and 17 months was still being offered a fourth dose,
+  // though the job aid's 3-dose row says to give none. It was caught by deleting
+  // the two guards and finding that NOTHING failed — so the cases below now
+  // cover both lines, and that mutation fails.
+  //
+  // An undated dose is counted toward the total but can never be the ≥12-month
+  // dose, because it cannot be placed: the engine's standing policy assumes an
+  // undated historical dose is an infant dose. That is the conservative reading
+  // (the child is still offered the dose) and it keeps `b.undated` out of the
+  // "started in the second year" test.
+  const startedInSecondYear = b.before12 === 0 && b.undated === 0;
+  const dosesThatFinishIt = startedInSecondYear ? 2 : 3;
+  const secondYearSeriesComplete = b.m12to23 >= 1 && prior >= dosesThatFinishIt;
+
   // 24–59 months
   if (am < M.m60) {
-    if (completedInfantSeries || caughtUpAt24mo || pcv.hasUndatedCompleting) {
+    if (completedInfantSeries || caughtUpAt24mo || secondYearSeriesComplete
+        || pcv.hasUndatedCompleting) {
       return [rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: 'PCV series complete',
