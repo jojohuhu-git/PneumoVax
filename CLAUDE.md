@@ -108,6 +108,43 @@ status, same due date — so neither verdict corpus moves. Changing the note wit
 `doseLabel` would leave the header leading with the dose while the body leads with the
 review; the test asserts the label's order too.
 
+**A SENTENCE IS ONLY ABOUT THE PATIENT ITS PARENT BULLET DESCRIBES** (FINDING K,
+2026-10-18). CDC's child notes do not print rules as a flat list; they nest them. "Previously
+received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed" is a SUB-BULLET,
+printed four times, each under a parent carrying its own conditions — at 6–18, *"Received PCV
+before age 6 years **but have not received PPSV23**"*. One `refs.js` entry held it with
+`population: ['child-nonIC','child-IC']` and the comment "printed in both at-risk lists, same
+instruction"; `recommend.js` said it "carries no age condition in its own words". Both are
+true of the sentence alone and false of the sentence in place: **56 of 992 cards showing it
+fitted; 904 did not**, and the IC instance at 6–18 uses *different words* ("no additional dose
+of PCV or PPSV23"). `population` cannot see this — it records the patient GROUP, and a parent
+bullet splits on **vaccine history**. So: read the nesting, split the key per branch, keep each
+quote **verbatim and contiguous** (a joined parent+child string exists nowhere on the page —
+that is how `pedsMinAge`'s deep link came to match nothing), and put the branch in the entry's
+`label`. Guard: `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
+
+**A NUMBER WITH NO CHIP CANNOT HAPPEN, AND FINDING L WAS A WRONG PREMISE** (closed
+2026-10-22). This paragraph used to say that a numbered citation whose document is not among
+the card's grey buttons "leaves a reader clicking `[2]` with nothing to match", and that 446
+such cards remained. **Measured over the grid: 0 of 17,361 cards.** `cardSources()` in
+`citations.jsx` builds the button row by walking the **numbered citations first**, creating a
+button for each, and only then adding the engine's own list — so a number always gets a
+button. The 446 is real as an **engine/renderer** inconsistency (`rec.citations` is a subset
+of what the card shows) and is invisible to the reader. **Do not "fix" it.** By that same
+measure the class is **1,634**, not 446 — `immPCV7` alone is 1,188 and the handoff never
+mentioned it, so "finishing the 446" would have left 1,188 identical cases behind.
+
+**It was already guarded, which is how the premise should have been checked.** `G2` in
+`regression-c2-c3-numbered-sources.test.jsx` sweeps >15,000 cards asserting exactly "every
+document a number points at has a button on that card", and C3 fixed the one real instance
+(the immunize.org PCV7 page had no whole-page entry — the origin of that 1,188). Proved
+load-bearing 2026-10-22 by deleting the cite-seeding from `cardSources`: G2 fails, plus 4
+other tests. **Before acting on a finding, run the guard that already covers its class.**
+
+FINDING K's `refKeys` change rests on this same wrong reason. The change itself is harmless
+and mildly good — the engine's list is now honest, and the authored chip title wins — and it
+moved no verdict, so it stays; only its stated justification was false.
+
 **Before removing a document from a card, read the document — including its TABLES.**
 FINDING F (2026-10-18): six removals were approved on 2026-10-17 on the stated ground that
 mm7401a1 "states none of these", from a reading that had recorded three sentences and never

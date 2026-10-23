@@ -208,6 +208,43 @@ export const REFS = {
     quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
     lastVerified: '2026-10-16',
   },
+  // C8, CDC Adult Notes' last uncredited statement (2026-10-22). On the
+  // 19-49 immunocompromising / cochlear implant / CSF leak card the INTERVAL
+  // sentence cites ACIP (the 8 weeks), so CDC's notes sat on the card as a
+  // grey button that no number pointed at -- on 25 cards. This is what they
+  // are credited FOR: the requirement itself, that a PCV15 is not a complete
+  // series until the PPSV23 is given.
+  //
+  // Read live 2026-10-22 with the pneumococcal accordion panels expanded and
+  // walked as nested <li> elements, not as flat text (FINDING K's lesson).
+  // The sentence is printed TWICE, identically -- under "Age 50 years or
+  // older who have:" in the routine panel and under "Age 19-49 years with
+  // certain underlying medical conditions or other risk factors** who have:"
+  // in the special-situations panel -- so it is about both adult bands. In
+  // each place its parent is "Not previously received a PCV13, PCV15, PCV20,
+  // or PCV21 ... : 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21", i.e. the
+  // row that CALLED FOR the PCV15 this patient has already had; the quoted
+  // clause is that row's own instruction for what follows it. Same shape as
+  // the owner's 2026-10-18 ruling on the 576 ("cite the row the dose
+  // satisfied"), and the app already reads it this way for the >=1-year
+  // patients through `adultPcv15ThenPpsv`.
+  //
+  // The quote stops at "1 dose PPSV23" ON PURPOSE. CDC's sentence continues
+  // "at least 1 year after the PCV15 dose", and this patient is being told 8
+  // weeks on ACIP's recommendation. Quoting the year to her would be a
+  // right-sounding sentence aimed at the wrong patient. The INTERVAL has one
+  // home and it is not here: `adultPcv15ThenPpsvShort`.
+  adultPcv15NeedsPpsvCompletion: {
+    rulebook: 'adult',
+    // Patients this sentence is about: printed identically under the >=50
+    // parent and the 19-49 at-risk parent, so both.
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal: a PCV15 is not a complete series on its own; a PPSV23 must follow it. Cited for the REQUIREMENT, never for the interval — this card states ACIP\'s 8 weeks, which has its own citation',
+    short: 'CDC Adult Notes',
+    quote: 'If PCV15 is used, administer 1 dose PPSV23',
+    lastVerified: '2026-10-22',
+  },
   // S15 (2026-10-16). The citation for the OTHER half of the rule: a 19-49
   // adult with an immunocompromising condition, cochlear implant or CSF leak
   // is told >=8 weeks, so the quote beside that card has to be the sentence
@@ -224,7 +261,15 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — for adults aged 19-49 years with an immunocompromising condition, a CSF leak, or a cochlear implant, PPSV23 follows PCV15 by >=8 weeks. CDC\'s March 2025 Adult Pneumococcal Vaccine Timing Job Aid prints the same >=8 weeks on its 19-49 immunocompromising (p.2) and cochlear implant / CSF leak (p.3) pages',
-    short: 'MMWR ≥50 expansion',
+    // The chip's name is deliberately AGE-NEUTRAL and must stay that way
+    // (OWNER DECISION 2026-10-22). It used to read "MMWR >=50 expansion",
+    // after the paper's own title -- but the app uses the clinical guidance
+    // table INSIDE that paper for adults from 19 up, so 1,015 cards were
+    // showing an under-50 patient a button that named a document about people
+    // 50 and over. One name for one paper, with no age in it; the age band a
+    // given sentence is about is carried by `population`, not by the chip.
+    // Guard: regression-2026-10-22-chip-name-fits-the-patient.test.jsx.
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'If PCV15 is used, administer a single dose of PPSV23* ≥8 weeks after the PCV15 dose.',
     lastVerified: '2026-10-16',
   },
@@ -410,15 +455,173 @@ export const REFS = {
     quote: 'Not previously received any dose of PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or PCV20. If PCV15 is used and no previous receipt of PPSV23, administer 1 dose of PPSV23 at least 8 weeks after the PCV15 dose.',
     lastVerified: '2026-10-10',
   },
+  // FINDING K (2026-10-18) — THESE THREE ENTRIES WERE ONE, AND THE ONE WAS
+  // CITED TO THE WRONG PATIENT 904 TIMES.
+  //
+  // CDC does not print "Previously received at least 1 dose of PCV20: no
+  // further PCV or PPSV23 doses needed" as a rule. It prints it as a SUB-BULLET,
+  // four times, and each parent carries conditions of its own:
+  //
+  //   Age 6-18 years
+  //     - Received PCV before age 6 years but have not received PPSV23
+  //         - ... no further PCV or PPSV23 doses needed             [non-IC]
+  //         - ... no additional dose of PCV or PPSV23                   [IC]
+  //   Age 2-5 years
+  //     - Completed recommended PCV series but have not received PPSV23
+  //         - ... no further PCV or PPSV23 doses needed    [both, same words]
+  //
+  // One entry held the non-IC wording with `population: ['child-nonIC',
+  // 'child-IC']` and the comment "printed in both at-risk lists, same
+  // instruction". Read as a flat sentence that is nearly true. Read in its
+  // nesting it is wrong twice over: the IC instance at 6-18 uses DIFFERENT
+  // words, and the parent restricts the patient by both age at the prior dose
+  // and PPSV23 history. `population` cannot see either — it records the patient
+  // GROUP, and this is a split on vaccine history.
+  //
+  // So the quotes stay verbatim and contiguous (a joined parent + sub-bullet
+  // string exists nowhere on the page, which is exactly how `pedsMinAge`'s deep
+  // link came to match nothing), the LABEL names the branch the sentence sits
+  // under so a clinician hovering sees the condition, and the engine is held to
+  // citing each one only inside its own branch by
+  // `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
+  //
+  // Read live 2026-10-18 with the accordion expanded. All three are in
+  // `accordion-panel-pneumo-situations`, which a plain page fetch never returns.
   pedsRiskPcv20Complete: {
     rulebook: 'child',
-    // Patients this sentence is about: printed in both at-risk lists, same instruction
-    population: ['child-nonIC', 'child-IC'],
+    // Patients this sentence is about: non-IC list, Age 6-18, under the parent
+    // "Received PCV before age 6 years but have not received PPSV23"
+    population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
-    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", a prior PCV20 completes an at-risk child\'s series',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 6-18 who received PCV before age 6 and no PPSV23: a prior PCV20 completes the series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
-    lastVerified: '2026-10-10',
+    lastVerified: '2026-10-18',
+  },
+  pedsIcPcv20Complete: {
+    rulebook: 'child',
+    // Patients this sentence is about: IC list, Age 6-18, under the same parent.
+    // Its WORDS differ from the non-IC twin above; do not let the two swap places.
+    population: ['child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 6-18 who received PCV before age 6 and no PPSV23: a prior PCV20 completes the series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Previously received at least 1 dose of PCV20: no additional dose of PCV or PPSV23',
+    lastVerified: '2026-10-18',
+  },
+  pedsRiskPcv20CompleteAt2: {
+    rulebook: 'child',
+    // Patients this sentence is about: the Age 2-5 instance, printed in both
+    // lists in the SAME words, under "Completed recommended PCV series but have
+    // not received PPSV23". Cited by the under-2 card whose own sentence says
+    // "at age 2 years or later" — the age this quote is about.
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 2-5 who completed the PCV series and has no PPSV23: a prior PCV20 completes the series',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
+    lastVerified: '2026-10-18',
+  },
+  // FINDING K. CDC's Risk-based page states the completion in words for the one
+  // history its 6-18 section does cover without an at-or-before-6 condition: a
+  // child whose PCV20 was their FIRST conjugate ever. Read live 2026-10-18; the
+  // sentence occurs exactly once as a leaf element on the page (checked, because
+  // the page states a completion several times and only this instance sits under
+  // a branch heading these patients match), under the H3 "Never received PCV13,
+  // PCV15, or PCV20" inside "Children 6 through 18 years old".
+  //
+  // The branch's own first line is what makes it fit a child who already had a
+  // PPSV23: "Give it regardless of whether the child has previously received
+  // PPSV23 or PCV7."
+  pedsRiskPcv20FirstConjugate: {
+    rulebook: 'child',
+    // Patients this sentence is about: at-risk 6-18, printed once, in a section
+    // that does not split by risk class — CDC's two 6-18 branches below it do
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC Risk-based Pneumococcal Recommendations — at-risk child 6-18 who had never received PCV13, PCV15 or PCV20: a PCV20 completes the series with no PPSV23 follow-up',
+    short: 'CDC Risk-based Pneumococcal',
+    quote: "It doesn't need to be followed by a dose of PPSV23. Their pneumococcal vaccinations are complete.",
+    lastVerified: '2026-10-18',
+  },
+  // FINDING K. p2016 Table 4's row for a child who completed before age 6 WITH a
+  // PCV20 — quoted here for the first time, because it is the only document with
+  // a row that fits a 6-18 year old who did that AND has since had a PPSV23
+  // (CDC's notes bullet for them is the one above, whose parent says "but have
+  // not received PPSV23"). The row states no PPSV23 condition at all, so a prior
+  // PPSV23 does not break it.
+  //
+  // Transcribed cell by cell from a live download 2026-10-18 (HTTP 200, 211,252
+  // bytes, Item #P2016 of 2/16/2024) laid out with `scripts/pdfLayout.py`, which
+  // keeps each cell tied to its own row and column. The row, in full:
+  //   Child's age now            | 2 through 18 years (any risk condition)
+  //   Number of previous PCV13,  | Completed PCV series before age 6 years,
+  //     PCV15, or PCV20 doses    |   including one or more doses of PCV20
+  //   Option A                   | No additional doses
+  //   Option B (if applicable)   | (blank)
+  // The quote joins the history column to Option A, which is how the table is
+  // read across; the PDF deep-links by page, so no text fragment depends on it.
+  p2016CompletedBefore6WithPcv20: {
+    rulebook: 'child',
+    // Patients this cell is about: both risk classes — the row is headed
+    // "(any risk condition)" — age 2 through 18
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — a child 2-18 with any risk condition who completed the PCV series before age 6 including a PCV20: no additional doses',
+    short: 'immunize.org p2016',
+    quote: 'Completed PCV series before age 6 years, including one or more doses of PCV20 — No additional doses',
+    pdfPage: 2,
+    lastVerified: '2026-10-18',
+  },
+  // Table 2, the HEALTHY 24–59 month catch-up row, read live 2026-10-22 with
+  // `scripts/pdfLayout.py`. Its three columns, in full:
+  //   Child's age now                           | 24 through 59 months
+  //   Number of previous PCV13, PCV15, or PCV20 | No previous doses, or any
+  //     doses                                   |   incomplete PCV schedule by
+  //                                             |   age 24 months
+  //   Number of PCV15 or PCV20 doses needed     | 1 additional dose, at least
+  //                                             |   8 wks after most recent PCV
+  //                                             |   dose
+  // This is the row the card's own sentence comes from — it is the only source
+  // on the card that states BOTH the single dose and the 8 weeks — and it sat
+  // uncredited on all 144 of those cards until now.
+  //
+  // The prior-dose column turns on the word "incomplete", which p2016 never
+  // defines; CDC's catch-up Table 2 and the catch-up job aid do, and since
+  // FINDING M (2026-10-22) the engine follows them. Every child still reaching
+  // this card is incomplete by that definition, so the column fits by
+  // construction — before FINDING M it did not, for 12 cards.
+  // Quoted in the joined form this file already uses for a p2016 table row
+  // (see `p2016CompletedBefore6WithPcv20` above): the PDF deep-links by page,
+  // so no text fragment depends on the join.
+  p2016HealthyCatchup24to59: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 2 is headed "healthy children age 24 months through 18 years", and this is its 24-59 month row
+    population: ['child-routine'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 2 — a HEALTHY child 24-59 months with no previous doses or an incomplete schedule by 24 months: one more dose, at least 8 weeks after the most recent PCV',
+    short: 'immunize.org p2016',
+    quote: 'No previous doses, or any incomplete PCV schedule by age 24 months — 1 additional dose, at least 8 wks after most recent PCV dose',
+    pdfPage: 1,
+    lastVerified: '2026-10-22',
+  },
+  // Table 2's OTHER 24–59 month row — the one the card above is not. Read live
+  // 2026-10-22 with `scripts/pdfLayout.py`:
+  //   Child's age now                           | 24 through 59 months
+  //   Number of previous PCV13, PCV15, or PCV20 | Completed any PCV schedule,
+  //     doses                                   |   including an all-PCV13
+  //                                             |   schedule by 24 mos
+  //   Number of PCV15 or PCV20 doses needed     | No additional doses
+  p2016HealthyComplete24to59: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 2 is headed "healthy children age 24 months through 18 years", and this is its 24-59 month "completed" row
+    population: ['child-routine'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 2 — a HEALTHY child 24-59 months who completed a PCV schedule by 24 months: no additional doses',
+    short: 'immunize.org p2016',
+    quote: 'Completed any PCV schedule, including an all-PCV13 schedule by 24 mos — No additional doses',
+    pdfPage: 1,
+    lastVerified: '2026-10-22',
   },
   pedsRiskPcv13At6: {
     rulebook: 'child',
@@ -605,6 +808,107 @@ export const REFS = {
     short: 'CDC PCV Catch-up Job Aid',
     lastVerified: '2026-10-12',
   },
+
+  // ── C8, document 5's CITEs: the catch-up job aid's own cells ────────────
+  //
+  // The healthy 24–59 month catch-up card listed this document and credited
+  // nothing to it, for 144 cards. The reason it took a split rather than one
+  // entry is the owner's all-columns rule of 2026-10-18: page 3 answers the
+  // SAME age band differently depending on the "# of previous doses" column
+  // and, within that, on when those doses were given. One entry could only
+  // have been right for one group.
+  //
+  // Read live 2026-10-22; the PDF was re-downloaded and is byte-identical
+  // (sha256 65aec99a…) to the copy read. Read with `scripts/pdfLayout.py`,
+  // which prints x/y coordinates so a cell stays tied to its own row — a flat
+  // text dump of this page interleaves the four condition columns, which is
+  // exactly how a true sentence gets attached to the wrong patient.
+  //
+  // Page 3 is the ONLY page covering 24–59 months (p.1 is 4–6 and 7–11 months,
+  // p.2 is 12–23), so every entry here is `pdfPage: 3`.
+  //
+  // ⚠ THE TABLE STOPS AT THREE PREVIOUS DOSES. A child with four or more
+  // conjugate doses all given before 12 months still lands on the catch-up
+  // card, and this document has no row for them — so they are deliberately
+  // left uncredited rather than pointed at the 3-dose row. That is owner case
+  // (a), "no document has a row for the history".
+  jobAidPedsCatchupDose1: {
+    rulebook: 'child',
+    // Patients this cell is about: p.3's own age column, "24 through 59 months", crossed with "0" previous doses. The job aid covers healthy children only — its title is "Catch-Up Guidance for Healthy Children"
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", the row with 0 previous doses: give the first dose today, and it is the only one needed',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 1 today',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose2: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months" with 1 previous dose. Both of the rows that reach this cell are quoted by it -- dose 1 before the 1st birthday, and dose 1 after it but before the 2nd with 8 weeks already elapsed -- because the two print the SAME cell
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 1 previous dose, where the dose is due now: the second dose is the final dose',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 2 (Final Dose) today',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose2Later: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months", 1 previous dose, "Dose 1 was given after 1st birthday" + "before 2nd birthday" + "It has not been at least 8 weeks since Dose 1". This is the job aid's "Next dose due" column, not its "THEN" column -- the THEN cell there reads "No dose today", which is the app's own not-due-yet state
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 1 previous dose given after the first birthday and less than 8 weeks ago: no dose today, the final dose falls due 8 weeks after dose 1',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 2 (Final Dose) at least 8 weeks after Dose 1',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose3: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months", 2 previous doses, "Dose 1 was given before 12 months of age". Since FINDING M a 2-dose child reaches this card ONLY with dose 1 before 12 months -- a series begun in the second year is complete at two doses -- so the row's prior-dose column fits by construction
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 2 previous doses with dose 1 before 12 months of age: the third dose is the final dose',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 3 (Final Dose) today',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose4: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months", 3 previous doses, "All 3 doses were given before 12 months of age". Since FINDING M a 3-dose child reaches this card ONLY when all three came before 12 months -- one dose at 12 months or later completes the series -- so the row's prior-dose column fits by construction
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 3 previous doses all given before 12 months of age: the fourth dose is the final dose',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 4 (Final Dose) today',
+    lastVerified: '2026-10-22',
+  },
+  // The job aid's "nothing more to give" cells. FOUR different rows of p.3 end
+  // here, and all four print the SAME pair of cells, which is why one entry
+  // serves them: 1 previous dose "given after 2nd birthday"; 2 previous doses
+  // "Dose 2 was given after 2nd birthday"; 2 previous doses "Dose 1 was given
+  // after 12 months of age"; and 3 previous doses "1 or more doses were given
+  // at 12 months of age or older".
+  //
+  // Quoted as THEN — Next dose due, the joined form this file already uses for
+  // a table row (`p2016CompletedBefore6WithPcv20`); the PDF deep-links by page,
+  // so no text fragment depends on the join.
+  jobAidPedsCatchupNoneNeeded: {
+    rulebook: 'child',
+    // Patients this cell is about: p.3's age column, "24 through 59 months", on every row whose action is to give nothing. The job aid covers healthy children only -- its title is "Catch-Up Guidance for Healthy Children"
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", every row that ends the series: 1-3 previous doses with at least one given at 12 months of age or later',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'No dose today — No additional doses needed',
+    lastVerified: '2026-10-22',
+  },
+
   cdcAdultTimingJobAid: {
     rulebook: 'adult',
     url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',
@@ -753,7 +1057,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "PPSV23 only" (identical in all three adult blocks)',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21, PCV20, or PCV15 \u22651 year after the last PPSV23 dose.',
     lastVerified: '2026-10-18',
   },
@@ -763,7 +1067,7 @@ export const REFS = {
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age >=65 years"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'Shared clinical decision-making is recommended regarding administration of either a single dose of PCV21 or PCV20 for any adult aged \u226565 years who has completed the recommended vaccination series with both PCV13 and PPSV23 (i.e., PPSV23 administered at age \u226565 years) but PCV21, PCV20, or PCV15 not yet received. If a decision to administer PCV21 or PCV20 is made, a single dose is recommended \u22655 years after the last pneumococcal vaccine dose.',
     lastVerified: '2026-10-18',
   },
@@ -787,7 +1091,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "PCV13 only" (identical in the >=50 and 19-49 chronic blocks)',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 \u22651 year after the PCV13 dose.',
     lastVerified: '2026-10-18',
   },
@@ -797,7 +1101,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 only"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 administered \u22651 year after the PCV13 dose.',
     lastVerified: '2026-10-18',
   },
@@ -807,7 +1111,7 @@ export const REFS = {
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age <65 years"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose.',
     lastVerified: '2026-10-17',
   },
@@ -821,7 +1125,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 1 dose of PPSV23"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
     lastVerified: '2026-10-17',
   },
@@ -838,7 +1142,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 2 doses of PPSV23"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     // Extended 2026-10-18 from the "Alternatively" sentence to the WHOLE row
     // (OWNER DECISION, *"use MMWR"*). The row's first sentence is the one the
     // card now leads with, and nothing else in the app's source set states it
@@ -858,7 +1162,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — the section "PPSV23 Use in PCV13-Experienced Adults Who Have Not Completed the Recommended Vaccination Series"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'Among adults aged \u226519 years who have started their pneumococcal vaccination series with PCV13 but have not received all recommended doses, PPSV23 is no longer recommended as an option to complete the series. Either PCV20 or PCV21 is recommended to complete the series as previously recommended.',
     lastVerified: '2026-10-17',
   },
@@ -871,7 +1175,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with chronic medical conditions", the row "PCV13 and 1 dose of PPSV23"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'The pneumococcal vaccination recommendations should be reviewed again when the person reaches age 50 years.',
     lastVerified: '2026-10-17',
   },
@@ -885,7 +1189,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — the summary "What is added by this report": the October 2024 expansion covers adults aged >=50, and the 19-49 recommendation stays risk-based',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'The risk-based recommendation for adults aged 19\u201349 years is unchanged.',
     lastVerified: '2026-10-17',
   },
@@ -902,7 +1206,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "None or PCV7 only at any age", printed identically for adults aged >=50 and for adults aged 19\u201349 with chronic medical conditions',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21, PCV20, or PCV15. If PCV15 is administered, a single dose of PPSV23* should be administered \u22651 year after the PCV15 dose.',
     lastVerified: '2026-10-17',
   },
@@ -946,7 +1250,15 @@ export const REFS = {
     rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 — Expanded routine pneumococcal vaccination of adults aged ≥50 years (MMWR mm7401a1)',
-    short: 'MMWR ≥50 expansion',
+    // The chip's name is deliberately AGE-NEUTRAL and must stay that way
+    // (OWNER DECISION 2026-10-22). It used to read "MMWR >=50 expansion",
+    // after the paper's own title -- but the app uses the clinical guidance
+    // table INSIDE that paper for adults from 19 up, so 1,015 cards were
+    // showing an under-50 patient a button that named a document about people
+    // 50 and over. One name for one paper, with no age in it; the age band a
+    // given sentence is about is carried by `population`, not by the chip.
+    // Guard: regression-2026-10-22-chip-name-fits-the-patient.test.jsx.
+    short: 'ACIP 2025 Adult MMWR',
     lastVerified: '2026-10-12',
   },
   mmwr7336a3: {

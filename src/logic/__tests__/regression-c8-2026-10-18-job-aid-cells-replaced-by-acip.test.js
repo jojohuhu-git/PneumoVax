@@ -56,7 +56,7 @@ const TODAY = '2026-10-11';
 // because it reads as coverage. Asserted below that the two differ, so a
 // later edit cannot reintroduce the same blind spot silently.
 const JOB_AID = 'CDC Adult Timing Job Aid';
-const MMWR = 'MMWR ≥50 expansion';
+const MMWR = 'ACIP 2025 Adult MMWR';
 
 const run = (input) => recommend({ today: TODAY, riskIds: [], pcvDoses: [], ppsv23Doses: [], ...input });
 const noteText = (rec) => (typeof rec.note === 'string'

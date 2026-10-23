@@ -34,8 +34,13 @@
 Standard 4-dose series at 2/4/6/12–15m. PCV min age = ACIP 6 weeks (`PCV_MIN_AGE_M = 42 / 30.4375`).
 
 ### Healthy 24m–18y Catch-Up (Table 2)
-- 24–59m: 1 dose if healthy and ≥3 prior PCVs; 2 doses if <3 prior PCVs (only doses at ≥24mo count as catch-up progress)
-- 60m–18y: 1 dose (PCV20)
+- 24–59m, schedule incomplete at 24mo: **1 dose** of PCV15/PCV20, ≥8wk after the most recent PCV
+- 24–59m, schedule complete at 24mo: no additional doses. **A dose given at 12–23 months
+  counts as the age-appropriate final dose** — see `CLINICAL_SPEC.md` §B, "What
+  'completed by 24 months' means" (FINDING M, 2026-10-22), for the full table. This line
+  used to read "only doses at ≥24mo count as catch-up progress", which was the mistake
+  FINDING M corrects.
+- 60m–18y: healthy, not caught up — no additional doses
 
 ### At-Risk 24m–18y (Table 4, `IC` or `nonIC` row)
 See `CLINICAL_SPEC.md` §III for the full 9-row grid. Key invariants:

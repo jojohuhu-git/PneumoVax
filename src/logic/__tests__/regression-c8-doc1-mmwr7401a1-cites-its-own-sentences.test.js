@@ -160,7 +160,7 @@ describe('the seven new entries are mm7401a1, quoted faithfully', () => {
       expect(ref.url, key).toBe(MMWR_URL);
       expect(ref.quote, `${key}'s quote must be the document's own words`).toBe(quote);
       expect(ref.rulebook, key).toBe('adult');
-      expect(ref.short, key).toBe('MMWR ≥50 expansion');
+      expect(ref.short, key).toBe('ACIP 2025 Adult MMWR');
       expect(ref.population, key).toEqual(POPULATION_OF[key]);
       expect(ref.lastVerified, key).toBe('2026-10-17');
     }

@@ -120,6 +120,46 @@ Catch-up grid by current age band × # previous PCV13/15/20 doses × age-at-prio
 - 5–18 y healthy, no/incomplete by 24mo → **no additional doses** (healthy older children
   are not caught up). (`p2016` Table 2)
 
+### What "completed by 24 months" means — FINDING M, 2026-10-22
+
+p2016 Table 2 splits on the word **completed** and never defines it. CDC's catch-up Table 2
+and the catch-up job aid do, and until 2026-10-22 the engine did not follow them: it
+credited a dose given at **12–23 months** as the age-appropriate FINAL dose only when four
+or more doses were on record, so a two- or three-dose series finished in the second year of
+life read as incomplete and the child was offered a dose nobody recommends. **12 real
+patients and 15 impossible-entry records moved.**
+
+**OWNER RULING 2026-10-22**, in her words: *"Healthy children, PCV initiated at 12–23 months
+→ 2 doses, ≥8 weeks apart is the full series. Two documented, appropriately spaced doses in
+this age range satisfy that requirement. Catch-up at 24–59 months (healthy): any incomplete
+schedule as of 24 months calls for 1 additional PCV dose ≥8 weeks after the most recent
+dose. This applies to the child who had only a single 12–23 month dose. Interval validity
+matters."*
+
+A healthy child 24–59 months is **complete** when any of these holds:
+
+| Dose history (counting doses only) | Complete? | The row that says so |
+|---|---|---|
+| A dose at **≥24 months** | yes | job aid, "Dose 1 was given after 2nd birthday" → "No dose today" |
+| Series **started at 12–23 months**, **≥2** doses | yes | job aid, 2 previous doses, "Dose 1 was given after 12 months of age" → "No dose today" |
+| Series **started before 12 months**, **≥3** doses, **≥1 of them at ≥12 months** | yes | job aid, 3 previous doses, "1 or more doses were given at 12 months of age or older" → "No dose today"; CDC Table 2, "Dose 2 to Dose 3" |
+| **3 doses all before 12 months** | **no** — a 4th is owed | CDC Table 2, "Dose 3 to Dose 4": *"8 weeks (as final dose) This dose is only necessary for children age 12 through 59 months regardless of risk, or age 60 through 71 months with any risk, who received 3 doses before age 12 months."* |
+| A **single** 12–23 month dose | **no** — a 2nd is owed | the owner's ruling above; job aid, 1 previous dose → "Give Dose 2 (Final Dose)" |
+
+**"≥8 weeks apart" is enforced by the interval table, not here** — `CHILD-PCV-AFTER-PCV` in
+`doseIntervalRules.js` is an `enforcement: 'floor'` row keyed on the age at the PREVIOUS
+dose, so a dose following one given at ≥12 months needs 56 days with CDC's 4-day grace.
+Measured on the engine: 51 days does not count, 52 days does. The completeness test counts
+**effective** doses, so the spacing requirement is already satisfied by the time it looks.
+**Do not add a second interval test here.**
+
+An **undated** dose counts toward the total but can never be the ≥12-month dose, because it
+cannot be placed — the engine's standing policy assumes an undated historical dose is an
+infant dose, which is the conservative reading (the child is still offered the dose).
+
+Engine: `secondYearSeriesComplete` in `pcvHealthyChild` (`recommend.js`).
+Test: `regression-finding-m-2026-10-22-second-year-series-is-complete.test.js`.
+
 If a healthy 24–59mo child gets PCV15 for the catch-up dose → **PPSV23 ≥8wk later** (the
 PCV15-requires-PPSV23 rule applies; `cdcChildPneumo`). If PCV20 → complete.
 

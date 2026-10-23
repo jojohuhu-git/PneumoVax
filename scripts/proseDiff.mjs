@@ -56,11 +56,26 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { recommend } from '../src/logic/recommend.js';
 import { buildCases, buildRecordProblemCases } from '../src/test-grid.js';
 
-/** Every citation label a card/dose shows, sorted, deduplicated. */
+/**
+ * Every citation label AND every chip NAME a card/dose shows, sorted,
+ * deduplicated.
+ *
+ * 2026-10-22: `short` was added. This function recorded only `label` — the
+ * hover text and the quoted sentence — and never the few words actually
+ * PRINTED on the grey button. So renaming a chip changed the visible text of
+ * 4,183 cards and this tool reported zero changes, which is the same shape of
+ * blind spot as the verdict corpora holding no prose at all (see the header
+ * above, and S15's 843 cards that read broken wording with a green suite).
+ * A chip name is the shortest piece of prose on the card and the one a
+ * clinician reads first when deciding whether to trust the advice.
+ */
 function citationLabels(...citationArrays) {
   const labels = new Set();
   for (const arr of citationArrays) {
-    for (const c of arr ?? []) if (c?.label) labels.add(c.label);
+    for (const c of arr ?? []) {
+      if (c?.label) labels.add(c.label);
+      if (c?.short) labels.add(`chip:${c.short}`);
+    }
   }
   return [...labels].sort().join(' | ');
 }
