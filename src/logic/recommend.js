@@ -1399,13 +1399,32 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // this change does not pretend to settle them and leaves them where they are.
   if ((pcv.count >= 3 && pcv.band.ge72 === 0) || allCountingPcvBefore72mo) {
     // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
+    //
+    // FINDING N (2026-10-23). CDC's notes print this row FOUR times — once in
+    // each at-risk list under "Age 2-5 years", once in each under "Age 6-18
+    // years" — and the parent bullets differ as well as the wording:
+    //
+    //   Age 2-5    "Completed recommended PCV series but have not received PPSV23"
+    //   Age 6-18   "Received PCV before age 6 years but have not received PPSV23"
+    //
+    // This block serves 24 months through 18 years, and until now it cited the
+    // Age 2-5 keys at every age inside it: 496 cards belonging to children aged
+    // 6 and over were shown a sentence printed about a 2-to-5-year-old. The
+    // instruction is the same either way, so no dose, date or verdict moves —
+    // only which sentence the number quotes and where its deep link lands.
+    //
+    // ONE age test, here, reading the engine's own `M.m72` boundary. Do not add
+    // a second one at any of the three call sites below.
+    const before6Cite = () => cite(am >= M.m72
+      ? (isIC ? 'pedsIcBefore6NoPcv20At6to18' : 'pedsRiskBefore6NoPcv20At6to18')
+      : (isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23'));
     if (ppsvGiven) {
       // non-IC: PPSV23 already given → complete.
       if (!isIC) {
         out.push(rec({
           vaccine: 'PCV', status: 'complete', doseLabel: 'Complete (PCV series + PPSV23)',
           note: `At-risk (non-immunocompromising) child who completed the PCV series and has received PPSV23 — complete [c]. Alternatively a single PCV20 ≥${PNEUMO_GAP_WORDS} after the last PCV also completes.`,
-          noteCites: [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
+          noteCites: [before6Cite()],
           refs,
         }));
         return out;
@@ -1453,7 +1472,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // names both products. Nothing is being substituted, so nothing needs
       // explaining.
       note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV (completes the series) [c].`,
-      noteCites: [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
+      noteCites: [before6Cite()],
       refs,
     }));
     out.push(rec({
@@ -1464,8 +1483,8 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both.'
         : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]. Choose Option A or B, not both.',
       noteCites: isIC
-        ? [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23'), cite('pedsSecondPpsv5y')]
-        : [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
+        ? [before6Cite(), cite('pedsSecondPpsv5y')]
+        : [before6Cite()],
       refs,
     }));
     return out;
