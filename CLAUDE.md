@@ -123,15 +123,27 @@ quote **verbatim and contiguous** (a joined parent+child string exists nowhere o
 that is how `pedsMinAge`'s deep link came to match nothing), and put the branch in the entry's
 `label`. Guard: `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
 
-**A NUMBER WITH NO CHIP IS C8'S FAULT REVERSED** (FINDING L, opened 2026-10-18). A numbered
-citation whose document is not among the card's grey buttons leaves a reader clicking `[2]`
-with nothing to match. Measured over the grid: **1,310** instances. FINDING K fixed the 864 of
-them that print ACIP's interchangeability sentence (`pcvInterchangeableBridge` now returns
-`refKeys`, and **every call site using `cites` must spread `refKeys` into its refs** — never
-into the block-level `refs`, which would put a chip with no number on its neighbours). **446
-remain, enumerated in the handoff**: `pedsInfantLastDose1215mo` (220), `pedsSecondPpsv5y` (111
-+ 90), `adultPcv15ThenPpsvShort` (25). `scripts/uncreditedSources.mjs` cannot see this class —
-it only looks for chips with no number.
+**A NUMBER WITH NO CHIP CANNOT HAPPEN, AND FINDING L WAS A WRONG PREMISE** (closed
+2026-10-22). This paragraph used to say that a numbered citation whose document is not among
+the card's grey buttons "leaves a reader clicking `[2]` with nothing to match", and that 446
+such cards remained. **Measured over the grid: 0 of 17,361 cards.** `cardSources()` in
+`citations.jsx` builds the button row by walking the **numbered citations first**, creating a
+button for each, and only then adding the engine's own list — so a number always gets a
+button. The 446 is real as an **engine/renderer** inconsistency (`rec.citations` is a subset
+of what the card shows) and is invisible to the reader. **Do not "fix" it.** By that same
+measure the class is **1,634**, not 446 — `immPCV7` alone is 1,188 and the handoff never
+mentioned it, so "finishing the 446" would have left 1,188 identical cases behind.
+
+**It was already guarded, which is how the premise should have been checked.** `G2` in
+`regression-c2-c3-numbered-sources.test.jsx` sweeps >15,000 cards asserting exactly "every
+document a number points at has a button on that card", and C3 fixed the one real instance
+(the immunize.org PCV7 page had no whole-page entry — the origin of that 1,188). Proved
+load-bearing 2026-10-22 by deleting the cite-seeding from `cardSources`: G2 fails, plus 4
+other tests. **Before acting on a finding, run the guard that already covers its class.**
+
+FINDING K's `refKeys` change rests on this same wrong reason. The change itself is harmless
+and mildly good — the engine's list is now honest, and the authored chip title wins — and it
+moved no verdict, so it stays; only its stated justification was false.
 
 **Before removing a document from a card, read the document — including its TABLES.**
 FINDING F (2026-10-18): six removals were approved on 2026-10-17 on the stated ground that
