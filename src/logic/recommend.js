@@ -610,11 +610,25 @@ function pcvInfant(am, riskIds, pcv, today) {
           : `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child [c].`}${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
       detail: `${minInterval
         ? `The next dose is due ${minInterval === 28 ? '4 weeks' : '8 weeks'} after the most recent one`
-        : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
+        : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months${target > 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
     },
     // FINDING 2: a total above 4 is cited to MMWR Table 2's "last dose" row,
     // not to CDC's routine 4-dose sentence, which states a different number.
-    noteCites: [cite(target > 4 ? 'pedsInfantLastDose1215mo' : 'pedsRoutine4Dose')],
+    //
+    // C8 (2026-10-23): and CDC's notes earn the second number on those same
+    // cards. 220 of them listed that page with nothing pointing at it, because
+    // FINDING 2 had moved the lead's citation to MMWR. The page does state WHERE
+    // the last dose goes — "4-dose series at 2, 4, 6, 12-15 months" — so the
+    // marker sits on the booster clause, which is the half it supports, and
+    // never on the total, which is still the app's own arithmetic. This is
+    // FINDING 2's own rule applied to the second document rather than a new one.
+    //
+    // CONDITIONAL, deliberately: at a total of 4 or fewer the lead already
+    // cites this page, and a document must not take two numbers on one card for
+    // one claim (the same rule as `mmwrNoneRowCites` and the adult 8-week card).
+    noteCites: target > 4
+      ? [cite('pedsInfantLastDose1215mo'), cite('pedsRoutine4Dose')]
+      : [cite('pedsRoutine4Dose')],
     refs,
   })];
 }
