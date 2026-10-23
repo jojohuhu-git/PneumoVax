@@ -1,3 +1,22 @@
+> ## ⚠ SUPERSEDED — 2026-10-22
+>
+> **This queue has been consumed.** Continue from
+> [`handoff-2026-10-22-finding-m-and-catchup-citations.md`](handoff-2026-10-22-finding-m-and-catchup-citations.md).
+>
+> Two things in this document are now known to be WRONG; do not act on them:
+>
+> 1. **The Catch-up Job Aid split of "60 / 72 / 12 cards" is wrong**, and two of the three
+>    cells it names do not fit the patients it assigns them to. Counted on EFFECTIVE doses
+>    (which is how the job aid's own preamble says to count) it was 48/84/12, and after
+>    FINDING M it is 48/84. The owner ruled on 2026-10-22 to re-derive from the measurement.
+>    Done in `67e6e56`.
+> 2. **Its 12-card group was not a citation problem at all.** It was FINDING M — a healthy
+>    child whose PCV series was finished in the second year of life was being asked for one
+>    more dose, against all three documents on the card. Fixed in `fee6c3c`.
+>
+> The rest of this document — the chip rename, FINDING L's closure, the C8 Adult Notes CITE,
+> the tooling notes, and the remaining queue — still stands.
+
 # PneumoVax — Handoff after closing FINDING L and renaming a misleading chip (2026-10-22)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
