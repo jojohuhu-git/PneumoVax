@@ -573,6 +573,56 @@ export const REFS = {
     pdfPage: 2,
     lastVerified: '2026-10-18',
   },
+  // Table 2, the HEALTHY 24–59 month catch-up row, read live 2026-10-22 with
+  // `scripts/pdfLayout.py`. Its three columns, in full:
+  //   Child's age now                           | 24 through 59 months
+  //   Number of previous PCV13, PCV15, or PCV20 | No previous doses, or any
+  //     doses                                   |   incomplete PCV schedule by
+  //                                             |   age 24 months
+  //   Number of PCV15 or PCV20 doses needed     | 1 additional dose, at least
+  //                                             |   8 wks after most recent PCV
+  //                                             |   dose
+  // This is the row the card's own sentence comes from — it is the only source
+  // on the card that states BOTH the single dose and the 8 weeks — and it sat
+  // uncredited on all 144 of those cards until now.
+  //
+  // The prior-dose column turns on the word "incomplete", which p2016 never
+  // defines; CDC's catch-up Table 2 and the catch-up job aid do, and since
+  // FINDING M (2026-10-22) the engine follows them. Every child still reaching
+  // this card is incomplete by that definition, so the column fits by
+  // construction — before FINDING M it did not, for 12 cards.
+  // Quoted in the joined form this file already uses for a p2016 table row
+  // (see `p2016CompletedBefore6WithPcv20` above): the PDF deep-links by page,
+  // so no text fragment depends on the join.
+  p2016HealthyCatchup24to59: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 2 is headed "healthy children age 24 months through 18 years", and this is its 24-59 month row
+    population: ['child-routine'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 2 — a HEALTHY child 24-59 months with no previous doses or an incomplete schedule by 24 months: one more dose, at least 8 weeks after the most recent PCV',
+    short: 'immunize.org p2016',
+    quote: 'No previous doses, or any incomplete PCV schedule by age 24 months — 1 additional dose, at least 8 wks after most recent PCV dose',
+    pdfPage: 1,
+    lastVerified: '2026-10-22',
+  },
+  // Table 2's OTHER 24–59 month row — the one the card above is not. Read live
+  // 2026-10-22 with `scripts/pdfLayout.py`:
+  //   Child's age now                           | 24 through 59 months
+  //   Number of previous PCV13, PCV15, or PCV20 | Completed any PCV schedule,
+  //     doses                                   |   including an all-PCV13
+  //                                             |   schedule by 24 mos
+  //   Number of PCV15 or PCV20 doses needed     | No additional doses
+  p2016HealthyComplete24to59: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 2 is headed "healthy children age 24 months through 18 years", and this is its 24-59 month "completed" row
+    population: ['child-routine'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 2 — a HEALTHY child 24-59 months who completed a PCV schedule by 24 months: no additional doses',
+    short: 'immunize.org p2016',
+    quote: 'Completed any PCV schedule, including an all-PCV13 schedule by 24 mos — No additional doses',
+    pdfPage: 1,
+    lastVerified: '2026-10-22',
+  },
   pedsRiskPcv13At6: {
     rulebook: 'child',
     // Patients this sentence is about: printed in both lists; the IC instance continues with the five-year tail, which the IC card cites separately
@@ -758,6 +808,107 @@ export const REFS = {
     short: 'CDC PCV Catch-up Job Aid',
     lastVerified: '2026-10-12',
   },
+
+  // ── C8, document 5's CITEs: the catch-up job aid's own cells ────────────
+  //
+  // The healthy 24–59 month catch-up card listed this document and credited
+  // nothing to it, for 144 cards. The reason it took a split rather than one
+  // entry is the owner's all-columns rule of 2026-10-18: page 3 answers the
+  // SAME age band differently depending on the "# of previous doses" column
+  // and, within that, on when those doses were given. One entry could only
+  // have been right for one group.
+  //
+  // Read live 2026-10-22; the PDF was re-downloaded and is byte-identical
+  // (sha256 65aec99a…) to the copy read. Read with `scripts/pdfLayout.py`,
+  // which prints x/y coordinates so a cell stays tied to its own row — a flat
+  // text dump of this page interleaves the four condition columns, which is
+  // exactly how a true sentence gets attached to the wrong patient.
+  //
+  // Page 3 is the ONLY page covering 24–59 months (p.1 is 4–6 and 7–11 months,
+  // p.2 is 12–23), so every entry here is `pdfPage: 3`.
+  //
+  // ⚠ THE TABLE STOPS AT THREE PREVIOUS DOSES. A child with four or more
+  // conjugate doses all given before 12 months still lands on the catch-up
+  // card, and this document has no row for them — so they are deliberately
+  // left uncredited rather than pointed at the 3-dose row. That is owner case
+  // (a), "no document has a row for the history".
+  jobAidPedsCatchupDose1: {
+    rulebook: 'child',
+    // Patients this cell is about: p.3's own age column, "24 through 59 months", crossed with "0" previous doses. The job aid covers healthy children only — its title is "Catch-Up Guidance for Healthy Children"
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", the row with 0 previous doses: give the first dose today, and it is the only one needed',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 1 today',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose2: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months" with 1 previous dose. Both of the rows that reach this cell are quoted by it -- dose 1 before the 1st birthday, and dose 1 after it but before the 2nd with 8 weeks already elapsed -- because the two print the SAME cell
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 1 previous dose, where the dose is due now: the second dose is the final dose',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 2 (Final Dose) today',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose2Later: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months", 1 previous dose, "Dose 1 was given after 1st birthday" + "before 2nd birthday" + "It has not been at least 8 weeks since Dose 1". This is the job aid's "Next dose due" column, not its "THEN" column -- the THEN cell there reads "No dose today", which is the app's own not-due-yet state
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 1 previous dose given after the first birthday and less than 8 weeks ago: no dose today, the final dose falls due 8 weeks after dose 1',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 2 (Final Dose) at least 8 weeks after Dose 1',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose3: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months", 2 previous doses, "Dose 1 was given before 12 months of age". Since FINDING M a 2-dose child reaches this card ONLY with dose 1 before 12 months -- a series begun in the second year is complete at two doses -- so the row's prior-dose column fits by construction
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 2 previous doses with dose 1 before 12 months of age: the third dose is the final dose',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 3 (Final Dose) today',
+    lastVerified: '2026-10-22',
+  },
+  jobAidPedsCatchupDose4: {
+    rulebook: 'child',
+    // Patients this cell is about: "24 through 59 months", 3 previous doses, "All 3 doses were given before 12 months of age". Since FINDING M a 3-dose child reaches this card ONLY when all three came before 12 months -- one dose at 12 months or later completes the series -- so the row's prior-dose column fits by construction
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", 3 previous doses all given before 12 months of age: the fourth dose is the final dose',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'Give Dose 4 (Final Dose) today',
+    lastVerified: '2026-10-22',
+  },
+  // The job aid's "nothing more to give" cells. FOUR different rows of p.3 end
+  // here, and all four print the SAME pair of cells, which is why one entry
+  // serves them: 1 previous dose "given after 2nd birthday"; 2 previous doses
+  // "Dose 2 was given after 2nd birthday"; 2 previous doses "Dose 1 was given
+  // after 12 months of age"; and 3 previous doses "1 or more doses were given
+  // at 12 months of age or older".
+  //
+  // Quoted as THEN — Next dose due, the joined form this file already uses for
+  // a table row (`p2016CompletedBefore6WithPcv20`); the PDF deep-links by page,
+  // so no text fragment depends on the join.
+  jobAidPedsCatchupNoneNeeded: {
+    rulebook: 'child',
+    // Patients this cell is about: p.3's age column, "24 through 59 months", on every row whose action is to give nothing. The job aid covers healthy children only -- its title is "Catch-Up Guidance for Healthy Children"
+    population: ['child-routine'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/job-aids/pneumococcal.pdf',
+    pdfPage: 3,
+    label: 'CDC PCV Catch-Up Job Aid (Jan 2025) — p.3 "24 through 59 months", every row that ends the series: 1-3 previous doses with at least one given at 12 months of age or later',
+    short: 'CDC PCV Catch-up Job Aid',
+    quote: 'No dose today — No additional doses needed',
+    lastVerified: '2026-10-22',
+  },
+
   cdcAdultTimingJobAid: {
     rulebook: 'adult',
     url: 'https://www.cdc.gov/pneumococcal/downloads/Vaccine-Timing-Adults-JobAid.pdf',

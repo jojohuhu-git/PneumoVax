@@ -684,25 +684,90 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   if (am < M.m60) {
     if (completedInfantSeries || caughtUpAt24mo || secondYearSeriesComplete
         || pcv.hasUndatedCompleting) {
+      // C8, documents 3 and 5. Both were listed on this card and credited with
+      // nothing. p2016 Table 2's "Completed any PCV schedule … by 24 mos" row is
+      // this card's sentence and fits every route to it.
+      //
+      // The job aid's "no dose today" cells need the same all-columns check as
+      // the catch-up card below: its table is keyed on 1–3 DOCUMENTED previous
+      // doses, at least one of them at 12 months or later. Two routes here fall
+      // outside that and get NO cite — a child with four or more conjugate doses
+      // (the table stops at three), and one whose completing dose is undated
+      // (the job aid requires doses to be documented). Owner case (a) both
+      // times: no document has a row for the history.
+      const datedAtOrAfter12mo = b.m12to23 + b.ge24;
+      const jobAidEndsItHere = b.undated === 0 && datedAtOrAfter12mo >= 1
+        && prior >= 1 && prior <= 3;
       return [rec({
         vaccine: 'PCV', status: 'complete',
+        // Markers are paired to cites by POSITION (`noteCiteSlices`), so the
+        // count here and the array below must move together.
+        note: `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.)`,
         doseLabel: 'PCV series complete',
-        note: 'Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c]. (A series that includes PCV20 also needs no PPSV23.)',
-        noteCites: [cite('pedsNoPcv20IfComplete')],
+        noteCites: [
+          cite('pedsNoPcv20IfComplete'),
+          cite('p2016HealthyComplete24to59'),
+          ...(jobAidEndsItHere ? [cite('jobAidPedsCatchupNoneNeeded')] : []),
+        ],
         refs,
       })];
     }
     const { dueToday, earliestNextDate } = dueState(anchor, WK8, today);
+
+    // C8, document 5. The catch-up job aid was listed on this card and credited
+    // with nothing, for all 144 of its cards. It cannot be credited with ONE
+    // sentence, because page 3 answers this one age band differently depending
+    // on how many previous doses there are — the owner's all-columns rule of
+    // 2026-10-18 applied to a second document. Which cell fits is decided here,
+    // in one place, the same shape as `mmwrBothPcv13PpsvKey()`.
+    //
+    // The job aid counts "previous doses" the way its own preamble requires —
+    // "previous doses must be documented and must meet minimum age requirements
+    // and minimum intervals between doses" — which is `pcv.count`, the EFFECTIVE
+    // count. A PCV7 or a dose rejected for spacing is not a previous dose this
+    // table is about. (Counting raw rows instead is what produced the 60/72/12
+    // split recorded in the 2026-10-22 handoff; measured on effective doses it
+    // is 48/84/12, and after FINDING M 48/84.)
+    //
+    // ⚠ FOUR OR MORE PREVIOUS DOSES GETS NO CITE. The table stops at three, so a
+    // child with four conjugate doses all given before 12 months — who does
+    // still reach this card — has no row here. Left uncredited deliberately:
+    // owner case (a), "no document has a row for the history". Do not point them
+    // at the 3-dose row.
+    const jobAidCatchupKey = () => {
+      if (prior === 0) return 'jobAidPedsCatchupDose1';
+      if (prior === 1) return dueToday ? 'jobAidPedsCatchupDose2' : 'jobAidPedsCatchupDose2Later';
+      // The 2- and 3-dose blocks print only a "today" cell; neither states a
+      // not-yet-due variant, so when the app is holding the dose back there is
+      // no cell of this document that says what the card says.
+      if (!dueToday) return null;
+      if (prior === 2) return 'jobAidPedsCatchupDose3';
+      if (prior === 3) return 'jobAidPedsCatchupDose4';
+      return null;
+    };
+    const jobAidKey = jobAidCatchupKey();
+
     return [rec({
       vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
       doseLabel: '1 dose PCV (catch-up)',
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: pcvRecBrands({ adult: false }),
       note: {
-        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].`,
+        // Two markers always (CDC's notes, then p2016's row), a third only when
+        // the job aid has a cell for this history. `noteCiteSlices` pairs
+        // markers to cites by POSITION, so the count here and the array below
+        // must move together.
+        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c]${jobAidKey ? ' [c]' : ''}.`,
         detail: 'This is the catch-up for a healthy child 24–59 months whose PCV schedule was not complete by 24 months. If PCV15 is used, a PPSV23 follow-up is NOT routine for a healthy child — PPSV23 here is risk-based only.',
       },
-      noteCites: [cite('pedsHealthyCatchup')],
+      // p2016 Table 2's row states this card's whole sentence — the single dose
+      // AND the 8 weeks — and is the only source on the card that states the
+      // interval. It goes on the lead beside CDC's notes.
+      noteCites: [
+        cite('pedsHealthyCatchup'),
+        cite('p2016HealthyCatchup24to59'),
+        ...(jobAidKey ? [cite(jobAidKey)] : []),
+      ],
       refs,
     })];
   }
