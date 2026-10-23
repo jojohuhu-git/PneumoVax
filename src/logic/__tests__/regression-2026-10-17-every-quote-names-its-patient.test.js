@@ -213,6 +213,21 @@ describe('the field itself', () => {
       // inside its two later branches. Checked on the live page by walking the
       // headings above the sentence, not inferred from reading order.
       'pedsRiskPcv20FirstConjugate', // above the page's IC/non-IC split
+      // C9 (2026-10-23), OWNER DECISION. ACIP mm7137a3's sentence under
+      // "Administration of PPSV23 After PCV13 or PCV15 Among Persons Aged 2-18
+      // Years with Risk Conditions". Its scope is its OWN first five words --
+      // "Children aged >=2 years with ANY risk conditions" -- so claiming both
+      // at-risk groups is transcription, not inference. It is NOT
+      // child-routine: a healthy child is never offered PPSV23.
+      //
+      // The app cites it on the NON-IC cards only, and that asymmetry is not a
+      // scope claim -- it is the document's own structure. Its revaccination
+      // subsection ("Children aged >=2 years who have an immunocompromising
+      // condition should receive a second dose of PPSV23 >=5 years after the
+      // first") means an IC child's completeness rests on a different sentence,
+      // so the single-dose sentence is not what finishes her. Read live
+      // 2026-10-23, whole section reproduced in order.
+      'pedsRiskSinglePpsv23AfterPcv', // its own words: "any risk conditions"
       'pedsRoutine4Dose',         // at-risk rows start at age 2, so it is every baby's series
     ]);
   });

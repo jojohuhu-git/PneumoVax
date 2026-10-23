@@ -1594,6 +1594,48 @@ export const REFS = {
     lastVerified: '2026-10-18',
   },
 
+  // C9 (2026-10-23) — OWNER DECISION, and it REPLACES a proposal to cite
+  // p2016's footnote §. Shown the 24-month-old with a cochlear implant (three
+  // PCV13 doses at 17/19/21 months, PPSV23 given) whose "complete" card cited
+  // only CDC's *"administer 1 dose PCV20 or 1 dose PPSV23"* — an instruction to
+  // GIVE a dose, printed on a card saying she needs none — the owner answered:
+  // *"p2016 doesn't cite this case. The MMWR pediatric PCV15 paper should."*
+  //
+  // She is right, and for a reason p2016 cannot match. p2016's footnote § ("If
+  // PPSV23 previously given, then child is complete") ASSERTS completeness;
+  // these two sentences EXPLAIN it, and the explanation is a pair:
+  //   - this sentence: a child aged ≥2 years with ANY risk condition gets a
+  //     SINGLE dose of PPSV23 once the PCV doses are done; and
+  //   - its own subsection a few sentences later, "Revaccination with PPSV23
+  //     among children with immunocompromising conditions", which gives a
+  //     SECOND dose only to an immunocompromising condition.
+  // One dose, and no second dose unless immunocompromised, is exactly why this
+  // NON-IC child is finished — so it is cited on the non-IC cards only.
+  //
+  // Read live 2026-10-23 from the MMWR page, under its own heading
+  // "Administration of PPSV23 After PCV13 or PCV15 Among Persons Aged 2-18
+  // Years with Risk Conditions". VERBATIM AND CONTIGUOUS: the two sentences are
+  // consecutive on the page and are quoted as printed, so the deep link can
+  // match. (A joined non-contiguous string exists nowhere on a page — that is
+  // what made `pedsMinAge`'s deep link match nothing.)
+  //
+  // (!) `population` IS BOTH AT-RISK GROUPS, which is the sentence's own scope:
+  // "Children aged ≥2 years with ANY risk conditions". It is NOT
+  // child-routine — a healthy child is never offered PPSV23 at all. The field
+  // records who the sentence is ABOUT, not where the app uses it (owner
+  // decision 2026-10-17), so it claims both groups even though only the non-IC
+  // cards cite it.
+  pedsRiskSinglePpsv23AfterPcv: {
+    rulebook: 'child',
+    // Patients this sentence is about: its own words, "any risk conditions".
+    population: ['child-IC', 'child-nonIC'],
+    url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
+    label: 'ACIP 2022 — MMWR mm7137a3, "Administration of PPSV23 After PCV13 or PCV15 Among Persons Aged 2–18 Years with Risk Conditions": a single dose of PPSV23 once the PCV series is complete',
+    short: 'PCV15 Children MMWR',
+    quote: 'Children aged ≥2 years with any risk conditions should receive PPSV23 after completing all recommended PCV doses (either PCV13 or PCV15). These children should receive a single dose of PPSV23 at age ≥2 years and ≥8 weeks after the most recent PCV dose.',
+    lastVerified: '2026-10-23',
+  },
+
   // immunize.org ----------------------------------------------------------
   p2016: {
     rulebook: 'child',
