@@ -1,3 +1,12 @@
+> **SUPERSEDED (2026-10-22)** by
+> [`handoff-2026-10-22-finding-l-closed-and-chip-names.md`](handoff-2026-10-22-finding-l-closed-and-chip-names.md).
+> Its top P1 item, **FINDING L's remaining 446**, is **CLOSED as a wrong premise** — measured
+> 0 of 17,361 cards, and the class was already guarded by `G2` in
+> `regression-c2-c3-numbered-sources.test.jsx`. Its "CDC Adult Notes, 1 statement" item is
+> **DONE**. Its "Catch-up Job Aid statement 2 is a clean CITE" is **WRONG** — the job aid's
+> rows split on the prior-dose column and it never names a product; the owner has decided how
+> to handle it. The counts below are stale (uncredited pairs are now 49). Follow the newer file.
+
 # PneumoVax — Handoff after FINDING K (2026-10-18)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
