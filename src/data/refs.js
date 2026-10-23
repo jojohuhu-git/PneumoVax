@@ -686,6 +686,54 @@ export const REFS = {
     pdfPage: 2,
     lastVerified: '2026-10-23',
   },
+  // ═══ Table 4's 6-18 YEAR rows for a child with no prior conjugate ═══
+  //
+  // C9 (2026-10-23). Rows 6 (non-IC) and 7 (IC), both keyed "No previous dose
+  // of PCV13, PCV15, or PCV20". Their Option A and Option B cells are
+  // CHARACTER-FOR-CHARACTER IDENTICAL between the two rows — checked cell by
+  // cell in `scripts/pdfLayout.py`'s layout, where row 6 sits at y=514.9 and
+  // row 7 at y=455.9 with the same two strings at the same two x positions.
+  //
+  // So ONE entry each, claiming both risk classes, rather than two keys per
+  // option. That is the `pedsRiskPcv13At6` treatment ("that sentence IS
+  // identical in both lists") and NOT the FINDING N treatment, which exists for
+  // the opposite case: CDC's notes print their twin rows in DIFFERENT words,
+  // and a card must quote its own. Where the words differ, split the key; where
+  // the document repeats itself exactly, one entry is the honest record and two
+  // would invent a distinction the page does not make.
+  //
+  // Read from the same live download as the rows above: sha1
+  // d69cf77055182b27cf6774b087138c3617068737, "Item #P2016 (2/16/2024)",
+  // Table 4 on page 2.
+  p2016NoPriorPcv6to18OptionA: {
+    rulebook: 'child',
+    // Patients this cell is about: printed identically in the "6 through 18
+    // years (non-IC)" and "6 through 18 years (IC)" rows
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — an at-risk child 6-18 with no previous PCV13, PCV15 or PCV20, Option A: 1 dose of PCV20 at least 8 weeks after the most recent pneumococcal vaccination',
+    short: 'immunize.org p2016',
+    quote: 'No previous dose of PCV13, PCV15, or PCV20 — 1 dose of PCV20 at least 8 weeks after most recent pneumococcal vaccination',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  // Option B of the same two rows. Quoted WHOLE — all three of its sentences —
+  // because the app shows it as two cards (the PCV15 now, the PPSV23 at least 8
+  // weeks later) and the cell is where both come from. Splitting the quote per
+  // card would hand each card half a sentence and leave the "if PPSV23
+  // previously given" clause, which is a real instruction, cited by nothing.
+  p2016NoPriorPcv6to18OptionB: {
+    rulebook: 'child',
+    // Patients this cell is about: printed identically in the "6 through 18
+    // years (non-IC)" and "6 through 18 years (IC)" rows
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — an at-risk child 6-18 with no previous PCV13, PCV15 or PCV20, Option B: 1 dose of PCV15, then a PPSV23 at least 8 weeks later if not previously given',
+    short: 'immunize.org p2016',
+    quote: 'No previous dose of PCV13, PCV15, or PCV20 — 1 dose of PCV15 at least 8 weeks after most recent pneumococcal vaccination. At least 8 weeks later, give 1 dose of PPSV23, if PPSV23 not previously given. If PPSV23 previously given, do not give another dose of PPSV23.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
   // Table 2, the HEALTHY 24–59 month catch-up row, read live 2026-10-22 with
   // `scripts/pdfLayout.py`. Its three columns, in full:
   //   Child's age now                           | 24 through 59 months

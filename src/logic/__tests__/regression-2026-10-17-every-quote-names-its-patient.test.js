@@ -159,6 +159,21 @@ describe('the field itself', () => {
       'p2016AtRiskCatchup24to71Incomplete',    // the row's own heading: "any risk condition"
       'p2016AtRiskCatchup24to71ThreeBefore12', // the row's own heading: "any risk condition"
       'p2016CompletedBefore6WithPcv20', // the row's own heading: "any risk condition"
+      // C9 (2026-10-23), and a DIFFERENT reason from the three above. Rows 6
+      // and 7 are headed "(non-IC)" and "(IC)" — the document does NOT merge
+      // them — but their Option A and Option B cells are character-for-character
+      // identical: the same two strings at the same two x positions, at y=514.9
+      // and y=455.9 in `scripts/pdfLayout.py`'s layout. So the SENTENCE is
+      // about both groups even though the ROW is not, which is exactly what
+      // this field records (owner decision 2026-10-17: it records who the
+      // sentence is about, not which block it was printed in).
+      //
+      // This is deliberately not FINDING N's treatment. There, CDC prints twin
+      // rows in different words and each needs its own key. Here the words are
+      // the same, and splitting would invent a distinction the page does not
+      // make. The test of which case you are in is to read the two cells.
+      'p2016NoPriorPcv6to18OptionA', // identical cell in the non-IC and IC rows
+      'p2016NoPriorPcv6to18OptionB', // identical cell in the non-IC and IC rows
       'p2016Pcv15NeedsFurtherDoses',           // footnote on the PCV15 in both of those rows
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       // FINDING 2 (2026-10-18). MMWR mm7137a3's Table 2 is divided into three

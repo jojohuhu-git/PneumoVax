@@ -1704,8 +1704,13 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
     dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
     brands: ['PCV20 (Prevnar 20)'],
+    // C9 (2026-10-23): p2016's Option A cell for rows 6/7 is this sentence, and
+    // it was a grey button with no number on 528 of these cards. Its cell is
+    // identical in the non-IC and IC rows, so one key serves both classes —
+    // unlike CDC's notes above, which word the two differently and get a key
+    // each.
     note: noPriorPcv
-      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine [c].`
+      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine [c] [c].`
       // The 112 residue. "the most recent PCV13" is replaced by the
       // product-agnostic phrase p2016's own Option A cell uses ("at least 8
       // weeks after most recent PCV dose"), so the anchor cannot name a product
@@ -1716,7 +1721,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     // stays shared on purpose — that sentence IS identical in both lists, and
     // the IC card cites its five-year tail separately below.
     noteCites: noPriorPcv
-      ? [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')]
+      ? [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'), cite('p2016NoPriorPcv6to18OptionA')]
       : [cite('pedsRiskPcv13At6'), ...bridge.cites],
     refs: noPriorPcv ? refs : [...refs, ...bridge.refKeys],
   }));
@@ -1728,10 +1733,19 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
       brands: ['PCV15 (Vaxneuvance)'],
       note: {
-        lead: `Option B — 1 dose of PCV15 ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine, then ≥${PNEUMO_GAP_WORDS} later 1 dose of PPSV23 if not previously given [c].`,
+        // C9: p2016's Option B cell states this whole two-step plan, including
+        // the "if PPSV23 not previously given" condition, so it takes the
+        // second number here and on the follow-up card below. The two cards are
+        // one cell shown twice — the same shape as the five-year step's two
+        // cards (2026-10-23) — so they must quote the SAME entry, which the
+        // guard asserts for one patient rather than trusting the two call sites.
+        lead: `Option B — 1 dose of PCV15 ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine, then ≥${PNEUMO_GAP_WORDS} later 1 dose of PPSV23 if not previously given [c] [c].`,
         detail: 'Choose Option A or B, not both.',
       },
-      noteCites: [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')],
+      noteCites: [
+        cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'),
+        cite('p2016NoPriorPcv6to18OptionB'),
+      ],
       refs,
     }));
     if (!ppsvGiven) {
@@ -1739,8 +1753,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B-2: PPSV23 (≥8 weeks after PCV15)',
         dueToday: false, earliestNextDate: null, minIntervalDays: WK8,
         brands: ['PPSV23 (Pneumovax 23)'],
-        note: `Second step of Option B: PPSV23 ≥${PNEUMO_GAP_WORDS} after the PCV15 dose [c]. Only if PPSV23 was not previously given.`,
-        noteCites: [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')],
+        note: `Second step of Option B: PPSV23 ≥${PNEUMO_GAP_WORDS} after the PCV15 dose [c] [c]. Only if PPSV23 was not previously given.`,
+        noteCites: [
+          cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'),
+          cite('p2016NoPriorPcv6to18OptionB'),
+        ],
         refs,
       }));
     }
