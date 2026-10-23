@@ -84,7 +84,9 @@ and so has no other disposition for that history. **The job aid is FINISHED too*
 3 statements (3,189 cards) rested on table CELLS stated in no prose — its "PCV13 & PPSV23"
 cell is the two text runs "≥5 years" and "PCV20 or PCV21" at different x positions — and the
 owner ruled 2026-10-18 *"use MMWR table"*, so mm7401a1's sentences are cited and the job aid
-comes off those cards. **Two of six documents now carry zero uncredited pairs.** Documents 3, 5 and 6
+comes off those cards. **CDC's Child/Adolescent Notes are FINISHED too** — 8 statements over
+1,107 cards cleared on 2026-10-23 (FINDING N plus four C8 commits), so **three of six
+documents now carry zero uncredited pairs**. Documents 3, 5 and 6
 have proposed removals still waiting, and **doc 4 statement 1 is an
 open owner decision she has asked not to be re-raised.** Readings, dispositions and counts:
 `docs/archive/c7-2026-10-17-source-readings.md`. Measure with
@@ -122,6 +124,31 @@ bullet splits on **vaccine history**. So: read the nesting, split the key per br
 quote **verbatim and contiguous** (a joined parent+child string exists nowhere on the page —
 that is how `pedsMinAge`'s deep link came to match nothing), and put the branch in the entry's
 `label`. Guard: `regression-finding-k-2026-10-18-nested-bullet-conditions.test.js`.
+
+**HALF OF FINDING K IS REVERSED, BY THE OWNER** (2026-10-23). Of its 904 wrong showings, the
+**40** with a PPSV23 on record are now CORRECT and cite the sub-bullet again. Shown a
+6-year-old with asplenia (PCV20 at 5, PPSV23 eight weeks later) whose card listed the page
+with no number, she answered with the deep link to that whole branch — parent and sub-bullet
+together — so *"but have not received PPSV23"* **describes the history that led to the dose,
+not a patient the row refuses to cover**. The guard records the exception and **pins it at
+40**; the other **864** (no conjugate before age 6) are still barred by the parent's AGE half.
+The same ruling, reached first that morning on the 145-card "series complete" card, is the
+general rule: **cite the row the patient FOLLOWED, and say on the card that its dose has been
+given.** It does not extend to a nested line that ORDERS NOTHING unless she says so — which
+is exactly what she said for these 40, and the distinction is why they were put to her.
+
+**THE SAME SENTENCE IN TWO AGE BANDS IS TWO SENTENCES** (FINDING N, 2026-10-23). CDC answers
+"series done, no PCV20, no PPSV23" **four** times — in each at-risk list, under *"Age 2–5
+years"* and again under *"Age 6–18 years"* — with different parents and different wording
+("administer 1 dose PCV20…" against "1 dose PCV20…"; "1 dose of PCV20 or dose 2 PPSV23"
+against "either PCV20 or dose 2 PPSV23"). Only the Age 2–5 pair had keys, and the block that
+serves 24 months to 18 years cited them at every age: **496 cards for children aged 6+ quoted
+a toddler's sentence.** `population` is blind to it (same risk class, different age) and so is
+the all-columns guard (it asks whether SOME row fits). **One age test, in one place**, reading
+`M.m72`; guard `regression-finding-n-2026-10-23-child-notes-age-band-row.test.js`.
+**A CDC page may legitimately carry two numbers on one card** — two different sentences, two
+claims (1,584 "not indicated" cards do) — but **never one sentence twice**; that is the
+invariant to sweep, and asserting the stronger one fails on correct cards.
 
 **A NUMBER WITH NO CHIP CANNOT HAPPEN, AND FINDING L WAS A WRONG PREMISE** (closed
 2026-10-22). This paragraph used to say that a numbered citation whose document is not among

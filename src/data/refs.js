@@ -573,6 +573,45 @@ export const REFS = {
     pdfPage: 2,
     lastVerified: '2026-10-18',
   },
+  // The two FOOTNOTES on Table 4's rows 6 and 7 (2026-10-23).
+  //
+  // Both rows are headed "(no PCV20, no PPSV23)" with a footnote mark on the
+  // PPSV23 half, and the footnote is what the row says about a child who HAS
+  // had one. They are the reason those rows speak for a patient the column
+  // heading appears to exclude — the same shape as FINDING F, where five
+  // approved removals turned out to be printed in a table nobody had opened.
+  //
+  // Read from a live download 2026-10-23: HTTP 200, 211,252 bytes,
+  // application/pdf, sha1 d69cf77055182b27cf6774b087138c3617068737, "Item
+  // #P2016 (2/16/2024)", laid out with `scripts/pdfLayout.py` so each cell
+  // stays tied to its own row and column. Both footnotes sit at the foot of
+  // page 2, beneath Table 4.
+  p2016Before6PpsvGivenComplete: {
+    rulebook: 'child',
+    // Patients this footnote is about: it is footnote § on the row "2 through
+    // 18 years (non-IC only)", so the non-IC list only. The IC row carries a
+    // different footnote, below, which does NOT say complete.
+    population: ['child-nonIC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4, footnote § — a non-immunocompromised child who completed the PCV series before age 6 and has already had PPSV23 is complete',
+    short: 'immunize.org p2016',
+    quote: 'If PPSV23 previously given, then child is complete.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  p2016Before6PpsvGivenIcOptions: {
+    rulebook: 'child',
+    // Patients this footnote is about: footnote ǁ on the row "2 through 18
+    // years (IC only)". Note what it does NOT say: an immunocompromised child
+    // with one PPSV23 is not complete — one more dose is owed, five years on.
+    population: ['child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4, footnote ǁ — an immunocompromised child who completed the PCV series before age 6 and has already had PPSV23 owes one further dose',
+    short: 'immunize.org p2016',
+    quote: 'If PPSV23 previously given, options are (a) give one dose of PCV20 at least 8 weeks after most recent pneumococcal vaccination, or (b) give a second dose of PPSV23 five years after the first dose of PPSV23.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
   // Table 2, the HEALTHY 24–59 month catch-up row, read live 2026-10-22 with
   // `scripts/pdfLayout.py`. Its three columns, in full:
   //   Child's age now                           | 24 through 59 months
@@ -798,6 +837,53 @@ export const REFS = {
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most recent PCV dose.',
     lastVerified: '2026-10-17',
+  },
+  // FINDING N (2026-10-23). CDC prints this row FOUR times, not twice: once in
+  // each at-risk list under "Age 2-5 years" (the two entries above), and once in
+  // each under "Age 6-18 years" — and the four parent bullets are not the same
+  // sentence either.
+  //
+  //   Age 2-5    "Completed recommended PCV series but have not received PPSV23"
+  //   Age 6-18   "Received PCV before age 6 years but have not received PPSV23"
+  //
+  // The instruction is clinically the same and the WORDING is not, which is why
+  // this cannot be left to the age-2-5 keys: 496 cards belonging to children
+  // aged 6 and over were quoting the Age 2-5 sentence. `population` cannot see
+  // it (both instances are about the same risk class) and neither could the
+  // all-columns guard, which asks whether SOME row fits. Measured, fixed and
+  // guarded by `regression-finding-n-2026-10-23-child-notes-age-band-row.test.js`.
+  //
+  // Read live 2026-10-23 in the browser pane with the accordion expanded and the
+  // panel walked as nested <li>s (`accordion-panel-pneumo-situations`; page
+  // 75,723 chars by textContent, "cochlear" present, as refs.js's positive
+  // control at the head of this file requires). Each of the two quotes below
+  // occurs EXACTLY ONCE in that panel — counted — so the deep-link text
+  // fragment lands on the right instance.
+  pedsRiskBefore6NoPcv20At6to18: {
+    rulebook: 'child',
+    // Patients this sentence is about: non-IC list, Age 6-18, under the parent
+    // "Received PCV before age 6 years but have not received PPSV23". Note the
+    // Age 2-5 twin repeats "administer" and this one does not — CDC's own
+    // inconsistency, kept verbatim, and the tell for which block a quote is from.
+    population: ['child-nonIC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 6-18 who received PCV before age 6 and no PCV20: one dose of PCV20 or PPSV23',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Not previously received PCV20: 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most recent PCV dose.',
+    lastVerified: '2026-10-23',
+  },
+  pedsIcBefore6NoPcv20At6to18: {
+    rulebook: 'child',
+    // Patients this sentence is about: the IMMUNOCOMPROMISING list, Age 6-18,
+    // under the same parent. Only the IC instances carry the five-year
+    // follow-on, and this one words it "either PCV20 or dose 2 PPSV23" where
+    // the Age 2-5 one says "1 dose of PCV20 or dose 2 PPSV23".
+    population: ['child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 6-18 who received PCV before age 6 and no PCV20: one dose now, and a further dose five years after the first PPSV23',
+    short: 'CDC Child/Adolescent Notes',
+    quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV dose. If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23.',
+    lastVerified: '2026-10-23',
   },
 
   // CDC job aids ----------------------------------------------------------
