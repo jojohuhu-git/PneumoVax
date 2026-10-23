@@ -122,7 +122,7 @@ describe('decision 1 — the job aid never says "routine begins at 50", so it co
     // quotes, and the risk-factor list for the second half of the sentence.
     const urls = (rec().citations ?? []).map((c) => c.url);
     expect(urls.some((u) => u.includes('adult-notes.html'))).toBe(true);
-    expect(shorts(rec())).toContain('MMWR ≥50 expansion');
+    expect(shorts(rec())).toContain('ACIP 2025 Adult MMWR');
   });
 });
 
@@ -210,7 +210,7 @@ describe('the control — every other adult card keeps all three defaults', () =
   it('a 50+ card with no history keeps all three', () => {
     const rec = (adult(OLDER).recs ?? [])[0];
     expect(shorts(rec)).toContain(JOB_AID);
-    expect(shorts(rec)).toContain('MMWR ≥50 expansion');
+    expect(shorts(rec)).toContain('ACIP 2025 Adult MMWR');
   });
 });
 

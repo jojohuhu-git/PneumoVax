@@ -224,7 +224,15 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — for adults aged 19-49 years with an immunocompromising condition, a CSF leak, or a cochlear implant, PPSV23 follows PCV15 by >=8 weeks. CDC\'s March 2025 Adult Pneumococcal Vaccine Timing Job Aid prints the same >=8 weeks on its 19-49 immunocompromising (p.2) and cochlear implant / CSF leak (p.3) pages',
-    short: 'MMWR ≥50 expansion',
+    // The chip's name is deliberately AGE-NEUTRAL and must stay that way
+    // (OWNER DECISION 2026-10-22). It used to read "MMWR >=50 expansion",
+    // after the paper's own title -- but the app uses the clinical guidance
+    // table INSIDE that paper for adults from 19 up, so 1,015 cards were
+    // showing an under-50 patient a button that named a document about people
+    // 50 and over. One name for one paper, with no age in it; the age band a
+    // given sentence is about is carried by `population`, not by the chip.
+    // Guard: regression-2026-10-22-chip-name-fits-the-patient.test.jsx.
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'If PCV15 is used, administer a single dose of PPSV23* ≥8 weeks after the PCV15 dose.',
     lastVerified: '2026-10-16',
   },
@@ -861,7 +869,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "PPSV23 only" (identical in all three adult blocks)',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21, PCV20, or PCV15 \u22651 year after the last PPSV23 dose.',
     lastVerified: '2026-10-18',
   },
@@ -871,7 +879,7 @@ export const REFS = {
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age >=65 years"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'Shared clinical decision-making is recommended regarding administration of either a single dose of PCV21 or PCV20 for any adult aged \u226565 years who has completed the recommended vaccination series with both PCV13 and PPSV23 (i.e., PPSV23 administered at age \u226565 years) but PCV21, PCV20, or PCV15 not yet received. If a decision to administer PCV21 or PCV20 is made, a single dose is recommended \u22655 years after the last pneumococcal vaccine dose.',
     lastVerified: '2026-10-18',
   },
@@ -895,7 +903,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "PCV13 only" (identical in the >=50 and 19-49 chronic blocks)',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 \u22651 year after the PCV13 dose.',
     lastVerified: '2026-10-18',
   },
@@ -905,7 +913,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 only"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 administered \u22651 year after the PCV13 dose.',
     lastVerified: '2026-10-18',
   },
@@ -915,7 +923,7 @@ export const REFS = {
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged >=50 years", the row "PCV13 at any age and PPSV23 at age <65 years"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose.',
     lastVerified: '2026-10-17',
   },
@@ -929,7 +937,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 1 dose of PPSV23"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21 or PCV20 \u22655 years after the last pneumococcal vaccine dose. The pneumococcal vaccination series is complete, and it need not be followed by additional pneumococcal vaccine doses.',
     lastVerified: '2026-10-17',
   },
@@ -946,7 +954,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with an immunocompromising condition, a CSF leak, or a cochlear implant", the row "PCV13 and 2 doses of PPSV23"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     // Extended 2026-10-18 from the "Alternatively" sentence to the WHOLE row
     // (OWNER DECISION, *"use MMWR"*). The row's first sentence is the one the
     // card now leads with, and nothing else in the app's source set states it
@@ -966,7 +974,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — the section "PPSV23 Use in PCV13-Experienced Adults Who Have Not Completed the Recommended Vaccination Series"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'Among adults aged \u226519 years who have started their pneumococcal vaccination series with PCV13 but have not received all recommended doses, PPSV23 is no longer recommended as an option to complete the series. Either PCV20 or PCV21 is recommended to complete the series as previously recommended.',
     lastVerified: '2026-10-17',
   },
@@ -979,7 +987,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, "Adults aged 19\u201349 years with chronic medical conditions", the row "PCV13 and 1 dose of PPSV23"',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'The pneumococcal vaccination recommendations should be reviewed again when the person reaches age 50 years.',
     lastVerified: '2026-10-17',
   },
@@ -993,7 +1001,7 @@ export const REFS = {
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — the summary "What is added by this report": the October 2024 expansion covers adults aged >=50, and the 19-49 recommendation stays risk-based',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'The risk-based recommendation for adults aged 19\u201349 years is unchanged.',
     lastVerified: '2026-10-17',
   },
@@ -1010,7 +1018,7 @@ export const REFS = {
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, the row "None or PCV7 only at any age", printed identically for adults aged >=50 and for adults aged 19\u201349 with chronic medical conditions',
-    short: 'MMWR \u226550 expansion',
+    short: 'ACIP 2025 Adult MMWR',
     quote: 'A single dose of PCV21, PCV20, or PCV15. If PCV15 is administered, a single dose of PPSV23* should be administered \u22651 year after the PCV15 dose.',
     lastVerified: '2026-10-17',
   },
@@ -1054,7 +1062,15 @@ export const REFS = {
     rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
     label: 'ACIP 2025 — Expanded routine pneumococcal vaccination of adults aged ≥50 years (MMWR mm7401a1)',
-    short: 'MMWR ≥50 expansion',
+    // The chip's name is deliberately AGE-NEUTRAL and must stay that way
+    // (OWNER DECISION 2026-10-22). It used to read "MMWR >=50 expansion",
+    // after the paper's own title -- but the app uses the clinical guidance
+    // table INSIDE that paper for adults from 19 up, so 1,015 cards were
+    // showing an under-50 patient a button that named a document about people
+    // 50 and over. One name for one paper, with no age in it; the age band a
+    // given sentence is about is carried by `population`, not by the chip.
+    // Guard: regression-2026-10-22-chip-name-fits-the-patient.test.jsx.
+    short: 'ACIP 2025 Adult MMWR',
     lastVerified: '2026-10-12',
   },
   mmwr7336a3: {

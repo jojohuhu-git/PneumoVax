@@ -8,7 +8,7 @@
 //
 // ── WHAT mm7401a1 ACTUALLY IS ─────────────────────────────────────────────
 //
-// `MMWR ≥50 expansion` is ACIP's January 2025 paper, and its whole subject is
+// `ACIP 2025 Adult MMWR` is ACIP's January 2025 paper, and its whole subject is
 // one thing: routine adult pneumococcal vaccination moving from 65 to 50. It
 // also carries the PCV13-experienced incomplete-series rule. That is the
 // extent of it. It was reaching 7,875 adult cards as an uncredited grey button
@@ -67,7 +67,7 @@ import { buildCases } from '../../test-grid.js';
 import { ROUTINE_ADULT_MIN_M } from '../scheduleConstants.js';
 
 const TODAY = '2026-10-11';
-const MMWR = 'MMWR ≥50 expansion';
+const MMWR = 'ACIP 2025 Adult MMWR';
 const JOB_AID = 'CDC Adult Timing Job Aid';
 const ADULT_NOTES = 'CDC Adult Notes';
 

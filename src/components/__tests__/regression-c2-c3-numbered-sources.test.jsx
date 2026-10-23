@@ -174,7 +174,7 @@ describe('C2 — the buttons carry the number the text uses', () => {
     const row = buttonRow();
     expect(row.map((b) => `${b.n} ${b.name}`)).toEqual([
       '[1] CDC Adult Notes',
-      '[2] MMWR ≥50 expansion',
+      '[2] ACIP 2025 Adult MMWR',
       '[3] CDC Adult Timing Job Aid',
     ]);
 
@@ -213,7 +213,7 @@ describe('C2 — the buttons carry the number the text uses', () => {
     openEveryCard();
     const names = buttonRow().map((b) => b.name);
     expect(names).toContain('CDC Adult Timing Job Aid');
-    expect(names).toContain('MMWR ≥50 expansion');
+    expect(names).toContain('ACIP 2025 Adult MMWR');
   });
 
   it('numbers run in order of first mention, and the row follows (owner decision)', () => {
