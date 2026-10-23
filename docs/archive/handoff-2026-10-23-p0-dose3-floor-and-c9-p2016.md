@@ -1,5 +1,19 @@
 # PneumoVax — Handoff after the PCV dose-3 floor fix and two p2016 citation blocks (2026-10-23)
 
+> ## ⚠ SUPERSEDED — do not work this queue
+>
+> Consumed on 2026-10-23 by the session that produced
+> `docs/archive/handoff-2026-10-23-c9-complete-cards-and-the-table2-gap.md`. **Go there instead.**
+>
+> Two of its numbers are now stale and one of its claims is WRONG:
+> - uncredited pairs are **24**, not 29; the suite is **1,397 in 126 files**, not 1,389/125.
+> - PR #77 merged and carried the P0 fix into `main`, so **PR #76 is redundant and should be
+>   CLOSED, not merged** (verified: it holds nothing `main` lacks).
+> - its queue says Table 2 row 3's 1,584 cards are all covered by p2016's "no previous doses
+>   or an incomplete schedule" row. **That is true of the grid and false of the code** — the
+>   same card fires for a healthy 10-year-old who COMPLETED her infant series, whom that row
+>   excludes. The newer handoff states the finding and the owner question it raises.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json` —
 **it reported port 58018 and actually served 5174 this session; always read the real port

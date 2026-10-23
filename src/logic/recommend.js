@@ -944,7 +944,23 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // cards quoted the sentence that omits the dose their own row owes them.
   const rowClass = pedsRiskRowClass(riskIds); // 'IC' | 'nonIC'
   const isIC = rowClass === 'IC';
-  const refs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016'], 'child');
+  // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT — the paediatric twin
+  // of `adultRefs`/`adultRefsExcept` below, added C9 2026-10-23. Until now this
+  // block computed ONE list and spread it over every card it builds, which is
+  // precisely the shape CLAUDE.md forbids and the reason the owner asked "why
+  // there are multiple source chips listed if its only citing one of them".
+  // Ask through these, never reuse `refs` for a card a document is silent on.
+  const CHILD_RISK_DEFAULT_REFS = ['cdcChildPneumo', 'p2016'];
+  const childRefs = (defaults = CHILD_RISK_DEFAULT_REFS) => collectRefs(riskIds, defaults, 'child');
+  /** The pathway defaults, minus documents that do not speak for this card. */
+  const childRefsExcept = (...drop) => childRefs(
+    CHILD_RISK_DEFAULT_REFS.filter((k) => !drop.includes(k)),
+  );
+  /** The pathway defaults, minus `drop`, plus `add`. */
+  const childRefsSwap = (drop, add) => childRefs(
+    [...CHILD_RISK_DEFAULT_REFS.filter((k) => k !== drop), add],
+  );
+  const refs = childRefs();
   // FINDING H / the 112 residue (2026-10-18). Computed once here so every
   // sentence in this block names the same history — the shape S6-1 exists to
   // enforce for numbers, applied to words.
@@ -1219,9 +1235,37 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         out.push(rec({
           vaccine: 'PCV', status: 'complete',
           doseLabel: 'PCV complete (at-risk catch-up done)',
-          note: 'At-risk (non-immunocompromising) child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and has had PPSV23 — complete [c].',
-          noteCites: [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
-          refs,
+          // C9 (2026-10-23). The SAME claim as the "completed the PCV series +
+          // PPSV23" card further down, on a differently-worded card, so the
+          // owner's ruling there applies here too — a one-card fix would have
+          // left these 15 reading differently from those 5 for one clinical
+          // situation. ACIP's single-dose sentence is cited for the completion;
+          // CDC's row keeps the choice it offered. p2016 off, same reading.
+          //
+          // (!) WHY THIS SAYS "(non-immunocompromising)" UNCONDITIONALLY, even
+          // though its gate `pedsPostSeriesDoseDone` is
+          // `isIC ? ppsv.count >= 2 : ppsv.count >= 1` and so mentions IC.
+          //
+          // An IC child cannot reach this card, and the reason is arithmetic,
+          // not a coincidence of the grid: a first PPSV23 does not count before
+          // age 24 months, a second needs >=5 years after it
+          // (`CHILD-PPSV23-AFTER-PPSV23`, 4-day grace), so the earliest an IC
+          // child can hold TWO counting PPSV23 doses is about age 84 months —
+          // past this block's 71-month ceiling. Checked by exhaustive search
+          // over every age 24-71 and every pair of PPSV23 dates: 0 reachable
+          // combinations.
+          //
+          // So there is deliberately NO `isIC` branch here. A branch for an
+          // unreachable state is dead code that cannot be tested, and an
+          // earlier draft of this change added one on the false premise that
+          // the path was live. The unreachability is GUARDED instead
+          // (`regression-c9-2026-10-23-complete-after-ppsv23-cards`), so if the
+          // revaccination interval or the band boundary ever moves, that test
+          // fails and whoever moves it has to word this card for an IC child
+          // rather than discovering it on a patient.
+          note: 'At-risk (non-immunocompromising) child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and has had PPSV23 — complete [c]. ACIP puts that at a single dose of PPSV23 once the conjugate doses are done [c].',
+          noteCites: [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23'), cite('pedsRiskSinglePpsv23AfterPcv')],
+          refs: childRefsSwap('p2016', 'mmwr7137a3'),
         }));
         return out;
       }
@@ -1557,9 +1601,35 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       if (!isIC) {
         out.push(rec({
           vaccine: 'PCV', status: 'complete', doseLabel: 'Complete (PCV series + PPSV23)',
-          note: `At-risk (non-immunocompromising) child who completed the PCV series and has received PPSV23 — complete [c]. Alternatively a single PCV20 ≥${PNEUMO_GAP_WORDS} after the last PCV also completes.`,
-          noteCites: [before6Cite()],
-          refs,
+          // C9 (2026-10-23) — OWNER DECISION, 5 cards, and it OVERRULED a
+          // proposal to cite p2016's footnote §.
+          //
+          // The card said "complete [1]" and its only citation was CDC's
+          // *"Not previously received PCV20: administer 1 dose PCV20 or 1 dose
+          // PPSV23 ... at least 8 weeks after the most recent PCV dose"* — an
+          // instruction to GIVE a dose, hung on the word "complete". A
+          // clinician clicking [1] on a card saying she needs nothing was shown
+          // an order for a dose.
+          //
+          // Shown that patient (24 months, cochlear implant, three PCV13 doses
+          // at 17/19/21 months, PPSV23 given), the owner ruled: *"p2016 doesn't
+          // cite this case. The MMWR pediatric PCV15 paper should"*, quoting
+          // the sentence now held in `pedsRiskSinglePpsv23AfterPcv`.
+          //
+          // So the two claims are separated and each gets its own source:
+          //   [1] ACIP mm7137a3 — a child >=2 with any risk condition gets a
+          //       SINGLE dose of PPSV23 after the PCV doses. That is the
+          //       completion.
+          //   [2] CDC's row — which offered PCV20 OR PPSV23 after the series.
+          //       It is cited for the CHOICE, in the PAST tense, because the
+          //       dose on record is the one it called for. That is the owner's
+          //       2026-10-23 rule ("cite the row the patient FOLLOWED, and say
+          //       on the card that its dose has been given") applied to the
+          //       sentence that used to read as a live offer.
+          // p2016 comes off: see the 840-card removal below for the reading.
+          note: `At-risk (non-immunocompromising) child who completed the PCV series and has received PPSV23 — complete [c]. ACIP puts that at a single dose of PPSV23 once the conjugate doses are done. The row this child followed offered either a PCV20 or that PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV, and the dose on record is that dose [c].`,
+          noteCites: [cite('pedsRiskSinglePpsv23AfterPcv'), before6Cite()],
+          refs: childRefsSwap('p2016', 'mmwr7137a3'),
         }));
         return out;
       }
@@ -1641,7 +1711,34 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         // product was never recorded.
         note: `Non-immunocompromising at-risk child with ${words.label} at/after age 6 who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated [c].${bridge.sentence}`,
         noteCites: [cite('pedsRiskDone'), ...bridge.cites],
-        refs: [...refs, ...bridge.refKeys],
+        // C9 (2026-10-23) — OWNER DECISION, 840 cards: p2016 COMES OFF.
+        //
+        // The owner was shown an 18-year-old with a cochlear implant, PCV13 at
+        // age 8 and PPSV23 at 13, and asked what the card's unnumbered p2016
+        // button was for. Her answer: "Take p2016 off."
+        //
+        // Why it does not speak here, read cell by cell off a live download
+        // (sha1 d69cf77055182b27cf6774b087138c3617068737, "Item #P2016
+        // (2/16/2024)", Table 4, page 2):
+        //   - p2016's rows 8/9 DO fit her history ("PCV13 only, given at or
+        //     after age 6 years"), but their Option B only ORDERS the PPSV23
+        //     she has had. Neither row says what follows it.
+        //   - the sentence that does say it, footnote § ("If PPSV23 previously
+        //     given, then child is complete"), is the mark on rows 4/5's
+        //     history cell — "Completed PCV series BEFORE age 6 years". Her
+        //     only conjugate dose was at 8, so she fails that row's prior-dose
+        //     column, and OWNER RULE 2026-10-18 requires every column to fit.
+        // Meanwhile `pedsRiskDone` is CDC's Child/Adolescent Notes stating the
+        // whole claim verbatim about exactly this patient — her age band, her
+        // PCV13 at/after 6, her PPSV23, and the conclusion. Nothing on this
+        // card rests on p2016, so it is not listed.
+        //
+        // NOT a FINDING F repeat: that was six removals approved from a reading
+        // that had never opened the document's table. This one is the table,
+        // transcribed above, footnotes included. The mirror guard
+        // (`regression-c8-2026-10-18-mmwr-table-rows-restored`) asserts a
+        // document is PRESENT where it speaks; this card is the other case.
+        refs: [...childRefsExcept('p2016'), ...bridge.refKeys],
       }));
       return out;
     }

@@ -57,14 +57,6 @@ const KNOWN_UNCITED = {
   immPneumo:
     'immunize.org Ask the Experts topic index — the landing page above immPCV7. '
     + 'Same reason as cdcPneumoIndex: a pointer, not a rule source.',
-  mmwr7137a3:
-    'ACIP PCV15-in-CHILDREN MMWR (2022) — the WHOLE-PAGE entry, which exists so '
-    + 'the grey button has a document to name. The sentence the app actually '
-    + 'rests on is the separate quoted entry `pedsInfantLastDose1215mo`, cited '
-    + 'by the infant catch-up card since FINDING 2 (2026-10-18). Note this '
-    + 'entry described the WRONG DOCUMENT until that date — "among adults", '
-    + "rulebook 'adult' — which was invisible precisely because nothing cited "
-    + 'it.',
   mmwr7239a5:
     'ACIP PCV20-in-children MMWR (2023). The paediatric PCV20 rules it introduced '
     + 'are cited to the CDC child schedule notes, which restate them and are the '

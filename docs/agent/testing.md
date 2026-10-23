@@ -262,3 +262,33 @@ end-to-end. The branch was kept rather than deleted — the day someone adds an 
 source to a risk condition it must not vanish — and `collectRefs` is now exported and
 tested directly, with the reason written at both ends. An untested branch that "obviously
 works" is the same shape as the comment N6 came from.
+
+**C9 (2026-10-23) — the "complete because PPSV23 was given" cards.**
+`regression-c9-2026-10-23-complete-after-ppsv23-cards` (8 tests). Suite 1,389 → 1,397 in
+126 files. Two owner decisions, 860 cards, **no verdict moved**: over both grids
+`scripts/proseDiff.mjs` reports 860 of 35,280 rows changed, 0 added, 0 removed, 0
+impossible entries — and field by field, 840 differ ONLY by the dropped p2016 chip (the
+clinical sentence byte-identical) and 20 by the Case 2 rewording. Card counts unchanged at
+840 / 15 / 5. Uncredited pairs 29 → 24; p2016 4,858 → 3,998 cards.
+
+| mutation | failed |
+|---|---|
+| p2016 put back on Case 1's 840 cards | 2 |
+| the ACIP cite dropped, its `[c]` marker left behind | 4 |
+| the ACIP quote altered by one character (`≥2` → `≥3` years) | 1 |
+| the "dose on record is that dose" sentence removed | 1 |
+| p2016 put back on both Case 2 cards | 3 |
+
+**The one worth knowing.** Dropping the cite while leaving its marker (4) trips the
+repo-wide marker-balance sweep and FINDING K's guard as well as this file's own — the
+orphan-citation hazard `CLAUDE.md` warns about is caught by **pre-existing** guards, which
+is what running the guard that already covers a class is for.
+
+**And a test that exists because a finding was FALSE.** "No immunocompromised child can
+reach the 24–71-month card at all" replaces an `isIC` wording branch added on the premise
+that one could. The path is unreachable by arithmetic — a first PPSV23 cannot count before
+24 months, a second needs ≥5 years after it, so two counting doses are impossible before
+~84 months. The test searches every age 24–71 crossed with every ordered pair of PPSV23
+dates (0 reachable), so if that interval or the band boundary ever moves it fails and the
+card gets worded then, rather than on a patient. **Prove a state is reachable before adding
+a branch for it**: a branch nothing can execute cannot be tested.
