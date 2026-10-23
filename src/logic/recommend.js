@@ -657,7 +657,15 @@ function pcvInfant(am, riskIds, pcv, today) {
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
 function pcvHealthyChild(am, pcv, ppsv, today) {
-  const refs = ['cdcChildPneumo', 'p2016', 'cdcCatchupJobAid'];
+  // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. This block asks per
+  // card -- `healthyRefsExcept` is the twin of `adultRefs` / `childRefsExcept`
+  // -- rather than spreading one list over every card it builds.
+  const HEALTHY_CHILD_DEFAULT_REFS = ['cdcChildPneumo', 'p2016', 'cdcCatchupJobAid'];
+  /** The pathway defaults, minus documents that do not speak for this card. */
+  const healthyRefsExcept = (...drop) => HEALTHY_CHILD_DEFAULT_REFS.filter(
+    (k) => !drop.includes(k),
+  );
+  const refs = HEALTHY_CHILD_DEFAULT_REFS;
   const prior = pcv.count;
   const anchor = pcv.lastDate;
   const b = pcv.band;
@@ -847,7 +855,30 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         aboutAnotherGroup: 'names the risk conditions this child does NOT have, which is why no dose is indicated',
       }),
     ],
-    refs,
+    // C9 (2026-10-23). p2016 is NOT listed here, and the reason is an OWNER
+    // RULE rather than this card alone: "Ok to cite p2016 if you cannot just
+    // cite the CDC references."
+    //
+    // You can cite CDC here. The card's sentence is a claim about SCOPE -- a
+    // healthy 5-18-year-old is not caught up, because CDC's catch-up row stops
+    // at age 4 -- and the row that stops at 4 is quoted on the lead. It settles
+    // the question identically for a child with no doses, an incomplete series
+    // or a complete one, so no second witness is needed.
+    //
+    // p2016 could not have served as one anyway. Table 2's 5-18 band holds a
+    // single row whose prior-dose column reads "No previous doses or any
+    // incomplete PCV schedule by 24 months" -- written about a child who never
+    // finished. A healthy 10-year-old who COMPLETED her series at 2/4/6/12
+    // months fails that column, and the row describing her sits in the
+    // 24-through-59-month band she has aged out of (OWNER RULE 2026-10-18: every
+    // column must fit). Both pages and all five tables were read before
+    // removing it (the FINDING F discipline) -- Table 4 is risk conditions, and
+    // Table 5 is HSCT.
+    //
+    // ⚠ The Catch-up Job Aid chip STAYS. It is a different (document,
+    // statement) pair on the same card and is the owner's do-not-re-raise
+    // decision; `healthyRefsExcept` drops p2016 and nothing else.
+    refs: healthyRefsExcept('p2016'),
   })];
 }
 
