@@ -44,6 +44,10 @@
 //     56  6-18y, PCV incl. PCV20 before age 6, no PPSV23   -> parent FITS
 //     40  6-18y, PCV incl. PCV20 before age 6, PPSV23 given -> "have not
 //         received PPSV23" fails
+//         ** REVERSED BY THE OWNER, 2026-10-23. She was shown one of these
+//         patients and answered with the deep link to this branch, so these 40
+//         DO cite it. See the comment at the exception below; the other 904
+//         stand. **
 //    864  6-18y, NO PCV before age 6 (PCV20 given at 17-18) -> "before age 6"
 //         fails; 640 of them also have a PPSV23
 //     32  15-month-olds, 3x PCV20 at 10-12 months          -> see below
@@ -162,6 +166,7 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
   it('no card shows the "1 dose of PCV20 -> no further doses" sub-bullet outside its parent branch', () => {
     const outside = new Map();
     let inside = 0;
+    let ownerException = 0;
 
     sweep((rec, p) => {
       if (!quotesOf(rec).some((q) => NESTED_PCV20_COMPLETE.some((n) => q.includes(n)))) return;
@@ -171,8 +176,28 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
       // PPSV23" — so this is an exemption from the age half only, not a hole.
       if (p.ageMonths < 24 && p.ppsvCount === 0) { inside += 1; return; }
       // The Age 6-18 parent: "Received PCV before age 6 years BUT HAVE NOT
-      // received PPSV23". Both halves, because both are printed.
+      // received PPSV23". The AGE half still bars anyone whose conjugates came
+      // at or after 6 -- which is FINDING K's 864 cards, and the half that is
+      // still enforced.
       if (p.anyPcvBefore6 && p.ppsvCount === 0) { inside += 1; return; }
+      // OWNER DECISION 2026-10-23 — the PPSV23 half is NOT enforced, for the 40
+      // cards that have one. Asked about a 6-year-old with asplenia (PCV20 at
+      // age 5, PPSV23 eight weeks later) whose card showed this page as a
+      // button no number pointed at, she answered with the deep link to this
+      // very branch, parent and sub-bullet together:
+      //   .../child-adolescent-notes.html#:~:text=Received%20PCV%20before,
+      //   PPSV23%20doses%20needed
+      // So the parent's "but have not received PPSV23" describes the history
+      // that led to the dose, not a patient the row refuses to cover. This
+      // reverses the removal of 2026-10-18 for these 40 and for no one else.
+      //
+      // PINNED AT 40 so the exception cannot grow unnoticed: a change that
+      // widened it would fail here, and this file is still what stops the 864
+      // from coming back.
+      if (p.anyPcvBefore6 && p.ageMonths >= 24 && p.ppsvCount > 0) {
+        ownerException += 1;
+        return;
+      }
       const why = !p.anyPcvBefore6 ? 'no PCV before age 6' : `PPSV23 x${p.ppsvCount} already given`;
       const key = `age ${p.ageMonths}mo, doses at [${p.pcv.map((d) => (d.ageM === null ? '?' : Math.round(d.ageM))).join(',')}]mo — ${why}`;
       outside.set(key, (outside.get(key) ?? 0) + 1);
@@ -181,6 +206,7 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
     // Anti-vacuity: if the sentence stopped appearing anywhere, the assertion
     // below would pass while checking nothing.
     expect(inside).toBeGreaterThan(50);
+    expect(ownerException).toBe(40);
     expect([...outside.entries()].slice(0, 6)).toEqual([]);
     expect([...outside.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });

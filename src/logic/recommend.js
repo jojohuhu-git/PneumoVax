@@ -1045,11 +1045,41 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // has the row that fits -- "2 through 18 years (any risk condition) |
       // Completed PCV series before age 6 years, including one or more doses of
       // PCV20 | No additional doses" -- and states no PPSV23 condition, so a
-      // prior PPSV23 does not break it. CDC's notes chip comes off: nothing on
-      // that page speaks for this history.
-      note = complete;
-      noteCites = [cite('p2016CompletedBefore6WithPcv20')];
-      cardRefs = collectRefs(riskIds, ['p2016'], 'child');
+      // prior PPSV23 does not break it.
+      //
+      // OWNER DECISION 2026-10-23 — 40 cards, and it REVERSES HALF OF FINDING K.
+      // On 2026-10-18 CDC's notes were taken off these cards on the engineering
+      // judgement that the sub-bullet's parent ("Received PCV before age 6 years
+      // but have not received PPSV23") excludes a child who has had one. Shown
+      // this patient -- a 6-year-old with asplenia, PCV20 at age 5, PPSV23 eight
+      // weeks later -- she answered with the deep link to that very branch,
+      // parent and sub-bullet together:
+      //   .../child-adolescent-notes.html#:~:text=Received%20PCV%20before,
+      //   PPSV23%20doses%20needed
+      // So the row DOES speak for him and the card credits it. Her ruling, not
+      // an inference from it: the chip stays and takes a number.
+      //
+      // WHAT IS NOT REVERSED, and the guard still holds it: FINDING K's other
+      // 864 cards, where NO conjugate was given before age 6 (the PCV20 came at
+      // 17 or 18). The parent's age condition still bars those; only its PPSV23
+      // condition is now read as describing the history that led to the dose.
+      // `regression-finding-k-...` pins this exception at exactly 40 so it
+      // cannot grow by accident.
+      //
+      // Age-split for the same reason as FINDING N: CDC prints this sub-bullet
+      // under "Age 2-5 years" as well, in words that differ, and a card must
+      // quote its own patient's band.
+      note = {
+        lead: complete,
+        detail: "CDC's row for a child who received PCV before age 6 is written for one who has not yet had PPSV23; this child has had one, which does not change the answer — a prior PCV20 means no further doses either way, and immunize.org p2016 prints the same row with no PPSV23 condition at all [c].",
+      };
+      noteCites = [
+        am >= M.m72
+          ? cite(isIC ? 'pedsIcPcv20Complete' : 'pedsRiskPcv20Complete')
+          : cite('pedsRiskPcv20CompleteAt2'),
+        cite('p2016CompletedBefore6WithPcv20'),
+      ];
+      cardRefs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016'], 'child');
     } else if (pcv20IsFirstConjugate) {
       // The 288. Never had a conjugate before this PCV20, so CDC's Risk-based
       // branch "Never received PCV13, PCV15, or PCV20" describes them, and that
