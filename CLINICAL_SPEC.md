@@ -147,11 +147,13 @@ A healthy child 24–59 months is **complete** when any of these holds:
 | A **single** 12–23 month dose | **no** — a 2nd is owed | the owner's ruling above; job aid, 1 previous dose → "Give Dose 2 (Final Dose)" |
 
 **"≥8 weeks apart" is enforced by the interval table, not here** — `CHILD-PCV-AFTER-PCV` in
-`doseIntervalRules.js` is an `enforcement: 'floor'` row keyed on the age at the PREVIOUS
-dose, so a dose following one given at ≥12 months needs 56 days with CDC's 4-day grace.
-Measured on the engine: 51 days does not count, 52 days does. The completeness test counts
-**effective** doses, so the spacing requirement is already satisfied by the time it looks.
-**Do not add a second interval test here.**
+`doseIntervalRules.js` is an `enforcement: 'floor'` row, so a dose following one given at
+≥12 months needs 56 days with CDC's 4-day grace. Measured on the engine: 51 days does not
+count, 52 days does. The completeness test counts **effective** doses, so the spacing
+requirement is already satisfied by the time it looks. **Do not add a second interval test
+here.** (That row was keyed on the age at the PREVIOUS dose alone until 2026-10-23; it is
+now CDC's Catch-up Table 2, dose by dose — see the rule table in §K and the sub-section
+below it.)
 
 An **undated** dose counts toward the total but can never be the ≥12-month dose, because it
 cannot be placed — the engine's standing policy assumes an undated historical dose is an
@@ -872,7 +874,7 @@ catch-up row**.
 
   | Rule | Rulebook | Vaccine | Measured from | Minimum gap | Enforcement | Authority |
   |---|---|---|---|---|---|---|
-  | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | >=4 weeks under 12 months, >=8 weeks from 12 months | floor | CDC |
+  | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | dose 2 after a dose under 12 months: >=4 weeks; dose 2 after a dose from 12 months: >=8 weeks; dose 3 under 12 months after a dose under 7 months: >=4 weeks; dose 3 after a dose at 7-11 months: >=8 weeks; dose 4+ given under 12 months: >=4 weeks; dose 4+ given from 12 months: >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PCV` | child | PPSV23 | `lastPcv` | >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PPSV23` | child | PPSV23 | `prevSameStream` | >=5 years | floor | CDC |
   | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | floor | OWNER |

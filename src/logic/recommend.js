@@ -399,22 +399,21 @@ function pcvInfant(am, riskIds, pcv, today) {
   // 12.2-month-old whose previous dose was at 11.5 months gets 4 weeks as
   // dose 2 and 8 weeks as dose 3. See intervals.js for the quoted cells.
   //
-  // The VALIDITY FLOOR is deliberately untouched (owner decision 2): a dose
-  // already given is still graded by doseIntervalRules.js's more permissive
-  // reading, so nothing a clinician already did is retroactively invalidated.
-  // Only what the app advises changes.
-  // Keyed off `anchor`, not off `prior`: an interval only exists when there is
-  // a DATED earlier dose to measure it from. With no prior dose (or only
-  // undated ones) the honest answer is null, not a number nothing was measured
-  // against — dueState short-circuits on a null anchor anyway.
-  const minInterval = anchor
-    ? pcvNextDoseMinIntervalDays({
-      doseNumber: prior + 1,
-      ageAtPrevDose: pcv.lastAgeAtDose,
-      currentAgeMonths: am,
-      anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
-    })
-    : null;
+  // The VALIDITY FLOOR used to be deliberately untouched (owner decision 2 of
+  // 2026-10-11): a dose already given was graded by a MORE PERMISSIVE reading,
+  // so nothing a clinician had done was retroactively invalidated. OWNER
+  // DECISION 2026-10-23 REVERSED THAT. Shown a 15-month-old whose third dose
+  // came 4 weeks after a dose at 11.3 months, she ruled that it "does not
+  // satisfy the required interval and does not count" — and the app had been
+  // advising 8 weeks for that very dose while accepting 4. Both sides now call
+  // `pcvNextDoseMinIntervalDays`, so there is one reading of CDC Table 2 and
+  // not two. See `doseIntervalRules.js`'s `CHILD-PCV-AFTER-PCV` row and
+  // `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`.
+  //
+  // The interval is computed BELOW rather than here, after `needs12moFloor` is
+  // known, because the dose-4-and-beyond cell keys on the age at which the dose
+  // will be GIVEN, and a final dose this function is holding back to the first
+  // birthday will be given at 12 months however old the child is today.
 
   // ── The series total: immunize.org p2016 Table 1, cell by cell ──────────
   //
@@ -566,11 +565,32 @@ function pcvInfant(am, riskIds, pcv, today) {
 
   const remaining = Math.max(1, target - prior);
   const doseNum = prior + 1;
-  const { dueToday, earliestNextDate } = dueState(anchor, minInterval, today);
   // The final dose must be at ≥12 months — if this is the last dose and the
   // child is <12mo, it is not due until 12 months.
   const isFinal = remaining === 1;
   const needs12moFloor = isFinal && am < M.m12;
+  // ── The interval to the NEXT dose: CDC Catch-up Table 2, dose by dose ──
+  //
+  // Keyed off `anchor`, not off `prior`: an interval only exists when there is
+  // a DATED earlier dose to measure it from. With no prior dose (or only
+  // undated ones) the honest answer is null, not a number nothing was measured
+  // against — dueState short-circuits on a null anchor anyway.
+  //
+  // `ageAtThisDose` is the age at which the advised dose will be GIVEN, which
+  // is 12 months exactly when `needs12moFloor` is holding it to the first
+  // birthday — the owner's 2026-10-23 ruling that "the booster is defined by
+  // age, not by how many doses came before it". Passing `am` there would advise
+  // 4 weeks for a 6-month-old's booster, which she ruled owes 8.
+  const minInterval = anchor
+    ? pcvNextDoseMinIntervalDays({
+      doseNumber: prior + 1,
+      ageAtPrevDose: pcv.lastAgeAtDose,
+      currentAgeMonths: am,
+      anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
+      ageAtThisDose: needs12moFloor ? M.m12 : am,
+    })
+    : null;
+  const { dueToday, earliestNextDate } = dueState(anchor, minInterval, today);
   const due = needs12moFloor ? false : dueToday;
 
   return [rec({
@@ -1281,19 +1301,39 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       doseLabel: target === 1 ? '1 dose PCV (at-risk catch-up)' : `PCV dose ${doseNum} of 2 (at-risk catch-up)`,
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: pcvRecBrands({ adult: false }),
+      // C9 (2026-10-23). p2016 was listed on all 976 of these cards and credited
+      // with nothing. It is not a confirming source here: CDC's notes say "2
+      // doses PCV", and p2016's row is the only place on the card that names
+      // WHICH products and states the 8 weeks between them in one sentence —
+      // "2 doses of PCV20 or PCV15, given at least 8 weeks apart". So the
+      // products and the interval now point at the row they come from.
+      //
+      // The PCV15 sentence in the detail earns footnote ‡, which is the mark on
+      // the "PCV15" in that very cell. Reading the row without its footnote is
+      // what FINDING F cost 1,594 cards; here the footnote IS the sentence.
+      //
+      // `target` already selects the row (1 = row 2, "3 doses of PCV, all
+      // before 12 months"; 2 = row 1, "0, 1, or 2 PCV doses by age 24 months"),
+      // so the key follows `target` and needs no second test of its own.
       note: target === 1
         ? {
-          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].`,
+          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c].`,
           // FINDING G: "all before 12 months", which is what p2016's row says.
           // It used to read "before 24 months" — a looser claim than the row,
           // and one that described 32 children the row is not about.
-          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later.`,
+          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`,
         }
         : {
-          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} apart [c].`,
-          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV.`,
+          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
+          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`,
         },
-      noteCites: [cite('pedsRiskIncompleteCatchup')],
+      noteCites: [
+        cite('pedsRiskIncompleteCatchup'),
+        cite(target === 1
+          ? 'p2016AtRiskCatchup24to71ThreeBefore12'
+          : 'p2016AtRiskCatchup24to71Incomplete'),
+        cite('p2016Pcv15NeedsFurtherDoses'),
+      ],
       refs,
     }));
     return out;
@@ -1664,8 +1704,13 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
     dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
     brands: ['PCV20 (Prevnar 20)'],
+    // C9 (2026-10-23): p2016's Option A cell for rows 6/7 is this sentence, and
+    // it was a grey button with no number on 528 of these cards. Its cell is
+    // identical in the non-IC and IC rows, so one key serves both classes —
+    // unlike CDC's notes above, which word the two differently and get a key
+    // each.
     note: noPriorPcv
-      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine [c].`
+      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine [c] [c].`
       // The 112 residue. "the most recent PCV13" is replaced by the
       // product-agnostic phrase p2016's own Option A cell uses ("at least 8
       // weeks after most recent PCV dose"), so the anchor cannot name a product
@@ -1676,7 +1721,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     // stays shared on purpose — that sentence IS identical in both lists, and
     // the IC card cites its five-year tail separately below.
     noteCites: noPriorPcv
-      ? [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')]
+      ? [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'), cite('p2016NoPriorPcv6to18OptionA')]
       : [cite('pedsRiskPcv13At6'), ...bridge.cites],
     refs: noPriorPcv ? refs : [...refs, ...bridge.refKeys],
   }));
@@ -1688,10 +1733,19 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
       brands: ['PCV15 (Vaxneuvance)'],
       note: {
-        lead: `Option B — 1 dose of PCV15 ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine, then ≥${PNEUMO_GAP_WORDS} later 1 dose of PPSV23 if not previously given [c].`,
+        // C9: p2016's Option B cell states this whole two-step plan, including
+        // the "if PPSV23 not previously given" condition, so it takes the
+        // second number here and on the follow-up card below. The two cards are
+        // one cell shown twice — the same shape as the five-year step's two
+        // cards (2026-10-23) — so they must quote the SAME entry, which the
+        // guard asserts for one patient rather than trusting the two call sites.
+        lead: `Option B — 1 dose of PCV15 ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine, then ≥${PNEUMO_GAP_WORDS} later 1 dose of PPSV23 if not previously given [c] [c].`,
         detail: 'Choose Option A or B, not both.',
       },
-      noteCites: [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')],
+      noteCites: [
+        cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'),
+        cite('p2016NoPriorPcv6to18OptionB'),
+      ],
       refs,
     }));
     if (!ppsvGiven) {
@@ -1699,8 +1753,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B-2: PPSV23 (≥8 weeks after PCV15)',
         dueToday: false, earliestNextDate: null, minIntervalDays: WK8,
         brands: ['PPSV23 (Pneumovax 23)'],
-        note: `Second step of Option B: PPSV23 ≥${PNEUMO_GAP_WORDS} after the PCV15 dose [c]. Only if PPSV23 was not previously given.`,
-        noteCites: [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv')],
+        note: `Second step of Option B: PPSV23 ≥${PNEUMO_GAP_WORDS} after the PCV15 dose [c] [c]. Only if PPSV23 was not previously given.`,
+        noteCites: [
+          cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'),
+          cite('p2016NoPriorPcv6to18OptionB'),
+        ],
         refs,
       }));
     }

@@ -10,7 +10,8 @@
  * PCV (PCV15 or PCV20): 5 doses in total for this child — the 4 already on
  * record, and the booster still owed at age 12-15 months."
  *
- * 220 cards (132 at ages 6-7 months, 88 at 12 months) listed CDC's
+ * 220 cards (132 at ages 6-7 months, 88 at 12 months — now 132, see the
+ * grid count below) listed CDC's
  * Child/Adolescent Notes with nothing pointing at it.
  *
  * ── WHY IT WAS UNCREDITED, AND WHY IT IS NOT A REMOVAL ────────────────────
@@ -115,7 +116,18 @@ describe('C8 — the five-dose catch-up card credits the booster row', () => {
     expect(card.note.detail).not.toMatch(/\[c\]/);
   });
 
-  it('every five-dose catch-up card in the grid credits the notes, and there are 220', () => {
+  it('every five-dose catch-up card in the grid credits the notes, and there are 132', () => {
+    // WAS 220 UNTIL 2026-10-23, and the 88 that went are not a regression here.
+    // The owner made CDC Catch-up Table 2 the validity floor that day, so a
+    // third dose given 4 weeks after a dose at 7-11 months stopped counting —
+    // and the 88 twelve-month-olds in this class were exactly such patients.
+    // With three counting doses instead of four they are no longer five-dose
+    // children at all; they now hold a 4-dose target. Nothing about the
+    // citation changed, only who reaches the card.
+    //
+    // The 132 that remain are the 6-7-month-olds, whose four doses were all
+    // given before 7 months at 4-week gaps — valid infant doses under the same
+    // ruling ("treat it as an extra infant dose", owner, 2026-10-23).
     let cards = 0;
     const missing = [];
     const doubled = [];
@@ -132,7 +144,7 @@ describe('C8 — the five-dose catch-up card credits the booster row', () => {
         if (n > 1) doubled.push(c.key);
       }
     }
-    expect(cards).toBe(220);
+    expect(cards).toBe(132);
     expect(missing.slice(0, 5)).toEqual([]);
     expect(doubled.slice(0, 5)).toEqual([]);
   });

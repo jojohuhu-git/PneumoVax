@@ -186,11 +186,27 @@ describe('P0-2 — the note never contradicts the computed total', () => {
   });
 });
 
-describe('P0-2 — owner decision 2: the validity floor is untouched', () => {
-  it('a dose already given 28 days after a 9.5mo dose still counts', () => {
-    // The scheduler now advises 8 weeks + a wait to 12 months for this child,
-    // but a dose the clinician ALREADY gave at 4 weeks stays valid — the floor
-    // is doseIntervalRules.js's, and it did not move.
+describe('P0-2 — owner decision 2 was REVERSED on 2026-10-23', () => {
+  // THIS BLOCK USED TO ASSERT THE OPPOSITE, and that is the point of keeping it
+  // here rather than deleting it.
+  //
+  // Owner decision 2 of 2026-10-11 held the validity floor still while P0-2
+  // corrected the scheduler: "a dose already given 28 days after a 9.5mo dose
+  // still counts — the floor is doseIntervalRules.js's, and it did not move."
+  // The consequence was that the app advised 8 weeks for a dose and then
+  // accepted it at 4, in silence, for the same child.
+  //
+  // Shown that contradiction on 2026-10-23 — a 15-month-old with asplenia whose
+  // three PCV20 doses came at 10.4, 11.3 and 12.2 months — the owner reversed
+  // it: the dose "does not satisfy the required interval and does not count.
+  // She needs 1 additional dose of PCV20 at >=12 months of age". 220 of 17,016
+  // grid patients moved.
+  //
+  // The replacement assertion is the same patient as the old one, with the
+  // verdict the owner's decision requires. Its sibling file
+  // `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js` carries
+  // the sources, both rulings and the "advise and grade by one number" guard.
+  it('a dose given 28 days after a 9.5mo dose no longer counts', () => {
     const dob = dobForAgeMonths(12);
     const out = recommend({
       ageMonths: 12,
@@ -204,6 +220,31 @@ describe('P0-2 — owner decision 2: the validity floor is untouched', () => {
       ppsv23Doses: [],
       today: TODAY,
     });
-    expect(out.perDose.pcv[2].status).toBe('valid');
+    // CDC Catch-up Table 2, Dose 2 to Dose 3: 8 weeks once the previous dose
+    // fell at 7-11 months. The 9.5-month dose is inside that band.
+    expect(out.perDose.pcv[2].status).toBe('invalid');
+    expect(out.perDose.pcv[2].intervalRuleId).toBe('CHILD-PCV-AFTER-PCV');
+    // The first two are untouched: dose 1 to dose 2 is 4 weeks when the first
+    // dose was before the first birthday, and these are 6 weeks apart anyway.
+    expect(out.perDose.pcv[0].status).toBe('valid');
+    expect(out.perDose.pcv[1].status).toBe('valid');
+  });
+
+  it('what P0-2 fixed on the SCHEDULER side is unchanged', () => {
+    // Anti-overreach. P0-2's own correction — the advised interval keyed on the
+    // dose number — is what this file mostly tests, and reversing decision 2
+    // must not disturb it. The 9.5-month child is advised 8 weeks either way;
+    // that was true before the reversal and is the number the floor now shares.
+    const dob = dobForAgeMonths(12);
+    const out = recommend({
+      ageMonths: 12,
+      dob,
+      riskIds: [],
+      pcvDoses: [doseAtAge(dob, 'PCV15', 8), doseAtAge(dob, 'PCV15', 9.5)],
+      ppsv23Doses: [],
+      today: TODAY,
+    });
+    const rec = (out.recs ?? []).find((r) => r.vaccine === 'PCV');
+    expect(rec.minIntervalDays).toBe(56);
   });
 });

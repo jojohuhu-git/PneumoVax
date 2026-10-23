@@ -612,6 +612,128 @@ export const REFS = {
     pdfPage: 2,
     lastVerified: '2026-10-23',
   },
+  // ═══ Table 4's two 24-71 MONTH rows, and the footnote on their PCV15 ═══
+  //
+  // C9 (2026-10-23). These are the rows the at-risk catch-up card is built from,
+  // and p2016 sat on 976 of those cards as a grey button no number pointed at.
+  // It is not a confirming source there: CDC's notes say "2 doses PCV", and
+  // p2016's row is the ONLY place on the card that names WHICH products ("PCV20
+  // or PCV15") and states the 8 weeks between them in the same breath.
+  //
+  // Read from a live download 2026-10-23: HTTP 200, 206.3 KB, application/pdf,
+  // sha1 d69cf77055182b27cf6774b087138c3617068737, "Item #P2016 (2/16/2024)" —
+  // byte-identical to the copy the 2026-10-23 footnote entries above were read
+  // from. Laid out with `scripts/pdfLayout.py` so each cell stays tied to its
+  // own row and column. Table 4 is on page 2.
+  //
+  // Row 1, in full:
+  //   Child's age now            | 24 through 71 months (any risk condition)
+  //   Number of previous PCV13,  | Any incomplete schedule of 0, 1, or 2 PCV
+  //     PCV15, or PCV20 doses    |   doses by age 24 months
+  //   Option A                   | 2 doses of PCV20 or PCV15,(double dagger)
+  //                              |   given at least 8 weeks apart
+  //   Option B (if applicable)   | (blank)
+  p2016AtRiskCatchup24to71Incomplete: {
+    rulebook: 'child',
+    // Patients this cell is about: the row is headed "(any risk condition)", so
+    // both paediatric risk classes; ages 24 through 71 months
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — an at-risk child 24-71 months with an incomplete schedule of 0, 1 or 2 PCV doses by age 24 months: 2 doses of PCV20 or PCV15, at least 8 weeks apart',
+    short: 'immunize.org p2016',
+    quote: 'Any incomplete schedule of 0, 1, or 2 PCV doses by age 24 months — 2 doses of PCV20 or PCV15, given at least 8 weeks apart',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  // Row 2. Its prior-dose column is "3 doses of PCV, all before 12 months" —
+  // before TWELVE, not before 24, which is FINDING G's whole point and why the
+  // card's own sentence says so too.
+  //
+  // ⚠ NO GRID CASE REACHES THIS CARD. `buildCases()` places historical doses at
+  // fixed day-offsets, so a child 24-71 months with three doses all before 12
+  // months is not expressible (recorded in the 2026-10-23 handoff as the grid
+  // gap). It is asserted with a patient built by hand instead, in
+  // `regression-c9-2026-10-23-p2016-at-risk-catchup-rows.test.js`. A sweep would
+  // have reported this entry as unused and proved nothing either way.
+  p2016AtRiskCatchup24to71ThreeBefore12: {
+    rulebook: 'child',
+    // Patients this cell is about: the row is headed "(any risk condition)", so
+    // both paediatric risk classes; ages 24 through 71 months
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — an at-risk child 24-71 months who had 3 PCV doses, all before 12 months: 1 dose of PCV20 or PCV15',
+    short: 'immunize.org p2016',
+    quote: '3 doses of PCV, all before 12 months — 1 dose of PCV20 or PCV15',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  // Footnote (double dagger), which hangs off the "PCV15" in BOTH rows above and
+  // is the reason the card ends by saying a PPSV23 follows a PCV15. Quoted as
+  // the single sentence it is; the row it points the reader at is rows 4/5,
+  // whose Option B is the PPSV23 at 8 weeks.
+  //
+  // Read with the rows, from the same download, from the foot of page 2 — the
+  // FINDING F lesson applied before the fact: a footnote is part of its row.
+  p2016Pcv15NeedsFurtherDoses: {
+    rulebook: 'child',
+    // Patients this footnote is about: it marks the PCV15 in the two 24-71
+    // month rows, both headed "(any risk condition)"
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4, footnote ‡ — if PCV15 is used to complete the at-risk catch-up, one or two further pneumococcal doses are needed',
+    short: 'immunize.org p2016',
+    quote: 'If PCV15 is used, one or two additional pneumococcal vaccine doses will be needed. For options, refer to the appropriate row of this table for a child age 2 through 18 years (IC or non-IC) who completed the PCV series before age 6 years without a dose of PCV20.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  // ═══ Table 4's 6-18 YEAR rows for a child with no prior conjugate ═══
+  //
+  // C9 (2026-10-23). Rows 6 (non-IC) and 7 (IC), both keyed "No previous dose
+  // of PCV13, PCV15, or PCV20". Their Option A and Option B cells are
+  // CHARACTER-FOR-CHARACTER IDENTICAL between the two rows — checked cell by
+  // cell in `scripts/pdfLayout.py`'s layout, where row 6 sits at y=514.9 and
+  // row 7 at y=455.9 with the same two strings at the same two x positions.
+  //
+  // So ONE entry each, claiming both risk classes, rather than two keys per
+  // option. That is the `pedsRiskPcv13At6` treatment ("that sentence IS
+  // identical in both lists") and NOT the FINDING N treatment, which exists for
+  // the opposite case: CDC's notes print their twin rows in DIFFERENT words,
+  // and a card must quote its own. Where the words differ, split the key; where
+  // the document repeats itself exactly, one entry is the honest record and two
+  // would invent a distinction the page does not make.
+  //
+  // Read from the same live download as the rows above: sha1
+  // d69cf77055182b27cf6774b087138c3617068737, "Item #P2016 (2/16/2024)",
+  // Table 4 on page 2.
+  p2016NoPriorPcv6to18OptionA: {
+    rulebook: 'child',
+    // Patients this cell is about: printed identically in the "6 through 18
+    // years (non-IC)" and "6 through 18 years (IC)" rows
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — an at-risk child 6-18 with no previous PCV13, PCV15 or PCV20, Option A: 1 dose of PCV20 at least 8 weeks after the most recent pneumococcal vaccination',
+    short: 'immunize.org p2016',
+    quote: 'No previous dose of PCV13, PCV15, or PCV20 — 1 dose of PCV20 at least 8 weeks after most recent pneumococcal vaccination',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  // Option B of the same two rows. Quoted WHOLE — all three of its sentences —
+  // because the app shows it as two cards (the PCV15 now, the PPSV23 at least 8
+  // weeks later) and the cell is where both come from. Splitting the quote per
+  // card would hand each card half a sentence and leave the "if PPSV23
+  // previously given" clause, which is a real instruction, cited by nothing.
+  p2016NoPriorPcv6to18OptionB: {
+    rulebook: 'child',
+    // Patients this cell is about: printed identically in the "6 through 18
+    // years (non-IC)" and "6 through 18 years (IC)" rows
+    population: ['child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4 — an at-risk child 6-18 with no previous PCV13, PCV15 or PCV20, Option B: 1 dose of PCV15, then a PPSV23 at least 8 weeks later if not previously given',
+    short: 'immunize.org p2016',
+    quote: 'No previous dose of PCV13, PCV15, or PCV20 — 1 dose of PCV15 at least 8 weeks after most recent pneumococcal vaccination. At least 8 weeks later, give 1 dose of PPSV23, if PPSV23 not previously given. If PPSV23 previously given, do not give another dose of PPSV23.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
   // Table 2, the HEALTHY 24–59 month catch-up row, read live 2026-10-22 with
   // `scripts/pdfLayout.py`. Its three columns, in full:
   //   Child's age now                           | 24 through 59 months

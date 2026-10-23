@@ -94,11 +94,31 @@ function canonicalGap(rule) {
   const iv = rule.interval;
   if (iv == null) return 'none stated';
   if (typeof iv.daysFrom === 'function') {
-    // The paediatric PCV series: the minimum depends on the age at the dose the
-    // gap is measured FROM, so the rulebook states both halves of the rule.
-    const under = iv.daysFrom({ ageAtDose: 6 });
-    const from12 = iv.daysFrom({ ageAtDose: 18 });
-    return `${weeks(under)} under 12 months, ${weeks(from12)} from 12 months`;
+    // The paediatric PCV series. Until 2026-10-23 this row's minimum depended
+    // only on the age at the dose the gap is measured FROM, and two halves were
+    // enough to state it. It is now CDC's Catch-up Table 2 — which keys the
+    // cell on the DOSE NUMBER as well as two ages — so the cell is derived by
+    // probing every branch the function has, one representative patient each.
+    //
+    // Still derived, never hardcoded, which is the whole mechanism: change any
+    // branch and this string changes, and §K stops matching until it is
+    // corrected. A single summary phrase would have been shorter and would
+    // have gone on matching while a branch quietly moved.
+    const probe = (label, ctx) => `${label}: ${weeks(iv.daysFrom(ctx.anchor, ctx.ctx))}`;
+    return [
+      probe('dose 2 after a dose under 12 months',
+        { anchor: { ageAtDose: 6 }, ctx: { doseNumber: 2, ageAtDose: 7, anyPriorDoseBefore12: true } }),
+      probe('dose 2 after a dose from 12 months',
+        { anchor: { ageAtDose: 18 }, ctx: { doseNumber: 2, ageAtDose: 19, anyPriorDoseBefore12: false } }),
+      probe('dose 3 under 12 months after a dose under 7 months',
+        { anchor: { ageAtDose: 6 }, ctx: { doseNumber: 3, ageAtDose: 7, anyPriorDoseBefore12: true } }),
+      probe('dose 3 after a dose at 7-11 months',
+        { anchor: { ageAtDose: 9 }, ctx: { doseNumber: 3, ageAtDose: 10, anyPriorDoseBefore12: true } }),
+      probe('dose 4+ given under 12 months',
+        { anchor: { ageAtDose: 4 }, ctx: { doseNumber: 4, ageAtDose: 5, anyPriorDoseBefore12: true } }),
+      probe('dose 4+ given from 12 months',
+        { anchor: { ageAtDose: 10 }, ctx: { doseNumber: 4, ageAtDose: 13, anyPriorDoseBefore12: true } }),
+    ].join('; ');
   }
   if (iv.days != null) return weeks(iv.days);
   return months(iv.months);
@@ -285,15 +305,32 @@ describe('P2-7: the invariants the rulebook states in words hold in the code', (
     )).toEqual([]);
   });
 
-  it('the paediatric series minimum really is the two-step rule the rulebook describes', () => {
+  it('the paediatric series minimum really is CDC Table 2, both numbers reachable', () => {
     // Guards the derivation in canonicalGap() above: if these two constants ever
-    // collapse into one, the "4 weeks under 12 months, 8 weeks from 12 months"
-    // cell would still be generated and would still match, while the rule it
-    // describes had quietly become a single flat interval.
+    // collapse into one, the generated cell would still be generated and would
+    // still match, while the rule it describes had quietly become a single flat
+    // interval. Anti-vacuity for the cell, in other words.
     expect(PCV_MIN_INTERVAL_DAYS_UNDER_12M).not.toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
     const childSeries = DOSE_INTERVAL_RULES.find((r) => r.id === 'CHILD-PCV-AFTER-PCV');
-    expect(childSeries.interval.daysFrom({ ageAtDose: 6 })).toBe(PCV_MIN_INTERVAL_DAYS_UNDER_12M);
-    expect(childSeries.interval.daysFrom({ ageAtDose: 18 })).toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
+    const at = (anchorAge, ctx) => childSeries.interval.daysFrom({ ageAtDose: anchorAge }, ctx);
+    // Dose 2 keys on the age at the EARLIER dose, which is the half of the old
+    // two-step rule that survives unchanged.
+    expect(at(6, { doseNumber: 2, ageAtDose: 7 })).toBe(PCV_MIN_INTERVAL_DAYS_UNDER_12M);
+    expect(at(18, { doseNumber: 2, ageAtDose: 19 })).toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
+    // Dose 3 is where the old rule was WRONG — 4 weeks whenever the earlier
+    // dose was under 12 months, where CDC asks 8 once that dose fell at 7-11
+    // months. This pair is the owner's 2026-10-23 decision, in one assertion.
+    expect(at(6, { doseNumber: 3, ageAtDose: 7, anyPriorDoseBefore12: true }))
+      .toBe(PCV_MIN_INTERVAL_DAYS_UNDER_12M);
+    expect(at(9, { doseNumber: 3, ageAtDose: 10, anyPriorDoseBefore12: true }))
+      .toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
+    // Dose 4+ keys on the age at which THIS dose is given, because CDC's "8
+    // weeks (as final dose)" is the >=12-month booster — the owner's ruling on
+    // the extra infant dose, also 2026-10-23.
+    expect(at(4, { doseNumber: 4, ageAtDose: 5, anyPriorDoseBefore12: true }))
+      .toBe(PCV_MIN_INTERVAL_DAYS_UNDER_12M);
+    expect(at(10, { doseNumber: 4, ageAtDose: 13, anyPriorDoseBefore12: true }))
+      .toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
   });
 });
 

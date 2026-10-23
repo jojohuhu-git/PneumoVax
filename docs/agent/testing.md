@@ -86,6 +86,30 @@ full suite; the counts below are the measured pre-fix failures.
 | `src/logic/__tests__/regression-c8-2026-10-23-infant-catchup-credits-the-booster-row.test.js` | **The five-dose infant catch-up card credits the booster row (220 cards).** FINDING 2 had moved the citation to MMWR because no document states a total of five; CDC's notes do state where the last dose goes, so the marker sits on the booster clause and never on the total. Conditional on `target > 4`, because at four or fewer the lead already cites that page. **A wrong invariant was corrected here**: "no card gives CDC's notes two numbers" fails on 1,648 correct cards (two different sentences, two claims); the right one is that no card gives the same SENTENCE two numbers. Mutations: dropping the citation fails **3**; adding it unconditionally fails **2**; moving the marker onto the total fails **1**. |
 | `src/logic/__tests__/regression-c8-2026-10-23-pcv20-complete-with-a-prior-ppsv23.test.js` | **OWNER DECISION 2026-10-23 — half of FINDING K reversed (40 cards).** Of FINDING K's 904 wrong showings, the 40 with a PPSV23 now cite the sub-bullet again, by her deep link to that whole branch; the 864 with no conjugate before age 6 are still barred, and FINDING K's own guard now records the exception and **pins it at 40**. Also records a blind spot: deleting the Age 2–5 / Age 6–18 split here broke **no** test, because no grid patient reaches this card below 72 months — so the 4-year-old who does reach it in the real app (two PCV20 doses at age 2, PPSV23 eight weeks later) is asserted directly, and the same mutation now fails that one test. |
 
+## The 2026-10-23 clinical fix and the p2016 citation guards
+
+Three new files, all on `feature/2026-10-23-*`.
+
+| File | What it holds |
+|---|---|
+| `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js` | The owner's reversal of owner decision 2 (2026-10-11): a PCV dose given 4 weeks after a dose at 7–11 months no longer counts. Holds her patient verbatim, her second ruling on the extra infant dose at 5.1 months, and the invariant that **the app advises and grades by the same interval, differing only by CDC's 4-day grace** — asserted as `daysBetween(earliest, advised) === GRACE_DAYS`, because asserting equality fails on correct behaviour. Mutations fail 10 / 3 / 8. |
+| `regression-c9-2026-10-23-p2016-at-risk-catchup-rows.test.js` | p2016 Table 4 rows 1 and 2 plus footnote ‡. **Builds row 2's patient by hand and measures that the grid reaches it 0 times**, so the hand-built case cannot quietly stop being load-bearing. Mutations fail 5 / 2 / 4 — and the 2 is the wrong-ROW mutation, which *only* the hand-built case catches. |
+| `regression-c9-2026-10-23-p2016-no-prior-pcv-6to18-rows.test.js` | p2016 Table 4 rows 6 and 7. Asserts that Option B's **two cards quote the same cell** for one patient, not merely that each cites something. Mutations fail 4 / 2 / 3. |
+
+Two mechanical traps that cost time this session and will cost it again:
+
+- **`cite()` names the document in `doc`, not `short`.** `short` is on the chips
+  (`rec.citations`). A sweep written against `.short` reports every card as uncredited and
+  reads exactly like an engine bug.
+- **The spanning-population list in `regression-2026-10-17-every-quote-names-its-patient`
+  is sorted.** Insert alphabetically or it fails on order alone.
+
+And one method note: `scripts/proseDiff.mjs`'s `diff` mode plus `grep -c '^<'` reported 0
+while the files differed. Load both dumps, extract each rec's vaccine / doseLabel / note
+fields, strip the `[c]` markers **before** any bracket parsing (the markers are themselves
+`[...]`), and compare character by character. Both C9 commits came out at **0 clinical
+sentences changed** that way.
+
 ## Coverage Requirements
 
 - When changing a rule: update `CLINICAL_SPEC.md`, the engine (`recommend.js`), and the test.

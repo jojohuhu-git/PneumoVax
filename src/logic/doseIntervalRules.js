@@ -92,7 +92,7 @@ import {
   intervalPhraseAdj,
   intervalArticle,
   calendarIntervalMeetsMinimum,
-  pcvSeriesMinIntervalDays,
+  pcvNextDoseMinIntervalDays,
   PCV_PPSV23_MIN_INTERVAL_DAYS,
   PPSV23_REVACC_MIN_MONTHS,
   ADULT_ADVISED_PCV_GAP_MONTHS,
@@ -125,13 +125,16 @@ function fmtDays(days) {
  * or "5 years" in prose while `interval:` above them held the constant, and
  * nothing reconciled the two.
  *
- * `daysFrom` rows compute their minimum from the anchor, so they are resolved
- * the same way here rather than being left to hand-type the answer.
+ * `daysFrom` rows compute their minimum from the anchor AND the judged dose's
+ * own context, so they are resolved the same way here rather than being left to
+ * hand-type the answer. `ctx` was added 2026-10-23: CDC's Catch-up Table 2 keys
+ * the PCV cell on the DOSE NUMBER as well as the two ages, so a function of the
+ * anchor alone cannot express it (see `CHILD-PCV-AFTER-PCV`).
  */
-function intervalWords(rule, anchor) {
+function intervalWords(rule, anchor, ctx) {
   const iv = rule.interval;
   if (!iv) return null;                       // an enforcement:'none' row
-  const spec = iv.daysFrom ? { days: iv.daysFrom(anchor) } : iv;
+  const spec = iv.daysFrom ? { days: iv.daysFrom(anchor, ctx) } : iv;
   // Both grammatical forms, because the verdict sentences use both: "given at
   // least 5 years after the first" (noun) and "this 5-year gap is enforced as
   // a minimum" (adjective). Handing out only the noun is what printed
@@ -249,7 +252,7 @@ function lastOf(list) {
 //                 shorterMinimum. It is NOT an inline age test deciding whether
 //                 a rule may bite — that was the S14-RC root cause. A row that
 //                 needs to speak only to one age band declares it here.
-//   interval      { days } | { months } | { daysFrom: fn(anchor) }
+//   interval      { days } | { months } | { daysFrom: fn(anchor, ctx) }
 //   grace         does CDC's 4-day grace apply? (floors: yes. recommendations:
 //                 no — the grace governs whether a dose that missed a MINIMUM
 //                 still counts, and a recommendation voids nothing.)
@@ -267,23 +270,67 @@ export const DOSE_INTERVAL_RULES = [
     vaccine: 'PCV',
     products: null,
     from: 'prevSameStream',
-    interval: { daysFrom: (anchor) => pcvSeriesMinIntervalDays(anchor.ageAtDose) },
+    // OWNER DECISION 2026-10-23. This row used to grade the gap with
+    // `pcvSeriesMinIntervalDays(anchor.ageAtDose)` — 4 weeks whenever the
+    // earlier dose fell before the first birthday — while the scheduler
+    // ADVISED the next dose with `pcvNextDoseMinIntervalDays`, which is CDC's
+    // Catch-up Table 2 cell by cell. The two disagree on one cell, and
+    // `intervals.js` said so in writing while leaving both standing: the app
+    // told a clinician to wait until 2026-08-15 and then accepted the dose
+    // given on 2026-07-18, silently, for the same child.
+    //
+    // The two now share ONE function, so they cannot drift apart again. That
+    // is the point of the fix, not a side effect of it — a second reading of
+    // the same table is what produced the contradiction.
+    //
+    // Table 2 keys the cell on the DOSE NUMBER as well as the two ages ("4
+    // weeks if current age is younger than 12 months AND previous dose was
+    // administered at <7 months old"), which a function of the anchor alone
+    // cannot express — hence `ctx`.
+    //
+    // `doseNumber` counts the doses that COUNT (`ctx.doseNumber` is built from
+    // validate.js's `kept` list), because that is how CDC's catch-up table
+    // counts them: a PCV7, or a dose already rejected for spacing, is not a
+    // "previous dose" these cells are about.
+    interval: {
+      daysFrom: (anchor, ctx) => pcvNextDoseMinIntervalDays({
+        doseNumber: ctx.doseNumber,
+        ageAtPrevDose: anchor.ageAtDose,
+        // "current age" for a dose already given is the age AT that dose: the
+        // question is whether it was valid when it was administered, not
+        // whether it would be valid today.
+        currentAgeMonths: ctx.ageAtDose,
+        anyDoseBefore12: ctx.anyPriorDoseBefore12,
+      }),
+    },
     grace: true,
     enforcement: 'floor',
     authority: 'CDC',
-    source: 'CDC Catch-up Immunization Schedule, Table 2, column "Minimum Interval Between Doses": '
-      + '"4 weeks if first dose was administered before the 1st birthday / 8 weeks (as final dose '
-      + 'for healthy children) if first dose was administered at the 1st birthday or after". '
-      + 'immunize.org p2016 Table 1 footnote keys it the same way.',
+    source: 'CDC Catch-up Immunization Schedule, pneumococcal conjugate row, column "Minimum '
+      + 'Interval Between Doses" (fetched live 2026-10-23). Dose 1 to Dose 2: "4 weeks if first '
+      + 'dose was administered before the 1st birthday / 8 weeks (as final dose for healthy '
+      + 'children) if first dose was administered at the 1st birthday or after". Dose 2 to Dose 3: '
+      + '"4 weeks if current age is younger than 12 months and previous dose was administered at '
+      + '<7 months old / 8 weeks (as final dose for healthy children) if previous dose was '
+      + 'administered between 7-11 months (wait until at least 12 months old); OR if current age '
+      + 'is 12 months or older and at least 1 dose was administered before age 12 months". '
+      + 'Dose 3 to Dose 4: "8 weeks (as final dose)". The cells are transcribed in intervals.js, '
+      + 'which owns the function both this row and the scheduler call.',
     message: (ctx, anchor, min) => {
-      const minDays = pcvSeriesMinIntervalDays(anchor.ageAtDose);
       const gap = daysBetween(anchor.date, ctx.doseDate);
-      const band = anchor.ageAtDose != null && anchor.ageAtDose < 12
-        ? 'before 12 months of age'
-        : 'at 12 months of age or older';
+      // The number comes from `min` — resolved from this row's own `interval`
+      // — so the sentence is physically unable to name a different one from
+      // the number that decided the verdict (S6). It used to recompute it.
+      const band = anchor.ageAtDose == null
+        ? 'earlier'
+        : anchor.ageAtDose < 7
+          ? 'before 7 months of age'
+          : anchor.ageAtDose < 12
+            ? 'between 7 and 11 months of age'
+            : 'at 12 months of age or older';
       return {
-        reasons: [`Given ${fmtDayCount(gap)} after the previous dose — the minimum interval is ${fmtDays(minDays)} when the earlier dose was given ${band}.`],
-        detail: `Gap: ${fmtDayCount(gap)} since the dose of ${anchor.date}. Minimum: ${fmtDays(minDays)} (doses up to 4 days early still count, per CDC).`,
+        reasons: [`Given ${fmtDayCount(gap)} after the previous dose — for dose ${ctx.doseNumber} of the series, when the earlier dose was given ${band}, CDC's minimum interval is ${min.words}.`],
+        detail: `Gap: ${fmtDayCount(gap)} since the dose of ${anchor.date}. Minimum: ${min.words} (doses up to 4 days early still count, per CDC).`,
       };
     },
   },
@@ -761,12 +808,12 @@ function anchorAllowed(rule, anchor) {
 // `intervalMet` already extends in the same direction. Lets validate.js say
 // "the next dose is due on or after <date>" instead of "repeat this dose",
 // which is wrong for a dose that was never missing, only early.
-function earliestValidDate(rule, anchor) {
+function earliestValidDate(rule, anchor, ctx) {
   const grace = rule.grace ? GRACE_DAYS : 0;
   if (rule.interval.months != null) {
     return addDays(addCalendarMonths(anchor.date, rule.interval.months), -grace);
   }
-  const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor) : rule.interval.days;
+  const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor, ctx) : rule.interval.days;
   return addDays(anchor.date, minDays - grace);
 }
 
@@ -778,7 +825,7 @@ function intervalMet(rule, ctx, anchor) {
       ? calendarIntervalMeetsMinimum(anchor.date, rule.interval.months, ctx.doseDate)
       : calendarIntervalElapsed(anchor.date, rule.interval.months, ctx.doseDate);
   }
-  const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor) : rule.interval.days;
+  const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor, ctx) : rule.interval.days;
   const gap = daysBetween(anchor.date, ctx.doseDate);
   return rule.grace ? intervalMeetsMinimum(gap, minDays) : gap >= minDays;
 }
@@ -830,12 +877,12 @@ export function evaluateDoseInterval(ctx) {
     if (rule.catchAll && namedByRule) continue;
     if (intervalMet(rule, ctx, anchor)) { namedByRule = namedByRule || !rule.catchAll; continue; }
 
-    const msg = rule.message(ctx, anchor, intervalWords(rule, anchor));
+    const msg = rule.message(ctx, anchor, intervalWords(rule, anchor, ctx));
     if (rule.enforcement === 'floor') {
       return {
         kind: 'floor', ruleId: rule.id, authority: rule.authority,
         reasons: msg.reasons, detail: msg.detail,
-        earliestValidDate: earliestValidDate(rule, anchor),
+        earliestValidDate: earliestValidDate(rule, anchor, ctx),
       };
     }
     return { kind: 'recommendation', ruleId: rule.id, authority: rule.authority, reason: msg };
