@@ -1301,19 +1301,39 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       doseLabel: target === 1 ? '1 dose PCV (at-risk catch-up)' : `PCV dose ${doseNum} of 2 (at-risk catch-up)`,
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: pcvRecBrands({ adult: false }),
+      // C9 (2026-10-23). p2016 was listed on all 976 of these cards and credited
+      // with nothing. It is not a confirming source here: CDC's notes say "2
+      // doses PCV", and p2016's row is the only place on the card that names
+      // WHICH products and states the 8 weeks between them in one sentence —
+      // "2 doses of PCV20 or PCV15, given at least 8 weeks apart". So the
+      // products and the interval now point at the row they come from.
+      //
+      // The PCV15 sentence in the detail earns footnote ‡, which is the mark on
+      // the "PCV15" in that very cell. Reading the row without its footnote is
+      // what FINDING F cost 1,594 cards; here the footnote IS the sentence.
+      //
+      // `target` already selects the row (1 = row 2, "3 doses of PCV, all
+      // before 12 months"; 2 = row 1, "0, 1, or 2 PCV doses by age 24 months"),
+      // so the key follows `target` and needs no second test of its own.
       note: target === 1
         ? {
-          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].`,
+          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c].`,
           // FINDING G: "all before 12 months", which is what p2016's row says.
           // It used to read "before 24 months" — a looser claim than the row,
           // and one that described 32 children the row is not about.
-          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later.`,
+          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`,
         }
         : {
-          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} apart [c].`,
-          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV.`,
+          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
+          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`,
         },
-      noteCites: [cite('pedsRiskIncompleteCatchup')],
+      noteCites: [
+        cite('pedsRiskIncompleteCatchup'),
+        cite(target === 1
+          ? 'p2016AtRiskCatchup24to71ThreeBefore12'
+          : 'p2016AtRiskCatchup24to71Incomplete'),
+        cite('p2016Pcv15NeedsFurtherDoses'),
+      ],
       refs,
     }));
     return out;
