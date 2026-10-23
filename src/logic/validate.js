@@ -622,15 +622,32 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     key ? valid() : unknown(['Product not recorded — counted as a generic PCV dose.']),
     prod, ageAtDose, ageMonths
   );
+  const priorPcv = (ctxParts.priorPcv ?? []).filter((d) => d.date && d.date <= dose.date);
   return applyIntervalRules(result, {
     vaccine: 'PCV',
     product: key,
     doseDate: dose.date,
     ageAtDose,
     prev,
-    priorPcv: (ctxParts.priorPcv ?? []).filter((d) => d.date && d.date <= dose.date),
+    priorPcv,
     priorPpsv23: (ctxParts.priorPpsv23 ?? []).filter((d) => d.date && d.date <= dose.date),
     riskIds: ctxParts.riskIds ?? [],
+    // Two FACTS about this patient, added 2026-10-23 for CDC's Catch-up Table 2
+    // — which keys the PCV interval on the dose number as well as the two ages.
+    // They are built here because this is where every other ctx fact is built
+    // (`ageAtDose` above is the same kind of thing); the RULE still lives in the
+    // table, and this file still owns no interval logic. If you find yourself
+    // writing a number or a comparison against one here, it belongs there.
+    //
+    // `doseNumber` is this dose's position among the doses that COUNT, which is
+    // how a catch-up table counts them: `ctxParts.priorPcv` is validate.js's
+    // `kept` list, so a PCV7 and a dose already rejected for spacing are both
+    // absent, and the dose after a rejected one takes the rejected one's number.
+    doseNumber: priorPcv.length + 1,
+    anyPriorDoseBefore12: priorPcv.some((d) => {
+      const a = ageAtDoseFromDate(d, ageMonths, today, dob);
+      return a != null && a < 12;
+    }),
   });
 }
 

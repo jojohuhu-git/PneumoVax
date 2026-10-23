@@ -140,7 +140,9 @@ export function pcvSeriesMinIntervalDays(ageMonths) {
  *     7-11 months (wait until at least 12 months old); OR if current age is 12
  *     months or older and at least 1 dose was administered before age 12
  *     months"
- *   Dose 3 to Dose 4: "8 weeks (as final dose)"
+ *   Dose 3 to Dose 4: "8 weeks (as final dose) This dose is only necessary for
+ *     children age 12 through 59 months regardless of risk, or age 60 through
+ *     71 months with any risk, who received 3 doses before age 12 months."
  *
  * The "wait until at least 12 months old" parenthetical is not an interval, so
  * it is not returned here — the caller's own ≥12-month floor on the closing
@@ -159,14 +161,21 @@ export function pcvSeriesMinIntervalDays(ageMonths) {
  * @param {object} p
  * @param {number}  p.doseNumber        the dose about to be given (2, 3 or 4+)
  * @param {?number} p.ageAtPrevDose     age in months at the most recent counting dose
- * @param {number}  p.currentAgeMonths  the patient's age now
+ * @param {number}  p.currentAgeMonths  the age Table 2's "current age" means — the
+ *   patient's age now when advising a dose due today, the age AT the dose when
+ *   grading one already given
  * @param {boolean} p.anyDoseBefore12   was any counting dose given before 12 months?
+ * @param {?number} p.ageAtThisDose     age in months at which the judged dose is or
+ *   will be GIVEN. Defaults to `currentAgeMonths`, which is right for every dose
+ *   given or due today; the scheduler passes 12 for a final dose it is holding
+ *   back to the first birthday. Read only by the dose-4-and-beyond branch.
  */
 export function pcvNextDoseMinIntervalDays({
   doseNumber,
   ageAtPrevDose,
   currentAgeMonths,
   anyDoseBefore12,
+  ageAtThisDose = currentAgeMonths,
 }) {
   // Dose 1 to Dose 2 — keyed on the age at that first dose.
   if (doseNumber <= 2) {
@@ -194,8 +203,41 @@ export function pcvNextDoseMinIntervalDays({
     // aged 12 months or older.
     return PCV_MIN_INTERVAL_DAYS_FROM_12M;
   }
-  // Dose 3 to Dose 4 and anything beyond — a flat 8 weeks "(as final dose)".
-  return PCV_MIN_INTERVAL_DAYS_FROM_12M;
+  // Dose 4 and beyond. Table 2 prints one number here — "8 weeks (as final
+  // dose)" — but the SAME cell says what dose it is talking about: "This dose
+  // is only necessary for children age 12 through 59 months regardless of risk,
+  // or age 60 through 71 months with any risk, who received 3 doses before age
+  // 12 months." It is the 12-15-month BOOSTER, not a 4th dose given in infancy.
+  //
+  // OWNER RULING 2026-10-23, on a healthy 6-month-old with four PCV20 doses at
+  // 2.4, 3.3, 4.2 and 5.1 months, every gap 28 days:
+  //
+  //   "The 5.1-month dose does not count as the 4th (booster) dose. Treat it as
+  //    an extra infant dose. She still needs the booster at 12-15 months, >=8
+  //    weeks after the most recent dose. ... The 8-week number belongs to the
+  //    booster given at >=12 months. No interval can turn a 5-month dose into
+  //    the 4th dose, because the booster is defined by age, not by how many
+  //    doses came before it. ... The 4-week minimum applies to doses given
+  //    before 12 months. Doses at >=12 months need >=8 weeks between them. ...
+  //    Record the 5.1-month dose as extra. It isn't harmful and it isn't
+  //    counted toward completion. Nothing needs to be repeated or restarted."
+  //
+  // So the key here is the age at which THIS dose is given, which is also
+  // p2016 Table 1's footnote t read plainly ("for children younger than age 12
+  // months = 4 weeks; for children age 12 months or older = 8 weeks"). A flat
+  // 8 weeks rejected 132 valid extra infant doses when this function became the
+  // validity floor as well as the schedule.
+  //
+  // ⚠ `ageAtThisDose`, NOT the patient's age today. For a dose already given
+  // they are the same thing. For a dose not yet given they are not: the
+  // scheduler holds a series' final dose to 12 months, so the booster it
+  // advises for a 6-month-old will be given at >=12 months and owes 8 weeks,
+  // even though the child is 6 months old now. The caller passes the age the
+  // dose will be GIVEN; passing today's age here would advise 4 weeks for a
+  // booster, which is the mirror image of the bug this ruling fixed.
+  return ageAtThisDose != null && ageAtThisDose < 12
+    ? PCV_MIN_INTERVAL_DAYS_UNDER_12M
+    : PCV_MIN_INTERVAL_DAYS_FROM_12M;
 }
 
 /**

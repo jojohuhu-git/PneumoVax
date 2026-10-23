@@ -399,22 +399,21 @@ function pcvInfant(am, riskIds, pcv, today) {
   // 12.2-month-old whose previous dose was at 11.5 months gets 4 weeks as
   // dose 2 and 8 weeks as dose 3. See intervals.js for the quoted cells.
   //
-  // The VALIDITY FLOOR is deliberately untouched (owner decision 2): a dose
-  // already given is still graded by doseIntervalRules.js's more permissive
-  // reading, so nothing a clinician already did is retroactively invalidated.
-  // Only what the app advises changes.
-  // Keyed off `anchor`, not off `prior`: an interval only exists when there is
-  // a DATED earlier dose to measure it from. With no prior dose (or only
-  // undated ones) the honest answer is null, not a number nothing was measured
-  // against — dueState short-circuits on a null anchor anyway.
-  const minInterval = anchor
-    ? pcvNextDoseMinIntervalDays({
-      doseNumber: prior + 1,
-      ageAtPrevDose: pcv.lastAgeAtDose,
-      currentAgeMonths: am,
-      anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
-    })
-    : null;
+  // The VALIDITY FLOOR used to be deliberately untouched (owner decision 2 of
+  // 2026-10-11): a dose already given was graded by a MORE PERMISSIVE reading,
+  // so nothing a clinician had done was retroactively invalidated. OWNER
+  // DECISION 2026-10-23 REVERSED THAT. Shown a 15-month-old whose third dose
+  // came 4 weeks after a dose at 11.3 months, she ruled that it "does not
+  // satisfy the required interval and does not count" — and the app had been
+  // advising 8 weeks for that very dose while accepting 4. Both sides now call
+  // `pcvNextDoseMinIntervalDays`, so there is one reading of CDC Table 2 and
+  // not two. See `doseIntervalRules.js`'s `CHILD-PCV-AFTER-PCV` row and
+  // `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`.
+  //
+  // The interval is computed BELOW rather than here, after `needs12moFloor` is
+  // known, because the dose-4-and-beyond cell keys on the age at which the dose
+  // will be GIVEN, and a final dose this function is holding back to the first
+  // birthday will be given at 12 months however old the child is today.
 
   // ── The series total: immunize.org p2016 Table 1, cell by cell ──────────
   //
@@ -566,11 +565,32 @@ function pcvInfant(am, riskIds, pcv, today) {
 
   const remaining = Math.max(1, target - prior);
   const doseNum = prior + 1;
-  const { dueToday, earliestNextDate } = dueState(anchor, minInterval, today);
   // The final dose must be at ≥12 months — if this is the last dose and the
   // child is <12mo, it is not due until 12 months.
   const isFinal = remaining === 1;
   const needs12moFloor = isFinal && am < M.m12;
+  // ── The interval to the NEXT dose: CDC Catch-up Table 2, dose by dose ──
+  //
+  // Keyed off `anchor`, not off `prior`: an interval only exists when there is
+  // a DATED earlier dose to measure it from. With no prior dose (or only
+  // undated ones) the honest answer is null, not a number nothing was measured
+  // against — dueState short-circuits on a null anchor anyway.
+  //
+  // `ageAtThisDose` is the age at which the advised dose will be GIVEN, which
+  // is 12 months exactly when `needs12moFloor` is holding it to the first
+  // birthday — the owner's 2026-10-23 ruling that "the booster is defined by
+  // age, not by how many doses came before it". Passing `am` there would advise
+  // 4 weeks for a 6-month-old's booster, which she ruled owes 8.
+  const minInterval = anchor
+    ? pcvNextDoseMinIntervalDays({
+      doseNumber: prior + 1,
+      ageAtPrevDose: pcv.lastAgeAtDose,
+      currentAgeMonths: am,
+      anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
+      ageAtThisDose: needs12moFloor ? M.m12 : am,
+    })
+    : null;
+  const { dueToday, earliestNextDate } = dueState(anchor, minInterval, today);
   const due = needs12moFloor ? false : dueToday;
 
   return [rec({
