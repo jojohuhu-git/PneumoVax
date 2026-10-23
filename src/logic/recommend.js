@@ -1311,11 +1311,42 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     out.push(rec({
       vaccine: 'PCV', status: 'complete',
       doseLabel: 'PCV series complete (PCV before age 6 + PPSV23)',
+      // OWNER DECISION 2026-10-23, in her words: *"her series is complete based
+      // on the following recommendation"*, linking CDC's Age 6-18 row "Received
+      // PCV before age 6 years but have not received PPSV23 -> Not previously
+      // received PCV20: 1 dose PCV20 or 1 dose PPSV23 administer at least 8
+      // weeks after the most recent PCV dose".
+      //
+      // The parent bullet says "have not received PPSV23" and this child HAS
+      // one, which is why the document looked silent here and sat on 145 cards
+      // as a grey button no number pointed at. Her reading settles it: that row
+      // is what ORDERED the dose, and the dose has been given — so the card
+      // credits the row it followed and says so, exactly as she ruled on
+      // 2026-10-18 for the 17-year-old whose PCV20 satisfied a row.
+      //
+      // This is NOT a licence to quote a nested sub-bullet at anyone whose
+      // history contradicts its parent. FINDING K's rule stands untouched: the
+      // "Previously received at least 1 dose of PCV20: no further doses" line
+      // orders nothing, so a child who also has a PPSV23 cannot have followed
+      // it, and `regression-finding-k-...` still fails if it is quoted to them.
+      //
+      // p2016's row for the same history is footnoted on the very column that
+      // appears to exclude this child, and the footnote is the answer: § "If
+      // PPSV23 previously given, then child is complete" for the non-IC row,
+      // and ǁ for the IC row, which gives options rather than completion.
+      // Both read from a live download today. With these, every document listed
+      // on this card is credited.
       note: {
         lead: 'No further PCV or PPSV23 is needed — the paediatric high-risk series is complete [c].',
-        detail: 'All conjugate doses on record were given before age 6 (72 months) and PPSV23 has been received, which completes the series. Verified against CDC PneumoRecs VaxAdvisor: "only received PCV before age 72 months" plus PPSV23 received → complete. PCV7 doses are never counted toward the series.',
+        detail: `All conjugate doses on record were given before age 6 (72 months)${isIC ? ' and both PPSV23 doses have been received' : ' and PPSV23 has been received'}, which completes the series. ${isIC
+          ? "CDC's row for an immunocompromised child this age asks for a PPSV23 and then, at least 5 years later, a PCV20 or a second PPSV23 — and both doses have been given [c]. immunize.org p2016 sets out the same two options for a child in this position [c]."
+          : "CDC's row for a child this age who received PCV before age 6 and had not yet had PPSV23 asks for one dose of PCV20 or PPSV23, and that dose has been given [c]. immunize.org p2016 states the completion outright in the footnote on that row [c]."} PCV7 doses are never counted toward the series.`,
       },
-      noteCites: [cite('pedsBefore6NoPcv20')],
+      noteCites: [
+        cite('pedsBefore6NoPcv20'),
+        cite(isIC ? 'pedsIcBefore6NoPcv20At6to18' : 'pedsRiskBefore6NoPcv20At6to18'),
+        cite(isIC ? 'p2016Before6PpsvGivenIcOptions' : 'p2016Before6PpsvGivenComplete'),
+      ],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', 'p2016'], 'child'),
     }));
     return out;

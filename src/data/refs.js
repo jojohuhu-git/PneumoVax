@@ -573,6 +573,45 @@ export const REFS = {
     pdfPage: 2,
     lastVerified: '2026-10-18',
   },
+  // The two FOOTNOTES on Table 4's rows 6 and 7 (2026-10-23).
+  //
+  // Both rows are headed "(no PCV20, no PPSV23)" with a footnote mark on the
+  // PPSV23 half, and the footnote is what the row says about a child who HAS
+  // had one. They are the reason those rows speak for a patient the column
+  // heading appears to exclude — the same shape as FINDING F, where five
+  // approved removals turned out to be printed in a table nobody had opened.
+  //
+  // Read from a live download 2026-10-23: HTTP 200, 211,252 bytes,
+  // application/pdf, sha1 d69cf77055182b27cf6774b087138c3617068737, "Item
+  // #P2016 (2/16/2024)", laid out with `scripts/pdfLayout.py` so each cell
+  // stays tied to its own row and column. Both footnotes sit at the foot of
+  // page 2, beneath Table 4.
+  p2016Before6PpsvGivenComplete: {
+    rulebook: 'child',
+    // Patients this footnote is about: it is footnote § on the row "2 through
+    // 18 years (non-IC only)", so the non-IC list only. The IC row carries a
+    // different footnote, below, which does NOT say complete.
+    population: ['child-nonIC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4, footnote § — a non-immunocompromised child who completed the PCV series before age 6 and has already had PPSV23 is complete',
+    short: 'immunize.org p2016',
+    quote: 'If PPSV23 previously given, then child is complete.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
+  p2016Before6PpsvGivenIcOptions: {
+    rulebook: 'child',
+    // Patients this footnote is about: footnote ǁ on the row "2 through 18
+    // years (IC only)". Note what it does NOT say: an immunocompromised child
+    // with one PPSV23 is not complete — one more dose is owed, five years on.
+    population: ['child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 4, footnote ǁ — an immunocompromised child who completed the PCV series before age 6 and has already had PPSV23 owes one further dose',
+    short: 'immunize.org p2016',
+    quote: 'If PPSV23 previously given, options are (a) give one dose of PCV20 at least 8 weeks after most recent pneumococcal vaccination, or (b) give a second dose of PPSV23 five years after the first dose of PPSV23.',
+    pdfPage: 2,
+    lastVerified: '2026-10-23',
+  },
   // Table 2, the HEALTHY 24–59 month catch-up row, read live 2026-10-22 with
   // `scripts/pdfLayout.py`. Its three columns, in full:
   //   Child's age now                           | 24 through 59 months
