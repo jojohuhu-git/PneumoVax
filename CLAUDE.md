@@ -373,6 +373,46 @@ pinned by name, as is the set of sources spanning more than one group. **Never w
 source's `population` to make a wrong quote legal** — that is the one mutation that made the
 sweep go quiet, which is why both lists are pinned. Fix the call site instead.
 
+### The App Advises And Grades By One Number — CDC Catch-up Table 2
+**OWNER DECISION 2026-10-23, and it REVERSES owner decision 2 of 2026-10-11.** A PCV dose
+given too soon **does not count**. The floor and the scheduler now call the same function,
+`pcvNextDoseMinIntervalDays()` in `intervals.js`, which is CDC's Catch-up Table 2 cell by
+cell. **Never give the two sides separate readings of one table again** — that is the bug
+this fixed: the app told a clinician to wait until 2026-08-15 for a dose and then accepted
+it on 2026-07-18, silently, for the same child. `intervals.js` had named the divergence in
+careful prose and left both readings live; **prose does not fail CI**.
+
+The patient who found it (she was shown her for a *citation* question): a 15-month-old with
+asplenia, PCV20 at 10.4, 11.3 and 12.2 months, every gap 28 days. Her words — *"it does not
+satisfy the required interval and does not count. She needs 1 additional dose of PCV20 at
+>=12 months of age … she is 15 months now, so it can be given today."* Moved **220 of
+17,016** verdicts and 275 of 18,264 record-problem rows.
+
+**The booster is defined by AGE, not by how many doses came before it** (same day, second
+ruling — it cut the blast radius from 352 patients to 220). A 4th dose given **below 12
+months** is a valid **extra infant dose** at the 4-week minimum; CDC's flat "8 weeks (as
+final dose)" belongs to the **>=12-month booster**, which that cell's own text says. So the
+dose-4-and-beyond branch keys on `ageAtThisDose` — the age at which THAT dose is or will be
+given — and `recommend.js` passes **12 months** for a final dose it is holding back to the
+first birthday. Passing the patient's age today there advises 4 weeks for a booster, the
+mirror image of the bug. Her words: *"Record the 5.1-month dose as extra. It isn't harmful
+and it isn't counted toward completion. Nothing needs to be repeated or restarted."*
+
+**Her proviso, and it is guarded:** *"if a later dose given helps correct the mistake in
+giving a vaccine early, this should be noted and marked as complete if appropriate."* The
+rejected dose stays on the record with its explanation; a properly spaced later dose is
+credited and the series reads Complete. Verified in the running app, not inferred.
+
+**ACIP confirms the anchor the engine already used** (General Best Practices, timing and
+spacing, read live 2026-10-23): *"The repeat dose should be spaced after the invalid dose by
+the recommended minimum interval."* So one early dose can legitimately void the next one
+too. **Still open and NOT to be changed without her:** the *recommendation* side anchors the
+next dose to the last **valid** dose, which is an earlier date than ACIP's sentence implies.
+
+Guard: `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`. `regression-p0-2`'s
+"the validity floor is untouched" block asserted the opposite and is **kept, renamed**, as
+the record of the reversal — do not delete it.
+
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
 
