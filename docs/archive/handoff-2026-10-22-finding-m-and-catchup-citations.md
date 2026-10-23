@@ -1,3 +1,13 @@
+> ## ⚠ SUPERSEDED — 2026-10-23
+>
+> **This queue has been consumed.** Continue from
+> [`handoff-2026-10-23-cdc-child-notes-finished.md`](handoff-2026-10-23-cdc-child-notes-finished.md).
+>
+> Also out of date here: the PR section. PR #74 was MERGED on 2026-10-23 and PR #73 was
+> CLOSED as redundant (its commits were already inside #74), so nothing from those sessions
+> is pending. And CDC's Child/Adolescent Notes — listed below as 8 statements over 1,107
+> cards — are now FINISHED, with zero uncredited pairs.
+
 # PneumoVax — Handoff after FINDING M and the healthy 24–59 month citations (2026-10-22)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
