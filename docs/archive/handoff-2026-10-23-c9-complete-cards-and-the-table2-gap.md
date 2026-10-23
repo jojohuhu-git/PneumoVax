@@ -1,5 +1,14 @@
 # PneumoVax — Handoff after the "complete" cards' citations, and a Table 2 gap (2026-10-23)
 
+> ## ⚠ SUPERSEDED — do not work this queue
+>
+> Consumed on 2026-10-23 by the session that produced
+> `docs/archive/handoff-2026-10-23-c9-healthy-5to18-cdc-over-p2016.md`. **Go there instead.**
+>
+> Its P0 (the Table 2 5–18 gap) is SETTLED: the owner answered with a general rule —
+> *"Ok to cite p2016 if you cannot just cite the CDC references"* — and p2016 came off that
+> card in `3c246a7`. The queue table below is also stale: 24 pairs is now 23.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json` —
 **it reported port 63441 and actually served 5174 this session; always read the real port
