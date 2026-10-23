@@ -1,5 +1,19 @@
 # PneumoVax — Handoff after finishing CDC's Child/Adolescent Notes (2026-10-23)
 
+> ## ⚠ SUPERSEDED — do not work this queue
+>
+> Consumed on 2026-10-23 by the session that produced
+> `docs/archive/handoff-2026-10-23-p0-dose3-floor-and-c9-p2016.md`. **Go there instead.**
+>
+> What changed, so you do not act on this file's numbers: that session's first act was to
+> show the owner a patient from the p2016 queue below, and she found a clinical bug in it —
+> a PCV dose given 4 weeks after a dose at 7–11 months was being accepted while the app
+> advised 8 weeks for the same dose. Fixing it (PR #76) moved 220 verdicts, dissolved
+> several card classes the grid could reach, and changed the pair count. **Every count in
+> this file is stale**: it says 38 uncredited pairs and 1,371 passing tests; the live
+> figures are in the newer handoff. Two of its three queue items were then started (p2016
+> Table 4's 24–71 month rows and its 6–18 "no prior conjugate" rows, PR #77).
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json`
 (reported and served on 5173 this session; still read the real port from `preview_logs`).

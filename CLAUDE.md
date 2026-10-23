@@ -93,6 +93,44 @@ open owner decision she has asked not to be re-raised.** Readings, dispositions 
 `npx vite-node scripts/uncreditedSources.mjs` and `scripts/citationMapping.mjs` — never
 quote a count from the log, which predates the IC-children fix and reads low.
 
+**A DOCUMENT THAT ORDERS A DOSE DOES NOT THEREBY SAY THE PATIENT IS FINISHED** (OWNER
+DECISIONS 2026-10-23, both from "complete because PPSV23 was given" cards). Three card
+families tell an at-risk child her series is done because she has had her PPSV23, and the
+owner split them by HISTORY, not by wording:
+
+- **p2016 comes OFF the at/after-6 cards (840).** An 18-year-old with a cochlear implant,
+  PCV13 at 8, PPSV23 at 13: p2016's rows 8/9 fit her history, but their Option B only
+  ORDERS the PPSV23 she has had and neither row says what follows. Footnote § ("If PPSV23
+  previously given, then child is complete") is the mark on rows **4/5**, whose column
+  reads "Completed PCV series BEFORE age 6 years" — she fails it. CDC's notes state her
+  whole claim verbatim, so nothing rested on p2016. *"Take p2016 off."*
+- **ACIP mm7137a3 — not p2016 § — is cited on the before-6 cards (20).** Offered § for the
+  word "complete", the owner declined: *"p2016 doesn't cite this case. The MMWR pediatric
+  PCV15 paper should."* § ASSERTS completeness; ACIP's pair EXPLAINS it — a single dose of
+  PPSV23 after the PCV doses, and a SECOND dose only for an immunocompromising condition.
+  One dose, no second unless IC, is why a non-IC child is finished.
+  `pedsRiskSinglePpsv23AfterPcv`, read live 2026-10-23.
+
+**A card whose citation ORDERS a dose must say that dose has been given**, or the number
+reads as an outstanding order on a card saying nothing is needed — this is the 2026-10-18 /
+2026-10-23 "cite the row the patient FOLLOWED" rule, and these cards are where it was
+first applied to a card that had none of its own words saying so.
+
+**The paediatric block now asks per card too.** `pcvRiskChild` computed one `refs` list and
+spread it over every card it builds — the exact shape this section forbids, and the origin
+of the owner's question. Use `childRefs` / `childRefsExcept` / `childRefsSwap`, the twin of
+`adultRefs`. Never reuse `refs` for a card a document is silent on.
+
+**AND A FALSE FINDING, recorded so it is not re-made.** The first draft added an `isIC`
+wording branch to the 24-71-month card, claiming its gate let an IC child reach a note
+hard-coded "(non-immunocompromising)". That is impossible by ARITHMETIC: a first PPSV23
+cannot count before 24 months and a second needs >=5 years after it, so two counting doses
+cannot exist before ~84 months, past the block's 71-month ceiling (0 reachable combinations
+over every age 24-71 and every date pair). **Before adding a branch for an unreachable
+state, prove the state is reachable** — a branch nothing can execute cannot be tested. The
+unreachability is guarded instead, so moving that interval fails a test.
+Guard: `regression-c9-2026-10-23-complete-after-ppsv23-cards.test.js`.
+
 **A disposition does not always split by AGE.** mm7401a1's table answers one history —
 PCV13 + PPSV23 — in three different rows, and in the **IMMUNOCOMPROMISING** block below 50
 which row speaks depends on how many PPSV23 doses actually COUNTED (one dose: "the series is
@@ -372,6 +410,46 @@ the patient is not — via `cite(key, { aboutAnotherGroup: 'why' })`. There are 
 pinned by name, as is the set of sources spanning more than one group. **Never widen a
 source's `population` to make a wrong quote legal** — that is the one mutation that made the
 sweep go quiet, which is why both lists are pinned. Fix the call site instead.
+
+### The App Advises And Grades By One Number — CDC Catch-up Table 2
+**OWNER DECISION 2026-10-23, and it REVERSES owner decision 2 of 2026-10-11.** A PCV dose
+given too soon **does not count**. The floor and the scheduler now call the same function,
+`pcvNextDoseMinIntervalDays()` in `intervals.js`, which is CDC's Catch-up Table 2 cell by
+cell. **Never give the two sides separate readings of one table again** — that is the bug
+this fixed: the app told a clinician to wait until 2026-08-15 for a dose and then accepted
+it on 2026-07-18, silently, for the same child. `intervals.js` had named the divergence in
+careful prose and left both readings live; **prose does not fail CI**.
+
+The patient who found it (she was shown her for a *citation* question): a 15-month-old with
+asplenia, PCV20 at 10.4, 11.3 and 12.2 months, every gap 28 days. Her words — *"it does not
+satisfy the required interval and does not count. She needs 1 additional dose of PCV20 at
+>=12 months of age … she is 15 months now, so it can be given today."* Moved **220 of
+17,016** verdicts and 275 of 18,264 record-problem rows.
+
+**The booster is defined by AGE, not by how many doses came before it** (same day, second
+ruling — it cut the blast radius from 352 patients to 220). A 4th dose given **below 12
+months** is a valid **extra infant dose** at the 4-week minimum; CDC's flat "8 weeks (as
+final dose)" belongs to the **>=12-month booster**, which that cell's own text says. So the
+dose-4-and-beyond branch keys on `ageAtThisDose` — the age at which THAT dose is or will be
+given — and `recommend.js` passes **12 months** for a final dose it is holding back to the
+first birthday. Passing the patient's age today there advises 4 weeks for a booster, the
+mirror image of the bug. Her words: *"Record the 5.1-month dose as extra. It isn't harmful
+and it isn't counted toward completion. Nothing needs to be repeated or restarted."*
+
+**Her proviso, and it is guarded:** *"if a later dose given helps correct the mistake in
+giving a vaccine early, this should be noted and marked as complete if appropriate."* The
+rejected dose stays on the record with its explanation; a properly spaced later dose is
+credited and the series reads Complete. Verified in the running app, not inferred.
+
+**ACIP confirms the anchor the engine already used** (General Best Practices, timing and
+spacing, read live 2026-10-23): *"The repeat dose should be spaced after the invalid dose by
+the recommended minimum interval."* So one early dose can legitimately void the next one
+too. **Still open and NOT to be changed without her:** the *recommendation* side anchors the
+next dose to the last **valid** dose, which is an earlier date than ACIP's sentence implies.
+
+Guard: `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`. `regression-p0-2`'s
+"the validity floor is untouched" block asserted the opposite and is **kept, renamed**, as
+the record of the reversal — do not delete it.
 
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
