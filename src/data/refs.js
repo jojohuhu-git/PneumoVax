@@ -208,6 +208,43 @@ export const REFS = {
     quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
     lastVerified: '2026-10-16',
   },
+  // C8, CDC Adult Notes' last uncredited statement (2026-10-22). On the
+  // 19-49 immunocompromising / cochlear implant / CSF leak card the INTERVAL
+  // sentence cites ACIP (the 8 weeks), so CDC's notes sat on the card as a
+  // grey button that no number pointed at -- on 25 cards. This is what they
+  // are credited FOR: the requirement itself, that a PCV15 is not a complete
+  // series until the PPSV23 is given.
+  //
+  // Read live 2026-10-22 with the pneumococcal accordion panels expanded and
+  // walked as nested <li> elements, not as flat text (FINDING K's lesson).
+  // The sentence is printed TWICE, identically -- under "Age 50 years or
+  // older who have:" in the routine panel and under "Age 19-49 years with
+  // certain underlying medical conditions or other risk factors** who have:"
+  // in the special-situations panel -- so it is about both adult bands. In
+  // each place its parent is "Not previously received a PCV13, PCV15, PCV20,
+  // or PCV21 ... : 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21", i.e. the
+  // row that CALLED FOR the PCV15 this patient has already had; the quoted
+  // clause is that row's own instruction for what follows it. Same shape as
+  // the owner's 2026-10-18 ruling on the 576 ("cite the row the dose
+  // satisfied"), and the app already reads it this way for the >=1-year
+  // patients through `adultPcv15ThenPpsv`.
+  //
+  // The quote stops at "1 dose PPSV23" ON PURPOSE. CDC's sentence continues
+  // "at least 1 year after the PCV15 dose", and this patient is being told 8
+  // weeks on ACIP's recommendation. Quoting the year to her would be a
+  // right-sounding sentence aimed at the wrong patient. The INTERVAL has one
+  // home and it is not here: `adultPcv15ThenPpsvShort`.
+  adultPcv15NeedsPpsvCompletion: {
+    rulebook: 'adult',
+    // Patients this sentence is about: printed identically under the >=50
+    // parent and the 19-49 at-risk parent, so both.
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal: a PCV15 is not a complete series on its own; a PPSV23 must follow it. Cited for the REQUIREMENT, never for the interval — this card states ACIP\'s 8 weeks, which has its own citation',
+    short: 'CDC Adult Notes',
+    quote: 'If PCV15 is used, administer 1 dose PPSV23',
+    lastVerified: '2026-10-22',
+  },
   // S15 (2026-10-16). The citation for the OTHER half of the rule: a 19-49
   // adult with an immunocompromising condition, cochlear implant or CSF leak
   // is told >=8 weeks, so the quote beside that card has to be the sentence

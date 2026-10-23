@@ -99,6 +99,12 @@ describe('the field itself', () => {
     const spanning = quotedKeys.filter((k) => REFS[k].population.length > 1).sort();
     expect(spanning).toEqual([
       'adultPcv13Only',           // printed identically in both adult blocks
+      // 2026-10-22: read live with the accordion panels expanded and walked
+      // as nested <li>s. "If PCV15 is used, administer 1 dose PPSV23 ..."
+      // is printed TWICE, word for word -- under "Age 50 years or older"
+      // in the routine panel and under "Age 19-49 years with certain
+      // underlying medical conditions" in the special-situations panel.
+      'adultPcv15NeedsPpsvCompletion', // the same sentence in both adult blocks
       'adultPcv15ThenPpsv',       // printed identically in both adult blocks
       'adultPcv20or21Complete',   // its own words: "Adults aged 19 years and older"
       'adultPcv7Only',            // printed identically in both adult blocks

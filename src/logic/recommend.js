@@ -1668,6 +1668,25 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
     ? [cite('mmwrNoneOrPcv7Only')]
     : [];
   const mmwrNoneRowMarker = mmwrNoneRowCites.length ? ' [c]' : '';
+  // C8, CDC Adult Notes' last uncredited statement (2026-10-22), 25 cards.
+  // The PCV15->PPSV23 card carries a grey button for CDC's Adult Schedule
+  // Notes. At >=50, and at 19-49 with chronic conditions only, the INTERVAL
+  // sentence already cites them (`adultPcv15ThenPpsv`, the year), so the
+  // button has a number. At 19-49 with an immunocompromising condition,
+  // cochlear implant or CSF leak the interval sentence cites ACIP instead
+  // (the 8 weeks), and the notes were left on the card with nothing pointing
+  // at them. This credits them for the claim they DO state for her -- that a
+  // PCV15 is not a complete series until the PPSV23 is given.
+  //
+  // Conditional for the reason recorded a few lines above for
+  // `mmwrNoneRowCites`: a document must not take a SECOND number on a card
+  // that already cites it. Keyed on `ppsvIntervalCite`, which IS the one S15
+  // risk-class decision -- never a second age test and never a second
+  // risk-class test.
+  const notesCompletionCites = ppsvIntervalCite === 'adultPcv15ThenPpsvShort'
+    ? [cite('adultPcv15NeedsPpsvCompletion')]
+    : [];
+  const notesCompletionMarker = notesCompletionCites.length ? ' [c]' : '';
   const adultBrands = pcvRecBrands({ adult: true });
 
   // 19–49 with NO risk → not indicated (routine starts at 50).
@@ -1731,12 +1750,21 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       brands: ['PPSV23 (Pneumovax 23)'],
       note: {
         lead: `Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose [c] — the series is INCOMPLETE until then.${shorterMinimumNote}`,
-        detail: 'PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete [c].',
+        detail: `PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given${notesCompletionMarker}. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete [c].`,
       },
       // C8, document 2's CITE: the substitution sentence is the job aid's
       // footnote and NOTHING ELSE in the app's source set states it, so this
       // claim had no citation of any kind before now.
-      noteCites: [cite(ppsvIntervalCite), ...shorterMinimumCites, cite('jobAidPpsv23Unavailable')],
+      //
+      // C8, CDC Adult Notes' last statement (2026-10-22): `notesCompletion*`
+      // credits the notes for the REQUIREMENT that a PPSV23 follow a PCV15.
+      // See its definition above for why it is conditional.
+      noteCites: [
+        cite(ppsvIntervalCite),
+        ...shorterMinimumCites,
+        ...notesCompletionCites,
+        cite('jobAidPpsv23Unavailable'),
+      ],
       refs: refsWithoutMmwr,
     })];
   }
