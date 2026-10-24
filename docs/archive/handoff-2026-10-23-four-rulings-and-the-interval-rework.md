@@ -1,5 +1,13 @@
 # PneumoVax — Handoff after the P0 citation measurement and four owner rulings (2026-10-23)
 
+> **SUPERSEDED (2026-10-23)** — its P0 item (C10-1, the citation pass) is done and shipped as
+> [PR #81](https://github.com/jojohuhu-git/PneumoVax/pull/81); immunize.org p2016 is now at zero
+> uncredited pairs and the whole-app count is 23 → 1. Its instruction that **PR #76 must be
+> CLOSED is also out of date**: #76 was merged, and the merge was a verified no-op (the trees
+> before and after are byte-identical), so there is nothing to undo. Read
+> `handoff-2026-10-23-c10-1-p2016-table1-citations.md` instead. **Rulings C and D are still
+> live** and are carried forward there as C10-2.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json` — always
 read the real port from `preview_logs`. What the app is: a client-side React SPA giving
