@@ -1,3 +1,9 @@
+> **SUPERSEDED (2026-10-24)** by
+> `handoff-2026-10-24-c11-grace-and-the-adult-families.md`. Its question 1 (the 4-day
+> grace) is ANSWERED and shipped as C11; its question 2 (the adult extension) is now
+> split into three clinical families and is an open owner decision. Do not resume from
+> this file.
+
 # PneumoVax — Handoff after RULING D, the repeat-dose anchor (2026-10-23)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
