@@ -1,5 +1,19 @@
 # PneumoVax — Handoff after C10-1, the p2016 Table 1 citation pass (2026-10-23)
 
+> ## ⚠ SUPERSEDED — do not work this queue
+>
+> Consumed on 2026-10-23 by the session that produced
+> `docs/archive/handoff-2026-10-23-c10-2-routine-date-vs-minimum.md`. **Go there instead.**
+>
+> Its P1 item **C10-2 is done and shipped** as
+> [PR #82](https://github.com/jojohuhu-git/PneumoVax/pull/82) — the routine-date/minimum split
+> AND the catch-up chip, which it had listed as a separate item. Its instruction to merge
+> **PR #80 is out of date** (#80 merged, which is what left #81 behind its base; #81 has since
+> been brought up to date and is CLEAN). The ⚠ it raised against ruling D — "check for
+> pneumococcal-specific guidance that overrides the general rule" — **has been answered: there
+> is none**, and the evidence is in the new handoff.
+
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json` — always
 read the real port from `preview_logs`. What the app is: a client-side React SPA giving
