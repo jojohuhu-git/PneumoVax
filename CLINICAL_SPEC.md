@@ -1278,3 +1278,80 @@ not implemented here (§B owns that age band).
 `pcvNextDoseMinIntervalDays()` is in `intervals.js`, **not** in `doseIntervalRules.js`. That
 table owns gaps between doses **already recorded**; this answers what to advise for a dose
 not yet given. Do not move it there, and do not key a table row off it.
+
+### §L-2 — C10-2 (2026-10-23): the advised date is the ROUTINE one; the minimum is stated beside it
+
+⚠ **THIS REVERSES OWNER DECISION 3 ABOVE**, which declined "a separate 'recommended'
+interval layered over Table 2's number". It is reversed by two LATER owner rulings of
+2026-10-23, and the difference between what was declined then and what is built now matters:
+
+* **Declined 2026-10-11:** a *blanket* 8-week recommendation at every infant interval.
+* **Built 2026-10-23:** 8 weeks **only where a p2016 Table 1 catch-up row states it**
+  (ages 7–23 months — all eight rows say 8 weeks), and in the routine 2–6-month band
+  **CDC's routine AGES** instead (2, 4, 6, 12–15 months). The 2–6-month band is
+  deliberately NOT given the 8 weeks: p2016's rows there read "4 doses … last dose at age
+  12–15 months" and, as C7's reading of the PDF recorded, p2016 "never prints the 2/4/6
+  months", so no document on the card would state it.
+
+**RULING A (2026-10-23)** ranks the paediatric documents — CDC/ACIP schedule Notes →
+immunize.org p2016 → CDC catch-up table — on the strength of the catch-up page's own
+sentence, read live 2026-10-23: *"Always use this table in conjunction with Table 1 and the
+Notes that follow."* So where p2016 states a spacing, p2016's number is the **advice** and
+the catch-up table's is the **floor**.
+
+**RULING C (2026-10-23)** is the limit: *"the validity floor does NOT change. A dose already
+given is graded by the rule that applied to that dose. Only the recommended number moves."*
+
+#### The rule, as implemented
+
+| Child | Advised date for the next PCV dose |
+|---|---|
+| 2–6 months (routine band, no Table 1 row) | the routine **age** for that dose number — 2, 4, 6 months; the closing dose at ≥12 months |
+| 7–23 months (a Table 1 catch-up row governs) | **8 weeks** after the most recent dose |
+| any child whose routine date has already passed | the **minimum** — the routine term stops binding and the advice collapses to the floor |
+
+The advised date is the **latest** of the minimum date, the 8-week spacing date (where a row
+states it) and the routine-age date. That single `max` is also the answer to "what about a
+child genuinely behind": she has no routine date left, so the minimum is what remains.
+**Nothing is ever advised earlier than the floor allows** — measured over 3,305 cards, 145
+moved later and 0 earlier.
+
+#### Both numbers go on the card, and that is not optional
+
+The P0 fix of the same day removed a state where the app named one date and then silently
+accepted a dose given earlier. Rulings A and C together deliberately re-create two numbers
+(advise 8 weeks, accept 4), so the card **states** the minimum rather than hiding it:
+
+> The next dose is due at age 6 months, following the routine 2, 4, 6 and 12–15 month
+> series; it can be given today if needed, as the minimum interval of 4 weeks has already
+> passed [2]; the final/booster dose is given at ≥12 months.
+
+A second number the reader can see is not the P0 bug; an invisible one is.
+
+#### Who is cited for which number
+
+Each clause credits the one document whose own words carry it — the advice and the floor now
+come from **different documents**, which is why they are cited separately:
+
+| Number on the card | Document cited |
+|---|---|
+| the routine ages | CDC Child/Adolescent Notes, "4-dose series at 2, 4, 6, 12–15 months" |
+| the 8-week catch-up spacing | the p2016 Table 1 row this child keyed on |
+| the minimum interval | **CDC's Catch-up Immunization Schedule, Table 2** — the cell the engine actually used |
+
+CDC's catch-up schedule had appeared on **no card in the app** before C10-2, while being the
+document `intervals.js` is built from cell by cell. The owner ruled on 2026-10-23: *"add a
+refs.js entry for CDC's Catch-up Immunization Schedule and cite it for the INTERVAL cells
+only (dose 1→2, 2→3, 3→4), never for a total."* Five cell entries plus one whole-page entry
+are in `refs.js`, read live 2026-10-23.
+
+**The cell is returned by the same call that returns the number** —
+`pcvNextDoseMinIntervalCell()` in `intervals.js`, which `pcvNextDoseMinIntervalDays()` now
+wraps. A caller that re-tested the ages to pick a citation would be a *third* reading of
+Table 2, free to drift from the figure it cites; two readings is precisely the P0 bug.
+
+#### Where it lives
+
+`pcvInfant()` in `recommend.js`. The guard is
+`regression-c10-2-2026-10-23-routine-date-recommended-minimum-commented.test.js`, proved
+load-bearing four ways (4 / 3 / 3 / 2 failing tests when each clause is broken separately).

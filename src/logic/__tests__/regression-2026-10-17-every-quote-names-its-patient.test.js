@@ -108,6 +108,22 @@ describe('the field itself', () => {
       'adultPcv15ThenPpsv',       // printed identically in both adult blocks
       'adultPcv20or21Complete',   // its own words: "Adults aged 19 years and older"
       'adultPcv7Only',            // printed identically in both adult blocks
+      // C10-2 (2026-10-23). CDC's catch-up table draws no healthy/at-risk split
+      // in its pneumococcal row — one row, one set of minimum intervals, for
+      // every child it covers — and it says so in its own words: the dose-3-to-4
+      // cell reads "children age 12 through 59 months REGARDLESS OF RISK, or age
+      // 60 through 71 months with ANY RISK". So all three child groups is
+      // transcription, not inference.
+      //
+      // ⚠ And read the "(as final dose for healthy children)" parentheticals
+      // precisely: they qualify whether that dose CLOSES the series, not the
+      // interval. The minimum interval itself is stated for every child, which
+      // is the only claim these entries are ever cited for.
+      'cdcCatchupDose1to2EightWeeks', // one row for every child; "regardless of risk"
+      'cdcCatchupDose1to2FourWeeks',  // one row for every child; "regardless of risk"
+      'cdcCatchupDose2to3EightWeeks', // one row for every child; "regardless of risk"
+      'cdcCatchupDose2to3FourWeeks',  // one row for every child; "regardless of risk"
+      'cdcCatchupDose3to4',           // its own words: "regardless of risk ... with any risk"
       'immPCV7',                  // "older teen or adult ... at increased risk"
       // C8, document 2's CITEs (2026-10-17). Both are FOOTNOTES printed on all
       // four pages of the Adult Timing Job Aid — against every "None*" row and

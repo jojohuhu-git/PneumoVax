@@ -306,6 +306,22 @@ describe('queue P1-0 — one home for the numbers', () => {
     });
     const due = out.recs.find((r) => r.vaccine === 'PCV');
     expect(due.minIntervalDays).toBe(28);
+    // C10-2 (2026-10-23) left this answer exactly where it was, and the two
+    // assertions below say why in more detail than the equality alone did.
+    //
+    // This child is in the ROUTINE 2-6-month band, where C10-2 deliberately
+    // does NOT apply p2016's 8-week recommended spacing: p2016's 2-6-month rows
+    // read "4 doses ... last dose at age 12-15 months" and never print the
+    // 2/4/6 months, so no document on the card states an 8-week gap there. Her
+    // routine age for dose 2 is 4 months, which she has already reached, so the
+    // honest remaining statement is the minimum — which is what it says.
+    //
+    // ⚠ The FIRST DRAFT of C10-2 applied 8 weeks to every band and this test
+    // caught it: it expected 2026-05-18 and got 2026-06-15. That is recorded
+    // because the failure was the useful kind — the test was right and the
+    // change was wrong, so the change was narrowed rather than the test.
+    const graced = addDays('2026-04-20', 28 - 4);
+    expect(due.earliestNextDate).not.toBe(graced);              // never the graced date
     expect(due.earliestNextDate).toBe(addDays('2026-04-20', 28));
   });
 });
