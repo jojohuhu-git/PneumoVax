@@ -1,3 +1,13 @@
+> **⚠️ CORRECTED AND PARTLY SUPERSEDED (2026-10-24)** — see
+> `handoff-2026-10-24-invalid-dose-scheduling-ruling.md`.
+> This document's claim that `ADULT-PPSV23-AFTER-PCV13` is "the exact twin of family 3" is
+> WRONG, measured: PCV15 + PPSV23 is a complete series and PCV13 + PPSV23 is not, so counting
+> the early dose does not complete the patient — it moves her final conjugate from 2027-07-19
+> to 2031-10-11. The owner has since ruled on invalid-dose scheduling (steps 1-4, verbatim in
+> the new handoff) and chose to keep the dose INVALID while moving the next dose's START DATE
+> to the invalid dose. The per-row patient counts below were re-measured at 34ab3bc and still
+> hold: 402 / 210 / 45.
+
 # The adult floors that remain — the decision after families 1–3 (2026-10-24)
 
 **Status: RAISED, NOT DECIDED.** Nothing in this document has been built. It exists because

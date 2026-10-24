@@ -1,3 +1,12 @@
+> **⚠️ SUPERSEDED (2026-10-24)** — by
+> `handoff-2026-10-24-invalid-dose-scheduling-ruling.md`. Do NOT resume from this file.
+> Its headline recommendation — that the 402-patient `ADULT-PPSV23-AFTER-PCV13` row is "the
+> exact twin of family 3" and "one commit of exactly family 3's shape" — was MEASURED AND IS
+> WRONG: PCV13 + PPSV23 is not a complete series, so counting the early dose does not complete
+> the patient, it moves her final conjugate out by 4 years. The owner then ruled on invalid-dose
+> scheduling in a way that appears to REVERSE families 2 and 3 of this handoff's own PR #84.
+> Read the new file first.
+
 # PneumoVax — Handoff after the three adult families shipped (2026-10-24)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
