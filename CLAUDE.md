@@ -244,6 +244,41 @@ Where a disposition splits by age, the predicate is the engine's existing `isOld
 passed all 1,177 tests, so `regression-s6-1-routine-adult-age-one-home.test.js` now guards
 the whole engine's source, not just the `M` table.
 
+### The Paediatric Document Order, And Who States A Dose TOTAL
+**OWNER RULING A (2026-10-23).** For paediatric intervals and totals the order is
+**CDC/ACIP schedule Notes → immunize.org p2016 → CDC catch-up table**. Her words: *"The
+Immunize.org sheet is built from the CDC/ACIP schedule. If the two ever differ, the CDC/ACIP
+schedule is the authoritative source... the catch up table is not the source of truth and may
+be considered if immunize.org does not provide a specific recommendation."* It does **not**
+disturb the 2026-10-17 CDC-beats-immunize.org rule; it ranks the *catch-up table* third.
+It is an **OWNER CLINICAL DETERMINATION**, not something a document says: CDC's catch-up page
+does say *"Always use this table in conjunction with Table 1 and the Notes that follow"*, but
+**p2016 carries no provenance statement at all** (whole PDF searched). **Never cite p2016 for
+its own authority.**
+
+**OWNER RULING B (2026-10-23): p2016 Table 1 states the dose TOTAL, for every child.** Its
+heading is *"...to all children (healthy and those with risk conditions) age 2 through 23
+months"*, so **there is no healthy/at-risk split to build** — a simplification of what the
+previous session's P1 assumed. CDC's notes cannot carry an infant catch-up total: they give
+the routine series and then punt, *"For other catch-up guidance, see Table 2."* Until C10-1,
+781 cards said "2 doses in total for this child" over a quote reading *"4-dose series"* —
+FINDING 2's fault at the other end of the range.
+
+**The engine now RECORDS which Table 1 row it used.** `pcvInfant`'s `target` ladder IS Table 1
+cell by cell, so it names the row as it picks it and the card cites that row — **only when the
+row's own stated total equals the number the card prints**; a total of exactly 4 cites CDC,
+which states 4. This closes FINDING I for the infant block by construction, which CLAUDE.md
+had recorded as needing exactly this. **Cite these rows for the TOTAL only, never an
+interval** — Table 1's row text is routine spacing, its footnote † is the minimum.
+p2016 came off 1,633 cards CDC already speaks for; **p2016 is now the fourth document at zero
+uncredited pairs.** Guard:
+`regression-c10-1-2026-10-23-infant-total-cites-p2016-table1.test.js`.
+
+**And a near miss worth keeping.** The first draft let a row take the marker at a total of 4
+too, which pushed CDC off **231 cards it speaks for** — a removal by side effect, the FINDING F
+fault. No test existed that could see it; the measurement caught it. That is why the guard
+asserts "CDC keeps its marker" over the whole grid, not on a sample.
+
 ### A Card Carries Every Document With A Fitting Row, And None Without
 **OWNER RULE 2026-10-18:** *"If using p2016 tables, all columns need to fit patient
 criteria in order to use recommendations."* p2016 Table 4's columns are **Child's age now |
