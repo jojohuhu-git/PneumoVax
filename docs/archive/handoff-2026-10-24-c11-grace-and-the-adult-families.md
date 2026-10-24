@@ -84,7 +84,72 @@ left, telling a woman who had a PCV20 twelve months ago to have another today. *
 reading gives Oct 2030 on its own, without Ruling D.** This is the single biggest and
 best-supported item in the queue.
 
-### Families 2 and 3 rest on her rule alone
+### OWNER RULINGS LATER ON 2026-10-24 — read these BEFORE touching families 2 or 3
+
+She answered both families herself after seeing the worked patients. **Neither is
+implemented.**
+
+**FAMILY 2 — the card is RIGHT; the CHIP is wrong.** Her words: *"in this case 10/11/26 is
+correct because the rule is a 1 year interval from PPSV23 to conjugate so you cannot just
+count from the last dose given."* The interval is defined BETWEEN TWO NAMED VACCINES.
+Counting a year forward from the rejected PCV15 invents a conjugate-to-conjugate interval
+that exists in no document. So `repeatDueDate` must NOT restart the clock for a CROSS-STREAM
+rule — the clock stays on the vaccine the rule names. **This is the ANCHOR-1 carve-out
+Ruling D already applies on the card side** (*"an unnecessary dose cannot reset a clock"*)
+and that was never applied to the chip. Scope: 66 cards, **0 due dates move**, the note under
+the rejected dose changes from `2027-07-19` to `2026-10-11`. Build it as `repeatDueDate`
+falling back to the ungraced `earliestValidDate` when the rule's anchor is in the other
+stream. **This is a safe, owner-approved, verdict-free fix — the obvious first item.**
+
+**FAMILY 3 — the dose should COUNT; no repeat exists.** Her words: *"count the PPSV23 and
+consider the series complete… Giving a second PPSV23 is outside ACIP's adult pathway."*
+Verified with the engine 2026-10-24 — **the app already agrees for 6 of 8 patients**: adults
+with asplenia / cochlear implant (any age) and both child risk classes all COUNT the 12-week
+dose, and the IC child's second PPSV23 lands on `2031-10-11`, her date to the day. It
+disagrees for exactly three rows: **adults with no risk factors, or chronic conditions only.**
+
+**ONE CORRECTION TO HER STATED REASON, and it must be carried forward.** She wrote that
+ACIP "name 8 weeks as the minimum interval" for PCV15→PPSV23. **8 weeks is attached ONLY to
+immunocompromising condition / cochlear implant / CSF leak** — mm7401a1 ≥50 row: *"A minimum
+interval of 8 weeks can be considered if PCV15 is used in adults with an immunocompromising
+condition, cochlear implant, or CSF leak"*; the 19–49 chronic row says ≥1 year and names no
+8-week option. CDSI agrees (8-week `minInt` only in the immunocompromised and CSF/cochlear
+series). **Her conclusion is still right, on better evidence:** CDSI v4.64 sets
+`absMinInt = 0 days` for EVERY adult pneumococcal interval — read locally from
+`~/Downloads/Version 4.64 - 508/XML/AntigenSupportingData- Pneumococcal-508.xml` on
+2026-10-24 — so CDC's own software never invalidates an early adult dose. Plus the structural
+argument: ACIP's adult pathway after PCV15 contains ONE PPSV23, so rejecting it and booking
+another invents a dose, whichever date is chosen.
+
+### THE FORK SHE HAS NOT YET ANSWERED — ask this first
+
+The only thing rejecting family 3's dose is **her own OWNER CLINICAL DETERMINATION of
+2026-10-11** (CLAUDE.md, "EVERY adult floor is an OWNER CLINICAL DETERMINATION…"), reconfirmed
+2026-10-16. The same `absMinInt = 0 days` argument applies to the rows behind families 1 and 2.
+
+- **Narrow** — `ADULT-PPSV23-AFTER-PCV15` becomes `enforcement: 'recommendation'` for non-IC
+  adults. Family 3 closes (dose counts, series complete, note says it was earlier than the
+  recommended year). Families 1 and 2 stay.
+- **Broad** — every adult floor becomes a recommendation. Families 1 AND 2 stop existing (the
+  PCV20 and the PCV15s all count) and the whole adult repeat question closes.
+
+**She has not chosen, and the broad option reverses a twice-confirmed determination — ask,
+never default.** Note the tension to put to her: she called family 2's 10/11/26 "correct",
+which presumes the PCV15s stay invalid, while family 3's reasoning says an early adult dose
+should count. Same shape, two answers.
+
+Changing either is a **verdict move** and needs `npm run sweep:update` with both moved counts
+in the PR, plus a field-level diff (`sweep:update` calls every row moved).
+
+### Family 1 under these rulings
+
+Untouched by either. It remains the reading error below — and note that under the **broad**
+option it dissolves instead (the PCV20 counts and no next dose is due at all), so **settle the
+fork before building family 1.**
+
+### The old framing, kept for the reasoning only
+
+### Families 2 and 3 as they were framed before her rulings
 
 Family 2: CDC counts from "the last **PPSV23** dose" and the rejected doses were conjugates,
 so the document's clock does not move. rr7203a1 states **no** rationale for the PPSV23 →
@@ -147,9 +212,11 @@ nothing in the remaining queue depends on it.
 2. `npx vitest run` — confirm **1,438 passing in 131 files**, no skips, before any new work.
    Pipe to `tail`, never `head`; for a file count use `--reporter=json` and `len(testResults)`.
 3. `npx vite-node scripts/uncreditedSources.mjs` — confirm **1** pair. Re-measure, never quote.
-4. **Ask, don't default** on the adult families above. She asked for families 2 and 3 to be
-   explained again and said she would start a new conversation — **start by asking which of
-   the three she wants, not by building.**
+4. **START WITH THE FORK** — narrow or broad (see "THE FORK SHE HAS NOT YET ANSWERED").
+   Nothing else in the adult queue can be scoped until she answers it, because the broad
+   option dissolves families 1 and 2 rather than changing them. The one item that is safe
+   to build before she answers is **family 2's chip fix**: owner-approved, 0 due dates move,
+   0 verdicts move.
 5. Per item: reproduce → failing test (say the pre-fix failure count) → fix → full suite green
    → **break the fix in more than one way and quote the counts** → `node scripts/proseDiff.mjs
    dump` on both sides (plain `node`, NOT `vite-node`), compared **field by field** → **drive
@@ -168,3 +235,14 @@ nothing in the remaining queue depends on it.
   unreadable; three families with one worked patient each was what let her engage.
 - **A guard can pass for the wrong reason.** Two `not.toMatch` assertions quoted wording the
   app no longer prints anywhere, so they would have passed against any date at all.
+- **CDSI settles "floor or recommendation?" in one grep, and nobody had run it for this row.**
+  `absMinInt = 0 days` on every adult pneumococcal interval is the strongest evidence in the
+  whole adult question and it was sitting unzipped in `~/Downloads`. Read it before arguing
+  from MMWR prose.
+- **Check her stated reason as carefully as her conclusion.** Her 8-week claim was wrong for
+  the patients she was describing and her conclusion was right anyway. Agreeing with the
+  reason would have put a false fact into the spec — the `refs.test.js` "p2016 has only 4
+  tables" failure mode.
+- **Run her ruling against the engine before agreeing it is a change.** Six of the eight
+  patients she described were already correct, including the IC child's 2031 date to the day.
+  "The app already does this" is a real and common answer.
