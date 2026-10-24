@@ -1,3 +1,11 @@
+> **SUPERSEDED (2026-10-24) — read `handoff-2026-10-24-rulings-e-and-f-nothing-built.md` instead.**
+> The owner ruled on families 1 and 3 after this was written, and both rulings change the queue
+> below. Family 1 is no longer a date fix: she ruled the early PCV20 **counts** and nothing
+> further is due, so the `lastDoseDate()` "reading error" item here is probably moot. Family 3's
+> dose stays invalid (her first "count it, series complete" answer was corrected by her own next
+> message) and only its date is open. The narrow/broad **fork** described below was never put to
+> her in those terms and should not be. Nothing in this file was built.
+
 # PneumoVax — Handoff after C11, with the adult extension still an OWNER DECISION (2026-10-24)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
