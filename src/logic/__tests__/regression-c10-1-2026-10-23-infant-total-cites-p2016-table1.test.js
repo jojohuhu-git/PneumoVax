@@ -180,9 +180,36 @@ describe('C10-1 — the infant total is cited to the p2016 Table 1 row that stat
     expect(missingCdc.length).toBe(0);
   });
 
-  it('p2016 comes OFF the routine 4-dose card — CDC states that number verbatim', () => {
-    const stillCarrying = S.routine4.filter((r) => r.chipUrls.includes(P2016_URL));
-    expect(stillCarrying.length).toBe(0);
+  it('p2016 never carries the routine 4-dose card\'s TOTAL — CDC states that number verbatim', () => {
+    // C10-2 (2026-10-23) NARROWED this assertion, and the narrowing is the
+    // point rather than a concession. C10-1's claim was about the TOTAL: a
+    // routine 4-dose card prints "4-dose series at 2, 4, 6, and 12-15 months",
+    // CDC states that number verbatim, so nothing on the card rested on p2016
+    // and p2016 came off. That remains true and is still asserted here.
+    //
+    // What changed is that such a card now states a SECOND number — its
+    // interval — and on some of these children p2016 is the document that
+    // states it. A 7-11-month-old with two doses before 7 months is owed two
+    // more, so her total comes to exactly 4 (CDC's number) while her spacing
+    // comes from p2016 Table 1's "1 or 2 before age 7 months" row ("1 dose 8
+    // weeks after most recent dose"). CDC's catch-up table says 4 weeks for
+    // her, and OWNER RULING A puts p2016 above it. Two documents, one claim
+    // each — which is this file's own principle, not an exception to it.
+    //
+    // So the test is now: p2016 may appear on a routine 4-dose card ONLY with a
+    // p2016 citation behind it, and NEVER as the total's own marker.
+    const carrying = S.routine4.filter((r) => r.chipUrls.includes(P2016_URL));
+    const orphaned = carrying.filter((r) => !r.cited.has(P2016_URL));
+    expect(orphaned.length).toBe(0);
+    // And the total's marker on these cards is CDC's, never a Table 1 row.
+    const totalTakenByP2016 = S.routine4.filter(
+      (r) => [...r.citedNames].some((k) => String(k).startsWith('p2016Table1_'))
+        && !r.cited.has(CDC_NOTES_URL),
+    );
+    expect(totalTakenByP2016.length).toBe(0);
+    // Pinned exactly, measured not quoted: the routine-4 cards whose INTERVAL
+    // rests on a p2016 row. If this moves, a citation moved with it.
+    expect(carrying.length).toBe(165);
   });
 
   it('p2016 comes OFF the five-dose card — Table 1 has no row that high', () => {

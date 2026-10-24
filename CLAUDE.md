@@ -279,6 +279,54 @@ too, which pushed CDC off **231 cards it speaks for** — a removal by side effe
 fault. No test existed that could see it; the measurement caught it. That is why the guard
 asserts "CDC keeps its marker" over the whole grid, not on a sample.
 
+### The App ADVISES The Routine Date And STATES The Minimum Beside It
+**C10-2 (2026-10-23), implementing OWNER RULINGS A and C of that date — and it REVERSES
+owner decision 3 of 2026-10-11** (`CLINICAL_SPEC.md` §L), which had declined "a separate
+recommended interval layered over Table 2's number". What she declined then was a *blanket*
+8 weeks at every infant interval; what is built now is narrower, and the narrowness is the
+rule:
+
+| Child | Advised date for the next PCV dose | Cited to |
+|---|---|---|
+| **2–6 months** (routine band, no Table 1 row) | the routine **AGE** — 2, 4, 6 months | CDC's notes |
+| **7–23 months** (a p2016 Table 1 catch-up row governs) | **8 weeks** after the most recent dose | that Table 1 row |
+| any child whose routine date has passed | the **minimum** | the CDC catch-up cell |
+
+The advised date is the **latest** of the minimum, the 8-week spacing and the routine age —
+one `max`, which is also the answer to "a child genuinely behind": her routine term stops
+binding and the advice collapses to the floor. **Never advised earlier than the floor**
+(measured: 145 of 3,305 cards moved later, 0 earlier).
+
+**Do NOT give the 2–6-month band the 8 weeks.** p2016's rows there read "4 doses … last dose
+at age 12–15 months" and it "never prints the 2/4/6 months" (C7's PDF reading), so the number
+would be stated by no document on the card. The first draft did this and
+`regression-p1-0-recorded-dose-intervals` caught it.
+
+**RULING C IS THE LIMIT: the validity floor does not move.** Only the *recommended* number
+does. `pcvNextDoseMinIntervalDays` returns the same figures it always did — measured 0 floor
+changes and 0 dose verdicts moved over 5,510 recorded doses. Patient E (PCV20 at 11 and 12.5
+months, a 6-week gap) keeps her second dose, which p2016's footnote read as a floor would
+have voided.
+
+**⚠ BOTH NUMBERS GO ON THE CARD.** Rulings A and C together deliberately re-create two
+numbers for one dose — advise 8 weeks, accept 4 — which is the shape today's P0 fix removed.
+The difference, and the whole reason this is allowed, is that the minimum is **stated**: *"it
+can be given today if needed, as the minimum interval of 4 weeks has already passed."* A
+second number the reader can see is not that bug; an invisible one is. Never drop that clause.
+
+**CDC's catch-up schedule is now ON cards, for the first time** — owner ruling 2026-10-23,
+*"cite it for the INTERVAL cells only (dose 1→2, 2→3, 3→4), never for a total."* Five cell
+entries plus one whole-page entry in `refs.js`. **The cell comes back from the same call as
+the number** (`pcvNextDoseMinIntervalCell`); a caller that re-tested the ages to choose a
+citation would be a THIRD reading of Table 2, which is the P0 bug's own shape.
+
+**And a citation ADDED is as dangerous as one removed.** C10-2 put p2016 back on **165**
+routine-4-dose cards — the first RISE in that footprint, 3,294 → 3,459 — because a
+7–11-month-old with two doses before 7 months has a total of exactly 4 (CDC's number) and a
+spacing of 8 weeks (p2016's row). C10-1's guard asserted p2016 was absent from those cards
+outright; its real claim was about the TOTAL, so it was narrowed to that and the 165 pinned.
+Two documents, one claim each — this file's own principle, not an exception to it.
+
 ### A Card Carries Every Document With A Fitting Row, And None Without
 **OWNER RULE 2026-10-18:** *"If using p2016 tables, all columns need to fit patient
 criteria in order to use recommendations."* p2016 Table 4's columns are **Child's age now |

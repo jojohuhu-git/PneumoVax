@@ -39,7 +39,7 @@ import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAY
 import { dobToAgeMonths } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
-import { pcvNextDoseMinIntervalDays, intervalPhrase } from './intervals.js';
+import { pcvNextDoseMinIntervalCell, intervalPhrase } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 
 // Age bands (months)
@@ -377,7 +377,7 @@ function pcvSeriesShape(pcv, am, total) {
 // it changes which sentence is true of this child, and what happens next.
 // The caller passes `pedsRiskIds(riskIds)`, so an adult-only tick cannot reach
 // here, exactly as it cannot reach `pcvRiskChild`.
-function pcvInfant(am, riskIds, pcv, today) {
+function pcvInfant(am, riskIds, pcv, today, dob) {
   const rowClass = pedsRiskRowClass(riskIds);   // 'IC' | 'nonIC' | null
   const prior = pcv.count;
   // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. Until C10-1
@@ -412,8 +412,10 @@ function pcvInfant(am, riskIds, pcv, today) {
   // DECISION 2026-10-23 REVERSED THAT. Shown a 15-month-old whose third dose
   // came 4 weeks after a dose at 11.3 months, she ruled that it "does not
   // satisfy the required interval and does not count" — and the app had been
-  // advising 8 weeks for that very dose while accepting 4. Both sides now call
-  // `pcvNextDoseMinIntervalDays`, so there is one reading of CDC Table 2 and
+  // advising 8 weeks for that very dose while accepting 4. Both sides now read
+  // CDC Table 2 through one function — `pcvNextDoseMinIntervalCell`, which
+  // C10-2 made the home of the branching and which `pcvNextDoseMinIntervalDays`
+  // (still the validator's entry point) now wraps — so there is one reading and
   // not two. See `doseIntervalRules.js`'s `CHILD-PCV-AFTER-PCV` row and
   // `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`.
   //
@@ -633,8 +635,11 @@ function pcvInfant(am, riskIds, pcv, today) {
   // birthday — the owner's 2026-10-23 ruling that "the booster is defined by
   // age, not by how many doses came before it". Passing `am` there would advise
   // 4 weeks for a 6-month-old's booster, which she ruled owes 8.
-  const minInterval = anchor
-    ? pcvNextDoseMinIntervalDays({
+  // C10-2: the CELL is taken from the same call that produces the number, so the
+  // citation can never drift from the figure it is citing. See the ⚠ in
+  // `pcvNextDoseMinIntervalCell` — a second reading of this table is the P0 bug.
+  const minCellResult = anchor
+    ? pcvNextDoseMinIntervalCell({
       doseNumber: prior + 1,
       ageAtPrevDose: pcv.lastAgeAtDose,
       currentAgeMonths: am,
@@ -642,8 +647,149 @@ function pcvInfant(am, riskIds, pcv, today) {
       ageAtThisDose: needs12moFloor ? M.m12 : am,
     })
     : null;
-  const { dueToday, earliestNextDate } = dueState(anchor, minInterval, today);
+  const minInterval = minCellResult ? minCellResult.days : null;
+  const minCell = minCellResult ? minCellResult.cell : null;
+
+  // ── C10-2 (2026-10-23): the date the app ADVISES is not the floor ───────
+  //
+  // Until now this block had ONE number for the next dose — CDC Catch-up
+  // Table 2's minimum interval — and used it for everything: the date, the
+  // `dueToday` flag, and the sentence a clinician reads. A minimum interval is
+  // the earliest a dose may be given and still COUNT. It is not when to bring
+  // the child back. Measured on the owner's worked patient F (healthy, 4
+  // months old, PCV20 at 2.0 and 3.0 months): the app said "PCV dose 3 of 4 …
+  // due 4 weeks after the most recent one", `dueToday: true` — advising the
+  // third dose at 4 months, where CDC's series (quoted on that very card) puts
+  // it at 6.
+  //
+  // TWO OWNER RULINGS, 2026-10-23, set the shape:
+  //
+  //   RULING A ranks the paediatric documents — CDC/ACIP Notes → immunize.org
+  //   p2016 → CDC catch-up table — and CDC's own catch-up page agrees it is an
+  //   adjunct: "Always use this table in conjunction with Table 1 and the Notes
+  //   that follow." So where p2016 states a spacing, p2016's number is the
+  //   ADVICE and the catch-up table's stays the floor.
+  //
+  //   RULING C is the limit: "the validity floor does NOT change. A dose
+  //   already given is graded by the rule that applied to that dose. Only the
+  //   *recommended* number moves." `minInterval` above is therefore untouched,
+  //   and patient E (PCV20 at 11 and 12.5 months, a 6-week gap) keeps her
+  //   second dose, which p2016's footnote read as a floor would have voided.
+  //
+  // ⚠ BOTH NUMBERS GO ON THE CARD, and that is not optional. The P0 fix
+  // earlier today removed a state where the app named one date and then
+  // silently accepted a dose given earlier — "the app had two numbers for one
+  // dose". Rulings A and C together deliberately re-create two numbers (advise
+  // 8 weeks, accept 4), so the minimum is STATED in the note instead of
+  // hidden. A second number the reader can see is not that bug; an invisible
+  // one is.
+  //
+  // WHY 8 WEEKS NEEDS NO PER-ROW TABLE. All eight of p2016 Table 1's catch-up
+  // rows state eight weeks — read off the quotes C10-1 transcribed from the PDF
+  // on 2026-10-23 ("1 dose at least 8 weeks after most recent dose", "2 doses 8
+  // weeks apart", and so on). CDC's own routine series is 8-week spacing too (2,
+  // 4, 6 months). So the recommended spacing is one number; it is the ROUTINE
+  // AGES that vary, and only in the 2-6-month band, which is the one band with
+  // no Table 1 row because CDC's routine sentence covers it.
+  //
+  // ⚠ AND THE SPACING APPLIES ONLY WHERE A ROW STATES IT. The 2-6-month band is
+  // the one band with no Table 1 row, because CDC's routine sentence covers it
+  // — and p2016 does NOT state an 8-week spacing there: its 2-6-month rows read
+  // "4 doses … last dose at age 12-15 months" and, as C7's reading of the PDF
+  // recorded, p2016 "never prints the 2/4/6 months". So in that band the advice
+  // is CDC's routine AGES, and if those have passed the honest remaining
+  // statement is the minimum, which CDC's catch-up table does state. A first
+  // draft applied 8 weeks to every band and would have printed a number no
+  // document on the card says.
+  const RECOMMENDED_SPACING_DAYS = WK8;
+  // CDC's routine series, "2, 4, 6, and 12-15 months", by dose number. The
+  // closing dose is absent on purpose: `needs12moFloor` already holds it to the
+  // first birthday, which is where CDC's 12-15-month window opens.
+  const ROUTINE_DOSE_AGE_M = { 1: 2, 2: 4, 3: 6 };
+  const routineAgeM = ROUTINE_DOSE_AGE_M[doseNum] ?? null;
+  // The date this child turns `routineAgeM` months old. With a date of birth on
+  // file that is exact calendar arithmetic; without one (a patient entered as
+  // years/months) it is derived from the age instead, carrying the same
+  // approximation that path already has everywhere else. Null when the routine
+  // age has no meaning for this dose number.
+  const routineAgeDate = routineAgeM == null
+    ? null
+    : dob
+      ? addCalendarMonths(dob, routineAgeM)
+      : addCalendarMonths(today, Math.max(0, routineAgeM - am));
+  const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
+  // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
+  // the TOTAL, and it has no bearing on whether the row states a spacing. The
+  // ladder picked `t1row` from this child's actual history, so its history
+  // columns fit her by construction — which is what the column-fit rule asks.
+  const spacingDate = anchor && t1row ? addDays(anchor, RECOMMENDED_SPACING_DAYS) : null;
+  // The advised date is the LATEST of the three — and that single `max` IS the
+  // answer to the open design question the owner agreed was real: a child
+  // genuinely behind (first dose at 9 months) has no routine date left, so the
+  // routine term simply stops binding and the recommendation collapses to the
+  // minimum. Nothing is ever advised earlier than the floor allows.
+  const advisedDate = [minDate, spacingDate, routineAgeDate]
+    .filter(Boolean)
+    .sort()
+    .at(-1) ?? null;
+  // Which constraint actually decided it, so the note can name its own reason
+  // instead of printing a spacing it did not use. Patient F's date comes from
+  // the routine age (6 months), not from 8 weeks after her 3-month dose.
+  const advisedReason = advisedDate == null ? null
+    : advisedDate === routineAgeDate && advisedDate !== spacingDate && advisedDate !== minDate
+      ? 'routineAge'
+      : advisedDate === spacingDate ? 'spacing' : 'minimum';
+  const advisedDueToday = anchor ? (advisedDate == null || advisedDate <= today) : true;
+  const dueToday = advisedDueToday;
+  const earliestNextDate = advisedDueToday ? null : advisedDate;
   const due = needs12moFloor ? false : dueToday;
+  // The minimum, in words — but only where a clinician could act on it. Three
+  // cases, and the first two were wrong in the first draft of this change:
+  //
+  //   • The dose is already due. There is no earlier date to offer, so saying
+  //     "it can be given from 2025-07-04" (patient D, a year overdue) is noise
+  //     pointing at a date in the past.
+  //   • The advised date is in the future but the minimum has already passed —
+  //     patient F, whose 4-week minimum fell four days ago. The useful sentence
+  //     is "today", not the stale date.
+  //   • Both are in the future: name the date.
+  const showMinClause = !(!minDate || advisedDueToday || !advisedDate || advisedDate <= minDate);
+  // The minimum is a CDC catch-up cell, so it takes a marker — but only when
+  // Table 2 actually prints a branch for this patient (`minCell`). Where it does
+  // not, the number is still stated and simply credits nobody, rather than
+  // borrowing the nearest-looking row.
+  const minClauseCite = showMinClause && minCell ? minCell : null;
+  const minMark = minClauseCite ? ' [c]' : '';
+  const minClause = !showMinClause
+    ? ''
+    : minDate <= today
+      ? `; it can be given today if needed, as the minimum interval of ${intervalPhrase({ days: minInterval })} has already passed${minMark}`
+      : `; it can be given from ${minDate} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
+  // The document that states the advised number itself. Each branch is credited
+  // to the one source whose own words carry it:
+  //   routineAge -> CDC's notes, "4-dose series at 2, 4, 6, and 12-15 months"
+  //   spacing    -> the p2016 Table 1 row, "8 weeks after most recent dose"
+  //   minimum    -> the CDC catch-up cell, when Table 2 prints one
+  // `null` where the advice has no anchor to measure from, which states nothing
+  // a document could speak for.
+  const advisedCiteRaw = !anchor ? null
+    : advisedReason === 'routineAge' ? 'pedsRoutine4Dose'
+      : advisedReason === 'spacing' ? t1row
+        : minCell;
+  // The lead's one marker, named here so the detail can avoid repeating it.
+  const leadCite = target > 4
+    ? 'pedsInfantLastDose1215mo'
+    : table1Row || 'pedsRoutine4Dose';
+  // ⚠ NOT CITED AGAIN WHERE THE LEAD ALREADY CITES IT. A p2016 Table 1 row
+  // states the child's TOTAL and her SPACING in one sentence ("2 additional
+  // doses: 1 dose at least 8 weeks after most recent dose"), so crediting it on
+  // both clauses gives ONE SENTENCE TWO NUMBERS — which `regression-c8-2026-10
+  // -23-infant-catchup-credits-the-booster-row`'s "no card anywhere gives the
+  // SAME sentence two numbers" forbids outright, and which it caught here. The
+  // interval still rests on that row; the row is already numbered on the card.
+  // This is the same conditional C8 used for CDC's notes at a total of 4.
+  const advisedCite = advisedCiteRaw === leadCite ? null : advisedCiteRaw;
+  const advisedMark = advisedCite ? ' [c]' : '';
 
   return [rec({
     vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
@@ -680,9 +826,19 @@ function pcvInfant(am, riskIds, pcv, today) {
         : target > 4
           ? `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child — the ${pcv.count} already on record, and the booster still owed at age 12–15 months [c].`
           : `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child [c].`}${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
-      detail: `${minInterval
-        ? `The next dose is due ${minInterval === 28 ? '4 weeks' : '8 weeks'} after the most recent one`
-        : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months${target !== 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
+      // C10-2: the clause names whichever constraint actually set the date, and
+      // then states the minimum separately whenever the two differ. The old
+      // sentence read the floor out as if it were the plan ("due 4 weeks after
+      // the most recent one" for a 4-month-old whose routine date is 6 months),
+      // and `minInterval === 28 ? '4 weeks' : '8 weeks'` hand-typed the words
+      // beside the number — the exact drift `intervalPhrase` exists to stop.
+      detail: `${!anchor
+        ? 'There is no earlier dated dose to measure an interval from'
+        : advisedReason === 'routineAge'
+          ? `The next dose is due at age ${routineAgeM} months, following the routine 2, 4, 6 and 12–15 month series`
+          : `The next dose is due ${intervalPhrase({
+            days: advisedReason === 'spacing' ? RECOMMENDED_SPACING_DAYS : minInterval,
+          })} after the most recent one`}${anchor ? advisedMark : ''}${minClause}; the final/booster dose is given at ≥12 months${target !== 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
     },
     // FINDING 2: a total above 4 is cited to MMWR Table 2's "last dose" row,
     // not to CDC's routine 4-dose sentence, which states a different number.
@@ -708,16 +864,51 @@ function pcvInfant(am, riskIds, pcv, today) {
     // does state it, row by row, and `table1Row` is the row this child keyed
     // on. So the lead's marker moves to that row and CDC keeps the booster
     // clause -- exactly the split FINDING 2 made for a total above 4.
-    noteCites: target > 4
-      ? [cite('pedsInfantLastDose1215mo'), cite('pedsRoutine4Dose')]
-      : table1Row
-        ? [cite(table1Row), cite('pedsRoutine4Dose')]
-        : [cite('pedsRoutine4Dose')],   // total of exactly 4: CDC states it
+    // ORDER MATTERS AND IS POSITIONAL. `noteCites` is one ordered list across
+    // both halves of the note (the contract `RecCard`'s `RecNote` documents):
+    // the lead's "[c]" markers consume the first entries and the detail's take
+    // the rest, in the order they appear. C10-2 adds up to two markers to the
+    // detail — the advised number, then the minimum — and both sit BEFORE the
+    // "final/booster at ≥12 months" marker, so they are spliced in ahead of it.
+    noteCites: [
+      // The lead's one marker.
+      cite(leadCite),
+      // The detail, in reading order.
+      ...(anchor && advisedCite ? [cite(advisedCite)] : []),
+      ...(minClauseCite ? [cite(minClauseCite)] : []),
+      // The closing "final/booster dose is given at ≥12 months", which only
+      // carries a marker when the total is not exactly 4 (at 4 the lead already
+      // cites this page, and a document must not take two numbers for one claim).
+      ...(target !== 4 ? [cite('pedsRoutine4Dose')] : []),
+    ],
     // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. p2016 stays only
     // where one of its rows is actually cited above; on a routine 4-dose card
     // and on a total above 4 (which Table 1's largest row does not reach) it
     // comes off, because nothing on those cards rests on it.
-    refs: table1Row ? INFANT_DEFAULT_REFS : infantRefsExcept('p2016'),
+    //
+    // C10-2: and CDC's catch-up schedule joins the list on the cards that now
+    // cite one of its interval cells — the first cards in the app ever to carry
+    // that document, which until today appeared on none despite being what
+    // `intervals.js` is built from. It is added CONDITIONALLY, by the same rule:
+    // only where a cell of it is actually cited above.
+    refs: [
+      ...(table1Row ? INFANT_DEFAULT_REFS : infantRefsExcept('p2016')),
+      // The whole-page entry, not the cell key: a grey button names a DOCUMENT,
+      // and C3's rule is that every cited document has exactly one such entry.
+      ...([advisedCite, minClauseCite].some((k) => k && k.startsWith('cdcCatchupDose'))
+        ? ['cdcCatchupSchedule']
+        : []),
+      // And p2016 stays on a card whose INTERVAL rests on one of its rows even
+      // when its TOTAL does not. The two tests are different and both are real:
+      // `table1Row` asks whether the row's stated total equals the printed one
+      // (C10-1's rule), while the interval only needs the row's history columns
+      // to fit. They part company on a 7-11-month child owed two more doses whose
+      // total comes to exactly 4 — 99 cards in the prose dump — where the lead
+      // prints CDC's routine sentence and the interval is p2016's. Without this
+      // the card carried a number pointing at a document its own chip list had
+      // dropped.
+      ...(!table1Row && advisedCite && advisedCite.startsWith('p2016') ? ['p2016'] : []),
+    ],
   })];
 }
 
@@ -2718,7 +2909,7 @@ export function recommend(input) {
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
     // does below — a tick that does not apply to a child must not reach a
     // child's card, by any route.
-    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today);
+    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today, dob);
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
     // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an

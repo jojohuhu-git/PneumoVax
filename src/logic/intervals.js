@@ -170,7 +170,32 @@ export function pcvSeriesMinIntervalDays(ageMonths) {
  *   given or due today; the scheduler passes 12 for a final dose it is holding
  *   back to the first birthday. Read only by the dose-4-and-beyond branch.
  */
-export function pcvNextDoseMinIntervalDays({
+export function pcvNextDoseMinIntervalDays(p) {
+  return pcvNextDoseMinIntervalCell(p).days;
+}
+
+/**
+ * The same answer, plus WHICH cell of Table 2 produced it.
+ *
+ * C10-2 (2026-10-23). The card now states this minimum in words ("the minimum
+ * interval of 4 weeks"), so a document has to be credited for it — and the
+ * owner ruled on 2026-10-23 that the document is this one, cited "for the
+ * INTERVAL cells only (dose 1 to 2, 2 to 3, 3 to 4), never for a total".
+ *
+ * ⚠ WHY THE CELL IS RETURNED FROM HERE AND NOT RE-DERIVED BY THE CALLER. The
+ * P0 bug fixed earlier the same day was two independent readings of this one
+ * table — the floor's and the scheduler's — which disagreed in silence. A
+ * caller that picked the citation by re-testing the ages would be a THIRD
+ * reading, free to drift from the number it is supposed to be citing. So the
+ * branch that chooses the number names the cell as it goes, the same shape as
+ * `t1row` in `recommend.js`'s Table 1 ladder.
+ *
+ * `cell` is null where Table 2 prints no branch (see the fall-through below);
+ * the caller must then credit nobody rather than reach for the nearest row.
+ *
+ * @returns {{days: number, cell: ?string}} `cell` is a key in `refs.js`.
+ */
+export function pcvNextDoseMinIntervalCell({
   doseNumber,
   ageAtPrevDose,
   currentAgeMonths,
@@ -180,8 +205,8 @@ export function pcvNextDoseMinIntervalDays({
   // Dose 1 to Dose 2 — keyed on the age at that first dose.
   if (doseNumber <= 2) {
     return ageAtPrevDose != null && ageAtPrevDose < 12
-      ? PCV_MIN_INTERVAL_DAYS_UNDER_12M
-      : PCV_MIN_INTERVAL_DAYS_FROM_12M;
+      ? { days: PCV_MIN_INTERVAL_DAYS_UNDER_12M, cell: 'cdcCatchupDose1to2FourWeeks' }
+      : { days: PCV_MIN_INTERVAL_DAYS_FROM_12M, cell: 'cdcCatchupDose1to2EightWeeks' };
   }
   // Dose 2 to Dose 3 — the only cell that needs BOTH ages. Each branch below
   // is one clause of Table 2's cell, in the order the cell states them.
@@ -189,19 +214,21 @@ export function pcvNextDoseMinIntervalDays({
     // "4 weeks if current age is younger than 12 months and previous dose was
     //  administered at <7 months old"
     if (currentAgeMonths < 12 && ageAtPrevDose != null && ageAtPrevDose < 7) {
-      return PCV_MIN_INTERVAL_DAYS_UNDER_12M;
+      return { days: PCV_MIN_INTERVAL_DAYS_UNDER_12M, cell: 'cdcCatchupDose2to3FourWeeks' };
     }
     // "8 weeks ... if previous dose was administered between 7-11 months
     //  (wait until at least 12 months old); OR if current age is 12 months or
     //  older and at least 1 dose was administered before age 12 months"
     const prev7to11 = ageAtPrevDose != null && ageAtPrevDose >= 7 && ageAtPrevDose < 12;
     if (prev7to11 || (currentAgeMonths >= 12 && anyDoseBefore12)) {
-      return PCV_MIN_INTERVAL_DAYS_FROM_12M;
+      return { days: PCV_MIN_INTERVAL_DAYS_FROM_12M, cell: 'cdcCatchupDose2to3EightWeeks' };
     }
     // Unlisted by Table 2: every dose given at or after the first birthday.
     // 8 weeks is the stricter option and matches p2016 footnote t for a child
-    // aged 12 months or older.
-    return PCV_MIN_INTERVAL_DAYS_FROM_12M;
+    // aged 12 months or older. NO CELL — Table 2 prints no branch for this
+    // patient, so there is nothing of its to cite, and C10-2 credits nobody
+    // rather than pick the nearest-looking row (FINDING I's fault).
+    return { days: PCV_MIN_INTERVAL_DAYS_FROM_12M, cell: null };
   }
   // Dose 4 and beyond. Table 2 prints one number here — "8 weeks (as final
   // dose)" — but the SAME cell says what dose it is talking about: "This dose
@@ -235,9 +262,16 @@ export function pcvNextDoseMinIntervalDays({
   // even though the child is 6 months old now. The caller passes the age the
   // dose will be GIVEN; passing today's age here would advise 4 weeks for a
   // booster, which is the mirror image of the bug this ruling fixed.
+  //
+  // The CELL, for C10-2's citation: Table 2's dose-3-to-4 cell is the one that
+  // names these children in its own words ("age 12 through 59 months ... who
+  // received 3 doses before age 12 months"), so it is credited for the booster's
+  // 8 weeks. An EXTRA INFANT dose — the owner's 5.1-month case — is not what
+  // that cell is about, and its 4 weeks comes from the under-12-month rule
+  // rather than from this cell, so it credits nobody.
   return ageAtThisDose != null && ageAtThisDose < 12
-    ? PCV_MIN_INTERVAL_DAYS_UNDER_12M
-    : PCV_MIN_INTERVAL_DAYS_FROM_12M;
+    ? { days: PCV_MIN_INTERVAL_DAYS_UNDER_12M, cell: null }
+    : { days: PCV_MIN_INTERVAL_DAYS_FROM_12M, cell: 'cdcCatchupDose3to4' };
 }
 
 /**

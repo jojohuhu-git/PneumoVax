@@ -755,6 +755,107 @@ export const REFS = {
   // Quoted in the joined form this file already uses for a p2016 table row
   // (see `p2016CompletedBefore6WithPcv20` above): the PDF deep-links by page,
   // so no text fragment depends on the join.
+  // ── C10-2 (2026-10-23): CDC's CATCH-UP SCHEDULE, Table 2's interval cells ──
+  //
+  // OWNER DECISION 2026-10-23, asked directly: "add a refs.js entry for CDC's
+  // Catch-up Immunization Schedule and cite it for the INTERVAL cells only
+  // (dose 1 to 2, 2 to 3, 3 to 4), never for a total" — and she ruled the work
+  // belongs in C10-2 rather than C10-1, so it is written against the final
+  // behaviour.
+  //
+  // Until now this document appeared on NO CARD, while being the thing
+  // `intervals.js` is built from cell by cell. That is the opposite of the
+  // usual fault: not a document cited for something it does not say, but a
+  // document saying something the app relies on and never being credited.
+  // `scripts/uncreditedSources.mjs` cannot see it — it only looks at documents
+  // already ON a card.
+  //
+  // WHY IT IS CITED FOR THE MINIMUM AND NOT THE RECOMMENDATION. Its own column
+  // heading is "Minimum Interval Between Doses", and OWNER RULING A ranks it
+  // third — below CDC's Notes and below p2016 — on the strength of the page's
+  // own sentence, read live 2026-10-23: "Always use this table in conjunction
+  // with Table 1 and the Notes that follow." So it states the floor the app
+  // accepts, and p2016 Table 1 states the spacing the app advises. One
+  // document per number, each cited where it speaks.
+  //
+  // Read live 2026-10-23 via the browser pane (textContent, 23,158 chars; page
+  // title "Catch-up Immunization Schedule for Children and Adolescents
+  // (Addendum updated July 2, 2025)"). The pneumococcal conjugate row's three
+  // interval cells came back verbatim identical to the transcription
+  // `intervals.js` has carried since 2026-10-11.
+  // The DOCUMENT-level entry — the grey button a reader clicks. Quote-free, which
+  // is what marks an entry as naming the whole page rather than one sentence of
+  // it, and therefore declaring no `population`: a document has no patient.
+  // Required by C3's rule that every document the app can cite has exactly one
+  // whole-page entry, which is what turns a numbered citation into a button.
+  cdcCatchupSchedule: {
+    rulebook: 'child',
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html',
+    label: 'CDC Catch-up Immunization Schedule for Children and Adolescents Who Start Late or Are More Than 1 Month Behind',
+    short: 'CDC catch-up schedule',
+    lastVerified: '2026-10-23',
+  },
+  cdcCatchupDose1to2FourWeeks: {
+    rulebook: 'child',
+    // Patients this cell is about: CDC's catch-up table covers children 4 months
+    // through 6 years, healthy and at risk; this is the 4-week half of its dose
+    // 1 to dose 2 cell.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html',
+    label: 'CDC Catch-up Immunization Schedule, Table 2 — the MINIMUM interval from PCV dose 1 to dose 2 when the first dose fell before the 1st birthday',
+    short: 'CDC catch-up schedule',
+    quote: '4 weeks if first dose was administered before the 1st birthday',
+    lastVerified: '2026-10-23',
+  },
+  cdcCatchupDose1to2EightWeeks: {
+    rulebook: 'child',
+    // Patients this cell is about: CDC's catch-up table covers children 4 months
+    // through 6 years, healthy and at risk; this is the 8-week half of its dose
+    // 1 to dose 2 cell.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html',
+    label: 'CDC Catch-up Immunization Schedule, Table 2 — the MINIMUM interval from PCV dose 1 to dose 2 when the first dose fell at or after the 1st birthday',
+    short: 'CDC catch-up schedule',
+    quote: '8 weeks (as final dose for healthy children) if first dose was administered at the 1st birthday or after',
+    lastVerified: '2026-10-23',
+  },
+  cdcCatchupDose2to3FourWeeks: {
+    rulebook: 'child',
+    // Patients this cell is about: CDC's catch-up table covers children 4 months
+    // through 6 years, healthy and at risk; this is the 4-week half of its dose
+    // 2 to dose 3 cell.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html',
+    label: 'CDC Catch-up Immunization Schedule, Table 2 — the MINIMUM interval from PCV dose 2 to dose 3 for a child under 12 months whose previous dose fell before 7 months',
+    short: 'CDC catch-up schedule',
+    quote: '4 weeks if current age is younger than 12 months and previous dose was administered at <7 months old',
+    lastVerified: '2026-10-23',
+  },
+  cdcCatchupDose2to3EightWeeks: {
+    rulebook: 'child',
+    // Patients this cell is about: CDC's catch-up table covers children 4 months
+    // through 6 years, healthy and at risk; this is the 8-week half of its dose
+    // 2 to dose 3 cell.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html',
+    label: 'CDC Catch-up Immunization Schedule, Table 2 — the MINIMUM interval from PCV dose 2 to dose 3 when the previous dose fell at 7-11 months, or a dose fell before 12 months',
+    short: 'CDC catch-up schedule',
+    quote: '8 weeks (as final dose for healthy children) if previous dose was administered between 7\u201311 months (wait until at least 12 months old); OR if current age is 12 months or older and at least 1 dose was administered before age 12 months',
+    lastVerified: '2026-10-23',
+  },
+  cdcCatchupDose3to4: {
+    rulebook: 'child',
+    // Patients this cell is about: CDC's catch-up table covers children 4 months
+    // through 6 years, healthy and at risk; this is its dose 3 to dose 4 cell,
+    // which names the children it is about in its own words.
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-catch-up.html',
+    label: 'CDC Catch-up Immunization Schedule, Table 2 — the MINIMUM interval from PCV dose 3 to the booster',
+    short: 'CDC catch-up schedule',
+    quote: '8 weeks (as final dose) This dose is only necessary for children age 12 through 59 months regardless of risk, or age 60 through 71 months with any risk, who received 3 doses before age 12 months.',
+    lastVerified: '2026-10-23',
+  },
+
   // ── C10-1 (2026-10-23): immunize.org p2016 TABLE 1, row by row ──────────
   //
   // Why these exist. The infant catch-up card states a SERIES TOTAL for the

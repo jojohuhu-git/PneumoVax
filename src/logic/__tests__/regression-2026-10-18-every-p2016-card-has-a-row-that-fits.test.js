@@ -197,9 +197,21 @@ describe("every card citing p2016 has a p2016 row whose columns all fit", () => 
     //          row they key on — CDC's notes cannot carry that number, since
     //          they punt: "For other catch-up guidance, see Table 2."
     //
+    //   3,459  after C10-2 (2026-10-23) — ADDED 165, the first rise in this
+    //          number rather than a fall. The card now states its INTERVAL as
+    //          well as its total, and on a 7-11-month-old with two doses before
+    //          7 months the interval is p2016's: her total comes to exactly 4,
+    //          so CDC's routine sentence keeps the total and p2016 Table 1's
+    //          "1 or 2 before age 7 months" row ("1 dose 8 weeks after most
+    //          recent dose") carries the spacing. CDC's catch-up table says 4
+    //          weeks for her and OWNER RULING A ranks p2016 above it. These are
+    //          cards p2016 SPEAKS for, so this is the FINDING F direction — a
+    //          document present where it has a fitting row — not a regression
+    //          of C10-1, whose claim was about the total and still holds.
+    //
     // If this fails, do not edit the number until you can say which cards moved
     // and why — then edit it and add the line.
-    expect(carrying).toBe(3294);
+    expect(carrying).toBe(3459);
     expect([...noRowFits.entries()].slice(0, 8)).toEqual([]);
     expect([...noRowFits.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });

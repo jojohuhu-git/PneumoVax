@@ -83,8 +83,14 @@ describe('C8 — the five-dose catch-up card credits the booster row', () => {
     const s = shown(card);
     // The lead's number stays with MMWR, per FINDING 2.
     expect(s.lead.map((c) => c.key)).toEqual(['pedsInfantLastDose1215mo']);
-    // The detail's new number is CDC's notes.
-    expect(s.detail.map((c) => c.key)).toEqual(['pedsRoutine4Dose']);
+    // The detail's numbers. C10-2 (2026-10-23) added the FIRST of these two:
+    // the card states an interval ("due 8 weeks after the most recent one"), and
+    // CDC's catch-up table is the document that states it — its dose-3-to-4
+    // cell, which names these children in its own words ("age 12 through 59
+    // months regardless of risk ... who received 3 doses before age 12 months").
+    // Before C10-2 that number was printed with nothing behind it. CDC's notes
+    // keep the booster clause, which is what this test was written for.
+    expect(s.detail.map((c) => c.key)).toEqual(['cdcCatchupDose3to4', 'pedsRoutine4Dose']);
     expect(notesNumbers(card)).toHaveLength(1);
   });
 
@@ -94,7 +100,11 @@ describe('C8 — the five-dose catch-up card credits the booster row', () => {
     expect(card.note.detail).toMatch(/the final\/booster dose is given at ≥12 months \[c\]/);
     // And the total carries no marker of its own beyond the lead's MMWR one.
     expect((card.note.lead.match(/\[c\]/g) ?? [])).toHaveLength(1);
-    expect(shown(card).detail[0].quote).toBe('Routine vaccination with PCV 4-dose series at 2, 4, 6, 12–15 months');
+    // Found BY DOCUMENT rather than by position: C10-2 added a marker ahead of
+    // this one, and an index would have made the assertion about ordering when
+    // what it is really about is which quote backs the booster clause.
+    const notesCite = shown(card).detail.find((c) => c.key === 'pedsRoutine4Dose');
+    expect(notesCite.quote).toBe('Routine vaccination with PCV 4-dose series at 2, 4, 6, 12–15 months');
   });
 
   it('a routine 4-dose baby does NOT get a second number for the same page', () => {
