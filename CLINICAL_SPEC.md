@@ -802,7 +802,9 @@ catch-up row**.
   Implemented in `logic/intervals.js` (`GRACE_DAYS = 4`) and applied to the minimum-age
   checks in `validate.js`. It is a **validity** rule and deliberately does **not** move the
   scheduler: `earliestNextDate` still shows the real minimum, because CDC's sentence permits
-  *counting* a dose given 4 days early, not *advising* one.
+  *counting* a dose given 4 days early, not *advising* one. Reaffirmed as an owner ruling on
+  2026-10-24 and extended to the one date that had slipped across the line — the repeat date
+  on a rejected dose's chip. See §L's Ruling D entry.
 - **Interval arithmetic** (added 2026-10-10, S10 — A-P2-11). Same source, same sentence
   block:
   > "For calculating intervals between doses, 4 weeks = 28 days. Intervals of ≥4 months are
@@ -1355,3 +1357,83 @@ Table 2, free to drift from the figure it cites; two readings is precisely the P
 `pcvInfant()` in `recommend.js`. The guard is
 `regression-c10-2-2026-10-23-routine-date-recommended-minimum-commented.test.js`, proved
 load-bearing four ways (4 / 3 / 3 / 2 failing tests when each clause is broken separately).
+
+### §L-3 — RULING D (2026-10-23): the repeat is measured from the dose the patient GOT
+
+**OWNER RULING D, 2026-10-23:** *"the repeat dose should be spaced from the invalid dose by
+the minimum interval. This should be followed."*
+
+**Source, read live 2026-10-23.** ACIP General Best Practices, "Timing and Spacing of
+Immunobiologics": *"The repeat dose should be spaced after the invalid dose by the
+recommended minimum interval (Table 3-2)."* The page states its per-vaccine exceptions
+explicitly: **hepatitis B is the only one** that anchors the repeat on the VALID dose
+(*"as early as 8 weeks after the 2nd valid dose"*); Hib and hepatitis A follow the general
+rule; live vaccines have their own 28-day rule. **Pneumococcal appears four times on that
+page and not once about repeat or invalid doses** — all four are simultaneous-administration
+findings — so the general rule governs and there is no pneumococcal override to look for.
+
+**What was wrong.** The validator had followed this since ANCHOR-1. The recommendation side
+had not: `recommend()` summarises the EFFECTIVE list, so a card measured from the last dose
+that COUNTED. Three otherwise identical 7-month-olds whose mistimed dose fell on 28 Sep, 5
+Oct and 12 Oct were all advised the same return date.
+
+**What moves and what does not.** The split is not invented here — it is the validator's own
+(`DOSE_INTERVAL_RULES` CHILD-PCV-AFTER-PCV takes `ageAtPrevDose` from the anchor and
+`doseNumber` from the kept list), copied so the two sides cannot hold separate readings:
+
+| Moves to the dose actually given | Stays on doses that COUNTED |
+|---|---|
+| the anchor date | the dose number and series totals |
+| the age at that anchor dose | `anyDoseBefore12` |
+
+The anchor is computed once, in `validate.js` (`st.prev`), exposed as the analysis's
+`anchor`, and carried by `summarizePcv` as `anchorDate` / `anchorAgeAtDose` — distinct from
+`lastDate` / `lastAgeAtDose`, which keep their own meaning. For a patient with no rejected
+dose the two are the same date, which is why nothing else moved.
+
+**Three things never anchor.** PCV7 (a superseded product properly given, not a mistimed
+one). A **record problem** — a dose dated in the future or before birth — because it is *"a
+dose the patient never had"*, the same reason `validate.js` already withholds its repeat
+sentence. And every **cross-stream** interval (PPSV23 measured from a PCV; the 5-year rows),
+which ANCHOR-1 keys on counting doses in both directions: Ruling D is about repeating the
+mistimed dose, not about a different vaccine that follows it.
+
+**The third surface.** The chip under a rejected dose read *"the next dose in this series is
+due on or after …"* and printed `earliestValidDate` — the date **that dose** would have been
+valid, measured from the one before it. `repeatDueDate` is its sibling: same rule, same
+arithmetic (`intervalFrom`), anchored on the dose given. Both are kept, because they answer
+different questions:
+
+| Field | Answers |
+|---|---|
+| `earliestValidDate` | when THIS dose would have counted (anchor + gap) |
+| `repeatDueDate` | when its REPEAT may be given (this dose + gap) |
+
+They differ in one thing more, and it is an **OWNER RULING of 2026-10-24** — the answer to
+the first question PR #83 left open. `earliestValidDate` carries CDC's 4-day grace;
+`repeatDueDate` does **not**.
+
+> *"I don't need the app to recommend dates within the 4 day grace period. Just the routine
+> date next dose is due with a comment on the earliest date it could be given."*
+
+The reason is the division this spec has drawn since the grace was added (§ "CDC's 4-day
+grace" above): the grace permits *counting* a dose given 4 days early, not *advising* one,
+so it belongs to the validator and never to the scheduler. `earliestValidDate` asks a
+validity question about a dose **already given** and keeps it. `repeatDueDate` is advice
+about a dose **not yet given**, so it takes the full interval — the first graced date the
+app had ever printed as advice, and the only one.
+
+Shipped with it, for the same reason: the chip names that date as the **earliest**, never as
+the date the dose is **due**. The rec card is the only surface that states a due date,
+because it is the only one that knows C10-2's routine age and spacing. Before, a
+7-month-old's screen carried three dates for one dose — header *"eligible Dec 7, 2026"*,
+chip *"due on or after 2026-11-05"*, note *"can be given from 2026-11-09 … the minimum
+interval of 4 weeks"*. It now carries two, and they are the routine date and the earliest
+date her ruling asks for.
+
+Measured over both grids: 10,712 chip sentences moved, every one of them **+4 days later**
+and none earlier; 0 verdicts moved in either corpus (`earliestValidDate`, the field the
+corpora record, did not change). The app advises the 9th and still **accepts** the 5th.
+
+Guards: `regression-ruling-d-2026-10-23-repeat-anchored-on-invalid-dose.test.js` and
+`regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js`.

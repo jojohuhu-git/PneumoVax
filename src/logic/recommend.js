@@ -182,7 +182,12 @@ export function collectRefs(riskIds, defaults, rulebook) {
 // `am`/`today` let us bucket each dated dose by the age it was given — matching
 // the age-band model CDC PneumoRecs uses (before 12mo / 12–23mo / 24–71mo / ≥6y).
 // Undated doses can't be banded; they're counted in `undated` and the total only.
-function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
+// `anchorDose` is validate.js's own anchor for this stream — the last DATED
+// dose, INCLUDING one rejected for spacing and EXCLUDING PCV7. It is passed in
+// rather than recomputed here because the validator already decides which
+// doses may anchor, and two places deciding that separately is exactly the
+// fault RULING D fixes (see the `anchorDate` field below).
+function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = null) {
   const products = pcvDoses.map((d) => d.product).filter(Boolean);
   const has = (k) => products.includes(k);
   const hasPCV20 = has('PCV20');
@@ -237,13 +242,40 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null) {
     includesCompleting,
     hasUndatedCompleting,
     lastDate: lastDated?.date || null,
-    // Age in months at the dose `lastDate` names — the anchor CDC Catch-up
-    // Table 2 keys its intervals on. Derived from `lastDated` rather than
-    // counted in the loop above so that the interval's key and the interval's
-    // anchor date can never refer to different doses. null when undated.
+    // Age in months at the dose `lastDate` names. Derived from `lastDated`
+    // rather than counted in the loop above so that a key and a date can
+    // never refer to different doses. null when undated.
     lastAgeAtDose: lastDated && today
       ? ageAtDoseMonths(lastDated, { dob, ageMonths: am }, today)
       : null,
+
+    // ── The SAME-STREAM interval anchor — RULING D (owner, 2026-10-23) ──
+    //
+    // "The repeat dose should be spaced from the invalid dose by the minimum
+    // interval. This should be followed." ACIP's General Best Practices says
+    // the same in its own words, and names hepatitis B as the only vaccine
+    // that anchors on the valid dose instead; pneumococcal is not an
+    // exception there.
+    //
+    // So this is deliberately NOT `lastDate`. `lastDate` is the last dose that
+    // COUNTED; `anchorDate` is the last dose the patient actually RECEIVED
+    // that can anchor a gap — a dose rejected for spacing does, PCV7 does not.
+    // For a patient with no rejected dose the two are the same date, which is
+    // every patient the app saw before this change.
+    //
+    // ⚠ The DATE and the AGE AT IT move together and must always name one
+    // dose. The series POSITION (dose number, totals, `band`) does not move:
+    // it still counts only doses that counted, because that is how CDC's
+    // catch-up table counts a "previous dose". That split is not invented
+    // here — it is the validator's, copied: DOSE_INTERVAL_RULES'
+    // CHILD-PCV-AFTER-PCV already takes `ageAtPrevDose` from the anchor and
+    // `doseNumber` from the kept list.
+    anchorDate: anchorDose?.date ?? (lastDated?.date || null),
+    anchorAgeAtDose: anchorDose
+      ? anchorDose.ageAtDose
+      : (lastDated && today
+        ? ageAtDoseMonths(lastDated, { dob, ageMonths: am }, today)
+        : null),
     band,
   };
 }
@@ -392,7 +424,10 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     (k) => !drop.includes(k),
   );
   const brands = pcvRecBrands({ adult: false });
-  const anchor = pcv.lastDate;
+  // RULING D (2026-10-23): the dose the child actually received, which is the
+  // last VALID one for every patient without a rejected dose. See
+  // `summarizePcv`'s `anchorDate`.
+  const anchor = pcv.anchorDate;
 
   // Determine total target doses + whether the booster (≥12mo) is the next due.
   // Reduced from p2016 Table 1 to: remaining count + next interval + 12mo floor.
@@ -641,7 +676,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   const minCellResult = anchor
     ? pcvNextDoseMinIntervalCell({
       doseNumber: prior + 1,
-      ageAtPrevDose: pcv.lastAgeAtDose,
+      ageAtPrevDose: pcv.anchorAgeAtDose,
       currentAgeMonths: am,
       anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
       ageAtThisDose: needs12moFloor ? M.m12 : am,
@@ -788,7 +823,31 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // SAME sentence two numbers" forbids outright, and which it caught here. The
   // interval still rests on that row; the row is already numbered on the card.
   // This is the same conditional C8 used for CDC's notes at a total of 4.
-  const advisedCite = advisedCiteRaw === leadCite ? null : advisedCiteRaw;
+  // The closing "final/booster dose is given at >=12 months" marker, which
+  // exists only when the total is not exactly 4. Named here for the same
+  // reason `leadCite` is: the advised marker has to know every OTHER marker
+  // the card will carry before it can decide whether it is a duplicate.
+  //
+  // RULING D (2026-10-23) found the gap. The dedupe above compared the advised
+  // document against the LEAD's only, which was enough while a child whose
+  // every dose had been rejected reached this card with no anchor at all —
+  // `anchor` was null, so no advised marker was emitted and the clash could
+  // not occur. Once a rejected dose anchors, it can: a 12-month-old whose only
+  // PCV20 was given below the minimum age gets "due at age 12 months,
+  // following the routine 2, 4, 6 and 12-15 month series [c]" AND "the
+  // final/booster dose is given at >=12 months [c]", both pointing at CDC's
+  // notes — one sentence, two numbers, on 132 cards. Caught by
+  // `regression-c8-2026-10-23-infant-catchup-credits-the-booster-row`'s "no
+  // card anywhere gives the SAME sentence two numbers", which is exactly the
+  // sweep that invariant exists for.
+  //
+  // `minClauseCite` needs no such test: `showMinClause` is false unless the
+  // advised date is strictly LATER than the minimum, so the advised branch is
+  // never the minimum when that clause is shown.
+  const boosterCite = target !== 4 ? 'pedsRoutine4Dose' : null;
+  const advisedCite = (advisedCiteRaw === leadCite || advisedCiteRaw === boosterCite)
+    ? null
+    : advisedCiteRaw;
   const advisedMark = advisedCite ? ' [c]' : '';
 
   return [rec({
@@ -926,7 +985,9 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   );
   const refs = HEALTHY_CHILD_DEFAULT_REFS;
   const prior = pcv.count;
-  const anchor = pcv.lastDate;
+  // RULING D (2026-10-23) — same-stream PCV→PCV gap, so the anchor is the dose
+  // given, not the last that counted.
+  const anchor = pcv.anchorDate;
   const b = pcv.band;
 
   // Completeness for a HEALTHY child is age-band driven, NOT "has any PCV20."
@@ -1256,7 +1317,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // enforce for numbers, applied to words.
   const words = pcvProductWords(pcv);
   const bridge = pcvInterchangeableBridge(words);
-  const anchorPcv = pcv.lastDate;
+  // RULING D (2026-10-23) — same-stream PCV→PCV gap (the 8-week rows below).
+  // `anchorPneumo` on the next line deliberately does NOT move: it is a
+  // CROSS-stream anchor, and ANCHOR-1 keys those on COUNTING doses in both
+  // directions.
+  const anchorPcv = pcv.anchorDate;
   // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
   const anchorPneumo = mostRecent(pcv.lastDate, ppsv.effective.find((d) => d.date)?.date || null);
   const ppsvGiven = ppsv.count > 0;
@@ -2899,7 +2964,7 @@ export function recommend(input) {
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
-  const pcv = summarizePcv(effectivePcv, am, today, dob);
+  const pcv = summarizePcv(effectivePcv, am, today, dob, pcvAnalysis.anchor);
   const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
 
   // ── Standard (age/history/risk) recommendations ──────────────────────
