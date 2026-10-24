@@ -147,7 +147,11 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     const reasons = a.perDose[1].reasons.join(' ');
     expect(reasons).toMatch(/14 days after the previous dose/);
     expect(reasons).toMatch(/4 weeks/);
-    expect(reasons).toMatch(/due on or after 2026-03-25/);
+    // OWNER RULING 2026-10-24: the full 28 days from the dose of 2026-03-15,
+    // with no 4-day grace — the grace decides what the app ACCEPTS, never what
+    // it ADVISES. Was 2026-04-08.
+    expect(reasons).toMatch(/can be given from 2026-04-12 at the earliest/);
+    expect(reasons).not.toMatch(/2026-04-08/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
 

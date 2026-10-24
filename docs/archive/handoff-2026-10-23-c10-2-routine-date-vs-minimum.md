@@ -1,3 +1,7 @@
+> **SUPERSEDED (2026-10-23)** — its queue was consumed by
+> `handoff-2026-10-23-ruling-d-repeat-dose-anchor.md`. PRs #81 and #82 are both MERGED,
+> and RULING D (this file's P1) is built and open as PR #83. Do not resume from here.
+
 # PneumoVax — Handoff after C10-2, the routine-date/minimum split (2026-10-23)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
