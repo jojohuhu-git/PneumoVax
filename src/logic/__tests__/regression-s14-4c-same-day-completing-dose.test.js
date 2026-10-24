@@ -205,16 +205,24 @@ describe('S14-4C — the controls that bound it', () => {
     expect(text(v)).toMatch(/at least 1 year/);
   });
 
-  it('CONTROL: a same-day PPSV23 after a PCV15 is still voided by the PCV15 floor', () => {
+  // ⚠️ The verdict here flipped with the owner's FAMILY-3 ruling (2026-10-24):
+  // the PCV15 row is a recommendation now, so this dose COUNTS and carries a
+  // note. What S14-4C is about is unchanged and is still what is asserted —
+  // a PPSV23 given at the same visit as a series-COMPLETING conjugate is an
+  // extra dose, while one given with a PCV15 is the dose that completes the
+  // series and must never be marked extra.
+  it('CONTROL: a same-day PPSV23 after a PCV15 is the completing dose, not an extra', () => {
     const r = adult({
       pcvDoses: [{ product: 'PCV15', date: VISIT }],
       ppsv23Doses: [{ product: 'PPSV23', date: VISIT }],
     });
     const v = r.ppsv23.perDose[0];
 
-    expect(v.status).toBe('invalid');
+    expect(v.status).toBe('valid');
+    expect(v.earlyAdvisory).toBe(true);
     expect(v.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
     expect(v.extraDose).toBeUndefined();
+    expect(v.effectiveDoseNum).toBe(1);
   });
 
   it('CONTROL: a CHILD\'s same-day PCV20 + PPSV23 is untouched', () => {

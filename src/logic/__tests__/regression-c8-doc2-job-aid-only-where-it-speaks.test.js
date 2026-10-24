@@ -214,6 +214,10 @@ describe('the control — every other adult card keeps all three defaults', () =
   });
 });
 
+// The owner's alternative line (2026-10-24). A card carrying it says two
+// things, and the job aid speaks for the second one at every adult age.
+const ALTERNATIVE = 'you prefer to treat it as not counting';
+
 describe('swept over every patient the grid can build', () => {
   // One pass, every adult card, so this cannot be true of a fixture and false
   // of the app. Counts are pinned: if a clinical change moves which patients
@@ -221,7 +225,16 @@ describe('swept over every patient the grid can build', () => {
   // quietly re-baselining.
   const tally = {};
   for (const key of Object.keys(SAYS)) {
-    tally[key] = { total: 0, under50: 0, ge50: 0, jobAidUnder50: 0, jobAidGe50: 0 };
+    tally[key] = {
+      total: 0, under50: 0, ge50: 0, jobAidUnder50: 0, jobAidGe50: 0,
+      // Cards under 50 that carry the job aid only because they ALSO carry
+      // the owner's alternative line (2026-10-24), whose substitution claim
+      // is the job aid's footnote and is not age-scoped. Counted apart from
+      // jobAidUnder50 so the 2026-10-17 decision — the job aid's COMPLETION
+      // sentence is about an adult at 50+ and comes off younger cards — stays
+      // asserted at exactly 0.
+      jobAidUnder50Alternative: 0,
+    };
   }
   let adultCards = 0;
   let jobAidElsewhere = 0;
@@ -249,7 +262,10 @@ describe('swept over every patient the grid can build', () => {
           if (hasJobAid(rec)) t.jobAidGe50 += 1;
         } else {
           t.under50 += 1;
-          if (hasJobAid(rec)) t.jobAidUnder50 += 1;
+          if (hasJobAid(rec)) {
+            if (text.includes(ALTERNATIVE)) t.jobAidUnder50Alternative += 1;
+            else t.jobAidUnder50 += 1;
+          }
         }
       }
       if (hasJobAid(rec)) {
@@ -273,7 +289,11 @@ describe('swept over every patient the grid can build', () => {
     // "Complete (history includes PCV20)"), each card carrying the owner's
     // alternative line and the documents that state it.
     expect(tally.complete20or21.total).toBe(2610 + 363 + 33);
-    expect(tally.complete15plus.total).toBe(914 + 99);
+    // 2026-10-24, FAMILY 3: 78 more patients — an adult PPSV23 given sooner
+    // than ACIP's year after a PCV15, outside the 8-week risk class — whose
+    // dose now counts, landing them on "Complete (PCV15 + PPSV23)" with the
+    // same alternative line and the same documents behind it.
+    expect(tally.complete15plus.total).toBe(914 + 99 + 59);
     expect(tally.routineAt50.total).toBe(180);
   });
 
@@ -282,18 +302,27 @@ describe('swept over every patient the grid can build', () => {
     // and a complete-by-PCV20 card at 50+ must CARRY the job aid, not
     // merely be counted at 50+.
     expect(tally.complete20or21.ge50).toBe(1980 + 363 + 33);
-    expect(tally.complete15plus.ge50).toBe(609 + 99);
+    expect(tally.complete15plus.ge50).toBe(609 + 99 + 54);
     expect(tally.complete20or21.jobAidGe50).toBe(1980 + 363 + 33);
-    expect(tally.complete15plus.jobAidGe50).toBe(609 + 99);
+    expect(tally.complete15plus.jobAidGe50).toBe(609 + 99 + 54);
   });
 
   it('the 1,115 cards it does not speak for have lost it', () => {
     expect(tally.complete20or21.under50).toBe(630);
-    expect(tally.complete15plus.under50).toBe(305);
+    // 2026-10-24 family 3: + 5 at 19-49. `jobAidUnder50` below MUST stay 0 —
+    // the owner's 2026-10-17 decision is that the job aid is credited at 50+
+    // and removed below it, and the alternative line must not smuggle it
+    // back onto a younger adult's card.
+    expect(tally.complete15plus.under50).toBe(305 + 5);
     expect(tally.routineAt50.under50).toBe(180);
     expect(tally.complete20or21.jobAidUnder50).toBe(0);
     expect(tally.complete15plus.jobAidUnder50).toBe(0);
     expect(tally.routineAt50.jobAidUnder50).toBe(0);
+    // The only under-50 complete cards carrying the job aid are the 5 that
+    // also offer the alternative, and they carry it for THAT sentence.
+    expect(tally.complete15plus.jobAidUnder50Alternative).toBe(5);
+    expect(tally.complete20or21.jobAidUnder50Alternative).toBe(0);
+    expect(tally.routineAt50.jobAidUnder50Alternative).toBe(0);
     expect(tally.routineAt50.jobAidGe50).toBe(0);
   });
 
@@ -314,6 +343,6 @@ describe('swept over every patient the grid can build', () => {
     // Family 2 grows the matched group on BOTH statements: +33 on the
     // complete-by-PCV20 card and +99 on complete-by-PCV15+PPSV23, which is
     // the whole 132. 4,001 - 3,084 = 917.
-    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 132) - (2589 + 363 + 33 + 99));
+    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 132) - (2589 + 363 + 33 + 99 + 54 + 5));
   });
 });

@@ -327,17 +327,18 @@ describe('swept over every patient the grid can build', () => {
     }
   });
 
-  it('the only overlap is family 2\'s 132 complete cards that also offer the alternative', () => {
+  it('the only overlap is the 209 complete cards that also offer the alternative', () => {
     // 2026-10-24, family 2: 33 patients whose early PCV20 now counts land on
     // "Complete (history includes PCV20)" AND carry the alternative sentence.
     // mm7401a1 is on those cards for the alternative, never for the
     // completion claim. Pinned exactly, so a future change that puts the
     // document back on a plain completion card fails here.
     expect(onLosers.complete20or21.withMmwr).toBe(33);
-    expect(onLosers.complete15plus.withMmwr).toBe(99);
-    // 33 + 99 = 132, the exact number of patients the family-2 ruling moves,
-    // counted here independently of the verdict corpus.
-    expect(onLosers.complete20or21.withMmwr + onLosers.complete15plus.withMmwr).toBe(132);
+    expect(onLosers.complete15plus.withMmwr).toBe(99 + 77);
+    // 33 + 99 = 132, the patients family 2 moves, plus family 3's 77 (of its
+    // 78 verdicts, the one that does not land here is pinned by family 3's own
+    // guard) = 209. Counted independently of the verdict corpus.
+    expect(onLosers.complete20or21.withMmwr + onLosers.complete15plus.withMmwr).toBe(132 + 77);
     for (const [k, v] of Object.entries(onLosers)) {
       if (k === 'complete20or21' || k === 'complete15plus') continue;
       expect(v.withMmwr, `${k} gained an overlap`).toBe(0);
@@ -371,7 +372,11 @@ describe('swept over every patient the grid can build', () => {
     // 2026-10-24 family 2: -132 due cards, +132 complete cards carrying the
     // alternative, so the TOTAL is unchanged at 3,795. The composition moved,
     // not the count — which the overlap pin below is what actually checks.
-    expect(mmwrCards).toBe(2564 + 1154 + 440 - 363);
+    // 2026-10-24, FAMILY 3: 78 more patients — an adult PPSV23 given sooner
+    // than ACIP's year after a PCV15, outside the 8-week risk class — whose
+    // dose now counts, landing them on "Complete (PCV15 + PPSV23)" with the
+    // same alternative line and the same documents behind it.
+    expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 + 77);
   });
 
   it("the job aid is on 3,869 — 3,616 after document 2, plus Ruling F's 253", () => {
@@ -389,6 +394,9 @@ describe('swept over every patient the grid can build', () => {
     // these patients used to see, and is on the complete card they see now,
     // but the complete card at 19-49 did not carry it before and does when
     // it offers the alternative.
+    // Family 3 adds NOTHING here: the card those 78 patients used to see
+    // ("PPSV23 >=1 year after PCV15") already carried the job aid, and the
+    // complete card they see now carries it too. Measured, not assumed.
     expect(jobAidCards).toBe(6805 - 3189 + 253 + 132);
   });
 

@@ -565,6 +565,33 @@ export const DOSE_INTERVAL_RULES = [
     }),
   },
   {
+    id: 'ADULT-PPSV23-AFTER-PPSV23',
+    what: 'A second adult PPSV23 dose',
+    rulebook: 'adult',
+    vaccine: 'PPSV23',
+    products: null,
+    from: 'prevSameStream',
+    // SAME CONSTANT as CHILD-PPSV23-AFTER-PPSV23, deliberately. The two rows
+    // exist separately only because their citations differ; the number has no
+    // age term, and the old age gate on it is what made a 70-year-old's
+    // second PPSV23 two years after the first read valid and SILENT.
+    interval: { months: PPSV23_REVACC_MIN_MONTHS },
+    grace: true,
+    enforcement: 'floor',
+    authority: 'OWNER',
+    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. The adult notes recommend a '
+      + 'second PPSV23 at 5 years for an immunocompromised adult 19–64 (rr7203a1, which excludes '
+      + 'cochlear implant and CSF leak from that row) and at ≥65 when an earlier PPSV23 was given '
+      + 'before 65 — stated as advice, with CDSI v4.64 absMinInt = 0 days. The interval is enforced on '
+      + 'the DOSE PAIR, not on the risk row: whether a second PPSV23 was indicated at all is the '
+      + 'recommendation engine\'s question, and keying the floor on risk class is what left this gap '
+      + 'unchecked for adults in the first place. See CLINICAL_SPEC.md §K.',
+    message: (ctx, anchor, min) => ({
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${anchor.date} — a second PPSV23 is given at least ${min.words} after the first.`],
+      detail: `Previous PPSV23: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+    }),
+  },
+  {
     id: 'ADULT-PPSV23-AFTER-PCV15',
     what: 'An adult PPSV23 after PCV15, where the 8-week option does not apply — 1 year from the PCV15',
     rulebook: 'adult',
@@ -573,19 +600,29 @@ export const DOSE_INTERVAL_RULES = [
     from: 'lastPcv15',
     shorterMinimum: false,
     interval: { months: ADULT_PPSV23_INTERVAL_MONTHS },
-    grace: true,
-    enforcement: 'floor',
-    authority: 'OWNER',
-    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. CDC states "at least 1 year '
+    // No grace — a recommendation counts every dose already. See Ruling F.
+    grace: false,
+    enforcement: 'recommendation',
+    // CDC, for the same reason as the other two rows the owner reversed on
+    // 2026-10-24: the row now asserts only CDC's own advised interval.
+    authority: 'CDC',
+    source: 'CDC Adult Immunization Schedule Notes, with the OWNER RULING of 2026-10-24 — which '
+      + 'REVERSED the owner\'s determination of 2026-10-11 for this row. CDC states "at least 1 year '
       + 'after the PCV15 dose" and names NO minimum for an adult without an immunocompromising '
-      + 'condition, cochlear implant or CSF leak. The owner determined the year is the floor for them. '
-      + 'This row is for an adult WITHOUT those conditions, so the year is what the app recommends '
-      + 'them too (S15, 2026-10-16: the 8 weeks is the recommendation only at 19-49, and only for '
-      + 'an immunocompromising condition, cochlear implant or CSF leak). See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — PPSV23 is given at least ${min.words} after PCV15.`],
-      detail: `Previous PCV15: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} minimum interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
-    }),
+      + 'condition, cochlear implant or CSF leak. This row is for an adult WITHOUT those conditions '
+      + '(S15, 2026-10-16: the 8 weeks is the recommendation only at 19-49, and only for an '
+      + 'immunocompromising condition, cochlear implant or CSF leak). Shown three such patients — a '
+      + '50-year-old with no risk factors, a 50-year-old and a 30-year-old with chronic heart '
+      + 'disease, each with PCV15 2026-07-19 and PPSV23 2026-10-11 — the owner ruled: "ACIP still '
+      + 'has no explicit guidance for this exact scenario, so either path rests on inference... '
+      + 'Either [a repeat] or series is complete could be considered", and settled on complete, '
+      + 'with the dose noted as early and a PCV20/PCV21 offered at >=1 year after the PPSV23 for a '
+      + 'clinician who would rather not count it. ⚠️ This row is ordered AFTER '
+      + 'ADULT-PPSV23-AFTER-PPSV23, which is still a floor and which she reaffirmed the same day '
+      + '("PPSV23 to PPSV23 spacing should be 5 years"): the evaluator returns on the first unmet '
+      + 'row, so a recommendation placed before that floor would let a second PPSV23 given too soon '
+      + 'escape it. See CLINICAL_SPEC.md §K.',
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date}. ACIP advises PPSV23 at least ${min.words} after PCV15 for an adult without an immunocompromising condition, cochlear implant or CSF leak, but states that as recommended timing and names no minimum, so this dose still counts (owner ruling, 2026-10-24).`,
   },
   // PPSV23 after PCV13 — the pair rr7203a1 spells out, added 2026-10-11 after
   // the owner reviewed it. Two floors, exactly as that MMWR keys the gap:
@@ -647,33 +684,6 @@ export const DOSE_INTERVAL_RULES = [
     message: (ctx, anchor, min) => ({
       reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — PPSV23 is given at least ${min.words} after PCV13.`],
       detail: `Previous PCV13: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
-    }),
-  },
-  {
-    id: 'ADULT-PPSV23-AFTER-PPSV23',
-    what: 'A second adult PPSV23 dose',
-    rulebook: 'adult',
-    vaccine: 'PPSV23',
-    products: null,
-    from: 'prevSameStream',
-    // SAME CONSTANT as CHILD-PPSV23-AFTER-PPSV23, deliberately. The two rows
-    // exist separately only because their citations differ; the number has no
-    // age term, and the old age gate on it is what made a 70-year-old's
-    // second PPSV23 two years after the first read valid and SILENT.
-    interval: { months: PPSV23_REVACC_MIN_MONTHS },
-    grace: true,
-    enforcement: 'floor',
-    authority: 'OWNER',
-    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. The adult notes recommend a '
-      + 'second PPSV23 at 5 years for an immunocompromised adult 19–64 (rr7203a1, which excludes '
-      + 'cochlear implant and CSF leak from that row) and at ≥65 when an earlier PPSV23 was given '
-      + 'before 65 — stated as advice, with CDSI v4.64 absMinInt = 0 days. The interval is enforced on '
-      + 'the DOSE PAIR, not on the risk row: whether a second PPSV23 was indicated at all is the '
-      + 'recommendation engine\'s question, and keying the floor on risk class is what left this gap '
-      + 'unchecked for adults in the first place. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${anchor.date} — a second PPSV23 is given at least ${min.words} after the first.`],
-      detail: `Previous PPSV23: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
 
