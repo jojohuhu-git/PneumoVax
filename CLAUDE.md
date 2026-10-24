@@ -583,7 +583,23 @@ under the rejected dose said *"the next dose … is due on or after"* and spent
 card already contradicted. `repeatDueDate` is its sibling, same rule and same arithmetic
 (`intervalFrom`), anchored on the dose given. **Keep both: they answer different questions.**
 
-Guard: `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`. `regression-p0-2`'s
+### The Grace Decides What The App ACCEPTS, Never What It ADVISES
+**OWNER RULING 2026-10-24**, answering the first question Ruling D left open: *"I don't need
+the app to recommend dates within the 4 day grace period. Just the routine date next dose is
+due with a comment on the earliest date it could be given."*
+
+This is `intervals.js`'s own standing line — the grace permits *counting* a dose given 4 days
+early, not *advising* one — and `repeatDueDate` was the one date that had crossed it, putting
+*"due on or after 2026-11-05"* on a card whose note already said *"can be given from
+2026-11-09"*. So: `earliestValidDate` **keeps** the grace (a dose already given), and
+`repeatDueDate` **loses** it (a dose not yet given). It is a parameter of `intervalFrom`, not
+a second reading of the interval. The chip also names its date as the **earliest** and never
+as the **due** date — the rec card is the only surface that knows the routine date, so it is
+the only one that states one. Measured: 10,712 chip sentences, every one **+4 days later**,
+none earlier, 0 verdicts moved. Guard:
+`regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js`.
+
+Guard for Ruling D itself: `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`. `regression-p0-2`'s
 "the validity floor is untouched" block asserted the opposite and is **kept, renamed**, as
 the record of the reversal — do not delete it.
 

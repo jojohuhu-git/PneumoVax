@@ -222,13 +222,18 @@ describe('RULING D — the advised repeat is measured from the invalid dose', ()
     expect(rejected.status).toBe('invalid');
     // When this dose would have counted: 2026-09-21 + 28 - 4 days of grace.
     expect(rejected.earliestValidDate).toBe('2026-10-15');
-    // When its REPEAT may be given: 2026-10-12 + 28 - 4.
-    expect(rejected.repeatDueDate).toBe('2026-11-05');
+    // When its REPEAT may be given: 2026-10-12 + 28, with NO grace subtracted
+    // — OWNER RULING 2026-10-24, "I don't need the app to recommend dates
+    // within the 4 day grace period". Ruling D's own fix shipped this as
+    // 2026-11-05, which left a fourth date on the screen; see
+    // regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js.
+    expect(rejected.repeatDueDate).toBe('2026-11-09');
     const sentence = rejected.reasons.find((r) => /next dose in this series/.test(r));
-    expect(sentence).toContain('2026-11-05');
+    expect(sentence).toContain('2026-11-09');
     expect(sentence).not.toContain('2026-10-15');
+    expect(sentence).not.toContain('2026-11-05');
     // And the card's advised date is never EARLIER than the floor the chip states.
-    expect(pcvCard(recommend(patient('2026-10-12'))).earliestNextDate >= '2026-11-05').toBe(true);
+    expect(pcvCard(recommend(patient('2026-10-12'))).earliestNextDate >= '2026-11-09').toBe(true);
   });
 
   it('the series POSITION is still counted from doses that counted', () => {

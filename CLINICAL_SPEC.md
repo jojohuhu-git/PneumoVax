@@ -802,7 +802,9 @@ catch-up row**.
   Implemented in `logic/intervals.js` (`GRACE_DAYS = 4`) and applied to the minimum-age
   checks in `validate.js`. It is a **validity** rule and deliberately does **not** move the
   scheduler: `earliestNextDate` still shows the real minimum, because CDC's sentence permits
-  *counting* a dose given 4 days early, not *advising* one.
+  *counting* a dose given 4 days early, not *advising* one. Reaffirmed as an owner ruling on
+  2026-10-24 and extended to the one date that had slipped across the line — the repeat date
+  on a rejected dose's chip. See §L's Ruling D entry.
 - **Interval arithmetic** (added 2026-10-10, S10 — A-P2-11). Same source, same sentence
   block:
   > "For calculating intervals between doses, 4 weeks = 28 days. Intervals of ≥4 months are
@@ -1407,9 +1409,31 @@ different questions:
 | `earliestValidDate` | when THIS dose would have counted (anchor + gap) |
 | `repeatDueDate` | when its REPEAT may be given (this dose + gap) |
 
-Both carry CDC's 4-day grace, as `earliestValidDate` always has — they are validity
-questions, and the grace is stated on the same chip (*"doses up to 4 days early still count,
-per CDC"*). The card's own "minimum interval of 4 weeks" clause is ungraced, so the two sit
-4 days apart on one screen; see the PR for C11 for the owner's call on that.
+They differ in one thing more, and it is an **OWNER RULING of 2026-10-24** — the answer to
+the first question PR #83 left open. `earliestValidDate` carries CDC's 4-day grace;
+`repeatDueDate` does **not**.
 
-Guard: `regression-ruling-d-2026-10-23-repeat-anchored-on-invalid-dose.test.js`.
+> *"I don't need the app to recommend dates within the 4 day grace period. Just the routine
+> date next dose is due with a comment on the earliest date it could be given."*
+
+The reason is the division this spec has drawn since the grace was added (§ "CDC's 4-day
+grace" above): the grace permits *counting* a dose given 4 days early, not *advising* one,
+so it belongs to the validator and never to the scheduler. `earliestValidDate` asks a
+validity question about a dose **already given** and keeps it. `repeatDueDate` is advice
+about a dose **not yet given**, so it takes the full interval — the first graced date the
+app had ever printed as advice, and the only one.
+
+Shipped with it, for the same reason: the chip names that date as the **earliest**, never as
+the date the dose is **due**. The rec card is the only surface that states a due date,
+because it is the only one that knows C10-2's routine age and spacing. Before, a
+7-month-old's screen carried three dates for one dose — header *"eligible Dec 7, 2026"*,
+chip *"due on or after 2026-11-05"*, note *"can be given from 2026-11-09 … the minimum
+interval of 4 weeks"*. It now carries two, and they are the routine date and the earliest
+date her ruling asks for.
+
+Measured over both grids: 10,712 chip sentences moved, every one of them **+4 days later**
+and none earlier; 0 verdicts moved in either corpus (`earliestValidDate`, the field the
+corpora record, did not change). The app advises the 9th and still **accepts** the 5th.
+
+Guards: `regression-ruling-d-2026-10-23-repeat-anchored-on-invalid-dose.test.js` and
+`regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js`.

@@ -93,7 +93,11 @@ describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', 
     // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
     // only early — it is not "repeated". See
     // regression-w1-too-soon-not-repeated.test.js for the dedicated coverage.
-    expect(second.reasons.join(' ')).toMatch(/due on or after 2027-02-05/);
+    // OWNER RULING 2026-10-24: ungraced, because the app no longer
+    // recommends a date inside the 4-day grace. Was 2027-02-05 (the PCV20 of
+    // 2026-02-09 + 1 year - 4 days); now 2027-02-09.
+    expect(second.reasons.join(' ')).toMatch(/can be given from 2027-02-09 at the earliest/);
+    expect(second.reasons.join(' ')).not.toMatch(/2027-02-05/);
     expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
     // Must NOT keep the old reassurance — it is now false.
     expect(second.reasons.join(' ')).not.toMatch(/still counts/);

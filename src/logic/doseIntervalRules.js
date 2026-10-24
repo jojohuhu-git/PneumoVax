@@ -809,7 +809,9 @@ function anchorAllowed(rule, anchor) {
 // "the next dose is due on or after <date>" instead of "repeat this dose",
 // which is wrong for a dose that was never missing, only early.
 function earliestValidDate(rule, anchor, ctx) {
-  return intervalFrom(rule, anchor, ctx, anchor.date);
+  // Grace ON. This question is ABOUT the grace: "would the dose the patient
+  // already received have counted?" — and a dose up to 4 days early does.
+  return intervalFrom(rule, anchor, ctx, anchor.date, { grace: true });
 }
 
 // RULING D (owner, 2026-10-23) — when the REPEAT of this rejected dose may be
@@ -828,14 +830,35 @@ function earliestValidDate(rule, anchor, ctx) {
 // computed for the dose already given — so a 7-month-old's chip read
 // "2026-10-15" beside a card reading "eligible Dec 7, 2026". Two dates for one
 // dose on one screen, which is the shape of the P0 bug fixed the same day.
+//
+// OWNER RULING 2026-10-24 — and the grace is OFF here. Her words, answering
+// the first question PR #83 left open: "I don't need the app to recommend
+// dates within the 4 day grace period. Just the routine date next dose is due
+// with a comment on the earliest date it could be given."
+//
+// This is `intervals.js`'s own standing line, which Ruling D had crossed
+// without anyone noticing: the grace is a VALIDITY rule and "NOT the
+// scheduler… Granting grace there would make the app advertise a date 4 days
+// early and actively advise giving doses before the minimum." `repeatDueDate`
+// is the only graced date the app ever printed as advice — it put "due on or
+// after 2026-11-05" on a card whose own note already said "can be given from
+// 2026-11-09 … the minimum interval of 4 weeks". Same dose, two earliest
+// dates, four days apart.
+//
+// The app therefore advises the 9th and still ACCEPTS the 5th, exactly as it
+// does everywhere else. Guard:
+// regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js.
 function repeatDueDate(rule, anchor, ctx) {
   return ctx.doseDate ? intervalFrom(rule, anchor, ctx, ctx.doseDate) : null;
 }
 
 // One reading of the rule's interval, applied to whichever date is handed in —
 // so the two dates above can never drift apart by using different arithmetic.
-function intervalFrom(rule, anchor, ctx, from) {
-  const grace = rule.grace ? GRACE_DAYS : 0;
+// The grace is a PARAMETER and not a second reading: the two callers ask
+// different questions of the same interval (see each one's comment), and the
+// only difference between them must stay this single flag.
+function intervalFrom(rule, anchor, ctx, from, { grace: allowGrace = false } = {}) {
+  const grace = allowGrace && rule.grace ? GRACE_DAYS : 0;
   if (rule.interval.months != null) {
     return addDays(addCalendarMonths(from, rule.interval.months), -grace);
   }

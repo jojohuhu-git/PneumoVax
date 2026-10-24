@@ -810,7 +810,18 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // RULING D: measured from the dose actually given. This used to print
           // `earliestValidDate`, which is when THIS dose would have been valid
           // — an earlier date, and one the rec card already contradicted.
-          ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.repeatDueDate ?? result.earliestValidDate}.`
+          //
+          // OWNER RULING 2026-10-24 — and it names that date as the EARLIEST,
+          // never as the date the dose is DUE. "Just the routine date next
+          // dose is due with a comment on the earliest date it could be
+          // given": the routine date is the rec card's job (it is the only
+          // place that knows C10-2's routine age and spacing), so this chip
+          // stops competing with it. The old "is due on or after 2026-11-05"
+          // sat under a header reading "eligible Dec 7, 2026" and above a note
+          // reading "can be given from 2026-11-09" — three dates for one dose.
+          // The wording now echoes that note deliberately, and the date behind
+          // it is the same ungraced minimum.
+          ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series can be given from ${result.repeatDueDate ?? result.earliestValidDate} at the earliest.`
           : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       perDose.push(addNote({
         ...result,
