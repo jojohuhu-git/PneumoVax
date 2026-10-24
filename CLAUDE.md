@@ -42,6 +42,16 @@ ACIP/CDC/AAP/immunize.org over FDA package inserts. Sources per topic are in `CL
 
 Within that group, AAP is a tiebreak, not a ranking (owner decision, 2026-08-10): where ACIP/CDC and AAP agree, cite either; where they disagree, AAP governs; never adopt a CDC revision recommending fewer doses or narrower eligibility than AAP; where AAP is silent, CDC/MMWR stands.
 
+**CITE CDC; REACH FOR p2016 ONLY IF YOU CANNOT (owner decision, 2026-10-23).** Her words:
+*"Ok to cite p2016 if you cannot just cite the CDC references."* This is about which document
+goes ON a card, and it is separate from the disagreement rule below — it applies when the two
+AGREE. If CDC's own pages carry the card's claim, cite CDC and leave immunize.org off; p2016
+is the fallback for a claim CDC does not state. It generalises what she had already ruled
+twice on single cards (the 840 at/after-6 cards, 2026-10-23: *"Take p2016 off"*, because CDC
+stated the whole claim verbatim), and it is why the healthy 5–18 "not indicated" card lost
+p2016 on all 1,584 of its cards. **Reading p2016 is still required before removing it**
+(FINDING F) — the rule says CDC wins when both speak, not that p2016 need not be read.
+
 **CDC vs immunize.org (owner decision, 2026-10-17).** Where a **current CDC page** and an
 **older immunize.org handout** disagree and AAP is silent, **CDC governs** — and say both
 documents' dates in the commit, the spec and the code comment, because the gap between
@@ -255,8 +265,10 @@ first (FINDING F).
 
 The machine guard she required is
 `regression-2026-10-18-every-p2016-card-has-a-row-that-fits.test.js`, which holds p2016's
-whole row inventory and fails if any card cites it without a fitting row (7,371 cards carry
-it, 0 unfitting). **Know its limit:** it asks whether *some* row fits, not whether the row
+whole row inventory and fails if any card cites it without a fitting row (**4,927** cards
+carry it, 0 unfitting — the count is now PINNED EXACTLY in that test, not floored, because
+C8/C9 keep lowering it: 7,371 → 6,511 after C9-3's 860 → 4,927 after C9-4's 1,584. Re-measure,
+never quote it from here). **Know its limit:** it asks whether *some* row fits, not whether the row
 the card *used* fits — so it catches a wrong DOCUMENT (FINDING J) and not a wrong ROW of a
 document that does cover the patient (FINDING I). The second is guarded per finding.
 Closing it generally needs the engine to record which row it used, which it does not do.

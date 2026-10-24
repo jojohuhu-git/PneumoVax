@@ -172,7 +172,23 @@ describe("every card citing p2016 has a p2016 row whose columns all fit", () => 
     // Anti-vacuity. If p2016 stopped appearing on any card at all, or if the
     // engine stopped producing cards, the assertion below would pass while
     // checking nothing — the hazard this repo has been bitten by more than once.
-    expect(carrying).toBeGreaterThan(5000);
+    //
+    // PINNED EXACTLY rather than floored, since C9 (2026-10-23). C8/C9 take
+    // p2016 off cards it does not speak for, so this number DECLINES as the
+    // queue is worked, and a floor silently absorbs each drop until one day it
+    // does not. An exact pin makes every change to p2016's footprint a visible
+    // edit with a reason beside it — the same discipline as the row-inventory
+    // length pinned below. Measured history:
+    //
+    //   7,371  before C9-3 (2026-10-23)
+    //   6,511  after C9-3 removed the "complete because PPSV23 was given"
+    //          cards (840 + 20)
+    //   4,927  after C9-4 removed the healthy 5–18 "not indicated" card
+    //          (1,584), under the owner's "cite CDC; p2016 only if you cannot"
+    //
+    // If this fails, do not edit the number until you can say which cards moved
+    // and why — then edit it and add the line.
+    expect(carrying).toBe(4927);
     expect([...noRowFits.entries()].slice(0, 8)).toEqual([]);
     expect([...noRowFits.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });
