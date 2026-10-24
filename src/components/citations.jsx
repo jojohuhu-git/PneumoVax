@@ -42,14 +42,51 @@ export function makeCiteNumberer() {
 // previous citation — attaching a source to a claim it does not support is the
 // one failure mode worse than no citation at all. It is dropped rather than
 // shown raw so a clinician never reads "[c]" as if it meant something.
+// ── Emphasis (2026-10-24, owner request) ────────────────────────────────
+//
+// A note may mark a span with `**...**` to have it stand out — asked for on
+// the cards that say "complete" AND then qualify it, where the qualification
+// is the part a clinician must not skim past.
+//
+// It is done HERE, in the one renderer, rather than as a third part of the
+// note object, because 28 files read a note as `lead` + `detail` and a third
+// part would have gone missing from every one of them — including the
+// citation sweeps, whose needles sit inside the emphasised sentence.
+//
+// ⚠️ The span may OPEN before a `[c]` marker and CLOSE after it, so emphasis
+// is tracked ACROSS the marker split rather than inside one piece of it.
+// Marker counting is untouched: `**` is not `[c]`, so every cite still lands
+// on the same number it did before.
+function emphasised(part, startOn, key) {
+  const chunks = String(part).split('**');
+  let on = startOn;
+  const out = [];
+  chunks.forEach((chunk, i) => {
+    if (chunk) {
+      out.push(on
+        ? <strong key={`${key}-e${i}`} className="note-emphasis">{chunk}</strong>
+        : chunk);
+    }
+    if (i < chunks.length - 1) on = !on;
+  });
+  return { nodes: out, on };
+}
+
 export function renderNoteWithCites(text, cites, numberFor = makeCiteNumberer()) {
-  if (!cites || cites.length === 0) return text;
-  const parts = String(text).split('[c]');
+  const str = String(text ?? '');
+  if (!cites || cites.length === 0) {
+    if (!str.includes('**')) return text;
+    return emphasised(str, false, 'n').nodes;
+  }
+  const parts = str.split('[c]');
+  let on = false;
   return parts.flatMap((part, i) => {
-    if (i === parts.length - 1) return [part];
+    const em = emphasised(part, on, i);
+    on = em.on;
+    if (i === parts.length - 1) return em.nodes;
     const c = cites[i];
-    if (!c) return [part];
-    return [part, (
+    if (!c) return em.nodes;
+    return [...em.nodes, (
       <a
         key={i}
         href={c.url}

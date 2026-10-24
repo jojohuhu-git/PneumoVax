@@ -466,7 +466,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'ADULT-PCV20-21-1Y-AFTER-PCV, which is still a floor: the evaluator returns on the first '
       + 'unmet row, so a recommendation placed before a floor would let a dose missing both gaps '
       + 'escape the floor. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. With both PCV13 and PPSV23 already on the record, ACIP advises a PCV20 or PCV21 at least ${min.words} after the most recent pneumococcal dose. ACIP states that as recommended timing and does not say an earlier dose must be repeated, so this dose still counts (owner ruling, 2026-10-24).`,
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. With both PCV13 and PPSV23 already on the record, ACIP advises a PCV20 or PCV21 at least ${min.words} after the most recent pneumococcal dose. ACIP states that as recommended timing and does not say an earlier dose must be repeated, so this dose still counts.`,
   },
   {
     id: 'ADULT-PCV20-21-AFTER-PCV13',
@@ -520,7 +520,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'on 2026-10-24 she ruled it takes the same shape, because no document names any minimum '
       + 'here and a cut-off at two months rather than eight would be an invented number. See '
       + 'CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. ACIP advises a conjugate dose at least ${min.words} after PPSV23, but states that as recommended timing and names no minimum, so this dose still counts (owner ruling, 2026-10-24).`,
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. ACIP advises a conjugate dose at least ${min.words} after PPSV23, but states that as recommended timing and names no minimum, so this dose still counts.`,
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
@@ -622,7 +622,7 @@ export const DOSE_INTERVAL_RULES = [
       + '("PPSV23 to PPSV23 spacing should be 5 years"): the evaluator returns on the first unmet '
       + 'row, so a recommendation placed before that floor would let a second PPSV23 given too soon '
       + 'escape it. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date}. ACIP advises PPSV23 at least ${min.words} after PCV15 for an adult without an immunocompromising condition, cochlear implant or CSF leak, but states that as recommended timing and names no minimum, so this dose still counts (owner ruling, 2026-10-24).`,
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date}. ACIP advises PPSV23 at least ${min.words} after PCV15 for an adult without an immunocompromising condition, cochlear implant or CSF leak, but states that as recommended timing and names no minimum, so this dose still counts.`,
   },
   // PPSV23 after PCV13 — the pair rr7203a1 spells out, added 2026-10-11 after
   // the owner reviewed it. Two floors, exactly as that MMWR keys the gap:

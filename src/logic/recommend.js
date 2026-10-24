@@ -2519,7 +2519,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, earlyAfterPpsv = nu
   // cards below. Empty string when no early-after-PPSV23 dose is on the
   // record, so the ordinary complete card is byte-identical to what it was.
   const earlyNote = earlyAfterPpsv
-    ? ` One dose in this series was given earlier than the ${ADULT_GAP_WORDS} ACIP recommends between a conjugate dose and PPSV23. ACIP states that as recommended timing and names no minimum, so it still counts. If you prefer to treat it as not counting, 1 dose of PCV20 or PCV21 ${earlyAfterPpsv.dueToday ? 'may be given now' : `on or after ${earlyAfterPpsv.earliestNextDate}`} — ${ADULT_GAP_WORDS} after the PPSV23 dose [c] [c] — also completes the series [c].`
+    ? ` **One dose in this series was given earlier than the ${ADULT_GAP_WORDS} ACIP recommends between a conjugate dose and PPSV23. ACIP states that as recommended timing and names no minimum, so it still counts. If you prefer to treat it as not counting, 1 dose of PCV20 or PCV21 ${earlyAfterPpsv.dueToday ? 'may be given now' : `on or after ${earlyAfterPpsv.earliestNextDate}`} — ${ADULT_GAP_WORDS} after the PPSV23 dose [c] [c] — also completes the series [c].**`
     : '';
   // The alternative's claim is the SAME claim the "PCV >=1 year after PPSV23"
   // due card makes, so it owes the same documents — CDC's notes row and
