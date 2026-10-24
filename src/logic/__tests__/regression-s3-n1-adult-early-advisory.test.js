@@ -154,22 +154,12 @@ describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', 
 });
 
 describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', () => {
-  // ⚠️ REVERSED BY THE OWNER'S FAMILY-3 RULING (2026-10-24). This adult's
-  // floor is no longer the year — ACIP states the year as recommended timing
-  // and names no minimum for a patient without an immunocompromising
-  // condition, cochlear implant or CSF leak, so the dose counts and is noted.
-  // The risk-keying S14-7 is about is intact and is asserted in the next case
-  // and the two below: what the risk class selects is now which SENTENCE the
-  // patient gets, and whether a floor exists for them at all.
-  it('notes 3 months for an adult with no immunocompromising condition, and counts it', () => {
+  it('voids 3 months for an adult with no immunocompromising condition — their floor is the year', () => {
     const a = adultPpsv('2026-04-05', '2026-01-05');
-    expect(a.perDose[0].status).toBe('valid');
-    expect(a.perDose[0].earlyAdvisory).toBe(true);
+    expect(a.perDose[0].status).toBe('invalid');
     expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PCV15/);
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/still counts/);
-    expect(a.effective).toHaveLength(1);
-    // The owner no longer enforces this gap, so the dose must not say she does.
-    expect(a.perDose[0].detail ?? '').not.toMatch(/owner clinical determination/i);
+    expect(a.effective).toHaveLength(0);
+    expect(a.perDose[0].detail).toMatch(/owner clinical determination/i);
   });
 
   it('keeps 3 months when the 8-week minimum may be considered — and SAYS it counts', () => {
@@ -240,23 +230,12 @@ describe('S14-7 — riskIds actually reach the validator from the engine', () =>
     expect(ppsvAfterPcv15(['cochlear_implant']).status).toBe('valid');
   });
 
-  // Same reversal, and the point of these two is unchanged: the risk ids must
-  // actually REACH the validator. They still prove it — an adult outside the
-  // 8-week class is judged by a different row than one inside it, and that is
-  // only visible if the ids arrive. Since 2026-10-24 the difference shows as
-  // the note rather than as the verdict.
-  it('but an adult with only a chronic condition is judged by the year row', () => {
-    const v = ppsvAfterPcv15(['diabetes']);
-    expect(v.status).toBe('valid');
-    expect(v.earlyAdvisory).toBe(true);
-    expect(v.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
+  it('but an adult with only a chronic condition has the dose voided', () => {
+    expect(ppsvAfterPcv15(['diabetes']).status).toBe('invalid');
   });
 
-  it('and so is an adult with no risk factors at all', () => {
-    const v = ppsvAfterPcv15([]);
-    expect(v.status).toBe('valid');
-    expect(v.earlyAdvisory).toBe(true);
-    expect(v.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
+  it('and so does an adult with no risk factors at all', () => {
+    expect(ppsvAfterPcv15([]).status).toBe('invalid');
   });
 });
 

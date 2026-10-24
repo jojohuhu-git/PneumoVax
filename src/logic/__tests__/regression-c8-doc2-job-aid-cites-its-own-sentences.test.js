@@ -425,11 +425,7 @@ describe('swept over the whole grid — the counts that moved', () => {
   // the job aid also QUOTES it, and that stays 0 uncredited.
   it('3,869 cards gained a job-aid citation, and none is left uncredited', () => {
     const { gained, uncreditedPairs, uncreditedStatements } = sweep();
-    // 2026-10-24, FAMILY 2: 132 patients whose early conjugate after a
-    // PPSV23 now counts (99 to "Complete (PCV15 + PPSV23)", 33 to
-    // "Complete (history includes PCV20)"), each card carrying the owner's
-    // alternative line and the documents that state it.
-    expect(gained).toBe(3616 + 253 + 132);
+    expect(gained).toBe(3616 + 253);
     expect(uncreditedPairs).toBe(0);
     expect(uncreditedStatements.size).toBe(0);
   });

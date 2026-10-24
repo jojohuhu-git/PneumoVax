@@ -343,7 +343,7 @@ describe('over the whole grid', () => {
     // row, and 110 from the shared-clinical-decision row at >=65, which
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
-    expect(stats.listing).toBe(2564 + 1154 + 440 - 363 + 77);
+    expect(stats.listing).toBe(2564 + 1154 + 440 - 363);
     expect(stats.uncredited).toBe(0);
     expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });

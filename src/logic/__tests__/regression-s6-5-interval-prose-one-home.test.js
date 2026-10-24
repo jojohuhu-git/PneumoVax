@@ -276,16 +276,9 @@ describe('a recorded-dose verdict says what it was judged against', () => {
     return r.perDose.ppsv23[0];
   };
 
-  // ⚠️ These two moved from PCV15 to PCV13 on 2026-10-24. The owner's family-3
-  // ruling made the PCV15 row a RECOMMENDATION, so it no longer prints a floor
-  // sentence for a chronic-only adult and had no subject left for either
-  // assertion. The PCV13 -> PPSV23 year is still a floor for exactly the same
-  // patient and prints the same two clauses, so the invariant this file exists
-  // for — one home for every interval phrase, adjectival where the sentence
-  // needs an adjective — is asserted on live text rather than deleted.
   it('states the floor it applied, from that rule own interval', () => {
-    // 60 days after PCV13, chronic-only: short of the year, so the year bites.
-    const d = graded({ pcvProduct: 'PCV13', gapDays: 60, riskIds: ['diabetes'] });
+    // 60 days after PCV15, chronic-only: short of the year, so the year bites.
+    const d = graded({ pcvProduct: 'PCV15', gapDays: 60, riskIds: ['diabetes'] });
     expect(d.status).toBe('invalid');
     const year = intervalPhrase({ months: ADULT_PPSV23_INTERVAL_MONTHS });
     expect(d.reasons.join(' ')).toContain(year);
@@ -295,11 +288,11 @@ describe('a recorded-dose verdict says what it was judged against', () => {
   // The clause that broke. "The 8-week minimum interval applies only to..."
   // must use the ADJECTIVE; the noun form reads "the 8 weeks minimum interval".
   it('names the shorter minimum adjectivally, never as a bare plural', () => {
-    const d = graded({ pcvProduct: 'PCV13', gapDays: 60, riskIds: ['diabetes'] });
+    const d = graded({ pcvProduct: 'PCV15', gapDays: 60, riskIds: ['diabetes'] });
     const adj = intervalPhraseAdj({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
     const noun = intervalPhrase({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
-    expect(d.detail).toContain(`The ${adj} interval applies`);
-    expect(d.detail).not.toContain(`The ${noun} interval applies`);
+    expect(d.detail).toContain(`The ${adj} minimum interval applies`);
+    expect(d.detail).not.toContain(`The ${noun} minimum interval`);
   });
 
   // ⚠️ REWRITTEN BY OWNER RULING F (2026-10-24). This case used to assert

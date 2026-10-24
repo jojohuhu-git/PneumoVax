@@ -58,31 +58,12 @@ describe('S14-7 symptom 1 — PCV15 and PPSV23 on the same day', () => {
     expect(a.perDose[0].reasons.join(' ')).toMatch(/same visit/i);
   });
 
-  // ⚠️ SPLIT BY RISK CLASS BY THE OWNER'S FAMILY-3 RULING (2026-10-24).
-  // An adult with an immunocompromising condition, a cochlear implant or a
-  // CSF leak still has a FLOOR — ACIP's 8 weeks, enforced as a minimum by
-  // the owner's 2026-10-11 determination, which she did NOT withdraw. An
-  // adult without those conditions no longer does: ACIP gives them a year
-  // and names no minimum at all, so their dose counts and carries a note.
-  // S14-7's point survives either way — the gap is CHECKED and the adult
-  // and the child both get an answer, which is what was broken. What
-  // changed is the consequence for one of the two risk classes.
-  it('an immunocompromised adult\'s same-day dose still does not count', () => {
-    const a = ppsvAfter(pcv, ['2026-01-10'], ADULT, ['hiv']);
-    expect(a.perDose[0].status).toBe('invalid');
-    expect(a.effective).toHaveLength(0);
-    expect(a.perDose[0].reasons.join(' ')).not.toMatch(/still counts/);
-  });
-
-  it('every other adult\'s same-day dose now counts, with a note saying so', () => {
-    // The sharpest case the family-3 ruling reaches: a zero-day gap. It
-    // follows from her own reason — no document names ANY minimum for these
-    // patients — and is asserted here rather than left to be discovered.
-    for (const riskIds of [['diabetes'], []]) {
+  it('an adult\'s dose does not count either — it used to be valid with a soft note', () => {
+    for (const riskIds of [['hiv'], ['diabetes'], []]) {
       const a = ppsvAfter(pcv, ['2026-01-10'], ADULT, riskIds);
-      expect(a.perDose[0].status).toBe('valid');
-      expect(a.perDose[0].intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
-      expect(a.perDose[0].reasons.join(' ')).toMatch(/still counts/);
+      expect(a.perDose[0].status).toBe('invalid');
+      expect(a.effective).toHaveLength(0);
+      expect(a.perDose[0].reasons.join(' ')).not.toMatch(/still counts/);
     }
   });
 });
@@ -94,50 +75,18 @@ describe('S14-7 symptom 2 — PCV15 then PPSV23 two weeks later', () => {
     expect(ppsvAfter(pcv, ['2026-01-24'], CHILD, ['hiv']).perDose[0].status).toBe('invalid');
   });
 
-  // ⚠️ SPLIT BY RISK CLASS BY THE OWNER'S FAMILY-3 RULING (2026-10-24).
-  // An adult with an immunocompromising condition, a cochlear implant or a
-  // CSF leak still has a FLOOR — ACIP's 8 weeks, enforced as a minimum by
-  // the owner's 2026-10-11 determination, which she did NOT withdraw. An
-  // adult without those conditions no longer does: ACIP gives them a year
-  // and names no minimum at all, so their dose counts and carries a note.
-  // S14-7's point survives either way — the gap is CHECKED and the adult
-  // and the child both get an answer, which is what was broken. What
-  // changed is the consequence for one of the two risk classes.
-  it('does not count for an adult whose floor is the 8 weeks', () => {
-    for (const riskIds of [['hiv'], ['cochlear_implant']]) {
+  it('does not count for an adult, whatever their risk class', () => {
+    for (const riskIds of [['hiv'], ['cochlear_implant'], ['diabetes'], []]) {
       expect(ppsvAfter(pcv, ['2026-01-24'], ADULT, riskIds).perDose[0].status).toBe('invalid');
     }
   });
 
-  it('counts, with a note, for every other adult (owner, 2026-10-24)', () => {
-    for (const riskIds of [['diabetes'], []]) {
-      const a = ppsvAfter(pcv, ['2026-01-24'], ADULT, riskIds);
-      expect(a.perDose[0].status).toBe('valid');
-      expect(a.perDose[0].reasons.join(' ')).toMatch(/still counts/);
-    }
-  });
-
-  it('the risk class still decides, but now it decides the NOTE, not the verdict', () => {
-    // At 10 weeks every adult's dose counts. The difference the risk class
-    // makes is that an immunocompromising condition, cochlear implant or CSF
-    // leak MET its recommended interval and so is told nothing, while every
-    // other adult is told the dose came before ACIP's year. Before the
-    // family-3 ruling this same line was the difference between valid and
-    // invalid.
+  it('but the adult floor is risk-keyed: 10 weeks counts for an immunocompromised adult only', () => {
     const tenWeeks = ['2026-03-21'];
-    for (const riskIds of [['hiv'], ['csf_leak']]) {
-      const a = ppsvAfter(pcv, tenWeeks, ADULT, riskIds);
-      expect(a.perDose[0].status).toBe('valid');
-      // These patients MET the interval ACIP states for them, so whatever
-      // note they carry is not this row's "you were early" one.
-      expect(a.perDose[0].intervalRuleId).not.toBe('ADULT-PPSV23-AFTER-PCV15');
-    }
-    for (const riskIds of [['diabetes'], []]) {
-      const a = ppsvAfter(pcv, tenWeeks, ADULT, riskIds);
-      expect(a.perDose[0].status).toBe('valid');
-      expect(a.perDose[0].earlyAdvisory).toBe(true);
-      expect(a.perDose[0].intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
-    }
+    expect(ppsvAfter(pcv, tenWeeks, ADULT, ['hiv']).perDose[0].status).toBe('valid');
+    expect(ppsvAfter(pcv, tenWeeks, ADULT, ['csf_leak']).perDose[0].status).toBe('valid');
+    expect(ppsvAfter(pcv, tenWeeks, ADULT, ['diabetes']).perDose[0].status).toBe('invalid');
+    expect(ppsvAfter(pcv, tenWeeks, ADULT, []).perDose[0].status).toBe('invalid');
   });
 });
 
@@ -212,22 +161,12 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].earlyAdvisory).toBeFalsy();
   });
 
-  // ⚠️ REVERSED BY THE OWNER'S FAMILY-2 RULING (2026-10-24) — this is "case H"
-  // in another file's words, and it is kept here as the record of what it used
-  // to prove. The gap is still CHECKED, which is all S14-7 was ever about: the
-  // silence it fixed is still fixed. What changed is the consequence — the
-  // dose counts and carries a note, because no source names a minimum for a
-  // conjugate after a PPSV23. See
-  // regression-2026-10-24-family-2-early-conjugate-after-ppsv23.test.js.
   it('a PCV20 two months after a PPSV23, with no PCV history', () => {
     const who = { ageMonths: 60 * 12, dob: '1966-05-01' };
     const a = analyzeHistory('PCV', [{ date: '2026-03-01', product: 'PCV20' }],
       who.ageMonths, TODAY, who.dob, { ppsv23Doses: [{ date: '2026-01-01' }] });
-    expect(a.perDose[0].status).toBe('valid');
-    expect(a.perDose[0].earlyAdvisory).toBe(true);
-    expect(a.perDose[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    expect(a.perDose[0].status).toBe('invalid');
     expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PPSV23/);
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/still counts/);
   });
 
   it('a PPSV23 at 66 given three years after one at 63', () => {
@@ -237,20 +176,14 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].reasons.join(' ')).toMatch(/at least 5 years/);
   });
 
-  // Same reversal, one surface along. The test used to prove that a DROPPED
-  // dose is visible to the recommendation engine, so the patient is offered it
-  // again. The dose is no longer dropped, so what must be proved now is the
-  // opposite and stronger thing: the engine COUNTS it, and the card does not
-  // ask for a conjugate the patient has already had.
-  it('the engine counts the early dose, so the patient is not asked for it twice', () => {
+  it('the engine sees the dropped dose, so the patient is owed it again', () => {
     const out = recommend({
       ageMonths: 60 * 12, dob: '1966-05-01', today: TODAY, riskIds: [],
       pcvDoses: [{ date: '2026-03-01', product: 'PCV20' }],
       ppsv23Doses: [{ date: '2026-01-01' }],
     });
-    expect(out.meta.pcvCount).toBe(1);
-    expect(out.perDose.pcv[0].status).toBe('valid');
-    expect(out.recs.every((r) => r.status === 'complete')).toBe(true);
+    expect(out.meta.pcvCount).toBe(0);
+    expect(out.perDose.pcv[0].status).toBe('invalid');
   });
 });
 

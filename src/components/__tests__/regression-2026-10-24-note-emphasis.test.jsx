@@ -62,39 +62,51 @@ describe('note emphasis — the renderer', () => {
   });
 });
 
-describe('note emphasis — on the card the owner asked about', () => {
-  // Her family-3 patient: PCV15 2026-07-19, PPSV23 2026-10-11, 30 years old
-  // with chronic heart disease. The card reads complete AND qualifies it.
-  const note = () => {
-    const out = recommend({
-      today: '2026-10-24', ageMonths: 30 * 12, riskIds: ['chronic_heart'],
-      pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }],
-    });
-    const rec = out.recs.find((r) => r.status === 'complete');
-    return typeof rec.note === 'string' ? rec.note : rec.note.lead;
-  };
+describe('note emphasis — wherever a card uses it, over the whole grid', () => {
+  // ⚠️ WHY THIS IS NOT BOUND TO ONE CARD ANY MORE. It used to be, to family
+  // 3's patient (PCV15 2026-07-19, PPSV23 2026-10-11) — the card that carried
+  // the owner's qualifying sentence. Family 3 was REVERTED on 2026-10-24
+  // (her later ruling the same day: that PPSV23 is invalid), so that card is
+  // gone and with it the only `**` in the engine. Re-pointing this at
+  // whichever card happens to carry the markers today would just set the same
+  // trap again — the "card absence guards break on two-sentence cards"
+  // lesson, which this repo has now paid for three times.
+  //
+  // So the claim is the one that cannot go stale: ANY note that marks a span
+  // renders as emphasis, and NO note ever shows a reader a literal asterisk.
+  // It passes trivially while nothing marks a span, and the renderer cases
+  // above are what carry the proof in the meantime.
+  const PATIENTS = [
+    // the three families, as they stood when the markers were introduced
+    { ageMonths: 840, riskIds: [], pcvDoses: [{ product: 'PCV13', date: '2016-10-13' }, { product: 'PCV20', date: '2025-10-10' }], ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-13' }] },
+    { ageMonths: 840, riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }] },
+    { ageMonths: 360, riskIds: ['chronic_heart'], pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }] },
+    { ageMonths: 480, riskIds: ['asplenia'], pcvDoses: [{ product: 'PCV15', date: '2026-08-30' }], ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }] },
+  ];
 
-  it('marks the qualifying sentence, and only that sentence', () => {
-    const text = note();
-    // Exactly one pair of markers.
-    expect(text.split('**')).toHaveLength(3);
-    const [before, emphasised] = text.split('**');
-    // The completion claim stays plain; the qualification is what stands out.
-    expect(before).toContain('is a complete pneumococcal series');
-    expect(before).not.toContain('given earlier than');
-    expect(emphasised).toContain('One dose in this series was given earlier than');
-    expect(emphasised).toContain('also completes the series');
+  const notesOf = (p) => recommend({ today: '2026-10-24', ...p }).recs
+    .map((r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`));
+
+  it('renders every marked span as emphasis, and never leaves an asterisk on screen', () => {
+    for (const p of PATIENTS) {
+      for (const text of notesOf(p)) {
+        const marked = text.includes('**');
+        document.body.innerHTML = '';
+        render(<p>{renderNoteWithCites(text, [CITE('a'), CITE('b'), CITE('c'), CITE('d'), CITE('e')], makeCiteNumberer())}</p>);
+        // Never an asterisk, marked or not.
+        expect(document.body.textContent).not.toContain('*');
+        // And when a span IS marked, something is actually emphasised.
+        expect(document.querySelectorAll('.note-emphasis').length > 0).toBe(marked);
+      }
+    }
   });
 
-  it('renders it as one emphasised block spanning its citations', () => {
-    const text = note();
-    render(<p>{renderNoteWithCites(text, [CITE('a'), CITE('b'), CITE('c'), CITE('d'), CITE('e')], makeCiteNumberer())}</p>);
-    const ems = [...document.querySelectorAll('.note-emphasis')].map((n) => n.textContent);
-    expect(ems.length).toBeGreaterThan(1); // broken by the [c] markers inside it
-    expect(ems.join('')).toContain('One dose in this series was given earlier');
-    expect(ems.join('')).toContain('also completes the series');
-    expect(document.body.textContent).not.toContain('*');
+  it('a marker pair is always balanced — an odd count would swallow the rest of the note', () => {
+    for (const p of PATIENTS) {
+      for (const text of notesOf(p)) {
+        expect(text.split('**').length % 2).toBe(1);
+      }
+    }
   });
 });
 
@@ -112,30 +124,50 @@ describe('note emphasis — the cards that must NOT have it', () => {
 });
 
 describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
-  // Her instruction: "remove owners ruling comment from cards". The rulings
-  // stay recorded in each rule's `source` and in CLINICAL_SPEC.md, where the
-  // audit trail belongs — they are not something a clinician reading a dose
-  // chip needs to be told.
+  // Her instruction: "remove owners ruling comment from cards". What she was
+  // looking at was the parenthetical "(owner ruling, 2026-10-24)" appended to
+  // three recommendation messages, and that is what came off.
+  //
+  // ⚠️ THIS ASSERTION USED TO BE BLUNTER AND IT WAS WRONG. It forbade the
+  // words "owner clinical determination" on any card at all. That held only
+  // while all three rows were recommendations; two of them were reverted to
+  // FLOORS the same afternoon, and a floor's own text is REQUIRED by
+  // CLAUDE.md to say it rests on an owner determination rather than on ACIP —
+  // "⚠️ EVERY adult floor is an OWNER CLINICAL DETERMINATION ... the app's own
+  // per-dose text says so". So the blunt version made a deliberate honesty
+  // feature into a test failure. Narrowed to the parenthetical she actually
+  // asked about; the floors' disclosure is asserted positively below so that
+  // narrowing cannot hide its removal.
   const patients = [
-    // family 1
+    // family 1 — Ruling F, still a recommendation and still counting
     { ageMonths: 840, riskIds: [], pcvDoses: [{ product: 'PCV13', date: '2016-10-13' }, { product: 'PCV20', date: '2025-10-10' }], ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-13' }] },
-    // family 2
+    // family 2 — reverted to a floor
     { ageMonths: 840, riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }] },
-    // family 3
+    // family 3 — reverted to a floor
     { ageMonths: 360, riskIds: ['chronic_heart'], pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }] },
   ];
 
-  it('no dose verdict and no card mentions an owner ruling or determination', () => {
+  const everythingFor = (p) => {
+    const out = recommend({ today: '2026-10-24', ...p });
+    return [...out.perDose.pcv, ...out.perDose.ppsv23]
+      .flatMap((d) => [...(d.reasons ?? []), d.detail ?? ''])
+      .concat(out.recs.map((r) => (typeof r.note === 'string'
+        ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`)))
+      .join(' ');
+  };
+
+  it('no card dates a ruling at the reader — the "(owner ruling, 2026-10-24)" parenthetical is gone', () => {
     for (const p of patients) {
-      const out = recommend({ today: '2026-10-24', ...p });
-      const everything = [
-        ...out.perDose.pcv, ...out.perDose.ppsv23,
-      ].flatMap((d) => [...(d.reasons ?? []), d.detail ?? ''])
-        .concat(out.recs.map((r) => (typeof r.note === 'string'
-          ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`)))
-        .join(' ');
-      expect(everything).not.toMatch(/owner ruling/i);
-      expect(everything).not.toMatch(/owner clinical determination/i);
+      expect(everythingFor(p)).not.toMatch(/owner ruling/i);
+      expect(everythingFor(p)).not.toMatch(/\(owner[^)]*2026-10-24\)/i);
+    }
+  });
+
+  it('but a FLOOR still discloses that it is an owner determination, not ACIP', () => {
+    // families 2 and 3, the two rows the afternoon ruling restored. If this
+    // ever goes quiet, the narrowing above has been over-applied.
+    for (const p of patients.slice(1)) {
+      expect(everythingFor(p)).toMatch(/owner clinical determination/i);
     }
   });
 });

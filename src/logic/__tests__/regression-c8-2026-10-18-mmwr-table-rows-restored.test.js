@@ -182,15 +182,13 @@ describe('FINDING F — over the whole grid', () => {
     // row, and 110 from the shared-clinical-decision row at >=65, which
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
-    // 2026-10-24 family 3: + 77, the PCV15 patients whose complete card now
-    // carries the alternative line, which rests on this same row.
-    expect(stats.ppsvOnly).toBe(1154 + 77);
+    expect(stats.ppsvOnly).toBe(1154);
     // -110: the shared-decision cards whose PCV20 now counts.
     expect(stats.shared).toBe(440 - 110);
   });
 
   it('mm7401a1 stays fully credited — every restored button has a number', () => {
-    expect(stats.listing).toBe(2564 + 1154 + 440 - 363 + 77);
+    expect(stats.listing).toBe(2564 + 1154 + 440 - 363);
     expect(stats.uncredited).toBe(0);
   });
 });

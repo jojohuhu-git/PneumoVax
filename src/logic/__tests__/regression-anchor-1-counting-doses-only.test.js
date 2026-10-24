@@ -103,28 +103,12 @@ describe('ANCHOR-1 Case D — the same error one row along (PCV13 + PPSV23, 5 ye
   });
 });
 
-describe('ANCHOR-1 Case H — the control the owner later withdrew', () => {
-  // ⚠️ READ THIS BEFORE TRUSTING THE NAME. Case H was the owner's reason for
-  // declining the cheaper 2026-10-11 fix: nothing in this history was
-  // rejected — a PPSV23 that counts, then a PCV20 two months later — so the
-  // 1-year floor, measured from a dose that COUNTED, still bit. The comment
-  // here used to read: "If this case ever goes green, the fix has stopped
-  // being narrow and has become a loosening of the floor itself."
-  //
-  // On 2026-10-24 the owner was shown case H again, by name, together with
-  // the 132 patients her family-2 ruling moves, and ruled that it takes the
-  // same shape as the rest: complete, with a note that the dose came early
-  // and an alternative conjugate offered at >=1 year after the PPSV23. Her
-  // reason is that no document names ANY minimum for a conjugate after a
-  // PPSV23, so a cut-off at two months rather than eight would be a number
-  // the app invented.
-  //
-  // So this case IS now green, deliberately, and it is no longer a control
-  // for ANCHOR-1. What ANCHOR-1 itself proved is untouched and still asserted
-  // in the four cases around it: a gap is measured from the dose that
-  // COUNTED, never from a rejected one. That is a question about the ANCHOR;
-  // case H has become a question about the CONSEQUENCE.
-  // See regression-2026-10-24-family-2-early-conjugate-after-ppsv23.test.js.
+describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () => {
+  // The reason the owner declined the cheaper fix. Nothing in this history was
+  // rejected: a PPSV23 that counts, then a PCV20 two months later. The 1-year
+  // floor is measured from a dose that COUNTED, so it still bites. If this
+  // case ever goes green, the fix has stopped being narrow and has become a
+  // loosening of the floor itself.
   const CASE_H = {
     ageMonths: Y(70),
     riskIds: [],
@@ -132,19 +116,16 @@ describe('ANCHOR-1 Case H — the control the owner later withdrew', () => {
     ppsv23Doses: [{ product: 'PPSV23', date: '2018-01-01' }],
   };
 
-  it('still measures the PCV20 from the PPSV23 that counted', () => {
-    // ANCHOR-1's own claim, and the half that did NOT change: the rule that
-    // speaks for this dose is still the one anchored on the counting PPSV23.
+  it('still rejects the PCV20 given 2 months after a PPSV23 that counted', () => {
     const v = verdictsFor(CASE_H);
     expect(v.ppsv23[0].status).toBe('valid');
+    expect(v.pcv[0].status).toBe('invalid');
     expect(v.pcv[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
   });
 
-  it('counts that PCV20 now, and shows the series complete (owner, 2026-10-24)', () => {
+  it('still shows the PCV as due, since the recorded one did not count', () => {
     const v = verdictsFor(CASE_H);
-    expect(v.pcv[0].status).toBe('valid');
-    expect(v.recText).not.toMatch(/≥1 year after PPSV23/);
-    expect(v.recText).toMatch(/Complete/);
+    expect(v.recText).toMatch(/≥1 year after PPSV23/);
   });
 });
 
@@ -250,14 +231,7 @@ describe('ANCHOR-1 — the property behind the five cases', () => {
   it('but a PPSV23 that COUNTS still anchors the PCV\'s clock', () => {
     // The same shape as above with the middle dose moved out to 2021, where
     // it clears the 5-year minimum and counts. The PCV20 is then measured
-    // from 2021, five months later.
-    //
-    // Until the owner's family-2 ruling of 2026-10-24 this asserted that the
-    // PCV20 was INVALID. It now counts — but the thing ANCHOR-1 exists to
-    // prove is unchanged and is what is asserted instead: the dose is judged
-    // against the 2021 PPSV23 (the one that counted) and not the 2015 one,
-    // which is why it draws a note at all. Measured from 2015 it would clear
-    // the year and say nothing.
+    // from 2021 and is genuinely too early.
     const v = verdictsFor({
       ageMonths: Y(70),
       riskIds: [],
@@ -265,9 +239,6 @@ describe('ANCHOR-1 — the property behind the five cases', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2015-01-01' }, { product: 'PPSV23', date: '2021-01-01' }],
     });
     expect(v.ppsv23[1].status).toBe('valid');
-    expect(v.pcv[0].status).toBe('valid');
-    expect(v.pcv[0].earlyAdvisory).toBe(true);
-    expect(v.pcv[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
-    expect(v.pcv[0].reasons.join(' ')).toMatch(/2021-01-01/);
+    expect(v.pcv[0].status).toBe('invalid');
   });
 });
