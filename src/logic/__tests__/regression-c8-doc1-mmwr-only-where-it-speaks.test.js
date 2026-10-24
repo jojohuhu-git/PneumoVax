@@ -263,7 +263,7 @@ describe('swept over every patient the grid can build', () => {
   let mmwrCards = 0;
   let jobAidCards = 0;
   const onLosers = {};
-  for (const k of Object.keys(LOSES)) onLosers[k] = { cards: 0, withMmwr: 0 };
+  for (const k of Object.keys(LOSES)) onLosers[k] = { cards: 0, withMmwr: 0, withMmwrAndNoKeeper: 0 };
   const onKeepers = {};
   for (const k of Object.keys(KEEPS)) onKeepers[k] = { cards: 0, withMmwr: 0 };
   let cardsWithNoSourceAtAll = 0;
@@ -286,10 +286,19 @@ describe('swept over every patient the grid can build', () => {
       // defaults, so this is scoped to the adult rulebook by age.
       if (am >= 228 && list.length === 0) cardsWithNoSourceAtAll += 1;
       const text = noteText(rec);
+      // ⚠️ A CARD MAY CARRY TWO SENTENCES. Since the owner's family-2 ruling
+      // (2026-10-24) a complete card can also carry the alternative line —
+      // "1 dose of PCV20 or PCV21 ... 1 year after the PPSV23 dose" — which
+      // mm7401a1's "PPSV23 only" row states in full. So a card can match a
+      // statement mm7401a1 does NOT state and one it DOES, at the same time,
+      // and the document belongs on it for the second. That is CLAUDE.md's
+      // "two different sentences, two claims", not a leak.
+      const matchesAKeeper = Object.values(KEEPS).some((n) => text.includes(n));
       for (const [k, needle] of Object.entries(LOSES)) {
         if (!text.includes(needle)) continue;
         onLosers[k].cards += 1;
         if (hasMmwr) onLosers[k].withMmwr += 1;
+        if (hasMmwr && !matchesAKeeper) onLosers[k].withMmwrAndNoKeeper += 1;
       }
       for (const [k, needle] of Object.entries(KEEPS)) {
         if (!text.includes(needle)) continue;
@@ -309,8 +318,29 @@ describe('swept over every patient the grid can build', () => {
   });
 
   it('not one of the four statements it does not state still carries mm7401a1', () => {
+    // The real claim, stated precisely: no card carries mm7401a1 FOR one of
+    // these four statements. A card that also says something mm7401a1 does
+    // state is a different case, pinned below — asserting the blunt version
+    // here would fail on correct cards, which is the trap C10-1 fell into.
     for (const [k, v] of Object.entries(onLosers)) {
-      expect(v.withMmwr, `${k} still carries it on ${v.withMmwr} cards`).toBe(0);
+      expect(v.withMmwrAndNoKeeper, `${k} still carries it on ${v.withMmwrAndNoKeeper} cards`).toBe(0);
+    }
+  });
+
+  it('the only overlap is family 2\'s 132 complete cards that also offer the alternative', () => {
+    // 2026-10-24, family 2: 33 patients whose early PCV20 now counts land on
+    // "Complete (history includes PCV20)" AND carry the alternative sentence.
+    // mm7401a1 is on those cards for the alternative, never for the
+    // completion claim. Pinned exactly, so a future change that puts the
+    // document back on a plain completion card fails here.
+    expect(onLosers.complete20or21.withMmwr).toBe(33);
+    expect(onLosers.complete15plus.withMmwr).toBe(99);
+    // 33 + 99 = 132, the exact number of patients the family-2 ruling moves,
+    // counted here independently of the verdict corpus.
+    expect(onLosers.complete20or21.withMmwr + onLosers.complete15plus.withMmwr).toBe(132);
+    for (const [k, v] of Object.entries(onLosers)) {
+      if (k === 'complete20or21' || k === 'complete15plus') continue;
+      expect(v.withMmwr, `${k} gained an overlap`).toBe(0);
     }
   });
 
@@ -338,6 +368,9 @@ describe('swept over every patient the grid can build', () => {
     // stopped being shown on cards whose sentence changed. This is the same
     // 363 the ruling moves, counted independently here and in the verdict
     // corpus.
+    // 2026-10-24 family 2: -132 due cards, +132 complete cards carrying the
+    // alternative, so the TOTAL is unchanged at 3,795. The composition moved,
+    // not the count — which the overlap pin below is what actually checks.
     expect(mmwrCards).toBe(2564 + 1154 + 440 - 363);
   });
 
@@ -352,7 +385,11 @@ describe('swept over every patient the grid can build', () => {
     // card it appears on, so those 110 were already inside the 3,616. Not an
     // age split — `jobAidCompleteCites` is gated on `isOlderAdult` and all
     // 363 clear it.
-    expect(jobAidCards).toBe(6805 - 3189 + 253);
+    // 2026-10-24 family 2: + 132. The job aid was already on the due card
+    // these patients used to see, and is on the complete card they see now,
+    // but the complete card at 19-49 did not carry it before and does when
+    // it offers the alternative.
+    expect(jobAidCards).toBe(6805 - 3189 + 253 + 132);
   });
 
   it('no adult card was left with no source at all', () => {

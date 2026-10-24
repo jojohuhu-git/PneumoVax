@@ -183,7 +183,11 @@ describe('over the whole grid', () => {
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
     // + 253 of them newly list the job aid (the other 110 already did).
-    expect(stats.jobAid).toBe(6805 - 3189 + 253);
+    // 2026-10-24, FAMILY 2: 132 patients whose early conjugate after a
+    // PPSV23 now counts (99 to "Complete (PCV15 + PPSV23)", 33 to
+    // "Complete (history includes PCV20)"), each card carrying the owner's
+    // alternative line and the documents that state it.
+    expect(stats.jobAid).toBe(6805 - 3189 + 253 + 132);
   });
 
   it('and reaches zero uncredited — every remaining button has a number', () => {

@@ -161,12 +161,22 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].earlyAdvisory).toBeFalsy();
   });
 
+  // ⚠️ REVERSED BY THE OWNER'S FAMILY-2 RULING (2026-10-24) — this is "case H"
+  // in another file's words, and it is kept here as the record of what it used
+  // to prove. The gap is still CHECKED, which is all S14-7 was ever about: the
+  // silence it fixed is still fixed. What changed is the consequence — the
+  // dose counts and carries a note, because no source names a minimum for a
+  // conjugate after a PPSV23. See
+  // regression-2026-10-24-family-2-early-conjugate-after-ppsv23.test.js.
   it('a PCV20 two months after a PPSV23, with no PCV history', () => {
     const who = { ageMonths: 60 * 12, dob: '1966-05-01' };
     const a = analyzeHistory('PCV', [{ date: '2026-03-01', product: 'PCV20' }],
       who.ageMonths, TODAY, who.dob, { ppsv23Doses: [{ date: '2026-01-01' }] });
-    expect(a.perDose[0].status).toBe('invalid');
+    expect(a.perDose[0].status).toBe('valid');
+    expect(a.perDose[0].earlyAdvisory).toBe(true);
+    expect(a.perDose[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
     expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PPSV23/);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/still counts/);
   });
 
   it('a PPSV23 at 66 given three years after one at 63', () => {
@@ -176,14 +186,20 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].reasons.join(' ')).toMatch(/at least 5 years/);
   });
 
-  it('the engine sees the dropped dose, so the patient is owed it again', () => {
+  // Same reversal, one surface along. The test used to prove that a DROPPED
+  // dose is visible to the recommendation engine, so the patient is offered it
+  // again. The dose is no longer dropped, so what must be proved now is the
+  // opposite and stronger thing: the engine COUNTS it, and the card does not
+  // ask for a conjugate the patient has already had.
+  it('the engine counts the early dose, so the patient is not asked for it twice', () => {
     const out = recommend({
       ageMonths: 60 * 12, dob: '1966-05-01', today: TODAY, riskIds: [],
       pcvDoses: [{ date: '2026-03-01', product: 'PCV20' }],
       ppsv23Doses: [{ date: '2026-01-01' }],
     });
-    expect(out.meta.pcvCount).toBe(0);
-    expect(out.perDose.pcv[0].status).toBe('invalid');
+    expect(out.meta.pcvCount).toBe(1);
+    expect(out.perDose.pcv[0].status).toBe('valid');
+    expect(out.recs.every((r) => r.status === 'complete')).toBe(true);
   });
 });
 

@@ -501,16 +501,26 @@ export const DOSE_INTERVAL_RULES = [
     needsNoPriorPcv: true,
     needsPriorPpsv23: true,
     interval: { months: ADULT_ADVISED_PCV_GAP_MONTHS },
-    grace: true,
-    enforcement: 'floor',
-    authority: 'OWNER',
-    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. CDC states, for an adult who '
-      + 'previously received only PPSV23: give PCV15, PCV20 or PCV21 at least 1 year after the PPSV23 '
-      + 'dose — advice for the next dose, with CDSI v4.64 absMinInt = 0 days. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date} — a conjugate dose is given at least ${min.words} after PPSV23.`],
-      detail: `Previous PPSV23: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
-    }),
+    // No grace — a recommendation counts every dose already. See Ruling F.
+    grace: false,
+    enforcement: 'recommendation',
+    // CDC, for the same reason as ADULT-PCV20-21-5Y-AFTER-PPSV23: the row now
+    // asserts only CDC's own advised interval, not an owner-invented bar.
+    authority: 'CDC',
+    source: 'CDC Adult Immunization Schedule Notes, with the OWNER RULING of 2026-10-24 — which '
+      + 'REVERSED the owner\'s determination of 2026-10-11 for this row. CDC states, for an adult '
+      + 'who previously received only PPSV23: give PCV15, PCV20 or PCV21 at least 1 year after the '
+      + 'PPSV23 dose — advice for the NEXT dose, with CDSI v4.64 absMinInt = 0 days, and no source '
+      + 'names a minimum in this direction at all. The owner, shown a 70-year-old with PPSV23 '
+      + '2025-10-11 and PCV15 2026-06-19: "PPSV23 -> conjugate is >=1 year for every group... Could '
+      + 'the card suggest [complete] but also offer an alternative if treated as invalid, give '
+      + 'PCV20/21 at least 1 year after last PPSV23?" So the dose counts, the card says it was '
+      + 'early, and it offers that alternative. ⚠️ This also REVERSES "case H", the control she set '
+      + 'on 2026-10-11 (a PCV20 two months after a PPSV23, which had to stay rejected): asked again '
+      + 'on 2026-10-24 she ruled it takes the same shape, because no document names any minimum '
+      + 'here and a cut-off at two months rather than eight would be an invented number. See '
+      + 'CLINICAL_SPEC.md §K.',
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. ACIP advises a conjugate dose at least ${min.words} after PPSV23, but states that as recommended timing and names no minimum, so this dose still counts (owner ruling, 2026-10-24).`,
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',

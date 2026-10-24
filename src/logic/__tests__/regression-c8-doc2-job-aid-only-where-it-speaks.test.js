@@ -268,8 +268,12 @@ describe('swept over every patient the grid can build', () => {
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
     // +363: every one of them lands on this very card.
-    expect(tally.complete20or21.total).toBe(2610 + 363);
-    expect(tally.complete15plus.total).toBe(914);
+    // 2026-10-24, FAMILY 2: 132 patients whose early conjugate after a
+    // PPSV23 now counts (99 to "Complete (PCV15 + PPSV23)", 33 to
+    // "Complete (history includes PCV20)"), each card carrying the owner's
+    // alternative line and the documents that state it.
+    expect(tally.complete20or21.total).toBe(2610 + 363 + 33);
+    expect(tally.complete15plus.total).toBe(914 + 99);
     expect(tally.routineAt50.total).toBe(180);
   });
 
@@ -277,10 +281,10 @@ describe('swept over every patient the grid can build', () => {
     // +363 on both lines, and they must stay equal: all 363 are at 50+,
     // and a complete-by-PCV20 card at 50+ must CARRY the job aid, not
     // merely be counted at 50+.
-    expect(tally.complete20or21.ge50).toBe(1980 + 363);
-    expect(tally.complete15plus.ge50).toBe(609);
-    expect(tally.complete20or21.jobAidGe50).toBe(1980 + 363);
-    expect(tally.complete15plus.jobAidGe50).toBe(609);
+    expect(tally.complete20or21.ge50).toBe(1980 + 363 + 33);
+    expect(tally.complete15plus.ge50).toBe(609 + 99);
+    expect(tally.complete20or21.jobAidGe50).toBe(1980 + 363 + 33);
+    expect(tally.complete15plus.jobAidGe50).toBe(609 + 99);
   });
 
   it('the 1,115 cards it does not speak for have lost it', () => {
@@ -302,11 +306,14 @@ describe('swept over every patient the grid can build', () => {
     // 2026-10-24, RULING F: + 253. The rise is 253 and not 363 because
     // this sweep counts a document once per CARD, and 110 of the 363 were
     // shared-decision cards that already carried a job-aid button.
-    expect(adultCards).toBe(6805 - 3189 + 253);
+    expect(adultCards).toBe(6805 - 3189 + 253 + 132);
     // 'Elsewhere' is every job-aid card that is NOT one of the two matched
     // statements, so Ruling F moves it twice: the total rose by 253, and
     // the MATCHED group rose by 363 — the 110 shared-decision cards that
     // already carried the button have moved INTO it. 3,869 - 2,952 = 917.
-    expect(jobAidElsewhere).toBe((6805 - 3189 + 253) - (2589 + 363));
+    // Family 2 grows the matched group on BOTH statements: +33 on the
+    // complete-by-PCV20 card and +99 on complete-by-PCV15+PPSV23, which is
+    // the whole 132. 4,001 - 3,084 = 917.
+    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 132) - (2589 + 363 + 33 + 99));
   });
 });
