@@ -1,5 +1,9 @@
 # PneumoVax — Handoff after C11, with the adult extension still an OWNER DECISION (2026-10-24)
 
+> **SUPERSEDED 2026-10-24** by `handoff-2026-10-24-three-adult-families-shipped.md`.
+> Families 1, 2 and 3 are BUILT and on PR #84. Do not resume from this document.
+
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json` —
 **read the real port from `preview_logs`** (5173 this session). What the app is: a
