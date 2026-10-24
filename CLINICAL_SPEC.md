@@ -1355,3 +1355,61 @@ Table 2, free to drift from the figure it cites; two readings is precisely the P
 `pcvInfant()` in `recommend.js`. The guard is
 `regression-c10-2-2026-10-23-routine-date-recommended-minimum-commented.test.js`, proved
 load-bearing four ways (4 / 3 / 3 / 2 failing tests when each clause is broken separately).
+
+### §L-3 — RULING D (2026-10-23): the repeat is measured from the dose the patient GOT
+
+**OWNER RULING D, 2026-10-23:** *"the repeat dose should be spaced from the invalid dose by
+the minimum interval. This should be followed."*
+
+**Source, read live 2026-10-23.** ACIP General Best Practices, "Timing and Spacing of
+Immunobiologics": *"The repeat dose should be spaced after the invalid dose by the
+recommended minimum interval (Table 3-2)."* The page states its per-vaccine exceptions
+explicitly: **hepatitis B is the only one** that anchors the repeat on the VALID dose
+(*"as early as 8 weeks after the 2nd valid dose"*); Hib and hepatitis A follow the general
+rule; live vaccines have their own 28-day rule. **Pneumococcal appears four times on that
+page and not once about repeat or invalid doses** — all four are simultaneous-administration
+findings — so the general rule governs and there is no pneumococcal override to look for.
+
+**What was wrong.** The validator had followed this since ANCHOR-1. The recommendation side
+had not: `recommend()` summarises the EFFECTIVE list, so a card measured from the last dose
+that COUNTED. Three otherwise identical 7-month-olds whose mistimed dose fell on 28 Sep, 5
+Oct and 12 Oct were all advised the same return date.
+
+**What moves and what does not.** The split is not invented here — it is the validator's own
+(`DOSE_INTERVAL_RULES` CHILD-PCV-AFTER-PCV takes `ageAtPrevDose` from the anchor and
+`doseNumber` from the kept list), copied so the two sides cannot hold separate readings:
+
+| Moves to the dose actually given | Stays on doses that COUNTED |
+|---|---|
+| the anchor date | the dose number and series totals |
+| the age at that anchor dose | `anyDoseBefore12` |
+
+The anchor is computed once, in `validate.js` (`st.prev`), exposed as the analysis's
+`anchor`, and carried by `summarizePcv` as `anchorDate` / `anchorAgeAtDose` — distinct from
+`lastDate` / `lastAgeAtDose`, which keep their own meaning. For a patient with no rejected
+dose the two are the same date, which is why nothing else moved.
+
+**Three things never anchor.** PCV7 (a superseded product properly given, not a mistimed
+one). A **record problem** — a dose dated in the future or before birth — because it is *"a
+dose the patient never had"*, the same reason `validate.js` already withholds its repeat
+sentence. And every **cross-stream** interval (PPSV23 measured from a PCV; the 5-year rows),
+which ANCHOR-1 keys on counting doses in both directions: Ruling D is about repeating the
+mistimed dose, not about a different vaccine that follows it.
+
+**The third surface.** The chip under a rejected dose read *"the next dose in this series is
+due on or after …"* and printed `earliestValidDate` — the date **that dose** would have been
+valid, measured from the one before it. `repeatDueDate` is its sibling: same rule, same
+arithmetic (`intervalFrom`), anchored on the dose given. Both are kept, because they answer
+different questions:
+
+| Field | Answers |
+|---|---|
+| `earliestValidDate` | when THIS dose would have counted (anchor + gap) |
+| `repeatDueDate` | when its REPEAT may be given (this dose + gap) |
+
+Both carry CDC's 4-day grace, as `earliestValidDate` always has — they are validity
+questions, and the grace is stated on the same chip (*"doses up to 4 days early still count,
+per CDC"*). The card's own "minimum interval of 4 weeks" clause is ungraced, so the two sit
+4 days apart on one screen; see the PR for C11 for the owner's call on that.
+
+Guard: `regression-ruling-d-2026-10-23-repeat-anchored-on-invalid-dose.test.js`.

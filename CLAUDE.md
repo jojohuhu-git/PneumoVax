@@ -539,8 +539,49 @@ credited and the series reads Complete. Verified in the running app, not inferre
 **ACIP confirms the anchor the engine already used** (General Best Practices, timing and
 spacing, read live 2026-10-23): *"The repeat dose should be spaced after the invalid dose by
 the recommended minimum interval."* So one early dose can legitimately void the next one
-too. **Still open and NOT to be changed without her:** the *recommendation* side anchors the
-next dose to the last **valid** dose, which is an earlier date than ACIP's sentence implies.
+too.
+
+### The Advice Is Measured From The Dose The PATIENT GOT — RULING D
+**OWNER RULING D (2026-10-23), implemented.** Her words: *"the repeat dose should be spaced
+from the invalid dose by the minimum interval. This should be followed."* This CLOSES the
+item this file used to record here as "still open and NOT to be changed without her".
+
+The validator had done it since ANCHOR-1; the *recommendation* side had not, because
+`recommend()` reads `summarizePcv(effectivePcv, …)` — the list with rejected doses already
+dropped. So a card counted from the last dose that COUNTED. The tell, on three patients
+alike but for the mistimed dose's date: all three were advised the SAME day.
+
+**THE SPLIT IS THE VALIDATOR'S, COPIED — NOT A NEW ONE.** `DOSE_INTERVAL_RULES`'
+CHILD-PCV-AFTER-PCV already takes `ageAtPrevDose` from the anchor and `doseNumber` from the
+kept list. So:
+
+| Moves to the dose given | Stays on doses that COUNTED |
+|---|---|
+| the anchor date, **and the age at it** — one dose, never two | dose number, series totals, `anyDoseBefore12` |
+
+`validate.js` exposes its own `anchor` (`st.prev`) and `summarizePcv` carries it as
+**`anchorDate` / `anchorAgeAtDose`**, deliberately distinct from `lastDate` /
+`lastAgeAtDose`. **Never recompute the anchor in `recommend.js`** — two readings of one
+thing is the P0 bug's shape.
+
+**THREE THINGS DO NOT ANCHOR, and each has a reason:**
+- **PCV7** — a superseded product properly given, not a mistimed dose; no source states an
+  interval from it.
+- **A RECORD PROBLEM** (dated in the future, or before birth) — *"a dose the patient never
+  had"*, which is why `validate.js` already withholds its repeat sentence. Until this was
+  added, a PCV20 typed as 2027 advised a return in Dec 2027 beside a chip saying the date is
+  in the future. `if (!result.recordProblem) anchorOn(dose)`.
+- **CROSS-STREAM intervals** (a PPSV23 measured from a PCV, the 5-year rows) — ANCHOR-1 keys
+  those on COUNTING doses both ways (*"an unnecessary dose cannot reset a clock"*). Ruling D
+  is about repeating the mistimed dose, not a different vaccine following it. So
+  `anchorPneumo` and the adult PPSV23 rows are untouched; `anchorPcv` and the two infant
+  blocks move.
+
+**THREE SURFACES, and the third was found by driving the app, not by the suite.** The chip
+under the rejected dose said *"the next dose … is due on or after"* and spent
+`earliestValidDate` — which is when **THIS** dose would have been valid, an earlier date the
+card already contradicted. `repeatDueDate` is its sibling, same rule and same arithmetic
+(`intervalFrom`), anchored on the dose given. **Keep both: they answer different questions.**
 
 Guard: `regression-2026-10-23-pcv-dose3-floor-follows-cdc-table2.test.js`. `regression-p0-2`'s
 "the validity floor is untouched" block asserted the opposite and is **kept, renamed**, as

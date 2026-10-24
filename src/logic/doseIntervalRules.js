@@ -809,12 +809,38 @@ function anchorAllowed(rule, anchor) {
 // "the next dose is due on or after <date>" instead of "repeat this dose",
 // which is wrong for a dose that was never missing, only early.
 function earliestValidDate(rule, anchor, ctx) {
+  return intervalFrom(rule, anchor, ctx, anchor.date);
+}
+
+// RULING D (owner, 2026-10-23) — when the REPEAT of this rejected dose may be
+// given: the same rule and the same interval, measured from the dose that was
+// actually given rather than from the one before it. "The repeat dose should
+// be spaced from the invalid dose by the minimum interval."
+//
+// It is deliberately a sibling of `earliestValidDate` and not a replacement.
+// The two answer different questions and the app says both out loud:
+//
+//   earliestValidDate  when THIS dose would have been valid  (anchor + gap)
+//   repeatDueDate      when the REPEAT may be given          (this dose + gap)
+//
+// They were conflated in one sentence until now. `validate.js` printed "the
+// next dose in this series is due on or after <earliestValidDate>" — a date
+// computed for the dose already given — so a 7-month-old's chip read
+// "2026-10-15" beside a card reading "eligible Dec 7, 2026". Two dates for one
+// dose on one screen, which is the shape of the P0 bug fixed the same day.
+function repeatDueDate(rule, anchor, ctx) {
+  return ctx.doseDate ? intervalFrom(rule, anchor, ctx, ctx.doseDate) : null;
+}
+
+// One reading of the rule's interval, applied to whichever date is handed in —
+// so the two dates above can never drift apart by using different arithmetic.
+function intervalFrom(rule, anchor, ctx, from) {
   const grace = rule.grace ? GRACE_DAYS : 0;
   if (rule.interval.months != null) {
-    return addDays(addCalendarMonths(anchor.date, rule.interval.months), -grace);
+    return addDays(addCalendarMonths(from, rule.interval.months), -grace);
   }
   const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor, ctx) : rule.interval.days;
-  return addDays(anchor.date, minDays - grace);
+  return addDays(from, minDays - grace);
 }
 
 // Is the gap long enough? `null` interval (a never-flagged row) is always met.
@@ -883,6 +909,7 @@ export function evaluateDoseInterval(ctx) {
         kind: 'floor', ruleId: rule.id, authority: rule.authority,
         reasons: msg.reasons, detail: msg.detail,
         earliestValidDate: earliestValidDate(rule, anchor, ctx),
+        repeatDueDate: repeatDueDate(rule, anchor, ctx),
       };
     }
     return { kind: 'recommendation', ruleId: rule.id, authority: rule.authority, reason: msg };

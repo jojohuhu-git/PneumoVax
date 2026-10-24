@@ -93,7 +93,7 @@ describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', 
     // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
     // only early — it is not "repeated". See
     // regression-w1-too-soon-not-repeated.test.js for the dedicated coverage.
-    expect(second.reasons.join(' ')).toMatch(/due on or after 2027-01-01/);
+    expect(second.reasons.join(' ')).toMatch(/due on or after 2027-02-05/);
     expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
     // Must NOT keep the old reassurance — it is now false.
     expect(second.reasons.join(' ')).not.toMatch(/still counts/);

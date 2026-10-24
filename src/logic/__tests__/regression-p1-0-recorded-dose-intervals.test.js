@@ -147,7 +147,7 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     const reasons = a.perDose[1].reasons.join(' ');
     expect(reasons).toMatch(/14 days after the previous dose/);
     expect(reasons).toMatch(/4 weeks/);
-    expect(reasons).toMatch(/due on or after 2026-03-25/);
+    expect(reasons).toMatch(/due on or after 2026-04-08/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
 

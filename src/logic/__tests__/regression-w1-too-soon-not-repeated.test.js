@@ -29,8 +29,16 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     expect(second.status).toBe('invalid');
     const reasons = second.reasons.join(' ');
 
-    const earliest = addDays('2026-03-01', 28 - 4); // CDC's 4-day grace
-    expect(reasons).toMatch(new RegExp(`due on or after ${earliest}`));
+    // RULING D (owner, 2026-10-23): the date in this sentence is now measured
+    // from the INVALID dose, not from the last one that counted. W1's point is
+    // unchanged — a too-soon dose is not "repeated", it is simply not yet due —
+    // only the anchor moved. CDC: "The repeat dose should be spaced after the
+    // invalid dose by the recommended minimum interval."
+    // Was 2026-03-25 (dose 1 + 28 - 4) before Ruling D; now 2026-04-08.
+    const repeatDue = addDays('2026-03-15', 28 - 4); // CDC's 4-day grace
+    expect(repeatDue).toBe('2026-04-08');
+    expect(reasons).toMatch(new RegExp(`due on or after ${repeatDue}`));
+    expect(reasons).not.toMatch(/due on or after 2026-03-25/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
 
@@ -45,8 +53,15 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     expect(second.status).toBe('invalid');
     const reasons = second.reasons.join(' ');
 
-    const earliest = addDays(addCalendarYears('2015-01-01', 5), -4); // 4-day grace
-    expect(reasons).toMatch(new RegExp(`This dose does not count toward the series — given too soon after the dose it is measured from\\. It is not repeated; the next dose in this series is due on or after ${earliest}\\.`));
+    // RULING D (owner, 2026-10-23): the date in this sentence is now measured
+    // from the INVALID dose, not from the last one that counted. W1's point is
+    // unchanged — a too-soon dose is not "repeated", it is simply not yet due —
+    // only the anchor moved. CDC: "The repeat dose should be spaced after the
+    // invalid dose by the recommended minimum interval."
+    // Was 2019-12-28 (the 2015 dose + 5y - 4d); now 2022-12-28.
+    const repeatDue = addDays(addCalendarYears('2018-01-01', 5), -4); // 4-day grace
+    expect(repeatDue).toBe('2022-12-28');
+    expect(reasons).toMatch(new RegExp(`This dose does not count toward the series — given too soon after the dose it is measured from\\. It is not repeated; the next dose in this series is due on or after ${repeatDue}\\.`));
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
 

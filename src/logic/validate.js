@@ -521,6 +521,7 @@ function applyIntervalRules(result, ctx) {
     const r = invalid(verdict.reasons, verdict.detail);
     r.intervalRuleId = verdict.ruleId;
     r.earliestValidDate = verdict.earliestValidDate;
+    r.repeatDueDate = verdict.repeatDueDate;
     return r;
   }
   return advise(result, verdict.reason, verdict.ruleId);
@@ -806,7 +807,10 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       const closingSentence = result.recordProblem
         ? null
         : result.intervalRuleId
-          ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.earliestValidDate}.`
+          // RULING D: measured from the dose actually given. This used to print
+          // `earliestValidDate`, which is when THIS dose would have been valid
+          // — an earlier date, and one the rec card already contradicted.
+          ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series is due on or after ${result.repeatDueDate ?? result.earliestValidDate}.`
           : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       perDose.push(addNote({
         ...result,
@@ -814,7 +818,19 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         doesNotCount: true,
         reasons: closingSentence ? [...result.reasons, closingSentence] : result.reasons,
       }));
-      anchorOn(dose);
+      // RULING D (2026-10-23) — a mistimed dose anchors the next one, because
+      // CDC repeats it from where it was given. A RECORD PROBLEM does not, for
+      // the same reason the sentences above are withheld from it: it is "a
+      // dose the patient never had". A date in the future has not happened and
+      // a date before birth never did, so there is nothing for an interval to
+      // run from.
+      //
+      // Without this test the recommendation reads out of a dose nobody gave:
+      // a 12-month-old with a PCV20 typed as 2027-10-23 was advised to return
+      // on 2027-12-18, on the same screen as a chip telling the clinician the
+      // date is in the future and to correct it. 813 rows of the
+      // record-problem corpus.
+      if (!result.recordProblem) anchorOn(dose);
       return;
     }
     if (result.status === 'noncounting') {
@@ -949,7 +965,9 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds)
   for (const dose of rawDoses) {
     stepStream(vaccine, dose, st, otherStream, ageMonths, today, dob, riskIds);
   }
-  return { perDose: st.perDose, effective: st.kept, doses: st.doses };
+  return {
+    perDose: st.perDose, effective: st.kept, doses: st.doses, anchor: st.prev,
+  };
 }
 
 // ── Both streams, one chronological pass (ANCHOR-1) ──────────────────────
@@ -1002,9 +1020,23 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
     stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds);
   }
 
+  // `anchor` is the stream's last DATED dose — the one a same-stream interval
+  // is measured from. It is NOT the last dose that counted: a dose rejected
+  // for spacing still anchors, because CDC repeats it from where it was given
+  // ("The repeat dose should be spaced after the invalid dose by the
+  // recommended minimum interval"), while PCV7 never anchors. That difference
+  // is written down once, in `freshStreamState`, and both the validator and
+  // the recommendation engine now read THIS value rather than each deciding
+  // for itself — RULING D (owner, 2026-10-23). The P0 bug fixed earlier the
+  // same day was two independent readings of one table; a second definition
+  // of the anchor would be the same shape of mistake.
   return {
-    pcv: { perDose: pcv.perDose, effective: pcv.kept, doses: pcv.doses },
-    ppsv23: { perDose: ppsv23.perDose, effective: ppsv23.kept, doses: ppsv23.doses },
+    pcv: {
+      perDose: pcv.perDose, effective: pcv.kept, doses: pcv.doses, anchor: pcv.prev,
+    },
+    ppsv23: {
+      perDose: ppsv23.perDose, effective: ppsv23.kept, doses: ppsv23.doses, anchor: ppsv23.prev,
+    },
   };
 }
 
@@ -1041,7 +1073,7 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
   // count but are never a timing anchor, and an undated historical dose is assumed to be
   // the earlier (infant) dose, matching summarizePcv's convention.
   const filtered = sortDosesChronologically(dropBlankDoseRows((doses ?? []).filter(Boolean)));
-  if (filtered.length === 0) return { perDose: [], effective: [], doses: [] };
+  if (filtered.length === 0) return { perDose: [], effective: [], doses: [], anchor: null };
   // The OTHER stream's doses, which the cross-stream rule rows measure from.
   const otherStream = sortDosesChronologically(
     dropBlankDoseRows(((vaccine === 'PPSV23' ? opts.pcvDoses : opts.ppsv23Doses) ?? []).filter(Boolean))
