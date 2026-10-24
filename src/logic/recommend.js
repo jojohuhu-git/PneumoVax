@@ -380,10 +380,17 @@ function pcvSeriesShape(pcv, am, total) {
 function pcvInfant(am, riskIds, pcv, today) {
   const rowClass = pedsRiskRowClass(riskIds);   // 'IC' | 'nonIC' | null
   const prior = pcv.count;
-  // Left as the plain key list it has always been. The grey chips at the foot
-  // of an infant card are not what this finding is about, and widening them to
-  // collectRefs() here would change every infant card's chips as a side effect.
-  const refs = ['cdcChildPneumo', 'p2016'];
+  // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. Until C10-1
+  // (2026-10-23) this was one flat list spread over every card the function
+  // builds -- the exact shape CLAUDE.md forbids, and the last block still
+  // doing it. `infantRefsExcept` is the twin of `adultRefs` / `childRefsExcept`
+  // / `healthyRefsExcept`; the default is unchanged, so a card that does rest
+  // on both documents still lists both.
+  const INFANT_DEFAULT_REFS = ['cdcChildPneumo', 'p2016'];
+  /** The pathway defaults, minus documents that do not speak for this card. */
+  const infantRefsExcept = (...drop) => INFANT_DEFAULT_REFS.filter(
+    (k) => !drop.includes(k),
+  );
   const brands = pcvRecBrands({ adult: false });
   const anchor = pcv.lastDate;
 
@@ -457,11 +464,26 @@ function pcvInfant(am, riskIds, pcv, today) {
   // before 7 months AND one at 7-11 months, say): the later dose counts as the
   // first of the "additional" doses the row owes, rather than stacking on top
   // of them.
+  // C10-1 (2026-10-23): the ladder below IS p2016 Table 1, so it now RECORDS
+  // which row it used (`t1row`) instead of leaving the card to be asked later
+  // which row fits. That is the difference between the two faults this repo
+  // keeps finding -- a wrong DOCUMENT on a card, which the column-fit guard
+  // catches, and a wrong ROW of a document that does cover the patient, which
+  // it cannot (see `regression-2026-10-18-every-p2016-card-has-a-row-that-fits`).
+  // Recording the row closes the second one for this block by construction.
+  //
+  // A row is only CITED when its own stated total equals the number the card
+  // ends up printing; `table1Row` below enforces that. The totals can part
+  // company two ways -- the `prior + 1` reassignment further down, and a
+  // mixed history Table 1 does not tabulate -- and in both the printed total
+  // is the app's own arithmetic, which no row states. FINDING 2's rule.
   let target;
+  let t1row = null;
   if (am < M.m7) {
     // "2 through 6 months": 0 prior -> "4 doses"; 1 -> "3 additional doses";
     // 2 -> "2 additional doses"; 3 -> "1 additional dose at age 12-15 months".
-    // Every row sums to 4, so the band needs no sub-branching.
+    // Every row sums to 4, so the band needs no sub-branching. No row is
+    // recorded: a total of 4 prints CDC's routine sentence, which states it.
     target = 4;
   } else if (am < M.m12) {
     // "7 through 11 months", keyed on WHEN the prior doses were given.
@@ -469,25 +491,38 @@ function pcvInfant(am, riskIds, pcv, today) {
       target = before7 + 1;      // "3 before age 7 months" -> 1 additional
     } else if (before7 >= 1) {
       target = before7 + 2;      // "1 or 2 before age 7 months" -> 2 additional
+      t1row = 'p2016Table1_7to11_oneOrTwoBefore7';
     } else if (m7to11 >= 2) {
       target = m7to11 + 1;       // "2 at age 7 months or older" -> 1 additional
+      t1row = 'p2016Table1_7to11_twoAt7Plus';
     } else if (m7to11 === 1) {
       target = m7to11 + 2;       // "1 at age 7 months or older" -> 2 additional
+      t1row = 'p2016Table1_7to11_oneAt7Plus';
     } else {
       target = 3;                // "0 before age 7 months" -> "3 doses"
+      t1row = 'p2016Table1_7to11_noneBefore7';
     }
   } else {
     // "12 through 23 months".
     if (before12 >= 2) {
       target = before12 + 1;     // "2 or 3 before age 12 months" -> 1 additional
+      t1row = 'p2016Table1_12to23_twoOrThreeBefore12';
     } else if (before12 === 1) {
       target = before12 + 2;     // "1 before age 12 months" -> 2 additional
+      t1row = 'p2016Table1_12to23_oneBefore12';
     } else if (at12plus >= 1) {
       target = at12plus + 1;     // "1 dose at age 12 months or older" -> 1 additional
+      t1row = 'p2016Table1_12to23_oneAt12Plus';
     } else {
       target = 2;                // "0 before age 12 months" -> "2 doses"
+      t1row = 'p2016Table1_12to23_noneBefore12';
     }
   }
+  // The total each recorded row STATES, for the equality check below. Table 1
+  // writes a row either as a total ("3 doses") or as doses still owed ("2
+  // additional doses"); both are read here as the total the row comes to, the
+  // same arithmetic the ladder above uses.
+  const t1rowTotal = target;
 
   // Has a dose at ≥12mo been given? (booster satisfied)
   // FIX H5: Must check whether ≥1 dose was ADMINISTERED at ≥12mo, not just
@@ -506,6 +541,23 @@ function pcvInfant(am, riskIds, pcv, today) {
   // behind, so `doseNum` overtook it. The owed closing dose is a real dose, so
   // it belongs in the total: this child's series is their own doses plus it.
   if (prior >= target && !boosterGiven) target = prior + 1;
+
+  // The p2016 Table 1 row to CITE, if any. A row earns the card's marker only
+  // when the total it states is the total the card prints. The reassignment
+  // just above is precisely when they part company: the child holds more doses
+  // than their row contemplates and still owes the >=12-month closing dose, so
+  // the printed total is the app's own arithmetic and no row says it. Same
+  // rule as FINDING 2 at the top of the range, enforced by equality rather
+  // than by a second reading of the ladder.
+  // `target < 4` is part of the condition, not an optimisation. A child can
+  // reach a total of exactly 4 through a 7-11-month row (two doses before 7
+  // months, two more owed), and at 4 the lead prints CDC's OWN routine
+  // sentence -- "4-dose series at 2, 4, 6, and 12-15 months" -- which states
+  // that number. Letting the row take the lead's single marker there pushed
+  // CDC off 231 cards it speaks for: a removal by side effect, which is the
+  // FINDING F fault. p2016 is cited only where the card prints a total CDC
+  // does not state.
+  const table1Row = target < 4 && t1row && t1rowTotal === target ? t1row : null;
 
   if (prior >= target && boosterGiven) {
     // FINDING D + E (2026-10-17). Three different children reach this line and
@@ -559,7 +611,7 @@ function pcvInfant(am, riskIds, pcv, today) {
       noteCites: !atRisk
         ? [cite('pedsNoPcv20IfComplete')]
         : [cite('pedsRoutine4Dose'), cite(pcv20Done ? 'pedsRiskPcv20CompleteAt2' : nextDoseCite)],
-      refs,
+      refs: INFANT_DEFAULT_REFS,
     })];
   }
 
@@ -630,7 +682,7 @@ function pcvInfant(am, riskIds, pcv, today) {
           : `Catch-up infant PCV (PCV15 or PCV20): ${target} doses in total for this child [c].`}${needs12moFloor ? ' This final dose is not due until the patient reaches 12 months.' : ''}`,
       detail: `${minInterval
         ? `The next dose is due ${minInterval === 28 ? '4 weeks' : '8 weeks'} after the most recent one`
-        : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months${target > 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
+        : 'There is no earlier dated dose to measure an interval from'}; the final/booster dose is given at ≥12 months${target !== 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
     },
     // FINDING 2: a total above 4 is cited to MMWR Table 2's "last dose" row,
     // not to CDC's routine 4-dose sentence, which states a different number.
@@ -646,10 +698,26 @@ function pcvInfant(am, riskIds, pcv, today) {
     // CONDITIONAL, deliberately: at a total of 4 or fewer the lead already
     // cites this page, and a document must not take two numbers on one card for
     // one claim (the same rule as `mmwrNoneRowCites` and the adult 8-week card).
+    //
+    // C10-1 (2026-10-23): and the SAME rule, applied at the bottom of the
+    // range. A total BELOW 4 -- "2 doses in total for this child" -- was
+    // footnoting CDC's "4-dose series at 2, 4, 6, 12-15 months", a quote
+    // stating a different number from the card, on 781 cards. CDC's notes
+    // cannot state it: read live 2026-10-23 they give the routine series and
+    // then punt, "For other catch-up guidance, see Table 2." p2016 Table 1
+    // does state it, row by row, and `table1Row` is the row this child keyed
+    // on. So the lead's marker moves to that row and CDC keeps the booster
+    // clause -- exactly the split FINDING 2 made for a total above 4.
     noteCites: target > 4
       ? [cite('pedsInfantLastDose1215mo'), cite('pedsRoutine4Dose')]
-      : [cite('pedsRoutine4Dose')],
-    refs,
+      : table1Row
+        ? [cite(table1Row), cite('pedsRoutine4Dose')]
+        : [cite('pedsRoutine4Dose')],   // total of exactly 4: CDC states it
+    // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. p2016 stays only
+    // where one of its rows is actually cited above; on a routine 4-dose card
+    // and on a total above 4 (which Table 1's largest row does not reach) it
+    // comes off, because nothing on those cards rests on it.
+    refs: table1Row ? INFANT_DEFAULT_REFS : infantRefsExcept('p2016'),
   })];
 }
 
@@ -1317,7 +1385,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
             detail: 'This is an at-risk child 24–71 months who has had the catch-up dose(s) at ≥24 months but has received neither PCV20 nor PPSV23. Choose Option A or B, not both.',
           },
           noteCites: [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
-          refs,
+          // C10-1 (2026-10-23): CDC states this card's claim and is cited by
+          // number above; nothing here rests on p2016, so it comes off.
+          refs: childRefsExcept('p2016'),
         }));
         out.push(rec({
           vaccine: 'PPSV23', status: 'risk-based',
@@ -1330,7 +1400,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           noteCites: isIC
             ? [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23'), cite('pedsSecondPpsv5y')]
             : [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')],
-          refs,
+          // C10-1 (2026-10-23): CDC states this card's claim and is cited by
+          // number above; nothing here rests on p2016, so it comes off.
+          refs: childRefsExcept('p2016'),
         }));
         return out;
       }
@@ -1707,7 +1779,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // explaining.
       note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV (completes the series) [c].`,
       noteCites: [before6Cite()],
-      refs,
+      // C10-1 (2026-10-23): CDC states this card's claim and is cited by
+      // number above; nothing here rests on p2016, so it comes off.
+      refs: childRefsExcept('p2016'),
     }));
     out.push(rec({
       vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks)',
@@ -1719,7 +1793,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       noteCites: isIC
         ? [before6Cite(), cite('pedsSecondPpsv5y')]
         : [before6Cite()],
-      refs,
+      // C10-1 (2026-10-23): CDC states this card's claim and is cited by
+      // number above; nothing here rests on p2016, so it comes off.
+      refs: childRefsExcept('p2016'),
     }));
     return out;
   }
@@ -1851,7 +1927,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     noteCites: noPriorPcv
       ? [cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'), cite('p2016NoPriorPcv6to18OptionA')]
       : [cite('pedsRiskPcv13At6'), ...bridge.cites],
-    refs: noPriorPcv ? refs : [...refs, ...bridge.refKeys],
+    // C10-1 (2026-10-23): the at/after-6 card cites CDC's row and the
+    // interchangeability bridge, and nothing of p2016's; only the no-prior-PCV
+    // card above rests on p2016 (its Option A cell), so only that one keeps it.
+    refs: noPriorPcv ? refs : [...childRefsExcept('p2016'), ...bridge.refKeys],
   }));
 
   if (noPriorPcv) {
@@ -1907,7 +1986,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       noteCites: isIC
         ? [cite('pedsRiskPcv13At6'), cite('pedsSecondPpsv5y')]
         : [cite('pedsRiskPcv13At6')],
-      refs,
+      // C10-1 (2026-10-23): CDC states this card's claim and is cited by
+      // number above; nothing here rests on p2016, so it comes off.
+      refs: childRefsExcept('p2016'),
     }));
   }
 

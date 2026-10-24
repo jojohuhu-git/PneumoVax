@@ -57,13 +57,29 @@ describe('uncreditedSources.mjs stays runnable', () => {
     expect(src).toContain("from '../src/test-grid.js'");
   });
 
-  it.skipIf(!ready)('runs, and reports at least one uncredited pair', async () => {
+  // C10-1 (2026-10-23): this assertion used to be `pairs > 0` -- "the tool
+  // reports at least one uncredited pair". That was always a PROXY for the
+  // thing being guarded (the helpers accept what the engine produces), and the
+  // citation work has now made it false: immunize.org p2016 reached zero
+  // uncredited pairs, and the first 400 grid cases carry none at all. A proxy
+  // that fails when the codebase gets BETTER is the wrong proxy.
+  //
+  // It is replaced by a STRONGER one, not a weaker one. `credited` counts the
+  // (card, document) pairs the helpers actually resolved from real engine
+  // output, so it is non-zero only if `noteCiteSlices`/`reasonCiteSlices` are
+  // present AND returning markers the cards really carry -- which is precisely
+  // the failure this file was written for (`noteCiteSlices is not a function`,
+  // broken on main through five merges). `pairs` is still computed, because
+  // the loop must keep exercising the chip side too, but nothing is asserted
+  // about its value: driving it to zero is the goal, not a regression.
+  it.skipIf(!ready)('runs, and the cite helpers resolve real markers', async () => {
     const { buildCases } = await import('../../src/test-grid.js');
     const { recommend } = await import('../../src/logic/recommend.js');
     // The tool's own counting loop, on a slice of the grid rather than all of
     // it — this proves the helpers accept what the engine produces, which is
     // the thing that broke. The full count is the tool's job, not a test's.
     let pairs = 0;
+    let credited = 0;
     let cards = 0;
     for (const c of [...buildCases()].slice(0, 400)) {
       let result;
@@ -83,11 +99,12 @@ describe('uncreditedSources.mjs stays runnable', () => {
         }
         const slices = citations.noteCiteSlices(rec.note, rec.noteCites);
         for (const x of [...slices.lead, ...slices.detail]) cited.add(x.page ?? x.key);
+        credited += cited.size;
         for (const chip of rec.citations ?? []) if (!cited.has(chip.url)) pairs += 1;
       }
     }
     expect(cards).toBeGreaterThan(0);
-    expect(pairs).toBeGreaterThan(0);
+    expect(credited).toBeGreaterThan(0);
   });
 
   if (!ready) {

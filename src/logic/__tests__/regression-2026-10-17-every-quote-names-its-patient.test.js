@@ -175,6 +175,28 @@ describe('the field itself', () => {
       'p2016NoPriorPcv6to18OptionA', // identical cell in the non-IC and IC rows
       'p2016NoPriorPcv6to18OptionB', // identical cell in the non-IC and IC rows
       'p2016Pcv15NeedsFurtherDoses',           // footnote on the PCV15 in both of those rows
+      // C10-1 (2026-10-23), and the simplest reason in this list: p2016 Table 1
+      // declares its own scope in its own heading, verbatim --
+      //   "Table 1. Recommended schedule for administering pneumococcal
+      //    conjugate vaccine (PCV) to all children (healthy and those with
+      //    risk conditions) age 2 through 23 months"
+      // -- so every row under it is about all three child groups by the
+      // document's own words, not by inference from where it is printed.
+      // That is OWNER RULING B (2026-10-23): there is no healthy/at-risk split
+      // to build for the infant totals. Read live 2026-10-23 with
+      // `scripts/pdfLayout.py` (p2016 sha256 9a59f0e4...), cell by cell.
+      //
+      // Eight rows, one per branch of the engine's total ladder, because the
+      // engine now records WHICH row it used rather than leaving the card to
+      // be asked later which row fits.
+      'p2016Table1_12to23_noneBefore12',      // Table 1's own heading: all children 2-23 months
+      'p2016Table1_12to23_oneAt12Plus',       // Table 1's own heading: all children 2-23 months
+      'p2016Table1_12to23_oneBefore12',       // Table 1's own heading: all children 2-23 months
+      'p2016Table1_12to23_twoOrThreeBefore12',// Table 1's own heading: all children 2-23 months
+      'p2016Table1_7to11_noneBefore7',        // Table 1's own heading: all children 2-23 months
+      'p2016Table1_7to11_oneAt7Plus',         // Table 1's own heading: all children 2-23 months
+      'p2016Table1_7to11_oneOrTwoBefore7',    // Table 1's own heading: all children 2-23 months
+      'p2016Table1_7to11_twoAt7Plus',         // Table 1's own heading: all children 2-23 months
       'pedsBefore6NoPcv20',       // a heading above BOTH the IC and non-IC sub-blocks
       // FINDING 2 (2026-10-18). MMWR mm7137a3's Table 2 is divided into three
       // blocks -- "All children", "Healthy children", and "Children with

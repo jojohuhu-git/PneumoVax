@@ -185,10 +185,21 @@ describe("every card citing p2016 has a p2016 row whose columns all fit", () => 
     //          cards (840 + 20)
     //   4,927  after C9-4 removed the healthy 5–18 "not indicated" card
     //          (1,584), under the owner's "cite CDC; p2016 only if you cannot"
+    //   3,294  after C10-1 (2026-10-23) — 1,633 cards, the last of p2016's
+    //          uncredited statements. Three groups, all measured, not
+    //          estimated: 1,072 at-risk Option A/B cards whose claim CDC's
+    //          notes state in full and already cite by number; 429 routine
+    //          4-dose infant cards, which quote CDC's "4-dose series at 2, 4,
+    //          6, 12–15 months" verbatim; and 132 five-dose cards, which
+    //          Table 1 has no row for at all (its prior-dose column stops at
+    //          "2 or 3 before age 12 months"). The 781 infant cards that state
+    //          a total of 2 or 3 KEEP p2016 and are now cited to the Table 1
+    //          row they key on — CDC's notes cannot carry that number, since
+    //          they punt: "For other catch-up guidance, see Table 2."
     //
     // If this fails, do not edit the number until you can say which cards moved
     // and why — then edit it and add the line.
-    expect(carrying).toBe(4927);
+    expect(carrying).toBe(3294);
     expect([...noRowFits.entries()].slice(0, 8)).toEqual([]);
     expect([...noRowFits.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });

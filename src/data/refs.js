@@ -755,6 +755,143 @@ export const REFS = {
   // Quoted in the joined form this file already uses for a p2016 table row
   // (see `p2016CompletedBefore6WithPcv20` above): the PDF deep-links by page,
   // so no text fragment depends on the join.
+  // ── C10-1 (2026-10-23): immunize.org p2016 TABLE 1, row by row ──────────
+  //
+  // Why these exist. The infant catch-up card states a SERIES TOTAL for the
+  // child in front of you ("3 doses in total for this child"), and until now
+  // its one [c] pointed at CDC's routine sentence, "4-dose series at 2, 4, 6,
+  // 12-15 months" — a quote stating a DIFFERENT NUMBER from the card. That is
+  // the same fault FINDING 2 fixed at the top of the range (a total above 4),
+  // pointed at the bottom of it, and it covers 781 cards.
+  //
+  // CDC's notes cannot carry the claim. Read live 2026-10-23, the pneumococcal
+  // note gives the routine series and then punts every other total:
+  //   "For other catch-up guidance, see Table 2."
+  // So p2016 Table 1 is the document that states these numbers, which is what
+  // OWNER RULING A's fallback is for.
+  //
+  // RULING B (owner, 2026-10-23): Table 1 needs NO healthy/at-risk split. Its
+  // own heading, verbatim, is
+  //   "Table 1. Recommended schedule for administering pneumococcal conjugate
+  //    vaccine (PCV) to all children (healthy and those with risk conditions)
+  //    age 2 through 23 months"
+  // so every entry below declares all three child populations.
+  //
+  // ONE ROW PER BRANCH, because the engine knows which row it used. The
+  // `target` ladder in `recommend.js` is already Table 1 cell by cell, so the
+  // row that keyed the total is recorded as it is chosen and cited directly.
+  // That closes FINDING I's "wrong ROW of a document that does cover the
+  // patient" for this block — the engine does not have to be asked which row
+  // fits, it says which row it used, and the card is only given the row whose
+  // own stated total equals the number the card prints.
+  //
+  // Provenance: p2016 downloaded live 2026-10-23 (HTTP 200, 211,252 bytes,
+  // Item #P2016 of 2/16/2024, sha256 9a59f0e467c7089294fc97bde96abfa067381063
+  // 6e964c892c90c2e7924e3145) and laid out with `scripts/pdfLayout.py`, which
+  // keeps each cell tied to its own row so a column cannot be read off the
+  // wrong row. Quoted in the joined "history column — doses needed" form this
+  // file already uses for a p2016 table row; the PDF deep-links by page, so no
+  // text fragment depends on the join.
+  //
+  // THE 4-WEEK/8-WEEK FOOTNOTE IS DELIBERATELY NOT QUOTED HERE. Table 1's row
+  // text is ROUTINE spacing; its footnote dagger is the MINIMUM interval
+  // ("for children younger than age 12 months = 4 weeks; for children age 12
+  // months or older = 8 weeks"). Mixing the two invents a divergence that is
+  // not there. These entries are cited for the TOTAL only — never for an
+  // interval. The interval question is C10-2's.
+
+  // Age 7-11 months.
+  p2016Table1_7to11_noneBefore7: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 7-11 month row for a child with no dose before 7 months
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 7-11 months with no PCV dose before age 7 months: three doses in total',
+    short: 'immunize.org p2016',
+    quote: '0 before age 7 months — 3 doses; 2 doses 8 weeks apart; last dose at age 12–15 months',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+  p2016Table1_7to11_oneOrTwoBefore7: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 7-11 month row for a child with one or two doses before 7 months
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 7-11 months with one or two PCV doses before age 7 months: two more doses',
+    short: 'immunize.org p2016',
+    quote: '1 or 2 before age 7 months — 2 additional doses: 1 dose 8 weeks after most recent dose; last dose at least 8 weeks later, at age 12–15 months',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+  p2016Table1_7to11_oneAt7Plus: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 7-11 month row for a child with one dose at age 7 months or older
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 7-11 months with one PCV dose at age 7 months or older: two more doses',
+    short: 'immunize.org p2016',
+    quote: '1 at age 7 months or older — 2 additional doses; 1 dose 8 weeks after most recent doses; last dose at least 8 weeks later, at age 12–15 months',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+  p2016Table1_7to11_twoAt7Plus: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 7-11 month row for a child with two doses at age 7 months or older
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 7-11 months with two PCV doses at age 7 months or older: one more dose',
+    short: 'immunize.org p2016',
+    quote: '2 at age 7 months or older — 1 additional dose at least 8 weeks later, at age 12–15 months',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+
+  // Age 12-23 months.
+  p2016Table1_12to23_noneBefore12: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 12-23 month row for a child with no dose before 12 months
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 12-23 months with no PCV dose before age 12 months: two doses in total',
+    short: 'immunize.org p2016',
+    quote: '0 before age 12 months — 2 doses: 2 doses 8 weeks apart',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+  p2016Table1_12to23_oneBefore12: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 12-23 month row for a child with one dose before 12 months
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 12-23 months with one PCV dose before age 12 months: two more doses',
+    short: 'immunize.org p2016',
+    quote: '1 before age 12 months — 2 additional doses: 1 dose at least 8 weeks after most recent dose; last dose at least 8 weeks later',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+  p2016Table1_12to23_twoOrThreeBefore12: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 12-23 month row for a child with two or three doses before 12 months
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 12-23 months with two or three PCV doses before age 12 months: one more dose',
+    short: 'immunize.org p2016',
+    quote: '2 or 3 before age 12 months — 1 additional dose, at least 8 weeks after most recent dose',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+  p2016Table1_12to23_oneAt12Plus: {
+    rulebook: 'child',
+    // Patients this cell is about: Table 1 covers all children 2-23 months, healthy and at risk; this is its 12-23 month row for a child whose only dose was given at 12 months or older
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
+    label: 'immunize.org p2016 Table 1 — a child 12-23 months with one PCV dose at age 12 months or older: one more dose',
+    short: 'immunize.org p2016',
+    quote: '1 dose at age 12 months or older — 1 additional dose, at least 8 weeks after the most recent dose',
+    pdfPage: 1,
+    lastVerified: '2026-10-23',
+  },
+
   p2016HealthyCatchup24to59: {
     rulebook: 'child',
     // Patients this cell is about: Table 2 is headed "healthy children age 24 months through 18 years", and this is its 24-59 month row

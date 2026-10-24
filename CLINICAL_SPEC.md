@@ -67,6 +67,60 @@ Unknown/undocumented history → treat as unvaccinated (`cdcAdultPneumo`, CDC ge
 ## §A — Routine children 2–23 months (p2016 Table 1; `cdcChildPneumo`)
 
 Applies to **all** children (healthy AND at-risk) age 2–23 months.
+
+### §A-cite — which document states the infant TOTAL (C10-1, 2026-10-23)
+
+**OWNER RULING A (2026-10-23) — the document order for paediatric intervals and totals.**
+Her words: *"The Immunize.org sheet is built from the CDC/ACIP schedule. If the two ever
+differ, the CDC/ACIP schedule is the authoritative source. CDC also says its catch-up table
+should be used together with the Notes. The way I interpret this is the catch up table is
+not the source of truth and may be considered if immunize.org does not provide a specific
+recommendation."* So the order is **CDC/ACIP schedule Notes → immunize.org p2016 → CDC
+catch-up table**. This does **not** disturb the 2026-10-17 rule that CDC beats immunize.org
+where they disagree; it ranks the *catch-up table* below p2016 as an adjunct.
+
+Two things verified live and recorded, because they change what may be cited for what:
+- CDC's catch-up page does say, verbatim, *"Always use this table in conjunction with Table
+  1 and the Notes that follow."*
+- **p2016 carries no provenance statement at all** — the whole PDF was searched: no "based
+  on ACIP", no CDC technical-review footer, only a pointer to CDC's PneumoRecs app.
+
+So the ranking is an **OWNER CLINICAL DETERMINATION**, like the adult floors — not something
+a document says. **Do not cite p2016 for its own authority.**
+
+**OWNER RULING B (2026-10-23) — Table 1 states the TOTAL, for every child.** Table 1's own
+heading, read live 2026-10-23 with `scripts/pdfLayout.py`:
+
+> Table 1. Recommended schedule for administering pneumococcal conjugate vaccine (PCV) to
+> **all children (healthy and those with risk conditions)** age 2 through 23 months
+
+so it covers healthy children too and **there is no healthy/at-risk split to build**. Every
+`p2016Table1_*` entry in `refs.js` therefore declares all three child populations.
+
+**Why the infant card needs it.** The catch-up card states a total for the child in front of
+you — "2 doses in total for this child" — and CDC's notes cannot carry that number: they give
+the routine series and then punt, *"For other catch-up guidance, see Table 2."* Until C10-1
+the card's one marker pointed at CDC's *"4-dose series at 2, 4, 6, 12–15 months"*, **a quote
+stating a different number from the card**, on 781 cards. That is FINDING 2's fault (a total
+ABOVE 4 credited to a document whose largest row says 4) found at the other end of the range.
+
+**How it is cited now.** The `target` ladder in `recommend.js` IS Table 1 cell by cell, so it
+RECORDS which row it used (`t1row`) and the card cites that row — but only when the row's own
+stated total equals the number the card prints. A card printing a total of exactly 4 cites
+CDC instead, because CDC's routine sentence states 4. This closes FINDING I ("the wrong ROW
+of a document that does cover the patient") for the infant block by construction.
+
+**p2016 comes OFF 1,633 cards** where CDC states the claim and is already cited: 1,072
+at-risk Option A/B cards, 429 routine 4-dose cards, and 132 five-dose cards (Table 1's
+prior-dose column stops at "2 or 3 before age 12 months", so it has no row that high).
+
+**These entries are cited for the TOTAL only — never for an interval.** Table 1's row text is
+ROUTINE spacing; its footnote † is the MINIMUM ("for children younger than age 12 months =
+4 weeks; for children age 12 months or older = 8 weeks"). Mixing the two invents a divergence
+that is not there.
+
+Guard: `regression-c10-1-2026-10-23-infant-total-cites-p2016-table1.test.js`.
+
 4-dose PCV (PCV15 or PCV20) at 2, 4, 6, 12–15 months.
 
 Minimum interval: see **§L** — the number is CDC Catch-up Table 2's, keyed on the **dose
