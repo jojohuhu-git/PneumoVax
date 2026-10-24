@@ -933,8 +933,8 @@ catch-up row**.
   | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | dose 2 after a dose under 12 months: >=4 weeks; dose 2 after a dose from 12 months: >=8 weeks; dose 3 under 12 months after a dose under 7 months: >=4 weeks; dose 3 after a dose at 7-11 months: >=8 weeks; dose 4+ given under 12 months: >=4 weeks; dose 4+ given from 12 months: >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PCV` | child | PPSV23 | `lastPcv` | >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PPSV23` | child | PPSV23 | `prevSameStream` | >=5 years | floor | CDC |
-  | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | floor | OWNER |
   | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | floor | OWNER |
+  | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | recommendation | CDC |
   | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | floor | OWNER |
   | `ADULT-PCV-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=1 year | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv15` | >=8 weeks | floor | OWNER |
@@ -1016,7 +1016,6 @@ catch-up row**.
 
   | Dose judged | Measured from | Floor | Row |
   |---|---|---|---|
-  | PCV20/PCV21, history has PCV13 **and** PPSV23 | last PPSV23 | ≥5 years | `ADULT-PCV20-21-5Y-AFTER-PPSV23` |
   | PCV20/PCV21, history has PCV13 **and** PPSV23 | last PCV | ≥1 year | `ADULT-PCV20-21-1Y-AFTER-PCV` |
   | PCV20/PCV21, history has PCV13, no PPSV23 | last PCV13 | ≥1 year | `ADULT-PCV20-21-AFTER-PCV13` |
   | PCV15/20/21, history has PPSV23 only | last PPSV23 | ≥1 year | `ADULT-PCV-AFTER-PPSV23` |
@@ -1025,6 +1024,42 @@ catch-up row**.
   | PPSV23, IC / cochlear implant / CSF leak | last PCV13 | ≥8 weeks | `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` |
   | PPSV23, any other adult | last PCV13 | ≥1 year | `ADULT-PPSV23-AFTER-PCV13` |
   | A second PPSV23 | previous PPSV23 | ≥5 years | `ADULT-PPSV23-AFTER-PPSV23` |
+
+  ### OWNER RULING F (2026-10-24) — one row left that table
+
+  **`ADULT-PCV20-21-5Y-AFTER-PPSV23` is no longer a floor.** An adult PCV20 or PCV21 given
+  sooner than 5 years after a PPSV23 now **counts**, carries a timing note, and the series
+  reads complete. This **reverses the owner's own determination of 2026-10-11 for that row
+  only** — every other adult floor above is unchanged.
+
+  Shown a 70-year-old with no risk factors (PCV13 2016-10-13, PPSV23 2021-10-13, PCV20
+  2025-10-10), whose card read *"PCV20 or PCV21 … due TODAY"*, she ruled:
+  > "Nothing further is due if they are healthy, with chronic conditions, or
+  > immunocompromised. Once an adult has received PCV20, ACIP recommends no additional
+  > pneumococcal doses… The only issue is timing. If the doses were given about 4 years
+  > apart… the PCV20 came before the recommended ≥5 years after the PPSV23. ACIP describes
+  > that as recommended timing and does not say an earlier dose is invalid or must be
+  > repeated."
+
+  **The row's authority changed with its enforcement, and that is the point.** While it was
+  a floor it asserted something no source states — that an early dose stops counting — so it
+  had to carry `authority: 'OWNER'`. As a recommendation it asserts only CDC's own advised
+  interval, so it reads `authority: 'CDC'`, like every other recommendation row in the
+  table. Ruling F **removed** an owner-invented bar; it did not add an owner-invented
+  recommendation.
+
+  **⚠️ The row order in `doseIntervalRules.js` moved, and it is load-bearing.**
+  `evaluateDoseInterval` returns on the **first unmet row of either kind**. With the 5-year
+  recommendation still sitting ahead of `ADULT-PCV20-21-1Y-AFTER-PCV`, a dose missing *both*
+  gaps would have been handed the note and the 1-year floor would never have run. The floor
+  is therefore ordered first. Such a dose is still rejected; it is now told about the
+  1-year gap rather than the 5-year one. Guard:
+  `regression-ruling-f-2026-10-24-early-conjugate-counts.test.js`.
+
+  **⚠️ An open question over the row that remains.** Reasoning about a *different* patient
+  that same day, the owner said an adult conjugate-to-conjugate interval *"exists in no
+  document"* — which is in tension with `ADULT-PCV20-21-1Y-AFTER-PCV` existing at all. She
+  was asked and chose to **leave it unchanged for now**: raised, not decided.
 
   The two **PCV13→PPSV23** rows were added 2026-10-11, on the owner's instruction that this
   pair gets no exception. Their interval is rr7203a1's, verified live that day:

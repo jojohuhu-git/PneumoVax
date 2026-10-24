@@ -149,7 +149,15 @@ describe('over the whole grid', () => {
   });
 
   it('the other 1,467 PCV13 + PPSV23 cards keep the flat wording', () => {
-    // 185 + 952 + 330 measured by effective dose count and age band.
-    expect(counts.flat).toBe(185 + 952 + 330);
+    // 2026-10-24, RULING F: the 363 patients whose early PCV20 now counts
+    // read "Complete (history includes PCV20)" instead of a dose-due card.
+    // All 363 are at 50+. They split by the mm7401a1 row their OLD card
+    // used: 253 from the flat ">=5 years after the last pneumococcal dose"
+    // row, and 110 from the shared-clinical-decision row at >=65, which
+    // already carried a job-aid button. Measured with scripts/proseDiff.mjs
+    // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
+    // 185 + 952 + 330 measured by effective dose count and age band,
+    // then - 253: the flat-wording half of Ruling F's 363.
+    expect(counts.flat).toBe(185 + 952 + 330 - 253);
   });
 });

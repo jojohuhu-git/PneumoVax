@@ -336,7 +336,14 @@ describe('over the whole grid', () => {
     // 2,564 after document 1's removals; + 1,594 restored by FINDING F on
     // 2026-10-18 (1,154 "PPSV23 only" + 440 shared-decision), each of which
     // arrived with its own cite, so the zero below is unaffected.
-    expect(stats.listing).toBe(2564 + 1154 + 440);
+    // 2026-10-24, RULING F: the 363 patients whose early PCV20 now counts
+    // read "Complete (history includes PCV20)" instead of a dose-due card.
+    // All 363 are at 50+. They split by the mm7401a1 row their OLD card
+    // used: 253 from the flat ">=5 years after the last pneumococcal dose"
+    // row, and 110 from the shared-clinical-decision row at >=65, which
+    // already carried a job-aid button. Measured with scripts/proseDiff.mjs
+    // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
+    expect(stats.listing).toBe(2564 + 1154 + 440 - 363);
     expect(stats.uncredited).toBe(0);
     expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });

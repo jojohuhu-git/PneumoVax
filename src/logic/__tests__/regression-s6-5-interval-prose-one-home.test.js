@@ -295,7 +295,17 @@ describe('a recorded-dose verdict says what it was judged against', () => {
     expect(d.detail).not.toContain(`The ${noun} minimum interval`);
   });
 
-  it('describes its own gap adjectivally where the sentence needs an adjective', () => {
+  // ⚠️ REWRITTEN BY OWNER RULING F (2026-10-24). This case used to assert
+  // "This 5-year gap is enforced..." on the SAME patient — the adjectival
+  // form in the 5-year row's floor detail. That row is now a recommendation
+  // and prints one sentence with no "gap is enforced" clause, so the old
+  // assertion had no subject left. The invariant the file exists for is
+  // unchanged and still covered: `intervalPhraseAdj` is asserted by the two
+  // cases above, through SHORTER_MINIMUM_ADJ. What is asserted here instead
+  // is that the row's new sentence reads the interval from ONE place — the
+  // reason this file exists — and uses the NOUN form, which is what "at
+  // least 5 years" needs.
+  it('states the 5-year gap from one home, in the noun form its sentence needs', () => {
     // An adult with BOTH PCV13 and PPSV23, given a PCV20 inside the 5 years.
     const r = recommend({
       dob: '1956-05-01', ageMonths: 845, riskIds: [], today: TODAY,
@@ -305,11 +315,13 @@ describe('a recorded-dose verdict says what it was judged against', () => {
       ],
       ppsv23Doses: [{ date: '2021-10-11', product: 'PPSV23' }],
     });
-    const late = r.perDose.pcv.find((d) => d.detail?.includes('gap is enforced'));
+    const late = r.perDose.pcv.find((d) => d.intervalRuleId === 'ADULT-PCV20-21-5Y-AFTER-PPSV23');
     expect(late, 'expected a 5-year-gap verdict').toBeDefined();
-    const adj = intervalPhraseAdj({ months: PPSV23_REVACC_MIN_MONTHS });
-    expect(late.detail).toContain(`This ${adj} gap is enforced`);
-    expect(late.detail).not.toContain(`This ${intervalPhrase({ months: PPSV23_REVACC_MIN_MONTHS })} gap`);
+    expect(late.status).toBe('valid');
+    const noun = intervalPhrase({ months: PPSV23_REVACC_MIN_MONTHS });
+    expect(late.reasons.join(' ')).toContain(`at least ${noun}`);
+    // The old floor sentence must not come back alongside the new one.
+    expect(late.detail ?? '').not.toContain('gap is enforced');
   });
 
   it('gets the article right in front of the shorter minimum', () => {

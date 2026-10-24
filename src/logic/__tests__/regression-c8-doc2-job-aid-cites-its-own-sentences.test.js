@@ -418,9 +418,14 @@ describe('swept over the whole grid — the counts that moved', () => {
   // mm7401a1's table over a quote assembled from the job aid's cells, so the
   // job aid came off those cards and the uncredited count is now zero — the
   // second document to finish.
-  it('3,616 cards gained a job-aid citation, and none is left uncredited', () => {
+  // 2026-10-24, RULING F: + 253. See the twin pin in
+  // regression-c8-doc1-mmwr-only-where-it-speaks.test.js for why 253 and not
+  // 363 — `jobAidCompleteCites` is gated on `isOlderAdult`. The invariant
+  // this test actually defends is the line below it: every card that LISTS
+  // the job aid also QUOTES it, and that stays 0 uncredited.
+  it('3,869 cards gained a job-aid citation, and none is left uncredited', () => {
     const { gained, uncreditedPairs, uncreditedStatements } = sweep();
-    expect(gained).toBe(3616);
+    expect(gained).toBe(3616 + 253);
     expect(uncreditedPairs).toBe(0);
     expect(uncreditedStatements.size).toBe(0);
   });

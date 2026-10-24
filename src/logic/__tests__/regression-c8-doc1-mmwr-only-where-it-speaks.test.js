@@ -330,11 +330,29 @@ describe('swept over every patient the grid can build', () => {
     // `scripts/citationMapping.mjs`, which also reports "cards citing a
     // document with NO button" still **0** — no removal orphaned a citation.
     // 2026-10-18: + 1,154 (PPSV23 only) + 440 (shared decision) = 4,158.
-    expect(mmwrCards).toBe(2564 + 1154 + 440);
+    //
+    // 2026-10-24, RULING F: **- 363**. Those cards used to read "PCV20 or
+    // PCV21 ... due", which quotes mm7401a1; their PCV20 now counts and they
+    // read "Complete (history includes PCV20)", which quotes CDC's adult
+    // notes instead. The document lost no card it still speaks for — it
+    // stopped being shown on cards whose sentence changed. This is the same
+    // 363 the ruling moves, counted independently here and in the verdict
+    // corpus.
+    expect(mmwrCards).toBe(2564 + 1154 + 440 - 363);
   });
 
-  it("the job aid is on 3,616 — 6,805 after document 2, minus the 3,189 cell-only", () => {
-    expect(jobAidCards).toBe(6805 - 3189);
+  it("the job aid is on 3,869 — 3,616 after document 2, plus Ruling F's 253", () => {
+    // 6,805 - 3,189 (the cell-only statements, 2026-10-18) = 3,616, then
+    // 2026-10-24 RULING F: **+ 253**. Measured with `scripts/proseDiff.mjs`
+    // over both grids: 363 patients changed, ALL of them at 50+, and every
+    // one now reads "Complete (history includes PCV20)" — a card that
+    // carries the job aid's completion sentence. The rise is 253 and not 363
+    // because 110 of those patients ALREADY had a job-aid button elsewhere
+    // in their case before the ruling; this sweep counts a document once per
+    // card it appears on, so those 110 were already inside the 3,616. Not an
+    // age split — `jobAidCompleteCites` is gated on `isOlderAdult` and all
+    // 363 clear it.
+    expect(jobAidCards).toBe(6805 - 3189 + 253);
   });
 
   it('no adult card was left with no source at all', () => {
