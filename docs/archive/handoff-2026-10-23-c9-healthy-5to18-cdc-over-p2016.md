@@ -1,5 +1,17 @@
 # PneumoVax — Handoff after the healthy 5–18 card's citations, and a new OWNER RULE (2026-10-23)
 
+> ## ⚠ SUPERSEDED — do not work this queue
+>
+> Consumed on 2026-10-23 by the session that produced
+> `docs/archive/handoff-2026-10-23-four-rulings-and-the-interval-rework.md`. **Go there instead.**
+>
+> **Its P0 is DONE.** The measurement it asked for — how many of the 22 remaining p2016 pairs
+> are claims CDC already states — was carried out: **18 of 22 are removals, 4 are not.** Its P1
+> entries are stale in two ways: the healthy/at-risk split it expected **does not exist**
+> (p2016 Table 1 covers all children, owner ruling 2026-10-23), and its "cite p2016 for the
+> TOTAL only, never the interval sentence" is now part of a larger reworking of the intervals
+> themselves. PR #79 has merged; #76 is still open and still to be closed, not merged.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
 Live site: https://jojohuhu-git.github.io/PneumoVax/. Dev server: `.claude/launch.json` —
 **it served port 5173 this session; always read the real port from `preview_logs`.** What the
