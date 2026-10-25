@@ -2584,6 +2584,43 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       ? [cite('mmwrPpsvOnlyThenPcv')]
       : [];
 
+    // THE SAME CORRECTION AGAIN, FOR THE FAMILIES ADDED 2026-10-25.
+    //
+    // Extending this card to the two PCV13 rows took mm7401a1 off **212**
+    // cards it speaks for, and the three C8 guards caught it the moment the
+    // change ran (3,795 -> 3,583). That is FINDING F's mirror for the third
+    // time on this one card, and the fix is the same shape as the two above:
+    // read the document, find the row that fits, cite it in its own sentence.
+    //
+    // The row: with the PPSV23 set aside, this patient's COUNTING history is a
+    // PCV13 and nothing else, which is precisely mm7401a1's "PCV13 only" row —
+    // "A single dose of PCV21 or PCV20 >=1 year after the PCV13 dose." It
+    // states her disposition outright, and it is the row the card she had
+    // before this change was built on.
+    //
+    // ⚠️ CITED FOR THE DISPOSITION, NOT FOR THE DATE — the same care the
+    // "PPSV23 only" sentence above takes, and for the same reason. The row's
+    // year runs from the PCV13; the card's date is later, because the repeat
+    // must also clear the spacing from the PPSV23 that did not count. That
+    // gap IS the owner's 2026-10-25 ruling (she was shown both dates and chose
+    // the later), so the sentence says which number belongs to the document
+    // and which to the ruling, and never lets the document carry the date.
+    //
+    // Mutually exclusive with both branches above: this one needs a counting
+    // PCV13 and no PCV15, `substitutingForOwedPpsv23` needs a PCV15, and
+    // `ppsvOnlyRowApplies` needs neither conjugate.
+    //
+    // `mmwrPcv13OnlyCite` is the existing picker (the 19-49 IC/CSF/cochlear
+    // block prints this row one word differently). Reused, never re-derived —
+    // a second risk-class test here would be the S14-RC fault.
+    const pcv13OnlyRowApplies = invalidVaccine === 'PPSV23' && pcv.hasPCV13 && !pcv.hasPCV15;
+    const pcv13OnlyRowNote = pcv13OnlyRowApplies
+      ? ` With only the PCV13 counting, ACIP's own row for this history gives a single dose of ${productWords} at least ${ADULT_GAP_WORDS} after that PCV13 [c] — the later date above is the further spacing CDC's general rule requires from the dose that did not count.`
+      : '';
+    const pcv13OnlyRowCites = pcv13OnlyRowApplies
+      ? [cite(mmwrPcv13OnlyCite)]
+      : [];
+
     const standing = basis === 'ppsv23ToConjugate'
       ? ` **ACIP states this interval itself — a conjugate dose comes at least ${ADULT_GAP_WORDS} after the last PPSV23, for every risk group, with no 8-week option [c]. Counting it from the dose that was given, rather than from the one before it, follows CDC's general rule that a repeat is spaced from the invalid dose.**`
       : ` **The ${ADULT_GAP_WORDS} is read across from the only adult conjugate-to-conjugate interval ACIP states — PCV20 or PCV21 at least ${ADULT_GAP_WORDS} after the last PCV13 dose [c] — and applied here to a conjugate that has to be repeated, which ACIP does not discuss. It is an interpretation, not a stated rule. The 8-week conjugate interval is paediatric: it is CDC's catch-up schedule, whose own scope line reads "Children age 4 months through 6 years", and no adult source states one.**`;
@@ -2596,7 +2633,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       brands: products.map((k) => (k === 'PCV20' ? 'PCV20 (Prevnar 20)' : 'PCV21 (Capvaxive)')),
       note: {
         lead: `The ${gaveWhat} dose of ${invalidDate} was given too soon to count, so the series is INCOMPLETE. Give 1 dose of ${productWords} ${dueToday ? 'now' : `on or after ${dueDate}`} and the series is complete [c].${standing}`,
-        detail: `PPSV23 is not what is owed here: ACIP's only interval between two PPSV23 doses is 5 years, and a repeat conjugate completes the series on its own. PCV15 is not used either — it adds nothing over a conjugate already on the record, and it would itself require a PPSV23 afterwards.${ppsvOnlyRowNote}${substitutionNote}`,
+        detail: `PPSV23 is not what is owed here: ACIP's only interval between two PPSV23 doses is 5 years, and a repeat conjugate completes the series on its own. PCV15 is not used either — it adds nothing over a conjugate already on the record, and it would itself require a PPSV23 afterwards.${ppsvOnlyRowNote}${pcv13OnlyRowNote}${substitutionNote}`,
       },
       noteCites: [
         cite('adultPcv20or21Complete'),
@@ -2604,6 +2641,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
           ? cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949')
           : cite('adultPcv13Only'),
         ...ppsvOnlyRowCites,
+        ...pcv13OnlyRowCites,
         ...substitutionCites,
       ],
       // ⚠️ CDC'S ADULT NOTES ALONE, and this is the fix for a real defect the
@@ -2619,11 +2657,17 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       // Each family carries the documents that speak for ITS sentences and no
       // others: CDC's notes always, mm7401a1 only where its "PPSV23 only" row
       // fits, the job aid only where its substitution footnote does.
+      // Each family carries the documents that speak for ITS sentences, and
+      // the branch order matches the four `...RowApplies` flags above.
+      // `pcv13OnlyRowApplies` (2026-10-25) keeps mm7401a1 for its "PCV13 only"
+      // row and drops the job aid, which says nothing about a repeat.
       refs: ppsvOnlyRowApplies
         ? adultRefsExcept('cdcAdultTimingJobAid')
-        : substitutingForOwedPpsv23
-          ? adultRefsExcept('mmwr7401a1')
-          : adultRefsExcept('cdcAdultTimingJobAid', 'mmwr7401a1'),
+        : pcv13OnlyRowApplies
+          ? adultRefsExcept('cdcAdultTimingJobAid')
+          : substitutingForOwedPpsv23
+            ? adultRefsExcept('mmwr7401a1')
+            : adultRefsExcept('cdcAdultTimingJobAid', 'mmwr7401a1'),
     })];
   }
 
@@ -3008,6 +3052,29 @@ const CARD_FOLLOWS_INVALID_DOSE = new Set([
   'ADULT-PCV-AFTER-PPSV23',
   'ADULT-PPSV23-AFTER-PCV15',
   'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
+  // OWNER DECISIONS 2026-10-25, the two PCV13 twins of the rows above.
+  //
+  // Shown two 60-year-olds alike in every particular but one — PCV13 on
+  // 2026-07-19 against PCV15 on the same day, each followed by a PPSV23 three
+  // months later — the owner ruled: *"A is treated the same as B."* The PCV15
+  // patient's screen had agreed with itself since 2026-10-24; the PCV13
+  // patient's card said 2027-07-19 while her own dose chip said 2027-10-11.
+  // Nothing in ACIP or CDC separates them: rr7203a1 states both halves in one
+  // sentence, and `CLINICAL_SPEC.md` §K already recorded the two rows as
+  // having "the same two-tier shape... for the same reason".
+  'ADULT-PPSV23-AFTER-PCV13',
+  // ...and the same for her 8-week class. Asked to confirm the number, she
+  // asked back whether the conjugate is owed "at least 1 year after the last
+  // PCV", which is ONE of the two clocks and the earlier one. Shown a
+  // 40-year-old with asplenia (PCV13 2026-08-30, PPSV23 2026-10-11) scored
+  // both ways — 2027-08-30 counting from the PCV13, 2027-10-11 counting from
+  // the PPSV23 that did not count, 2027-10-11 taking the later of the two —
+  // she chose the later of the two, *"and i want the rationale to be
+  // explained and cited when its recommended"*. That explanation is the
+  // sentence `invalidAdultDoseCard` already carries, which is why extending
+  // the set is the whole change: both intervals have to be satisfied, so the
+  // conjugate waits for whichever runs out last.
+  'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM',
 ]);
 
 /**

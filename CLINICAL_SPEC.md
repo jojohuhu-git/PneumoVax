@@ -1317,22 +1317,60 @@ assertion.
   requires ≥5 years between PPSV23 doses. PCV20 or PCV21 can be given ≥1 year after it,
   because ACIP schedules any conjugate ≥1 year after the last PPSV23."* Applying the general
   rule there would have moved 66 corpus rows FOUR YEARS earlier.
-- **Every adult family except three keeps the recommendation card it had.** The card follows
-  the invalid dose only for `ADULT-PCV-AFTER-PPSV23`, `ADULT-PPSV23-AFTER-PCV15` and
-  `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` — the three she worked through. Fired for every
-  adult floor it moved 667 of 17,016 verdicts and overrode cards reasoning from a richer
-  history: an immunocompromised adult with PCV13 + two PPSV23 doses lost her mm7401a1
-  "review again at age 50" card altogether. `ADULT-PPSV23-AFTER-PCV13` (402 patients) is the
-  same clinical shape and is **flagged, not taken** — widening to it moves verdicts in a
-  family she has not been shown.
+- **Every adult family except FIVE keeps the recommendation card it had.** The card follows
+  the invalid dose only for `ADULT-PCV-AFTER-PPSV23`, `ADULT-PPSV23-AFTER-PCV15`,
+  `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` (2026-10-24) and the two PCV13 rows added
+  2026-10-25 below. Fired for every adult floor it moved 667 of 17,016 verdicts and
+  overrode cards reasoning from a richer history: an immunocompromised adult with PCV13 +
+  two PPSV23 doses lost her mm7401a1 "review again at age 50" card altogether. That patient
+  is still out — her last dose is a second PPSV23, `ADULT-PPSV23-AFTER-PPSV23`.
+
+#### The two PCV13 families, added by the owner 2026-10-25
+
+`ADULT-PPSV23-AFTER-PCV13` (402 patients) stood here as **flagged, not taken** until she
+took it. Shown two 60-year-olds alike but for one product — PCV13 against PCV15 on
+2026-07-19, each followed by a PPSV23 on 2026-10-11 — she ruled *"yes A is treated the same
+as B."* The PCV15 patient's two surfaces had agreed since 2026-10-24; the PCV13 patient's
+card said 2027-07-19 against her own chip's 2027-10-11, and **200 of the 402 were being
+shown two different dates**. Nothing separates them: rr7203a1 states both halves in one
+sentence, and §K already recorded the two rows as having the same two-tier shape for the
+same reason. `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` (210, the 8-week class) came with
+it.
+
+**WHICH CLOCK — she was asked and chose the later one.** Confirming the second family she
+asked back *"to confirm is the recommendation PCV20/21 may be given at least 1 year after
+the last PCV?"*, which names one clock and the earlier one. Shown a 40-year-old with
+asplenia (PCV13 2026-08-30, PPSV23 2026-10-11) scored three ways — 2027-08-30 from the
+PCV13, 2027-10-11 from the PPSV23 that did not count, 2027-10-11 taking the later — she
+answered *"i am thinking it is third row. i want the rationale to be explained and cited
+when its recommended."* Both ACIP intervals have to be satisfied, so the conjugate waits for
+whichever runs out last; this is step 4 of her own four steps above, no longer inert for
+these families.
+
+**mm7401a1's "PCV13 only" row is CITED ON THESE CARDS, for the disposition and never for
+the date.** With the PPSV23 set aside the counting history is a PCV13 and nothing else, so
+the row — *"A single dose of PCV21 or PCV20 ≥1 year after the PCV13 dose"* (one word
+different in the 19–49 immunocompromising block) — states her disposition outright. Its
+year runs from the PCV13 and the card's date is later, so the claim gets its own sentence
+saying so. **Omitting it was the first draft's defect**: extending the card took mm7401a1
+off **212 cards it speaks for** (3,795 → 3,583), FINDING F's mirror on this card for the
+third time, caught by the three C8 guards. The job aid stays off — it says nothing about
+repeating a dose.
+
+Measured 2026-10-25: **212 cards changed wording** (0 added, 0 removed over 35,280 rendered
+lines), of which **179 of 17,016 moved a verdict** and 33 changed wording only — those 33
+are patients whose repeat date has already passed, so the card said "now" before and after.
+**0 of 18,264** record-problem rows moved.
 
 **A repaired series gets no repeat card**, per her proviso of 2026-10-23: *"if a later dose
 given helps correct the mistake in giving a vaccine early, this should be noted and marked
 as complete if appropriate."* Only an invalid dose that is the LAST dose on the record
 leaves anything owing.
 
-Guards: `regression-2026-10-24-invalid-adult-dose-owes-a-conjugate.test.js` and
-`regression-2026-10-24-card-and-chip-agree-after-an-invalid-dose.test.js`.
+Guards: `regression-2026-10-24-invalid-adult-dose-owes-a-conjugate.test.js`,
+`regression-2026-10-24-card-and-chip-agree-after-an-invalid-dose.test.js` (its per-family
+pin is now 400, was 188) and
+`regression-2026-10-25-pcv13-families-follow-the-invalid-dose.test.js`.
 
 ---
 
