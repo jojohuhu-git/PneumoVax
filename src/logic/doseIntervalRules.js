@@ -236,7 +236,12 @@ function lastOf(list) {
 //
 // Fields, every row:
 //   id            stable identifier, used in tests and in the dose's `ruleId`
-//   what          plain English: which dose this row judges, and against what
+//   what          plain English: which pair of doses this row judges. It is
+//                 what the "How recommendations are made" page prints, so it
+//                 is written for a clinician reading it cold: name the two
+//                 doses and the history that selects this row, and leave the
+//                 interval, the outcome and the authority to that page's own
+//                 columns, which are generated from the fields below.
 //   rulebook      'child' | 'adult' | 'any' — which schedule states it
 //   vaccine       'PCV' | 'PPSV23' — the stream the judged dose is in
 //   products      which products this row judges (null = any in that stream)
@@ -265,6 +270,14 @@ function lastOf(list) {
 //                 no — the grace governs whether a dose that missed a MINIMUM
 //                 still counts, and a recommendation voids nothing.)
 //   enforcement   'floor' | 'recommendation' | 'none'
+//   whyNotJudged  enforcement:'none' ONLY, and required there: one sentence
+//                 saying why nothing is flagged. The "How recommendations are
+//                 made" page prints it in place of the interval these rows do
+//                 not have — without it the page said only "no interval is
+//                 applied", which reads as an oversight and, on
+//                 ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE, is actively
+//                 misleading: a SHORTER gap there is still caught by the floor
+//                 row. The long version stays in `source`.
 //   authority     'CDC' | 'OWNER'  (see the header)
 //   source        the sentence the row rests on
 //   message       (ctx, anchor) → { reasons: [...], detail } for a floor,
@@ -273,7 +286,7 @@ export const DOSE_INTERVAL_RULES = [
   // ── Paediatric floors — every one stated as a minimum by CDC ──────────
   {
     id: 'CHILD-PCV-AFTER-PCV',
-    what: 'A PCV dose given after an earlier PCV dose, under the child schedule',
+    what: 'A PCV after an earlier PCV',
     rulebook: 'child',
     vaccine: 'PCV',
     products: null,
@@ -344,7 +357,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'CHILD-PPSV23-AFTER-PCV',
-    what: 'A PPSV23 dose given after a PCV dose, under the child schedule',
+    what: 'A PPSV23 after a PCV',
     rulebook: 'child',
     vaccine: 'PPSV23',
     products: null,
@@ -374,7 +387,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'CHILD-PPSV23-AFTER-PPSV23',
-    what: 'A second PPSV23 dose, under the child schedule',
+    what: 'A second PPSV23 after the first',
     rulebook: 'child',
     vaccine: 'PPSV23',
     products: null,
@@ -428,7 +441,7 @@ export const DOSE_INTERVAL_RULES = [
   // regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js.
   {
     id: 'ADULT-PCV20-21-1Y-AFTER-PCV',
-    what: 'PCV20/PCV21 for an adult whose history already has BOTH PCV13 and PPSV23 — 1 year from the last PCV',
+    what: 'A PCV20 or PCV21 after the last PCV, when PCV13 and PPSV23 are both already on the record',
     rulebook: 'adult',
     vaccine: 'PCV',
     products: ['PCV20', 'PCV21'],
@@ -479,7 +492,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PCV20-21-5Y-AFTER-PPSV23',
-    what: 'PCV20/PCV21 for an adult whose history already has BOTH PCV13 and PPSV23 — 5 years from the PPSV23',
+    what: 'A PCV20 or PCV21 after the PPSV23, when PCV13 and PPSV23 are both already on the record',
     rulebook: 'adult',
     vaccine: 'PCV',
     products: ['PCV20', 'PCV21'],
@@ -526,7 +539,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PCV20-21-AFTER-PCV13',
-    what: 'PCV20/PCV21 for an adult whose history has PCV13 and no PPSV23 — 1 year from the PCV13',
+    what: 'A PCV20 or PCV21 after a PCV13, with no PPSV23 on the record',
     rulebook: 'adult',
     vaccine: 'PCV',
     products: ['PCV20', 'PCV21'],
@@ -563,7 +576,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PCV-AFTER-PPSV23',
-    what: 'An adult PCV dose when PPSV23 is the only thing on the record — 1 year from the PPSV23',
+    what: 'A PCV after a PPSV23, when the PPSV23 is the only dose on the record',
     rulebook: 'adult',
     vaccine: 'PCV',
     products: ['PCV15', 'PCV20', 'PCV21'],
@@ -593,7 +606,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
-    what: 'An adult PPSV23 after PCV15, where the 8-week minimum may be considered (immunocompromising condition, cochlear implant, CSF leak)',
+    what: 'A PPSV23 after a PCV15 — immunocompromising condition, cochlear implant or CSF leak',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -635,7 +648,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV15',
-    what: 'An adult PPSV23 after PCV15, where the 8-week option does not apply — 1 year from the PCV15',
+    what: 'A PPSV23 after a PCV15 — every other adult',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -684,7 +697,7 @@ export const DOSE_INTERVAL_RULES = [
   // the PCV15 rows above then govern.
   {
     id: 'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM',
-    what: 'An adult PPSV23 after PCV13, for an immunocompromising condition, cochlear implant or CSF leak — 8 weeks',
+    what: 'A PPSV23 after a PCV13 — immunocompromising condition, cochlear implant or CSF leak',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -708,7 +721,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV13',
-    what: 'An adult PPSV23 after PCV13, for any other adult — 1 year',
+    what: 'A PPSV23 after a PCV13 — every other adult',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -749,7 +762,7 @@ export const DOSE_INTERVAL_RULES = [
     // from. An invisible second number is the bug; a visible one the reader can
     // act on is the point.
     conjugateAlternativeAfterInvalid: true,
-    what: 'A second adult PPSV23 dose',
+    what: 'A second PPSV23 after the first',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -783,7 +796,7 @@ export const DOSE_INTERVAL_RULES = [
   // about. An `enforcement: 'none'` row that matches stops the walk.
   {
     id: 'ADULT-PCV20-21-AFTER-PCV15-NO-INTERVAL',
-    what: 'PCV20/PCV21 given after an adult PCV15 — the "PPSV23 not available" substitute path',
+    what: 'A PCV20 or PCV21 after a PCV15, given in place of the PPSV23',
     rulebook: 'adult',
     vaccine: 'PCV',
     products: ['PCV20', 'PCV21'],
@@ -791,6 +804,7 @@ export const DOSE_INTERVAL_RULES = [
     needsPriorPcv: ['PCV15'],
     interval: null,
     grace: false,
+    whyNotJudged: 'CDC offers this substitution and states no interval for it, so flagging a gap would invent one.',
     enforcement: 'none',
     authority: 'CDC',
     source: 'CDC Adult Immunization Schedule Notes offer PCV20 or PCV21 as a substitute when PPSV23 is '
@@ -808,7 +822,7 @@ export const DOSE_INTERVAL_RULES = [
   // a day short of the year is a day short.
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED',
-    what: 'An adult aged 50+ whose PPSV23 used the 8-week option rather than waiting the recommended year',
+    what: 'A PPSV23 after a PCV15, where the shorter interval is an option but the longer one is the recommendation',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -842,7 +856,7 @@ export const DOSE_INTERVAL_RULES = [
   // add a row instead."
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE',
-    what: 'An adult 19-49 with an immunocompromising condition, cochlear implant or CSF leak whose PPSV23 came >=8 weeks after PCV15 — the recommended interval for them',
+    what: 'A PPSV23 after a PCV15 that met the shorter interval recommended for this adult — immunocompromising condition, cochlear implant or CSF leak',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,
@@ -855,6 +869,7 @@ export const DOSE_INTERVAL_RULES = [
     // ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM, and it is unchanged.
     interval: null,
     grace: false,
+    whyNotJudged: 'The dose already met the interval recommended for this adult, so there is nothing to say. A shorter gap is still caught by the minimum for this adult, listed earlier.',
     enforcement: 'none',
     authority: 'CDC',
     source: 'mm7401a1 (ACIP, January 2025), row "Adults aged 19-49 years with an immunocompromising '
@@ -865,7 +880,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PCV-AFTER-PCV-CATCH-ALL',
-    what: 'Any two adult PCV doses less than a year apart that no row above covers',
+    what: 'Any other two adult PCV doses, where no rule above covers the pair',
     rulebook: 'adult',
     vaccine: 'PCV',
     products: null,
@@ -884,7 +899,7 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV-CATCH-ALL',
-    what: 'An adult PPSV23 less than a year after a PCV dose that no row above covers (a PCV13 or PCV20, not a PCV15)',
+    what: 'Any other adult PPSV23 after a PCV, where no rule above covers the pair (a PCV13 or PCV20, not a PCV15)',
     rulebook: 'adult',
     vaccine: 'PPSV23',
     products: null,

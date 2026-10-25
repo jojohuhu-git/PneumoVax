@@ -28,8 +28,18 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import Rulebook from '../Rulebook.jsx';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES, monthsInWords } from '../../data/rulebook.js';
+import {
+  BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES,
+  OUTCOMES, AUTHORITIES, EVIDENCE, monthsInWords, ageInWords,
+} from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
+import {
+  GRACE_DAYS,
+  PCV_PPSV23_MIN_INTERVAL_DAYS,
+  PPSV23_REVACC_MIN_MONTHS,
+  ADULT_ADVISED_PCV_GAP_MONTHS,
+  intervalPhrase,
+} from '../../logic/intervals.js';
 import { DOSE_INTERVAL_RULES } from '../../logic/doseIntervalRules.js';
 import { ALL_PRODUCTS } from '../../data/brands.js';
 import { RISK_FACTORS } from '../../data/riskFactors.js';
@@ -58,10 +68,19 @@ describe('C14 — the rulebook page states the engine\'s own numbers', () => {
       '24',   // the infant/child line, asserted against the engine below
       '2', '5',   // "Children 2 up to...", "caught up to age 5" - both asserted below
       '19',   // ADULT_SCHED_MIN_M in years, spelled out in a pathway name
+      // Section 4's own numbers. The prose INTERPOLATES these constants rather
+      // than typing them (`${EIGHT_WEEKS}`, `${GRACE_DAYS}`), so a literal can
+      // only appear here if someone typed one by hand - which is the thing
+      // this test is for. They are listed so that a hand-typed digit matching
+      // a current constant still reads as allowed and one that does not fails.
+      String(GRACE_DAYS),
+      String(PCV_PPSV23_MIN_INTERVAL_DAYS / 7),
+      String(PPSV23_REVACC_MIN_MONTHS / 12),
+      String(ADULT_ADVISED_PCV_GAP_MONTHS / 12),
     ]);
     const offenders = [];
     // Only the sentence-bearing fields: skip code, comments and imports.
-    for (const m of rulebookSrc.matchAll(/(?:whenWritten|writtenSummary|means|name|engineFn):\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)) {
+    for (const m of rulebookSrc.matchAll(/(?:whenWritten|writtenSummary|means|name|engineFn|lead|pair|child|adult|grace|asOf|intervalVaries|intervalLabel|whyNotJudged|childLabel|adultLabel):\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)) {
       // A product's name carries digits that are not an age: PCV7, PCV13,
       // PCV15, PCV20, PCV21, PPSV23. Take the names out before looking.
       const text = m[2].replace(/\bP?[CP]C?S?V-?\d+\b/g, 'the vaccine');
@@ -118,15 +137,107 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
       expect(r.enforcement).toBe(real.enforcement);
       expect(r.authority ?? null).toBe(real.authority ?? null);
       expect(r.rulebook).toBe(real.rulebook);
+      expect(r.what).toBe(real.what);
     }
   });
 
   it('every rule the engine can apply appears on the rendered page', () => {
+    // 2026-10-25: this used to look for each rule's ID on the page, because the
+    // page printed it under the row. The owner asked for them to go
+    // ("CHILD-PCV-AFTER-PCV and others can be removed?") - a reader has no use
+    // for an internal identifier. So the rule is now found by the words a
+    // clinician reads, which is the stronger assertion anyway: an id could be
+    // printed beside a description of some other rule and this would have
+    // passed.
     render(<Rulebook onClose={() => {}} />);
     // Section 4 is collapsed by default, so open it the way a reader would.
     fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
     for (const r of DOSE_INTERVAL_RULES) {
-      expect(screen.getAllByText(r.id).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(r.what).length, r.id).toBeGreaterThan(0);
+    }
+  });
+
+  it('no rule id is printed on the page at all', () => {
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
+    for (const r of DOSE_INTERVAL_RULES) {
+      expect(screen.queryAllByText(r.id), r.id).toEqual([]);
+    }
+  });
+
+  it('every rule states its interval, in words built from its own constant', () => {
+    for (const r of INTERVAL_RULES) {
+      const real = DOSE_INTERVAL_RULES.find((x) => x.id === r.id);
+      if (real.interval == null) {
+        // The two rows that apply no interval at all.
+        expect(r.interval, r.id).toBeNull();
+        expect(r.intervalVaries, r.id).toBeNull();
+        expect(r.intervalLabel, r.id).toBeNull();
+      } else if (typeof real.interval.daysFrom === 'function') {
+        // The paediatric conjugate series: CDC's Catch-up Table 2 keys the cell
+        // on two ages and the dose number, so there is no single number to
+        // print and the row says so instead of picking one branch to show.
+        expect(r.interval, r.id).toBeNull();
+        expect(r.intervalVaries, r.id).toMatch(/catch-up table/);
+      } else {
+        expect(r.interval, r.id).toBe(intervalPhrase(real.interval));
+        expect(r.intervalVaries, r.id).toBeNull();
+      }
+      // A floor's number is a minimum; a recommendation's is advice. The page
+      // must not print one as the other.
+      if (real.interval != null) {
+        expect(r.intervalLabel, r.id).toBe(real.enforcement === 'floor' ? 'Minimum' : 'Recommended');
+      }
+    }
+  });
+
+  it('a rule that is never flagged says why, and it is the only kind that may omit an interval', () => {
+    // Without this the page printed "no interval is applied" and stopped,
+    // which reads as an oversight - and on the row where a SHORTER gap is
+    // still caught by the floor above it, it was misleading.
+    for (const r of INTERVAL_RULES) {
+      if (r.enforcement === 'none') {
+        expect(r.whyNotJudged, r.id).toBeTruthy();
+        expect(r.interval, r.id).toBeNull();
+        expect(r.intervalLabel, r.id).toBeNull();
+      } else {
+        expect(r.whyNotJudged, r.id).toBeNull();
+        // every judging row prints a number or says what the number depends on
+        expect(r.interval ?? r.intervalVaries, r.id).toBeTruthy();
+        expect(r.intervalLabel, r.id).toBeTruthy();
+      }
+    }
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
+    for (const r of INTERVAL_RULES.filter((x) => x.whyNotJudged)) {
+      expect(screen.getAllByText(new RegExp(r.whyNotJudged.slice(0, 40).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))).length, r.id)
+        .toBeGreaterThan(0);
+    }
+  });
+
+  it('the three outcomes are the engine\'s three enforcement values, one to one', () => {
+    const mapped = OUTCOMES.filter((o) => o.enforcement).map((o) => o.enforcement);
+    expect(mapped.slice().sort()).toEqual(['floor', 'none', 'recommendation']);
+    // Every enforcement the table actually uses has an outcome, and every rule
+    // carries the matching words.
+    for (const r of INTERVAL_RULES) {
+      const o = OUTCOMES.find((x) => x.enforcement === r.enforcement);
+      expect(o, r.id).toBeTruthy();
+      expect(r.outcome).toBe(o.name);
+      expect(r.outcomeMeans).toBe(o.means);
+    }
+  });
+
+  it('the authority tags are the two values the rule table uses, explained once each', () => {
+    expect(AUTHORITIES.map((a) => a.authority).sort()).toEqual(['CDC', 'OWNER']);
+    const used = new Set(DOSE_INTERVAL_RULES.map((r) => r.authority));
+    for (const a of used) expect(AUTHORITIES.some((x) => x.authority === a), a).toBe(true);
+    // The long explanation appears ONCE, not on all 17 rows - that repetition
+    // was most of what made this section long (owner, 2026-10-25).
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
+    for (const a of AUTHORITIES) {
+      expect(screen.getAllByText(a.means).length, a.authority).toBe(1);
     }
   });
 
@@ -164,6 +275,36 @@ describe('C14 — the page says things a clinician can read', () => {
     expect(monthsInWords(600)).toBe('50 years');
     expect(monthsInWords(216)).toBe('18 years');
     expect(monthsInWords(18)).toBe('18 months');
+  });
+
+  it('states every product\'s youngest age in weeks, months or years - never in bare days', () => {
+    // OWNER, 2026-10-25: "youngest age should be described in the appropriate
+    // weeks months or years. 42 days is hard to comprehend." The conjugate
+    // minimum is STORED in days, because that is how CDC states it and how
+    // validate.js enforces it; only the words on this page changed.
+    for (const p of PRODUCTS) {
+      expect(p.youngestAge, p.key).toMatch(/^\d+ (weeks?|months?|years?)$/);
+      const real = ALL_PRODUCTS.find((x) => x.key === p.key);
+      expect(p.youngestAge, p.key).toBe(ageInWords({ months: real.minAgeM, days: real.minAgeDays }));
+    }
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Which doses count/).closest('button'));
+    const pcv = PRODUCTS.find((x) => x.key === 'PCV13');
+    expect(pcv.youngestAge).toBe(intervalPhrase({ days: pcv.minAgeDays }));
+    expect(screen.getAllByText(pcv.youngestAge).length).toBeGreaterThan(0);
+    // and the raw day count is nowhere on the page
+    const { container } = render(<Rulebook onClose={() => {}} />);
+    expect(container.textContent).not.toContain(`${pcv.minAgeDays} days`);
+  });
+
+  it('turns a stored age into the unit a clinician would say it in', () => {
+    expect(ageInWords({ days: 42 })).toBe('6 weeks');
+    expect(ageInWords({ months: 24 })).toBe('2 years');
+    expect(ageInWords({ months: 216 })).toBe('18 years');
+    // days win when a product states both, because they are the exact figure
+    // the validator uses
+    expect(ageInWords({ months: 1.38, days: 42 })).toBe('6 weeks');
+    expect(ageInWords({})).toBe('');
   });
 
   it('renders without a single decorative icon or emoji', () => {

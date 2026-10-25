@@ -1581,6 +1581,66 @@ count), which is why the guard sweeps the rendered sentences instead.
 Guard: `regression-2026-10-25-no-date-for-a-dose-nobody-asks-for.test.js`, pinned on both
 sides — 2,930 withdrawn and 2,335 kept.
 
+### §K-EVIDENCE — The rules page says out loud which cut-offs are the app's own (OWNER, 2026-10-25)
+
+**No rule changed. No verdict moved. No card's prose changed** (`proseDiff`: 0 of 35,280
+lines). This records what the “How recommendations are made” page now TELLS a clinician
+about the rules §K already states, and the one premise it had to correct to be true.
+
+**Her ask:**
+> “#4 — there should be a section where nuance is applied. For example we discussed there
+> is no data discussing the minimum duration between a PPSV23 to PPSV23, PCV to PCV or
+> PPSV23 to PCV if the latter vaccine was given earlier.”
+
+Everything she is describing is the determination above — *“every adult floor in this app is
+the owner's determination”* — and its evidence (CDSI v4.64's `absMinInt = 0 days`; “should
+be repeated” / “does not count” 0 hits across the three current adult MMWRs). Until now that
+lived only in this file and in one sentence under a rejected dose. It is now a block on the
+page, headed **“Where the evidence runs out”**, and each rule carries a **“this app”** or
+**“CDC / ACIP”** tag read from its own `authority` field.
+
+**THE PREMISE IS AN ADULT FACT, AND THE PAGE SPLITS ON THAT.** For a CHILD the minimum
+intervals ARE published: CDC's catch-up schedule prints a column headed *“Minimum Interval
+Between Doses”* for the conjugate series — the column that voided the 15-month-old's third
+dose on 2026-10-23 (§L-3) — and the Child & Adolescent Notes say a PPSV23 is given *“at
+least 8 weeks after the most recent PCV dose”*. Writing her sentence flat would have
+contradicted this app's own paediatric floors. So every claim is made per age group.
+
+**The inventory, measured through the real validator** (7 days between the two doses, at 10
+years with asplenia and at 60 with no risk factors). This is what the page's three-row table
+states:
+
+| Second dose given sooner than recommended | In a child | In an adult |
+|---|---|---|
+| A second PPSV23 after the first | Does not count (`CHILD-PPSV23-AFTER-PPSV23`, authority CDC — CDC words it “at least 5 years”) | Does not count (`ADULT-PPSV23-AFTER-PPSV23`, authority OWNER) |
+| One conjugate after another | Does not count (`CHILD-PCV-AFTER-PCV`, CDC's Catch-up Table 2) | Counts, with a note (`ADULT-PCV-AFTER-PCV-CATCH-ALL` and the rows above it, all `recommendation`) |
+| A conjugate after a PPSV23 | **No rule at all** — valid, silent, `intervalRuleId` null | Does not count when the PPSV23 is the only dose on record (`ADULT-PCV-AFTER-PPSV23`, OWNER); counts with a note where a PCV13 is also on record (Ruling F) |
+
+**TWO ASYMMETRIES ARE RECORDED, NOT RESOLVED — both are open questions for the owner.**
+Neither was changed, because changing either moves doses:
+1. **The same 5-year gap carries two different authorities.** A child's second PPSV23 inside
+   5 years is voided on CDC's authority; an adult's is voided on the owner's. The child row
+   rests on *“at least 5 years”* and the adult rows on *“should be administered”*, which is a
+   real difference in CDC's verbs — but it is the same number, the same vaccine pair, and the
+   same clinical question.
+2. **A conjugate after a PPSV23 is a hard stop in an adult and is not judged at all in a
+   child.** The adult bar is her ruling of 2026-10-24 (§K-INVALID); the child silence is
+   nobody's decision, it is simply a row that does not exist.
+
+Guard: `regression-2026-10-25-rulebook-evidence-limits.test.js` — every cell of that table is
+driven through `analyzeBoth()` on a named patient, because C14's own guard checks that every
+NUMBER on the page comes from a constant and every claim here is about an OUTCOME. Seven
+mutations were tried; all seven failed the suite.
+
+**Two smaller things in the same pass, both hers:**
+- **“42 days is hard to comprehend.”** A product's youngest age is now put into words by
+  `ageInWords()`, which hands a day-stated minimum to `intervalPhrase` — the app's single
+  place where a day count becomes words. The conjugates read **6 weeks**; the stored figure
+  and every validity check are untouched.
+- **“CHILD-PCV-AFTER-PCV and others can be removed?”** Rule ids are off the page. The guard
+  that used to look for each id now looks for the words a clinician reads, which is the
+  stronger assertion, and a second test fails if any id comes back.
+
 ---
 
 ## §L — The next dose's minimum interval, children <24 months (`cdcCatchupJobAid`)

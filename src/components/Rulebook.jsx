@@ -9,7 +9,10 @@
 // regression-2026-10-25-rulebook-matches-the-engine.test.js.
 // ─────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES, monthsInWords } from '../data/rulebook.js';
+import {
+  BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES,
+  OUTCOMES, AUTHORITIES, EVIDENCE, monthsInWords,
+} from '../data/rulebook.js';
 
 function Section({ title, lead, children, open: initial = false }) {
   const [open, setOpen] = useState(initial);
@@ -26,6 +29,8 @@ function Section({ title, lead, children, open: initial = false }) {
 }
 
 const SOURCE_SCOPE = { child: 'children', adult: 'adults', any: 'any age' };
+const RULEBOOK_NAMES = { child: 'Children', adult: 'Adults', any: 'Any age' };
+const AUTHORITY_NAME = Object.fromEntries(AUTHORITIES.map((a) => [a.authority, a.name]));
 
 export default function Rulebook({ onClose }) {
   return (
@@ -115,7 +120,7 @@ export default function Rulebook({ onClose }) {
               <tr key={p.key}>
                 <td><strong>{p.label}</strong>{!p.active && <span className="rb-tag">no longer given</span>}</td>
                 <td>{p.counts ? 'Yes' : 'No'}</td>
-                <td>{p.minAgeDays < 60 ? `${p.minAgeDays} days` : monthsInWords(Math.round(p.minAgeM))}</td>
+                <td>{p.youngestAge}</td>
                 <td>
                   {!p.counts && 'Never counted towards the series. A patient whose only doses are these is treated as not yet vaccinated.'}
                   {p.counts && p.completesSeries && 'A series that includes this one is finished — nothing further is needed.'}
@@ -130,43 +135,78 @@ export default function Rulebook({ onClose }) {
 
       <Section
         title="4. Whether a dose already given was far enough after the last one"
-        lead="This is the part CDC's own PneumoRecs tool cannot do, because it never asks for dose dates. Every rule the app uses is here."
+        lead="CDC’s own PneumoRecs tool cannot answer this — it never asks for dose dates. This is all of what this app does with them."
       >
-        <p className="rb-note">
-          Each rule says what happens when the gap is too short. <strong>Does not count</strong>{' '}
-          means the dose stays on the record with an explanation but the series still owes a
-          dose. <strong>Counted, with a note</strong> means the dose is kept and the shortfall
-          is written on it.
-        </p>
+        <h3 className="rb-h3">The three things that can happen to a dose</h3>
+        <table className="rb-table">
+          <tbody>
+            {OUTCOMES.map((o) => (
+              <tr key={o.name}>
+                <td className="rb-td-outcome"><strong>{o.name}</strong></td>
+                <td>{o.means}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="rb-note">{EVIDENCE.grace}</p>
+        <p className="rb-note">{EVIDENCE.asOf}</p>
+
+        <h3 className="rb-h3">Where the evidence runs out</h3>
+        <p className="rb-note">{EVIDENCE.lead}</p>
+        <ul className="rb-plain-list">
+          {EVIDENCE.points.map((pt) => (
+            <li key={pt.name}>
+              <strong>{pt.name}</strong>
+              <span className="rb-sub">{pt.means}</span>
+            </li>
+          ))}
+        </ul>
+        <ul className="rb-rule-list">
+          {EVIDENCE.pairs.map((row) => (
+            <li key={row.pair} className="rb-rule">
+              <div className="rb-rule-what">{row.pair}</div>
+              <div className="rb-rule-gap"><strong>{`${row.childLabel}: `}</strong>{row.child}</div>
+              <div className="rb-rule-gap"><strong>{`${row.adultLabel}: `}</strong>{row.adult}</div>
+            </li>
+          ))}
+        </ul>
+
+        <h3 className="rb-h3">Every rule the app applies</h3>
+        <ul className="rb-plain-list">
+          {AUTHORITIES.map((a) => (
+            <li key={a.authority}>
+              <strong>{a.name}</strong>
+              <span className="rb-sub">{a.means}</span>
+            </li>
+          ))}
+        </ul>
         {['child', 'adult', 'any'].map((book) => {
           const rows = INTERVAL_RULES.filter((r) => r.rulebook === book);
           if (!rows.length) return null;
           return (
             <div key={book} className="rb-group">
-              <h3 className="rb-h3">{book === 'child' ? 'Children' : book === 'adult' ? 'Adults' : 'Any age'}</h3>
-              <table className="rb-table">
-                <thead>
-                  <tr><th>The gap being judged</th><th>If it is too short</th><th>Who says so</th></tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.id}>
-                      <td>{r.what}<span className="rb-sub">{r.id}</span></td>
-                      <td>
-                        {r.enforcement === 'floor' && <strong>Does not count.</strong>}
-                        {r.enforcement === 'recommendation' && <strong>Counted, with a note.</strong>}
-                        {r.enforcement === 'none' && <strong>Never flagged.</strong>}
-                        <span className="rb-sub">{r.enforcementMeans}</span>
-                      </td>
-                      <td>
-                        {r.authority === 'OWNER'
-                          ? <><strong>This app</strong><span className="rb-sub">{r.authorityMeans}</span></>
-                          : <>CDC / ACIP<span className="rb-sub">{r.authorityMeans}</span></>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <h4 className="rb-h4">{RULEBOOK_NAMES[book]}</h4>
+              <ul className="rb-rule-list">
+                {rows.map((r) => (
+                  <li key={r.id} className="rb-rule">
+                    <div className="rb-rule-what">
+                      {r.what}
+                      <span className="rb-tag">{AUTHORITY_NAME[r.authority] ?? r.authority}</span>
+                    </div>
+                    {r.whyNotJudged ? (
+                      <div className="rb-rule-gap">{`${r.outcome}: ${r.whyNotJudged}`}</div>
+                    ) : (
+                      <>
+                        <div className="rb-rule-gap">
+                          {`${r.intervalLabel}: `}
+                          {r.interval ?? r.intervalVaries}
+                        </div>
+                        <div className="rb-rule-out">{`If the gap is shorter: ${r.outcome}`}</div>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           );
         })}

@@ -24,6 +24,13 @@ import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../logi
 import { ALL_PRODUCTS } from './brands.js';
 import { RISK_FACTORS } from './riskFactors.js';
 import { DOSE_INTERVAL_RULES } from '../logic/doseIntervalRules.js';
+import {
+  GRACE_DAYS,
+  PCV_PPSV23_MIN_INTERVAL_DAYS,
+  PPSV23_REVACC_MIN_MONTHS,
+  ADULT_ADVISED_PCV_GAP_MONTHS,
+  intervalPhrase,
+} from '../logic/intervals.js';
 import { REFS } from './refs.js';
 
 /** Months as a clinician would say them. 228 -> "19 years". */
@@ -32,6 +39,28 @@ export function monthsInWords(m) {
   if (m < 24) return `${m} month${m === 1 ? '' : 's'}`;
   if (m % 12 === 0) return `${m / 12} years`;
   return `${Math.floor(m / 12)} years ${m % 12} months`;
+}
+
+/**
+ * A product's minimum age in the unit a clinician would say it in.
+ *
+ * OWNER, 2026-10-25: "the youngest age should be described in the appropriate
+ * weeks months or years. 42 days is hard to comprehend." The conjugate
+ * minimum is stored in DAYS because that is how CDC states it and how
+ * validate.js enforces it, and this page used to print the stored figure.
+ *
+ * A day-stated minimum goes through `intervalPhrase`, the app's single place
+ * where a day count becomes words, so "42 days" reads "6 weeks" here and in
+ * every verdict sentence from the same number. A month-stated one goes
+ * through monthsInWords. Nothing converts twice: the two inputs are different
+ * fields on the product, not two readings of one.
+ */
+export function ageInWords({ months, days } = {}) {
+  if (days != null) return intervalPhrase({ days });
+  if (months == null) return '';
+  // A stored month figure can be fractional (the conjugate minimum is 42 days
+  // expressed in months); round before putting it into words.
+  return monthsInWords(Math.round(months));
 }
 
 // ── GENERATED: the three ages that decide which rulebook a patient gets ──
@@ -107,6 +136,9 @@ export const PRODUCTS = ALL_PRODUCTS.map((p) => ({
   requiresPPSV23: p.requiresPPSV23,
   minAgeM: p.minAgeM,
   minAgeDays: p.minAgeDays,
+  // Generated from whichever unit the product states, so the page never has
+  // to choose between them in JSX.
+  youngestAge: ageInWords({ months: p.minAgeM, days: p.minAgeDays }),
   active: p.active,
   historyOnly: p.historyOnly,
 }));
@@ -135,25 +167,181 @@ export const RISK_GROUPS = ['IC', 'special', 'nonIC', 'exclude'].map((g) => ({
     .map((r) => ({ id: r.id, label: r.label, sublabel: r.sublabel ?? null, adultOnly: !!r.adultOnly })),
 })).filter((g) => g.conditions.length);
 
+// ── The three things that can happen to a dose already given ────────────
+//
+// OWNER, 2026-10-25, on the previous version of this page: "simplify the
+// explanations [of] how the app determines if doses are given on time and
+// valid, off schedule valid, or invalid that require revaccination." These
+// three rows are her three outcomes, and they are the ONLY vocabulary the
+// dose-spacing table uses — `enforcement` maps onto them one to one, so a
+// reader never meets the engine's word for a thing and the page's word for
+// the same thing.
+export const OUTCOMES = [
+  {
+    enforcement: null,
+    name: 'On time',
+    means: 'The gap met the interval. The dose counts and nothing is flagged.',
+  },
+  {
+    enforcement: 'recommendation',
+    name: 'Off schedule, still valid',
+    means: 'The gap was shorter than the recommended one. The dose counts, and the app writes on it how short the gap was. Nothing is repeated.',
+  },
+  {
+    enforcement: 'floor',
+    name: 'Not valid — repeat it',
+    means: 'The gap was shorter than a minimum. The dose stays on the record with an explanation, does not count, and the series still owes a dose.',
+  },
+  {
+    enforcement: 'none',
+    name: 'Not judged',
+    means: 'No interval is applied to this pair of doses at all. Nothing is ever flagged.',
+  },
+];
+
+const OUTCOME_BY_ENFORCEMENT = OUTCOMES.reduce((acc, o) => {
+  if (o.enforcement) acc[o.enforcement] = o;
+  return acc;
+}, {});
+
+// ── Who states a rule, explained ONCE rather than on every row ───────────
+//
+// This used to repeat the same two sentences on all 17 rows, which is most of
+// what made the section long. A row now carries a short tag and the reader
+// meets the explanation once.
+export const AUTHORITIES = [
+  {
+    authority: 'CDC',
+    name: 'CDC / ACIP',
+    means: 'CDC or ACIP state this interval themselves.',
+  },
+  {
+    authority: 'OWNER',
+    name: 'This app',
+    means: 'The interval is CDC’s or ACIP’s, but treating it as a cut-off that voids a dose is this app’s own clinical judgement. The app says so on the dose itself.',
+  },
+];
+
 // ── GENERATED: every rule about the gap between two recorded doses ───────
-const ENFORCEMENT_MEANS = {
-  floor: 'The dose does not count. It stays on the record with an explanation, and the series still owes a dose.',
-  recommendation: 'The dose counts. The app notes that the gap was shorter than recommended and says by how much.',
-  none: 'Never flagged — the reason is recorded in the rule itself.',
-};
+//
+// `interval` is the row's own `interval:` spec turned into words by
+// `intervalPhrase` — the same function the verdict sentences use, fed from the
+// same constant that decided the verdict. The paediatric conjugate row is the
+// one row whose minimum is a FUNCTION of the child's age and dose number
+// (CDC's Catch-up Table 2), so it has no single number to print and says so.
+function ruleInterval(rule) {
+  const iv = rule.interval;
+  if (!iv) return null;
+  if (typeof iv.daysFrom === 'function') return null;
+  return intervalPhrase(iv);
+}
+
 export const INTERVAL_RULES = DOSE_INTERVAL_RULES.map((r) => ({
   id: r.id,
   what: r.what,
   rulebook: r.rulebook,
   vaccine: r.vaccine,
+  interval: ruleInterval(r),
+  // A floor's number is a minimum; a recommendation's is the recommended
+  // spacing. Saying which is the difference between "repeat it" and "note it",
+  // so the row names it rather than leaving the reader to infer it from the
+  // outcome line below.
+  intervalLabel: r.interval == null ? null : (r.enforcement === 'floor' ? 'Minimum' : 'Recommended'),
+  // WRITTEN, and true of exactly one row — the only row with no single
+  // number. Asserted against `ruleInterval` returning null.
+  intervalVaries: ruleInterval(r) == null && r.interval != null
+    ? 'set by CDC’s catch-up table — it depends on how old the child was at the earlier dose and which dose in the series this one is'
+    : null,
   enforcement: r.enforcement,
-  enforcementMeans: ENFORCEMENT_MEANS[r.enforcement],
+  // Only the never-flagged rows have one, and they must: see the field's note
+  // in doseIntervalRules.js.
+  whyNotJudged: r.whyNotJudged ?? null,
+  outcome: OUTCOME_BY_ENFORCEMENT[r.enforcement].name,
+  outcomeMeans: OUTCOME_BY_ENFORCEMENT[r.enforcement].means,
   authority: r.authority ?? null,
-  authorityMeans: r.authority === 'OWNER'
-    ? 'This one is a clinical judgement of this app, not something CDC or ACIP states. The interval is theirs; treating it as a hard cut-off is ours, and the app says so on the dose itself.'
-    : 'CDC or ACIP state this interval themselves.',
   sourceKey: typeof r.source === 'string' ? r.source : null,
 }));
+
+// ── Where the evidence runs out ──────────────────────────────────────────
+//
+// OWNER, 2026-10-25: "there should be a section where nuance is applied. For
+// example we discussed there is no data discussing the minimum duration
+// between a PPSV23 to PPSV23, PCV to PCV or PPSV23 to PCV if the latter
+// vaccine was given earlier."
+//
+// All of this is already in CLINICAL_SPEC.md §K, where it has only ever been
+// readable by whoever opens that file. It is her own determination of
+// 2026-10-11 and its evidence, said plainly to the clinician the rule is
+// applied to.
+//
+// ONE CORRECTION TO THE PREMISE, and it is why this is split child/adult: for
+// a CHILD the minimum intervals ARE published — CDC's catch-up schedule
+// prints a column headed "Minimum Interval Between Doses" for the conjugate
+// series, and that column is what voided the 15-month-old's third dose on
+// 2026-10-23. The absence of evidence is an ADULT fact.
+//
+// Every number below comes from the constant the engine enforces, and the
+// three "what the app does" claims are driven through the real validator by
+// regression-2026-10-25-rulebook-evidence-limits.test.js — so a rule that
+// changes makes this section fail rather than quietly lie.
+const YEAR = intervalPhrase({ months: ADULT_ADVISED_PCV_GAP_MONTHS });
+const FIVE_YEARS = intervalPhrase({ months: PPSV23_REVACC_MIN_MONTHS });
+const EIGHT_WEEKS = intervalPhrase({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
+
+export const EVIDENCE = {
+  lead: 'The intervals above are not all the same kind of rule. For a child most of them are published minimums. For an adult none of them is — and that changes what a short gap should mean to you.',
+  points: [
+    {
+      name: 'For a child, the minimums are published',
+      means: `CDC’s catch-up schedule prints a column headed “Minimum Interval Between Doses” for the pneumococcal conjugate series, and the Child & Adolescent Notes say a PPSV23 is given at least ${EIGHT_WEEKS} after the most recent PCV. Those are minimums in CDC’s own words, so a child’s dose given sooner genuinely does not count.`,
+    },
+    {
+      name: 'For an adult, no document states a minimum at all',
+      means: `The adult intervals — ${YEAR}, ${FIVE_YEARS}, ${EIGHT_WEEKS} — are published as the recommended spacing for the NEXT dose. None of the three current ACIP adult papers says that a shorter gap makes a dose invalid or that it should be repeated, and CDC’s own machine-readable rule set sets no absolute minimum for any adult pneumococcal interval. Where this app refuses an adult dose on timing, that is this app’s clinical judgement, and those rows are tagged “this app” above.`,
+    },
+    {
+      name: 'The three pairs with no evidence either way',
+      means: 'Nothing published says what to do when a second PPSV23, one conjugate after another, or a conjugate after a PPSV23 was given sooner than the recommended gap. The app does not treat the three alike, and the table below is what it actually does.',
+    },
+    {
+      name: 'So a rule tagged “this app” is a prompt, not a requirement',
+      means: 'If you judge that a dose given inside one of those adult intervals was reasonable, no published guidance contradicts you. Read the app’s note as a flag to check, and record your own decision.',
+    },
+  ],
+  // WRITTEN, and every cell is driven through the validator by this section's
+  // guard test on a named patient. Keep the two in step: the test names the
+  // patient it drove for each cell in its own comments.
+  //
+  // Each row carries its own "in a child" / "in an adult" label rather than
+  // relying on a column header, because the page's mobile rule hides table
+  // headers and stacks the cells — which left two sentences running together
+  // with no way to tell which patient each was about. Checked at 390px.
+  pairs: [
+    {
+      pair: 'A second PPSV23 after the first',
+      childLabel: 'In a child',
+      adultLabel: 'In an adult',
+      child: `Not valid before ${FIVE_YEARS}. CDC words this one as “at least ${FIVE_YEARS}”, so it is CDC’s minimum.`,
+      adult: `Not valid before ${FIVE_YEARS} — this app’s judgement. ACIP recommends the gap and does not say a shorter one must be repeated.`,
+    },
+    {
+      pair: 'One conjugate after another',
+      childLabel: 'In a child',
+      adultLabel: 'In an adult',
+      child: 'Not valid inside CDC’s catch-up minimum for that dose of the series.',
+      adult: 'Counts, with a note saying how short the gap was. Nothing is repeated.',
+    },
+    {
+      pair: 'A conjugate after a PPSV23',
+      childLabel: 'In a child',
+      adultLabel: 'In an adult',
+      child: 'No rule at all — the app applies no interval and says nothing.',
+      adult: `Not valid before ${YEAR} when the PPSV23 is the only dose on the record — this app’s judgement. Where a PCV13 is on the record too, it counts with a note.`,
+    },
+  ],
+  grace: `One grace CDC does state, for every vaccine: a dose given up to ${GRACE_DAYS} days before a minimum still counts. It applies only to a dose already given — never to the dates this app advises for a dose still to come.`,
+  asOf: 'Each dose is judged as of the day it was given, not against today. A dose that did not count stays on the record with its explanation, and a later, properly spaced dose still completes the series.',
+};
 
 // ── GENERATED: every document the app can cite, newest check first ───────
 export const SOURCES = Object.values(

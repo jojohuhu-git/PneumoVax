@@ -703,6 +703,20 @@ body {
 }
 .rb-table td:last-child, .rb-table th:last-child { padding-right: 0; }
 .rb-td-age { white-space: nowrap; }
+.rb-td-outcome { white-space: nowrap; }
+
+/* The dose-spacing rules (section 4). A list, not a table: the mobile rule
+   below collapses a table's cells and hides its header, which leaves a row of
+   unlabelled fragments — and these rows carry three different KINDS of text
+   (which gap, which interval, what happens). As a list each row reads the same
+   on a phone as on a desktop. */
+.rb-h4 { font-size: var(--fs-sm); font-weight: 700; color: var(--gy3); text-transform: uppercase; letter-spacing: 0.04em; margin: var(--sp-16) 0 var(--sp-8); }
+.rb-rule-list { list-style: none; }
+.rb-rule { padding: var(--sp-8) 0; border-bottom: 1px solid var(--gy6); }
+.rb-rule:last-child { border-bottom: none; }
+.rb-rule-what { font-size: var(--fs-sm); font-weight: 600; color: var(--gy); line-height: 1.45; }
+.rb-rule-gap { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; margin-top: 2px; }
+.rb-rule-out { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.45; margin-top: 2px; }
 
 .rb-foot { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.6; margin-top: var(--sp-24); }
 
