@@ -300,6 +300,61 @@ the DOM but collapsed, so `innerText` returns ~9,200 characters with *"cochlear"
 pathway, where these two risks are genuine, and `hasAnyRisk` gates whether a 19–49 adult
 gets a recommendation at all.
 
+### §C-PPSV23ANCHOR — The at-risk catch-up's 8 weeks runs from the most recent PNEUMOCOCCAL dose (2026-10-25)
+
+**OWNER RULING 2026-10-25,** answering "does this apply to little children too, or only 6 and
+up?": *"yes PPSV recs should apply at the earliest age of 2 years, this is the minimum
+approved age. Other CDC tables and p2016 have PPSV23 guidance for 24 months and older."*
+
+**The defect.** CDC's at-risk "Age 2–5 years" row states **two** intervals and the card
+implemented only the second:
+
+> *"Less than 3 PCV doses: 2 doses PCV (**at least 8 weeks after the most recent dose** and
+> administered at least 8 weeks apart)"*
+
+The card's date came from the last **PCV**, so a 4-year-old with asplenia whose only
+pneumococcal dose was a PPSV23 24 days ago was told her first conjugate was due **today**,
+on a card quoting *"at least 8 weeks after the most recent dose"* underneath it. The
+citation and the date contradicted each other on one screen.
+
+It was found by comparing two patients who differ only in age. The **6–18** block already
+anchors on the most recent pneumococcal dose, so an 8-year-old with that history was
+correctly told 26 Nov while a 4-year-old was told today. Measured over the grid: **225 of
+17,016**, every one of them aged 2 or 5, **none aged 6 or over**.
+
+**CDC's own tool reads it the same way.** PneumoRecs, for a 4-year-old with asplenia, a
+PPSV23 and no conjugate: *"Give 2 doses of PCV: first dose, given **8 weeks after the dose of
+PPSV23**."*
+
+**THE FIX IS A LATER ANCHOR, NEVER A SECOND INTERVAL.** Both clocks carry the same 8 weeks,
+so the card takes the later of two anchors and reads the interval once:
+
+| Side | Anchor | Which rule |
+|---|---|---|
+| the conjugate stream | `anchorPcv` — the dose the patient GOT, including one that did not count | RULING D |
+| the polysaccharide stream | the most recent **counting** PPSV23 (`ppsv.lastDate`) | ANCHOR-1 — "an unnecessary dose cannot reset a clock" |
+
+`ppsv.lastDate` is new and is deliberately **not** `ppsv.effective.find(...)`, which five
+call sites use for the **first** PPSV23 because the five-year revaccination clock runs from
+dose 1. First and last are different questions, and a child with two PPSV23 doses has them
+five years apart — reading one for the other is a five-year error.
+
+**TWO CASES ARE DELIBERATELY LEFT ON THE PCV ANCHOR, because no document states the
+interval for them.** 192 of the 225 are fixed; the remaining **33** are pinned by number in
+the guard so that widening the anchor fails a test rather than passing quietly:
+
+| Left alone | Count | What the documents say |
+|---|---|---|
+| the **3-doses-before-12-months** row | 22 | ACIP 2023: *"one dose of either PCV15 or PCV20 is recommended at least 8 weeks after the last **PCV** dose"*; CDC's neighbouring rows say *"the most recent **PCV** dose"* |
+| a **healthy** child's catch-up | 11 | CDC's healthy row states no interval; p2016 says *"after most recent **PCV** dose"*; the CDC PCV Catch-up Job Aid (Jan 2025) counts previous **PCV** doses only and says *"Give Dose 1 today"* |
+
+Both are **open questions for the owner**, not oversights. Anchoring either on a PPSV23
+would make the number this app's own.
+
+Guard: `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
+which pins 33, splits it 11 / 22, and holds the 4-year-old and the 8-year-old to the same
+date.
+
 ---
 
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
