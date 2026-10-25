@@ -127,6 +127,13 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
 // silent against the live engine before this file existed.
 // ─────────────────────────────────────────────────────────────────────────
 describe('S14-7 — the adult gaps that nothing used to check', () => {
+  // ⚠️ REVERSED BY OWNER RULING F (2026-10-24), and kept as the record of the
+  // reversal rather than deleted. This dose used to be INVALID on an owner
+  // determination of 2026-10-11; the owner withdrew that determination for
+  // this row, on the ground that ACIP states the 5 years as recommended
+  // timing and never says an earlier dose must be repeated. So the gap is
+  // still CHECKED — which is what S14-7 was about, and the original silence
+  // it fixed is still fixed — but it is now a note on a dose that counts.
   it('a PCV20 less than 5 years after PPSV23, when PCV13 is also on the record', () => {
     // 55y: PCV13 2015, PPSV23 2018, PCV20 2021 — three years, not five.
     const who = { ageMonths: 55 * 12, dob: '1971-05-01' };
@@ -134,9 +141,14 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
       { date: '2015-03-01', product: 'PCV13' },
       { date: '2021-03-01', product: 'PCV20' },
     ], who.ageMonths, TODAY, who.dob, { ppsv23Doses: [{ date: '2018-03-01' }] });
-    expect(a.perDose[1].status).toBe('invalid');
+    expect(a.perDose[1].status).toBe('valid');
+    expect(a.perDose[1].earlyAdvisory).toBe(true);
+    expect(a.perDose[1].intervalRuleId).toBe('ADULT-PCV20-21-5Y-AFTER-PPSV23');
     expect(a.perDose[1].reasons.join(' ')).toMatch(/at least 5 years/);
-    expect(a.perDose[1].detail).toMatch(/owner clinical determination/i);
+    // The note must say the dose counts, and must NOT claim the owner
+    // enforces the gap — she no longer does, and the row now credits CDC.
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/still counts/);
+    expect(a.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
   it('...and counts once the five years are there', () => {
@@ -417,14 +429,23 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(v.ruleId).toBe('ADULT-PCV-AFTER-PCV-CATCH-ALL');
   });
 
-  it('reports the 5-year row, not the 1-year one, when a dose misses both', () => {
+  // ⚠️ THIS ASSERTION IS THE OPPOSITE OF WHAT IT ONCE WAS, by RULING F
+  // (2026-10-24). While both rows were floors, the more specific 5-year row
+  // came first so the clinician was told about the binding gap. The 5-year
+  // row is now a RECOMMENDATION, and `evaluateDoseInterval` returns on the
+  // first unmet row of EITHER kind — so leaving it first would have let a
+  // dose missing both gaps escape the 1-year floor with only a note. The rows
+  // were swapped; the dose is still rejected, and now names the gap that
+  // actually rejects it.
+  it('reports the 1-year FLOOR, not the 5-year recommendation, when a dose misses both', () => {
     const v = evaluateDoseInterval({
       ...base, doseDate: '2026-02-09',
       priorPcv: [{ date: '2026-01-05', product: 'PCV13' }],
       priorPpsv23: [{ date: '2026-01-20' }],
       prev: { date: '2026-01-05', ageAtDose: 840, product: 'PCV13' },
     });
-    expect(v.ruleId).toBe('ADULT-PCV20-21-5Y-AFTER-PPSV23');
+    expect(v.kind).toBe('floor');
+    expect(v.ruleId).toBe('ADULT-PCV20-21-1Y-AFTER-PCV');
   });
 
   // CDC's grace applies to the FLOOR: 4 days short of the year still counts,

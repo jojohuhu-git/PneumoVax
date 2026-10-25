@@ -91,7 +91,12 @@ function DoseValidation({ result, seriesTotal, numberFor }) {
             const slices = reasonCiteSlices(reasons, reasonCites);
             return reasons.map((r, i) => (
               <span key={i} className="dose-val-reason">
-                {slices[i]?.length ? renderNoteWithCites(r, slices[i], numberFor) : r}
+                {/* ALWAYS through the renderer, even with no cites. A bare
+                    string would print a literal `**` for an emphasised reason
+                    — which is what the second-PPSV23 alternative below uses.
+                    `renderNoteWithCites(text, [], ...)` is a supported shape
+                    and has its own renderer test. */}
+                {renderNoteWithCites(r, slices[i] ?? [], numberFor)}
               </span>
             ));
           })()}

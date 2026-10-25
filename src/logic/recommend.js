@@ -41,6 +41,7 @@ import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { pcvNextDoseMinIntervalCell, intervalPhrase } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
+import { ADULT_OWED_AFTER_INVALID_DOSE } from './doseIntervalRules.js';
 
 // Age bands (months)
 // y18 is the ADULT SCHEDULE boundary (228 = 19y), not the PCV21 product gate (216 = 18y).
@@ -2254,7 +2255,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  ADULTS 19–49y (risk-only) and ≥50y (routine) — CDC adult notes
 // ═══════════════════════════════════════════════════════════════════════════
-function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
+function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null) {
   const isOlderAdult = am >= M.y50;
   const anyRisk = hasAnyRisk(riskIds);
   // S15 (owner decision 2026-10-16): the recommended PCV15→PPSV23 interval
@@ -2499,6 +2500,130 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null) {
       note: `PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c]${jobAidCompleteMarker}.`,
       noteCites: [cite('adultPcv15ThenPpsv'), ...jobAidCompleteCites],
       refs: refsSeriesComplete,
+    })];
+  }
+
+  // ── An invalid dose is the last thing on the record → a conjugate is owed
+  //    (OWNER RULING 2026-10-24) ─────────────────────────────────────────
+  //
+  // PLACED AFTER THE TWO "COMPLETE" CHECKS ON PURPOSE, and that placement is
+  // her dividing line, not an implementation detail: "Calling it 'invalid'
+  // changes nothing, because no dose was owed." A patient whose COUNTING
+  // history already completes the series keeps her complete card — an early
+  // extra dose cannot un-finish her, which is Ruling F. This branch is only
+  // for a patient who still owed a dose and whose attempt at it came too soon.
+  //
+  // It replaces two cards that were both wrong for these patients. Driven in
+  // the app on her asplenic patient, the old screen read "PPSV23 (>=8 weeks
+  // after PCV15) — Not yet due, eligible Oct 25, 2026" directly above a chip
+  // reading "can be given from 2027-10-11": two dates, two different vaccines,
+  // one patient.
+  //
+  // THE DATE AND THE PRODUCTS COME FROM `adultRepeat`, which the engine read
+  // off the dose verdict. Nothing here recalculates either.
+  if (adultRepeat) {
+    const { dueDate, products, invalidDate, invalidVaccine, basis } = adultRepeat;
+    const dueToday = dueDate <= today;
+    const productWords = products.join(' or ');
+    const gaveWhat = invalidVaccine === 'PPSV23' ? 'PPSV23' : 'conjugate';
+
+    // HER RULING 6, the whole reason this sentence exists: "make it clear that
+    // the 8 week interval is pediatric data with nothing clarifying adults.
+    // Cite the reference. State using 1 year is an interpretation from ACIP
+    // minimum interval for adults between PCV13 and the next conjugate. Cite
+    // this too."
+    //
+    // So the two legs of her lookup say different things about their own
+    // standing, and the clause is EMPHASISED because a reader who skims past
+    // it is the reader who thinks the app has simply used the wrong number.
+    //
+    // ⚠️ THE PAEDIATRIC TABLE IS NAMED IN WORDS AND CARRIES NO [c]. A numbered
+    // citation asserts "this document states my claim", and the claim here is
+    // partly about what the document does NOT cover — there is no adult
+    // 8-week conjugate-to-conjugate interval anywhere. CLAUDE.md's rule is
+    // cite it or take it off; a negative claim can be neither, so it is stated
+    // the way the dose chips already name CDC, in prose. The card's grey
+    // buttons stay adult, which is also what `population` requires.
+    // ⚠️ FINDING F IN MINIATURE, CAUGHT BY THE COUNT PINS. Narrowing this
+    // card's sources to CDC's adult notes took the job aid off 56 cards it
+    // DOES speak for. For a patient with a PCV15 on record whose PPSV23 came
+    // too soon, the conjugate now being offered is literally standing in for
+    // the PPSV23 she still owes — which is the job aid's footnote, and nothing
+    // else in the app's source set states it (C8, document 2). So those cards
+    // keep it, WITH a number and the sentence it is attached to. For family 2
+    // there is no PPSV23 being substituted, so it stays off.
+    //
+    // This is the owner's 2026-10-18 rule in use: every candidate document
+    // gives the SAME dose here, so the only question is which goes on the
+    // card, and that is a judgement to take and record rather than escalate.
+    const substitutingForOwedPpsv23 = invalidVaccine === 'PPSV23' && pcv.hasPCV15;
+    const substitutionNote = substitutingForOwedPpsv23
+      ? ' The PPSV23 this patient still owed may be replaced by PCV20 or PCV21 [c].'
+      : '';
+    const substitutionCites = substitutingForOwedPpsv23 ? [cite('jobAidPpsv23Unavailable')] : [];
+
+    // THE SAME CORRECTION, FOR THE OTHER FAMILY AND THE OTHER DOCUMENT.
+    // Narrowing the sources also took mm7401a1 off 132 family-2 cards, and
+    // FINDING F's guard is what caught it. Its "PPSV23 only" row — identical in
+    // all three adult blocks — states exactly this patient's disposition: "A
+    // single dose of PCV21, PCV20, or PCV15 >=1 year after the last PPSV23
+    // dose." With her conjugate set aside her counting history IS PPSV23-only,
+    // so the row fits, and its own year has already elapsed.
+    //
+    // ⚠️ CITED FOR THE DISPOSITION, NOT FOR THE DATE. The card's date is later
+    // than the row's, because the repeat must also clear the spacing from the
+    // dose that did not count. Crediting mm7401a1 with the card's date would
+    // be the "right-sounding quote written about something else" fault, so the
+    // claim gets its OWN sentence and the sentence says why the date differs.
+    // The two families are mutually exclusive: family 2 has no counting PCV15.
+    const ppsvOnlyRowApplies = invalidVaccine === 'PCV' && !pcv.hasPCV15 && !pcv.hasPCV13;
+    const ppsvOnlyRowNote = ppsvOnlyRowApplies
+      ? ` With only a PPSV23 counting, a single dose of ${productWords} at least ${ADULT_GAP_WORDS} after it completes the series [c] — the later date above is the further spacing CDC's general rule requires from the dose that did not count.`
+      : '';
+    const ppsvOnlyRowCites = ppsvOnlyRowApplies
+      ? [cite('mmwrPpsvOnlyThenPcv')]
+      : [];
+
+    const standing = basis === 'ppsv23ToConjugate'
+      ? ` **ACIP states this interval itself — a conjugate dose comes at least ${ADULT_GAP_WORDS} after the last PPSV23, for every risk group, with no 8-week option [c]. Counting it from the dose that was given, rather than from the one before it, follows CDC's general rule that a repeat is spaced from the invalid dose.**`
+      : ` **The ${ADULT_GAP_WORDS} is read across from the only adult conjugate-to-conjugate interval ACIP states — PCV20 or PCV21 at least ${ADULT_GAP_WORDS} after the last PCV13 dose [c] — and applied here to a conjugate that has to be repeated, which ACIP does not discuss. It is an interpretation, not a stated rule. The 8-week conjugate interval is paediatric: it is CDC's catch-up schedule, whose own scope line reads "Children age 4 months through 6 years", and no adult source states one.**`;
+
+    return [rec({
+      vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
+      doseLabel: `${productWords} ≥${ADULT_GAP_WORDS} after the ${gaveWhat} dose of ${invalidDate} — completes the series`,
+      dueToday, earliestNextDate: dueToday ? null : dueDate,
+      minIntervalMonths: MO12,
+      brands: products.map((k) => (k === 'PCV20' ? 'PCV20 (Prevnar 20)' : 'PCV21 (Capvaxive)')),
+      note: {
+        lead: `The ${gaveWhat} dose of ${invalidDate} was given too soon to count, so the series is INCOMPLETE. Give 1 dose of ${productWords} ${dueToday ? 'now' : `on or after ${dueDate}`} and the series is complete [c].${standing}`,
+        detail: `PPSV23 is not what is owed here: ACIP's only interval between two PPSV23 doses is 5 years, and a repeat conjugate completes the series on its own. PCV15 is not used either — it adds nothing over a conjugate already on the record, and it would itself require a PPSV23 afterwards.${ppsvOnlyRowNote}${substitutionNote}`,
+      },
+      noteCites: [
+        cite('adultPcv20or21Complete'),
+        basis === 'ppsv23ToConjugate'
+          ? cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949')
+          : cite('adultPcv13Only'),
+        ...ppsvOnlyRowCites,
+        ...substitutionCites,
+      ],
+      // ⚠️ CDC'S ADULT NOTES ALONE, and this is the fix for a real defect the
+      // first draft shipped. `adultRefs()` with no exclusions spreads all three
+      // adult documents over the card — exactly the shape CLAUDE.md forbids,
+      // "never a single list computed once and spread over every card" — and
+      // it left 188 cards carrying mm7401a1 and job-aid buttons that no number
+      // on the card pointed at. Every numbered citation this card makes is a
+      // sentence of CDC's adult notes: the completion claim, and whichever leg
+      // of the interval lookup applies. The job aid and mm7401a1 say nothing
+      // about repeating an invalid dose, so they come off — "cite it, or take
+      // it off that card".
+      // Each family carries the documents that speak for ITS sentences and no
+      // others: CDC's notes always, mm7401a1 only where its "PPSV23 only" row
+      // fits, the job aid only where its substitution footnote does.
+      refs: ppsvOnlyRowApplies
+        ? adultRefsExcept('cdcAdultTimingJobAid')
+        : substitutingForOwedPpsv23
+          ? adultRefsExcept('mmwr7401a1')
+          : adultRefsExcept('cdcAdultTimingJobAid', 'mmwr7401a1'),
     })];
   }
 
@@ -2876,6 +3001,71 @@ const EXCLUSION_MESSAGE = 'Revaccination after hematopoietic cell transplant, '
 // ═══════════════════════════════════════════════════════════════════════════
 //  PUBLIC API
 // ═══════════════════════════════════════════════════════════════════════════
+// The adult families whose RECOMMENDATION CARD follows the invalid dose, per
+// the owner's ruling of 2026-10-24. See `adultRepeatOwed` for why this is a
+// named set and not "every adult floor".
+const CARD_FOLLOWS_INVALID_DOSE = new Set([
+  'ADULT-PCV-AFTER-PPSV23',
+  'ADULT-PPSV23-AFTER-PCV15',
+  'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
+]);
+
+/**
+ * The repeat an adult's invalid dose leaves owing, or null.
+ *
+ * Returns the date and products the RULES TABLE computed, plus which leg of
+ * her two clocks set it, so the card can say whether its number is stated by
+ * ACIP or read across from a neighbouring rule.
+ */
+function adultRepeatOwed(analysis, rawPcv, rawPpsv, ageMonths) {
+  if (ageMonths < ADULT_SCHED_MIN_M) return null;
+  const dated = (list) => (list ?? []).filter((d) => d?.date)
+    .slice().sort((a, b) => a.date.localeCompare(b.date));
+  const rows = [
+    ...(analysis.pcv?.perDose ?? []).map((v, i) => ({ v, d: dated(rawPcv)[i], vaccine: 'PCV' })),
+    ...(analysis.ppsv23?.perDose ?? []).map((v, i) => ({ v, d: dated(rawPpsv)[i], vaccine: 'PPSV23' })),
+  ].filter((r) => r.d?.date).sort((a, b) => a.d.date.localeCompare(b.d.date));
+  if (!rows.length) return null;
+  const last = rows[rows.length - 1];
+  // Only an invalid LAST dose leaves something owing (her "repaired" proviso),
+  // and never a record problem — "a dose the patient never had".
+  if (last.v.status !== 'invalid' || last.v.recordProblem || !last.v.repeatDueDate) return null;
+  // ⚠️ DELIBERATELY NARROW, AND THE FIRST DRAFT WAS NOT. Applied to every
+  // adult whose last dose is invalid, this moved 667 of 17,016 verdicts and
+  // broke eleven citation guards — because it overrode cards that reason from
+  // a RICHER history with a blunter rule. The clearest casualty: an
+  // immunocompromised adult with PCV13 + two PPSV23 doses, the second given
+  // too soon, lost her mm7401a1 "review again at age 50" card altogether and
+  // was told to come back for a conjugate in a year. Her counting history owes
+  // a conjugate at FIVE years, which is Ruling F's territory, and no ruling
+  // said otherwise.
+  //
+  // So this fires only for the families the owner actually worked through, and
+  // they are named by the rule that rejected the dose rather than inferred:
+  //
+  //   ADULT-PCV-AFTER-PPSV23                    her patients 1 and 2
+  //   ADULT-PPSV23-AFTER-PCV15                  her patient 3
+  //   ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM  her patient 4, the asplenic one
+  //
+  // Every other adult family keeps the card it had. `ADULT-PPSV23-AFTER-PCV13`
+  // (402 patients) is the same clinical shape and is the previous handoff's
+  // "clearest defect", but widening to it moves verdicts in a family she has
+  // not been shown — her own 2026-10-18 rule sends that back to her. It is
+  // flagged, not taken.
+  if (!CARD_FOLLOWS_INVALID_DOSE.has(last.v.intervalRuleId)) return null;
+  const alt = last.v.conjugateAlternative;
+  return {
+    dueDate: last.v.repeatDueDate,
+    products: ADULT_OWED_AFTER_INVALID_DOSE,
+    invalidDate: last.d.date,
+    invalidVaccine: last.vaccine,
+    invalidProduct: last.d.product || null,
+    // `conjugateAlternative` is only attached by the one row that opts in, so
+    // fall back to the leg the date implies.
+    basis: alt?.basis ?? (last.vaccine === 'PPSV23' ? 'ppsv23ToConjugate' : 'conjugateToConjugate'),
+  };
+}
+
 export function recommend(input) {
   // P3-1 (S10): the patient's date of birth, when the clinician gave one. It is
   // what lets the engine compare a dose date against a real birthday — the
@@ -2964,6 +3154,22 @@ export function recommend(input) {
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
+  // OWNER RULING 2026-10-24 — what an adult with an UNREPAIRED invalid dose is
+  // owed, read off the walk's own verdicts.
+  //
+  // ⚠️ READ, NEVER RECOMPUTED. `repeatDueDate` is produced by
+  // `doseIntervalRules.js`'s clocks and carried on the dose verdict; this
+  // function only picks the right verdict and hands the date on. Computing a
+  // second answer here is the exact shape of the P0 bug of 2026-10-23, where
+  // the card and the chip each read CDC's table and disagreed.
+  //
+  // "UNREPAIRED" is her own proviso, from the 2026-10-23 ruling: "if a later
+  // dose given helps correct the mistake in giving a vaccine early, this
+  // should be noted and marked as complete if appropriate." So the invalid
+  // dose only leaves something owing if it is the LAST dose on the record —
+  // a properly spaced dose after it has already filled the gap, and the
+  // counting history speaks for itself.
+  const adultRepeat = adultRepeatOwed(analysis, rawPcv, rawPpsv, am);
   const pcv = summarizePcv(effectivePcv, am, today, dob, pcvAnalysis.anchor);
   const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
 
@@ -3001,7 +3207,7 @@ export function recommend(input) {
       recs = pcvHealthyChild(am, pcv, ppsv, today);
     }
   } else {
-    recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob);
+    recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob, adultRepeat);
   }
 
   // ── PCV21 geographic advisory ─────────────────────────────────────────

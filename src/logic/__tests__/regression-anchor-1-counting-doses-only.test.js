@@ -125,7 +125,22 @@ describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () =
 
   it('still shows the PCV as due, since the recorded one did not count', () => {
     const v = verdictsFor(CASE_H);
-    expect(v.recText).toMatch(/≥1 year after PPSV23/);
+    // OWNER RULING 2026-10-24 — the card for this patient changed, and the
+    // point of the assertion did not. It used to read "PCV (PCV15, PCV20, or
+    // PCV21) >=1 year after PPSV23", counted from the PPSV23 that COUNTED,
+    // which put the dose in the past and the card at "due today". Her ruling
+    // names what is owed (a conjugate, PCV20 or PCV21 — never PCV15) and dates
+    // it from the dose that was actually given. So the wording moved from
+    // "after PPSV23" to "after the conjugate dose of 2018-03-01".
+    //
+    // WHAT THIS CONTROL IS STILL FOR is unchanged: the PCV must still be DUE,
+    // because the recorded one did not count. If it ever reads complete, the
+    // floor has been loosened — which is what the case above guards.
+    expect(v.recText).toMatch(/PCV:due/);
+    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of 2018-03-01/);
+    // And never PCV15, which she ruled out by name: "PCV15 adds nothing over
+    // the patient's prior dose."
+    expect(v.recText).not.toMatch(/PCV15/);
   });
 });
 

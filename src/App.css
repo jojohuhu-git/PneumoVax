@@ -412,6 +412,14 @@ body {
 .rec-brand-item { display: flex; align-items: center; gap: var(--sp-8); font-size: var(--fs-base); color: var(--gy); padding: 2px 0; }
 .rec-brand-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gy4); flex-shrink: 0; }
 .rec-note { font-size: var(--fs-base); color: var(--gy2); line-height: 1.55; margin-bottom: var(--sp-12); }
+/* 2026-10-24, owner request: the sentence that QUALIFIES a "complete" card —
+   a dose was given earlier than ACIP advises, and here is the alternative —
+   must not read like the rest of the note. Bold, in the darker body colour.
+   NOT --r: that red is reserved for errors and invalid doses (see the token's
+   own comment), and these cards are telling the clinician the series IS
+   complete. Colouring a correct answer with the error colour would say the
+   opposite of what the card says. */
+.note-emphasis { font-weight: 600; color: var(--gy); }
 /* P6-4: the note's one-line lead, with the supporting half behind "Why this".
    .rec-note-lead needs no rule of its own — it inherits .rec-note's size,
    color and leading, because the lead IS the note as far as the reader is
