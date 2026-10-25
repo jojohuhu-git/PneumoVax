@@ -1,0 +1,1242 @@
+CDC PneumoRecs VaxAdvisor - every recommendation it can print, and what you must
+answer to get there. Read off the tool's own scripts on 2026-10-25; its page
+metadata reads cdc:last_updated content="December 15, 2024".
+
+A branch marked UNREACHABLE is one nobody can actually arrive at - either the
+answer it tests is only in an HTML comment, or the question is never asked. They
+are left in so the leftovers are visible, not hidden.
+
+============================================================================================
+  CHILDREN UNDER 2 (the 0-6 month, 7-11 month and 12-23 month pages)   (18 live branches, 0 unreachable)
+============================================================================================
+  1. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ---> Give 4 doses of PCV[1]: Three doses, preferably 8 weeks apart (minimum 4 week intervals), then last dose between the ages of 12 through 15 months (given at least 8 weeks after third dose). Schedule is then complete.
+
+  2. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 1 dose
+      ---> Give 3 more doses of PCV[1]: Next dose preferably 8 weeks after initial dose (minimum 4 week interval), another dose preferably 8 weeks later (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the third dose). Schedule is then complete.
+
+  3. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 2 doses
+      ---> Give 2 more doses of PCV[1]: Next dose preferably 8 weeks after most recent dose (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the third dose). Schedule is then complete.
+
+  4. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 3 doses
+      ---> Give 1 more dose of PCV[1] between the ages of 12 through 15 months. Schedule is then complete.
+
+  5. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ---> Give 3 doses of PCV[1]: Two doses, preferably 8 weeks apart (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the second dose). Schedule is then complete.
+
+  6. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 7 months?   answer: 0 doses
+      ask: How many doses were given after age 7 months?   answer: 1 dose
+      ---> Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after initial dose (minimum 4 week interval), then last dose between the ages 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete.
+
+  7. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 7 months?   answer: 0 doses
+      ask: How many doses were given after age 7 months?   answer: 2 doses
+      ---> Give 1 more dose of PCV[1] between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete.
+
+  8. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 7 months?   answer: 1 dose
+      ---> Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after most recent dose (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete.
+
+  9. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 7 months?   answer: 2 doses
+      ---> Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after most recent dose (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete.
+
+ 10. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 7 months?   answer: 3 doses
+      ---> Give 1 more dose of PCV[1] between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete.
+
+ 11. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ---> Give 2 doses of PCV[1], 8 weeks apart. Schedule is then complete.
+
+ 12. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 1 dose
+      ask: Was the dose given before age 12 months?   answer: Yes, it was given before age 12 months
+      ---> Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after initial dose (minimum 4 week interval), then last dose at least 8 weeks later. Schedule is then complete.
+
+ 13. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 1 dose
+      ask: Was the dose given before age 12 months?   answer: No, it was given at or since age 12 months
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete.
+
+ 14. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 2 or more doses
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ---> Schedule complete.
+
+ 15. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 2 or more doses
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete.
+
+ 16. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 2 or more doses
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ---> Schedule complete.
+
+ 17. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 2 or more doses
+      ask: How many doses were given before age 12 months?   answer: 2 or more doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete.
+
+ 18. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes, 2 or more doses
+      ask: How many doses were given before age 12 months?   answer: 2 or more doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 or more doses
+      ---> Schedule complete.
+
+============================================================================================
+  CHILDREN 2-5 WITH NO RISK CONDITION   (13 live branches, 0 unreachable)
+============================================================================================
+  1. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ---> Give 1 dose of PCV[1]. Schedule is then complete.
+
+  2. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ---> Schedule complete.
+
+  3. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given at or since age 24 months?   answer: 0 doses
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete.
+
+  4. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given at or since age 24 months?   answer: 1 dose
+      ---> Schedule complete.
+
+  5. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ---> Schedule complete.
+
+  6. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given at or since age 24 months?   answer: 0 doses
+      ---> Give 1 more dose of PCV[1]. Schedule is then complete.
+
+  7. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given at or since age 24 months?   answer: 1 dose
+      ---> Schedule complete.
+
+  8. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given at or since age 24 months?   answer: 0 doses
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete.
+
+  9. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given at or since age 24 months?   answer: 1 dose
+      ---> Schedule complete.
+
+ 10. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ---> Schedule complete.
+
+ 11. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 or more doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given at or since age 24 months?   answer: 0 doses
+      ---> Give 1 more dose of PCV[1]. Schedule is then complete.
+
+ 12. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 or more doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given at or since age 24 months?   answer: 1 dose
+      ---> Schedule complete.
+
+ 13. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 or more doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 or more doses
+      ---> Schedule complete.
+
+============================================================================================
+  CHILDREN 2-5 WITH A CHRONIC CONDITION   (42 live branches, 0 unreachable)
+============================================================================================
+  1. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ask: Has the patient ever received PPSV23?   answer: No
+      ---> Give 2 doses of PCV[1] at least 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+  2. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ---> Give 2 doses of PCV[1]: First dose, given at least 8 weeks after the dose of PPSV23, then second dose of PCV at least 8 weeks later. Schedule is then complete.
+
+  3. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+  4. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete.
+
+  5. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. Schedule is then complete.
+
+  6. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+  7. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+  8. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given at least 8 weeks after most recent dose of PCV or PPSV23, then last dose of PCV at least 8 weeks later. Schedule is then complete.
+
+  9. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+ 10. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete.
+
+ 11. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. Schedule is then complete.
+
+ 12. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 13. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 14. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 15. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1] 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete.
+
+ 16. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given at least 8 weeks after the dose of PPSV23, then last dose at least 8 weeks later. Schedule is then complete.
+
+ 17. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete.
+
+ 18. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete.
+
+ 19. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 20. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 21. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1] 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+ 22. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given at least 8 weeks after the dose of PPSV23, then last dose of PCV at least 8 weeks later. Schedule is then complete.
+
+ 23. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+ 24. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete.
+
+ 25. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 26. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 27. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete
+
+ 28. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 29. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1] 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete.
+
+ 30. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1] 8 weeks apart. Schedule is then complete.
+
+ 31. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete.
+
+ 32. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete.
+
+ 33. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 34. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 35. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 or more doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 36. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 or more doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 37. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete.
+
+ 38. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete.
+
+ 39. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 40. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+ 41. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+ 42. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Schedule complete.
+
+============================================================================================
+  CHILDREN 2-5 WITH AN IMMUNOCOMPROMISING CONDITION   (42 live branches, 0 unreachable)
+============================================================================================
+  1. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ask: Has the patient ever received PPSV23?   answer: No
+      ---> Give 2 doses of PCV[1] at least 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  2. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: No
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ---> Give 2 doses of PCV[1]: First dose, given 8 weeks after the dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  3. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  4. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  5. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  6. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  7. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  8. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  9. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 10. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 11. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 12. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 13. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 14. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 15. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1]: Next dose, given today, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 16. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after prior dose of PPSV23. Schedule is then complete.
+
+ 17. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 18. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after first dose of PPSV23. Schedule is then complete.
+
+ 19. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 20. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 21. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after first dose of PPSV23. Schedule is then complete.
+
+ 22. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 23. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after first dose of PPSV23. Schedule is then complete.
+
+ 24. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 25. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 26. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 27. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 28. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 1 dose
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 29. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 2 more doses of PCV[1]: Next dose, given today, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 30. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 31. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 32. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after prior dose of PPSV23. Schedule is then complete.
+
+ 33. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 34. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 2 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 35. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 or more doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 36. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 2 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 or more doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 37. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> Give 1 more dose of PCV[1] today. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 38. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 0 doses
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after prior dose of PPSV23. Schedule is then complete.
+
+ 39. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 40. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 0 doses
+      ask: How many doses were given between the ages of 24 and 71 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 41. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 42. 
+      ask: Has the patient ever received PCV13, PCV15, or PCV20?   answer: Yes
+      ask: How many doses were given before age 12 months?   answer: 3 doses
+      ask: How many doses were given between the ages of 12 and 23 months?   answer: 1 dose
+      ask: Any prior dose of PPSV23?   answer: Yes
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+============================================================================================
+  CHILDREN AND TEENS 6-18 WITH A RISK CONDITION   (14 live branches, 2 unreachable)
+============================================================================================
+  1. [UNREACHABLE] 
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PPSV23?   answer: No
+      ---> 105 Give 1 dose of PPSV23 at least 8 weeks after any prior dose of PCV[1].
+      (unreachable because an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it)
+
+  2. [UNREACHABLE] 
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ---> 106 Schedule complete.
+      (unreachable because an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it)
+
+  3. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: No
+      ask: Any prior doses of PPSV23?   answer: No
+      ---> Give 1 dose of PCV[1,2]. If PCV20 was given, schedule is then complete. If PCV15 was given, administer 1 dose of PPSV23 at least 8 weeks later. Schedule is then complete.
+
+  4. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: No
+      ask: Any prior doses of PPSV23?   answer: Yes
+      ---> Give 1 dose of PCV[1,2] at least 8 weeks after most recent dose of PPSV23. Schedule is then complete.
+
+  5. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: No
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: How many prior doses of PPSV23?   answer: 1 dose
+      ---> Give 1 dose of PCV[1,2] at least 8 weeks after most recent dose of PPSV23.
+
+  6. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?   answer: Yes
+      ask: How many prior doses of PPSV23?   answer: 0 doses
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  7. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?   answer: No
+      ask: How many prior doses of PPSV23?   answer: 0 doses
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete.
+
+  8. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?   answer: Yes
+      ask: How many prior doses of PPSV23?   answer: 1 dose
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.
+
+  9. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?   answer: No
+      ask: How many prior doses of PPSV23?   answer: 1 dose
+      ---> If at least 1 dose of either PCV15 or PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV13 and 5 years after the first dose of PPSV23. Schedule is then complete.
+
+ 10. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: How many prior doses of PPSV23?   answer: 2 doses
+      ask: Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?   answer: No
+      ---> Schedule complete.
+
+ 11. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: How many prior doses of PPSV23?   answer: 2 doses
+      ask: Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?   answer: Yes
+      ---> Schedule complete.
+
+ 12. 
+      ask: Does the patient have any of the following risk conditions?   answer: Immunocompromising conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: How many prior doses of PPSV23?   answer: 1 dose
+      ---> Schedule complete for now.
+
+ 13. 
+      ask: Does the patient have any of the following risk conditions?   answer: Chronic medical conditions (See below)
+      ask: Any prior doses of PPSV23?   answer: No
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: No
+      ---> Give 1 dose of PCV[1,2]. If PCV20 was given, schedule is then complete. If PCV15 was given, administer 1 dose of PPSV23 at least 8 weeks later. Schedule is then complete.
+
+ 14. 
+      ask: Does the patient have any of the following risk conditions?   answer: Chronic medical conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: No
+      ask: Any prior doses of PPSV23?   answer: Yes
+      ---> Give 1 dose of PCV[1,2] at least 8 weeks after most recent dose of PPSV23. Schedule is then complete.
+
+ 15. 
+      ask: Does the patient have any of the following risk conditions?   answer: Chronic medical conditions (See below)
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ask: Any prior doses of PPSV23?   answer: No
+      ---> If at least 1 dose of PCV20 was given at any age, schedule is complete. If PCV15 was given at or after age 72 months , then give 1 dose of PPSV23 at least 8 weeks after most recent dose of PCV13 or PCV15. Schedule is then complete. If PCV13 was given (at any age) or PCV15 was given only before age 72 months , then give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV13 or PCV15. Schedule is then complete.
+
+ 16. 
+      ask: Does the patient have any of the following risk conditions?   answer: Chronic medical conditions (See below)
+      ask: Any prior doses of PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13, PCV15 or PCV20?   answer: Yes
+      ---> Schedule complete.
+
+============================================================================================
+  ADULTS 19-49   (17 live branches, 4 unreachable)
+============================================================================================
+  1. [UNREACHABLE] 
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ---> Give 1 dose of PPSV23. A second and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.
+      (unreachable because at 19-49 the 'has the patient ever received PPSV23' question is always the GrpB pair whatever the risk group - measured live with an HIV patient)
+
+  2. [UNREACHABLE] 
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ---> Schedule complete for now. Reminder: A second and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.
+      (unreachable because at 19-49 the 'has the patient ever received PPSV23' question is always the GrpB pair whatever the risk group - measured live with an HIV patient)
+
+  3. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ---> Give one dose of PCV15, PCV20, or PCV21. If PCV20 or PCV21 is used, their pneumococcal vaccinations are complete. If PCV15 is used, follow with one dose of PPSV23 to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[1], cochlear implants, or cerebrospinal fluid leaks. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.
+
+  4. 
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ---> Give 1 dose of PPSV23 at least 8 weeks after previous PCV13 dose. A second and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.
+
+  5. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ---> Give one dose of PCV15, PCV20, or PCV21 at least 1 year after their last dose of PPSV23. Regardless of which vaccine is used (PCV15, PCV20, or PCV21), their pneumococcal vaccinations are complete. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.
+
+  6. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> Give one dose of PPSV23[1] at least 8 weeks after PCV13. Give a second dose of PPSV23 at least 5 years after the first PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years as long as at least 5 years have passed since the second dose of PPSV23.
+
+  7. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ---> Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.
+
+  8. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete. OR Give one dose of PPSV23 at least 8 weeks after PCV13. Check this app when your patient turns 65 years old to see if any pneumococcal vaccines are recommended for them.
+
+  9. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete. OR Give one dose of PPSV23 at least 8 weeks after PCV13. Then give one dose of PCV20, PCV21, or PPSV23 at least 5 years after the first PPSV23 dose. Check this app when your patient turns 65 years old to see if any pneumococcal vaccines are recommended for them.
+
+ 10. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> If your patient has only received 1 dose of PPSV23 , give a second dose of PPSV23[1] at least 8 weeks after PCV13 and at least 5 years after the first PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years as long as at least 5 years have passed since the second dose of PPSV23. If your patient has received 2 doses of PPSV23 , no additional doses of any type of pneumococcal vaccine are recommended at this time. A third and final dose of PPSV23 is not indicated until age 65 years as long as at least 5 years have passed since the second dose of PPSV23.
+
+ 11. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> No additional doses of any type of pneumococcal vaccine are recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended.
+
+ 12. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose or give no additional pneumococcal vaccines. If PCV20 or PCV21 is administered, their pneumococcal vaccinations are complete. If PCV20 or PCV21 is not administered, check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended.
+
+ 13. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Has your patient already received 1 or 2 doses of PPSV23?   answer: 1 dose
+      ---> Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.
+
+ 14. 
+      ask: Does the patient have any of the following risk conditions?   answer: Yes, one of these risk conditions
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Has your patient already received 1 or 2 doses of PPSV23?   answer: 2 doses
+      ---> Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose or give no additional pneumococcal vaccines. If PCV20 or PCV21 is administered, their pneumococcal vaccinations are complete. If PCV20 or PCV21 is not administered, check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended.
+
+ 15. 
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: Has your patient already received 1 or 2 doses of PPSV23?   answer: 2 doses
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ---> Give a second dose of PPSV23 at least 8 weeks after previous PCV13 dose and at least 5 years after the first PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.
+
+ 16. [UNREACHABLE] 
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: (risk-condition question)   answer: (rd-adult-1c-GrpC - not on the live page)
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ---> Give 1 dose of PCV13 at least 1 year after most recent PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.
+      (unreachable because an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it)
+
+ 17. [UNREACHABLE] 
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ask: (risk-condition question)   answer: (rd-adult-1c-GrpC - not on the live page)
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ---> Schedule complete for now. Reminder: A third and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.
+      (unreachable because an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it)
+
+ 18. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV20 or PCV21
+      ---> Regardless of whether the patient has a risk condition, no vaccine recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.
+
+ 19. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV15
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Does the patient have any of the following risk conditions?   answer: Yes
+      ---> Give one dose of PPSV23[1] to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[2], cochlear implants, or cerebrospinal fluid leaks.
+
+ 20. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV15
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Does the patient have any of the following risk conditions?   answer: No
+      ---> PCV15 was inadvertently adminstered. Adults 19–49 years of age without a risk condition are not recommended pneumococcal vaccination. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.
+
+ 21. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV15
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ---> Regardless of whether the patient has a risk condition, no vaccine recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.
+
+============================================================================================
+  ADULTS 50 AND OVER   (10 live branches, 13 unreachable)
+============================================================================================
+  1. 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ---> Give one dose of PCV15, PCV20, or PCV21. If PCV20 or PCV21 is used, their pneumococcal vaccinations are complete. If PCV15 is used, follow with one dose of PPSV23[1] to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[2], cochlear implants, or cerebrospinal fluid leaks.
+
+  2. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV20 or PCV21
+      ---> Their pneumococcal vaccinations are complete.
+
+  3. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV15
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ---> Give one dose of PPSV23[1] to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[2], cochlear implants, or cerebrospinal fluid leaks.
+
+  4. 
+      ask: Has the patient ever received PCV15, PCV20, or PCV21?   answer: Yes
+      ask: Did the patient receive PCV15, PCV20, or PCV21?   answer: PCV15
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ---> Their pneumococcal vaccinations are complete.
+
+  5. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> Consider discussing PCV13 vaccination with your patient (it is recommended for this patient based on shared clinical decision-making). If you and your patient decide together that PCV13 is appropriate for them, then give 1 dose of PCV13 followed by 1 dose of PPSV23 at least 1 year later. If you and your patient decide together that PCV13 is not appropriate for them, give 1 dose of PPSV23 now. Considerations for shared clinical decision-making for PCV13 use among adults ≥65 years old PCV13 is a safe and effective vaccine for older adults, but in most communities the risk of exposure to PCV13-serotypes is low because of indirect effects from pediatric PCV13 use. The following adults ≥65 years old are potentially at higher risk of exposure to PCV13-serotypes and so may have greater-than-average benefit from PCV13 vaccination: Residing in nursing homes and other long-term care facilities Residing in settings with low pediatric PCV13 uptake or traveling to settings with no pediatric PCV13 program PCV13-type invasive pneumococcal disease incidence increases with increasing age and is higher among individuals with chronic heart, lung, and liver disease, diabetes, alcoholism, and those who smoke cigarettes or those who have more than one chronic medical condition. While indirect effects from pediatric PCV13 use were documented for these groups of adults and were comparable to those observed among healthy adults, the residual PCV13-type disease burden remains higher in these groups. Therefore, providers/practices caring for many patients in these groups may consider offering PCV13 to their patients who are ≥65 years old and who have not previously received PCV13.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+  6. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> Give 1 dose of PCV13. Then give 1 dose of PPSV23 at least 8 weeks later.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+  7. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ---> Give 1 dose of PCV13. Then give 1 dose of PPSV23 at least 8 weeks later.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+  8. 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ---> Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.
+
+  9. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> Give one dose of PCV20, PCV21, or PPSV23 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20, PCV21, or PPSV23), their pneumococcal vaccinations are complete. However, if PPSV23 is administered, use shared clinical decision-making to decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 10. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> Give one dose of PCV20 or PCV21 at least 1 year after PCV13 or give one dose of PPSV23 at least 8 weeks after PCV13. Regardless of which vaccine is used (PCV20, PCV21, or PPSV23), their pneumococcal vaccinations are complete. However, if PPSV23 is administered, use shared clinical decision-making to decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 11. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: No/Unknown
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ---> Give one dose of PCV20 or PCV21 at least 1 year after PCV13 or give one dose of PPSV23 at least 8 weeks after PCV13. Regardless of which vaccine is used (PCV20, PCV21, or PPSV23), their pneumococcal vaccinations are complete. However, if PPSV23 is administered, use shared clinical decision-making to decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 12. 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ---> Give one dose of PCV15, PCV20, or PCV21 at least 1 year after the last dose of PPSV23. Regardless of which vaccine is used (PCV15, PCV20, or PCV21), their pneumococcal vaccinations are complete.
+
+ 13. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> Consider discussing PCV13 vaccination with your patient (it is recommended for this patient based on shared clinical decision-making). If you and your patient decide together that PCV13 is appropriate for them, then give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. Then give a final dose of PPSV23 1 year after PCV13 dose and at least 5 years after most recent PPSV23 dose. If you and your patient decide together that PCV13 is not appropriate for them, give a final dose of PPSV23 at least 5 years after most recent PPSV23 dose. Considerations for shared clinical decision-making for PCV13 use among adults ≥65 years old PCV13 is a safe and effective vaccine for older adults, but in most communities the risk of exposure to PCV13-serotypes is low because of indirect effects from pediatric PCV13 use. The following adults ≥65 years old are potentially at higher risk of exposure to PCV13-serotypes and so may have greater-than-average benefit from PCV13 vaccination: Residing in nursing homes and other long-term care facilities Residing in settings with low pediatric PCV13 uptake or traveling to settings with no pediatric PCV13 program PCV13-type invasive pneumococcal disease incidence increases with increasing age and is higher among individuals with chronic heart, lung, and liver disease, diabetes, alcoholism, and those who smoke cigarettes or those who have more than one chronic medical condition. While indirect effects from pediatric PCV13 use were documented for these groups of adults and were comparable to those observed among healthy adults, the residual PCV13-type disease burden remains higher in these groups. Therefore, providers/practices caring for many patients in these groups may consider offering PCV13 to their patients who are ≥65 years old and who have not previously received PCV13.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 14. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> Give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. Then give 1 more dose of PPSV23 at least 8 weeks after PCV13 dose and at least 5 years after most recent PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 15. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ---> Give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. Then give 1 more dose of PPSV23 at least 8 weeks after PCV13 dose and at least 5 years after most recent PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 16. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Did your patient receive PPSV23 before age 65 years or at/after age 65 years?   answer: Before age 65 years only
+      ask: Does your patient have any of the following risk factors?   answer: None of the below risk factors
+      ---> Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete. OR Give one more dose of PPSV23 at least 1 year after PCV13 and at least 5 years after previous PPSV23 dose. Their pneumococcal vaccinations are complete.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 17. 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Did your patient receive PPSV23 before age 65 years or at/after age 65 years?   answer: Before age 65 years only
+      ---> Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.
+
+ 18. 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Did your patient receive PPSV23 before age 65 years or at/after age 65 years?   answer: At or after age 65 years
+      ---> Based on shared clinical decision-making, decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of whether PCV20 or PCV21 is administered, their pneumococcal vaccinations are complete.
+
+ 19. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Chronic health conditions (See below)
+      ---> Give 1 more dose of PPSV23 at least 1 year after previous PCV13 dose and at least 5 years after previous PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 20. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: CSF leak or cochlear implant (See below)
+      ---> Give 1 more dose of PPSV23 at least 8 weeks after previous PCV13 dose and at least 5 years after previous PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 21. [UNREACHABLE] 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ask: Does the patient have any of the following risk factors?   answer: Immunocompromising conditions (See below)
+      ---> Give 1 more dose of PPSV23 at least 8 weeks after previous PCV13 dose and at least 5 years after previous PPSV23 dose.
+      (unreachable because the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors')
+
+ 22. 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: No/Unknown
+      ---> Consider discussing PCV13 vaccination with your patient (it is recommended for this patient based on shared clinical decision-making). If you and your patient decide together that PCV13 is appropriate for them, then give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. If you and your patient decide together that PCV13 is not appropriate for them, then no action is needed. Schedule complete. Considerations for shared clinical decision-making for PCV13 use among adults ≥65 years old PCV13 is a safe and effective vaccine for older adults, but in most communities the risk of exposure to PCV13-serotypes is low because of indirect effects from pediatric PCV13 use. The following adults ≥65 years old are potentially at higher risk of exposure to PCV13-serotypes and so may have greater-than-average benefit from PCV13 vaccination: Residing in nursing homes and other long-term care facilities Residing in settings with low pediatric PCV13 uptake or traveling to settings with no pediatric PCV13 program PCV13-type invasive pneumococcal disease incidence increases with increasing age and is higher among individuals with chronic heart, lung, and liver disease, diabetes, alcoholism, and those who smoke cigarettes or those who have more than one chronic medical condition. While indirect effects from pediatric PCV13 use were documented for these groups of adults and were comparable to those observed among healthy adults, the residual PCV13-type disease burden remains higher in these groups. Therefore, providers/practices caring for many patients in these groups may consider offering PCV13 to their patients who are ≥65 years old and who have not previously received PCV13.
+
+ 23. 
+      ask: Has the patient ever received PPSV23?   answer: Yes
+      ask: Has the patient ever received PCV13?   answer: Yes
+      ---> Schedule complete.
+

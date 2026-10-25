@@ -1,3 +1,10 @@
+> **SUPERSEDED 2026-10-25** by
+> `comparison-2026-10-25-pneumorecs-vs-pneumovax-66-patients.md` (66 patients). This
+> document is kept because its 23 answers were captured by hand from the live tool on
+> 2026-10-17 and remain a dated record. **Two of its statements are corrected there:**
+> the 19–49 page does ask a three-way risk question on the "has already had PPSV23" path,
+> and the PCV-naive 2-year-old wording item it flagged is still unfixed.
+
 # PneumoRecs VaxAdvisor next to PneumoVax — 23 patients, both tools, one day
 
 **Date:** 2026-10-17. **Who ran it:** agent session, at the owner's request.

@@ -1,0 +1,22 @@
+{
+  "capturedOn": "2026-10-25",
+  "how": "Each answer below was read off the live CDC PneumoRecs VaxAdvisor (https://www2a.cdc.gov/vaccines/m/pneumo/) by clicking through its questions in a browser on 2026-10-25 and copying the recommendation it printed. The tool's own page metadata reads cdc:last_updated content=\"December 15, 2024\".",
+  "captures": [
+    { "id": "LIVE-1", "page": "weeks7-6mo.asp", "patient": "2 months old, no prior PCV", "answers": ["Has the patient ever received PCV13, PCV15, or PCV20? -> No"],
+      "printed": "Give 4 doses of PCV1: Three doses, preferably 8 weeks apart (minimum 4 week intervals), then last dose between the ages of 12 through 15 months (given at least 8 weeks after third dose). Schedule is then complete." },
+    { "id": "LIVE-2", "page": "weeks7mo-11mo.asp", "patient": "11 months + 0 days, no prior PCV", "answers": ["Has the patient ever received PCV13, PCV15, or PCV20? -> No"],
+      "printed": "Give 3 doses of PCV1: Two doses, preferably 8 weeks apart (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the second dose). Schedule is then complete." },
+    { "id": "LIVE-3", "page": "weeks12mo-23mo.asp", "patient": "11 months + 1 day, no prior PCV - the tool routed this child here itself", "answers": ["Has the patient ever received PCV13, PCV15, or PCV20? -> No"],
+      "printed": "Give 2 doses of PCV1, 8 weeks apart. Schedule is then complete." },
+    { "id": "LIVE-4", "page": "years19-49.asp", "patient": "19-49, no risk conditions, nothing given", "answers": ["Has the patient ever received PCV15, PCV20, or PCV21? -> No", "Does the patient have any of the following risk conditions? -> No"],
+      "printed": "No vaccine recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them." },
+    { "id": "LIVE-5", "page": "years19-49.asp", "patient": "19-49, HIV, PCV13 and one PPSV23", "answers": ["Has the patient ever received PCV15, PCV20, or PCV21? -> No", "Does the patient have any of the following risk conditions? -> Yes, one of these risk conditions", "Has the patient ever received PPSV23? -> Yes", "Has the patient ever received PCV13? -> Yes", "Which of the following risk conditions does your patient have? -> Immunocompromising conditions", "Has your patient already received 1 or 2 doses of PPSV23? -> 1 dose"],
+      "printed": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete." },
+    { "id": "LIVE-6", "page": "over50yr.asp", "patient": "50+, PCV13 and PPSV23, the PPSV23 before age 65", "answers": ["Has the patient ever received PCV15, PCV20, or PCV21? -> No", "Has the patient ever received PPSV23? -> Yes", "Has the patient ever received PCV13? -> Yes", "Did your patient receive PPSV23 before age 65 years or at/after age 65 years? -> Before age 65 years only"],
+      "printed": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.",
+      "note": "The tool never asked the risk-factor question on this path, and its own printout showed the placeholder 'Risk Factors: Risk factors'." },
+    { "id": "LIVE-7", "page": "over50yr.asp", "patient": "50+, nothing given, no risk conditions", "answers": ["Has the patient ever received PCV15, PCV20, or PCV21? -> No", "Has the patient ever received PPSV23? -> No/Unknown", "Has the patient ever received PCV13? -> No/Unknown"],
+      "printed": "Give one dose of PCV15, PCV20, or PCV21. If PCV20 or PCV21 is used, their pneumococcal vaccinations are complete. If PCV15 is used, follow with one dose of PPSV23 to complete their pneumococcal vaccinations.",
+      "note": "Printout showed 'Risk Factors: N/A' - the risk question is never asked on the 50+ page." }
+  ]
+}

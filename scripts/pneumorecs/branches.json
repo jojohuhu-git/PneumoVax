@@ -1,0 +1,2246 @@
+[
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-1a"
+  ],
+  "answer": "Give 4 doses of PCV[1]: Three doses, preferably 8 weeks apart (minimum 4 week intervals), then last dose between the ages of 12 through 15 months (given at least 8 weeks after third dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-1b"
+  ],
+  "answer": "Give 3 more doses of PCV[1]: Next dose preferably 8 weeks after initial dose (minimum 4 week interval), another dose preferably 8 weeks later (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the third dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-1c"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose preferably 8 weeks after most recent dose (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the third dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-1d"
+  ],
+  "answer": "Give 1 more dose of PCV[1] between the ages of 12 through 15 months. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-2a"
+  ],
+  "answer": "Give 3 doses of PCV[1]: Two doses, preferably 8 weeks apart (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the second dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-2b",
+   "rd-child-3a",
+   "rd-child-4a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after initial dose (minimum 4 week interval), then last dose between the ages 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-2b",
+   "rd-child-3a",
+   "rd-child-4b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-2b",
+   "rd-child-3b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after most recent dose (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-2b",
+   "rd-child-3c"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after most recent dose (minimum 4 week interval), then last dose between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-2b",
+   "rd-child-3d"
+  ],
+  "answer": "Give 1 more dose of PCV[1] between the ages of 12 through 15 months (given at least 8 weeks after the most recent dose). Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5a"
+  ],
+  "answer": "Give 2 doses of PCV[1], 8 weeks apart. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5b",
+   "rd-child-6a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, preferably 8 weeks after initial dose (minimum 4 week interval), then last dose at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5b",
+   "rd-child-6b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5c",
+   "rd-child-7a"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5c",
+   "rd-child-7b",
+   "rd-child-8a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5c",
+   "rd-child-7b",
+   "rd-child-8b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5c",
+   "rd-child-7c",
+   "rd-child-9a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-infant",
+  "ids": [
+   "rd-child-5c",
+   "rd-child-7c",
+   "rd-child-9b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10a"
+  ],
+  "answer": "Give 1 dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11a",
+   "rd-child-12a"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11a",
+   "rd-child-12b",
+   "rd-child-13a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11a",
+   "rd-child-12b",
+   "rd-child-13b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11a",
+   "rd-child-12c"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11b",
+   "rd-child-14a",
+   "rd-child-15a"
+  ],
+  "answer": "Give 1 more dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11b",
+   "rd-child-14a",
+   "rd-child-15b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11b",
+   "rd-child-14b",
+   "rd-child-16a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11b",
+   "rd-child-14b",
+   "rd-child-16b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11b",
+   "rd-child-14c"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11c",
+   "rd-child-17a",
+   "rd-child-18a"
+  ],
+  "answer": "Give 1 more dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11c",
+   "rd-child-17a",
+   "rd-child-18b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-norisk",
+  "ids": [
+   "rd-child-10b",
+   "rd-child-11c",
+   "rd-child-17b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19a",
+   "rd-child-20a"
+  ],
+  "answer": "Give 2 doses of PCV[1] at least 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19a",
+   "rd-child-20b"
+  ],
+  "answer": "Give 2 doses of PCV[1]: First dose, given at least 8 weeks after the dose of PPSV23, then second dose of PCV at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22a",
+   "rd-child-23a",
+   "rd-child-24a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22a",
+   "rd-child-23a",
+   "rd-child-24b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22a",
+   "rd-child-23b",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22a",
+   "rd-child-23b",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22b",
+   "rd-child-25a",
+   "rd-child-24a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22b",
+   "rd-child-25a",
+   "rd-child-24b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given at least 8 weeks after most recent dose of PCV or PPSV23, then last dose of PCV at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22b",
+   "rd-child-25b",
+   "rd-child-24a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22b",
+   "rd-child-25b",
+   "rd-child-24b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22b",
+   "rd-child-25c",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22b",
+   "rd-child-25c",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22c",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21a",
+   "rd-child-22c",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22a",
+   "rd-child-25a",
+   "rd-child-24a"
+  ],
+  "answer": "Give 2 more doses of PCV[1] 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22a",
+   "rd-child-25a",
+   "rd-child-24b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given at least 8 weeks after the dose of PPSV23, then last dose at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22a",
+   "rd-child-25b",
+   "rd-child-24a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22a",
+   "rd-child-25b",
+   "rd-child-24b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22a",
+   "rd-child-25c",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22a",
+   "rd-child-25c",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22b",
+   "rd-child-25a",
+   "rd-child-24a"
+  ],
+  "answer": "Give 2 more doses of PCV[1] 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22b",
+   "rd-child-25a",
+   "rd-child-24b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given at least 8 weeks after the dose of PPSV23, then last dose of PCV at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22b",
+   "rd-child-25b",
+   "rd-child-24a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22b",
+   "rd-child-25b",
+   "rd-child-24b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22b",
+   "rd-child-25c",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22b",
+   "rd-child-25c",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22c",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21b",
+   "rd-child-22c",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26a",
+   "rd-child-25a",
+   "rd-child-24a"
+  ],
+  "answer": "Give 2 more doses of PCV[1] 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26a",
+   "rd-child-25a",
+   "rd-child-24b"
+  ],
+  "answer": "Give 2 more doses of PCV[1] 8 weeks apart. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26a",
+   "rd-child-25b",
+   "rd-child-24a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26a",
+   "rd-child-25b",
+   "rd-child-24b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26a",
+   "rd-child-25c",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26a",
+   "rd-child-25c",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26b",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21c",
+   "rd-child-26b",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21d",
+   "rd-child-27a",
+   "rd-child-28a",
+   "rd-child-24a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21d",
+   "rd-child-27a",
+   "rd-child-28a",
+   "rd-child-24b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21d",
+   "rd-child-27a",
+   "rd-child-28b",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21d",
+   "rd-child-27a",
+   "rd-child-28b",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21d",
+   "rd-child-27b",
+   "rd-child-24a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-chronic",
+  "ids": [
+   "rd-child-19b",
+   "rd-child-21d",
+   "rd-child-27b",
+   "rd-child-24b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29a",
+   "rd-child-30a"
+  ],
+  "answer": "Give 2 doses of PCV[1] at least 8 weeks apart. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29a",
+   "rd-child-30b"
+  ],
+  "answer": "Give 2 doses of PCV[1]: First dose, given 8 weeks after the dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32a",
+   "rd-child-33a",
+   "rd-child-34a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32a",
+   "rd-child-33a",
+   "rd-child-34b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32a",
+   "rd-child-33b",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32a",
+   "rd-child-33b",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32b",
+   "rd-child-35a",
+   "rd-child-34a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32b",
+   "rd-child-35a",
+   "rd-child-34b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32b",
+   "rd-child-35b",
+   "rd-child-34a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32b",
+   "rd-child-35b",
+   "rd-child-34b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32b",
+   "rd-child-35c",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of PCV20 or PPSV23 at least 8 weeks after last dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32b",
+   "rd-child-35c",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32c",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31a",
+   "rd-child-32c",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32a",
+   "rd-child-35a",
+   "rd-child-34a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given today, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32a",
+   "rd-child-35a",
+   "rd-child-34b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after prior dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32a",
+   "rd-child-35b",
+   "rd-child-34a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32a",
+   "rd-child-35b",
+   "rd-child-34b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32a",
+   "rd-child-35c",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32a",
+   "rd-child-35c",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32b",
+   "rd-child-35a",
+   "rd-child-34a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PCV, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32b",
+   "rd-child-35a",
+   "rd-child-34b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32b",
+   "rd-child-35b",
+   "rd-child-34a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32b",
+   "rd-child-35b",
+   "rd-child-34b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32b",
+   "rd-child-35c",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32b",
+   "rd-child-35c",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32c",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31b",
+   "rd-child-32c",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36a",
+   "rd-child-35a",
+   "rd-child-34a"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given today, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36a",
+   "rd-child-35a",
+   "rd-child-34b"
+  ],
+  "answer": "Give 2 more doses of PCV[1]: Next dose, given 8 weeks after most recent dose of PPSV23, then last dose of PCV at least 8 weeks later. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36a",
+   "rd-child-35b",
+   "rd-child-34a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after last dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36a",
+   "rd-child-35b",
+   "rd-child-34b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PCV or PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after prior dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36a",
+   "rd-child-35c",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36a",
+   "rd-child-35c",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36b",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31c",
+   "rd-child-36b",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31d",
+   "rd-child-37a",
+   "rd-child-38a",
+   "rd-child-34a"
+  ],
+  "answer": "Give 1 more dose of PCV[1] today. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31d",
+   "rd-child-37a",
+   "rd-child-38a",
+   "rd-child-34b"
+  ],
+  "answer": "Give 1 more dose of PCV[1] at least 8 weeks after most recent dose of PPSV23. If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after prior dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If a child started the PCV series with PCV13, they may complete the series with PCV15 or PCV20 without giving additional doses. The PCV series does not need to be restarted.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31d",
+   "rd-child-37a",
+   "rd-child-38b",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31d",
+   "rd-child-37a",
+   "rd-child-38b",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31d",
+   "rd-child-37b",
+   "rd-child-34a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "child-IC",
+  "ids": [
+   "rd-child-29b",
+   "rd-child-31d",
+   "rd-child-37b",
+   "rd-child-34b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-groupC",
+   "rd-teen-1a"
+  ],
+  "answer": "105 Give 1 dose of PPSV23 at least 8 weeks after any prior dose of PCV[1]. Footnotes: 1. PCV includes PCV7, PCV13, and PCV15.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it"
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-groupC",
+   "rd-teen-1b"
+  ],
+  "answer": "106 Schedule complete.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it"
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2a",
+   "rd-teen-3a"
+  ],
+  "answer": "Give 1 dose of PCV[1,2]. If PCV20 was given, schedule is then complete. If PCV15 was given, administer 1 dose of PPSV23 at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. If PCV20 was given, schedule is then complete. If PPSV23 was given, then administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. 2. PCV15 or PCV20 should be administered regardless of prior PCV7 receipt.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2a",
+   "rd-teen-3b"
+  ],
+  "answer": "Give 1 dose of PCV[1,2] at least 8 weeks after most recent dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. 2. PCV15 or PCV20 should be administered regardless of prior PCV7 receipt.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2a",
+   "rd-teen-1b",
+   "rd-teen-4b"
+  ],
+  "answer": "Give 1 dose of PCV[1,2] at least 8 weeks after most recent dose of PPSV23. Footnotes: 1. PCV includes PCV13 and PCV15. These vaccines can be used interchangeably. 2. PCV13 or PCV15 should be administered regardless of prior PCV7 receipt.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-5b",
+   "rd-teen-4a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. If PCV20 was given, schedule is then complete. If PPSV23 was given, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV13 or PCV15.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-5a",
+   "rd-teen-4a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV[1]. Schedule is then complete. Footnotes: 1. If PCV13 was given initially and a dose of PPSV23 is given now, administer either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-5b",
+   "rd-teen-4b"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If not, give either 1 dose of PCV20 or a second dose of PPSV23 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-5a",
+   "rd-teen-4b"
+  ],
+  "answer": "If at least 1 dose of either PCV15 or PCV20 was given at any age, schedule is complete. If not, give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV13 and 5 years after the first dose of PPSV23. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-4c",
+   "rd-teen-5a"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-4c",
+   "rd-teen-5b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-risk-Egroup",
+   "rd-teen-2b",
+   "rd-teen-1b",
+   "rd-teen-4b"
+  ],
+  "answer": "Schedule complete for now.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-teen-groupD",
+   "rd-teen-3a",
+   "rd-teen-2a"
+  ],
+  "answer": "Give 1 dose of PCV[1,2]. If PCV20 was given, schedule is then complete. If PCV15 was given, administer 1 dose of PPSV23 at least 8 weeks later. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. 2. PCV15 or PCV20 should be administered regardless of prior PCV7 receipt.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-teen-groupD",
+   "rd-teen-2a",
+   "rd-teen-3b"
+  ],
+  "answer": "Give 1 dose of PCV[1,2] at least 8 weeks after most recent dose of PPSV23. Schedule is then complete. Footnotes: 1. PCV includes PCV15 or PCV20. 2. PCV15 or PCV20 should be administered regardless of prior PCV7 receipt.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-teen-groupD",
+   "rd-teen-2b",
+   "rd-teen-3a"
+  ],
+  "answer": "If at least 1 dose of PCV20 was given at any age, schedule is complete. If PCV15 was given at or after age 72 months , then give 1 dose of PPSV23 at least 8 weeks after most recent dose of PCV13 or PCV15. Schedule is then complete. If PCV13 was given (at any age) or PCV15 was given only before age 72 months , then give 1 dose of either PCV20 or PPSV23 at least 8 weeks after most recent dose of PCV13 or PCV15. Schedule is then complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "teen6-18",
+  "ids": [
+   "chk-teen-groupD",
+   "rd-teen-3b",
+   "rd-teen-2b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-groupA",
+   "rd-adult-1a-GrpA"
+  ],
+  "answer": "Give 1 dose of PPSV23. A second and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "at 19-49 the 'has the patient ever received PPSV23' question is always the GrpB pair whatever the risk group - measured live with an HIV patient"
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-groupA",
+   "rd-adult-1b-GrpA"
+  ],
+  "answer": "Schedule complete for now. Reminder: A second and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "at 19-49 the 'has the patient ever received PPSV23' question is always the GrpB pair whatever the risk group - measured live with an HIV patient"
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1a-GrpB",
+   "rd-adult-2a"
+  ],
+  "answer": "Give one dose of PCV15, PCV20, or PCV21. If PCV20 or PCV21 is used, their pneumococcal vaccinations are complete. If PCV15 is used, follow with one dose of PPSV23 to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[1], cochlear implants, or cerebrospinal fluid leaks. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them. Footnotes: 1. Immunocompromising conditions include: Chronic renal failure Congenital or acquired asplenia Congenital or acquired immunodeficiencies (Includes B- [humoral] or T-lymphocyte deficiency, complement deficiencies [particularly C1, C2, C3, and C4 deficiencies], and phagocytic disorders [excluding chronic granulomatous disease]) Generalized malignancy HIV infection Hodgkin disease latrogenic immunosuppression (Diseases requiring treatment with immunosuppressive drugs, including long-term systemic corticosteroids and radiation therapy) Leukemia Lymphoma Multiple myeloma Nephrotic syndrome Sickle cell disease or other hemoglobinopathies Solid organ transplant",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-groupB",
+   "rd-adult-1a-GrpB",
+   "rd-adult-2b"
+  ],
+  "answer": "Give 1 dose of PPSV23 at least 8 weeks after previous PCV13 dose. A second and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1b-GrpB",
+   "rd-adult-2a"
+  ],
+  "answer": "Give one dose of PCV15, PCV20, or PCV21 at least 1 year after their last dose of PPSV23. Regardless of which vaccine is used (PCV15, PCV20, or PCV21), their pneumococcal vaccinations are complete. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1a-GrpB",
+   "rd-adult-2b",
+   "chk-groupC",
+   "chk-groupB"
+  ],
+  "answer": "Give one dose of PPSV23[1] at least 8 weeks after PCV13. Give a second dose of PPSV23 at least 5 years after the first PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years as long as at least 5 years have passed since the second dose of PPSV23. Footnotes: 1. One dose of PCV20 may be used if PPSV23 is not available. If PCV20 is used, their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1a-GrpB",
+   "rd-adult-2b"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1a-GrpB",
+   "rd-adult-2b",
+   "chk-groupB",
+   "chk-groupA"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete. OR Give one dose of PPSV23 at least 8 weeks after PCV13. Check this app when your patient turns 65 years old to see if any pneumococcal vaccines are recommended for them.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1a-GrpB",
+   "rd-adult-2b",
+   "chk-groupC",
+   "chk-groupA",
+   "chk-groupB"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete. OR Give one dose of PPSV23 at least 8 weeks after PCV13. Then give one dose of PCV20, PCV21, or PPSV23 at least 5 years after the first PPSV23 dose. Check this app when your patient turns 65 years old to see if any pneumococcal vaccines are recommended for them.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1b-GrpB",
+   "rd-adult-2b",
+   "chk-groupC",
+   "chk-groupB"
+  ],
+  "answer": "If your patient has only received 1 dose of PPSV23 , give a second dose of PPSV23[1] at least 8 weeks after PCV13 and at least 5 years after the first PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years as long as at least 5 years have passed since the second dose of PPSV23. If your patient has received 2 doses of PPSV23 , no additional doses of any type of pneumococcal vaccine are recommended at this time. A third and final dose of PPSV23 is not indicated until age 65 years as long as at least 5 years have passed since the second dose of PPSV23. Footnotes: 1. One dose of PCV20 may be used if PPSV23 is not available. If PCV20 is used, their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1b-GrpB",
+   "rd-adult-2b",
+   "chk-groupA"
+  ],
+  "answer": "No additional doses of any type of pneumococcal vaccine are recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1b-GrpB",
+   "rd-adult-2b",
+   "chk-groupB",
+   "chk-groupA"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose or give no additional pneumococcal vaccines. If PCV20 or PCV21 is administered, their pneumococcal vaccinations are complete. If PCV20 or PCV21 is not administered, check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1b-GrpB",
+   "rd-adult-2b",
+   "chk-groupC",
+   "rd-adult-1a-GrpC"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-risk-adult-yes",
+   "rd-adult-1b-GrpB",
+   "rd-adult-2b",
+   "chk-groupC",
+   "rd-adult-1b-GrpC"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose or give no additional pneumococcal vaccines. If PCV20 or PCV21 is administered, their pneumococcal vaccinations are complete. If PCV20 or PCV21 is not administered, check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-groupC",
+   "rd-adult-1b-GrpC",
+   "rd-adult-2b"
+  ],
+  "answer": "Give a second dose of PPSV23 at least 8 weeks after previous PCV13 dose and at least 5 years after the first PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-groupC",
+   "rd-adult-1c-GrpC",
+   "rd-adult-2a"
+  ],
+  "answer": "Give 1 dose of PCV13 at least 1 year after most recent PPSV23 dose. A third and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it"
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-groupC",
+   "rd-adult-1c-GrpC",
+   "rd-adult-2b"
+  ],
+  "answer": "Schedule complete for now. Reminder: A third and final dose of PPSV23 is not indicated until age 65 years and at least 5 years since the prior dose of PPSV23.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "an option it tests is not on the live page - it survives only inside an HTML comment, so nobody can select it"
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-pcv-adult-yes",
+   "chk-pcv-adult-20"
+  ],
+  "answer": "Regardless of whether the patient has a risk condition, no vaccine recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.",
+  "patient": "PCV20 or PCV21",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-pcv-adult-yes",
+   "chk-pcv-adult-15",
+   "chk-adult-15-PPSV23-no",
+   "chk-risk-adultrisk-yes"
+  ],
+  "answer": "Give one dose of PPSV23[1] to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[2], cochlear implants, or cerebrospinal fluid leaks. Footnotes: 1. If PPSV23 is not available, one dose of PCV20 or PCV21 may be given. 2. Immunocompromising conditions include: Chronic renal failure Congenital or acquired asplenia Congenital or acquired immunodeficiencies (Includes B- [humoral] or T-lymphocyte deficiency, complement deficiencies [particularly C1, C2, C3, and C4 deficiencies], and phagocytic disorders [excluding chronic granulomatous disease]) Generalized malignancy HIV infection Hodgkin disease latrogenic immunosuppression (Diseases requiring treatment with immunosuppressive drugs, including long-term systemic corticosteroids and radiation therapy) Leukemia Lymphoma Multiple myeloma Nephrotic syndrome Sickle cell disease or other hemoglobinopathies Solid organ transplant",
+  "patient": "PCV15",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-pcv-adult-yes",
+   "chk-pcv-adult-15",
+   "chk-adult-15-PPSV23-no",
+   "chk-risk-adultrisk-no"
+  ],
+  "answer": "PCV15 was inadvertently adminstered. Adults 19\u201349 years of age without a risk condition are not recommended pneumococcal vaccination. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.",
+  "patient": "PCV15",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult19-49",
+  "ids": [
+   "chk-pcv-adult-yes",
+   "chk-pcv-adult-15",
+   "chk-adult-15-PPSV23-yes"
+  ],
+  "answer": "Regardless of whether the patient has a risk condition, no vaccine recommended at this time. Check this app when your patient turns 50 years old to see if any pneumococcal vaccines are recommended for them.",
+  "patient": "PCV15",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1a"
+  ],
+  "answer": "Give one dose of PCV15, PCV20, or PCV21. If PCV20 or PCV21 is used, their pneumococcal vaccinations are complete. If PCV15 is used, follow with one dose of PPSV23[1] to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[2], cochlear implants, or cerebrospinal fluid leaks. Footnotes: 1. If PPSV23 was inadvertently given before PCV15, one dose of PCV15, PCV20, or PCV21 should be given at least 1 year after PPSV23. 2. Immunocompromising conditions include: Chronic renal failure Congenital or acquired asplenia Congenital or acquired immunodeficiencies (Includes B- [humoral] or T-lymphocyte deficiency, complement deficiencies [particularly C1, C2, C3, and C4 deficiencies], and phagocytic disorders [excluding chronic granulomatous disease]) Generalized malignancy HIV infection Hodgkin disease latrogenic immunosuppression (Diseases requiring treatment with immunosuppressive drugs, including long-term systemic corticosteroids and radiation therapy) Leukemia Lymphoma Multiple myeloma Nephrotic syndrome Sickle cell disease or other hemoglobinopathies Solid organ transplant",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-pcv-adult-yes",
+   "rd-pcv-adult-20"
+  ],
+  "answer": "Their pneumococcal vaccinations are complete.",
+  "patient": "PCV20 or PCV21",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-pcv-adult-yes",
+   "rd-pcv-adult-15",
+   "rd-adult-15-PPSV23-no"
+  ],
+  "answer": "Give one dose of PPSV23[1] to complete their pneumococcal vaccinations. The recommended interval between PCV15 and PPSV23 is at least 1 year. The minimum interval is 8 weeks and can be considered in adults with immunocompromising conditions[2], cochlear implants, or cerebrospinal fluid leaks. Footnotes: 1. If PPSV23 is not available, one dose of PCV20 or PCV21 may be given. 2. Immunocompromising conditions include: Chronic renal failure Congenital or acquired asplenia Congenital or acquired immunodeficiencies (Includes B- [humoral] or T-lymphocyte deficiency, complement deficiencies [particularly C1, C2, C3, and C4 deficiencies], and phagocytic disorders [excluding chronic granulomatous disease]) Generalized malignancy HIV infection Hodgkin disease latrogenic immunosuppression (Diseases requiring treatment with immunosuppressive drugs, including long-term systemic corticosteroids and radiation therapy) Leukemia Lymphoma Multiple myeloma Nephrotic syndrome Sickle cell disease or other hemoglobinopathies Solid organ transplant",
+  "patient": "PCV15",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-pcv-adult-yes",
+   "rd-pcv-adult-15",
+   "rd-adult-15-PPSV23-yes"
+  ],
+  "answer": "Their pneumococcal vaccinations are complete.",
+  "patient": "PCV15",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1a",
+   "chk-groupA"
+  ],
+  "answer": "Consider discussing PCV13 vaccination with your patient (it is recommended for this patient based on shared clinical decision-making). If you and your patient decide together that PCV13 is appropriate for them, then give 1 dose of PCV13 followed by 1 dose of PPSV23 at least 1 year later. If you and your patient decide together that PCV13 is not appropriate for them, give 1 dose of PPSV23 now. Considerations for shared clinical decision-making for PCV13 use among adults \u226565 years old PCV13 is a safe and effective vaccine for older adults, but in most communities the risk of exposure to PCV13-serotypes is low because of indirect effects from pediatric PCV13 use. The following adults \u226565 years old are potentially at higher risk of exposure to PCV13-serotypes and so may have greater-than-average benefit from PCV13 vaccination: Residing in nursing homes and other long-term care facilities Residing in settings with low pediatric PCV13 uptake or traveling to settings with no pediatric PCV13 program PCV13-type invasive pneumococcal disease incidence increases with increasing age and is higher among individuals with chronic heart, lung, and liver disease, diabetes, alcoholism, and those who smoke cigarettes or those who have more than one chronic medical condition. While indirect effects from pediatric PCV13 use were documented for these groups of adults and were comparable to those observed among healthy adults, the residual PCV13-type disease burden remains higher in these groups. Therefore, providers/practices caring for many patients in these groups may consider offering PCV13 to their patients who are \u226565 years old and who have not previously received PCV13.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1a",
+   "chk-groupB"
+  ],
+  "answer": "Give 1 dose of PCV13. Then give 1 dose of PPSV23 at least 8 weeks later.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1a",
+   "chk-groupC"
+  ],
+  "answer": "Give 1 dose of PCV13. Then give 1 dose of PPSV23 at least 8 weeks later.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1b"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1b",
+   "chk-groupA"
+  ],
+  "answer": "Give one dose of PCV20, PCV21, or PPSV23 at least 1 year after PCV13. Regardless of which vaccine is used (PCV20, PCV21, or PPSV23), their pneumococcal vaccinations are complete. However, if PPSV23 is administered, use shared clinical decision-making to decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1b",
+   "chk-groupB"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 1 year after PCV13 or give one dose of PPSV23 at least 8 weeks after PCV13. Regardless of which vaccine is used (PCV20, PCV21, or PPSV23), their pneumococcal vaccinations are complete. However, if PPSV23 is administered, use shared clinical decision-making to decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1a",
+   "rd-OA2_1b",
+   "chk-groupC"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 1 year after PCV13 or give one dose of PPSV23 at least 8 weeks after PCV13. Regardless of which vaccine is used (PCV20, PCV21, or PPSV23), their pneumococcal vaccinations are complete. However, if PPSV23 is administered, use shared clinical decision-making to decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA4_1a"
+  ],
+  "answer": "Give one dose of PCV15, PCV20, or PCV21 at least 1 year after the last dose of PPSV23. Regardless of which vaccine is used (PCV15, PCV20, or PCV21), their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA2_1a",
+   "chk-groupA"
+  ],
+  "answer": "Consider discussing PCV13 vaccination with your patient (it is recommended for this patient based on shared clinical decision-making). If you and your patient decide together that PCV13 is appropriate for them, then give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. Then give a final dose of PPSV23 1 year after PCV13 dose and at least 5 years after most recent PPSV23 dose. If you and your patient decide together that PCV13 is not appropriate for them, give a final dose of PPSV23 at least 5 years after most recent PPSV23 dose. Considerations for shared clinical decision-making for PCV13 use among adults \u226565 years old PCV13 is a safe and effective vaccine for older adults, but in most communities the risk of exposure to PCV13-serotypes is low because of indirect effects from pediatric PCV13 use. The following adults \u226565 years old are potentially at higher risk of exposure to PCV13-serotypes and so may have greater-than-average benefit from PCV13 vaccination: Residing in nursing homes and other long-term care facilities Residing in settings with low pediatric PCV13 uptake or traveling to settings with no pediatric PCV13 program PCV13-type invasive pneumococcal disease incidence increases with increasing age and is higher among individuals with chronic heart, lung, and liver disease, diabetes, alcoholism, and those who smoke cigarettes or those who have more than one chronic medical condition. While indirect effects from pediatric PCV13 use were documented for these groups of adults and were comparable to those observed among healthy adults, the residual PCV13-type disease burden remains higher in these groups. Therefore, providers/practices caring for many patients in these groups may consider offering PCV13 to their patients who are \u226565 years old and who have not previously received PCV13.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA2_1a",
+   "chk-groupB"
+  ],
+  "answer": "Give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. Then give 1 more dose of PPSV23 at least 8 weeks after PCV13 dose and at least 5 years after most recent PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA2_1a",
+   "chk-groupC"
+  ],
+  "answer": "Give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. Then give 1 more dose of PPSV23 at least 8 weeks after PCV13 dose and at least 5 years after most recent PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA4_1b",
+   "rd-OA5_1a",
+   "chk-risk-adultOA5-no"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete. OR Give one more dose of PPSV23 at least 1 year after PCV13 and at least 5 years after previous PPSV23 dose. Their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA4_1b",
+   "rd-OA5_1a"
+  ],
+  "answer": "Give one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of which vaccine is used (PCV20 or PCV21), their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA4_1b",
+   "rd-OA5_1b"
+  ],
+  "answer": "Based on shared clinical decision-making, decide whether to administer one dose of PCV20 or PCV21 at least 5 years after the last pneumococcal vaccine dose. Regardless of whether PCV20 or PCV21 is administered, their pneumococcal vaccinations are complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA2_1b",
+   "chk-groupA"
+  ],
+  "answer": "Give 1 more dose of PPSV23 at least 1 year after previous PCV13 dose and at least 5 years after previous PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA2_1b",
+   "chk-groupB"
+  ],
+  "answer": "Give 1 more dose of PPSV23 at least 8 weeks after previous PCV13 dose and at least 5 years after previous PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA2_1b",
+   "chk-groupC"
+  ],
+  "answer": "Give 1 more dose of PPSV23 at least 8 weeks after previous PCV13 dose and at least 5 years after previous PPSV23 dose.",
+  "patient": "",
+  "reachable": false,
+  "unreachableBecause": "the 50+ page never asks the risk-factor question - measured twice live, where its own printout showed 'Risk Factors: N/A' and the literal placeholder 'Risk factors'"
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA4_1a"
+  ],
+  "answer": "Consider discussing PCV13 vaccination with your patient (it is recommended for this patient based on shared clinical decision-making). If you and your patient decide together that PCV13 is appropriate for them, then give 1 dose of PCV13 at least 1 year after previous PPSV23 dose. If you and your patient decide together that PCV13 is not appropriate for them, then no action is needed. Schedule complete. Considerations for shared clinical decision-making for PCV13 use among adults \u226565 years old PCV13 is a safe and effective vaccine for older adults, but in most communities the risk of exposure to PCV13-serotypes is low because of indirect effects from pediatric PCV13 use. The following adults \u226565 years old are potentially at higher risk of exposure to PCV13-serotypes and so may have greater-than-average benefit from PCV13 vaccination: Residing in nursing homes and other long-term care facilities Residing in settings with low pediatric PCV13 uptake or traveling to settings with no pediatric PCV13 program PCV13-type invasive pneumococcal disease incidence increases with increasing age and is higher among individuals with chronic heart, lung, and liver disease, diabetes, alcoholism, and those who smoke cigarettes or those who have more than one chronic medical condition. While indirect effects from pediatric PCV13 use were documented for these groups of adults and were comparable to those observed among healthy adults, the residual PCV13-type disease burden remains higher in these groups. Therefore, providers/practices caring for many patients in these groups may consider offering PCV13 to their patients who are \u226565 years old and who have not previously received PCV13.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ },
+ {
+  "file": "adult50+",
+  "ids": [
+   "rd-OA1_1b",
+   "rd-OA4_1b"
+  ],
+  "answer": "Schedule complete.",
+  "patient": "",
+  "reachable": true,
+  "unreachableBecause": null
+ }
+]

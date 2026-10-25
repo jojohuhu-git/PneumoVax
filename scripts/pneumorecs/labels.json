@@ -1,0 +1,750 @@
+{
+ "label": {
+  "rd-child-1a": "No",
+  "rd-child-1b": "Yes, 1 dose",
+  "rd-child-1c": "Yes, 2 doses",
+  "rd-child-1d": "Yes, 3 doses",
+  "rd-child-2a": "No",
+  "rd-child-2b": "Yes",
+  "rd-child-3a": "0 doses",
+  "rd-child-3b": "1 dose",
+  "rd-child-3c": "2 doses",
+  "rd-child-3d": "3 doses",
+  "rd-child-4a": "1 dose",
+  "rd-child-4b": "2 doses",
+  "rd-child-5a": "No",
+  "rd-child-5b": "Yes, 1 dose",
+  "rd-child-5c": "Yes, 2 or more doses",
+  "rd-child-6a": "Yes, it was given before age 12 months",
+  "rd-child-6b": "No, it was given at or since age 12 months",
+  "rd-child-7a": "0 doses",
+  "rd-child-7b": "1 dose",
+  "rd-child-7c": "2 or more doses",
+  "rd-child-8a": "1 dose",
+  "rd-child-8b": "2 doses",
+  "rd-child-9a": "0 doses",
+  "rd-child-9b": "1 or more doses",
+  "chk-risk-child-no": "No risk",
+  "chk-risk-child-groupA": "Chronic medical conditions (See below)",
+  "chk-risk-child-groupB": "Immunocompromising conditions (See below)",
+  "rd-child-19a": "No",
+  "rd-child-19b": "Yes",
+  "rd-child-20a": "No",
+  "rd-child-20b": "Yes",
+  "rd-child-21a": "0 doses",
+  "rd-child-21b": "1 dose",
+  "rd-child-21c": "2 doses",
+  "rd-child-21d": "3 doses",
+  "rd-child-22a": "0 doses",
+  "rd-child-22b": "1 dose",
+  "rd-child-22c": "2 doses",
+  "rd-child-23a": "1 dose",
+  "rd-child-23b": "2 doses",
+  "rd-child-24a": "No",
+  "rd-child-24b": "Yes",
+  "rd-child-25a": "0 doses",
+  "rd-child-25b": "1 dose",
+  "rd-child-25c": "2 doses",
+  "rd-child-26a": "0 doses",
+  "rd-child-26b": "1 or more doses",
+  "rd-child-27a": "0 doses",
+  "rd-child-27b": "1 dose",
+  "rd-child-28a": "0 doses",
+  "rd-child-28b": "1 dose",
+  "rd-child-29a": "No",
+  "rd-child-29b": "Yes",
+  "rd-child-30a": "No",
+  "rd-child-30b": "Yes",
+  "rd-child-31a": "0 doses",
+  "rd-child-31b": "1 dose",
+  "rd-child-31c": "2 doses",
+  "rd-child-31d": "3 doses",
+  "rd-child-32a": "0 doses",
+  "rd-child-32b": "1 dose",
+  "rd-child-32c": "2 doses",
+  "rd-child-33a": "1 dose",
+  "rd-child-33b": "2 doses",
+  "rd-child-34a": "No",
+  "rd-child-34b": "Yes",
+  "rd-child-35a": "0 doses",
+  "rd-child-35b": "1 dose",
+  "rd-child-35c": "2 doses",
+  "rd-child-36a": "0 doses",
+  "rd-child-36b": "1 or more doses",
+  "rd-child-37a": "0 doses",
+  "rd-child-37b": "1 dose",
+  "rd-child-38a": "0 doses",
+  "rd-child-38b": "1 dose",
+  "rd-child-10a": "No",
+  "rd-child-10b": "Yes",
+  "rd-child-11a": "0 doses",
+  "rd-child-11b": "1 dose",
+  "rd-child-11c": "2 or more doses",
+  "rd-child-12a": "0 doses",
+  "rd-child-12b": "1 dose",
+  "rd-child-12c": "2 doses",
+  "rd-child-13a": "0 doses",
+  "rd-child-13b": "1 dose",
+  "rd-child-14a": "0 doses",
+  "rd-child-14b": "1 dose",
+  "rd-child-14c": "2 doses",
+  "rd-child-15a": "0 doses",
+  "rd-child-15b": "1 dose",
+  "rd-child-16a": "0 doses",
+  "rd-child-16b": "1 dose",
+  "rd-child-17a": "0 doses",
+  "rd-child-17b": "1 or more doses",
+  "rd-child-18a": "0 doses",
+  "rd-child-18b": "1 dose",
+  "chk-risk-teen-no": "No risk factors",
+  "chk-teen-groupD": "Chronic medical conditions (See below)",
+  "chk-risk-Egroup": "Immunocompromising conditions (See below)",
+  "rd-teen-1a": "No",
+  "rd-teen-1b": "Yes",
+  "rd-teen-2a": "No",
+  "rd-teen-2b": "Yes",
+  "rd-teen-3a": "No",
+  "rd-teen-3b": "Yes",
+  "rd-teen-5a": "No",
+  "rd-teen-5b": "Yes",
+  "rd-teen-4a": "0 doses",
+  "rd-teen-4b": "1 dose",
+  "rd-teen-4c": "2 doses",
+  "chk-pcv-adult-no": "No",
+  "chk-pcv-adult-yes": "Yes",
+  "chk-pcv-adult-15": "PCV15",
+  "chk-pcv-adult-20": "PCV20 or PCV21",
+  "chk-adult-15-PPSV23-no": "No/Unknown",
+  "chk-adult-15-PPSV23-yes": "Yes",
+  "chk-risk-adultrisk-no": "No",
+  "chk-risk-adultrisk-yes": "Yes",
+  "chk-risk-adult-no": "No risk factors",
+  "chk-risk-adult-yes": "Yes, one of these risk conditions",
+  "chk-groupA": "Chronic health conditions (See below)",
+  "chk-groupB": "CSF leak or cochlear implant (See below)",
+  "chk-groupC": "Immunocompromising conditions (See below)",
+  "rd-adult-1a-GrpA": "No/Unknown",
+  "rd-adult-1b-GrpA": "Yes",
+  "rd-adult-1a-GrpB": "No/Unknown",
+  "rd-adult-1b-GrpB": "Yes",
+  "rd-adult-2a": "No/Unknown",
+  "rd-adult-2b": "Yes",
+  "rd-adult-1a-GrpC": "1 dose",
+  "rd-adult-1b-GrpC": "2 doses",
+  "rd-pcv-adult-no": "No",
+  "rd-pcv-adult-yes": "Yes",
+  "rd-pcv-adult-15": "PCV15",
+  "rd-pcv-adult-20": "PCV20 or PCV21",
+  "rd-adult-15-PPSV23-no": "No/Unknown",
+  "rd-adult-15-PPSV23-yes": "Yes",
+  "rd-OA1_1a": "No/Unknown",
+  "rd-OA1_1b": "Yes",
+  "rd-OA2_1a": "No/Unknown",
+  "rd-OA2_1b": "Yes",
+  "rd-OA4_1a": "No/Unknown",
+  "rd-OA4_1b": "Yes",
+  "rd-OA5_1a": "Before age 65 years only",
+  "rd-OA5_1b": "At or after age 65 years",
+  "chk-risk-adultOA5-no": "None of the below risk factors",
+  "chk-adultOA5-groupC": "Yes, one of these risk factors"
+ },
+ "question": {
+  "rd-child-1a": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-1b": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-1c": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-1d": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-2a": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-2b": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-3a": "How many doses were given before age 7 months?",
+  "rd-child-3b": "How many doses were given before age 7 months?",
+  "rd-child-3c": "How many doses were given before age 7 months?",
+  "rd-child-3d": "How many doses were given before age 7 months?",
+  "rd-child-4a": "How many doses were given after age 7 months?",
+  "rd-child-4b": "How many doses were given after age 7 months?",
+  "rd-child-5a": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-5b": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-5c": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-6a": "Was the dose given before age 12 months?",
+  "rd-child-6b": "Was the dose given before age 12 months?",
+  "rd-child-7a": "How many doses were given before age 12 months?",
+  "rd-child-7b": "How many doses were given before age 12 months?",
+  "rd-child-7c": "How many doses were given before age 12 months?",
+  "rd-child-8a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-8b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-9a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-9b": "How many doses were given between the ages of 12 and 23 months?",
+  "chk-risk-child-no": "Does the patient have any of the following risk conditions?",
+  "chk-risk-child-groupA": "Does the patient have any of the following risk conditions?",
+  "chk-risk-child-groupB": "Does the patient have any of the following risk conditions?",
+  "rd-child-19a": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-19b": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-20a": "Has the patient ever received PPSV23?",
+  "rd-child-20b": "Has the patient ever received PPSV23?",
+  "rd-child-21a": "How many doses were given before age 12 months?",
+  "rd-child-21b": "How many doses were given before age 12 months?",
+  "rd-child-21c": "How many doses were given before age 12 months?",
+  "rd-child-21d": "How many doses were given before age 12 months?",
+  "rd-child-22a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-22b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-22c": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-23a": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-23b": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-24a": "Any prior dose of PPSV23?",
+  "rd-child-24b": "Any prior dose of PPSV23?",
+  "rd-child-25a": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-25b": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-25c": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-26a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-26b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-27a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-27b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-28a": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-28b": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-29a": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-29b": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-30a": "Has the patient ever received PPSV23?",
+  "rd-child-30b": "Has the patient ever received PPSV23?",
+  "rd-child-31a": "How many doses were given before age 12 months?",
+  "rd-child-31b": "How many doses were given before age 12 months?",
+  "rd-child-31c": "How many doses were given before age 12 months?",
+  "rd-child-31d": "How many doses were given before age 12 months?",
+  "rd-child-32a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-32b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-32c": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-33a": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-33b": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-34a": "Any prior dose of PPSV23?",
+  "rd-child-34b": "Any prior dose of PPSV23?",
+  "rd-child-35a": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-35b": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-35c": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-36a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-36b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-37a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-37b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-38a": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-38b": "How many doses were given between the ages of 24 and 71 months?",
+  "rd-child-10a": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-10b": "Has the patient ever received PCV13, PCV15, or PCV20?",
+  "rd-child-11a": "How many doses were given before age 12 months?",
+  "rd-child-11b": "How many doses were given before age 12 months?",
+  "rd-child-11c": "How many doses were given before age 12 months?",
+  "rd-child-12a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-12b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-12c": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-13a": "How many doses were given at or since age 24 months?",
+  "rd-child-13b": "How many doses were given at or since age 24 months?",
+  "rd-child-14a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-14b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-14c": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-15a": "How many doses were given at or since age 24 months?",
+  "rd-child-15b": "How many doses were given at or since age 24 months?",
+  "rd-child-16a": "How many doses were given at or since age 24 months?",
+  "rd-child-16b": "How many doses were given at or since age 24 months?",
+  "rd-child-17a": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-17b": "How many doses were given between the ages of 12 and 23 months?",
+  "rd-child-18a": "How many doses were given at or since age 24 months?",
+  "rd-child-18b": "How many doses were given at or since age 24 months?",
+  "chk-risk-teen-no": "Does the patient have any of the following risk conditions?",
+  "chk-teen-groupD": "Does the patient have any of the following risk conditions?",
+  "chk-risk-Egroup": "Does the patient have any of the following risk conditions?",
+  "rd-teen-1a": "Has the patient ever received PPSV23?",
+  "rd-teen-1b": "Has the patient ever received PPSV23?",
+  "rd-teen-2a": "Has the patient ever received PCV13, PCV15 or PCV20?",
+  "rd-teen-2b": "Has the patient ever received PCV13, PCV15 or PCV20?",
+  "rd-teen-3a": "Any prior doses of PPSV23?",
+  "rd-teen-3b": "Any prior doses of PPSV23?",
+  "rd-teen-5a": "Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?",
+  "rd-teen-5b": "Did the patient only receive PCV13, PCV15, or PCV20 before age 72 months?",
+  "rd-teen-4a": "How many prior doses of PPSV23?",
+  "rd-teen-4b": "How many prior doses of PPSV23?",
+  "rd-teen-4c": "How many prior doses of PPSV23?",
+  "chk-pcv-adult-no": "Has the patient ever received PCV15, PCV20, or PCV21?",
+  "chk-pcv-adult-yes": "Has the patient ever received PCV15, PCV20, or PCV21?",
+  "chk-pcv-adult-15": "Did the patient receive PCV15, PCV20, or PCV21?",
+  "chk-pcv-adult-20": "Did the patient receive PCV15, PCV20, or PCV21?",
+  "chk-adult-15-PPSV23-no": "Has the patient ever received PPSV23?",
+  "chk-adult-15-PPSV23-yes": "Has the patient ever received PPSV23?",
+  "chk-risk-adultrisk-no": "Does the patient have any of the following risk conditions?",
+  "chk-risk-adultrisk-yes": "Does the patient have any of the following risk conditions?",
+  "chk-risk-adult-no": "Does the patient have any of the following risk factors?",
+  "chk-risk-adult-yes": "Does the patient have any of the following risk conditions?",
+  "chk-groupA": "Does the patient have any of the following risk factors?",
+  "chk-groupB": "Does the patient have any of the following risk factors?",
+  "chk-groupC": "Does the patient have any of the following risk factors?",
+  "rd-adult-1a-GrpA": "Has the patient ever received PPSV23?",
+  "rd-adult-1b-GrpA": "Has the patient ever received PPSV23?",
+  "rd-adult-1a-GrpB": "Has the patient ever received PPSV23?",
+  "rd-adult-1b-GrpB": "Has the patient ever received PPSV23?",
+  "rd-adult-2a": "Has the patient ever received PCV13?",
+  "rd-adult-2b": "Has the patient ever received PCV13?",
+  "rd-adult-1a-GrpC": "Has your patient already received 1 or 2 doses of PPSV23?",
+  "rd-adult-1b-GrpC": "Has your patient already received 1 or 2 doses of PPSV23?",
+  "rd-pcv-adult-no": "Has the patient ever received PCV15, PCV20, or PCV21?",
+  "rd-pcv-adult-yes": "Has the patient ever received PCV15, PCV20, or PCV21?",
+  "rd-pcv-adult-15": "Did the patient receive PCV15, PCV20, or PCV21?",
+  "rd-pcv-adult-20": "Did the patient receive PCV15, PCV20, or PCV21?",
+  "rd-adult-15-PPSV23-no": "Has the patient ever received PPSV23?",
+  "rd-adult-15-PPSV23-yes": "Has the patient ever received PPSV23?",
+  "rd-OA1_1a": "Has the patient ever received PPSV23?",
+  "rd-OA1_1b": "Has the patient ever received PPSV23?",
+  "rd-OA2_1a": "Has the patient ever received PCV13?",
+  "rd-OA2_1b": "Has the patient ever received PCV13?",
+  "rd-OA4_1a": "Has the patient ever received PCV13?",
+  "rd-OA4_1b": "Has the patient ever received PCV13?",
+  "rd-OA5_1a": "Did your patient receive PPSV23 before age 65 years or at/after age 65 years?",
+  "rd-OA5_1b": "Did your patient receive PPSV23 before age 65 years or at/after age 65 years?",
+  "chk-risk-adultOA5-no": "Does your patient have any of the following risk factors?",
+  "chk-adultOA5-groupC": "Does your patient have any of the following risk factors?"
+ },
+ "pages": {
+  "rd-child-1a": [
+   "weeks7-6mo"
+  ],
+  "rd-child-1b": [
+   "weeks7-6mo"
+  ],
+  "rd-child-1c": [
+   "weeks7-6mo"
+  ],
+  "rd-child-1d": [
+   "weeks7-6mo"
+  ],
+  "rd-child-2a": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-2b": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-3a": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-3b": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-3c": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-3d": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-4a": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-4b": [
+   "weeks7mo-11mo"
+  ],
+  "rd-child-5a": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-5b": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-5c": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-6a": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-6b": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-7a": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-7b": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-7c": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-8a": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-8b": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-9a": [
+   "weeks12mo-23mo"
+  ],
+  "rd-child-9b": [
+   "weeks12mo-23mo"
+  ],
+  "chk-risk-child-no": [
+   "child-riskfactors",
+   "child-riskfactorssecond"
+  ],
+  "chk-risk-child-groupA": [
+   "child-riskfactors",
+   "child-riskfactorssecond"
+  ],
+  "chk-risk-child-groupB": [
+   "child-riskfactors",
+   "child-riskfactorssecond"
+  ],
+  "rd-child-19a": [
+   "child-groupA"
+  ],
+  "rd-child-19b": [
+   "child-groupA"
+  ],
+  "rd-child-20a": [
+   "child-groupA"
+  ],
+  "rd-child-20b": [
+   "child-groupA"
+  ],
+  "rd-child-21a": [
+   "child-groupA"
+  ],
+  "rd-child-21b": [
+   "child-groupA"
+  ],
+  "rd-child-21c": [
+   "child-groupA"
+  ],
+  "rd-child-21d": [
+   "child-groupA"
+  ],
+  "rd-child-22a": [
+   "child-groupA"
+  ],
+  "rd-child-22b": [
+   "child-groupA"
+  ],
+  "rd-child-22c": [
+   "child-groupA"
+  ],
+  "rd-child-23a": [
+   "child-groupA"
+  ],
+  "rd-child-23b": [
+   "child-groupA"
+  ],
+  "rd-child-24a": [
+   "child-groupA"
+  ],
+  "rd-child-24b": [
+   "child-groupA"
+  ],
+  "rd-child-25a": [
+   "child-groupA"
+  ],
+  "rd-child-25b": [
+   "child-groupA"
+  ],
+  "rd-child-25c": [
+   "child-groupA"
+  ],
+  "rd-child-26a": [
+   "child-groupA"
+  ],
+  "rd-child-26b": [
+   "child-groupA"
+  ],
+  "rd-child-27a": [
+   "child-groupA"
+  ],
+  "rd-child-27b": [
+   "child-groupA"
+  ],
+  "rd-child-28a": [
+   "child-groupA"
+  ],
+  "rd-child-28b": [
+   "child-groupA"
+  ],
+  "rd-child-29a": [
+   "child-groupB"
+  ],
+  "rd-child-29b": [
+   "child-groupB"
+  ],
+  "rd-child-30a": [
+   "child-groupB"
+  ],
+  "rd-child-30b": [
+   "child-groupB"
+  ],
+  "rd-child-31a": [
+   "child-groupB"
+  ],
+  "rd-child-31b": [
+   "child-groupB"
+  ],
+  "rd-child-31c": [
+   "child-groupB"
+  ],
+  "rd-child-31d": [
+   "child-groupB"
+  ],
+  "rd-child-32a": [
+   "child-groupB"
+  ],
+  "rd-child-32b": [
+   "child-groupB"
+  ],
+  "rd-child-32c": [
+   "child-groupB"
+  ],
+  "rd-child-33a": [
+   "child-groupB"
+  ],
+  "rd-child-33b": [
+   "child-groupB"
+  ],
+  "rd-child-34a": [
+   "child-groupB"
+  ],
+  "rd-child-34b": [
+   "child-groupB"
+  ],
+  "rd-child-35a": [
+   "child-groupB"
+  ],
+  "rd-child-35b": [
+   "child-groupB"
+  ],
+  "rd-child-35c": [
+   "child-groupB"
+  ],
+  "rd-child-36a": [
+   "child-groupB"
+  ],
+  "rd-child-36b": [
+   "child-groupB"
+  ],
+  "rd-child-37a": [
+   "child-groupB"
+  ],
+  "rd-child-37b": [
+   "child-groupB"
+  ],
+  "rd-child-38a": [
+   "child-groupB"
+  ],
+  "rd-child-38b": [
+   "child-groupB"
+  ],
+  "rd-child-10a": [
+   "child-norisk"
+  ],
+  "rd-child-10b": [
+   "child-norisk"
+  ],
+  "rd-child-11a": [
+   "child-norisk"
+  ],
+  "rd-child-11b": [
+   "child-norisk"
+  ],
+  "rd-child-11c": [
+   "child-norisk"
+  ],
+  "rd-child-12a": [
+   "child-norisk"
+  ],
+  "rd-child-12b": [
+   "child-norisk"
+  ],
+  "rd-child-12c": [
+   "child-norisk"
+  ],
+  "rd-child-13a": [
+   "child-norisk"
+  ],
+  "rd-child-13b": [
+   "child-norisk"
+  ],
+  "rd-child-14a": [
+   "child-norisk"
+  ],
+  "rd-child-14b": [
+   "child-norisk"
+  ],
+  "rd-child-14c": [
+   "child-norisk"
+  ],
+  "rd-child-15a": [
+   "child-norisk"
+  ],
+  "rd-child-15b": [
+   "child-norisk"
+  ],
+  "rd-child-16a": [
+   "child-norisk"
+  ],
+  "rd-child-16b": [
+   "child-norisk"
+  ],
+  "rd-child-17a": [
+   "child-norisk"
+  ],
+  "rd-child-17b": [
+   "child-norisk"
+  ],
+  "rd-child-18a": [
+   "child-norisk"
+  ],
+  "rd-child-18b": [
+   "child-norisk"
+  ],
+  "chk-risk-teen-no": [
+   "teen-riskfactors"
+  ],
+  "chk-teen-groupD": [
+   "teen-riskfactors"
+  ],
+  "chk-risk-Egroup": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-1a": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-1b": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-2a": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-2b": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-3a": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-3b": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-5a": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-5b": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-4a": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-4b": [
+   "teen-riskfactors"
+  ],
+  "rd-teen-4c": [
+   "teen-riskfactors"
+  ],
+  "chk-pcv-adult-no": [
+   "years19-49"
+  ],
+  "chk-pcv-adult-yes": [
+   "years19-49"
+  ],
+  "chk-pcv-adult-15": [
+   "years19-49"
+  ],
+  "chk-pcv-adult-20": [
+   "years19-49"
+  ],
+  "chk-adult-15-PPSV23-no": [
+   "years19-49"
+  ],
+  "chk-adult-15-PPSV23-yes": [
+   "years19-49"
+  ],
+  "chk-risk-adultrisk-no": [
+   "years19-49"
+  ],
+  "chk-risk-adultrisk-yes": [
+   "years19-49"
+  ],
+  "chk-risk-adult-no": [
+   "years19-49",
+   "over50yr"
+  ],
+  "chk-risk-adult-yes": [
+   "years19-49"
+  ],
+  "chk-groupA": [
+   "years19-49",
+   "over50yr"
+  ],
+  "chk-groupB": [
+   "years19-49",
+   "over50yr"
+  ],
+  "chk-groupC": [
+   "years19-49",
+   "over50yr"
+  ],
+  "rd-adult-1a-GrpA": [
+   "years19-49"
+  ],
+  "rd-adult-1b-GrpA": [
+   "years19-49"
+  ],
+  "rd-adult-1a-GrpB": [
+   "years19-49"
+  ],
+  "rd-adult-1b-GrpB": [
+   "years19-49"
+  ],
+  "rd-adult-2a": [
+   "years19-49"
+  ],
+  "rd-adult-2b": [
+   "years19-49"
+  ],
+  "rd-adult-1a-GrpC": [
+   "years19-49"
+  ],
+  "rd-adult-1b-GrpC": [
+   "years19-49"
+  ],
+  "rd-pcv-adult-no": [
+   "over50yr"
+  ],
+  "rd-pcv-adult-yes": [
+   "over50yr"
+  ],
+  "rd-pcv-adult-15": [
+   "over50yr"
+  ],
+  "rd-pcv-adult-20": [
+   "over50yr"
+  ],
+  "rd-adult-15-PPSV23-no": [
+   "over50yr"
+  ],
+  "rd-adult-15-PPSV23-yes": [
+   "over50yr"
+  ],
+  "rd-OA1_1a": [
+   "over50yr"
+  ],
+  "rd-OA1_1b": [
+   "over50yr"
+  ],
+  "rd-OA2_1a": [
+   "over50yr"
+  ],
+  "rd-OA2_1b": [
+   "over50yr"
+  ],
+  "rd-OA4_1a": [
+   "over50yr"
+  ],
+  "rd-OA4_1b": [
+   "over50yr"
+  ],
+  "rd-OA5_1a": [
+   "over50yr"
+  ],
+  "rd-OA5_1b": [
+   "over50yr"
+  ],
+  "chk-risk-adultOA5-no": [
+   "over50yr"
+  ],
+  "chk-adultOA5-groupC": [
+   "over50yr"
+  ]
+ }
+}
