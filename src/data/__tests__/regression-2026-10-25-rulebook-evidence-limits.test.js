@@ -33,6 +33,7 @@
 // row, and every child row is CDC's.
 import { describe, it, expect } from 'vitest';
 import { analyzeBoth } from '../../logic/validate.js';
+import { recommend } from '../../logic/recommend.js';
 import { DOSE_INTERVAL_RULES } from '../../logic/doseIntervalRules.js';
 import { EVIDENCE } from '../rulebook.js';
 import {
@@ -139,6 +140,63 @@ describe('the evidence-limits block: a conjugate after a PPSV23', () => {
   it('the page states the interval the adult row enforces', () => {
     const row = EVIDENCE.pairs.find((p) => /conjugate after a PPSV23/.test(p.pair));
     expect(row.adult).toContain(intervalPhrase({ months: ADULT_ADVISED_PCV_GAP_MONTHS }));
+  });
+});
+
+// ── The four patients in CLINICAL_SPEC.md §K-EVIDENCE's two tension tables ──
+//
+// The owner asked for the two asymmetries "organized into a table: age, risk,
+// vaccine schedule/intervals and the recommendations given with reference and
+// the tension". Those tables quote the engine, so the quotes are pinned here:
+// each pair differs ONLY in age, and that is the whole claim. A doc table that
+// quoted output nothing re-ran is the shape of the post-transplant drift.
+describe('§K-EVIDENCE tension 1 — the same 5-year gap, two authorities', () => {
+  const DOSES = { pcvDoses: [], ppsv23Doses: [{ date: '2024-01-01' }, { date: '2025-01-01' }] };
+  const RISK = ['asplenia'];
+
+  it('A: a 10-year-old with asplenia — voided, and the card can cite CDC', () => {
+    const v = lastDose({ ageMonths: 120, dob: '2016-10-25', riskIds: RISK, ...DOSES }, 'ppsv23');
+    expect(v.status).toBe('invalid');
+    expect(v.reasons[1]).toContain('Jan 1, 2030');
+    expect(DOSE_INTERVAL_RULES.find((r) => r.id === v.intervalRuleId).authority).toBe('CDC');
+    // nothing on this child's dose claims an owner determination
+    expect(v.detail).not.toContain('owner clinical determination');
+  });
+
+  it('B: a 60-year-old with asplenia and the SAME dates — same verdict, the app\'s own authority', () => {
+    const v = lastDose({ ageMonths: 729, dob: '1966-10-25', riskIds: RISK, ...DOSES }, 'ppsv23');
+    expect(v.status).toBe('invalid');
+    expect(v.reasons[1]).toContain('Jan 1, 2030');   // the same date as the child
+    expect(DOSE_INTERVAL_RULES.find((r) => r.id === v.intervalRuleId).authority).toBe('OWNER');
+    expect(v.detail).toContain('not by ACIP');
+  });
+});
+
+describe('§K-EVIDENCE tension 2 — a conjugate a week after a PPSV23', () => {
+  // Identical dates AND identical risk. Only the age differs.
+  const DOSES = {
+    pcvDoses: [{ date: '2026-01-08', product: 'PCV20' }],
+    ppsv23Doses: [{ date: '2026-01-01' }],
+  };
+  const RISK = ['asplenia'];
+
+  it('C: a 6-year-old — both doses valid, nothing said, and the series reads complete', () => {
+    const who = { ageMonths: 72, dob: '2020-10-25', riskIds: RISK, ...DOSES };
+    const v = lastDose(who, 'pcv');
+    expect(v.status).toBe('valid');
+    expect(v.intervalRuleId ?? null).toBeNull();
+    expect(v.reasons).toEqual([]);
+    const r = recommend({ ...who, today: TODAY });
+    expect(r.recs.some((x) => /complete/i.test(x.doseLabel ?? ''))).toBe(true);
+  });
+
+  it('D: a 60-year-old with the SAME dates and risk — the dose does not count', () => {
+    const who = { ageMonths: 729, dob: '1966-10-25', riskIds: RISK, ...DOSES };
+    const v = lastDose(who, 'pcv');
+    expect(v.status).toBe('invalid');
+    expect(v.intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    expect(v.reasons[0]).toContain('7 days');
+    expect(v.reasons[1]).toContain('Jan 8, 2027');
   });
 });
 

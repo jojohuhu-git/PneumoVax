@@ -1617,15 +1617,42 @@ states:
 | A conjugate after a PPSV23 | **No rule at all** — valid, silent, `intervalRuleId` null | Does not count when the PPSV23 is the only dose on record (`ADULT-PCV-AFTER-PPSV23`, OWNER); counts with a note where a PCV13 is also on record (Ruling F) |
 
 **TWO ASYMMETRIES ARE RECORDED, NOT RESOLVED — both are open questions for the owner.**
-Neither was changed, because changing either moves doses:
-1. **The same 5-year gap carries two different authorities.** A child's second PPSV23 inside
-   5 years is voided on CDC's authority; an adult's is voided on the owner's. The child row
-   rests on *“at least 5 years”* and the adult rows on *“should be administered”*, which is a
-   real difference in CDC's verbs — but it is the same number, the same vaccine pair, and the
-   same clinical question.
-2. **A conjugate after a PPSV23 is a hard stop in an adult and is not judged at all in a
-   child.** The adult bar is her ruling of 2026-10-24 (§K-INVALID); the child silence is
-   nobody's decision, it is simply a row that does not exist.
+Neither was changed, because changing either moves doses. **Every cell below is the running
+engine's own output**, printed by `scripts/` ad-hoc runs on 2026-10-25 and pinned by
+`regression-2026-10-25-rulebook-evidence-limits.test.js`; nothing in it is paraphrase.
+
+#### Tension 1 — the same 5-year gap, two different authorities
+
+Two patients, **identical dose dates**, differing only in age.
+
+| | Age | Risk | On the record | Interval the app applies | What the app says about the second dose | The reference that rests under it |
+|---|---|---|---|---|---|---|
+| **A** | 10 y | Asplenia (immunocompromising) | PPSV23 2024-01-01, PPSV23 2025-01-01 | ≥5 years, **minimum** | *“Given less than 5 years after the previous PPSV23 dose … This dose does not count toward the series … the next dose in this series can be given from Jan 1, 2030 at the earliest.”* | **CDC**, Child & Adolescent Schedule Notes: *“If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 **at least** 5 years after dose 1 PPSV23.”* (`CHILD-PPSV23-AFTER-PPSV23`) |
+| **B** | 60 y | Asplenia (immunocompromising) | PPSV23 2024-01-01, PPSV23 2025-01-01 | ≥5 years, **minimum** | The same verdict and the same 2030 date, plus: *“Enforced as a minimum by an owner clinical determination dated 2026-10-11, **not by ACIP**.”* | **OWNER, 2026-10-11.** ACIP words the adult interval *“should be administered”*; CDSI v4.64 carries `absMinInt = 0 days`. (`ADULT-PPSV23-AFTER-PPSV23`) |
+
+**The tension.** Same number, same vaccine pair, same clinical question — and the app answers
+both the same way — but one answer is CDC's and the other is hers. The ground for the split
+is a difference in CDC's **verb** (*“at least”* for the child, *“should be administered”* for
+the adult), not in the evidence. **Her options:** leave it (the verbs really do differ);
+or re-label the child row OWNER too (honest, costs a CDC citation on the card); or re-read
+the child note as advice and downgrade that row to a recommendation (**moves doses** — a
+child's early second PPSV23 would start counting).
+
+#### Tension 2 — a conjugate after a PPSV23: a hard stop in an adult, silent in a child
+
+Two patients, **identical dose dates and identical risk**, differing only in age.
+
+| | Age | Risk | On the record | Interval the app applies | What the app says | The reference that rests under it |
+|---|---|---|---|---|---|---|
+| **C** | 6 y | Asplenia (immunocompromising) | PPSV23 2026-01-01, PCV20 2026-01-08 (**7 days**) | **none — no rule exists** | Both doses `valid`. No note, no flag, `intervalRuleId` null. Recommendation card: **“PCV complete (includes PCV20)”** | **Nothing.** No paediatric row measures a conjugate from a PPSV23. |
+| **D** | 60 y | Asplenia (immunocompromising) | PPSV23 2026-01-01, PCV20 2026-01-08 (**7 days**) | ≥1 year, **minimum** | *“Given 7 days after the PPSV23 dose of Jan 1, 2026 … This dose does not count … can be given from Jan 8, 2027 at the earliest.”* Card: **“PCV20 or PCV21 ≥1 year after the conjugate dose of Jan 8, 2026”** | **OWNER, 2026-10-11**, restored 2026-10-24 (§K-INVALID). (`ADULT-PCV-AFTER-PPSV23`) |
+
+**The tension.** The same week-long gap declares a 6-year-old's series **complete** and costs
+a 60-year-old her dose and a year. The adult bar is the owner's ruling of 2026-10-24; the
+child silence is **nobody's decision** — it is a row that was never written. **Her options:**
+leave it (no source states a paediatric interval here either); or add a paediatric row
+(**moves doses** — and would need a source, which there is not); or re-examine whether the
+adult bar should be a note, which she set as a floor twice and a note once.
 
 Guard: `regression-2026-10-25-rulebook-evidence-limits.test.js` — every cell of that table is
 driven through `analyzeBoth()` on a named patient, because C14's own guard checks that every

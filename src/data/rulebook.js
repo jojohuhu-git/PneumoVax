@@ -222,6 +222,36 @@ export const AUTHORITIES = [
   },
 ];
 
+// ── The child / adult split, said out loud ──────────────────────────────
+//
+// OWNER, 2026-10-25: "for the rules make it clear distinctions on child vs
+// adult rules." The rules were already grouped by `rulebook`, under a small
+// grey heading that said only "Children" / "Adults" — which names the group
+// without saying what is DIFFERENT about it. The difference is the whole
+// point of the evidence block below: a child's numbers are CDC's minimums and
+// an adult's are CDC's recommended spacing, so the same short gap means two
+// different things.
+//
+// The ages are interpolated from ADULT_SCHED_MIN_M, so this heading and
+// section 1's boundary table can never name different lines.
+export const RULEBOOK_GROUPS = [
+  {
+    rulebook: 'child',
+    name: `Children — under ${monthsInWords(ADULT_SCHED_MIN_M)}`,
+    means: 'CDC states these as MINIMUM intervals, in those words. A dose given sooner does not count, and the series still owes one.',
+  },
+  {
+    rulebook: 'adult',
+    name: `Adults — ${monthsInWords(ADULT_SCHED_MIN_M)} and over`,
+    means: 'CDC states these as the RECOMMENDED spacing for the next dose, and states no minimum at all. Where a rule below still refuses a dose, it is tagged “this app” and the reason is in the block above.',
+  },
+  {
+    rulebook: 'any',
+    name: 'Any age',
+    means: 'Rules stated the same way for a child and for an adult.',
+  },
+];
+
 // ── GENERATED: every rule about the gap between two recorded doses ───────
 //
 // `interval` is the row's own `interval:` spec turned into words by

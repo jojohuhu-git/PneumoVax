@@ -11,7 +11,7 @@
 import React, { useState } from 'react';
 import {
   BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES,
-  OUTCOMES, AUTHORITIES, EVIDENCE, monthsInWords,
+  OUTCOMES, AUTHORITIES, EVIDENCE, RULEBOOK_GROUPS, monthsInWords,
 } from '../data/rulebook.js';
 
 function Section({ title, lead, children, open: initial = false }) {
@@ -29,7 +29,6 @@ function Section({ title, lead, children, open: initial = false }) {
 }
 
 const SOURCE_SCOPE = { child: 'children', adult: 'adults', any: 'any age' };
-const RULEBOOK_NAMES = { child: 'Children', adult: 'Adults', any: 'Any age' };
 const AUTHORITY_NAME = Object.fromEntries(AUTHORITIES.map((a) => [a.authority, a.name]));
 
 export default function Rulebook({ onClose }) {
@@ -180,12 +179,13 @@ export default function Rulebook({ onClose }) {
             </li>
           ))}
         </ul>
-        {['child', 'adult', 'any'].map((book) => {
-          const rows = INTERVAL_RULES.filter((r) => r.rulebook === book);
+        {RULEBOOK_GROUPS.map((g) => {
+          const rows = INTERVAL_RULES.filter((r) => r.rulebook === g.rulebook);
           if (!rows.length) return null;
           return (
-            <div key={book} className="rb-group">
-              <h4 className="rb-h4">{RULEBOOK_NAMES[book]}</h4>
+            <div key={g.rulebook} className="rb-group rb-book">
+              <h4 className="rb-h4">{g.name}</h4>
+              <p className="rb-book-lead">{g.means}</p>
               <ul className="rb-rule-list">
                 {rows.map((r) => (
                   <li key={r.id} className="rb-rule">

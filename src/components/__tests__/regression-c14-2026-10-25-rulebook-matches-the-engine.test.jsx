@@ -30,7 +30,7 @@ import { dirname, join } from 'node:path';
 import Rulebook from '../Rulebook.jsx';
 import {
   BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES,
-  OUTCOMES, AUTHORITIES, EVIDENCE, monthsInWords, ageInWords,
+  OUTCOMES, AUTHORITIES, EVIDENCE, RULEBOOK_GROUPS, monthsInWords, ageInWords,
 } from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
 import {
@@ -225,6 +225,33 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
       expect(o, r.id).toBeTruthy();
       expect(r.outcome).toBe(o.name);
       expect(r.outcomeMeans).toBe(o.means);
+    }
+  });
+
+  it('every rule group names its age range and says what kind of rule it holds', () => {
+    // OWNER, 2026-10-25: "for the rules make it clear distinctions on child vs
+    // adult rules." Naming the group ("Children") does not say what is
+    // DIFFERENT about it, which is the whole point of the evidence block.
+    const used = new Set(DOSE_INTERVAL_RULES.map((r) => r.rulebook));
+    for (const book of used) {
+      const g = RULEBOOK_GROUPS.find((x) => x.rulebook === book);
+      expect(g, book).toBeTruthy();
+      expect(g.means, book).toBeTruthy();
+    }
+    // the heading carries the boundary, from the constant the engine dispatches on
+    const child = RULEBOOK_GROUPS.find((g) => g.rulebook === 'child');
+    const adult = RULEBOOK_GROUPS.find((g) => g.rulebook === 'adult');
+    expect(child.name).toContain(monthsInWords(ADULT_SCHED_MIN_M));
+    expect(adult.name).toContain(monthsInWords(ADULT_SCHED_MIN_M));
+    // and the split they describe is the one the rules actually have
+    expect(/MINIMUM/.test(child.means)).toBe(true);
+    expect(/RECOMMENDED/.test(adult.means)).toBe(true);
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
+    for (const book of used) {
+      const g = RULEBOOK_GROUPS.find((x) => x.rulebook === book);
+      expect(screen.getAllByText(g.name).length, book).toBe(1);
+      expect(screen.getAllByText(g.means).length, book).toBe(1);
     }
   });
 

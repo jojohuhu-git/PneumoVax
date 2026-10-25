@@ -56,20 +56,55 @@ per age group. **Raise this with her** — she may not have meant children.
   stopped — which on `ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE` was misleading, because
   a SHORTER gap there is still caught by the floor row.
 
+### 4. "Make it clear distinctions on child vs adult rules"
+
+Each group in section 4 is now a band carrying its **age range** (interpolated from
+`ADULT_SCHED_MIN_M`, so it can never disagree with section 1's boundary table) and a one-line
+statement of what KIND of rule it holds:
+
+- **Children — under 19 years.** *“CDC states these as MINIMUM intervals, in those words. A
+  dose given sooner does not count, and the series still owes one.”*
+- **Adults — 19 years and over.** *“CDC states these as the RECOMMENDED spacing for the next
+  dose, and states no minimum at all. Where a rule below still refuses a dose, it is tagged
+  ‘this app’ …”*
+
+Guarded: every `rulebook` value the engine uses must have a group, the heading must carry the
+boundary constant, and the two leads must actually say MINIMUM and RECOMMENDED.
+
 ## Two things for her, recorded and NOT changed
 
-Both surfaced while measuring the nuance block. Each would move doses, so neither was
-touched. They are in `CLINICAL_SPEC.md` §K-EVIDENCE with the measurement.
+Both surfaced while measuring the nuance block; each would move doses. **Laid out as two
+tables in `CLINICAL_SPEC.md` §K-EVIDENCE** — age, risk, doses on record, interval applied,
+what the app actually says, and the reference under it — at her request on 2026-10-25. Every
+cell is the running engine's own output, and the four patients are pinned by
+`regression-2026-10-25-rulebook-evidence-limits.test.js` so the tables cannot drift from the
+code the way the post-transplant schedule did.
 
-1. **The same 5-year gap carries two different authorities.** A child's second PPSV23 inside
-   5 years is voided on **CDC's** authority; an adult's is voided on **the owner's**. The
-   child row rests on CDC's *"at least 5 years"* and the adult rows on *"should be
-   administered"* — a real difference in CDC's verbs, but the same number, the same vaccine
-   pair, the same clinical question. The page says both, plainly.
-2. **A conjugate after a PPSV23 is a hard stop in an adult and is not judged at all in a
-   child.** Measured: a 6-year-old with asplenia given PPSV23 then PCV20 a week later gets
-   `status: valid`, no rule, no note. The adult bar is her ruling of 2026-10-24 (§K-INVALID);
-   the child silence is nobody's decision — it is a row that does not exist.
+1. **Tension 1 — the same 5-year gap, two different authorities.** A 10-year-old and a
+   60-year-old, both with asplenia, both PPSV23 2024-01-01 and 2025-01-01. Identical verdict,
+   identical 2030 date — but the child's rests on CDC's *“at least 5 years”* and the adult's
+   on the owner's determination of 2026-10-11, which the adult's own dose text says
+   (*“not by ACIP”*).
+2. **Tension 2 — a conjugate after a PPSV23.** A 6-year-old and a 60-year-old, both with
+   asplenia, both PPSV23 2026-01-01 and PCV20 2026-01-08. The child: both doses valid, no
+   note at all, card reads **“PCV complete (includes PCV20)”**. The adult: the PCV20 **does
+   not count**, repeat from 2027-01-08. The adult bar is her ruling of 2026-10-24
+   (§K-INVALID); the child silence is nobody's decision — a row that was never written.
+
+§K-EVIDENCE lists her options under each, with which of them move doses.
+
+## The preview
+
+Published as a private artifact: **https://claude.ai/artifact/Fnwi4W8htqsSrQBto9zkiR**
+
+Built with `npx vite build --base ./ --outDir dist-preview` (relative base; the committed
+config's `/PneumoVax/` base is untouched, and `dist-preview/` is gitignored). **The published
+page is deliberately NOT a whole HTML document** — the artifact service wraps the page in its
+own `<html>/<head>/<body>`, so the first attempt nested one document inside another. It is
+now the stylesheet link, `<div id="root">` and the module script, nothing else. Verified by
+rebuilding that exact wrapper locally and rendering it: app mounts, both group bands present,
+**0 console errors**. Rebuild and republish to the same URL after any UI change — the
+artifact does not follow the repo.
 
 ## How it was verified
 
