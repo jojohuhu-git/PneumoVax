@@ -988,6 +988,7 @@ catch-up row**.
   | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | dose 2 after a dose under 12 months: >=4 weeks; dose 2 after a dose from 12 months: >=8 weeks; dose 3 under 12 months after a dose under 7 months: >=4 weeks; dose 3 after a dose at 7-11 months: >=8 weeks; dose 4+ given under 12 months: >=4 weeks; dose 4+ given from 12 months: >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PCV` | child | PPSV23 | `lastPcv` | >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PPSV23` | child | PPSV23 | `prevSameStream` | >=5 years | floor | CDC |
+  | `CHILD-PCV-AFTER-PPSV23` | child | PCV | `lastPpsv23` | >=8 weeks | recommendation | CDC |
   | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | recommendation | OWNER |
   | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | recommendation | CDC |
   | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | recommendation | CDC |
@@ -1545,6 +1546,67 @@ Table 1 is silent on it.
 (FINDING K) — the heading's conditions live in each entry's `label`. Both declare
 `population: ['child-nonIC','child-IC']`, which is transcription: the row is headed "any
 risk condition" and the report's footnote lists both classes in one list.
+
+### §K-PPSV23THENPCV — A child's conjugate soon after a PPSV23 COUNTS, and the card offers the repeat (OWNER, 2026-10-25)
+
+**The gap.** The app had **no rule at all** for a conjugate given after a PPSV23 in a child.
+An 8-year-old with asplenia, PPSV23 on 1 Oct and PCV20 on 15 Oct, was accepted in **total
+silence** — no note, no number, nothing — on a screen whose other card quoted an 8-week
+interval. It was found from the advice side (§C-PPSV23ANCHOR) and the two halves shipped
+together.
+
+**The document states the PPSV23 anchor outright.** ACIP's *Use of 20-Valent Pneumococcal
+Conjugate Vaccine Among U.S. Children*, 22 September 2023, under *"Children 6–18 years with
+any risk condition with no previous PCV13, PCV15, or PCV20 vaccination"*:
+
+> *"a single dose of PCV15 or PCV20 is recommended **≥8 weeks after the most recent dose of
+> pneumococcal vaccination, regardless of whether the child has previously received PPSV23**,
+> even if PCV7 was received."*
+
+Table 1 states it again. That clause is why the row carries **CDC's** name and not the
+owner's: the document names the PPSV23 as the anchor in its own words. CDC's PneumoRecs
+reads it the same way for the younger band.
+
+**A RECOMMENDATION, NOT A FLOOR — OWNER RULING 2026-10-25.** Asked whether the early dose is
+thrown away or flagged, she answered: *"I think this a grey zone where it could be considered
+complete but an alternative suggest should be listed that allows a clinician to repeat the
+dose 8 weeks after the early PCV20 if conservative due to lack of direct CDC/ACIP guidance."*
+The sentence above is timing for the **next** dose; no source says a dose given inside it must
+be repeated. This is **Ruling F's reading applied to a second row**.
+
+**The card offers the repeat, and the chip gains no new word.** Her instruction on the chips:
+*"I want to keep the dose chips to a limited variety for ease of maintaining and understanding
+… then yes you can update chip and give alternative schedule in the expander."* So the chip
+vocabulary is untouched — the dose reads `Dose N of M` as any counted dose does — and the
+alternative lives behind **"Why this"**:
+
+> *"A clinician who prefers the conservative course may repeat the conjugate dose from
+> Dec 10, 2026 — 8 weeks after the dose given."*
+
+**THE DATE IS NOT COMPUTED BY THE MESSAGE.** `evaluateDoseInterval` passes it in as a fourth
+argument, from `intervalFrom(rule, anchor, ctx, ctx.doseDate)` — the same arithmetic as
+`repeatDueDate`'s child branch, and the same grace decision: **no grace**, because the ruling
+of 2026-10-24 keeps every *advised* date outside the four-day window. A message that did its
+own date arithmetic would be the P0 bug's shape.
+
+**⚠ DELIBERATELY ASYMMETRIC WITH `CHILD-PPSV23-AFTER-PCV`,** which is a **floor** at the same
+8 weeks in the opposite direction. The difference is in the documents, not in the engine: CDC
+instructs the PPSV23 itself (*"administer 1 dose PPSV23 at least 8 weeks after the most recent
+PCV dose"*, nine times, plus *"PCV15 and PPSV23 should not be administered during the same
+visit"*), while for a conjugate **following** a PPSV23 it states only the timing of the next
+dose. Never collapse the two enforcements without a new owner ruling.
+
+**Measured.** **231 of 17,016** verdicts and **22 of 18,264** record-problem rows moved, and
+every moved line is the SAME substitution on one dose:
+
+> `valid:-:N:0:0:-:-:n0` → `valid:CHILD-PCV-AFTER-PPSV23:N:0:1:-:-:n1`
+
+The dose stays **valid**, keeps its number, keeps `doesNotCount: 0`, and gains an early
+advisory and one reason. **No dose changed status, no dose number moved, and the `R=`
+recommendation field is byte-identical on all 231 lines** — nobody's schedule changed, which
+is what "counted, with a note" has to mean.
+
+Guard: `regression-2026-10-25-child-conjugate-after-ppsv23-counts.test.js`.
 
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 

@@ -390,6 +390,82 @@ export const DOSE_INTERVAL_RULES = [
       detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
     }),
   },
+  {
+    // ── NEW 2026-10-25 ───────────────────────────────────────────────────
+    //
+    // Until today the app had NO rule here. A child given a conjugate two
+    // weeks after her PPSV23 was accepted in silence — no note, no number,
+    // nothing — while the card beside her quoted an 8-week interval. It was
+    // found from the advice side: the 6-18 block held the next dose to 8
+    // weeks after a PPSV23 and the 24-71-month block did not, and checking
+    // which was right turned up that NEITHER side graded a dose already
+    // given.
+    //
+    // THE DOCUMENT STATES THE PPSV23 ANCHOR OUTRIGHT. ACIP's 2023 PCV20-in-
+    // children report, "Children 6-18 years with any risk condition with no
+    // previous PCV13, PCV15, or PCV20 vaccination":
+    //
+    //   "a single dose of PCV15 or PCV20 is recommended >=8 weeks after the
+    //    most recent dose of pneumococcal vaccination, REGARDLESS OF WHETHER
+    //    THE CHILD HAS PREVIOUSLY RECEIVED PPSV23, even if PCV7 was received."
+    //
+    // That clause is why this is a CDC row and not an owner determination:
+    // the document names the PPSV23 as the anchor in its own words, and its
+    // Table 1 repeats it.
+    //
+    // ⚠ A RECOMMENDATION, NOT A FLOOR, AND THAT IS AN OWNER RULING.
+    // 2026-10-25, asked whether the early dose is thrown away or flagged:
+    // *"I think this a grey zone where it could be considered complete but an
+    // alternative suggest should be listed that allows a clinician to repeat
+    // the dose 8 weeks after the early PCV20 if conservative due to lack of
+    // direct CDC/ACIP guidance."* The sentence above is advice for the NEXT
+    // dose; no source anywhere says a dose given inside it must be repeated.
+    // That is Ruling F's reading applied to a second row.
+    //
+    // ⚠ IT IS DELIBERATELY ASYMMETRIC WITH CHILD-PPSV23-AFTER-PCV, which is a
+    // FLOOR at the same 8 weeks in the opposite direction. The difference is
+    // in the documents, not in this file: CDC instructs the PPSV23 itself
+    // ("administer 1 dose PPSV23 at least 8 weeks after the most recent PCV
+    // dose", nine times) and adds "PCV15 and PPSV23 should not be
+    // administered during the same visit", while for a conjugate following a
+    // PPSV23 it states only the timing of the next dose. Never "tidy" the two
+    // into one enforcement without a new owner ruling.
+    id: 'CHILD-PCV-AFTER-PPSV23',
+    what: 'A PCV dose given after a PPSV23 dose, under the child schedule',
+    rulebook: 'child',
+    vaccine: 'PCV',
+    products: null,
+    from: 'lastPpsv23',
+    interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
+    // No grace, like every other recommendation row: the grace decides whether
+    // a dose that missed a MINIMUM still counts, and a recommendation counts
+    // every dose already. A grace here would only move the day the note starts
+    // printing.
+    grace: false,
+    enforcement: 'recommendation',
+    authority: 'CDC',
+    // The alternative the owner asked for. The DATE comes from this row's own
+    // clock, measured from the dose the patient got — never recomputed by a
+    // caller, which is the P0 bug's shape.
+    optionalRepeat: true,
+    source: 'ACIP, "Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children: Updated '
+      + 'Recommendations of the Advisory Committee on Immunization Practices - United States, '
+      + '2023" (published 22 September 2023), under "Children 6-18 years with any risk condition '
+      + 'with no previous PCV13, PCV15, or PCV20 vaccination": "a single dose of PCV15 or PCV20 is '
+      + 'recommended >=8 weeks after the most recent dose of pneumococcal vaccination, regardless '
+      + 'of whether the child has previously received PPSV23, even if PCV7 was received." Table 1 '
+      + 'states it again. CDC\'s Child & Adolescent Schedule Notes say the same for the younger '
+      + 'band - "Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after the most recent dose '
+      + '...)" - and CDC\'s own PneumoRecs tool names the PPSV23 as the anchor for a 4-year-old. '
+      + 'OWNER RULING 2026-10-25 made it a RECOMMENDATION rather than a floor: the sources state '
+      + 'the gap as timing for the next dose and none says an earlier dose must be repeated, so '
+      + 'the dose counts and the card offers the repeat as an option. See CLINICAL_SPEC.md '
+      + '\u00a7K-PPSV23THENPCV.',
+    message: (ctx, anchor, min, repeatFrom) => ({
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} \u2014 shorter than the ${min.words} CDC advises. **Counted; a repeat is optional \u2014 see \u201cWhy this\u201d.**`,
+      why: `CDC and ACIP state the ${min.words} as the timing for the next pneumococcal dose and do not direct that a dose given inside it be repeated, so this dose counts toward the series. Immunogenicity at the shorter interval has not been established. A clinician who prefers the conservative course may repeat the conjugate dose from ${fmtDate(repeatFrom)} \u2014 ${min.words} after the dose given.`,
+    }),
+  },
 
   // ── Adult conjugate-to-conjugate ─────────────────────────────────────
   //
@@ -1260,7 +1336,15 @@ export function evaluateDoseInterval(ctx) {
     if (rule.catchAll && namedByRule) continue;
     if (intervalMet(rule, ctx, anchor)) { namedByRule = namedByRule || !rule.catchAll; continue; }
 
-    const msg = rule.message(ctx, anchor, intervalWords(rule, anchor, ctx));
+    // The fourth argument is the OPTIONAL REPEAT date (owner ruling
+    // 2026-10-25), and it exists so a message never computes a date. Same
+    // arithmetic as `repeatDueDate`'s child branch and the same grace
+    // decision: `intervalFrom` without `{ grace: true }`, because the ruling
+    // of 2026-10-24 keeps every ADVISED date outside the 4-day grace.
+    const msg = rule.message(
+      ctx, anchor, intervalWords(rule, anchor, ctx),
+      rule.optionalRepeat ? intervalFrom(rule, anchor, ctx, ctx.doseDate) : null,
+    );
     if (rule.enforcement !== 'floor') {
       // An unmet enumerated row HAS spoken for this dose, so the catch-all
       // must stay quiet even though the walk continues past it — otherwise
