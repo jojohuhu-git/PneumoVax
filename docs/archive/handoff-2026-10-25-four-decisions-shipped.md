@@ -1,3 +1,12 @@
+> **⚠️ SUPERSEDED (2026-10-25, later the same day)** — see
+> `handoff-2026-10-25-conjugate-gaps-card-wording-and-2023-citations.md`.
+> Three further items shipped on the same branch and PR after this was written
+> (§K-CONJUGATE, C12 and C13), and the queue below is stale in two ways: **PR #85
+> is CLOSED** — the owner closed it, so the P0 is resolved and needs nothing —
+> and the **2023 PCV20-children MMWR is now on the cards**, which is the P1 item
+> listed below. The test counts here (1,521 in 138 files) are superseded by
+> **1,576 in 142**. Do not resume from this document.
+
 # PneumoVax — Handoff after the owner's four decisions of 2026-10-25
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
