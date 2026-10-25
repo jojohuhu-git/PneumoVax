@@ -1,5 +1,7 @@
-> **⚠️ SUPERSEDED (2026-10-24)** — by
-> `handoff-2026-10-24-invalid-dose-scheduling-ruling.md`. Do NOT resume from this file.
+> **⚠️ SUPERSEDED TWICE (2026-10-24)** — first by
+> `handoff-2026-10-24-invalid-dose-scheduling-ruling.md` and now by
+> **`handoff-2026-10-24-invalid-adult-dose-built.md`**, which is the current one.
+> Do NOT resume from this file.
 > Its headline recommendation — that the 402-patient `ADULT-PPSV23-AFTER-PCV13` row is "the
 > exact twin of family 3" and "one commit of exactly family 3's shape" — was MEASURED AND IS
 > WRONG: PCV13 + PPSV23 is not a complete series, so counting the early dose does not complete
