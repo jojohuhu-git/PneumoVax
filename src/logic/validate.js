@@ -522,6 +522,11 @@ function applyIntervalRules(result, ctx) {
     r.intervalRuleId = verdict.ruleId;
     r.earliestValidDate = verdict.earliestValidDate;
     r.repeatDueDate = verdict.repeatDueDate;
+    // ⚠️ FIELDS ARE COPIED ONE BY ONE HERE, so a new field on the floor
+    // verdict is SILENTLY DROPPED until it is named. That is how the owner's
+    // emphasised alternative came out missing on its first run, with no error
+    // — the rule computed it and nothing carried it.
+    r.conjugateAlternative = verdict.conjugateAlternative ?? null;
     return r;
   }
   return advise(result, verdict.reason, verdict.ruleId);
@@ -823,11 +828,29 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // it is the same ungraced minimum.
           ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series can be given from ${result.repeatDueDate ?? result.earliestValidDate} at the earliest.`
           : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
+      // OWNER RULING 2026-10-24 — the second sentence she asked for on a
+      // mistimed SECOND PPSV23, emphasised, giving the conjugate option its
+      // own date and its own reason. Her words: "bold the alternative option
+      // that a PCV20/21 could be considered 1 year later and summarize the
+      // following reasoning and citation."
+      //
+      // Both numbers are hers and both are stated: the 5 years that governs a
+      // repeat PPSV23, and the 1 year that governs any conjugate after a
+      // PPSV23. ACIP is named in words because a dose chip carries no numbered
+      // citations — the same way the chips already say "per CDC".
+      //
+      // The date is `result.conjugateAlternative.dueDate`, computed by the
+      // rules table's own clocks. Never recompute it here; this file owns no
+      // interval logic.
+      const alt = result.recordProblem ? null : result.conjugateAlternative;
+      const alternativeSentence = alt
+        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${alt.dueDate} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
+        : null;
       perDose.push(addNote({
         ...result,
         effectiveDoseNum: null,
         doesNotCount: true,
-        reasons: closingSentence ? [...result.reasons, closingSentence] : result.reasons,
+        reasons: [...result.reasons, closingSentence, alternativeSentence].filter(Boolean),
       }));
       // RULING D (2026-10-23) — a mistimed dose anchors the next one, because
       // CDC repeats it from where it was given. A RECORD PROBLEM does not, for

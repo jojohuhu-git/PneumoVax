@@ -19,9 +19,11 @@
 // grid, by regression-c2-c3-numbered-sources.test.jsx.
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { renderNoteWithCites, makeCiteNumberer } from '../citations.jsx';
 import { recommend } from '../../logic/recommend.js';
+import { analyzeHistory } from '../../logic/validate.js';
+import RecCard from '../RecCard.jsx';
 
 const CITE = (key) => ({ key, page: key, url: `https://example.test/${key}`, label: key, short: key });
 
@@ -169,5 +171,48 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
     for (const p of patients.slice(1)) {
       expect(everythingFor(p)).toMatch(/owner clinical determination/i);
     }
+  });
+});
+
+describe('a dose CHIP renders emphasis too — the owner\'s second-PPSV23 alternative', () => {
+  // ⚠️ WHY THIS EXISTS. `RecCard` used to render a reason with no citations as
+  // a BARE STRING, bypassing `renderNoteWithCites` entirely. Every reason had
+  // been plain prose, so nothing noticed. The moment the owner asked for the
+  // conjugate alternative to be bolded (2026-10-24), that path would have
+  // printed a literal `**` to a clinician. Nothing in the suite covered it:
+  // the renderer tests call `renderNoteWithCites` directly, and the card tests
+  // only look at rec notes.
+  const SECOND_PPSV23 = analyzeHistory(
+    'PPSV23', [{ date: '2015-01-01' }, { date: '2018-01-01' }], 840, '2026-06-01', '1945-01-01',
+  ).perDose[1];
+
+  const renderChip = () => render(
+    <RecCard
+      rec={{
+        // `status: 'due'` deliberately — a 'complete' card renders COLLAPSED
+        // and its dose rows never mount, which is how the first draft of this
+        // test passed an empty card and proved nothing.
+        vaccine: 'PPSV23', status: 'due', doseLabel: 'PPSV23',
+        dueToday: false, earliestNextDate: null,
+        minIntervalDays: null, minIntervalMonths: null,
+        brands: [], note: null, noteCites: [],
+        advisory: false, seriesTotal: null, primaryTotal: null, citations: [],
+      }}
+      doses={[{ date: '2015-01-01' }, { date: '2018-01-01' }]}
+      doseValidations={[{ status: 'valid', reasons: [] }, SECOND_PPSV23]}
+      ageMonths={981}
+      dob="1945-01-01"
+      today="2026-06-01"
+    />,
+  );
+
+  it('shows the alternative in bold and never a literal asterisk', () => {
+    const { container } = renderChip();
+    // A neutral card renders collapsed; the dose rows live in the body.
+    container.querySelectorAll('.rec-card-head-toggle').forEach((b) => fireEvent.click(b));
+    container.querySelectorAll('.dose-val-toggle, [class*="toggle"]').forEach((b) => fireEvent.click(b));
+    expect(document.body.textContent).toContain('may be considered from 2019-01-01');
+    expect(document.body.textContent).not.toContain('*');
+    expect(document.querySelectorAll('.note-emphasis').length).toBeGreaterThan(0);
   });
 });

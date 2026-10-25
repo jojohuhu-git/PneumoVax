@@ -659,6 +659,26 @@ export const DOSE_INTERVAL_RULES = [
   },
   {
     id: 'ADULT-PPSV23-AFTER-PPSV23',
+    // OWNER RULING 2026-10-24 (afternoon), answering what this patient should
+    // be told. She kept the 5-year floor — "PPSV23 to PPSV23 spacing should be
+    // 5 years" — and declined to let the invalid-dose clock shorten it, so
+    // this row is the ONE adult floor that keeps its own arithmetic for the
+    // repeat date. Applying the general ruling here would have moved 66 rows
+    // FOUR YEARS earlier, in a family she had not been shown.
+    //
+    // What she asked for instead: both options on the card, the conjugate one
+    // emphasised. "bold the alternative option that a PCV20/21 could be
+    // considered 1 year later and summarize the following reasoning and
+    // citation: A repeat PPSV23 should wait >=5 years after the early PPSV23,
+    // because ACIP requires >=5 years between PPSV23 doses. PCV20 or PCV21 can
+    // be given >=1 year after it, because ACIP schedules any conjugate >=1 year
+    // after the last PPSV23."
+    //
+    // TWO DATES ON ONE CARD, DELIBERATELY — and allowed for the reason
+    // CLAUDE.md gives: both numbers are STATED, each with the rule it comes
+    // from. An invisible second number is the bug; a visible one the reader can
+    // act on is the point.
+    conjugateAlternativeAfterInvalid: true,
     what: 'A second adult PPSV23 dose',
     rulebook: 'adult',
     vaccine: 'PPSV23',
@@ -903,8 +923,173 @@ function earliestValidDate(rule, anchor, ctx) {
 // The app therefore advises the 9th and still ACCEPTS the 5th, exactly as it
 // does everywhere else. Guard:
 // regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js.
+// ─────────────────────────────────────────────────────────────────────────
+// OWNER RULING 2026-10-24 (afternoon) — WHAT AN INVALID ADULT DOSE LEAVES
+// OWING, AND WHEN.
+//
+// Her four steps, verbatim and in order:
+//
+//   1. "Decide what is being repeated. Base this on the valid history."
+//   2. "Start the clock at the invalid dose. Under CDC's rule, every interval
+//       runs from the most recent dose given, valid or not."
+//   3. "Use the interval for the prior vaccine type, counted from that invalid
+//       dose."
+//   4. "Check the earlier valid doses too... In practice, use whichever date
+//       comes later."
+//
+// STEP 1 HAS A CONSTANT ANSWER FOR ADULTS, and that is what makes this
+// tractable here rather than in recommend.js. Asked what is owed after an
+// invalid dose in each direction, she gave the same product both times:
+//
+//   invalid PPSV23 after a PCV15  -> "a single PCV20 or PCV21 ... >=1 year
+//     after the PPSV23. That dose completes the series." NOT a repeat PPSV23,
+//     because "ACIP's only PPSV23 -> PPSV23 interval is >=5 years" and
+//     "repeating polysaccharide doses less than 5 years apart is linked to
+//     hyporesponsiveness".
+//   invalid conjugate after a PPSV23 -> "PCV20 or PCV21 is preferable to
+//     another PCV15"; "PCV15 adds nothing over the patient's prior dose."
+//
+// So the owed dose is ALWAYS a conjugate, and the only thing the interval
+// depends on is which vaccine the clock is anchored on. That is why this needs
+// no view of the patient's history beyond what `ctx` already carries, and why
+// it must NOT be re-derived in recommend.js.
+//
+// ⚠️ THE ERROR THIS REPLACES. `repeatDueDate` used to spend the interval of
+// the rule that REJECTED the dose. For the three healthy patients she worked
+// through, the rejecting rule's interval and the owed dose's interval are both
+// 1 year, so the answer came out right by coincidence. For her asplenic
+// patient it did not: the rejecting row is the 8-week IC minimum, so the chip
+// advised repeating a PPSV23 on 2026-12-06 — the wrong vaccine on the wrong
+// date. Her verdict on exactly that: "Why 12/6/26 ... is not appropriate: the
+// 8-week interval applies only to PCV15 -> PPSV23. It does not apply to
+// PPSV23 -> PPSV23."
+//
+// CHILDREN ARE DELIBERATELY NOT HERE. Every word above is adult-shaped, and
+// she has said separately that "pediatric intervals don't follow the adult
+// 1-year rule". A child keeps the original arithmetic until she rules; the
+// boundary is `rulebookOf(ctx.ageAtDose)` and it is asserted, not assumed.
+// See docs/archive/decision-2026-10-24-invalid-adult-dose-repeat-rule.md.
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * The products an invalid adult pneumococcal dose leaves owing. One dose of
+ * either completes the series, whichever vaccine was given early.
+ */
+export const ADULT_OWED_AFTER_INVALID_DOSE = ['PCV20', 'PCV21'];
+
+/**
+ * How long after a dose of `priorVaccine` the owed PCV20/PCV21 may be given,
+ * and WHICH of the owner's two citations states it.
+ *
+ * ONE NUMBER FOR EVERY ADULT: a year. Asked directly whether the shorter
+ * interval should apply to an immunocompromised adult here, she answered
+ * "can you use 1 year for adults and 8 weeks for pediatrics with risks?" — so
+ * the adult clock is flat and the 8 weeks stays where it is published, in the
+ * child schedule. Children are not routed through this function at all.
+ *
+ * ⚠️ THE TWO LEGS CARRY THE SAME NUMBER AND DIFFERENT STANDING. That is why
+ * this returns a `basis` as well as an interval: her instruction of 2026-10-24
+ * was "make it clear that the 8 week interval is pediatric data with nothing
+ * clarifying adults. Cite the reference. State using 1 year is an
+ * interpretation from ACIP minimum interval for adults between PCV13 and the
+ * next conjugate. Cite this too." A card cannot honour that without knowing
+ * which leg it is standing on.
+ *
+ *   after a PPSV23 -> STATED. CDC adult notes, read live 2026-10-24: "1 dose
+ *     PCV15 or 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last
+ *     PPSV23 dose." Every adult risk group; CDSi v4.64 agrees, giving 1 year
+ *     in this direction even in its immunocompromised series, with no 8-week
+ *     option anywhere. Her words: ">=1 year for every risk group. There is no
+ *     8-week option."
+ *
+ *   after a conjugate -> INTERPRETED. CDC states exactly one adult
+ *     conjugate-to-conjugate interval — "1 dose PCV20 or 1 dose PCV21 at
+ *     least 1 year after the last PCV13 dose" — and this applies it to a
+ *     conjugate that must be REPEATED, which CDC does not discuss. It is
+ *     generalised from PCV13 to any conjugate for the same reason.
+ *
+ * ⚠️ NOT 8 WEEKS, AND THE REASON IS ON THE RECORD. A flat 8-week second clock
+ * was built first and she declined it: the only 8-week conjugate-to-conjugate
+ * figure is paediatric, from CDC's catch-up table whose own scope line reads
+ * "Children age 4 months through 6 years". Her ground for preferring the year
+ * was not caution for its own sake — "Conservative should mean meeting every
+ * published interval, not waiting the longest" — and for an adult the year is
+ * published where the 8 weeks is not.
+ */
+function adultIntervalToOwedConjugate(priorVaccine) {
+  return {
+    interval: { months: ADULT_ADVISED_PCV_GAP_MONTHS },
+    basis: priorVaccine === 'PPSV23' ? 'ppsv23ToConjugate' : 'conjugateToConjugate',
+  };
+}
+
+/**
+ * The most recent dose that COUNTED, on or before the judged dose — step 4's
+ * anchor. Read from `ctx.priorPcv` / `ctx.priorPpsv23`, which the walk has
+ * already filtered to counting doses, so a rejected earlier dose cannot
+ * become a clock of its own.
+ */
+function lastCountingDose(ctx) {
+  const last = (list, vaccine) => {
+    const dated = (list ?? []).filter((d) => d?.date);
+    return dated.length ? { date: dated[dated.length - 1].date, vaccine } : null;
+  };
+  const candidates = [last(ctx.priorPcv, 'PCV'), last(ctx.priorPpsv23, 'PPSV23')].filter(Boolean);
+  if (!candidates.length) return null;
+  return candidates.reduce((a, b) => (b.date > a.date ? b : a));
+}
+
+/**
+ * Both clocks, step 4's `max`, and which leg won — computed in ONE place so
+ * the date a card prints and the date a chip prints cannot be two readings.
+ *
+ * No grace on either, for the reason the 2026-10-24 morning ruling gave about
+ * this same date: the grace decides what the app ACCEPTS, never what it
+ * ADVISES.
+ *
+ * `boundBy` is not decoration. It is how a card explains itself, and it is how
+ * a test can see the `max` actually doing something rather than one leg always
+ * winning by construction.
+ */
+function adultRepeatClocks(ctx) {
+  const invalidLeg = adultIntervalToOwedConjugate(ctx.vaccine);
+  const fromInvalid = applyIntervalFrom(ctx.doseDate, invalidLeg.interval);
+  const valid = lastCountingDose(ctx);
+  const validLeg = valid ? adultIntervalToOwedConjugate(valid.vaccine) : null;
+  const fromValid = valid ? applyIntervalFrom(valid.date, validLeg.interval) : null;
+  const validWins = fromValid != null && fromValid > fromInvalid;
+  return {
+    dueDate: validWins ? fromValid : fromInvalid,
+    boundBy: validWins ? 'lastValidDose' : 'invalidDose',
+    basis: validWins ? validLeg.basis : invalidLeg.basis,
+    anchoredOnInvalid: ctx.doseDate,
+    anchoredOnValid: valid?.date ?? null,
+  };
+}
+
+function adultRepeatDueDate(ctx) {
+  const { dueDate } = adultRepeatClocks(ctx);
+  return dueDate;
+}
+
+/**
+ * Both clocks and the owed products, for a caller that has to SAY them rather
+ * than just use the date — the recommendation card. Exported so the card and
+ * the dose chip read one answer; `recommend.js` must never recompute either
+ * clock.
+ */
+export function adultRepeatAfterInvalidDose(ctx) {
+  if (!ctx?.doseDate || rulebookOf(ctx.ageAtDose) !== 'adult') return null;
+  const clocks = adultRepeatClocks(ctx);
+  return { ...clocks, owedProducts: ADULT_OWED_AFTER_INVALID_DOSE };
+}
+
 function repeatDueDate(rule, anchor, ctx) {
-  return ctx.doseDate ? intervalFrom(rule, anchor, ctx, ctx.doseDate) : null;
+  if (!ctx.doseDate) return null;
+  // An ADULT dose follows the owner's ruling above: the clock length comes
+  // from the pair (vaccine before -> PCV20/PCV21 owed), not from this rule.
+  if (rulebookOf(ctx.ageAtDose) === 'adult' && rule.id !== 'ADULT-PPSV23-AFTER-PPSV23') return adultRepeatDueDate(ctx);
+  return intervalFrom(rule, anchor, ctx, ctx.doseDate);
 }
 
 // One reading of the rule's interval, applied to whichever date is handed in —
@@ -914,11 +1099,22 @@ function repeatDueDate(rule, anchor, ctx) {
 // only difference between them must stay this single flag.
 function intervalFrom(rule, anchor, ctx, from, { grace: allowGrace = false } = {}) {
   const grace = allowGrace && rule.grace ? GRACE_DAYS : 0;
-  if (rule.interval.months != null) {
-    return addDays(addCalendarMonths(from, rule.interval.months), -grace);
+  const interval = rule.interval.daysFrom
+    ? { days: rule.interval.daysFrom(anchor, ctx) }
+    : rule.interval;
+  return applyIntervalFrom(from, interval, grace);
+}
+
+// The arithmetic itself, on a bare `{months}` or `{days}` interval and nothing
+// else. Split out of `intervalFrom` so the invalid-dose clocks below measure
+// with the SAME code as every other date this file prints — a second
+// implementation of "add an interval to a date" is how the P0 bug of
+// 2026-10-23 came to tell one clinician two different dates for one dose.
+function applyIntervalFrom(from, interval, graceDays = 0) {
+  if (interval.months != null) {
+    return addDays(addCalendarMonths(from, interval.months), -graceDays);
   }
-  const minDays = rule.interval.daysFrom ? rule.interval.daysFrom(anchor, ctx) : rule.interval.days;
-  return addDays(from, minDays - grace);
+  return addDays(from, interval.days - graceDays);
 }
 
 // Is the gap long enough? `null` interval (a never-flagged row) is always met.
@@ -988,6 +1184,12 @@ export function evaluateDoseInterval(ctx) {
         reasons: msg.reasons, detail: msg.detail,
         earliestValidDate: earliestValidDate(rule, anchor, ctx),
         repeatDueDate: repeatDueDate(rule, anchor, ctx),
+        // The owner's emphasised alternative, where a row asks for it. The
+        // date comes from the SAME clocks as every other repeat date in this
+        // file — validate.js must never compute it.
+        conjugateAlternative: rule.conjugateAlternativeAfterInvalid
+          ? adultRepeatAfterInvalidDose(ctx)
+          : null,
       };
     }
     return { kind: 'recommendation', ruleId: rule.id, authority: rule.authority, reason: msg };
