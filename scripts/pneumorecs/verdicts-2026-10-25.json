@@ -1,0 +1,42 @@
+{
+  "judgedOn": "2026-10-25",
+  "scale": {
+    "same": "Both tools ask for the same thing. Wording differs; the clinical answer does not.",
+    "same-plus-dates": "Same dose, and PneumoVax additionally gives the calendar date or checks the spacing of a dose already given - something PneumoRecs cannot do because it never asks for dates.",
+    "differs": "The two tools would lead a clinician to do different things."
+  },
+  "verdicts": {
+    "I01": "same", "I02": "same", "I03": "same", "I04": "same", "I05": "same", "I06": "same",
+    "I07": "same", "I08": "same", "I09": "same", "I10": "same", "I11": "same",
+    "I12": "differs", "I13": "differs", "I14": "same",
+    "C01": "same", "C02": "same", "C03": "same", "C04": "same", "C05": "same",
+    "C06": "same-plus-dates", "C07": "same", "C08": "same", "C09": "same", "C10": "same",
+    "T01": "same", "T02": "same", "T03": "same", "T04": "same-plus-dates", "T05": "same",
+    "T06": "same", "T07": "same", "T08": "same", "T09": "same", "T10": "same",
+    "H01": "same", "H02": "same", "H03": "same",
+    "A01": "same", "A02": "differs", "A03": "same", "A04": "differs", "A05": "differs",
+    "A06": "same", "A07": "differs", "A08": "same", "A09": "same", "A10": "same",
+    "A11": "same", "A12": "same", "A13": "same",
+    "B01": "same", "B02": "same", "B03": "same", "B04": "same", "B05": "same-plus-dates",
+    "B06": "same", "B07": "same", "B08": "same", "B09": "same", "B10": "same",
+    "X01": "differs", "X02": "differs", "X03": "differs", "X04": "differs", "X05": "differs", "X06": "differs"
+  },
+  "why": {
+    "I12": "PneumoRecs says 'Schedule complete.' PneumoVax says one more dose is owed, because the third dose was given 30 days after the second and CDC's minimum there is 8 weeks. PneumoRecs is never told the dates, so it counts three doses and stops.",
+    "I13": "An 11-month-old with no counting doses. PneumoRecs says 2 doses, PneumoVax says 3. Cause: PneumoRecs rounds a part-month UP when it picks the rulebook, so this child was handed the 12-23 month page. At exactly 11 months + 0 days the same tool says 3.",
+    "A02": "19-49 with HIV offered PCV15. PneumoVax recommends the PPSV23 at 8 weeks; PneumoRecs prints 'recommended at least 1 year, minimum 8 weeks can be considered'. ACIP's January 2025 table says 'administer ... at least 8 weeks' for this band; the tool is on its December 2024 text.",
+    "A04": "Same split, cochlear implant.",
+    "A05": "Same split, CSF leak.",
+    "A07": "Same split, for a patient whose PCV15 is already given - so the difference decides whether the PPSV23 is due today or in ten months.",
+    "X01": "PneumoVax stops entirely for a stem-cell transplant, CAR-T or B-cell-depleting therapy and names the specialist protocols. PneumoRecs has no such question and gives the ordinary adult schedule. This is PneumoVax's owner decision of 2026-10-16, not an error on either side.",
+    "X02": "A PCV20 dated in 2027. PneumoRecs counts it as given. PneumoVax rejects it and says why.",
+    "X03": "A PCV15 given today. PneumoRecs says give the PPSV23 'to complete'; PneumoVax names the date it may first be given.",
+    "X04": "Two PCV20 doses 14 days apart. PneumoRecs counts both and the schedule reads complete; PneumoVax rejects the second and still asks for dose 2.",
+    "X05": "A PPSV23 three months after PCV13. PneumoRecs counts it; PneumoVax rejects it (an owner-set adult floor) and re-anchors the next dose.",
+    "X06": "A PCV20 dated before the child was born. PneumoRecs counts it as a dose given before 12 months; PneumoVax rejects it. Both happen to end on one more dose."
+  },
+  "wordingOnlyToReview": {
+    "H02": "A healthy 5-year-old with a completed 4-dose series: PneumoRecs says 'Schedule complete.', PneumoVax says 'Not indicated (healthy 5-18y)'. Same action (nothing to give) but PneumoVax does not acknowledge the completed series.",
+    "A13": "A 25-year-old with asplenia and a PCV20: PneumoVax says 'Complete'; PneumoRecs says no vaccine now and 'check this app when your patient turns 50'."
+  }
+}

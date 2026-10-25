@@ -1,3 +1,8 @@
+> **SUPERSEDED 2026-10-25** by
+> `handoff-2026-10-25-rules-map-and-the-66-patient-comparison.md`. PR #86, which this
+> document lists as open, **was merged by the owner**. Its remaining queue is carried
+> forward there, with two items added. Do not resume from this file.
+
 # PneumoVax — Handoff after the conjugate gaps, the card wording, and the 2023 children's citations (2026-10-25)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

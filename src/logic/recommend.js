@@ -3183,6 +3183,63 @@ function adultRepeatOwed(analysis, rawPcv, rawPpsv, ageMonths) {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// C14 (2026-10-25) — `path`: the route this patient actually took.
+//
+// The owner asked for a map of the rules AND a way to see, for the patient on
+// screen, which way the app went. The map is the Rulebook page; this is the
+// other half.
+//
+// IT IS RECORDED WHERE THE DECISION IS MADE, never re-derived afterwards. A
+// second reading of the same question is the shape of the worst bug this repo
+// has had (the scheduler and the validator reading CDC's catch-up table
+// separately), so `path` is pushed to at the branch itself and is a plain
+// record of what happened — it decides nothing and nothing reads it back.
+//
+// Each step is { step, took, because } in plain words, and `because` may be
+// null when the step speaks for itself.
+function pathStep(step, took, because = null) {
+  return { step, took, because };
+}
+
+/** Months the way a clinician says them. Shared with the Rulebook page's own
+ *  helper in intent, but kept here so the engine owes the UI nothing. */
+function ageWords(m) {
+  if (m == null) return 'an age that was not given';
+  // `am` is fractional when it comes from a date of birth, so floor it: a
+  // clinician says "15 months", never "15.16 months".
+  const w = Math.floor(m);
+  if (w < 24) return `${w} month${w === 1 ? '' : 's'}`;
+  const y = Math.floor(w / 12), r = w % 12;
+  return r === 0 ? `${y} years` : `${y} years ${r} month${r === 1 ? '' : 's'}`;
+}
+
+/** The risk conditions as the group the rules actually turn on. */
+function riskWords(riskIds) {
+  if (!riskIds.length) return 'None ticked';
+  const names = riskIds.map((id) => RISK_BY_ID[id]?.label ?? id);
+  const group = hasIC(riskIds) ? 'an immunocompromising condition'
+    : hasSpecial(riskIds) ? 'a cochlear implant or CSF leak'
+    : 'a chronic condition';
+  return `${names.join('; ')} — ${group}`;
+}
+
+/** What the engine made of the doses on the record: how many it counted, and
+ *  how many it set aside. The REASON each one was set aside stays on the dose
+ *  itself, where the clinician reads it; it is not repeated here. */
+function doseWords(pcvAnalysis, ppsvAnalysis) {
+  const parts = [];
+  for (const [name, a] of [['PCV', pcvAnalysis], ['PPSV23', ppsvAnalysis]]) {
+    const all = a?.perDose ?? [];
+    if (!all.length) continue;
+    const kept = all.filter((d) => d.status === 'valid' || d.status === 'counted').length;
+    const set = all.length - kept;
+    parts.push(`${kept} of ${all.length} ${name} dose${all.length === 1 ? '' : 's'} counted`
+      + (set ? ` — ${set} set aside, with the reason on the dose itself` : ''));
+  }
+  return parts.length ? parts.join('. ') : 'None on the record';
+}
+
 export function recommend(input) {
   // P3-1 (S10): the patient's date of birth, when the clinician gave one. It is
   // what lets the engine compare a dose date against a real birthday — the
@@ -3224,6 +3281,10 @@ export function recommend(input) {
       // reason — a consumer iterating it must not have to special-case the
       // hard stop.
       orderedDoses: { pcv: [], ppsv23: [] },
+      // C14: deliberately NO `path` here. The transplant hard stop shows one
+      // banner and nothing else on the page (owner decision 2026-10-16, frozen
+      // byte-for-byte against MeningoVax), so the route is withheld at the
+      // engine rather than left for a surface to remember not to render.
       meta: { ageMonths: am, dob, today, riskIds, pcvCount: 0, ppsv23Count: 0 },
     };
   }
@@ -3291,12 +3352,19 @@ export function recommend(input) {
   const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
 
   // ── Standard (age/history/risk) recommendations ──────────────────────
+  //
+  // C14: `path` is built HERE, at the branch, as each decision is taken.
+  const path = [
+    pathStep('Age', ageWords(am), dob ? 'worked out from the date of birth you entered' : 'from the age you entered'),
+    pathStep('Risk conditions', riskWords(riskIds), null),
+  ];
   let recs;
   if (am < M.m24) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
     // does below — a tick that does not apply to a child must not reach a
     // child's card, by any route.
+    path.push(pathStep('Which rules apply', 'Babies and toddlers under 2', `under ${ageWords(M.m24)}`));
     recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today, dob);
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
@@ -3319,13 +3387,23 @@ export function recommend(input) {
     // `regression-n6-citations-follow-the-rulebook.test.js`.
     const pedsIds = pedsRiskIds(riskIds);
     if (pedsRiskRowClass(pedsIds)) {
+      path.push(pathStep('Which rules apply', 'Children with a risk condition',
+        `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}, with a risk condition that applies at this age`));
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today);
     } else {
+      path.push(pathStep('Which rules apply', 'Children with no risk condition',
+        `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
+        + (riskIds.length && !pedsIds.length ? ' — the condition ticked is one that only applies to adults' : '')));
       recs = pcvHealthyChild(am, pcv, ppsv, today);
     }
   } else {
+    path.push(pathStep('Which rules apply', 'Adults',
+      am < M.y50
+        ? `${ageWords(M.y18)} and over but under ${ageWords(M.y50)}, so a vaccine is recommended only with a qualifying risk condition`
+        : `${ageWords(M.y50)} and over, so a vaccine is recommended whatever the risk conditions`));
     recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob, adultRepeat);
   }
+  path.push(pathStep('Doses already given', doseWords(pcvAnalysis, ppsvAnalysis), null));
 
   // ── PCV21 geographic advisory ─────────────────────────────────────────
   const pcv21Geo = pcv21GeoNote(am, recs);
@@ -3384,6 +3462,7 @@ export function recommend(input) {
     // from here; reading its own input array alongside `perDose` is what put
     // every verdict on the wrong row for a history typed newest-first.
     orderedDoses: { pcv: pcvAnalysis.doses, ppsv23: ppsvAnalysis.doses },
+    path,
     meta: { ageMonths: am, dob, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
   };
 }

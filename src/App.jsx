@@ -4,6 +4,7 @@ import StepAge from './components/StepAge.jsx';
 import StepRisks from './components/StepRisks.jsx';
 import StepHistory from './components/StepHistory.jsx';
 import Results from './components/Results.jsx';
+import Rulebook from './components/Rulebook.jsx';
 import { dropBlankDoseRows } from './logic/doseIdentity.js';
 import { hasExclusion } from './data/riskFactors.js';
 import { patientAgeMonths } from './logic/patientAge.js';
@@ -34,6 +35,11 @@ const INITIAL_STATE = {
 export default function App() {
   const [state, setState] = useState(INITIAL_STATE);
   const [ageError, setAgeError] = useState('');
+  // C14 (2026-10-25): the rulebook page. Held as a flag rather than a route so
+  // that opening it and coming back leaves the half-filled patient exactly as
+  // it was — this app has no router, and a clinician three steps into a
+  // history should not lose it to answer "why is it saying that?".
+  const [rulebookOpen, setRulebookOpen] = useState(false);
 
   // P3-1: one clock read, one age. Derived here so a tab left open across
   // midnight ages the patient along with the calendar, instead of holding the
@@ -58,6 +64,7 @@ export default function App() {
   // taking focus would move a screen reader off the recommendation the
   // clinician just asked for.
   useEffect(() => {
+    if (rulebookOpen) return;         // C14 — the rulebook is read, not filled in.
     if (state.step >= 3) return;      // Results — read, not filled in.
     const main = mainRef.current;
     if (!main) return;
@@ -73,7 +80,7 @@ export default function App() {
        main.querySelector('.add-dose-btn') ||
        main.querySelector('.history-toggle-btn'));
     target?.focus();
-  }, [state.step]);
+  }, [state.step, rulebookOpen]);
 
   function update(patch) {
     setState(prev => ({ ...prev, ...patch }));
@@ -141,9 +148,22 @@ export default function App() {
               <div className="app-logo-sub">Pneumococcal Vaccine Advisor</div>
             </div>
           </div>
-          <Stepper steps={STEPS} current={state.step} />
+          {!rulebookOpen && <Stepper steps={STEPS} current={state.step} />}
+          {/* Only when the rulebook is shut: the page carries its own way back,
+              and two controls doing the same thing in the same view is noise. */}
+          {!rulebookOpen && (
+            <button type="button" className="rb-link" onClick={() => setRulebookOpen(true)}>
+              How recommendations are made
+            </button>
+          )}
         </div>
       </header>
+
+      {rulebookOpen && (
+        <main className="app-main-rulebook">
+          <Rulebook onClose={() => setRulebookOpen(false)} />
+        </main>
+      )}
 
       {/* S11 / P5-1 (2026-10-12): a real <form>, so Enter continues the wizard
           the way it does on every other web page. Before this the app had no
@@ -160,7 +180,7 @@ export default function App() {
           button in the app carries an explicit type="button" — inside a form a
           typeless button is a SUBMIT button, which would have made "+ Add PCV
           dose" advance the step. */}
-      <form className="app-form" onSubmit={e => { e.preventDefault(); goNext(); }}>
+      <form className="app-form" onSubmit={e => { e.preventDefault(); goNext(); }} hidden={rulebookOpen}>
 
       <main className="app-main" ref={mainRef}>
         {state.step === 0 && (
@@ -201,7 +221,7 @@ export default function App() {
         )}
       </main>
 
-      {state.step < 3 && (
+      {state.step < 3 && !rulebookOpen && (
         <div className="app-nav">
           <div className="app-nav-inner">
             {state.step > 0 ? (

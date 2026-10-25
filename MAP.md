@@ -12,13 +12,15 @@ folder — they go where the table at the bottom says.**
 | Folder / file | What it is |
 |---|---|
 | `src/` | The app's working parts. This is where the actual program lives. |
-| `src/components/` | The screens, cards, and buttons you see on screen. |
+| `src/components/` | The screens, cards, and buttons you see on screen. Two of them answer "why is it saying that?": `Rulebook.jsx` is the **How recommendations are made** page (the whole rulebook, reachable from the header at any time), and `HowThisWasWorkedOut.jsx` is the short list on the results screen showing the route *this* patient took. |
+| `src/data/rulebook.js` | What the **How recommendations are made** page says. Most of it is read live from the files the engine itself reads, so it cannot drift; the few typed sentences are checked against the engine by a test. |
 | `src/logic/` | The "brain" — `recommend.js` decides what's due; `validate.js` checks recorded doses; `doseIntervalRules.js` is the single list of "how long must there be between two doses" rules; `doseIdentity.js` decides whether a row of the history counts as a dose at all (an empty row you never typed in does not). |
 | `src/data/` | The facts the brain uses: brands, risk factors, schedules. |
 | `src/test-grid.js` | A list of about 16,000 made-up patients (every age, risk tick and vaccination history worth testing). Used only by the tests, never shipped to anyone using the app. |
 | `public/` | Images and files shipped with the app exactly as-is. |
 | `index.html` | The single web page the app loads into. |
 | `scripts/` | Verification tools: compare this app's answers against CDC's PneumoRecs tool, and rebuild the saved answers file below. Not part of the app. |
+| `scripts/pneumorecs/` | CDC's PneumoRecs VaxAdvisor, read out of its own code on 2026-10-25: all 175 recommendations it can print, which of them nobody can reach, the seven answers checked by hand against the live site, and how its answers compared with ours. `pneumorecs-rulebook.txt` is the readable version. |
 | `src/logic/__tests__/__corpus__/` | The app's saved answers for all ~16,000 made-up patients. The tests re-run the app over them and complain if any answer changed, so a change that quietly moves thousands of patients' advice can't slip through. If a change was meant to move them, run `npm run sweep:update` and say in the pull request how many moved. |
 
 ## Instructions and manuals
