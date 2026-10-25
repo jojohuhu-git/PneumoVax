@@ -116,7 +116,9 @@ opposite directions, so read the table rather than any sentence:
 
 Governing sources, read live 2026-10-16: **mm7401a1** (ACIP, January 2025) and CDC's
 **Adult Pneumococcal Vaccine Timing Job Aid** (March 2025). **`rr7203a1` (2023) is
-superseded — never cite it for an adult interval.** mm7401a1 uses a different verb per age
+superseded — never cite it for an adult CONJUGATE interval.** (Narrowed by the owner
+2026-10-25: it IS cited for the five years between two adult PPSV23 doses, in one place —
+see `CLINICAL_SPEC.md` §K-EVIDENCE.)** mm7401a1 uses a different verb per age
 band and that is the rule: 19–49 IC/CSF/cochlear "**administer** … ≥8 weeks"; ≥50 "should
 be administered ≥1 year … 8 weeks **can be considered**".
 

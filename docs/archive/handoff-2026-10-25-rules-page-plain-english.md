@@ -150,6 +150,17 @@ rule's `source` names it in prose, but it is on no card because §K's standing r
 PCV15→PPSV23 interval. **Ask her whether it now reads “never for an adult CONJUGATE
 interval”.**
 
+**Tension 1 — SHIPPED, 2026-10-25.** *“yes cite PPSV23→PPSV23”*. `rr7203a1` is now cited in
+exactly one place: the interval sentence of `ADULT-PPSV23-AFTER-PPSV23`. The ban in CLAUDE.md,
+`CLINICAL_SPEC.md` §K and `docs/agent/clinical-rules.md` was NARROWED in the same commit to
+*“never for an adult CONJUGATE interval”* — do not re-broaden it. **The marker is on the
+INTERVAL sentence and nowhere else**: rr7203a1 states five years, it does not say a shorter
+gap voids the dose, and that half stays the owner's determination of 2026-10-11, credited to
+nobody. The mechanism (a floor row may carry `reasonCites`) is general but used by one row,
+and the guard pins that list by name. Guard:
+`regression-2026-10-25-second-ppsv23-cites-its-interval.test.js`. Prose moved on 66 of 35,280
+lines, **0 real patients**, every one of them only gaining the `[c]`.
+
 **Tension 2 — I WAS WRONG, AND IT IS A DIVERGENCE BUG.** The previous entry said no source
 states a paediatric conjugate-after-PPSV23 interval. She supplied one: ACIP 2023
 PCV20-in-children **Table 1**, the 6–18 no-previous-conjugate row, *“≥8 weeks after the most
@@ -161,10 +172,15 @@ side** (`pcvRiskChild` Option A, `anchorPneumo` + `WK8`) while validating nothin
 **Measured, as a throwaway mutation, then reverted: 198 of 17,016 real patients move** (104
 recommendations, 94 dose chips only) and 22 of 18,264 impossible entries. 132 are 6–18, 66
 are 19+ with a childhood dose. **NOT BUILT** — it moves verdicts, so it is hers. Two
-questions go with it: does the floor stop at age 6 (her row says “6–18”; an age split must be
-a SECOND ROW), and is it a floor or a note (the mirror direction,
-`CHILD-PPSV23-AFTER-PCV`, is a floor on CDC's authority from an equally
-recommendation-shaped sentence)?
+questions go with it, both restated for her on 2026-10-25 with named patients:
+
+1. **Does it stop at age 6?** Her row says “6–18”, but CDC's PneumoRecs states the same 8
+   weeks for the 2–5 band and anchors it on the PPSV23 by name. **And a second, smaller
+   defect sits there**: a 4-year-old with asplenia whose only dose is a PPSV23 two weeks ago
+   is told *“due today”* while her card carries `minIntervalDays: 56`. The 8-year-old twin is
+   correctly held. So 2–5 needs the recommendation fixed as well as the floor added.
+2. **Floor or note?** The mirror direction, `CHILD-PPSV23-AFTER-PCV`, is a floor on CDC's
+   authority from an equally recommendation-shaped sentence.
 
 **⚠ cdc.gov is DENIED by this container's network policy**, so neither document could be
 re-read live this session. Everything above rests on her quotes, on `refs.js` entries that

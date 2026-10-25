@@ -414,7 +414,7 @@ and the 2026-10-15 reversal banner that stood here.
 
 **The governing sources are `mm7401a1` (ACIP, January 2025) and CDC's Adult Pneumococcal
 Vaccine Timing Job Aid (NCIRD, March 2025).** Both read live 2026-10-16.
-**`rr7203a1` (2023) is superseded — never cite it for an adult interval again.**
+**`rr7203a1` (2023) is superseded for an adult CONJUGATE interval — never cite it for one again. NARROWED BY THE OWNER 2026-10-25: it IS cited, in one place, for the five years between two adult PPSV23 doses** (*“yes cite PPSV23→PPSV23”*), because no 2025 document has been shown to state that interval at all and the 2026-10-16 ban was made about the PCV15→PPSV23 interval, where mm7401a1 says something different. One place only: the interval sentence of `ADULT-PPSV23-AFTER-PPSV23`. The marker is on the INTERVAL and not on the rejection — rr7203a1 states five years, it does not say a shorter gap voids a dose, and that half stays the owner's. See `CLINICAL_SPEC.md` §K-EVIDENCE.**
 
 mm7401a1's clinical guidance table uses a **different verb per age band, and that
 difference is the rule**: 19–49 IC/CSF/cochlear reads "If PCV15 is used, **administer** a

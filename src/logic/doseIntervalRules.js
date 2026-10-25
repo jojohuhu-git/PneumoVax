@@ -86,6 +86,11 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { daysBetween, calendarMonthsBetween, calendarIntervalElapsed, addDays, addCalendarMonths } from './dateUtils.js';
+// A floor row may credit the document its INTERVAL comes from. Only the
+// interval: whether a short gap voids the dose is a separate claim, and on
+// the adult rows it is the owner's, which the row's own `detail` says in
+// words and credits to nobody.
+import { cite } from '../data/refs.js';
 import {
   intervalMeetsMinimum,
   intervalPhrase,
@@ -280,8 +285,13 @@ function lastOf(list) {
 //                 row. The long version stays in `source`.
 //   authority     'CDC' | 'OWNER'  (see the header)
 //   source        the sentence the row rests on
-//   message       (ctx, anchor) → { reasons: [...], detail } for a floor,
-//                 or a single string for a recommendation
+//   message       (ctx, anchor) -> { reasons: [...], detail } for a floor,
+//                 or a single string for a recommendation.
+//                 A floor's object may also carry `reasonCites`: one cite()
+//                 per literal "[c]" across its `reasons`, in marker order,
+//                 exactly as validate.js's own `withMarker` pairs them. The
+//                 marker goes on ONLY where a citation goes with it, or
+//                 RecCard drops the orphan and the parity guard fails.
 export const DOSE_INTERVAL_RULES = [
   // ── Paediatric floors — every one stated as a minimum by CDC ──────────
   {
@@ -782,8 +792,21 @@ export const DOSE_INTERVAL_RULES = [
       + 'the DOSE PAIR, not on the risk row: whether a second PPSV23 was indicated at all is the '
       + 'recommendation engine\'s question, and keying the floor on risk class is what left this gap '
       + 'unchecked for adults in the first place. See CLINICAL_SPEC.md §K.',
+    // OWNER, 2026-10-25: "yes cite PPSV23->PPSV23". rr7203a1 is the document
+    // that STATES this interval, and it is the only one shown to state it
+    // — mm7401a1 (2025) was read for the PCV15->PPSV23 split, not for a
+    // second PPSV23. So §K's standing rule of 2026-10-16 ("never cite
+    // rr7203a1 for an adult interval again"), which was made about the
+    // PCV15->PPSV23 interval where a 2025 document says something different,
+    // is narrowed by her rather than reversed: see §K-EVIDENCE.
+    //
+    // THE MARKER IS ON THE INTERVAL SENTENCE AND NOWHERE ELSE. rr7203a1 states
+    // the five years; it does not say a shorter gap voids the dose. That half
+    // is the owner's determination, it is in `detail` below, and it stays
+    // credited to nobody but her.
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${fmtDate(anchor.date)} — a second PPSV23 is given at least ${min.words} after the first.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${fmtDate(anchor.date)} — a second PPSV23 is given at least ${min.words} after the first.[c]`],
+      reasonCites: [cite('mmwr7203a1')],
       detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
@@ -1298,6 +1321,9 @@ export function evaluateDoseInterval(ctx) {
       return {
         kind: 'floor', ruleId: rule.id, authority: rule.authority,
         reasons: msg.reasons, detail: msg.detail,
+        // One cite() per "[c]" in `reasons`, or undefined. Named here and
+        // again in validate.js because that copy is field by field.
+        reasonCites: msg.reasonCites,
         earliestValidDate: earliestValidDate(rule, anchor, ctx),
         repeatDueDate: repeatDueDate(rule, anchor, ctx),
         // The owner's emphasised alternative, where a row asks for it. The

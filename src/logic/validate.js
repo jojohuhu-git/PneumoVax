@@ -527,7 +527,10 @@ function applyIntervalRules(result, ctx) {
   const verdict = evaluateDoseInterval(ctx);
   if (!verdict) return result;
   if (verdict.kind === 'floor') {
-    const r = invalid(verdict.reasons, verdict.detail);
+    // `reasonCites` is named HERE, in the same breath as the reasons it is
+    // indexed against - the copy below is field by field, and the comment on
+    // it says what a silently dropped field costs.
+    const r = invalid(verdict.reasons, verdict.detail, verdict.reasonCites);
     r.intervalRuleId = verdict.ruleId;
     r.earliestValidDate = verdict.earliestValidDate;
     r.repeatDueDate = verdict.repeatDueDate;
