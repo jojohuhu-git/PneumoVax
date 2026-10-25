@@ -1437,18 +1437,31 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // Group A. CDC's branch fits on both columns: the PCV series was before
       // age 6 and no PPSV23 has been given. The two risk classes word the
       // sub-bullet differently, so each quotes its own.
+      // OWNER DECISION 2026-10-25, and it is the 2026-10-23 "cite CDC; reach
+      // for p2016 only if you cannot" rule applied with a document that did
+      // not exist on these cards before. She had given the 2023 ACIP
+      // PCV20-in-children report herself -- *"You can reference this document
+      // for pediatric recommendations too"* -- and, shown this card and what
+      // it cites, chose to SWAP: p2016 off, the 2023 report on.
+      //
+      // Both documents state the whole claim, read live 2026-10-25:
+      //   p2016 Table 4  "Completed PCV series before age 6 years, including
+      //                   one or more doses of PCV20 | No additional doses"
+      //   ACIP 2023 T1   "No additional doses of any pneumococcal vaccine are
+      //                   indicated."
+      // So this is NOT a removal for silence -- p2016 has a fitting row and
+      // keeps it everywhere else. It is CDC/ACIP preferred over immunize.org
+      // where the two agree, which is her standing rule, and it leaves the
+      // card with two CDC sources rather than one CDC and one handout.
       note = {
         lead: complete,
-        detail: 'p2016 states the same for this history: a child 2-18 with any risk condition who completed the PCV series before age 6 including a PCV20 needs no additional doses [c].',
+        detail: "ACIP's 2023 PCV20-in-children report states the same for this history: for a child 2-18 with any risk condition whose completed series includes a PCV20, no additional doses of any pneumococcal vaccine are indicated [c].",
       };
       noteCites = [
         cite(isIC ? 'pedsIcPcv20Complete' : 'pedsRiskPcv20Complete'),
-        // p2016's row fits this patient on every column too, and is on the card
-        // as a chip, so it is credited rather than left as a grey button with no
-        // number -- the fault C8 exists to remove.
-        cite('p2016CompletedBefore6WithPcv20'),
+        cite('cdcPcv20Children2023CompleteWithPcv20'),
       ];
-      cardRefs = refs;
+      cardRefs = childRefsSwap('p2016', 'cdcPcv20Children2023');
     } else if (completedBefore6) {
       // Group B. The series was before age 6, but a PPSV23 HAS been given, and
       // CDC's branch is headed "but have not received PPSV23". p2016 Table 4
@@ -2052,25 +2065,44 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // recent PCV dose", read live 2026-10-18), and its risk-indications twin
       // names both products. Nothing is being substituted, so nothing needs
       // explaining.
-      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV (completes the series) [c].`,
-      noteCites: [before6Cite()],
+      // OWNER DECISION 2026-10-25 — ACIP's 2023 PCV20-in-children report is
+      // ADDED here (not swapped: p2016 is already off these cards, and CDC's
+      // child notes state the interval). Shown this card and asked where its
+      // Table 1 belongs, she chose to add it alongside.
+      //
+      // ⚠️ THE MARKER IS ON ITS OWN SENTENCE, AND THAT IS NOT TIDINESS.
+      // Table 1 states the CHOICE and no interval: "Either a single dose of
+      // PCV20 or PPSV23 using previously recommended dosing and schedules is
+      // recommended to complete the recommended vaccine series" (read live
+      // 2026-10-25, Supplementary Report p.10). The 8 weeks is CDC's child
+      // notes' number. Putting both markers on one sentence would give that
+      // sentence two numbers for two different claims — the thing
+      // `regression-c8-...-infant-catchup-credits-the-booster-row`'s "no card
+      // anywhere gives the SAME sentence two numbers" forbids outright.
+      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]. Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].`,
+      noteCites: [before6Cite(), cite('cdcPcv20Children2023CompleteWithoutPcv20')],
       // C10-1 (2026-10-23): CDC states this card's claim and is cited by
       // number above; nothing here rests on p2016, so it comes off.
-      refs: childRefsExcept('p2016'),
+      refs: childRefsSwap('p2016', 'cdcPcv20Children2023'),
     }));
     out.push(rec({
       vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks)',
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: ['PPSV23 (Pneumovax 23)'],
+      // The Option B half of the same owner decision, and the same discipline:
+      // Table 1's sentence is about the CHOICE completing the series, so it
+      // takes its own sentence. The IC card's "≥5 years later" clause belongs
+      // to `pedsSecondPpsv5y` and Table 1 is silent on it — never let the 2023
+      // marker drift onto that one.
       note: isIC
-        ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both.'
-        : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]. Choose Option A or B, not both.',
+        ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both. Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].'
+        : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]. Choose Option A or B, not both. Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].',
       noteCites: isIC
-        ? [before6Cite(), cite('pedsSecondPpsv5y')]
-        : [before6Cite()],
+        ? [before6Cite(), cite('pedsSecondPpsv5y'), cite('cdcPcv20Children2023CompleteWithoutPcv20')]
+        : [before6Cite(), cite('cdcPcv20Children2023CompleteWithoutPcv20')],
       // C10-1 (2026-10-23): CDC states this card's claim and is cited by
       // number above; nothing here rests on p2016, so it comes off.
-      refs: childRefsExcept('p2016'),
+      refs: childRefsSwap('p2016', 'cdcPcv20Children2023'),
     }));
     return out;
   }

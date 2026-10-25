@@ -1444,6 +1444,53 @@ the dose counts, which would contradict a rejection printed beside it.
 
 Guard: `regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js`.
 
+### §K-PCV20CHILD2023 — ACIP's 2023 PCV20-in-children report on the cards (OWNER, 2026-10-25)
+
+**The document.** *Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children:
+Updated Recommendations of the Advisory Committee on Immunization Practices — United
+States, 2023*, CDC/ACIP, Supplementary Report to MMWR 72(39), stacks date 2023-09-22, 19
+pages. **Table 1 is on page 10.** Downloaded and read live 2026-10-25 (477.11 KB):
+`https://stacks.cdc.gov/view/cdc/133252/cdc_133252_DS1.pdf`.
+
+**⚠️ THE MMWR PAGE IS NOT THIS DOCUMENT.** `cdc.gov/mmwr/volumes/72/wr/mm7239a5.htm`
+(the pre-existing `mmwr7239a5` entry) is a ONE-PARAGRAPH NOTICE, fetched live the same day:
+it records that ACIP voted on 22 June 2023 and points at the Supplementary Report. It
+contains no table and no recommendation text. Both entries are kept and they are different
+documents; **never cite the notice for a Table 1 row.**
+
+**Table 1's row, verbatim.** Heading: *"Children aged 2–18 years with any risk condition
+who completed a recommended PCV series before age 6 years"*. It then splits:
+
+| | Table 1 says | Where it goes |
+|---|---|---|
+| **Completed series includes ≥1 dose of PCV20** | *"No additional doses of any pneumococcal vaccine are indicated."* | the "PCV complete (includes PCV20)" card — **replacing immunize.org p2016**, 56 cards |
+| **Completed series using PCV13 or PCV15 (no PCV20)** | *"Either a single dose of PCV20 or PPSV23 using previously recommended dosing and schedules is recommended to complete the recommended vaccine series."* | the Option A and Option B cards — **added** beside CDC's child notes, 432 cards |
+
+**The swap is a RANKING, not a removal for silence — so it is not FINDING F.** p2016 Table 4
+has a fitting row and it was re-read live the same day: *"Completed PCV series before age 6
+years, including one or more doses of PCV20 | No additional doses"*. Both documents state
+the claim; the owner's standing rule of 2026-10-23 prefers CDC where both speak, which is
+the same disposition she gave the 840 at/after-6 cards.
+
+**⚠️ THE SWAP IS SCOPED, AND THE SCOPE IS THE PPSV23.** Only the **56** cards where no
+PPSV23 counts lose p2016. The **40** sibling cards where one HAS been given keep it — her
+decision of 2026-10-23, which turns on CDC's child-notes branch being headed *"but have not
+received PPSV23"* where p2016's row carries no such condition. 56 + 40 = the 96 that
+`regression-finding-j-...` previously pinned as one bucket; it now pins both halves
+separately. The p2016 footprint moves **3,459 → 3,403**.
+
+**⚠️ TABLE 1 STATES NO INTERVAL.** Half B offers the choice and says nothing about 8 weeks
+— that number is CDC's child notes' and p2016's. Its marker therefore sits on **its own
+sentence** ("Either a single dose of PCV20 or a PPSV23 completes the recommended series"),
+never on the clause carrying the interval, which would give one sentence two numbers for
+two claims. Likewise the IC card's "≥5 years later" clause belongs to `pedsSecondPpsv5y`;
+Table 1 is silent on it.
+
+**Both quotes are verbatim and contiguous bullets**, not a bullet joined to its heading
+(FINDING K) — the heading's conditions live in each entry's `label`. Both declare
+`population: ['child-nonIC','child-IC']`, which is transcription: the row is headed "any
+risk condition" and the report's footnote lists both classes in one list.
+
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 
 Neither is a clinical rule; both are about whether a clinician can read the card correctly.

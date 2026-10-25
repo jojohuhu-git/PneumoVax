@@ -561,6 +561,96 @@ export const REFS = {
   //   Option B (if applicable)   | (blank)
   // The quote joins the history column to Option A, which is how the table is
   // read across; the PDF deep-links by page, so no text fragment depends on it.
+  // ── CDC/ACIP 2023, "Use of 20-Valent Pneumococcal Conjugate Vaccine Among
+  //    U.S. Children", Table 1 ────────────────────────────────────────────
+  //
+  // OWNER DECISION 2026-10-25, given with the document itself: *"You can
+  // reference this document for pediatric recommendations too."* Then, shown
+  // the actual cards on 2026-10-25, she chose where each half goes: half A
+  // REPLACES immunize.org p2016, half B is ADDED beside CDC's child notes.
+  //
+  // ⚠️ THE URL IS NOT THE MMWR PAGE, AND THAT IS THE WHOLE POINT. Fetched live
+  // 2026-10-25: `cdc.gov/mmwr/volumes/72/wr/mm7239a5.htm` (the existing
+  // `mmwr7239a5` entry) is a ONE-PARAGRAPH NOTICE — "On June 22, 2023, the
+  // Advisory Committee on Immunization Practices (ACIP) convened and approved
+  // recommendations... The recommendations, underlying evidence and rationale,
+  // and clinical guidance are available (Supplementary Report,
+  // https://stacks.cdc.gov/view/cdc/133252)." It contains NO table and NO
+  // recommendation text. Table 1 is in the 19-page Supplementary Report PDF,
+  // which is what these two entries point at. Citing the notice page for
+  // Table 1 would be a deep link to a document that does not say it.
+  //
+  // Transcribed from a live download 2026-10-25 (477.11 KB, 19 pages, stacks
+  // metadata date 2023/09/22; the MMWR issue carrying the notice is dated
+  // 29 September 2023, v72 no.39). Table 1 is on PDF page 10. Its row:
+  //   Age and Risk group | Children aged 2-18 years with any risk condition
+  //                      |   who completed a recommended PCV series before
+  //                      |   age 6 years
+  //   Recommendations    | Completed series includes >=1 dose of PCV20:
+  //                      |   * No additional doses of any pneumococcal
+  //                      |     vaccine are indicated.
+  //                      |   * This recommendation may be updated as
+  //                      |     additional data become available.
+  //                      | Completed series using PCV13 or PCV15 (no PCV20):
+  //                      |   * Either a single dose of PCV20 or PPSV23 using
+  //                      |     previously recommended dosing and schedules is
+  //                      |     recommended to complete the recommended
+  //                      |     vaccine series.
+  //
+  // ⚠️ EACH QUOTE IS VERBATIM AND CONTIGUOUS — one bullet, not a bullet joined
+  // to its heading. FINDING K (2026-10-18) is why: a joined parent+child
+  // string exists nowhere in the document, and that is how `pedsMinAge`'s deep
+  // link came to match nothing. The heading's conditions live in the `label`.
+  //
+  // ⚠️ AND TABLE 1 STATES NO INTERVAL. Half B offers the CHOICE ("a single
+  // dose of PCV20 or PPSV23 ... to complete the recommended vaccine series")
+  // and says nothing about 8 weeks; p2016 Table 4 and CDC's child notes are
+  // where that number comes from. Never let this marker sit on a sentence
+  // whose claim is the interval.
+  // The WHOLE-PAGE entry for the Supplementary Report -- what the grey button
+  // is built from, so it carries no `quote` and (per the population rule) no
+  // `population`: a document has no patient, only a sentence does.
+  //
+  // Distinct from `mmwr7239a5`, which is the one-paragraph MMWR NOTICE at a
+  // different URL. Both are kept: the notice is a real CDC page and may yet be
+  // the right thing to cite for the fact that ACIP voted, but it states no
+  // recommendation and must never carry one of Table 1's rows.
+  cdcPcv20Children2023: {
+    rulebook: 'child',
+    // The PDF, matching the two quoted entries below. One chip name must mean
+    // ONE document: pointing the button at the stacks landing page while the
+    // numbered citations deep-link into the PDF put two URLs under one name,
+    // which `regression-c1-hover-names-the-document` catches by design.
+    url: 'https://stacks.cdc.gov/view/cdc/133252/cdc_133252_DS1.pdf',
+    label: 'ACIP 2023 \u2014 Use of 20-valent pneumococcal conjugate vaccine among U.S. children: updated recommendations (Supplementary Report to MMWR 72(39))',
+    short: 'ACIP 2023 PCV20 Children',
+    lastVerified: '2026-10-25',
+  },
+  cdcPcv20Children2023CompleteWithPcv20: {
+    rulebook: 'child',
+    // The row's own heading is "any risk condition", so both risk classes.
+    population: ['child-nonIC', 'child-IC'],
+    // The PDF itself, not the stacks landing page: the landing page carries
+    // metadata only, and `pdfPage` is meaningless against HTML.
+    url: 'https://stacks.cdc.gov/view/cdc/133252/cdc_133252_DS1.pdf',
+    label: 'ACIP 2023 PCV20-in-children, Table 1 \u2014 a child 2\u201318 with any risk condition who completed a PCV series before age 6 that includes a PCV20: no additional doses',
+    short: 'ACIP 2023 PCV20 Children',
+    quote: 'No additional doses of any pneumococcal vaccine are indicated.',
+    pdfPage: 10,
+    lastVerified: '2026-10-25',
+  },
+  cdcPcv20Children2023CompleteWithoutPcv20: {
+    rulebook: 'child',
+    population: ['child-nonIC', 'child-IC'],
+    // The PDF itself, not the stacks landing page: the landing page carries
+    // metadata only, and `pdfPage` is meaningless against HTML.
+    url: 'https://stacks.cdc.gov/view/cdc/133252/cdc_133252_DS1.pdf',
+    label: 'ACIP 2023 PCV20-in-children, Table 1 \u2014 a child 2\u201318 with any risk condition who completed a PCV series before age 6 with PCV13 or PCV15 and no PCV20: one dose of PCV20 or PPSV23 completes the series',
+    short: 'ACIP 2023 PCV20 Children',
+    quote: 'Either a single dose of PCV20 or PPSV23 using previously recommended dosing and schedules is recommended to complete the recommended vaccine series.',
+    pdfPage: 10,
+    lastVerified: '2026-10-25',
+  },
   p2016CompletedBefore6WithPcv20: {
     rulebook: 'child',
     // Patients this cell is about: both risk classes — the row is headed

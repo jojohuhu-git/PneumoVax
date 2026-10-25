@@ -209,9 +209,23 @@ describe("every card citing p2016 has a p2016 row whose columns all fit", () => 
     //          document present where it has a fitting row — not a regression
     //          of C10-1, whose claim was about the total and still holds.
     //
+    //   3,403  after the 2026-10-25 swap — REMOVED 56. CDC/ACIP's 2023
+    //          PCV20-in-children report, Table 1, states the whole claim on
+    //          the "PCV complete (includes PCV20)" card for a child who
+    //          completed before age 6 with NO counting PPSV23: "No additional
+    //          doses of any pneumococcal vaccine are indicated." The owner,
+    //          shown that card and what it cited, chose to swap p2016 out for
+    //          it. ⚠️ NOT a FINDING F removal: p2016's row fits and was
+    //          re-read live the same day — it is ranked below CDC where both
+    //          speak, her standing rule of 2026-10-23. The 40 sibling cards
+    //          where a PPSV23 HAS been given keep p2016, because CDC's branch
+    //          there is headed "but have not received PPSV23" and p2016's row
+    //          carries no such condition. 40 + 56 = the 96 that
+    //          `regression-finding-j-...` used to pin as one bucket.
+    //
     // If this fails, do not edit the number until you can say which cards moved
     // and why — then edit it and add the line.
-    expect(carrying).toBe(3459);
+    expect(carrying).toBe(3403);
     expect([...noRowFits.entries()].slice(0, 8)).toEqual([]);
     expect([...noRowFits.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });
