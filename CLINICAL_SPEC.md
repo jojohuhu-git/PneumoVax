@@ -1374,6 +1374,64 @@ pin is now 400, was 188) and
 
 ---
 
+### §K-NOPROMISE — A rejected dose does not name a date for a dose nobody is asking for (OWNER, 2026-10-25)
+
+**The defect.** A dose rejected for TIMING carried the sentence *"...It is not repeated; the
+next dose in this series can be given from `<date>` at the earliest."* Measured over the
+grid, **647 of the 814 children** whose PPSV23 was rejected were shown that date on a screen
+where every card said they were finished or needed nothing — 398 at risk with a complete
+PCV20-containing series, 111 with PCV20 whose card read "Not indicated", 138 with no PCV20
+and a complete or not-indicated card. The patient who found it: a 5-year-old with asplenia,
+PCV20 on 2026-06-01 and a PPSV23 21 days later.
+
+**The owner's ruling, and her document.** Asked what such a child is actually owed, she
+answered with CDC/ACIP's **Table 1** and told the app it may cite that document for
+paediatric recommendations:
+
+> *"Children aged 2–18 years with any risk condition who completed a recommended PCV series
+> before age 6 years: **Completed series includes ≥1 dose of PCV20:** No additional doses of
+> any pneumococcal vaccine are indicated."*
+
+**Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children: Updated
+Recommendations of the Advisory Committee on Immunization Practices — United States, 2023**,
+CDC/ACIP, published **22 September 2023**, Table 1 —
+`https://stacks.cdc.gov/view/cdc/133252`, verified live 2026-10-25. The table is in the PDF;
+the stacks landing page carries metadata only. Table 1's other half, for a completed series
+**without** PCV20, reads *"Either a single dose of PCV20 or PPSV23 using previously
+recommended dosing and schedules is recommended to complete the recommended vaccine
+series."*
+
+**The recommendation CARDS already honoured this** — `pcvInfant`'s complete branch has said
+"the series already includes PCV20, so no further pneumococcal dose is needed" since
+FINDING D. Only the dose note did not, so this is a wording fix and moves no dose.
+
+**THE TEST IS "IS ANYTHING OWED AT ALL", NOT "IS A DOSE OF THIS VACCINE OWED."** An adult
+whose PPSV23 was rejected IS owed something — a conjugate, per §K-INVALID — so her clause
+stays and goes on matching her card's date. Keying on the vaccine stream would have stripped
+it from every one of those adults one commit after the owner ruled that the two surfaces
+must agree. It is **not an age test** either: what separates these children is that nothing
+is owed, which `recs` states directly. `complete` and `not-indicated` are the only two card
+statuses that ask for nothing.
+
+**The lead always survives.** Only the forward-looking half goes; the dose still does not
+count, and it is still not repeated.
+
+**Where it lives.** `validate.js` emits both halves and hands `recommend.js` the exact
+sentence to swap and its replacement (`forwardLookingReason` / `withoutForwardLook`).
+`validate.js` cannot see the cards, and `recommend.js` must not match the sentence by text —
+string surgery on a sentence built elsewhere breaks silently when the wording changes.
+
+Measured 2026-10-25 over both grids: **3,282 of 35,280 rendered lines changed** (2,930 real
+patients, 352 impossible entries), 0 added, 0 removed, and **every changed line is explained
+entirely by the clause being withdrawn** — no line gained it and nothing else moved. **Both
+corpora are blind to this** (they record a reason COUNT, not its text, and the swap keeps the
+count), which is why the guard sweeps the rendered sentences instead.
+
+Guard: `regression-2026-10-25-no-date-for-a-dose-nobody-asks-for.test.js`, pinned on both
+sides — 2,930 withdrawn and 2,335 kept.
+
+---
+
 ## §L — The next dose's minimum interval, children <24 months (`cdcCatchupJobAid`)
 
 **Added 2026-10-11 (peds audit P0-2 / queue S3-N2).** Owner decisions of the same date,

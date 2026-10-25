@@ -3280,10 +3280,55 @@ export function recommend(input) {
   // ── PCV21 geographic advisory ─────────────────────────────────────────
   const pcv21Geo = pcv21GeoNote(am, recs);
 
+  // ── OWNER DECISION 2026-10-25: a rejected dose does not promise a dose
+  //    nobody is asking for ───────────────────────────────────────────────
+  //
+  // The grey note under a dose rejected for TIMING ended with "the next dose
+  // in this series can be given from <date> at the earliest." Swept over the
+  // grid, that was being shown to **647 of the 814 children** whose PPSV23
+  // was rejected, on screens whose every card said the child was finished or
+  // needed nothing:
+  //
+  //   398  at risk, series complete, PCV20 in it   <- her Table 1 row exactly
+  //   111  PCV20 in the series, "Not indicated"
+  //   138  no PCV20, complete or not indicated
+  //
+  // Her ruling, with the document: *"Children aged 2–18 years with any risk
+  // condition who completed a recommended PCV series before age 6 years:
+  // Completed series includes >=1 dose of PCV20: No additional doses of any
+  // pneumococcal vaccine are indicated"* — CDC/ACIP, "Use of 20-Valent
+  // Pneumococcal Conjugate Vaccine Among U.S. Children", 22 September 2023,
+  // Table 1 (`cdcPcv20Children2023Table1`). The cards already honoured it; the
+  // note did not.
+  //
+  // ⚠️ THE TEST IS "IS ANYTHING OWED AT ALL", NOT "IS A DOSE OF THIS VACCINE
+  // OWED", and the difference is deliberate. An adult whose PPSV23 was
+  // rejected IS owed something — a conjugate, per the 2026-10-24/25 rulings —
+  // so her clause stays and keeps agreeing with her card's date. Keying on the
+  // stream instead would have stripped it from every one of those adults, two
+  // commits after the owner ruled the two surfaces must agree.
+  //
+  // It is also not an age test. CLAUDE.md forbids one deciding whether a rule
+  // bites, and none is needed: what makes these children different is that
+  // nothing is owed, which `recs` states directly.
+  //
+  // `complete` and `not-indicated` are the only two statuses that ask for
+  // nothing; `due`, `catchup`, `risk-based` and `shared-decision` all ask.
+  const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
+  const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
+  const withdrawForwardLook = (list) => (nothingIsOwed
+    ? list.map((d) => (d.forwardLookingReason
+      ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? d.withoutForwardLook : x)) }
+      : d))
+    : list);
+
   return {
     recs,
     pcv21Geo,
-    perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
+    perDose: {
+      pcv: withdrawForwardLook(pcvAnalysis.perDose),
+      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose),
+    },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH
     // from here; reading its own input array alongside `perDose` is what put
