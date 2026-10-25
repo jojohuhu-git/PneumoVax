@@ -5,6 +5,7 @@ import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PPSV23_PRODUCT, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
+import HowThisWasWorkedOut from './HowThisWasWorkedOut.jsx';
 import RiskAgeNote from './RiskAgeNote.jsx';
 import DoseEditor from './DoseEditor.jsx';
 import { Chevron } from './icons.jsx';
@@ -58,7 +59,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     today,
   });
 
-  const { recs, pcv21Geo, excluded, exclusionMessage, exclusionCitations } = result;
+  const { recs, pcv21Geo, excluded, exclusionMessage, exclusionCitations, path } = result;
 
   if (excluded) {
     // Decision 3 of the 2026-10-16 hard-stop plan: typed doses stay in memory
@@ -363,6 +364,11 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
         <div className="rec-section-title">Recommendation</div>
         {buildCards(recs)}
       </div>
+
+      {/* C14: the route this patient took. The engine withholds `path`
+          entirely for the transplant hard stop, so nothing is needed here to
+          keep that screen bare. */}
+      <HowThisWasWorkedOut path={path} />
 
       <Disclaimer />
 

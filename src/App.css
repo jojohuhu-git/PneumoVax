@@ -645,3 +645,90 @@ body {
 }
 .risk-age-note-line + .risk-age-note-line { margin-top: var(--sp-4); }
 .risk-age-note-footer { margin-top: var(--sp-4); color: var(--gy2); }
+
+/* ── "How recommendations are made" (the rulebook page) ──────────
+   C14 (2026-10-25). Design rules applied: no decorative icons, small radii
+   only, every colour a token. The +/- marks are text, not shapes. */
+.rb-link {
+  margin-left: auto; flex-shrink: 0; background: none; border: none; padding: var(--sp-4) 0;
+  font-size: var(--fs-sm); font-family: inherit; color: var(--c2);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.rb-link:hover { color: var(--c); }
+
+.rb { max-width: 660px; margin: 0 auto; width: 100%; padding: var(--sp-24) var(--sp-16) 60px; }
+.rb-top { display: flex; align-items: flex-start; gap: var(--sp-16); margin-bottom: var(--sp-12); }
+.rb-title { font-size: var(--fs-xl); font-weight: 700; color: var(--gy); line-height: 1.25; }
+.rb-close { flex-shrink: 0; margin-left: auto; }
+.rb-intro { font-size: var(--fs-base); color: var(--gy2); line-height: 1.6; margin-bottom: var(--sp-24); }
+
+.rb-section { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-16) var(--sp-24); margin-bottom: var(--sp-16); }
+.rb-section-head {
+  width: 100%; display: flex; align-items: center; gap: var(--sp-12);
+  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; text-align: left;
+}
+.rb-section-title { font-size: var(--fs-md); font-weight: 700; color: var(--c); }
+.rb-section-mark { margin-left: auto; font-size: var(--fs-lg); color: var(--gy3); line-height: 1; }
+.rb-section-lead { font-size: var(--fs-sm); color: var(--gy3); line-height: 1.5; margin-top: var(--sp-4); }
+.rb-section-body { margin-top: var(--sp-16); border-top: 1px solid var(--gy6); padding-top: var(--sp-16); }
+
+.rb-h3 { font-size: var(--fs-base); font-weight: 700; color: var(--gy); margin: var(--sp-16) 0 var(--sp-4); }
+.rb-note { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.6; margin-bottom: var(--sp-12); }
+.rb-sub { display: block; font-size: var(--fs-xs); color: var(--gy3); line-height: 1.45; margin-top: 2px; }
+.rb-tag {
+  display: inline-block; margin-left: var(--sp-8); padding: 1px var(--sp-8);
+  border-radius: var(--rads); background: var(--gy6); color: var(--gy2); font-size: var(--fs-2xs);
+}
+
+.rb-path-list { list-style: none; counter-reset: rbp; }
+.rb-path { position: relative; padding-left: var(--sp-24); margin-bottom: var(--sp-16); counter-increment: rbp; }
+.rb-path::before { content: counter(rbp) "."; position: absolute; left: 0; top: 0; color: var(--c3); font-weight: 700; font-size: var(--fs-sm); }
+.rb-path-name { font-size: var(--fs-base); font-weight: 700; color: var(--gy); }
+.rb-path-when { font-size: var(--fs-xs); color: var(--c2); margin-bottom: var(--sp-4); }
+.rb-path-sum { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.6; }
+
+.rb-group { margin-bottom: var(--sp-16); }
+.rb-plain-list { list-style: none; }
+.rb-plain-list li { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; padding: var(--sp-8) 0; border-bottom: 1px solid var(--gy6); }
+.rb-plain-list li:last-child { border-bottom: none; }
+
+.rb-table { width: 100%; border-collapse: collapse; margin-bottom: var(--sp-12); }
+.rb-table th {
+  text-align: left; font-size: var(--fs-xs); font-weight: 700; color: var(--gy3);
+  padding: var(--sp-4) var(--sp-8) var(--sp-8) 0; border-bottom: 1px solid var(--gy5);
+}
+.rb-table td {
+  font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5;
+  padding: var(--sp-8) var(--sp-8) var(--sp-8) 0; border-bottom: 1px solid var(--gy6); vertical-align: top;
+}
+.rb-table td:last-child, .rb-table th:last-child { padding-right: 0; }
+.rb-td-age { white-space: nowrap; }
+
+.rb-foot { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.6; margin-top: var(--sp-24); }
+
+@media (max-width: 560px) {
+  .rb-top { flex-direction: column; }
+  .rb-close { margin-left: 0; }
+  .rb-table, .rb-table tbody, .rb-table tr, .rb-table td { display: block; width: 100%; }
+  .rb-table thead { display: none; }
+  .rb-table tr { border-bottom: 1px solid var(--gy5); padding: var(--sp-8) 0; }
+  .rb-table td { border-bottom: none; padding: 2px 0; }
+}
+.app-main-rulebook { flex: 1; width: 100%; }
+
+/* ── "How this was worked out" — the per-patient route (C14, 2026-10-25) ── */
+.howpath { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-12) var(--sp-16); margin-bottom: var(--sp-16); }
+.howpath-toggle {
+  width: 100%; display: flex; align-items: center; gap: var(--sp-8);
+  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; text-align: left;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--c2);
+}
+.howpath-toggle:hover { color: var(--c); }
+.howpath-mark { margin-left: auto; font-size: var(--fs-md); color: var(--gy3); line-height: 1; }
+.howpath-list { list-style: none; margin-top: var(--sp-12); border-top: 1px solid var(--gy6); padding-top: var(--sp-12); counter-reset: hp; }
+.howpath-step { position: relative; padding-left: var(--sp-24); padding-bottom: var(--sp-12); counter-increment: hp; }
+.howpath-step:last-child { padding-bottom: 0; }
+.howpath-step::before { content: counter(hp); position: absolute; left: 0; top: 0; color: var(--c3); font-weight: 700; font-size: var(--fs-xs); }
+.howpath-step-name { display: block; font-size: var(--fs-xs); color: var(--gy3); }
+.howpath-step-took { display: block; font-size: var(--fs-sm); color: var(--gy); line-height: 1.45; }
+.howpath-step-why { display: block; font-size: var(--fs-xs); color: var(--gy2); line-height: 1.5; margin-top: 2px; }
