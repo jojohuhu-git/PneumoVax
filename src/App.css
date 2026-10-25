@@ -675,6 +675,7 @@ body {
 .rb-h3 { font-size: var(--fs-base); font-weight: 700; color: var(--gy); margin: var(--sp-16) 0 var(--sp-4); }
 .rb-note { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.6; margin-bottom: var(--sp-12); }
 .rb-sub { display: block; font-size: var(--fs-xs); color: var(--gy3); line-height: 1.45; margin-top: 2px; }
+.rb-call { color: var(--c); }
 .rb-tag {
   display: inline-block; margin-left: var(--sp-8); padding: 1px var(--sp-8);
   border-radius: var(--rads); background: var(--gy6); color: var(--gy2); font-size: var(--fs-2xs);

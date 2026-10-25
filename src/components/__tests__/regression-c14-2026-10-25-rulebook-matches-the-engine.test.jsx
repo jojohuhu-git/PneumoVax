@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import Rulebook from '../Rulebook.jsx';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES, monthsInWords } from '../../data/rulebook.js';
+import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, OWNER_INTERVAL_CALLS, WRITTEN_JUDGEMENT_CALLS, SOURCES, monthsInWords } from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
 import { DOSE_INTERVAL_RULES } from '../../logic/doseIntervalRules.js';
 import { ALL_PRODUCTS } from '../../data/brands.js';
@@ -61,7 +61,7 @@ describe('C14 — the rulebook page states the engine\'s own numbers', () => {
     ]);
     const offenders = [];
     // Only the sentence-bearing fields: skip code, comments and imports.
-    for (const m of rulebookSrc.matchAll(/(?:whenWritten|writtenSummary|means|name|engineFn):\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)) {
+    for (const m of rulebookSrc.matchAll(/(?:whenWritten|writtenSummary|means|name|says|engineFn):\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)) {
       // A product's name carries digits that are not an age: PCV7, PCV13,
       // PCV15, PCV20, PCV21, PPSV23. Take the names out before looking.
       const text = m[2].replace(/\bP?[CP]C?S?V-?\d+\b/g, 'the vaccine');
@@ -155,6 +155,71 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
       expect(s.url).not.toContain('#');
       expect(s.lastVerified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     }
+  });
+});
+
+describe('C14 — the judgement calls the page highlights are the engine\'s own', () => {
+  // OWNER REQUEST 2026-10-25: "I also want the rulebook updated to highlight
+  // cases where there are no clear CDC/ACIP recommendations so the app is
+  // making a judgement call."
+  //
+  // The risk this section carries is the one the whole page carries: a list of
+  // judgement calls that stops matching the judgement calls. So the interval
+  // half is GENERATED from the same flag the engine reads, and the written
+  // half is DRIVEN THROUGH THE ENGINE below rather than taken on trust.
+  it('the generated half is exactly the rows the engine marks as the app\'s own', () => {
+    const fromEngine = DOSE_INTERVAL_RULES.filter((r) => r.authority === 'OWNER').map((r) => r.id);
+    expect(OWNER_INTERVAL_CALLS.map((r) => r.id)).toEqual(fromEngine);
+    // Anti-vacuity: an empty list would pass the line above and say nothing.
+    expect(fromEngine.length).toBeGreaterThan(0);
+  });
+
+  it('and it lists no row the engine credits to CDC or ACIP', () => {
+    for (const r of OWNER_INTERVAL_CALLS) {
+      const real = DOSE_INTERVAL_RULES.find((x) => x.id === r.id);
+      expect(real.authority, r.id).toBe('OWNER');
+    }
+  });
+
+  it('every judgement call appears on the rendered page', () => {
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Where the app is making a judgement call/).closest('button'));
+    for (const r of OWNER_INTERVAL_CALLS) {
+      expect(screen.getAllByText(r.id).length).toBeGreaterThan(0);
+    }
+    for (const c of WRITTEN_JUDGEMENT_CALLS) {
+      expect(screen.getAllByText(c.name).length).toBeGreaterThan(0);
+    }
+  });
+
+  // ── the written half, driven ──────────────────────────────────────────
+  it('the read-across interval really is on the screen, and really does say it is an interpretation', () => {
+    // Her 55-year-old of 2026-10-25: PPSV23, then a conjugate fourteen days
+    // later. The dose counts, and the alternative offered in its disclosure
+    // is the number the page describes as read across.
+    const out = recommend({
+      today: '2026-10-25', ageMonths: 55 * 12, riskIds: ['chronic_lung'],
+      pcvDoses: [{ product: 'PCV20', date: '2026-06-15' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2026-06-01' }],
+    });
+    const why = (out.perDose.pcv[0].whys ?? []).join(' ');
+    expect(why).toContain('read across from the only adult conjugate-to-conjugate interval ACIP states');
+    expect(why).toContain('an interpretation and not a stated rule');
+  });
+
+  it('the transplant stop really does give no schedule and name the bodies in words', () => {
+    const out = recommend({
+      today: '2026-10-25', ageMonths: 600,
+      riskIds: ['hct_cart_bcell_exclude'], pcvDoses: [], ppsv23Doses: [],
+    });
+    expect(out.excluded).toBe(true);
+    expect(out.recs).toEqual([]);
+    // Named in words, linked to nothing — the page says both, and the
+    // message itself is where "linked to nothing" has to be true.
+    expect(out.exclusionMessage).toMatch(/ASCO/);
+    expect(out.exclusionMessage).toMatch(/NCCN/);
+    expect(out.exclusionMessage).toMatch(/IDSA/);
+    expect(out.exclusionMessage).not.toMatch(/https?:\/\//);
   });
 });
 

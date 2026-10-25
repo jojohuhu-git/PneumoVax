@@ -9,7 +9,7 @@
 // regression-2026-10-25-rulebook-matches-the-engine.test.js.
 // ─────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES, monthsInWords } from '../data/rulebook.js';
+import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, OWNER_INTERVAL_CALLS, WRITTEN_JUDGEMENT_CALLS, SOURCES, monthsInWords } from '../data/rulebook.js';
 
 function Section({ title, lead, children, open: initial = false }) {
   const [open, setOpen] = useState(initial);
@@ -160,7 +160,12 @@ export default function Rulebook({ onClose }) {
                       </td>
                       <td>
                         {r.authority === 'OWNER'
-                          ? <><strong>This app</strong><span className="rb-sub">{r.authorityMeans}</span></>
+                          ? (
+                            <>
+                              <strong className="rb-call">This app&rsquo;s judgement</strong>
+                              <span className="rb-sub">{r.authorityMeans}</span>
+                            </>
+                          )
                           : <>CDC / ACIP<span className="rb-sub">{r.authorityMeans}</span></>}
                       </td>
                     </tr>
@@ -173,7 +178,55 @@ export default function Rulebook({ onClose }) {
       </Section>
 
       <Section
-        title="5. Where the rules come from"
+        title="5. Where the app is making a judgement call"
+        lead="The places where CDC and ACIP do not answer the question, and the app answers it anyway."
+      >
+        <p className="rb-note">
+          Everywhere else on this page, the app is following a document. These are the
+          exceptions, gathered in one place. In each one the <strong>interval is CDC&rsquo;s or
+          ACIP&rsquo;s</strong> and the <strong>decision about what to do with it is the
+          app&rsquo;s</strong> — so a clinician who disagrees is disagreeing with this app, not
+          with a guideline, and may reasonably decide otherwise.
+        </p>
+
+        <h3 className="rb-h3">Gaps that stop a dose counting, where no document says they should</h3>
+        <p className="rb-note">
+          CDC and ACIP publish these intervals as <em>recommended timing</em>. Neither says a
+          dose given inside one has to be repeated — CDC&rsquo;s own data file sets no minimum
+          for any adult pneumococcal interval. Treating them as cut-offs is this app&rsquo;s
+          decision, and the app says so on the dose itself as well as here.
+        </p>
+        <table className="rb-table">
+          <thead>
+            <tr><th>The gap being judged</th><th>Which patients</th></tr>
+          </thead>
+          <tbody>
+            {OWNER_INTERVAL_CALLS.map((r) => (
+              <tr key={r.id}>
+                <td>{r.what}<span className="rb-sub">{r.id}</span></td>
+                <td>
+                  {r.rulebook === 'child' ? 'Children' : r.rulebook === 'adult' ? 'Adults' : 'Any age'}
+                  <span className="rb-sub">{r.enforcementMeans}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h3 className="rb-h3">Judgement calls that are not about a gap</h3>
+        <ul className="rb-plain-list">
+          {WRITTEN_JUDGEMENT_CALLS.map((c) => (
+            <li key={c.id}>
+              <strong>{c.name}</strong>
+              <span className="rb-sub">{c.means}</span>
+              <span className="rb-sub">What the app does: {c.says}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section
+        title="6. Where the rules come from"
         lead="Every document the app can put on a card, and the date each was last read."
       >
         <ul className="rb-plain-list">

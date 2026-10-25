@@ -155,6 +155,48 @@ export const INTERVAL_RULES = DOSE_INTERVAL_RULES.map((r) => ({
   sourceKey: typeof r.source === 'string' ? r.source : null,
 }));
 
+// ── Where the app is making a judgement call ─────────────────────────────
+//
+// OWNER REQUEST 2026-10-25, in her words: "I also want the rulebook updated to
+// highlight cases where there are no clear CDC/ACIP recommendations so the app
+// is making a judgement call."
+//
+// The page already said this once per row, in the last column of the
+// dose-spacing table, where a reader has to open a section and then read down
+// a third column to find it. This is the same fact gathered into one place and
+// named.
+//
+// TWO HALVES, and the page says which is which, exactly as the rest of this
+// file does.
+//
+//   GENERATED  every interval row carrying `authority: 'OWNER'`. That flag is
+//              the engine's own record of "the interval is ACIP's; treating it
+//              as a cut-off is ours", so this list cannot drift from the table
+//              it is drawn from — a row that loses the flag leaves here in the
+//              same commit.
+//   WRITTEN    the judgement calls that are NOT rows. They live in sentences
+//              the engine builds, so nothing generates them. Each one is
+//              DRIVEN THROUGH THE ENGINE by
+//              regression-c14-2026-10-25-rulebook-matches-the-engine.test.js,
+//              which fails if the app stops saying it — a typed sentence about
+//              behaviour is the failure mode this whole page exists to avoid.
+export const OWNER_INTERVAL_CALLS = INTERVAL_RULES.filter((r) => r.authority === 'OWNER');
+
+export const WRITTEN_JUDGEMENT_CALLS = [
+  {
+    id: 'repeat-conjugate-interval',
+    name: 'How long to wait before repeating a conjugate dose',
+    means: 'ACIP states one interval between two conjugate doses in an adult — a PCV20 or PCV21 after a PCV13 — and says nothing at all about a conjugate that has to be given again because it was given too soon. The app reads that interval across to the repeat.',
+    says: 'Every card and every dose note that uses the number says in its own words that it is an interpretation and not a stated rule, and names the paediatric table as paediatric rather than citing it.',
+  },
+  {
+    id: 'transplant-stop',
+    name: 'Stem-cell transplant, CAR-T, and B-cell-depleting therapy',
+    means: 'These patients are revaccinated on a transplant- or therapy-specific protocol rather than on an age-based schedule. Published schedules differ from each other and are revised, so the app does not choose one.',
+    says: 'It gives no schedule at all — not even the age-based one the patient would otherwise get — names the bodies whose current guidance to follow, and links to none of them, because a sentence naming them stays true longer than a link.',
+  },
+];
+
 // ── GENERATED: every document the app can cite, newest check first ───────
 export const SOURCES = Object.values(
   Object.entries(REFS).reduce((acc, [, v]) => {

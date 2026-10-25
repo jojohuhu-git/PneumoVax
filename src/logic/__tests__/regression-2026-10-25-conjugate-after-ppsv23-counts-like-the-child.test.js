@@ -206,6 +206,69 @@ describe('the row itself', () => {
   });
 });
 
+describe('no adult conjugate can be rejected for its timing any more', () => {
+  // A CONSEQUENCE OF THE RULING, measured rather than assumed, and recorded
+  // because it quietly killed a sentence.
+  //
+  // ADULT-PCV-AFTER-PPSV23 was the last adult row that could reject a PCV
+  // dose; the other five adult PCV rows are recommendations or never flagged.
+  // So `adultRepeatAfterInvalidDose`'s `conjugateToConjugate` basis can no
+  // longer reach a recommendation CARD — a card only appears when the last
+  // dose is invalid, and the last dose can no longer be an invalid conjugate.
+  //
+  // The sentence that basis prints — "It is an interpretation, not a stated
+  // rule", with the paediatric 8 weeks named as paediatric — is therefore
+  // unreachable on a card: measured 0 of 35,223 cards over both grids. It has
+  // NOT been deleted. The same clause now rides the dose's own disclosure for
+  // all 132 patients, and if a later ruling re-floors an adult conjugate the
+  // card path is there and correct. What a later session must not do is
+  // "clean up" the card branch on the strength of a coverage report.
+  it('every adult PCV row is a recommendation or never flagged', () => {
+    const adultPcvRows = DOSE_INTERVAL_RULES
+      .filter((r) => r.rulebook === 'adult' && r.vaccine === 'PCV');
+    expect(adultPcvRows.length).toBeGreaterThan(0);
+    for (const r of adultPcvRows) expect(r.enforcement, r.id).not.toBe('floor');
+  });
+
+  it('so no PCV dose in the grid is ever rejected by an adult rule', () => {
+    // ⚠️ KEYED ON THE RULE THAT FIRED, not on the patient's age today, and the
+    // first draft got that wrong: filtering by `ageMonths >= 228` found 1,287
+    // "offenders", every one of them a 50-, 65- or 70-year-old with a dose
+    // recorded in CHILDHOOD and rejected by CHILD-PCV-AFTER-PCV. The rulebook
+    // is chosen by the age AT THE DOSE (`rulebookOf(ctx.ageAtDose)`), so an
+    // adult patient's infant doses are a child's doses. Those rejections are
+    // correct and are not what this test is about — and they cannot reach the
+    // card either, because `adultRepeatOwed` only fires for the ADULT rule ids
+    // in its named set.
+    const offenders = [];
+    for (const c of buildCases()) {
+      let out; try { out = recommend(c.input); } catch { continue; }
+      for (const d of (out.perDose?.pcv ?? [])) {
+        if (d.status === 'invalid' && !d.recordProblem
+          && String(d.intervalRuleId ?? '').startsWith('ADULT-')) {
+          offenders.push([c.key, d.intervalRuleId]);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('and the card\'s conjugate-to-conjugate wording appears on no card at all', () => {
+    // 0 of 35,223 cards over both grids when this was measured. Kept as the
+    // record that the clause did not vanish, it MOVED — the companion count
+    // is the 132 in the sweep below.
+    let onCards = 0;
+    for (const c of buildCases()) {
+      let out; try { out = recommend(c.input); } catch { continue; }
+      for (const r of (out.recs ?? [])) {
+        const t = typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`;
+        if (t.includes('It is an interpretation, not a stated rule')) onCards++;
+      }
+    }
+    expect(onCards).toBe(0);
+  });
+});
+
 describe('swept over the grid', () => {
   // The exact population, pinned. A RISE means doses are being counted that
   // were not part of her ruling; a FALL means some of her 132 have been taken
