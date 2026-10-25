@@ -134,22 +134,38 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
   });
 
-  it('end to end: an adult five-week PCV13 → PCV20 gap now reads as a dose that does not count', () => {
+  // ⚠️ REVERSED 2026-10-24 (§K-CONJUGATE) — kept as the record of it. This
+  // case was called "...now reads as a dose that does not count" and asserted
+  // the rejection, the repeat date and the owner's name on the screen. The
+  // owner downgraded the row: the dose counts, and the explanation is bolded
+  // on her instruction — *"make the wording more clinical and nuanced since
+  // this is clinically likely ok but data free. Also bold it."*
+  it('end to end: an adult five-week PCV13 → PCV20 gap counts, and the caveat is BOLD', () => {
     const { container } = render(<Harness pcvDoses={[
       { product: 'PCV13', date: '2026-01-05' },
       { product: 'PCV20', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
     expect(screen.getByText(/at least 1 year after the last PCV13 dose/i)).toBeInTheDocument();
-    // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
-    // only early — the UI must not tell the clinician to repeat it.
-    // OWNER RULING 2026-10-24: the chip names the ungraced minimum, and
-    // names it as the earliest rather than as the date the dose is due.
-    expect(screen.getByText(/can be given from 2027-02-09 at the earliest/i)).toBeInTheDocument();
-    expect(screen.queryByText(/repeat this dose only/i)).not.toBeInTheDocument();
-    // The clinician must be able to see this is the owner's rule, not ACIP's.
-    expect(screen.getByText(/owner clinical determination/i)).toBeInTheDocument();
-    // And it must NOT still claim the dose counts.
-    expect(screen.queryByText(/This dose still counts/i)).not.toBeInTheDocument();
+
+    // THE BOLD IS THE OWNER'S REQUIREMENT, SO IT IS ASSERTED ON THE RENDERED
+    // DOM, not on the string the engine produced. `**...**` in a reason is
+    // turned into <strong class="note-emphasis"> by renderNoteWithCites;
+    // a reason rendered as a bare string would print literal asterisks.
+    const bold = [...container.querySelectorAll('.note-emphasis')].map((n) => n.textContent).join(' ');
+    expect(bold).toMatch(/no data establish that it performs as well/);
+    expect(bold).toMatch(/clinical judgement/);
+    expect(container.textContent).not.toMatch(/\*\*/);
+
+    // Counted, numbered, not struck through, not an error.
+    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
+    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(container.querySelector('.dose-val-dropped')).toBeNull();
+
+    // No repeat date, and no claim of the owner determination it no longer
+    // rests on — both would contradict "the dose is counted".
+    expect(screen.queryByText(/at the earliest/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/2027-02-09/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/owner clinical determination/i)).not.toBeInTheDocument();
   });
 });

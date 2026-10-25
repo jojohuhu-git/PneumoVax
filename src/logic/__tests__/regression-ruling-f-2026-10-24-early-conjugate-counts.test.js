@@ -84,13 +84,20 @@ describe('RULING F — the owner\'s patient: PCV20 four years after PPSV23', () 
   });
 });
 
-describe('RULING F — the floors it must NOT loosen', () => {
-  // ⚠️ THE ORDERING CONTROL. This PCV20 misses BOTH gaps: 9 months after the
-  // PPSV23 (short of 5 years) and 4 months after the PCV13 (short of 1 year).
-  // The 1-year conjugate-to-conjugate floor is an owner determination of
-  // 2026-10-11 that Ruling F does not touch, so the dose must still be
-  // rejected — and rejected BY THAT ROW, not quietly waved through by the
-  // recommendation that now sits beside it.
+// ⚠️ RENAMED, NOT DELETED — this block is the RECORD OF A REVERSAL, the same
+// way regression-p0-2's "the validity floor is untouched" block was kept when
+// its claim was reversed. It used to be called "the floors it must NOT
+// loosen" and it asserted that a PCV20 missing BOTH gaps is still rejected by
+// the 1-year conjugate floor. On 2026-10-24, later the same day, the owner
+// downgraded that floor too (§K-CONJUGATE), so the dose now COUNTS — and,
+// per her *"mention both gaps"*, carries one sentence per missed interval.
+// Do not restore the old assertions; they are preserved below as the thing
+// that changed.
+describe('RULING F — what became of the floor beside it (reversed 2026-10-24)', () => {
+  // THE SAME PATIENT AS BEFORE. This PCV20 misses BOTH gaps: 9 months after
+  // the PPSV23 (short of 5 years) and 4 months after the PCV13 (short of 1
+  // year). She is the patient the owner was shown when she chose to relax the
+  // conjugate rows and to have both gaps named.
   const MISSES_BOTH = {
     ageMonths: Y(70),
     riskIds: [],
@@ -101,15 +108,35 @@ describe('RULING F — the floors it must NOT loosen', () => {
     ppsv23Doses: [{ product: 'PPSV23', date: '2025-01-01' }],
   };
 
-  it('still rejects a PCV20 that misses the 1-year conjugate gap as well', () => {
+  it('COUNTS the PCV20 that misses both gaps — the 1-year floor is gone too', () => {
     const v = verdictsFor(MISSES_BOTH);
     const pcv20 = v.pcv[1];
     expect(v.pcv).toHaveLength(2);
-    expect(pcv20.status).toBe('invalid');
+    // Was 'invalid' until 2026-10-24.
+    expect(pcv20.status).toBe('valid');
+    expect(pcv20.earlyAdvisory).toBe(true);
+    // The FIRST unmet row still names the verdict, so the id is unchanged.
     expect(pcv20.intervalRuleId).toBe('ADULT-PCV20-21-1Y-AFTER-PCV');
+    // A recommendation owes no repeat and no "earliest valid" date.
+    expect(pcv20.earliestValidDate).toBeUndefined();
+    expect(pcv20.repeatDueDate).toBeUndefined();
   });
 
-  it('orders the 1-year floor BEFORE the 5-year recommendation in the table', () => {
+  it('names BOTH missed gaps on her dose, not just the first', () => {
+    const v = verdictsFor(MISSES_BOTH);
+    const text = v.pcv[1].reasons.join(' ¶ ');
+    // The conjugate gap, from ADULT-PCV20-21-1Y-AFTER-PCV...
+    expect(text).toMatch(/previous pneumococcal conjugate dose of 2025-06-01/);
+    // ...and the 5-year gap, from ADULT-PCV20-21-5Y-AFTER-PPSV23.
+    expect(text).toMatch(/PPSV23 dose of 2025-01-01/);
+    expect(text).toMatch(/at least 5 years/);
+    expect(v.pcv[1].reasons).toHaveLength(2);
+  });
+
+  it('still orders the conjugate row BEFORE the 5-year row, so it names the verdict', () => {
+    // The ordering no longer protects a floor — the walk continues past an
+    // unmet recommendation now, so neither row can hide the other. It still
+    // decides which rule id the dose records and which sentence prints first.
     const ids = DOSE_INTERVAL_RULES.map((r) => r.id);
     expect(ids.indexOf('ADULT-PCV20-21-1Y-AFTER-PCV'))
       .toBeLessThan(ids.indexOf('ADULT-PCV20-21-5Y-AFTER-PPSV23'));

@@ -933,9 +933,9 @@ catch-up row**.
   | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | dose 2 after a dose under 12 months: >=4 weeks; dose 2 after a dose from 12 months: >=8 weeks; dose 3 under 12 months after a dose under 7 months: >=4 weeks; dose 3 after a dose at 7-11 months: >=8 weeks; dose 4+ given under 12 months: >=4 weeks; dose 4+ given from 12 months: >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PCV` | child | PPSV23 | `lastPcv` | >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PPSV23` | child | PPSV23 | `prevSameStream` | >=5 years | floor | CDC |
-  | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | floor | OWNER |
+  | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | recommendation | OWNER |
   | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | recommendation | CDC |
-  | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | floor | OWNER |
+  | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | recommendation | CDC |
   | `ADULT-PCV-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=1 year | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv15` | >=8 weeks | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV15` | adult | PPSV23 | `lastPcv15` | >=1 year | floor | OWNER |
@@ -951,13 +951,23 @@ catch-up row**.
   Reading the table:
   - **Enforcement** — `floor`: a shorter gap means the dose does not count and is owed a
     repeat. `recommendation`: the dose counts, keeps its number, and carries a sentence
-    explaining the gap. `none`: deliberately never flagged, with the reason in the row's
+    explaining the gap. **A dose may collect more than one such sentence** — since the
+    owner's *"mention both gaps"* decision of 2026-10-24 the walk no longer stops at the
+    first unmet recommendation, so a patient inside two advised intervals is told about
+    both. An unmet **floor** still ends the walk and discards any sentence collected before
+    it: every recommendation sentence ends by saying the dose counts, which would read as a
+    contradiction printed beside a rejection. `none`: deliberately never flagged, with the reason in the row's
     `source` field. A `none` row states no interval at all, because an interval it never
     reads would read as a live rule to the next person (asserted by P2-7).
   - **Authority** — ⚠️ `OWNER` means an **owner clinical determination dated 2026-10-11**,
     not ACIP's and not CDC's. Every adult floor is one; see the determination below. `CDC`
     appears only on the three paediatric floors, whose sources state the gap as a minimum in
     so many words, and on the rows that void nothing.
+    `ADULT-PCV20-21-1Y-AFTER-PCV` is the one row carrying `OWNER` that is **not** a floor:
+    it was downgraded on 2026-10-24 (§K-CONJUGATE below) and keeps the owner's name because,
+    unlike every other recommendation row, no ACIP or CDC source states its interval **in
+    any form** — not as a minimum and not as advice. Its message tells the clinician that
+    in words. Never relabel it `CDC` to make the pair of conjugate rows look symmetrical.
   - **Minimum gap** is the gap the rule *enforces*, which for adults is a different question
     from the gap the app *recommends*. The app recommends ≥1 year after a PCV15 for every
     adult (A-P1-1) and merely **names** the 8-week option; the two 8-week rows above judge a
@@ -1373,6 +1383,56 @@ pin is now 400, was 188) and
 `regression-2026-10-25-pcv13-families-follow-the-invalid-dose.test.js`.
 
 ---
+
+### §K-CONJUGATE — One adult conjugate soon after another is ADVICE, not a floor (OWNER, 2026-10-24)
+
+**The decision.** The last two adult rows asserting that a conjugate given sooner than a
+year after another conjugate **does not count** were downgraded to recommendations:
+`ADULT-PCV20-21-AFTER-PCV13` and `ADULT-PCV20-21-1Y-AFTER-PCV`. The dose now counts and the
+card explains the timing.
+
+**Why.** Both were owner clinical determinations of 2026-10-11, not minimums any source
+states — §K's determination below says so in capitals, and CDSI v4.64 sets
+`absMinInt = 0 days` for every adult pneumococcal interval. Reasoning about a different
+patient on 2026-10-24 the owner had already said an adult conjugate-to-conjugate interval
+*"exists in no document"*, and the rows were left standing as raised-not-decided. They were
+put to her again with two patients, each scored both ways through the real engine:
+
+| Patient | History | Before | After |
+|---|---|---|---|
+| 68 y, chronic heart disease | PCV13 2026-02-10, PCV20 2026-09-10 | PCV20 thrown out; return 2027-09-10 | PCV20 counts; series complete |
+| 70 y, no risk conditions | PPSV23 2018-06-01, PCV13 2026-01-15, PCV20 2026-08-15 | PCV20 thrown out; return 2027-08-15 | PCV20 counts; series complete |
+
+She chose to relax both, with a wording instruction: *"make the wording more clinical and
+nuanced since this is clinically likely ok but data free. Also bold it."* Each message
+therefore states three things and emphasises them with `**...**`, which
+`renderNoteWithCites` turns into `<strong class="note-emphasis">`: the dose is counted; a
+shorter gap is not known to reduce effectiveness; **no data establish that it performs as
+well**, so a further dose is a clinical judgement.
+
+**⚠️ The two rows do not share an authority.** `ADULT-PCV20-21-AFTER-PCV13`'s year is CDC's
+own sentence — *"Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1
+year after the last PCV13 dose"* — so as a recommendation it carries `authority: 'CDC'`,
+the same relabelling Ruling F performed on `ADULT-PCV20-21-5Y-AFTER-PPSV23` and for the same
+reason: what was removed was an owner-invented **bar**, leaving CDC's advice behind.
+`ADULT-PCV20-21-1Y-AFTER-PCV` has no such sentence in any source. It keeps
+`authority: 'OWNER'` and its message tells the clinician, in words, that the interval is the
+app's own convention. Never relabel it to make the pair look symmetrical.
+
+**⚠️ Measured blast radius: 0 of 35,280.** Neither corpus can build a patient either row
+touches — the two above were typed by hand. "0 in the grid" is not "0 in a clinic"; the
+sweeps simply cannot see this change, which is why the guard holds named patients rather
+than a count.
+
+**And the walk changed with it.** Asked about a third patient — 70 y, PPSV23 2024-06-01,
+PCV13 2026-01-15, PCV20 2026-08-15 — who is inside the 1-year conjugate gap **and** inside
+the 5-year gap after her PPSV23, and who was being told only about the first, the owner
+chose *"mention both gaps"*. `evaluateDoseInterval` now collects unmet recommendations and
+keeps walking instead of returning at the first. An unmet **floor** still returns at once
+and discards anything collected before it — every recommendation sentence ends by saying
+the dose counts, which would contradict a rejection printed beside it.
+
+Guard: `regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js`.
 
 ### §K-NOPROMISE — A rejected dose does not name a date for a dose nobody is asking for (OWNER, 2026-10-25)
 

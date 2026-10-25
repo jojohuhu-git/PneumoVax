@@ -469,7 +469,7 @@ function adviseIfBeforeRecommendedAge(result, prod, ageAtDose, ageMonths) {
     : `The patient is currently ~${fmtAgeM(ageMonths)}, so this dose was given`;
   return advise(
     result,
-    `PCV21 (Capvaxive) is FDA-licensed from ${licensed}, but ACIP recommends it from ${recommended}. ${when} — before the recommended starting age. It counts and does not need repeating.`
+    [`PCV21 (Capvaxive) is FDA-licensed from ${licensed}, but ACIP recommends it from ${recommended}. ${when} — before the recommended starting age. It counts and does not need repeating.`]
   );
 }
 
@@ -502,12 +502,16 @@ function noncounting(reasons = [], reasonCites) { return withCites({ status: 'no
 // "Off-window" is reserved for MeningoVax's sense of the word — a dose that
 // does NOT count and is owed a repeat (doseChipLabel.js, S14-6) — and this
 // dose is the opposite of that: it counts.
-function advise(result, reason, ruleId) {
+// `reasons` is a LIST since the owner's *"mention both gaps"* decision of
+// 2026-10-24: a dose can miss more than one advised interval, and each unmet
+// row contributes its own sentence. `intervalRuleId` still names the FIRST
+// one, so nothing that records a single rule id had to change.
+function advise(result, reasons, ruleId) {
   return {
     ...result,
     earlyAdvisory: true,
     intervalRuleId: ruleId,
-    reasons: [...(result.reasons ?? []), reason],
+    reasons: [...(result.reasons ?? []), ...reasons],
   };
 }
 
@@ -529,7 +533,7 @@ function applyIntervalRules(result, ctx) {
     r.conjugateAlternative = verdict.conjugateAlternative ?? null;
     return r;
   }
-  return advise(result, verdict.reason, verdict.ruleId);
+  return advise(result, verdict.reasons, verdict.ruleId);
 }
 
 // ── Validate one PCV dose ────────────────────────────────────────────────

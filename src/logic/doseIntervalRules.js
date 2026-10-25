@@ -383,26 +383,41 @@ export const DOSE_INTERVAL_RULES = [
     }),
   },
 
-  // ── Adult floors ─────────────────────────────────────────────────────
+  // ── Adult conjugate-to-conjugate ─────────────────────────────────────
   //
-  // ⚠️ ORDER IS LOAD-BEARING, and since RULING F (2026-10-24) it is load-
-  // bearing for a different reason than it used to be. These two rows judge
-  // the same dose — a 70-year-old's PCV20 with both PCV13 and PPSV23 already
-  // on the record — against two different gaps: 1 year from the last
-  // conjugate (still a FLOOR, owner determination 2026-10-11) and 5 years
-  // from the PPSV23 (now a RECOMMENDATION, owner Ruling F).
+  // OWNER DECISION 2026-10-24 (the "relax both" ruling). These two rows were
+  // the last adult FLOORS asserting that one conjugate given sooner than a
+  // year after another does not count. She had already said, reasoning about
+  // a different patient, that an adult conjugate-to-conjugate interval
+  // "exists in no document"; shown two hand-built patients scored both ways
+  // she ruled that both rows become RECOMMENDATIONS — the dose counts, and
+  // the card explains the timing. Her wording instruction, verbatim: *"make
+  // the wording more clinical and nuanced since this is clinically likely ok
+  // but data free. Also bold it."* Hence the `**...**` span in each message,
+  // which `renderNoteWithCites` turns into <strong class="note-emphasis">.
   //
-  // `evaluateDoseInterval` returns on the FIRST unmet row, floor or
-  // recommendation alike. So the floor MUST come first: with the
-  // recommendation ahead of it, a dose that misses both gaps would be handed
-  // the note and the floor would never run. It was the other way round until
-  // 2026-10-24, when the 5-year row was still a floor and the ordering
-  // comment here said "most specific first" — true then, and silently wrong
-  // the moment the row changed kind.
+  // ⚠️ ORDER IS NO LONGER LOAD-BEARING FOR SAFETY, and that is deliberate.
+  // Until this change `evaluateDoseInterval` returned on the FIRST unmet row,
+  // so a recommendation placed ahead of a floor would have let a dose escape
+  // the floor, and this comment said the floor must come first. The walk now
+  // COLLECTS unmet recommendations and keeps going, so a later floor still
+  // fires and a patient who misses two advised gaps hears about both. That
+  // second half is the owner's other instruction of the same day, asked about
+  // a 70-year-old who missed the 1-year conjugate gap AND the 5-year gap
+  // after her PPSV23 and was told only about the first: she chose *"mention
+  // both gaps"*.
   //
-  // The cost of the swap is prose, not verdicts: a dose missing both gaps is
-  // still rejected, now told about the 1-year gap rather than the 5-year one.
-  // Guard: regression-ruling-f-2026-10-24-early-conjugate-counts.test.js.
+  // ⚠️ THE TWO ROWS DO NOT SHARE AN AUTHORITY, and the split is the point.
+  // ADULT-PCV20-21-AFTER-PCV13's year is CDC's own sentence ("at least 1 year
+  // after the last PCV13 dose"), so as a recommendation it may carry CDC's
+  // name — the same relabelling Ruling F did for the 5-year row, and for the
+  // same reason: what was removed was an owner-invented BAR, leaving CDC's
+  // advice behind. ADULT-PCV20-21-1Y-AFTER-PCV has no such sentence anywhere;
+  // its year is this app's own convention. It stays `authority: 'OWNER'` and
+  // its message SAYS SO IN WORDS to the clinician. Never relabel it CDC to
+  // make the pair look tidy.
+  // Guards: regression-ruling-f-2026-10-24-early-conjugate-counts.test.js and
+  // regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js.
   {
     id: 'ADULT-PCV20-21-1Y-AFTER-PCV',
     what: 'PCV20/PCV21 for an adult whose history already has BOTH PCV13 and PPSV23 — 1 year from the last PCV',
@@ -413,21 +428,27 @@ export const DOSE_INTERVAL_RULES = [
     needsPriorPcv: ['PCV13'],
     needsPriorPpsv23: true,
     interval: { months: ADULT_ADVISED_PCV_GAP_MONTHS },
-    grace: true,
-    enforcement: 'floor',
+    // No grace, deliberately — the same reasoning Ruling F wrote onto the
+    // 5-year row below. The 4-day grace exists to let a dose given slightly
+    // early still COUNT; a recommendation counts every dose already, so a
+    // grace here would only shift the day the note starts printing.
+    grace: false,
+    enforcement: 'recommendation',
+    // STAYS OWNER — see the block above. No ACIP or CDC source states a
+    // minimum, or even an advised, interval between two adult conjugate
+    // doses. The year is this app's own convention and the message says so.
     authority: 'OWNER',
-    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. This was once "the second '
-      + 'leg" of the 5-year PPSV23 row, when both gaps had to hold for the dose to count. RULING F '
-      + '(2026-10-24) made that row a recommendation, so this is now the ONLY gap that can void an '
-      + 'adult PCV20/PCV21 whose record already has PCV13 and PPSV23, and it stands alone. ⚠️ The '
-      + 'owner has an OPEN QUESTION over this row: reasoning about a different patient on 2026-10-24 '
-      + 'she said an adult conjugate-to-conjugate interval "exists in no document", which is in '
-      + 'tension with the row existing at all. She was asked and chose to leave it unchanged for now '
-      + '— raised, not decided. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose of ${anchor.date} — at least ${min.words} is required between conjugate doses.`],
-      detail: `Previous PCV: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
-    }),
+    source: 'OWNER CLINICAL DETERMINATION 2026-10-11, DOWNGRADED FROM A FLOOR TO A RECOMMENDATION '
+      + 'BY OWNER DECISION 2026-10-24 — not ACIP, not CDC, in either form. This was once "the '
+      + 'second leg" of the 5-year PPSV23 row, when both gaps had to hold for the dose to count; '
+      + 'RULING F (2026-10-24) made that row a recommendation, leaving this as the only gap that '
+      + 'could void an adult PCV20/PCV21 whose record already has PCV13 and PPSV23. The owner had '
+      + 'said of a different patient that an adult conjugate-to-conjugate interval "exists in no '
+      + 'document", and the row was left standing as raised-not-decided. Shown a 70-year-old '
+      + '(PPSV23 2018-06-01, PCV13 2026-01-15, PCV20 2026-08-15) scored both ways she closed it: '
+      + 'the dose counts and the card explains the timing. CDSI v4.64 sets absMinInt = 0 days for '
+      + 'every adult pneumococcal interval. See CLINICAL_SPEC.md §K.',
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose of ${anchor.date}. **No ACIP or CDC source states an interval between two adult conjugate doses; the spacing of ${min.words} shown here is this app’s own convention. The dose is counted. A shorter gap is not known to make it less effective, but no data establish that it performs as well, so whether to give a further conjugate dose is a clinical judgement.**`,
   },
   {
     id: 'ADULT-PCV20-21-5Y-AFTER-PPSV23',
@@ -478,18 +499,28 @@ export const DOSE_INTERVAL_RULES = [
     needsPriorPcv: ['PCV13'],
     needsNoPriorPpsv23: true,
     interval: { months: ADULT_ADVISED_PCV_GAP_MONTHS },
-    grace: true,
-    enforcement: 'floor',
-    authority: 'OWNER',
-    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 (decision 5) — not ACIP, not CDC. CDC states: '
-      + '"Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last '
-      + 'PCV13 dose" — advice for the next dose, with CDSI v4.64 absMinInt = 0 days. The owner '
-      + 'determined that a PCV20/PCV21 given inside that year does not count and must be repeated, '
-      + 'with the 4-day grace. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — PCV20 or PCV21 is given at least ${min.words} after the last PCV13 dose.`],
-      detail: `Previous PCV13: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
-    }),
+    // No grace — see the sibling row above and Ruling F's note on the
+    // 5-year row: a recommendation counts every dose, so a grace would only
+    // shift the day the note starts printing.
+    grace: false,
+    enforcement: 'recommendation',
+    // CDC, not OWNER — the relabelling Ruling F performed on the 5-year row,
+    // for the same reason. As a FLOOR this row asserted something no source
+    // states (that an early dose stops counting), so it had to carry the
+    // owner's name. As a recommendation it asserts only CDC's own advised
+    // interval, which CDC does state in words. Contrast the sibling row
+    // above, which has no CDC sentence at all and stays OWNER.
+    authority: 'CDC',
+    source: 'CDC Adult Immunization Schedule Notes, with OWNER DECISION 2026-10-24 — which '
+      + 'DOWNGRADED the owner\'s own determination of 2026-10-11 (decision 5) from a floor to a '
+      + 'recommendation, on the ground that the determination added a bar the sources do not '
+      + 'state. CDC states the gap as advice for the next dose: "Previously received only PCV13: '
+      + '1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PCV13 dose", and CDSI v4.64 '
+      + 'sets absMinInt = 0 days for it. The owner, shown a 68-year-old with chronic heart disease '
+      + '(PCV13 2026-02-10, PCV20 2026-09-10) whose PCV20 was being thrown out and re-ordered for '
+      + '2027-09-10, ruled that the dose counts and the card explains the timing. See '
+      + 'CLINICAL_SPEC.md §K.',
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date}. CDC advises PCV20 or PCV21 at least ${min.words} after the last PCV13 dose. **CDC states that as recommended timing and does not say an earlier dose is invalid or must be repeated, so the dose is counted. A shorter gap is not known to make it less effective, but no data establish that it performs as well, so whether to give a further conjugate dose is a clinical judgement.**`,
   },
   {
     id: 'ADULT-PCV-AFTER-PPSV23',
@@ -1147,7 +1178,7 @@ function intervalMet(rule, ctx, anchor) {
  * @param {string[]} ctx.riskIds
  * @returns {null
  *   | {kind:'floor', ruleId:string, authority:string, reasons:string[], detail:string, earliestValidDate:string}
- *   | {kind:'recommendation', ruleId:string, authority:string, reason:string}}
+ *   | {kind:'recommendation', ruleId:string, authority:string, reasons:string[]}}
  */
 export function evaluateDoseInterval(ctx) {
   const book = rulebookOf(ctx.ageAtDose);
@@ -1158,6 +1189,18 @@ export function evaluateDoseInterval(ctx) {
 
   // Has an enumerated (non-catch-all) row already spoken for this dose?
   let namedByRule = false;
+  // OWNER DECISION 2026-10-24, *"mention both gaps"*. An unmet RECOMMENDATION
+  // no longer ends the walk; its sentence is collected here and the walk goes
+  // on, so a dose that misses two advised gaps is told about both. The
+  // 70-year-old who forced it: PPSV23 2024-06-01, PCV13 2026-01-15, PCV20
+  // 2026-08-15 — inside the 1-year conjugate gap AND inside the 5-year gap
+  // after her PPSV23, and until now told only about the first.
+  //
+  // An unmet FLOOR still returns immediately, and DISCARDS anything collected
+  // before it. That is not an oversight: every recommendation sentence ends by
+  // saying the dose is counted, which would contradict a rejection printed
+  // beside it. The floor is the headline; the advice is moot.
+  const advisories = [];
   for (const rule of DOSE_INTERVAL_RULES) {
     if (!ruleApplies(rule, ctx, book)) continue;
     const anchor = ANCHORS[rule.from](ctx);
@@ -1178,7 +1221,16 @@ export function evaluateDoseInterval(ctx) {
     if (intervalMet(rule, ctx, anchor)) { namedByRule = namedByRule || !rule.catchAll; continue; }
 
     const msg = rule.message(ctx, anchor, intervalWords(rule, anchor, ctx));
-    if (rule.enforcement === 'floor') {
+    if (rule.enforcement !== 'floor') {
+      // An unmet enumerated row HAS spoken for this dose, so the catch-all
+      // must stay quiet even though the walk continues past it — otherwise
+      // the generic "CDC advises at least 1 year" note talks over the
+      // specific row, which is the A-P1-1 mistake the block above describes.
+      namedByRule = namedByRule || !rule.catchAll;
+      advisories.push({ ruleId: rule.id, authority: rule.authority, reason: msg });
+      continue;
+    }
+    {
       return {
         kind: 'floor', ruleId: rule.id, authority: rule.authority,
         reasons: msg.reasons, detail: msg.detail,
@@ -1192,7 +1244,17 @@ export function evaluateDoseInterval(ctx) {
           : null,
       };
     }
-    return { kind: 'recommendation', ruleId: rule.id, authority: rule.authority, reason: msg };
+  }
+  if (advisories.length) {
+    return {
+      kind: 'recommendation',
+      // The FIRST unmet row names the verdict, as it always did — so
+      // `intervalRuleId`, which the corpora and several guards record, is
+      // unchanged for every dose that misses exactly one gap.
+      ruleId: advisories[0].ruleId,
+      authority: advisories[0].authority,
+      reasons: advisories.map((a) => a.reason),
+    };
   }
   return null;
 }

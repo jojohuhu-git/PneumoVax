@@ -409,14 +409,33 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
   });
 
   it('returns a floor verdict with the rule id that produced it', () => {
+    // A PCV20 five weeks after a PPSV23, with nothing else on the record —
+    // ADULT-PCV-AFTER-PPSV23, still a floor. This used to be a PCV13 → PCV20
+    // pair; that row stopped being a floor on 2026-10-24 (§K-CONJUGATE), and
+    // the test below holds its new shape.
+    const v = evaluateDoseInterval({
+      ...base,
+      priorPpsv23: [{ date: '2026-01-05' }],
+      prev: null,
+    });
+    expect(v.kind).toBe('floor');
+    expect(v.ruleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    expect(v.authority).toBe('OWNER');
+  });
+
+  // OWNER DECISION 2026-10-24, §K-CONJUGATE. The PCV13 → PCV20 pair that used
+  // to produce the floor above is now a recommendation — and the one that
+  // changed authority with it, because its year is CDC's own sentence.
+  it('returns a CDC recommendation for a PCV20 inside the year after a PCV13', () => {
     const v = evaluateDoseInterval({
       ...base,
       priorPcv: [{ date: '2026-01-05', product: 'PCV13' }],
       prev: { date: '2026-01-05', ageAtDose: 840, product: 'PCV13' },
     });
-    expect(v.kind).toBe('floor');
+    expect(v.kind).toBe('recommendation');
     expect(v.ruleId).toBe('ADULT-PCV20-21-AFTER-PCV13');
-    expect(v.authority).toBe('OWNER');
+    expect(v.authority).toBe('CDC');
+    expect(v.reasons).toHaveLength(1);
   });
 
   it('returns a recommendation verdict for a pair no floor names', () => {
@@ -429,41 +448,69 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(v.ruleId).toBe('ADULT-PCV-AFTER-PCV-CATCH-ALL');
   });
 
-  // ⚠️ THIS ASSERTION IS THE OPPOSITE OF WHAT IT ONCE WAS, by RULING F
-  // (2026-10-24). While both rows were floors, the more specific 5-year row
-  // came first so the clinician was told about the binding gap. The 5-year
-  // row is now a RECOMMENDATION, and `evaluateDoseInterval` returns on the
-  // first unmet row of EITHER kind — so leaving it first would have let a
-  // dose missing both gaps escape the 1-year floor with only a note. The rows
-  // were swapped; the dose is still rejected, and now names the gap that
-  // actually rejects it.
-  it('reports the 1-year FLOOR, not the 5-year recommendation, when a dose misses both', () => {
+  // ⚠️ THIS ASSERTION HAS NOW BEEN REWRITTEN TWICE, AND BOTH REWRITES ARE
+  // THE SAME DAY'S OWNER DECISIONS. Originally the 5-year row came first and
+  // named the verdict. RULING F made it a recommendation, and because the
+  // walk returned at the first unmet row of EITHER kind, the rows were
+  // swapped so the surviving 1-year FLOOR could not be escaped. Later that
+  // day §K-CONJUGATE removed that floor too AND stopped the walk returning
+  // early: unmet recommendations are collected and the walk goes on. So a
+  // dose missing both gaps now counts and carries BOTH sentences — the
+  // owner's *"mention both gaps"*. The ordering still decides which rule id
+  // is recorded and which sentence prints first.
+  it('collects BOTH recommendations when a dose misses both gaps', () => {
     const v = evaluateDoseInterval({
       ...base, doseDate: '2026-02-09',
       priorPcv: [{ date: '2026-01-05', product: 'PCV13' }],
       priorPpsv23: [{ date: '2026-01-20' }],
       prev: { date: '2026-01-05', ageAtDose: 840, product: 'PCV13' },
     });
-    expect(v.kind).toBe('floor');
+    expect(v.kind).toBe('recommendation');
     expect(v.ruleId).toBe('ADULT-PCV20-21-1Y-AFTER-PCV');
+    expect(v.reasons).toHaveLength(2);
+    expect(v.reasons[0]).toMatch(/previous pneumococcal conjugate dose of 2026-01-05/);
+    expect(v.reasons[1]).toMatch(/PPSV23 dose of 2026-01-20/);
   });
 
   // CDC's grace applies to the FLOOR: 4 days short of the year still counts,
   // 5 days short does not. A graced dose says NOTHING — its own rule named it
   // and was satisfied, and a catch-all may not then talk over that rule with a
   // generic number (see the catchAll guard in the evaluator).
+  //
+  // The pair used here USED TO BE the PCV13 → PCV20 row. That row lost both
+  // its floor and its grace on 2026-10-24 (§K-CONJUGATE: a recommendation
+  // counts every dose, so a grace would only move the day the note prints),
+  // so the still-graced ADULT-PCV-AFTER-PPSV23 row carries the case now.
   it('applies the grace to a calendar-month floor: 4 days short counts, 5 does not', () => {
+    const anniversary = addCalendarMonths('2026-01-05', 12);
+    const ctx = (doseDate) => ({
+      ...base, doseDate,
+      priorPpsv23: [{ date: '2026-01-05' }],
+      prev: null,
+    });
+    expect(evaluateDoseInterval(ctx(addDays(anniversary, -4)))).toBeNull();
+
+    const tooEarly = evaluateDoseInterval(ctx(addDays(anniversary, -5)));
+    expect(tooEarly.kind).toBe('floor');
+    expect(tooEarly.ruleId).toBe('ADULT-PCV-AFTER-PPSV23');
+
+    // A full year clears it, and says nothing at all.
+    expect(evaluateDoseInterval(ctx(anniversary))).toBeNull();
+  });
+
+  // §K-CONJUGATE's other half: the two conjugate rows no longer take the
+  // grace, because they no longer void anything. 5 days short of the year is
+  // a note here, not a rejection — and so is 4.
+  it('gives the conjugate rows no grace: 4 days short already prints the note', () => {
     const anniversary = addCalendarMonths('2026-01-05', 12);
     const ctx = (doseDate) => ({
       ...base, doseDate,
       priorPcv: [{ date: '2026-01-05', product: 'PCV13' }],
       prev: { date: '2026-01-05', ageAtDose: 840, product: 'PCV13' },
     });
-    expect(evaluateDoseInterval(ctx(addDays(anniversary, -4)))).toBeNull();
-
-    const tooEarly = evaluateDoseInterval(ctx(addDays(anniversary, -5)));
-    expect(tooEarly.kind).toBe('floor');
-    expect(tooEarly.ruleId).toBe('ADULT-PCV20-21-AFTER-PCV13');
+    const graced = evaluateDoseInterval(ctx(addDays(anniversary, -4)));
+    expect(graced.kind).toBe('recommendation');
+    expect(graced.ruleId).toBe('ADULT-PCV20-21-AFTER-PCV13');
 
     // A full year clears it, and says nothing at all.
     expect(evaluateDoseInterval(ctx(anniversary))).toBeNull();
