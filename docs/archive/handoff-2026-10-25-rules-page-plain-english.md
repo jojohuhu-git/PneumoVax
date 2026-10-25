@@ -127,6 +127,51 @@ artifact does not follow the repo.
 | `src/components/__tests__/regression-c14-…-rulebook-matches-the-engine.test.jsx` | every number on the page is a constant; every list is the engine's; no rule id is printed; a floor's number is not labelled as advice |
 | `src/data/__tests__/regression-2026-10-25-rulebook-evidence-limits.test.js` | every cell of the nuance table driven through `analyzeBoth()` on a named patient; every OWNER rule is an adult rule; every child rule is CDC's |
 
+### 5. Worked examples (her 2026-10-25 ask)
+
+New **section 5, “Worked examples — a history in, a dose out”**: 14 patients, 7 children and
+7 adults, put through `recommend()` when the page loads. Her reason is the requirement:
+*“to make this easier to validate and follow for future updates”*, so **nothing in a row is
+typed** — the risk words are the risk factor's own label, the history is written out from the
+dose list (a child's doses by the AGE they were given at, an adult's by how long ago), and
+everything right of it is the engine's answer. Two of the 14 are the §K-EVIDENCE tension
+patients, pinned by name in the guard.
+
+## THE OWNER'S 2026-10-25 REVIEW OF THE TWO TENSIONS — READ THIS FIRST
+
+Full detail, with the measurement, in `CLINICAL_SPEC.md` §K-EVIDENCE.
+
+**Tension 1 — nothing changes.** She is right and the app already agrees: a PPSV23-only adult
+is offered a conjugate at ≥1 year (card: *“PCV (PCV15, PCV20, or PCV21) ≥1 year after
+PPSV23”*), and PneumoRecs says the same. The 5 years is applied only to PPSV23→PPSV23. **One
+open item:** she asked that `rr7203a1` be CITED for the 5-year rule. The entry exists and the
+rule's `source` names it in prose, but it is on no card because §K's standing rule of
+2026-10-16 says never to cite it for an adult interval. That rule was made about the adult
+PCV15→PPSV23 interval. **Ask her whether it now reads “never for an adult CONJUGATE
+interval”.**
+
+**Tension 2 — I WAS WRONG, AND IT IS A DIVERGENCE BUG.** The previous entry said no source
+states a paediatric conjugate-after-PPSV23 interval. She supplied one: ACIP 2023
+PCV20-in-children **Table 1**, the 6–18 no-previous-conjugate row, *“≥8 weeks after the most
+recent dose of pneumococcal vaccination”* — and that document is **already in `refs.js`**.
+PneumoRecs prints the same 8 weeks. **And the app already says it on the recommendation
+side** (`pcvRiskChild` Option A, `anchorPneumo` + `WK8`) while validating nothing — the exact
+“two numbers for one dose” shape P0 was written to end.
+
+**Measured, as a throwaway mutation, then reverted: 198 of 17,016 real patients move** (104
+recommendations, 94 dose chips only) and 22 of 18,264 impossible entries. 132 are 6–18, 66
+are 19+ with a childhood dose. **NOT BUILT** — it moves verdicts, so it is hers. Two
+questions go with it: does the floor stop at age 6 (her row says “6–18”; an age split must be
+a SECOND ROW), and is it a floor or a note (the mirror direction,
+`CHILD-PPSV23-AFTER-PCV`, is a floor on CDC's authority from an equally
+recommendation-shaped sentence)?
+
+**⚠ cdc.gov is DENIED by this container's network policy**, so neither document could be
+re-read live this session. Everything above rests on her quotes, on `refs.js` entries that
+earlier sessions verified live, and on the PneumoRecs resolver. **A session that can reach
+cdc.gov should re-read ACIP 2023 Table 1 and mm7401a1 before the fix lands** (FINDING F: read
+the document, including its tables).
+
 ## What is NOT done — the queue, unchanged from the previous handoff
 
 | Priority | Item |

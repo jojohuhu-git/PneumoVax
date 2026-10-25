@@ -721,6 +721,9 @@ body {
 .rb-rule-what { font-size: var(--fs-sm); font-weight: 600; color: var(--gy); line-height: 1.45; }
 .rb-rule-gap { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; margin-top: 2px; }
 .rb-rule-out { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.45; margin-top: 2px; }
+/* The engine's answer for a worked example: one line per card it returns. */
+.rb-ex-due { list-style: none; margin-top: var(--sp-4); }
+.rb-ex-due li { font-size: var(--fs-sm); color: var(--c); line-height: 1.5; padding: 1px 0; }
 
 .rb-foot { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.6; margin-top: var(--sp-24); }
 

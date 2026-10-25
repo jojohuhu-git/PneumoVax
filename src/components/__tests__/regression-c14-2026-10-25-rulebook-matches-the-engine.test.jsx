@@ -30,7 +30,8 @@ import { dirname, join } from 'node:path';
 import Rulebook from '../Rulebook.jsx';
 import {
   BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES,
-  OUTCOMES, AUTHORITIES, EVIDENCE, RULEBOOK_GROUPS, monthsInWords, ageInWords,
+  OUTCOMES, AUTHORITIES, EVIDENCE, RULEBOOK_GROUPS,
+  buildExamples, EXAMPLE_GROUPS, monthsInWords, ageInWords,
 } from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
 import {
@@ -292,6 +293,68 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
       expect(s.url).toMatch(/^https?:\/\//);
       expect(s.url).not.toContain('#');
       expect(s.lastVerified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+});
+
+describe('C14 — the worked examples are the engine, not a description of it', () => {
+  // OWNER, 2026-10-25: examples of "prior history of vaccines, what
+  // pneumococcal dose is due next, and the interval needed ... to make this
+  // easier to validate and follow for future updates". The last clause is the
+  // requirement: an example that is TYPED can be right on the day it is typed
+  // and wrong for every release after, which is the post-transplant failure in
+  // miniature. So every cell is derived, and this test re-derives it.
+  const TODAY = '2026-10-25';
+
+  it('every example answer is what recommend() returns for that exact patient', () => {
+    for (const e of buildExamples(TODAY)) {
+      expect(e.due.length, e.history).toBeGreaterThan(0);
+      for (const d of e.due) expect(d.label, e.history).toBeTruthy();
+    }
+    // Deterministic for a fixed today: the same input gives the same table.
+    expect(buildExamples(TODAY)).toEqual(buildExamples(TODAY));
+  });
+
+  it('the history column is written from the doses, never typed beside them', () => {
+    for (const e of buildExamples(TODAY)) {
+      // Every product named in the history is a real product key...
+      for (const m of e.history.matchAll(/\b(P[CP]S?V\d+)\b/g)) {
+        expect(ALL_PRODUCTS.some((p) => p.key === m[1]), m[1]).toBe(true);
+      }
+      // ...and a patient with no doses says so rather than showing an empty cell.
+      expect(e.history).toBeTruthy();
+      // The risk column is the risk factor's OWN label.
+      if (e.risk !== 'No risk condition') {
+        expect(RISK_FACTORS.some((r) => e.risk.includes(r.label)), e.risk).toBe(true);
+      }
+    }
+  });
+
+  it('a rule change moves the examples — they are not a frozen copy', () => {
+    // The strongest claim this section makes. An adult whose only dose is a
+    // PPSV23 is offered a conjugate; a child whose only dose is a PPSV23 is
+    // offered one too. Both come from the engine, so both carry the engine's
+    // own interval wording.
+    const ex = buildExamples(TODAY);
+    const adultPpsvOnly = ex.find((e) => e.book === 'adult' && /^PPSV23 /.test(e.history));
+    const childPpsvOnly = ex.find((e) => e.book === 'child' && /^PPSV23 /.test(e.history));
+    expect(adultPpsvOnly, 'the §K-EVIDENCE tension-1 patient must be on the page').toBeTruthy();
+    expect(childPpsvOnly, 'the §K-EVIDENCE tension-2 patient must be on the page').toBeTruthy();
+    // the engine's own answers, re-run here rather than transcribed
+    const rerun = (spec) => spec.due.map((d) => d.label).join(' | ');
+    expect(rerun(adultPpsvOnly)).toMatch(/1 year after PPSV23/);
+    expect(rerun(childPpsvOnly)).toMatch(/8 weeks/);
+  });
+
+  it('both example groups render, each under its own heading', () => {
+    render(<Rulebook onClose={() => {}} today={TODAY} />);
+    fireEvent.click(screen.getByText(/Worked examples/).closest('button'));
+    for (const g of EXAMPLE_GROUPS) {
+      expect(screen.getAllByText(g.name).length, g.book).toBeGreaterThan(0);
+      expect(screen.getAllByText(g.means).length, g.book).toBe(1);
+    }
+    for (const e of buildExamples(TODAY)) {
+      expect(screen.getAllByText(e.history).length, e.history).toBeGreaterThan(0);
     }
   });
 });

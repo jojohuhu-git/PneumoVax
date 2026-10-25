@@ -1630,6 +1630,28 @@ Two patients, **identical dose dates**, differing only in age.
 | **A** | 10 y | Asplenia (immunocompromising) | PPSV23 2024-01-01, PPSV23 2025-01-01 | ≥5 years, **minimum** | *“Given less than 5 years after the previous PPSV23 dose … This dose does not count toward the series … the next dose in this series can be given from Jan 1, 2030 at the earliest.”* | **CDC**, Child & Adolescent Schedule Notes: *“If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 **at least** 5 years after dose 1 PPSV23.”* (`CHILD-PPSV23-AFTER-PPSV23`) |
 | **B** | 60 y | Asplenia (immunocompromising) | PPSV23 2024-01-01, PPSV23 2025-01-01 | ≥5 years, **minimum** | The same verdict and the same 2030 date, plus: *“Enforced as a minimum by an owner clinical determination dated 2026-10-11, **not by ACIP**.”* | **OWNER, 2026-10-11.** ACIP words the adult interval *“should be administered”*; CDSI v4.64 carries `absMinInt = 0 days`. (`ADULT-PPSV23-AFTER-PPSV23`) |
 
+#### ✓ OWNER REVIEW 2026-10-25 — the dose advice is right; only the citation is open
+
+Checked against her two documents and against CDC's own tool. **No rule changes.**
+- *“For A and B PCV20 can be given 1 year later since this patient received only PPSV23.”*
+  The app already does this. Patient B's card reads **“PCV (PCV15, PCV20, or PCV21) ≥1 year
+  after PPSV23”**, and the rejected dose's own text bolds the same alternative. PneumoRecs,
+  adult 50+ page, resolved 2026-10-25: *“Give one dose of PCV15, PCV20, or PCV21 at least 1
+  year after the last dose of PPSV23.”* Same answer.
+- *“5 year is for when a patient wants to repeat PPSV23 following a PPSV23.”* That is exactly
+  and only what the app applies it to — `ADULT-PPSV23-AFTER-PPSV23` / `CHILD-PPSV23-AFTER-PPSV23`,
+  both `from: 'prevSameStream'` on the PPSV23 stream. The 5 years never gates a conjugate.
+- **The one open item: she asked that `rr7203a1` be cited for it.** The entry already exists
+  (`mmwr7203a1`, `refs.js`), and the rule's `source` already NAMES it in prose — but it is
+  cited on **no card**, because §K's own standing rule of 2026-10-16 reads
+  ***“rr7203a1 (2023) is superseded — never cite it for an adult interval again.”***
+  That rule was made about the adult **PCV15→PPSV23** interval, where mm7401a1 (2025) states
+  a different split. **For PPSV23→PPSV23 no 2025 document has been shown to state the
+  5-year interval at all**, which would make rr7203a1 the only source for it and her new
+  instruction a narrowing of the ban rather than a reversal. **NOT APPLIED: confirm, and say
+  whether the ban now reads “never for an adult CONJUGATE interval”.** (The 2025 document
+  could not be re-read this session — the container's network policy denies cdc.gov.)
+
 **The tension.** Same number, same vaccine pair, same clinical question — and the app answers
 both the same way — but one answer is CDC's and the other is hers. The ground for the split
 is a difference in CDC's **verb** (*“at least”* for the child, *“should be administered”* for
@@ -1649,10 +1671,58 @@ Two patients, **identical dose dates and identical risk**, differing only in age
 
 **The tension.** The same week-long gap declares a 6-year-old's series **complete** and costs
 a 60-year-old her dose and a year. The adult bar is the owner's ruling of 2026-10-24; the
-child silence is **nobody's decision** — it is a row that was never written. **Her options:**
-leave it (no source states a paediatric interval here either); or add a paediatric row
-(**moves doses** — and would need a source, which there is not); or re-examine whether the
-adult bar should be a note, which she set as a floor twice and a note once.
+child silence is a row that was never written.
+
+#### ⚠ OWNER CORRECTION 2026-10-25 — THERE IS A SOURCE, AND THIS IS A DIVERGENCE BUG
+
+The paragraph above said *“would need a source, which there is not”*. **That was wrong, and
+the owner supplied the row the same day:**
+
+> ACIP 2023, *Use of PCV20 among U.S. children* (the Supplementary Report already in
+> `refs.js` as `cdcPcv20Children2023`, https://stacks.cdc.gov/view/cdc/133252), **Table 1**,
+> *“Children aged 6–18 years with any risk condition with no previous PCV13, PCV15, or PCV20
+> vaccination”*: *“If the child has previously received PCV7 and/or PPSV23, a single dose of
+> either PCV15 or PCV20 is recommended **≥8 weeks after the most recent dose of pneumococcal
+> vaccination**.”*
+
+**CDC's own PneumoRecs prints the same number** for this patient — resolved 2026-10-25
+through `scripts/pneumoRecsAnswer.mjs`, teen 6–18 page, IC, no conjugate, prior PPSV23:
+*“Give 1 dose of PCV at least 8 weeks after most recent dose of PPSV23. Schedule is then
+complete.”*
+
+**AND THE APP ALREADY SAYS IT — ON THE RECOMMENDATION SIDE ONLY.** `pcvRiskChild`'s Option A
+card for a child 6–18 with no prior PCV anchors on `anchorPneumo` at `WK8` and prints
+*“1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine”*, citing CDC's notes
+and p2016 Table 4. Nothing validates it. **So the app advises 8 weeks and then accepts a
+dose given the next day, silently, for the same child** — which is, exactly, the
+“TWO NUMBERS FOR ONE DOSE” failure that §K's own P0 fix of 2026-10-23 was written to end,
+one direction along.
+
+**Measured blast radius of the fix** (`CHILD-PCV-AFTER-PPSV23`: `from: 'lastPpsv23'`,
+`needsNoPriorPcv: true`, `interval: PCV_PPSV23_MIN_INTERVAL_DAYS`, `enforcement: 'floor'`,
+`authority: 'CDC'`), applied as a throwaway mutation on 2026-10-25 and reverted:
+
+| | Count |
+|---|---|
+| Real patients whose verdict moves | **198 of 17,016** |
+| — of those, the RECOMMENDATION changes | **104** |
+| — of those, only the dose chip changes | **94** |
+| Impossible entries that move | **22 of 18,264** |
+| By age band | **132** aged 6–18, **66** aged 19+ (a childhood dose judged under the child rulebook) |
+| Aged 2–5 | **0** — the grid has no such patient, so that band is UNMEASURED |
+
+**NOT BUILT. It needs the owner's word, because it moves verdicts** (§K's own rule: a change
+that moves a verdict comes back to her every time). **Two questions go with it:**
+1. **Scope.** Her row is headed *“Children aged 6–18 years”*. Should the floor stop at 6, or
+   cover every child? CDC's own 2–5 at-risk note anchors its 8 weeks on *“the most recent
+   **PCV** dose”*, not on any pneumococcal dose, so a 2–5-year-old whose only dose is a
+   PPSV23 is covered by neither row. Per §K, an age split is a SECOND ROW, never a test
+   inside one.
+2. **Floor or note?** Her row says *“is recommended ≥8 weeks”*. `CHILD-PPSV23-AFTER-PCV` —
+   the mirror direction — is a **floor** on CDC's authority from an equally
+   recommendation-shaped sentence (*“administer … at least 8 weeks after the most recent PCV
+   dose”*), so the precedent in children is floor. Confirm, and the two directions stay
+   symmetric.
 
 Guard: `regression-2026-10-25-rulebook-evidence-limits.test.js` — every cell of that table is
 driven through `analyzeBoth()` on a named patient, because C14's own guard checks that every

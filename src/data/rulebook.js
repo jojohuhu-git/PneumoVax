@@ -32,6 +32,7 @@ import {
   intervalPhrase,
 } from '../logic/intervals.js';
 import { REFS } from './refs.js';
+import { recommend } from '../logic/recommend.js';
 
 /** Months as a clinician would say them. 228 -> "19 years". */
 export function monthsInWords(m) {
@@ -372,6 +373,123 @@ export const EVIDENCE = {
   grace: `One grace CDC does state, for every vaccine: a dose given up to ${GRACE_DAYS} days before a minimum still counts. It applies only to a dose already given — never to the dates this app advises for a dose still to come.`,
   asOf: 'Each dose is judged as of the day it was given, not against today. A dose that did not count stays on the record with its explanation, and a later, properly spaced dose still completes the series.',
 };
+
+// ── WORKED EXAMPLES: a history in, a dose and an interval out ────────────
+//
+// OWNER, 2026-10-25: "I also think the rulebook should show examples of prior
+// history of vaccines, what pneumococcal dose is due next, and the interval
+// needed for adults and kids to make this easier to validate and follow for
+// future updates."
+//
+// THE POINT IS THE LAST CLAUSE, so NOTHING in a row is typed. The spec below
+// is the patient — an age, a risk id, and a list of doses — and every cell of
+// the rendered row is derived from it:
+//
+//   the risk words   the risk factor's OWN label from riskFactors.js
+//   the history      written out from the dose list, in the unit a clinician
+//                    would use (a child's age at each dose; how long ago for
+//                    an adult)
+//   the dose due     `recommend()`, run when the page loads
+//   the interval     the engine's own `doseLabel` and date
+//
+// So a rule change shows up here on the next page load and cannot be papered
+// over by editing a sentence. That is what makes the page checkable against a
+// document, which is what she asked it for.
+const ex = (label, monthsAgo) => ({ monthsAgo, label });
+
+function dateMonthsAgo(monthsAgo, today) {
+  const t = new Date(`${today}T00:00:00Z`);
+  t.setUTCMonth(t.getUTCMonth() - monthsAgo);
+  return t.toISOString().slice(0, 10);
+}
+
+/** "PCV20 at 2 and 4 months" for a child, "PPSV23 10 years ago" for an adult. */
+function historyWords(spec) {
+  const all = [...(spec.pcv ?? []), ...(spec.ppsv ?? [])];
+  if (!all.length) return 'No pneumococcal vaccine yet';
+  const byProduct = [];
+  for (const d of all) {
+    const last = byProduct[byProduct.length - 1];
+    if (last && last.label === d.label) last.when.push(d.monthsAgo);
+    else byProduct.push({ label: d.label, when: [d.monthsAgo] });
+  }
+  const andList = (xs) => (xs.length === 1 ? xs[0] : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+  return byProduct.map(({ label, when }) => (spec.book === 'child'
+    // A child's dose is placed by the age it was given at — the way a chart
+    // records it, and the way every paediatric rule is written.
+    ? `${label} at ${andList(when.map((m) => monthsInWords(spec.ageMonths - m)))}`
+    // An adult's by how long ago, because an adult's rules are intervals.
+    : `${label} ${andList(when.map((m) => (m % 12 === 0 ? `${m / 12} year${m === 12 ? '' : 's'}` : `${m} months`)))} ago`)).join('; ');
+}
+
+function riskWords(riskIds) {
+  if (!riskIds.length) return 'No risk condition';
+  return riskIds.map((id) => RISK_FACTORS.find((r) => r.id === id)?.label ?? id).join('; ');
+}
+
+// The histories. One family each, and they deliberately include the two
+// patients behind CLINICAL_SPEC.md §K-EVIDENCE's tensions, so a future session
+// reading this page meets them without opening the spec.
+const EXAMPLE_SPECS = [
+  // ── Children ──────────────────────────────────────────────────────────
+  { book: 'child', ageMonths: 2, risk: [] },
+  { book: 'child', ageMonths: 7, risk: [], pcv: [ex('PCV20', 5), ex('PCV20', 3)] },
+  { book: 'child', ageMonths: 14, risk: [], pcv: [ex('PCV20', 12), ex('PCV20', 10), ex('PCV20', 8)] },
+  { book: 'child', ageMonths: 40, risk: [] },
+  { book: 'child', ageMonths: 96, risk: ['asplenia'] },
+  // §K-EVIDENCE tension 2 — the at-risk child whose only dose is a PPSV23.
+  { book: 'child', ageMonths: 96, risk: ['asplenia'], ppsv: [ex('PPSV23', 12)] },
+  { book: 'child', ageMonths: 96, risk: ['chronic_lung'], pcv: [ex('PCV13', 72)] },
+  // ── Adults ────────────────────────────────────────────────────────────
+  { book: 'adult', ageMonths: 360, risk: [] },
+  { book: 'adult', ageMonths: 360, risk: ['diabetes'] },
+  { book: 'adult', ageMonths: 360, risk: ['asplenia'], pcv: [ex('PCV15', 2)] },
+  { book: 'adult', ageMonths: 660, risk: [] },
+  // §K-EVIDENCE tension 1 — the adult whose only dose is a PPSV23.
+  { book: 'adult', ageMonths: 660, risk: [], ppsv: [ex('PPSV23', 120)] },
+  { book: 'adult', ageMonths: 660, risk: [], pcv: [ex('PCV13', 120)] },
+  { book: 'adult', ageMonths: 660, risk: [], pcv: [ex('PCV20', 24)] },
+];
+
+/**
+ * Run every example through the engine. Called with the real today, so a date
+ * in the "when" column is never stale.
+ */
+export function buildExamples(today = new Date().toISOString().slice(0, 10)) {
+  return EXAMPLE_SPECS.map((spec) => {
+    const r = recommend({
+      ageMonths: spec.ageMonths,
+      riskIds: spec.risk,
+      today,
+      pcvDoses: (spec.pcv ?? []).map((x) => ({ product: x.label, date: dateMonthsAgo(x.monthsAgo, today) })),
+      ppsv23Doses: (spec.ppsv ?? []).map((x) => ({ product: 'PPSV23', date: dateMonthsAgo(x.monthsAgo, today) })),
+    });
+    return {
+      book: spec.book,
+      age: monthsInWords(spec.ageMonths),
+      risk: riskWords(spec.risk),
+      history: historyWords(spec),
+      // EVERY card the engine returns, so an example that offers a choice
+      // (Option A / Option B) shows the choice rather than its first half.
+      due: (r.recs ?? []).map((rec) => ({
+        label: rec.doseLabel,
+        status: rec.status,
+        when: rec.status === 'complete' || rec.status === 'not-indicated' ? null
+          : rec.dueToday ? 'Due now'
+            : rec.earliestNextDate ? `From ${rec.earliestNextDate}`
+              // Option B-2 and its kind: the dose follows another dose that has
+              // not been given, so there is no date yet. Its own label carries
+              // the interval.
+              : 'After the dose it follows',
+      })),
+    };
+  });
+}
+
+export const EXAMPLE_GROUPS = [
+  { book: 'child', name: 'Children', means: 'A child’s doses are placed by the age they were given at, which is how every paediatric rule is written.' },
+  { book: 'adult', name: 'Adults', means: 'An adult’s are placed by how long ago, because an adult’s rules are intervals rather than ages.' },
+];
 
 // ── GENERATED: every document the app can cite, newest check first ───────
 export const SOURCES = Object.values(

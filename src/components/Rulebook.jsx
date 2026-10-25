@@ -8,10 +8,11 @@
 // sentences are checked against the engine by
 // regression-2026-10-25-rulebook-matches-the-engine.test.js.
 // ─────────────────────────────────────────────────────────────────────────
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES,
-  OUTCOMES, AUTHORITIES, EVIDENCE, RULEBOOK_GROUPS, monthsInWords,
+  OUTCOMES, AUTHORITIES, EVIDENCE, RULEBOOK_GROUPS,
+  buildExamples, EXAMPLE_GROUPS, monthsInWords,
 } from '../data/rulebook.js';
 
 function Section({ title, lead, children, open: initial = false }) {
@@ -31,7 +32,10 @@ function Section({ title, lead, children, open: initial = false }) {
 const SOURCE_SCOPE = { child: 'children', adult: 'adults', any: 'any age' };
 const AUTHORITY_NAME = Object.fromEntries(AUTHORITIES.map((a) => [a.authority, a.name]));
 
-export default function Rulebook({ onClose }) {
+export default function Rulebook({ onClose, today }) {
+  // Run once per mount, not once per render: `recommend()` is pure, but these
+  // are 14 real engine runs and a re-render must not repeat them.
+  const examples = useMemo(() => buildExamples(today), [today]);
   return (
     <div className="rb">
       <div className="rb-top">
@@ -213,7 +217,44 @@ export default function Rulebook({ onClose }) {
       </Section>
 
       <Section
-        title="5. Where the rules come from"
+        title="5. Worked examples — a history in, a dose out"
+        lead="Fourteen real patients put through the engine when this page loads. Nothing here is typed: change a rule and these rows change with it."
+      >
+        <p className="rb-note">
+          Use these to check the app against a document. Each row is a history on the left and
+          the engine&rsquo;s own answer on the right &mdash; the dose, the interval it carries, and
+          the date it can be given. Where a patient is offered a choice, every option is shown.
+        </p>
+        {EXAMPLE_GROUPS.map((g) => {
+          const rows = examples.filter((e) => e.book === g.book);
+          if (!rows.length) return null;
+          return (
+            <div key={g.book} className="rb-group rb-book">
+              <h4 className="rb-h4">{g.name}</h4>
+              <p className="rb-book-lead">{g.means}</p>
+              <ul className="rb-rule-list">
+                {rows.map((e) => (
+                  <li key={`${e.book}-${e.age}-${e.history}`} className="rb-rule">
+                    <div className="rb-rule-what">{`${e.age} — ${e.risk}`}</div>
+                    <div className="rb-rule-gap">{e.history}</div>
+                    <ul className="rb-ex-due">
+                      {e.due.map((d) => (
+                        <li key={d.label}>
+                          {d.label}
+                          {d.when && <span className="rb-tag">{d.when}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </Section>
+
+      <Section
+        title="6. Where the rules come from"
         lead="Every document the app can put on a card, and the date each was last read."
       >
         <ul className="rb-plain-list">
