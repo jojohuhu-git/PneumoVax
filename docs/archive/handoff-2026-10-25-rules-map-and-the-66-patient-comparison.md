@@ -1,3 +1,8 @@
+> **SUPERSEDED 2026-10-25** by
+> `handoff-2026-10-25-ppsv23-then-pcv-and-the-rules-lookup.md`. PR #87, which this
+> document lists as open, **was merged**. Its remaining queue is carried forward there.
+> Do not resume from this file.
+
 # PneumoVax — Handoff after the rules map and the 66-patient PneumoRecs comparison (2026-10-25)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.

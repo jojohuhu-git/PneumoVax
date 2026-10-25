@@ -9,7 +9,7 @@
 // regression-2026-10-25-rulebook-matches-the-engine.test.js.
 // ─────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES, monthsInWords } from '../data/rulebook.js';
+import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_GROUPS, SOURCE_GROUPS, monthsInWords } from '../data/rulebook.js';
 
 function Section({ title, lead, children, open: initial = false }) {
   const [open, setOpen] = useState(initial);
@@ -25,7 +25,70 @@ function Section({ title, lead, children, open: initial = false }) {
   );
 }
 
-const SOURCE_SCOPE = { child: 'children', adult: 'adults', any: 'any age' };
+/**
+ * One row of the lookup, plus the two things that do not fit in a cell: the
+ * paediatric conjugate GRID (a number that depends on the dose number and two
+ * ages is not a number) and the SOURCE SENTENCE, which is the owner's stated
+ * reason for the whole reorganisation - checking a rule should not mean
+ * opening a CDC page.
+ *
+ * The rule's internal id is deliberately NOT shown. It used to print under
+ * every row; a clinician has no use for `CHILD-PCV-AFTER-PCV` and it was the
+ * most list-like thing on a page that is meant to be a table.
+ */
+function RuleRow({ r }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <tr>
+        {/* `data-label` is what keeps this readable on a phone. The shared
+            mobile rule turns every cell into a block and hides the header
+            row, which is fine for a 3-column table and unreadable for a
+            6-column one - six unlabelled values stacked. The label is
+            printed from the attribute below 560px and ignored above it. */}
+        <td data-label="Risk group">{r.risk}</td>
+        <td data-label="Already on the record">{r.record}</td>
+        <td data-label="Dose being given">{r.giving}</td>
+        <td data-label="Measured from">{r.from}</td>
+        <td data-label="Shortest acceptable gap"><strong>{r.gap}</strong></td>
+        {/* NO BOILERPLATE IN THE CELL. What "counts, with a note" means, and
+            what it means for a rule to be this app's own judgement rather
+            than CDC's, are the SAME two sentences on every row - printed per
+            row they tripled the height of the table and buried the one phrase
+            that differs. They are stated once in the legend above instead,
+            which is also the owner's standing style rule: abbreviated, with
+            an expander, worded clinically and succinctly. */}
+        <td data-label="If it is shorter">
+          <strong>{r.ifShorter}.</strong>
+          {r.authority === 'OWNER' && <span className="rb-flag">this app&rsquo;s own judgement</span>}
+          {r.source && (
+            <button type="button" className="rb-why" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+              {open ? 'Hide source' : 'Source'}
+            </button>
+          )}
+        </td>
+      </tr>
+      {r.grid && (
+        <tr className="rb-subrow">
+          <td colSpan={6}>
+            <table className="rb-table rb-inner">
+              <thead><tr><th>Which dose</th><th>Shortest acceptable gap</th></tr></thead>
+              <tbody>
+                {r.grid.map((c) => (
+                  <tr key={c.when}><td>{c.when}</td><td><strong>{c.gap}</strong></td></tr>
+                ))}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      )}
+      {open && r.source && (
+        <tr className="rb-subrow"><td colSpan={6}><p className="rb-source">{r.source}</p></td></tr>
+      )}
+    </>
+  );
+}
+
 
 export default function Rulebook({ onClose }) {
   return (
@@ -130,63 +193,76 @@ export default function Rulebook({ onClose }) {
 
       <Section
         title="4. Whether a dose already given was far enough after the last one"
-        lead="This is the part CDC's own PneumoRecs tool cannot do, because it never asks for dose dates. Every rule the app uses is here."
+        lead="Look your patient up: their age, their risk group, and what is already on their record. This is the part CDC's own PneumoRecs tool cannot do, because it never asks for dose dates."
       >
-        <p className="rb-note">
-          Each rule says what happens when the gap is too short. <strong>Does not count</strong>{' '}
-          means the dose stays on the record with an explanation but the series still owes a
-          dose. <strong>Counted, with a note</strong> means the dose is kept and the shortfall
-          is written on it.
-        </p>
-        {['child', 'adult', 'any'].map((book) => {
-          const rows = INTERVAL_RULES.filter((r) => r.rulebook === book);
-          if (!rows.length) return null;
-          return (
-            <div key={book} className="rb-group">
-              <h3 className="rb-h3">{book === 'child' ? 'Children' : book === 'adult' ? 'Adults' : 'Any age'}</h3>
-              <table className="rb-table">
-                <thead>
-                  <tr><th>The gap being judged</th><th>If it is too short</th><th>Who says so</th></tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.id}>
-                      <td>{r.what}<span className="rb-sub">{r.id}</span></td>
-                      <td>
-                        {r.enforcement === 'floor' && <strong>Does not count.</strong>}
-                        {r.enforcement === 'recommendation' && <strong>Counted, with a note.</strong>}
-                        {r.enforcement === 'none' && <strong>Never flagged.</strong>}
-                        <span className="rb-sub">{r.enforcementMeans}</span>
-                      </td>
-                      <td>
-                        {r.authority === 'OWNER'
-                          ? <><strong>This app</strong><span className="rb-sub">{r.authorityMeans}</span></>
-                          : <>CDC / ACIP<span className="rb-sub">{r.authorityMeans}</span></>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
+        <dl className="rb-legend">
+          <dt>Does not count</dt>
+          <dd>The dose stays on the record with an explanation, and the series still owes a dose.</dd>
+          <dt>Counts, with a note</dt>
+          <dd>The dose is kept and the shortfall is written on it.</dd>
+          <dt>Never flagged</dt>
+          <dd>Deliberately not checked; the reason is recorded in the rule.</dd>
+          <dt>this app&rsquo;s own judgement</dt>
+          <dd>
+            Marked on the few rows where CDC and ACIP state the interval but do <em>not</em>{' '}
+            say a shorter gap invalidates the dose. Treating it as a cut-off is this
+            app&rsquo;s decision, and the app says so on the dose itself. Every unmarked row
+            is CDC&rsquo;s or ACIP&rsquo;s own.
+          </dd>
+          <dt>Source</dt>
+          <dd>Opens the sentence that row rests on, so checking a rule need not mean opening a CDC page.</dd>
+        </dl>
+        {INTERVAL_GROUPS.map((g) => (
+          <div key={g.book} className="rb-group">
+            <h3 className="rb-h3">{g.name}</h3>
+            <table className="rb-table rb-lookup">
+              <thead>
+                <tr>
+                  <th>Risk group</th>
+                  <th>Already on the record</th>
+                  <th>Dose being given</th>
+                  <th>Measured from</th>
+                  <th>Shortest acceptable gap</th>
+                  <th>If it is shorter</th>
+                </tr>
+              </thead>
+              <tbody>
+                {g.rows.map((r) => (
+                  <RuleRow key={r.id} r={r} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
       </Section>
 
       <Section
         title="5. Where the rules come from"
-        lead="Every document the app can put on a card, and the date each was last read."
+        lead="Grouped by who the document is about, then by publisher — CDC and ACIP first, because they outrank the rest."
       >
-        <ul className="rb-plain-list">
-          {SOURCES.map((s) => (
-            <li key={s.name}>
-              <a href={s.url} target="_blank" rel="noreferrer">{s.label}</a>
-              <span className="rb-sub">
-                Written about {SOURCE_SCOPE[s.rulebook] ?? s.rulebook}
-                {s.lastVerified ? ` · read on ${s.lastVerified}` : ''}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <p className="rb-note">
+          &ldquo;Sentences quoted&rdquo; is how many distinct passages of that document the app
+          puts on cards. A document it quotes seventeen times and one it quotes once are
+          different things to go and check.
+        </p>
+        {SOURCE_GROUPS.map((g) => (
+          <div key={g.book} className="rb-group">
+            <h3 className="rb-h3">{g.name}</h3>
+            <ul className="rb-plain-list">
+              {g.docs.map((d) => (
+                <li key={d.name}>
+                  <a href={d.url} target="_blank" rel="noreferrer">{d.label}</a>
+                  {d.describes && <span className="rb-sub">{d.describes}</span>}
+                  <span className="rb-sub">
+                    {d.publisher}
+                    {d.quotes ? ` \u00b7 ${d.quotes} sentence${d.quotes === 1 ? '' : 's'} quoted` : ' \u00b7 listed, not quoted'}
+                    {d.lastVerified ? ` \u00b7 read on ${d.lastVerified}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </Section>
 
       <p className="rb-foot">

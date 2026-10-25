@@ -136,34 +136,265 @@ export const RISK_GROUPS = ['IC', 'special', 'nonIC', 'exclude'].map((g) => ({
 })).filter((g) => g.conditions.length);
 
 // ── GENERATED: every rule about the gap between two recorded doses ───────
+//
+// OWNER REQUEST 2026-10-25: *"I want to reorganize the rulebook to show the
+// acceptable vaccine intervals between doses based on age, risks and last
+// pneumococcal dose given. This will be easier to follow than a line list of
+// rules... I anticipate more bugs to come up in the future and I need
+// something for me to check back on when verifying rules. It\'s confusing for
+// me to go back to each reference document on my own."*
+//
+// So this is a LOOKUP, not a list. You arrive with a patient — an age, a risk
+// group, what is already on their record — and the dose in front of you, and
+// you read across. Three things follow from that sentence of hers:
+//
+//   • the ROWS ARE SORTED BY PATIENT, not by rule name, and the rule id moves
+//     to the end where a clinician never has to look at it;
+//   • "what else is already on the record" IS A COLUMN. Her three axes were
+//     age, risk and last dose, but 14 of the 18 rules actually split on a
+//     FOURTH thing — a 55-year-old and a 70-year-old with the same PPSV23 are
+//     given different gaps because one of them also has a PCV13 on file. Hide
+//     that and the table has rows that look identical and disagree;
+//   • every row CARRIES ITS OWN SOURCE SENTENCE, so that checking a rule does
+//     not mean opening a CDC page.
+//
+// EVERY CELL IS DERIVED FROM `DOSE_INTERVAL_RULES`. `rule-docs-match-code.test.js`
+// builds CLINICAL_SPEC.md\'s expected table from these same functions, so the
+// screen, the rulebook and the engine cannot say three different things.
 const ENFORCEMENT_MEANS = {
   floor: 'The dose does not count. It stays on the record with an explanation, and the series still owes a dose.',
   recommendation: 'The dose counts. The app notes that the gap was shorter than recommended and says by how much.',
   none: 'Never flagged — the reason is recorded in the rule itself.',
 };
-export const INTERVAL_RULES = DOSE_INTERVAL_RULES.map((r) => ({
+const ENFORCEMENT_SHORT = {
+  floor: 'Does not count',
+  recommendation: 'Counts, with a note',
+  none: 'Never flagged',
+};
+
+/** Which patients a row is for. */
+export function ruleWho(r) {
+  if (r.rulebook === 'child') return `Child (under ${monthsInWords(ADULT_SCHED_MIN_M)})`;
+  if (r.rulebook === 'adult') return `Adult (${monthsInWords(ADULT_SCHED_MIN_M)} and over)`;
+  return 'Any age';
+}
+
+/**
+ * Which risk group, when a row has one.
+ *
+ * Only TWO of the eighteen rules read the risk conditions at all, and both are
+ * adult PPSV23-after-PCV15 rows. Saying "Any" everywhere else is not padding:
+ * it is the answer to "does my patient\'s asplenia change this interval", and
+ * for sixteen rows it is no.
+ */
+export function ruleRisk(r) {
+  if (r.shorterMinimum === true || r.shorterIsTheAdvice === true) {
+    return 'Immunocompromising condition, cochlear implant or CSF leak';
+  }
+  if (r.shorterMinimum === false || r.shorterIsTheAdvice === false) {
+    return 'Every other risk group';
+  }
+  return 'Any';
+}
+
+/** What must already be on the record for the row to apply. */
+export function ruleRecord(r) {
+  const parts = [];
+  if (r.needsPriorPcv) parts.push(r.needsPriorPcv.join(' and '));
+  if (r.needsNoPriorPcv) parts.push('no PCV of any kind');
+  if (r.needsPriorPpsv23) parts.push('PPSV23');
+  if (r.needsNoPriorPpsv23) parts.push('no PPSV23');
+  return parts.length ? parts.join(', ') : 'Anything';
+}
+
+/** The dose being judged. */
+export function ruleGiving(r) {
+  if (r.vaccine === 'PPSV23') return 'PPSV23';
+  return r.products ? r.products.join(' or ') : 'Any PCV';
+}
+
+/** The earlier dose the gap is measured from, in a clinician\'s words. */
+const FROM_WORDS = {
+  prevSameStream: 'the previous dose of the same vaccine — including one that did not count',
+  lastPcv: 'the most recent PCV that counted',
+  lastPcv13: 'the most recent PCV13 that counted',
+  lastPcv15: 'the most recent PCV15 that counted',
+  lastPpsv23: 'the most recent PPSV23 that counted',
+};
+export function ruleFrom(r) { return FROM_WORDS[r.from] ?? r.from; }
+
+const weeksWords = (d) => (d % 7 === 0 ? `at least ${d / 7} weeks` : `at least ${d} days`);
+const monthsWords = (m) => (m % 12 === 0
+  ? `at least ${m / 12} year${m / 12 === 1 ? '' : 's'}`
+  : `at least ${m} months`);
+
+/**
+ * The six cells of CDC Catch-up Table 2, probed out of the engine\'s own
+ * function rather than transcribed.
+ *
+ * One row of the table cannot hold this: the paediatric conjugate minimum
+ * depends on the DOSE NUMBER and on two different ages, which is a grid and
+ * not a number. It gets its own small grid on the page, and changing any
+ * branch of `pcvNextDoseMinIntervalDays` changes these strings — which is the
+ * whole mechanism, the same one `rule-docs-match-code.test.js` relies on.
+ */
+export function childPcvGrid(r) {
+  if (typeof r.interval?.daysFrom !== 'function') return null;
+  const cell = (when, anchor, ctx) => ({
+    when, gap: weeksWords(r.interval.daysFrom(anchor, ctx)),
+  });
+  return [
+    cell('Dose 2, when dose 1 was given before the first birthday',
+      { ageAtDose: 6 }, { doseNumber: 2, ageAtDose: 7, anyPriorDoseBefore12: true }),
+    cell('Dose 2, when dose 1 was given at the first birthday or later',
+      { ageAtDose: 18 }, { doseNumber: 2, ageAtDose: 19, anyPriorDoseBefore12: false }),
+    cell('Dose 3, given under 12 months, previous dose before 7 months',
+      { ageAtDose: 6 }, { doseNumber: 3, ageAtDose: 7, anyPriorDoseBefore12: true }),
+    cell('Dose 3, previous dose at 7–11 months',
+      { ageAtDose: 9 }, { doseNumber: 3, ageAtDose: 10, anyPriorDoseBefore12: true }),
+    cell('Dose 4 or later, given under 12 months (an extra infant dose)',
+      { ageAtDose: 4 }, { doseNumber: 4, ageAtDose: 5, anyPriorDoseBefore12: true }),
+    cell('Dose 4 or later, given at 12 months or over (the booster)',
+      { ageAtDose: 10 }, { doseNumber: 4, ageAtDose: 13, anyPriorDoseBefore12: true }),
+  ];
+}
+
+/** The shortest acceptable gap, as one phrase for the screen. */
+export function ruleGap(r) {
+  const iv = r.interval;
+  if (iv == null) return 'none stated';
+  if (typeof iv.daysFrom === 'function') return 'depends on the dose number and the age — see the grid below';
+  return iv.days != null ? weeksWords(iv.days) : monthsWords(iv.months);
+}
+
+/**
+ * The same gap written out in full, for CLINICAL_SPEC.md.
+ *
+ * The screen can say "see the grid below" because the grid is directly
+ * beneath it. The rulebook is a document, and a cell that points at
+ * something else is a cell nobody can check — so the paediatric row spells
+ * all six cells here, probed out of the engine exactly as `childPcvGrid`
+ * does. `rule-docs-match-code.test.js` builds its expectation from this
+ * function, so changing any branch of `pcvNextDoseMinIntervalDays` changes
+ * this string and the rulebook stops matching until it is corrected.
+ */
+export function ruleGapExact(r) {
+  const grid = childPcvGrid(r);
+  if (grid) return grid.map((c) => `${c.when}: ${c.gap}`).join('; ');
+  return ruleGap(r);
+}
+
+export const INTERVAL_TABLE = DOSE_INTERVAL_RULES.map((r) => ({
   id: r.id,
   what: r.what,
-  rulebook: r.rulebook,
-  vaccine: r.vaccine,
+  who: ruleWho(r),
+  risk: ruleRisk(r),
+  record: ruleRecord(r),
+  giving: ruleGiving(r),
+  from: ruleFrom(r),
+  gap: ruleGap(r),
+  grid: childPcvGrid(r),
+  ifShorter: ENFORCEMENT_SHORT[r.enforcement],
+  ifShorterMeans: ENFORCEMENT_MEANS[r.enforcement],
   enforcement: r.enforcement,
-  enforcementMeans: ENFORCEMENT_MEANS[r.enforcement],
   authority: r.authority ?? null,
   authorityMeans: r.authority === 'OWNER'
     ? 'This one is a clinical judgement of this app, not something CDC or ACIP states. The interval is theirs; treating it as a hard cut-off is ours, and the app says so on the dose itself.'
     : 'CDC or ACIP state this interval themselves.',
-  sourceKey: typeof r.source === 'string' ? r.source : null,
+  // The sentence the rule rests on, so that checking a rule does not mean
+  // opening a CDC page. This is the owner\'s stated reason for the whole
+  // reorganisation, so it is a first-class column and not an appendix.
+  source: typeof r.source === 'string' ? r.source : null,
 }));
 
-// ── GENERATED: every document the app can cite, newest check first ───────
+/** The table as a clinician reads it: by patient, then by the dose in hand. */
+const GROUP_ORDER = { child: 0, any: 1, adult: 2 };
+export const INTERVAL_GROUPS = ['child', 'any', 'adult']
+  .map((book) => ({
+    book,
+    name: book === 'child' ? 'Children' : book === 'adult' ? 'Adults' : 'Any age',
+    rows: DOSE_INTERVAL_RULES
+      .map((r, i) => ({ r, i }))
+      .filter(({ r }) => r.rulebook === book)
+      // Within a patient group, the vaccine in hand is what a clinician knows
+      // first, so PCV rows come before PPSV23 rows; otherwise source order,
+      // which is the order the engine itself walks them.
+      .sort((a, b) => (a.r.vaccine === b.r.vaccine ? a.i - b.i : (a.r.vaccine === 'PCV' ? -1 : 1)))
+      .map(({ i }) => INTERVAL_TABLE[i]),
+  }))
+  .filter((g) => g.rows.length)
+  .sort((a, b) => GROUP_ORDER[a.book] - GROUP_ORDER[b.book]);
+
+// ── GENERATED: every document the app can cite, ORGANISED ────────────────
+//
+// OWNER REQUEST 2026-10-25: *"The reference documents in the app should also
+// be organized in a way that is easy to find a document in question. Right now
+// it seems random."*
+//
+// It was not random, it was alphabetical by an INTERNAL KEY — so "CDC
+// Child/Adolescent Notes", "CDC PCV Catch-up Job Aid" and "CDC Risk-based
+// Pneumococcal" sat in a block while "MMWR mm7401a1" and "immunize.org p2016"
+// landed wherever their key fell, and nothing told a reader which of them
+// governed the patient in front of her.
+//
+// Organised on the two questions someone actually arrives with:
+//   WHO IS IT ABOUT   children, adults, or any age — the same `rulebook`
+//                     field that keeps a child\'s quote off an adult\'s card
+//   WHO PUBLISHED IT  CDC/ACIP first, then everyone else, because the
+//                     authority rule in CLAUDE.md ranks them that way
+//
+// and each one now says HOW MUCH THE APP LEANS ON IT — the number of distinct
+// sentences quoted from it. A document the app quotes 30 times and one it
+// quotes once are different things to go and check, and the old list showed
+// them identically.
+const PUBLISHER = (r) => {
+  const u = r.url ?? '';
+  if (u.includes('cdc.gov')) return 'CDC / ACIP';
+  if (u.includes('immunize.org')) return 'immunize.org';
+  return 'Other';
+};
+const PUBLISHER_RANK = { 'CDC / ACIP': 0, 'immunize.org': 1, Other: 2 };
+
 export const SOURCES = Object.values(
   Object.entries(REFS).reduce((acc, [, v]) => {
     if (!v || !v.url) return acc;
     const page = (v.page ?? v.url).split('#')[0];
     const key = v.short ?? v.doc ?? page;
-    if (!acc[key] || (v.lastVerified ?? '') > (acc[key].lastVerified ?? '')) {
-      acc[key] = { name: key, label: v.label ?? key, url: page, rulebook: v.rulebook ?? 'any', lastVerified: v.lastVerified ?? null };
-    }
+    const prev = acc[key];
+    acc[key] = {
+      name: key,
+      // ⚠ THE DOCUMENT'S NAME, NEVER A LABEL. A ref entry's `label` describes
+      // the SENTENCE it quotes, not the document - "CDC Child & Adolescent
+      // Schedule Notes - pneumococcal: the PCV15 to PPSV23 interval of >=1
+      // year, with 8 weeks named as a minimum that MAY be considered..." is a
+      // fine chip title and a useless thing to go looking for a document by.
+      // The first draft here picked the LONGEST label and produced exactly
+      // that list. `short` is the document's own name and is what a reader
+      // scans. A whole-page entry's label is kept as the subtitle, because it
+      // does describe the document.
+      label: key,
+      describes: v.quote ? (prev?.describes ?? null) : (v.label ?? prev?.describes ?? null),
+      url: page,
+      rulebook: v.rulebook ?? prev?.rulebook ?? 'any',
+      publisher: PUBLISHER(v),
+      // Distinct quoted sentences, which is what "how much does the app lean
+      // on this" means. A whole-page entry carries no quote and adds nothing.
+      quotes: new Set([...(prev?.quotes ?? []), ...(v.quote ? [v.quote] : [])]),
+      lastVerified: (v.lastVerified ?? '') > (prev?.lastVerified ?? '') ? v.lastVerified : prev?.lastVerified ?? null,
+    };
     return acc;
   }, {}),
-).sort((a, b) => a.name.localeCompare(b.name));
+).map((d) => ({ ...d, quotes: d.quotes.size }));
+
+const SCOPE_NAME = { child: 'About children', adult: 'About adults', any: 'Used at any age' };
+export const SOURCE_GROUPS = ['child', 'adult', 'any']
+  .map((book) => ({
+    book,
+    name: SCOPE_NAME[book],
+    docs: SOURCES
+      .filter((d) => d.rulebook === book)
+      .sort((a, b) => (PUBLISHER_RANK[a.publisher] - PUBLISHER_RANK[b.publisher])
+        || b.quotes - a.quotes
+        || a.name.localeCompare(b.name)),
+  }))
+  .filter((g) => g.docs.length);

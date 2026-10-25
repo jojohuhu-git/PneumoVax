@@ -1343,6 +1343,32 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   const anchorPcv = pcv.anchorDate;
   // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
   const anchorPneumo = mostRecent(pcv.lastDate, ppsv.effective.find((d) => d.date)?.date || null);
+  // ── 2026-10-25: the 24-71-month catch-up card's 8 weeks ─────────────────
+  //
+  // CDC's at-risk catch-up row states TWO intervals and the card implemented
+  // only the second: "Less than 3 PCV doses: 2 doses PCV (at least 8 weeks
+  // after the most recent dose AND administered at least 8 weeks apart)". The
+  // card was anchored on `anchorPcv`, so a 4-year-old with asplenia, a PPSV23
+  // 24 days ago and no conjugate was told her first PCV was due TODAY on a
+  // card quoting "at least 8 weeks after the most recent dose". Measured over
+  // the grid: 225 patients were advised a PCV sooner than 8 weeks after a
+  // PPSV23, all of them aged 2 or 5 — the 6-18 block below already uses a
+  // pneumococcal anchor, which is why no patient over 6 was affected. 192 are
+  // fixed here; the 33 left are the two cases no document covers, below.
+  //
+  // It is the LATER of the two clocks, not a third reading of either:
+  //   `anchorPcv`      the PCV side, which is RULING D's anchor (the dose the
+  //                    patient GOT, including one that did not count)
+  //   `ppsv.lastDate`  the PPSV23 side, which is ANCHOR-1's (counting doses
+  //                    only — "an unnecessary dose cannot reset a clock")
+  // Both carry the same 8 weeks, so the later anchor is the later date and no
+  // second interval is introduced.
+  //
+  // ⚠ A PPSV23 ANCHOR IS NOT APPLIED TO A HEALTHY CHILD'S CATCH-UP CARD. No
+  // document states it there: CDC's healthy row gives no interval, p2016's
+  // says "after most recent PCV dose", and the catch-up job aid says "Give
+  // Dose 1 today". See CLINICAL_SPEC.md §C-PPSV23ANCHOR.
+  const anchorPneumoGiven = mostRecent(anchorPcv, ppsv.lastDate);
   const ppsvGiven = ppsv.count > 0;
   // IC-1/IC-2/IC-3 (2026-10-17). Once an at-risk child's conjugate series is
   // done, CDC and p2016 ask ONE more question — has the post-series dose been
@@ -1729,7 +1755,18 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       }));
       return out;
     }
-    const { dueToday, earliestNextDate } = dueState(anchorPcv, WK8, today);
+    // ⚠ THE ANCHOR FOLLOWS THE ROW, and the two rows word it differently.
+    //
+    // `target === 2` is CDC's "Less than 3 PCV doses" row, whose own words are
+    // "at least 8 weeks after the most recent DOSE" — so a PPSV23 anchors it.
+    // `target === 1` is the 3-doses-before-12-months row, and every document
+    // that states its interval says PCV: ACIP 2023, "one dose of either PCV15
+    // or PCV20 is recommended at least 8 weeks after the last PCV dose", and
+    // CDC's neighbouring rows, "at least 8 weeks after the most recent PCV
+    // dose". Anchoring that one on a PPSV23 would be this app's own number.
+    const { dueToday, earliestNextDate } = dueState(
+      target === 2 ? anchorPneumoGiven : anchorPcv, WK8, today,
+    );
     const doseNum = target - remaining + 1;
     out.push(rec({
       vaccine: 'PCV', status: 'risk-based',
@@ -1759,7 +1796,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`,
         }
         : {
-          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
+          // Both halves of CDC's row, 2026-10-25. It states two intervals --
+          // "at least 8 weeks after the most recent dose AND administered at
+          // least 8 weeks apart" -- and this lead printed only the second,
+          // while the card's date was computed from neither.
+          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal dose and ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
           detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`,
         },
       noteCites: [
@@ -3349,7 +3390,31 @@ export function recommend(input) {
   // counting history speaks for itself.
   const adultRepeat = adultRepeatOwed(analysis, rawPcv, rawPpsv, am);
   const pcv = summarizePcv(effectivePcv, am, today, dob, pcvAnalysis.anchor);
-  const ppsv = { count: effectivePpsv.length, effective: effectivePpsv };
+  const ppsv = {
+    count: effectivePpsv.length,
+    effective: effectivePpsv,
+    // The most recent COUNTING PPSV23, mirroring `pcv.lastDate`. Added
+    // 2026-10-25 for the at-risk catch-up card's 8 weeks, which CDC measures
+    // from "the most recent dose" and not from the most recent PCV.
+    //
+    // Deliberately NOT `effective.find(...)`, which five call sites above use
+    // for the FIRST PPSV23 because the 5-year revaccination clock runs from
+    // dose 1. First and last are different questions; a child with two PPSV23
+    // doses has them five years apart, so reading one for the other is a
+    // five-year error.
+    //
+    // ⚠ THE DIFFERENCE IS UNREACHABLE FROM TODAY'S ONLY CALLER, and that is
+    // recorded rather than hidden: swapping this line for `.find(...)` broke
+    // 0 of 1,607 tests. Its caller is the 24-71-month catch-up card, and a
+    // SECOND counting PPSV23 cannot exist there by arithmetic — a first
+    // PPSV23 cannot count before 24 months and a second needs >=5 years after
+    // it, so two counting doses are impossible before ~84 months, past the
+    // block's 71-month ceiling. The unreachability is pinned by a test
+    // instead, so moving that ceiling fails rather than silently reading the
+    // wrong dose. The field keeps the name it earns: a `lastDate` that
+    // returned the first dose is a trap for whoever calls it next.
+    lastDate: [...effectivePpsv].reverse().find((d) => d.date)?.date || null,
+  };
 
   // ── Standard (age/history/risk) recommendations ──────────────────────
   //

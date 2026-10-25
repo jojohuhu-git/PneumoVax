@@ -704,6 +704,37 @@ body {
 .rb-table td:last-child, .rb-table th:last-child { padding-right: 0; }
 .rb-td-age { white-space: nowrap; }
 
+/* ── The rule LOOKUP (2026-10-25) ─────────────────────────────────────── */
+/* Six columns of mostly short phrases, so the cells are tightened and the
+   two widest ("measured from", "if it is shorter") are allowed to wrap. */
+.rb-lookup td, .rb-lookup th { padding-right: var(--sp-12); }
+.rb-lookup td { font-size: var(--fs-xs); }
+.rb-lookup td strong { font-size: var(--fs-sm); }
+/* The sub-rows carry the paediatric grid and the source sentence. They are
+   part of the row above, so they lose the divider that would cut them off. */
+.rb-subrow > td { border-bottom: 1px solid var(--gy5); padding-top: 0; }
+.rb-inner { margin: var(--sp-4) 0 var(--sp-8); }
+.rb-inner td, .rb-inner th { font-size: var(--fs-xs); padding-top: var(--sp-4); padding-bottom: var(--sp-4); }
+.rb-why {
+  display: block; margin-top: var(--sp-8); background: none; border: none; padding: 0;
+  cursor: pointer; font-family: inherit; text-align: left;
+  font-size: var(--fs-xs); font-weight: 600; color: var(--c2); text-decoration: underline;
+}
+.rb-source {
+  font-size: var(--fs-xs); color: var(--gy2); line-height: 1.6;
+  background: var(--gy7, #f6f7f9); border-left: 3px solid var(--gy5);
+  padding: var(--sp-8) var(--sp-12); margin: 0 0 var(--sp-8);
+}
+
+.rb-legend { margin: 0 0 var(--sp-16); font-size: var(--fs-xs); line-height: 1.55; }
+.rb-legend dt { font-weight: 700; color: var(--gy2); margin-top: var(--sp-8); }
+.rb-legend dd { margin: 0; color: var(--gy3); }
+.rb-flag {
+  display: inline-block; margin-left: var(--sp-4); padding: 1px var(--sp-4);
+  border-radius: 3px; background: var(--gy6); color: var(--gy3);
+  font-size: var(--fs-xs); font-weight: 600; white-space: nowrap;
+}
+
 .rb-foot { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.6; margin-top: var(--sp-24); }
 
 @media (max-width: 560px) {
@@ -713,6 +744,16 @@ body {
   .rb-table thead { display: none; }
   .rb-table tr { border-bottom: 1px solid var(--gy5); padding: var(--sp-8) 0; }
   .rb-table td { border-bottom: none; padding: 2px 0; }
+  /* Without this the lookup's six values stack unlabelled, because `thead`
+     is hidden above. Each cell prints its own column name instead. */
+  .rb-lookup td[data-label]::before {
+    content: attr(data-label) ': ';
+    font-weight: 700; color: var(--gy3);
+  }
+  /* The sub-rows are full-width panels, not columns, so they take no label
+     and keep their own padding. */
+  .rb-subrow > td::before { content: none; }
+  .rb-subrow > td { padding: var(--sp-4) 0 var(--sp-8); }
 }
 .app-main-rulebook { flex: 1; width: 100%; }
 

@@ -61,7 +61,12 @@ describe('p2016 Table 4 row 1 — the 2-dose at-risk catch-up', () => {
   it('credits the row that names the products, and the footnote on its PCV15', () => {
     const card = catchupCard(recommend(child));
     expect(card, 'no at-risk catch-up card for this child').toBeTruthy();
-    expect(noteOf(card)).toMatch(/Give 2 doses of PCV20 or PCV15, ≥8 weeks apart/);
+    // Both halves of CDC's row since 2026-10-25 — it states "at least 8 weeks
+    // after the most recent dose AND administered at least 8 weeks apart",
+    // and the lead printed only the second.
+    expect(noteOf(card)).toMatch(
+      /Give 2 doses of PCV20 or PCV15, ≥8 weeks after the most recent pneumococcal dose and ≥8 weeks apart/,
+    );
     const cites = citesOf(card);
     expect(cites.map((c) => c.key)).toEqual([
       'pedsRiskIncompleteCatchup',
