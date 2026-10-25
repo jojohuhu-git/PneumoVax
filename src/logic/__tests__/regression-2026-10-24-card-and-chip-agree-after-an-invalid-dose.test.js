@@ -31,18 +31,38 @@ const invalidOf = (o) => [...o.perDose.pcv, ...o.perDose.ppsv23].filter((d) => d
 const leadOf = (r) => (typeof r.note === 'string' ? r.note : r.note?.lead ?? '');
 const detailOf = (r) => (typeof r.note === 'string' ? '' : r.note?.detail ?? '');
 
-const PATIENTS = {
-  // family 2 — invalid conjugate after a PPSV23-only history
+// ⚠️ FAMILY 2 LEFT THIS CARD ON 2026-10-25. `ADULT-PCV-AFTER-PPSV23` became a
+// recommendation, so p1 and p2 no longer have an invalid dose and no longer
+// get the repeat card at all. They are kept here, under FORMER_FAMILY_2,
+// because the sentences that used to be on their card have not vanished —
+// they moved onto the dose's own "Why this" disclosure, and that move is
+// exactly the kind of thing that goes unnoticed. PATIENTS now holds only the
+// patients this card still serves.
+const FORMER_FAMILY_2 = {
   p1: { ageMonths: Y(70), riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }] },
   p2: { ageMonths: Y(70), riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2026-09-26' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }] },
+};
+
+const PATIENTS = {
   // family 3 — invalid PPSV23 after a PCV15
   p3: { ageMonths: Y(60), riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }] },
   // her asplenic patient — the 8-week IC row
   p4: { ageMonths: Y(40), riskIds: ['asplenia'], pcvDoses: [{ product: 'PCV15', date: '2026-08-30' }], ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }] },
 };
 
+describe('family 2 has no repeat card at all since 2026-10-25', () => {
+  for (const [name, patient] of Object.entries(FORMER_FAMILY_2)) {
+    it(`${name}: the dose counts and the series reads complete`, () => {
+      const out = run(patient);
+      expect(invalidOf(out)).toHaveLength(0);
+      expect(out.recs[0].status).toBe('complete');
+      expect(leadOf(out.recs[0])).not.toContain('was given too soon to count');
+    });
+  }
+});
+
 describe('one date, on the card and on the chip', () => {
-  const EXPECTED = { p1: '2027-06-19', p2: '2027-09-26', p3: '2027-10-11', p4: '2027-10-11' };
+  const EXPECTED = { p3: '2027-10-11', p4: '2027-10-11' };
   for (const [name, due] of Object.entries(EXPECTED)) {
     it(`${name}: both surfaces say ${due}`, () => {
       const out = run(PATIENTS[name]);
@@ -85,15 +105,18 @@ describe('the card says which number is stated and which is read across', () => 
     }
   });
 
-  it('after a conjugate the year is an INTERPRETATION, and the 8 weeks is named as paediatric', () => {
-    // p1 and p2: the invalid dose was the conjugate, so the owed conjugate's
-    // year is read across from ACIP's PCV13 sentence.
+  // ⚠️ THE CLAUSE MOVED, IT DID NOT GO. Until 2026-10-25 p1 and p2 read this
+  // on their recommendation card. Their dose now counts, so there is no such
+  // card — and her instruction ("make it clear that the 8 week interval is
+  // pediatric data with nothing clarifying adults... State using 1 year is an
+  // interpretation") still binds the number the app offers them. It is now
+  // the alternative in the dose's own disclosure, and it must still say which
+  // kind of number it is.
+  it('after a conjugate the year is still named an INTERPRETATION, now in the expander', () => {
     for (const name of ['p1', 'p2']) {
-      const lead = leadOf(run(PATIENTS[name]).recs[0]);
-      expect(lead).toContain('at least 1 year after the last PCV13 dose');
-      expect(lead).toContain('It is an interpretation, not a stated rule');
-      expect(lead).toContain('The 8-week conjugate interval is paediatric');
-      expect(lead).toContain('Children age 4 months through 6 years');
+      const why = (run(FORMER_FAMILY_2[name]).perDose.pcv[0].whys ?? []).join(' ');
+      expect(why).toContain('read across from the only adult conjugate-to-conjugate interval ACIP states');
+      expect(why).toContain('an interpretation and not a stated rule');
     }
   });
 
@@ -110,13 +133,19 @@ describe('each card carries only the documents that speak for its sentences', ()
   const refKeysOf = (rec) => (rec.citations ?? []).map((c) => c.page ?? c.key);
   const citeKeysOf = (rec) => (rec.noteCites ?? []).map((c) => c.key ?? c.page);
 
-  it('family 2 keeps mm7401a1 — its "PPSV23 only" row states this disposition', () => {
-    // FINDING F in miniature: narrowing the sources took mm7401a1 off these
-    // 132 cards, and FINDING F's own guard is what caught it. Cited for the
-    // DISPOSITION only; the card's date is later than the row's and says so.
-    const card = run(PATIENTS.p1).recs[0];
-    expect(citeKeysOf(card)).toContain('mmwrPpsvOnlyThenPcv');
-    expect(detailOf(card)).toContain('the later date above is the further spacing');
+  // ⚠️ FAMILY 2'S CARD IS A DIFFERENT CARD SINCE 2026-10-25, and mm7401a1's
+  // "PPSV23 only" row no longer speaks for it: that row orders the conjugate
+  // this patient is no longer owed. Dropping a document because the card
+  // changed is FINDING F's fault, so the replacement assertion is the one
+  // that matters either way — whatever grey buttons this card carries, every
+  // one of them is credited by a sentence on the card.
+  it('family 2 now gets the ordinary complete card, fully credited', () => {
+    const card = run(FORMER_FAMILY_2.p1).recs[0];
+    expect(card.status).toBe('complete');
+    expect(citeKeysOf(card)).not.toContain('mmwrPpsvOnlyThenPcv');
+    const credited = new Set(citeKeysOf(card));
+    expect(credited.size).toBeGreaterThan(0);
+    expect(refKeysOf(card).length).toBeGreaterThan(0);
   });
 
   it('family 3 keeps the job aid — the conjugate stands in for the PPSV23 owed', () => {
@@ -197,7 +226,9 @@ describe('THE BOUNDARY — only the three families she worked through', () => {
 
   it('swept over the grid: the repeat card appears ONLY for those five rules', () => {
     const ALLOWED = new Set([
-      'ADULT-PCV-AFTER-PPSV23',
+      // 'ADULT-PCV-AFTER-PPSV23' was here until 2026-10-25. It is a
+      // recommendation now, so it can reach no card; leaving it in the set
+      // would let a future regression that re-rejects these doses pass.
       'ADULT-PPSV23-AFTER-PCV15',
       'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
       // Added by the owner 2026-10-25, the two PCV13 twins.
@@ -224,10 +255,15 @@ describe('THE BOUNDARY — only the three families she worked through', () => {
     //   188  the three families of 2026-10-24
     //   400  plus the two PCV13 rows she added on 2026-10-25
     //        (+182 ADULT-PPSV23-AFTER-PCV13, +30 ...-SHORTER-MINIMUM = +212)
+    //   268  MINUS the 132 of ADULT-PCV-AFTER-PPSV23, which stopped rejecting
+    //        doses later on 2026-10-25 and so stopped reaching this card at
+    //        all. A FALL is as much an owner decision as a rise; it is pinned
+    //        here so neither can happen quietly.
     //
-    // The two families hold 402 and 210 patients; only the 212 whose INVALID
-    // dose is also their LAST dose reach this card, which is `adultRepeatOwed`'s
-    // "only an invalid last dose leaves something owing" and not a shortfall.
-    expect(seen).toBe(400);
+    // The two PCV13 families hold 402 and 210 patients; only the 212 whose
+    // INVALID dose is also their LAST dose reach this card, which is
+    // `adultRepeatOwed`'s "only an invalid last dose leaves something owing"
+    // and not a shortfall.
+    expect(seen).toBe(268);
   });
 });

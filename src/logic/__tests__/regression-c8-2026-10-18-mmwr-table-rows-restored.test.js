@@ -182,13 +182,25 @@ describe('FINDING F — over the whole grid', () => {
     // row, and 110 from the shared-clinical-decision row at >=65, which
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
-    expect(stats.ppsvOnly).toBe(1154);
+    // 2026-10-25: - 132. Every one of the 132 whose conjugate now counts was
+    // on the "PPSV23 only" row; none was a shared-decision card, so `shared`
+    // below is untouched. That asymmetry is the check — a change that moved
+    // patients between the two rows would show here first.
+    expect(stats.ppsvOnly).toBe(1154 - 132);
     // -110: the shared-decision cards whose PCV20 now counts.
     expect(stats.shared).toBe(440 - 110);
   });
 
   it('mm7401a1 stays fully credited — every restored button has a number', () => {
-    expect(stats.listing).toBe(2564 + 1154 + 440 - 363);
+
+    // 2026-10-25, "COUNT LIKE THE CHILD": **- 132**. ADULT-PCV-AFTER-PPSV23
+    // became a recommendation, so those patients' conjugate counts and their
+    // card changed from "PCV20 or PCV21 ... completes the series" — which
+    // quotes mm7401a1 — to a Complete card quoting CDC's adult notes. As with
+    // Ruling F, the document lost no card it still speaks for; it stopped
+    // being shown on cards whose sentence changed. Same 132 as the verdict
+    // corpus, counted independently here.
+    expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132);
     expect(stats.uncredited).toBe(0);
   });
 });

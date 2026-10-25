@@ -67,27 +67,38 @@ const CHILD = {
 // `intervalFrom`. A months rule subtracts the grace from a calendar date, so
 // it needs its own case: the days arm passing proves nothing about it.
 //
-// ⚠️ THE HISTORY CHANGED ON 2026-10-24, THE NUMBERS DID NOT. It used to be
-// PCV13 2026-01-01 → PCV20 2026-02-05, rejected by the 1-year
-// conjugate-to-conjugate floor. §K-CONJUGATE downgraded that row to a
-// recommendation the same day, so the dose counts and the fixture stopped
-// exercising a floor at all. It is now PPSV23 → PCV20 at the same two dates,
-// rejected by ADULT-PCV-AFTER-PPSV23 — also adult, also 1 calendar year,
-// also cross-stream, and it produces the identical pair of dates
-// (earliestValidDate 2026-12-28, repeatDueDate 2027-02-05). Every assertion
-// below is unchanged.
+// ⚠️ THE HISTORY HAS CHANGED TWICE AND THE NUMBERS HAVE NOT MOVED ONCE. The
+// fixture only ever needs an adult floor stated in calendar MONTHS, and each
+// time the row it stood on stopped being a floor it was repointed at the next
+// one, keeping the same two dates.
+//
+//   originally  PCV13 2026-01-01 → PCV20 2026-02-05, the 1-year
+//               conjugate-to-conjugate floor — downgraded by §K-CONJUGATE on
+//               2026-10-24.
+//   then        PPSV23 2026-01-01 → PCV20 2026-02-05, ADULT-PCV-AFTER-PPSV23
+//               — downgraded by the owner on 2026-10-25 ("count like the
+//               child").
+//   now         PCV13 2026-01-01 → PPSV23 2026-02-05,
+//               ADULT-PPSV23-AFTER-PCV13 — adult, 1 calendar year,
+//               cross-stream, graced, still a floor.
+//
+// All three produce the identical pair of dates (earliestValidDate
+// 2026-12-28, repeatDueDate 2027-02-05), which is why every assertion below
+// is unchanged. The judged dose is now a PPSV23, so it is read out of the
+// PPSV23 stream — hence `lastAdultDose` beside `lastPcvDose`.
 const ADULT = {
   dob: '1956-01-01',
   ageMonths: 846,
   today: '2026-10-23',
   riskIds: [],
-  ppsv23Doses: [{ product: 'PPSV23', date: '2026-01-01' }],
-  pcvDoses: [
-    { product: 'PCV20', date: '2026-02-05' }, // 5 weeks after the PPSV23 — rejected
+  pcvDoses: [{ product: 'PCV13', date: '2026-01-01' }],
+  ppsv23Doses: [
+    { product: 'PPSV23', date: '2026-02-05' }, // 5 weeks after the PCV13 — rejected
   ],
 };
 
 const lastPcvDose = (p) => analyzeBoth({ ...p }).pcv.perDose.at(-1);
+const lastAdultDose = (p) => analyzeBoth({ ...p }).ppsv23.perDose.at(-1);
 
 /** Re-run the patient with one more dose of `product` given on `date`. */
 function giveNextDose(patient, product, date) {
@@ -127,9 +138,9 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
   });
 
   it('the adult months-stated rule loses the grace too', () => {
-    const dose = lastPcvDose(ADULT);
+    const dose = lastAdultDose(ADULT);
     expect(dose.status).toBe('invalid');
-    expect(dose.intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    expect(dose.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV13');
     // 2026-02-05 + 1 calendar year. Pre-fix: 2027-02-01.
     expect(dose.repeatDueDate).toBe('2027-02-05');
   });
@@ -140,7 +151,7 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
     // not move, and no committed verdict may change with it.
     expect(lastPcvDose(CHILD).earliestValidDate).toBe('2026-10-15');
     // 2026-01-01 + 1 year = 2027-01-01, minus 4 days.
-    expect(lastPcvDose(ADULT).earliestValidDate).toBe('2026-12-28');
+    expect(lastAdultDose(ADULT).earliestValidDate).toBe('2026-12-28');
   });
 
   it('the app advises the 9th and still ACCEPTS the 5th — grace intact', () => {
@@ -155,20 +166,25 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
   });
 
   it('that grace-window property is a CHILD property, and here is why', () => {
-    // Not an oversight: an adult's next PCV is anchored on the PPSV23 that
-    // still counts (ADULT-PCV-AFTER-PPSV23, `from: 'lastPpsv23'`), so the
-    // rejected PCV20 does not move the date the app will ACCEPT. A child's is
-    // anchored on the previous dose including a rejected one, so it does.
-    // (The rule named here was ADULT-PCV20-21-AFTER-PCV13 until 2026-10-24;
-    // the cross-stream shape that produces the gap is the same.)
+    // Not an oversight. An adult's next conjugate is anchored CROSS-STREAM on
+    // a dose that still counts — here the PCV13 of 2026-01-01
+    // (ADULT-PCV20-21-AFTER-PCV13, `from: 'lastPcv13'`) — so the rejected
+    // PPSV23 does not move the date the app will ACCEPT. A child's is
+    // anchored on the previous dose in the same stream INCLUDING a rejected
+    // one, so it does.
     //
-    // That difference is the second of PR #83's two open questions, put to the
-    // owner on 2026-10-24 and NOT decided here: the adult chip names
-    // 2027-02-05 while the adult card names 2027-01-01, and the app would
-    // accept the dose on either. Nothing below pins which is right.
-    const advised = lastPcvDose(ADULT).repeatDueDate;
+    // ⚠️ THE CARD/CHIP GAP THIS USED TO RECORD IS CLOSED. It read "the adult
+    // chip names 2027-02-05 while the adult card names 2027-01-01" and left
+    // the question open for the owner. She answered it on 2026-10-25 for this
+    // family — the card follows the invalid dose — so both surfaces now say
+    // 2027-02-05, which is asserted here rather than described.
+    const advised = lastAdultDose(ADULT).repeatDueDate;
+    expect(advised).toBe('2027-02-05');
+    expect(recommend(ADULT).recs[0].earliestNextDate).toBe('2027-02-05');
     expect(giveNextDose(ADULT, 'PCV20', advised).status).toBe('valid');
-    // The card's date, a month earlier, is accepted too — that is the gap.
+    // And the app still ACCEPTS a dose earlier than it ADVISES, because the
+    // acceptance clock is the PCV13's. That is the property, and it is what
+    // makes the advice/acceptance split visible on an adult at all.
     expect(giveNextDose(ADULT, 'PCV20', '2027-01-01').status).toBe('valid');
   });
 });

@@ -31,21 +31,29 @@ const run = (p) => recommend({ today: TODAY, ...p });
 const invalidOf = (out) => [...out.perDose.pcv, ...out.perDose.ppsv23]
   .filter((d) => d.status === 'invalid');
 
+// The date in a counted dose's "Why this" alternative. Added 2026-10-25, when
+// the owner turned ADULT-PCV-AFTER-PPSV23 into a recommendation: her two
+// conjugate patients below no longer have a repeat date because they no longer
+// have an invalid dose, and the SAME date is now offered to them as the
+// alternative. Both come from `adultRepeatAfterInvalidDose`, so reading it here
+// tests the clock she ruled on, not a second one.
+const alternativeDateOf = (dose) => {
+  const m = (dose?.whys ?? []).join(' ')
+    .match(/1 dose of PCV20 or PCV21 on or after ([A-Z][a-z]{2} \d{1,2}, \d{4})/);
+  return m ? m[1] : null;
+};
+
 describe('her four worked patients, to the day', () => {
   // These are the ONLY four patients she gave dates for. Every one of them was
   // wrong before this change or right only by coincidence, so they are
   // asserted exactly rather than by shape.
+  // ⚠️ HER FIRST TWO PATIENTS MOVED OUT OF THIS LIST ON 2026-10-25, not out of
+  // the file. Both are a conjugate given early after a PPSV23, and that row
+  // stopped rejecting doses when she ruled "count like the child". They have
+  // their own block below, asserting THE SAME TWO DATES through the
+  // alternative the card now offers — which is the point: her dates survived
+  // the reversal, they just stopped being orders.
   const CASES = [
-    ['70y healthy, early conjugate 8 months after PPSV23', {
-      ageMonths: Y(70), riskIds: [],
-      pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
-    }, '2027-06-19'],
-    ['70y healthy, early conjugate 15 days short of the year', {
-      ageMonths: Y(70), riskIds: [],
-      pcvDoses: [{ product: 'PCV15', date: '2026-09-26' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
-    }, '2027-09-26'],
     ['60y healthy, early PPSV23 12 weeks after PCV15', {
       ageMonths: Y(60), riskIds: [],
       pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }],
@@ -69,8 +77,44 @@ describe('her four worked patients, to the day', () => {
   }
 
   it('the asplenic patient is NOT given the 8 weeks she was given before', () => {
-    const bad = invalidOf(run(CASES[3][1]));
+    const bad = invalidOf(run(CASES[1][1]));
     expect(bad[0].repeatDueDate).not.toBe('2026-12-06');
+  });
+});
+
+describe('her two conjugate patients keep her dates — as the alternative', () => {
+  // OWNER DECISION 2026-10-25. The dose counts now, so there is no repeat to
+  // be due; what she asked for instead is "Counted + alternative with a date",
+  // and the date has to be the one she worked out herself on 2026-10-24. If
+  // these two ever print a different day from the dates in this file's history,
+  // the two readings of her clock have drifted apart again.
+  const CONJUGATE_CASES = [
+    ['70y healthy, early conjugate 8 months after PPSV23', {
+      ageMonths: Y(70), riskIds: [],
+      pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
+    }, 'Jun 19, 2027'],
+    ['70y healthy, early conjugate 15 days short of the year', {
+      ageMonths: Y(70), riskIds: [],
+      pcvDoses: [{ product: 'PCV15', date: '2026-09-26' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
+    }, 'Sep 26, 2027'],
+  ];
+
+  for (const [name, patient, alt] of CONJUGATE_CASES) {
+    it(`${name} -> counts, alternative ${alt}`, () => {
+      const out = run(patient);
+      expect(invalidOf(out)).toHaveLength(0);
+      expect(out.perDose.pcv[0].status).toBe('valid');
+      expect(alternativeDateOf(out.perDose.pcv[0])).toBe(alt);
+    });
+  }
+
+  it('and the alternative is emphasised, as she asked', () => {
+    const d = run(CONJUGATE_CASES[0][1]).perDose.pcv[0];
+    expect((d.whys ?? []).join(' ')).toMatch(/\*\*Alternative, if this dose is treated as invalid:[\s\S]*?\*\*/);
+    // Balanced markers, or the renderer swallows the rest of the sentence.
+    for (const w of (d.whys ?? [])) expect(w.split('**').length % 2).toBe(1);
   });
 });
 
@@ -78,18 +122,37 @@ describe('one number for every adult, which is what she chose', () => {
   // "can you use 1 year for adults and 8 weeks for pediatrics with risks?"
   // So the adult clock does NOT vary by risk class. Same history, four risk
   // profiles, one date.
+  // Read from the ALTERNATIVE since 2026-10-25, because this patient's dose now
+  // counts. Same function, same clock, same question: does the adult number
+  // vary by risk class? It must not.
   const sameDateAcrossRisk = (riskProfiles) => riskProfiles.map((riskIds) => {
-    const bad = invalidOf(run({
+    const out = run({
       ageMonths: Y(50), riskIds,
       pcvDoses: [{ product: 'PCV15', date: '2026-08-15' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
-    }));
-    return bad[0]?.repeatDueDate;
+    });
+    return alternativeDateOf(out.perDose.pcv[0]);
   });
 
-  it('healthy, chronic, immunocompromised and cochlear all get 2027-08-15', () => {
+  it('healthy, chronic, immunocompromised and cochlear all get Aug 15, 2027', () => {
     const dates = sameDateAcrossRisk([[], ['chronic_heart'], ['asplenia'], ['cochlear_implant']]);
-    expect(dates).toEqual(['2027-08-15', '2027-08-15', '2027-08-15', '2027-08-15']);
+    expect(dates).toEqual(['Aug 15, 2027', 'Aug 15, 2027', 'Aug 15, 2027', 'Aug 15, 2027']);
+  });
+
+  // And the floor side of the same question, on a family that still HAS a
+  // repeat date: a PPSV23 given the day after a PCV15 misses the 8-week
+  // minimum and the year alike, and every risk class is owed its conjugate on
+  // the same day.
+  it('a still-rejected dose gives one repeat date across the four risk classes', () => {
+    const dates = [[], ['chronic_heart'], ['asplenia'], ['cochlear_implant']].map((riskIds) => {
+      const bad = invalidOf(run({
+        ageMonths: Y(50), riskIds,
+        pcvDoses: [{ product: 'PCV15', date: '2026-08-15' }],
+        ppsv23Doses: [{ product: 'PPSV23', date: '2026-08-16' }],
+      }));
+      return bad[0]?.repeatDueDate;
+    });
+    expect(dates).toEqual(['2027-08-16', '2027-08-16', '2027-08-16', '2027-08-16']);
   });
 });
 
@@ -208,13 +271,29 @@ describe('STEP 4 IS INERT TODAY, AND THAT IS GUARDED RATHER THAN HIDDEN', () => 
 describe('the advice is never inside CDC\'s 4-day grace', () => {
   // The 2026-10-24 morning ruling, which these new dates must not undo: the
   // grace decides what the app ACCEPTS, never what it ADVISES.
+  // Repointed 2026-10-25 from the 70-year-old's early conjugate (which no
+  // longer has a repeat date) to the 60-year-old's early PPSV23, which still
+  // does. Same claim, same arithmetic, a family that still reaches it.
   it('a repeat date is the full interval, not the interval minus four days', () => {
     const bad = invalidOf(run({
+      ageMonths: Y(60), riskIds: [],
+      pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }],
+    }));
+    expect(bad[0].repeatDueDate).toBe('2027-10-11');   // 1 year exactly
+    expect(bad[0].repeatDueDate).not.toBe('2027-10-07'); // 1 year less the grace
+  });
+
+  // And the alternative offered to a dose that COUNTS takes no grace either —
+  // it is the same number from the same function, so a grace could only
+  // appear here if someone introduced a second reading of the clock.
+  it('the counted dose\'s alternative is ungraced too', () => {
+    const d = run({
       ageMonths: Y(70), riskIds: [],
       pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
-    }));
-    expect(bad[0].repeatDueDate).toBe('2027-06-19');   // 1 year exactly
-    expect(bad[0].repeatDueDate).not.toBe('2027-06-15'); // 1 year less the grace
+    }).perDose.pcv[0];
+    expect(alternativeDateOf(d)).toBe('Jun 19, 2027');
+    expect(alternativeDateOf(d)).not.toBe('Jun 15, 2027');
   });
 });

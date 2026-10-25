@@ -183,7 +183,12 @@ describe('over the whole grid', () => {
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
     // + 253 of them newly list the job aid (the other 110 already did).
-    expect(stats.jobAid).toBe(6805 - 3189 + 253);
+
+    // 2026-10-25, "COUNT LIKE THE CHILD": **+ 132**. The same patients, from
+    // the other side: their new Complete cards carry the job aid's completion
+    // sentence. All 132 are at 50+ (the grid builds this history only at 50,
+    // 65 and 70), so none of them tests the `isOlderAdult` gate.
+    expect(stats.jobAid).toBe(6805 - 3189 + 253 + 132);
   });
 
   it('and reaches zero uncredited — every remaining button has a number', () => {

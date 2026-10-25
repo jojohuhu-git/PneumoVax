@@ -3099,7 +3099,14 @@ const EXCLUSION_MESSAGE = 'Revaccination after hematopoietic cell transplant, '
 // the owner's ruling of 2026-10-24. See `adultRepeatOwed` for why this is a
 // named set and not "every adult floor".
 const CARD_FOLLOWS_INVALID_DOSE = new Set([
-  'ADULT-PCV-AFTER-PPSV23',
+  // ⚠️ `ADULT-PCV-AFTER-PPSV23` USED TO HEAD THIS LIST — her patients 1 and 2
+  // — and was removed by OWNER DECISION 2026-10-25, which made that row a
+  // RECOMMENDATION. It can no longer reject a dose, so an entry for it would
+  // be a line nothing can reach, and a dead entry in a named set is exactly
+  // the kind of thing a later reader treats as evidence the case is handled.
+  // The alternative date those patients were shown has not been lost: the row
+  // now prints it in its own "Why this" disclosure, from this same file's
+  // `adultRepeatAfterInvalidDose`.
   'ADULT-PPSV23-AFTER-PCV15',
   'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
   // OWNER DECISIONS 2026-10-25, the two PCV13 twins of the rows above.
@@ -3161,6 +3168,7 @@ function adultRepeatOwed(analysis, rawPcv, rawPpsv, ageMonths) {
   // they are named by the rule that rejected the dose rather than inferred:
   //
   //   ADULT-PCV-AFTER-PPSV23                    her patients 1 and 2
+  //                                             (gone — see the set above)
   //   ADULT-PPSV23-AFTER-PCV15                  her patient 3
   //   ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM  her patient 4, the asplenic one
   //

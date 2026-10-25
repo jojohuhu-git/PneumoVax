@@ -936,7 +936,7 @@ catch-up row**.
   | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | recommendation | OWNER |
   | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | recommendation | CDC |
   | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | recommendation | CDC |
-  | `ADULT-PCV-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=1 year | floor | OWNER |
+  | `ADULT-PCV-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=1 year | recommendation | CDC |
   | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv15` | >=8 weeks | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV15` | adult | PPSV23 | `lastPcv15` | >=1 year | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv` | >=8 weeks | floor | OWNER |
@@ -1028,7 +1028,6 @@ catch-up row**.
   |---|---|---|---|
   | PCV20/PCV21, history has PCV13 **and** PPSV23 | last PCV | ≥1 year | `ADULT-PCV20-21-1Y-AFTER-PCV` |
   | PCV20/PCV21, history has PCV13, no PPSV23 | last PCV13 | ≥1 year | `ADULT-PCV20-21-AFTER-PCV13` |
-  | PCV15/20/21, history has PPSV23 only | last PPSV23 | ≥1 year | `ADULT-PCV-AFTER-PPSV23` |
   | PPSV23, IC / cochlear implant / CSF leak | last PCV15 | ≥8 weeks | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` |
   | PPSV23, any other adult | last PCV15 | ≥1 year | `ADULT-PPSV23-AFTER-PCV15` |
   | PPSV23, IC / cochlear implant / CSF leak | last PCV13 | ≥8 weeks | `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` |
@@ -1070,6 +1069,51 @@ catch-up row**.
   that same day, the owner said an adult conjugate-to-conjugate interval *"exists in no
   document"* — which is in tension with `ADULT-PCV20-21-1Y-AFTER-PCV` existing at all. She
   was asked and chose to **leave it unchanged for now**: raised, not decided.
+
+  ### OWNER DECISION 2026-10-25 — a second row left that table
+
+  **`ADULT-PCV-AFTER-PPSV23` is no longer a floor either.** An adult PCV15, PCV20 or PCV21
+  given sooner than a year after a PPSV23 now **counts**, carries a timing note, and the
+  series reads complete. This **reverses the owner's own restoration of this floor on the
+  afternoon of 2026-10-24**, and it is the row's FOURTH state: floor (2026-10-11) →
+  recommendation (2026-10-24 morning, shipped as family 2) → floor (2026-10-24 afternoon) →
+  recommendation. "Case H" — a conjugate two months after a PPSV23 — counts again.
+
+  **The patient who settled it was a pair.** A 55-year-old with chronic lung disease
+  (PPSV23 2026-06-01, PCV20 2026-06-15, fourteen days apart) had her conjugate thrown out
+  and was told to return on 2027-06-15. A 6-year-old with asplenia on the **same two dates**
+  had hers counted and her series read Complete — because the child rulebook has no
+  conjugate-after-PPSV23 row at all. Asked whether the adult should follow the child, the
+  owner answered: *"count like the child, provide alternative in comments."*
+
+  **It reaches all three conjugate products**, and she was asked that specifically, because
+  her 2026-10-24 afternoon ruling had named PCV15: *"All three — PCV15 too but make sure the
+  alternative option is listed in the expander."*
+
+  **The alternative, with a date, is part of the ruling and not decoration.** Asked what the
+  comment should say she chose *"Counted + alternative with a date"* — the same shape she
+  required on the second-PPSV23 card on 2026-10-24. The row's `why` therefore names the dose
+  a clinician who preferred to treat this one as invalid would give, and when: **1 dose of
+  PCV20 or PCV21 on or after the date `adultRepeatAfterInvalidDose` computes** — the same
+  function, and so the same date, that the card and the chip printed while the row was a
+  floor. It also says that this date is an interpretation rather than a stated rule, because
+  its year is read across from the only adult conjugate-to-conjugate interval ACIP states.
+
+  **The authority changed with the enforcement, exactly as in Ruling F.** While it was a
+  floor the row asserted something no source states, so it carried `authority: 'OWNER'`. As
+  a recommendation it asserts only CDC's own sentence — *"1 dose PCV15 or 1 dose PCV20 or 1
+  dose PCV21 at least 1 year after the last PPSV23 dose"* — so it reads `authority: 'CDC'`.
+
+  **Measured: 132 of 17,016 verdicts moved, 0 of 18,264 record-problem rows.** Every one of
+  the 132 moved from "incomplete, return in a year" to **Complete**; none was made to wait
+  longer. Guard:
+  `regression-2026-10-25-conjugate-after-ppsv23-counts-like-the-child.test.js`.
+
+  **This does NOT reach the PPSV23-after-a-conjugate rows**, and the reason is her own
+  analogy. The child rulebook *does* throw those doses out — `CHILD-PPSV23-AFTER-PCV`, a
+  CDC floor of 8 weeks stated in words — so "count like the child" lands on the
+  conjugate-after-PPSV23 row and stops there. Families 3 and the two PCV13→PPSV23 rows are
+  untouched.
 
   The two **PCV13→PPSV23** rows were added 2026-10-11, on the owner's instruction that this
   pair gets no exception. Their interval is rr7203a1's, verified live that day:
@@ -1327,10 +1371,13 @@ assertion.
   requires ≥5 years between PPSV23 doses. PCV20 or PCV21 can be given ≥1 year after it,
   because ACIP schedules any conjugate ≥1 year after the last PPSV23."* Applying the general
   rule there would have moved 66 corpus rows FOUR YEARS earlier.
-- **Every adult family except FIVE keeps the recommendation card it had.** The card follows
-  the invalid dose only for `ADULT-PCV-AFTER-PPSV23`, `ADULT-PPSV23-AFTER-PCV15`,
+- **Every adult family except FOUR keeps the recommendation card it had.** The card follows
+  the invalid dose only for `ADULT-PPSV23-AFTER-PCV15`,
   `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` (2026-10-24) and the two PCV13 rows added
-  2026-10-25 below. Fired for every adult floor it moved 667 of 17,016 verdicts and
+  2026-10-25 below. `ADULT-PCV-AFTER-PPSV23` was the fifth and **left on 2026-10-25**, when
+  the owner made it a recommendation: it can no longer reject a dose, so the entry would be
+  unreachable. Its patients did not lose the date — the row now prints it in its own "Why
+  this" disclosure, from this same `adultRepeatAfterInvalidDose`. Fired for every adult floor it moved 667 of 17,016 verdicts and
   overrode cards reasoning from a richer history: an immunocompromised adult with PCV13 +
   two PPSV23 doses lost her mm7401a1 "review again at age 50" card altogether. That patient
   is still out — her last dose is a second PPSV23, `ADULT-PPSV23-AFTER-PPSV23`.

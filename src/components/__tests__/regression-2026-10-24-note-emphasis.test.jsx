@@ -143,9 +143,12 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
   const patients = [
     // family 1 — Ruling F, still a recommendation and still counting
     { ageMonths: 840, riskIds: [], pcvDoses: [{ product: 'PCV13', date: '2016-10-13' }, { product: 'PCV20', date: '2025-10-10' }], ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-13' }] },
-    // family 2 — reverted to a floor
+    // family 2 — a floor on 2026-10-24, a RECOMMENDATION again from
+    // 2026-10-25 ("count like the child"), so it is grouped with family 1
+    // below and no longer discloses an owner determination, because it no
+    // longer rests on one.
     { ageMonths: 840, riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }] },
-    // family 3 — reverted to a floor
+    // family 3 — still a floor
     { ageMonths: 360, riskIds: ['chronic_heart'], pcvDoses: [{ product: 'PCV15', date: '2026-07-19' }], ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }] },
   ];
 
@@ -166,10 +169,19 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
   });
 
   it('but a FLOOR still discloses that it is an owner determination, not ACIP', () => {
-    // families 2 and 3, the two rows the afternoon ruling restored. If this
-    // ever goes quiet, the narrowing above has been over-applied.
-    for (const p of patients.slice(1)) {
-      expect(everythingFor(p)).toMatch(/owner clinical determination/i);
+    // Family 3 — the only one of the three still resting on an owner floor,
+    // after 2026-10-25 took family 2 back to a recommendation. If this ever
+    // goes quiet, the narrowing above has been over-applied.
+    expect(everythingFor(patients[2])).toMatch(/owner clinical determination/i);
+  });
+
+  it('and a RECOMMENDATION does not — families 1 and 2 rest on CDC', () => {
+    // The other half, and the reason the assertion above is narrow rather
+    // than absent. A recommendation asserts only CDC's own advised interval,
+    // so claiming an owner determination there would be false. Family 2
+    // joined family 1 here on 2026-10-25, with its authority relabelled CDC.
+    for (const p of [patients[0], patients[1]]) {
+      expect(everythingFor(p)).not.toMatch(/owner clinical determination/i);
     }
   });
 });

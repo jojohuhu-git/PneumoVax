@@ -571,25 +571,76 @@ export const DOSE_INTERVAL_RULES = [
     needsNoPriorPcv: true,
     needsPriorPpsv23: true,
     interval: { months: ADULT_ADVISED_PCV_GAP_MONTHS },
-    grace: true,
-    enforcement: 'floor',
-    authority: 'OWNER',
-    source: 'OWNER CLINICAL DETERMINATION 2026-10-11 — not ACIP, not CDC. CDC states, for an adult who '
-      + 'previously received only PPSV23: give PCV15, PCV20 or PCV21 at least 1 year after the PPSV23 '
-      + 'dose — advice for the next dose, with CDSI v4.64 absMinInt = 0 days. '
-      + '⚠️ THIS ROW HAS BEEN A FLOOR TWICE AND A RECOMMENDATION ONCE, AND THE SECOND FLOOR IS THE '
-      + 'OWNER\'S. On the morning of 2026-10-24 she made it a recommendation, shipped as FAMILY 2, '
-      + 'which also un-rejected "case H" (a conjugate two months after a PPSV23). Later the same '
-      + 'day, on the 70-year-old with PPSV23 2025-10-11 and PCV15 2026-06-19: "For a healthy adult, '
-      + 'ACIP requires a PCV15 or PCV20 given after a PPSV23 to be >=1 year after the PPSV23, with '
-      + 'no 8-week option. So the 19 Jun 2026 PCV15 ... is invalid and needs to be repeated." So the '
-      + 'floor is restored and case H is rejected again. Do NOT re-read the morning ruling as '
-      + 'current. Both are recorded in '
-      + 'docs/archive/decision-2026-10-24-invalid-adult-dose-repeat-rule.md. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} — a conjugate dose is given at least ${min.words} after PPSV23.`],
-      detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
-    }),
+    // No grace, deliberately — the same reasoning Ruling F wrote onto the
+    // 5-year row and the two conjugate rows above. The 4-day grace exists to
+    // let a dose given slightly early still COUNT; a recommendation counts
+    // every dose already, so a grace here would only move the day the note
+    // starts printing.
+    grace: false,
+    enforcement: 'recommendation',
+    // CDC, not OWNER — the relabelling Ruling F performed on the 5-year row,
+    // and for the same reason. As a FLOOR this row asserted something no
+    // source states (that an early dose stops counting), so it had to carry
+    // the owner's name. As a recommendation it asserts only CDC's own advised
+    // interval, which CDC does state in words: "1 dose PCV15 or 1 dose PCV20
+    // or 1 dose PCV21 at least 1 year after the last PPSV23 dose." What the
+    // owner removed was her own bar, leaving CDC's sentence behind.
+    authority: 'CDC',
+    source: 'CDC Adult Immunization Schedule Notes, with OWNER DECISION 2026-10-25 — which REVERSED '
+      + 'the owner\'s own restoration of this floor on the afternoon of 2026-10-24. CDC states, for '
+      + 'an adult who previously received only PPSV23: give PCV15, PCV20 or PCV21 at least 1 year '
+      + 'after the PPSV23 dose — advice for the next dose, with CDSI v4.64 absMinInt = 0 days. '
+      + '⚠️ THIS ROW HAS NOW HELD FOUR STATES, AND THIS IS THE FOURTH. Floor (2026-10-11) -> '
+      + 'recommendation (2026-10-24 morning, shipped as FAMILY 2, which also un-rejected "case H", '
+      + 'a conjugate two months after a PPSV23) -> floor again (2026-10-24 afternoon, on the '
+      + '70-year-old with PPSV23 2025-10-11 and PCV15 2026-06-19: "For a healthy adult, ACIP '
+      + 'requires a PCV15 or PCV20 given after a PPSV23 to be >=1 year after the PPSV23, with no '
+      + '8-week option. So the 19 Jun 2026 PCV15 ... is invalid and needs to be repeated.") -> '
+      + 'recommendation again, now. The owner was shown a 55-year-old with chronic lung disease '
+      + '(PPSV23 2026-06-01, PCV20 2026-06-15, 14 days apart) whose conjugate was thrown out, '
+      + 'beside a 6-year-old with asplenia on the SAME two dates whose conjugate counted and whose '
+      + 'series read Complete — the child rulebook has no conjugate-after-PPSV23 row at all. She '
+      + 'was asked which of the two answers was right and ruled: "count like the child, provide '
+      + 'alternative in comments." She was then shown her 2026-10-24 afternoon words verbatim and '
+      + 'asked whether this reaches PCV15 as well, and answered: "All three — PCV15 too but make '
+      + 'sure the alternative option is listed in the expander." Asked what the comment should say '
+      + 'she chose "Counted + alternative with a date". So all three products count, and the '
+      + 'expander names the dose a clinician would give, and the day, if they chose to treat this '
+      + 'one as invalid. Case H counts again. '
+      + 'Do NOT re-read the 2026-10-24 afternoon ruling as current. See CLINICAL_SPEC.md §K.',
+    // ⚠️ THE ALTERNATIVE IS THE OWNER'S REQUIREMENT, NOT A FLOURISH, and it
+    // carries a DATE because she asked for one ("Counted + alternative with a
+    // date", 2026-10-25). It is the same shape she asked for on the
+    // second-PPSV23 card on 2026-10-24: say the dose counts, and still name
+    // what a clinician who prefers to treat it as invalid would give, and
+    // when. It lives in `why` — the "Why this" disclosure — because that is
+    // where she asked for it; `why` strings carry no "[c]" markers, so the
+    // documents are named in words (see RecCard.jsx's note on reasonCites).
+    //
+    // THE DATE IS NOT COMPUTED HERE. `adultRepeatAfterInvalidDose` is the one
+    // place this file works out what an invalid adult dose leaves owing and
+    // when — the owner's four steps of 2026-10-24 — and it is what the card
+    // and the chip both printed while this row was a floor. Asking it again
+    // keeps the number a reader saw yesterday identical to the one they see
+    // today; recomputing "anchor + a year" here would be a second reading of
+    // the same question, which is the P0 bug's own shape.
+    //
+    // Its `boundBy` is always 'invalidDose' for this row, and that is
+    // arithmetic rather than luck: the walk only reaches a rule whose anchor
+    // falls on or before the judged dose, and `needsNoPriorPcv` means the
+    // anchor PPSV23 IS the last counting dose, so a year after the judged
+    // dose can never fall earlier. Hence the single un-branched sentence
+    // below, which names that leg as the interpretation it is.
+    message: (ctx, anchor, min) => {
+      const alt = adultRepeatAfterInvalidDose(ctx);
+      const alternative = alt
+        ? ` **Alternative, if this dose is treated as invalid: 1 dose of ${ADULT_OWED_AFTER_INVALID_DOSE.join(' or ')} on or after ${fmtDate(alt.dueDate)}** — ${min.words} after the dose given on ${fmtDate(ctx.doseDate)}, read across from the only adult conjugate-to-conjugate interval ACIP states, so that date is an interpretation and not a stated rule.`
+        : '';
+      return {
+        reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} CDC advises. **Counted; no repeat indicated.**`,
+        why: `CDC schedules a conjugate at least ${min.words} after the last PPSV23 dose, but states that as recommended timing and does not direct that an earlier dose be repeated.${alternative}`,
+      };
+    },
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',

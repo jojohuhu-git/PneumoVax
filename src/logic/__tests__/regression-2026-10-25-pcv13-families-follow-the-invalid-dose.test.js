@@ -198,7 +198,10 @@ describe('the widening stops where she stopped it', () => {
 
   it('swept: every rule now reaching this card is one of the five she approved', () => {
     const ALLOWED = new Set([
-      'ADULT-PCV-AFTER-PPSV23',
+      // 'ADULT-PCV-AFTER-PPSV23' sat here until later the same day. The owner
+      // made it a recommendation ("count like the child"), so it rejects
+      // nothing and reaches no card; leaving it in the set would let a
+      // regression that re-rejects those 132 doses pass unnoticed.
       'ADULT-PPSV23-AFTER-PCV15',
       'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
       'ADULT-PPSV23-AFTER-PCV13',
@@ -219,7 +222,6 @@ describe('the widening stops where she stopped it', () => {
     // BETWEEN families cannot hide inside a correct-looking sum. Measured
     // 2026-10-25; the two new rows are the +212.
     expect(byRule).toEqual({
-      'ADULT-PCV-AFTER-PPSV23': 132,
       'ADULT-PPSV23-AFTER-PCV15': 41,
       'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM': 15,
       'ADULT-PPSV23-AFTER-PCV13': 182,
@@ -240,6 +242,9 @@ describe('the widening stops where she stopped it', () => {
       if (fits) { withRow++; expect(cites).toContain('mmwrPcv13Only'); } else { withoutRow++; expect(cites).not.toContain('mmwrPcv13Only'); }
     }
     expect(withRow).toBe(212);
-    expect(withoutRow).toBe(188);
+    // 188 until ADULT-PCV-AFTER-PPSV23 became a recommendation later on
+    // 2026-10-25, taking its 132 cards out of this card family altogether.
+    // They did not lose a citation — they stopped being this card.
+    expect(withoutRow).toBe(56);
   });
 });

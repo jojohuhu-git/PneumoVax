@@ -425,7 +425,12 @@ describe('swept over the whole grid — the counts that moved', () => {
   // the job aid also QUOTES it, and that stays 0 uncredited.
   it('3,869 cards gained a job-aid citation, and none is left uncredited', () => {
     const { gained, uncreditedPairs, uncreditedStatements } = sweep();
-    expect(gained).toBe(3616 + 253);
+
+    // 2026-10-25, "COUNT LIKE THE CHILD": **+ 132**. The same patients, from
+    // the other side: their new Complete cards carry the job aid's completion
+    // sentence. All 132 are at 50+ (the grid builds this history only at 50,
+    // 65 and 70), so none of them tests the `isOlderAdult` gate.
+    expect(gained).toBe(3616 + 253 + 132);
     expect(uncreditedPairs).toBe(0);
     expect(uncreditedStatements.size).toBe(0);
   });

@@ -167,7 +167,15 @@ describe('swept over the grid', () => {
     // PINNED EXACTLY, both sides. A rise in `withdrawn` means the engine has
     // stopped asking for doses somewhere; a rise in `kept` means it has
     // started. Either is a clinical change and must be explained, not absorbed.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2930, kept: 2335 });
+    //
+    // `kept` fell from 2,335 to 2,203 later on 2026-10-25, when the owner made
+    // ADULT-PCV-AFTER-PPSV23 a recommendation. Those 132 patients did not lose
+    // a promised date: their dose counts now, so it carries no
+    // `forwardLookingReason` and they leave this sweep's population entirely.
+    // `withdrawn` is unmoved, which is the tell — had the clause been stripped
+    // from patients who still need it, the LOST-WRONGLY branch above would
+    // have named them.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2930, kept: 2203 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {

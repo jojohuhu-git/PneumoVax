@@ -103,12 +103,22 @@ describe('ANCHOR-1 Case D — the same error one row along (PCV13 + PPSV23, 5 ye
   });
 });
 
-describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () => {
-  // The reason the owner declined the cheaper fix. Nothing in this history was
-  // rejected: a PPSV23 that counts, then a PCV20 two months later. The 1-year
-  // floor is measured from a dose that COUNTED, so it still bites. If this
-  // case ever goes green, the fix has stopped being narrow and has become a
-  // loosening of the floor itself.
+describe('ANCHOR-1 Case H — the control, and what is left of it', () => {
+  // Nothing in this history was rejected: a PPSV23 that counts, then a PCV20
+  // two months later.
+  //
+  // ⚠️ THIS CONTROL WAS DELIBERATELY LOOSENED, by the owner, on 2026-10-25.
+  // It used to read "if this case ever goes green, the fix has stopped being
+  // narrow and has become a loosening of the floor itself" — and the floor
+  // has now been removed on purpose, so the case IS green. Case H has been
+  // rejected, counted, rejected and counted again across four rulings; the
+  // current one is "count like the child, provide alternative in comments."
+  //
+  // WHAT IT STILL CONTROLS, and why it is not deleted: ANCHOR-1's property is
+  // about WHICH DOSE a gap is measured from, not about what the gap does.
+  // A counting PPSV23 must still be the anchor — the note has to name it, and
+  // name its date. If that ever stops being true, ANCHOR-1 has been lost
+  // whatever the enforcement of the row happens to be that week.
   const CASE_H = {
     ageMonths: Y(70),
     riskIds: [],
@@ -116,31 +126,22 @@ describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () =
     ppsv23Doses: [{ product: 'PPSV23', date: '2018-01-01' }],
   };
 
-  it('still rejects the PCV20 given 2 months after a PPSV23 that counted', () => {
+  it('counts the PCV20 given 2 months after a PPSV23, and still measures from it', () => {
     const v = verdictsFor(CASE_H);
     expect(v.ppsv23[0].status).toBe('valid');
-    expect(v.pcv[0].status).toBe('invalid');
+    expect(v.pcv[0].status).toBe('valid');
     expect(v.pcv[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    // The anchor, named on the dose: the PPSV23 that counted.
+    expect(v.pcv[0].reasons.join(' ')).toMatch(/the PPSV23 dose of Jan 1, 2018/);
   });
 
-  it('still shows the PCV as due, since the recorded one did not count', () => {
+  it('and now reads complete, with the alternative date in the expander', () => {
     const v = verdictsFor(CASE_H);
-    // OWNER RULING 2026-10-24 — the card for this patient changed, and the
-    // point of the assertion did not. It used to read "PCV (PCV15, PCV20, or
-    // PCV21) >=1 year after PPSV23", counted from the PPSV23 that COUNTED,
-    // which put the dose in the past and the card at "due today". Her ruling
-    // names what is owed (a conjugate, PCV20 or PCV21 — never PCV15) and dates
-    // it from the dose that was actually given. So the wording moved from
-    // "after PPSV23" to "after the conjugate dose of 2018-03-01".
-    //
-    // WHAT THIS CONTROL IS STILL FOR is unchanged: the PCV must still be DUE,
-    // because the recorded one did not count. If it ever reads complete, the
-    // floor has been loosened — which is what the case above guards.
-    expect(v.recText).toMatch(/PCV:due/);
-    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of Mar 1, 2018/);
-    // And never PCV15, which she ruled out by name: "PCV15 adds nothing over
-    // the patient's prior dose."
-    expect(v.recText).not.toMatch(/PCV15/);
+    expect(v.recText).toMatch(/PCV:complete/);
+    // Her 2026-10-25 requirement. The date is a year after the dose GIVEN,
+    // which is the same number the card printed while the row was a floor.
+    expect((v.pcv[0].whys ?? []).join(' '))
+      .toMatch(/Alternative, if this dose is treated as invalid: 1 dose of PCV20 or PCV21 on or after Mar 1, 2019/);
   });
 });
 
@@ -265,6 +266,13 @@ describe('ANCHOR-1 — the property behind the five cases', () => {
     // The same shape as above with the middle dose moved out to 2021, where
     // it clears the 5-year minimum and counts. The PCV20 is then measured
     // from 2021 and is genuinely too early.
+    //
+    // Since the owner's decision of 2026-10-25 "too early" means a note on a
+    // dose that counts rather than a rejection, so the assertion is on the
+    // ANCHOR rather than on the status — which is what this test was always
+    // really about. The sibling above gets no note at all, because its
+    // rejected middle dose anchors nothing; this one is named from 2021 and
+    // not from 2015, and that contrast is the invariant.
     const v = verdictsFor({
       ageMonths: Y(70),
       riskIds: [],
@@ -272,6 +280,9 @@ describe('ANCHOR-1 — the property behind the five cases', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2015-01-01' }, { product: 'PPSV23', date: '2021-01-01' }],
     });
     expect(v.ppsv23[1].status).toBe('valid');
-    expect(v.pcv[0].status).toBe('invalid');
+    expect(v.pcv[0].status).toBe('valid');
+    expect(v.pcv[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    expect(v.pcv[0].reasons.join(' ')).toMatch(/the PPSV23 dose of Jan 1, 2021/);
+    expect(v.pcv[0].reasons.join(' ')).not.toMatch(/2015/);
   });
 });
