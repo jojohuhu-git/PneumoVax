@@ -113,7 +113,7 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
     // and the rec card alone states when the dose is DUE. "is due on or
     // after" put a second due-date on the screen.
     expect(dose.reasons.at(-1))
-      .toContain('can be given from 2026-11-09 at the earliest');
+      .toContain('can be given from Nov 9, 2026 at the earliest');
     expect(dose.reasons.at(-1)).not.toContain('is due on or after');
     expect(dose.reasons.at(-1)).not.toContain('2026-11-05');
   });
@@ -121,7 +121,8 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
   it("and that is the same date the rec card's own note calls the minimum", () => {
     // The whole point of the ruling: one earliest date on the screen, not two.
     const card = recommend(CHILD).recs.find((r) => r.vaccine === 'PCV');
-    expect(card.note.detail).toContain('2026-11-09');
+    // C12 (2026-10-24): the card's minimum clause prints the friendly form.
+    expect(card.note.detail).toContain('Nov 9, 2026');
     expect(lastPcvDose(CHILD).repeatDueDate).toBe('2026-11-09');
   });
 

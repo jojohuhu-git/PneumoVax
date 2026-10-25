@@ -1404,11 +1404,21 @@ put to her again with two patients, each scored both ways through the real engin
 | 70 y, no risk conditions | PPSV23 2018-06-01, PCV13 2026-01-15, PCV20 2026-08-15 | PCV20 thrown out; return 2027-08-15 | PCV20 counts; series complete |
 
 She chose to relax both, with a wording instruction: *"make the wording more clinical and
-nuanced since this is clinically likely ok but data free. Also bold it."* Each message
-therefore states three things and emphasises them with `**...**`, which
-`renderNoteWithCites` turns into `<strong class="note-emphasis">`: the dose is counted; a
-shorter gap is not known to reduce effectiveness; **no data establish that it performs as
-well**, so a further dose is a clinical judgement.
+nuanced since this is clinically likely ok but data free. Also bold it."*
+
+**The wording was then revised twice more the same day, reading the result on screen.**
+First: *"the bolded and nonbolded text on the card — meningovax has an abbreviated
+explanation that you can expand. Do that here while also tailoring the language to sound
+more clinical yet succinct."* So a recommendation's `message` may return
+`{ reason, why }` — one short clinical line on the dose chip, the rationale behind a
+"Why this" disclosure, the shape MeningoVax's rec notes have used since P6-4. The
+disposition is what carries the `**...**` emphasis, because it is what a clinician reads
+first. Second, shown patient C: *"the 5 years isn't being met right?"* — and it was not,
+2 years 2 months against an advised 5. **Every chip line now states the SHORTFALL, not
+just the interval** ("— shorter than the 5 years ACIP advises"); a note that recites a
+rule and leaves the reader to do the subtraction is not a clinical note. Both halves are
+guarded, because a split that silently dropped the rationale would pass a test that only
+read the chip.
 
 **⚠️ The two rows do not share an authority.** `ADULT-PCV20-21-AFTER-PCV13`'s year is CDC's
 own sentence — *"Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1
@@ -1433,6 +1443,40 @@ and discards anything collected before it — every recommendation sentence ends
 the dose counts, which would contradict a rejection printed beside it.
 
 Guard: `regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js`.
+
+### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
+
+Neither is a clinical rule; both are about whether a clinician can read the card correctly.
+No date, verdict or corpus column moves under either.
+
+**1. A card never advises an age the child has already passed.** A 12-month-old whose only
+PCV15 was at 2 months read *"The next dose is due at age 4 months"*. The date was right —
+`advisedDate` is the latest of the minimum, the 8-week spacing and the routine age (§L /
+C10-2), and the routine age genuinely was the latest here — but a past date was printed as
+a future instruction, on **198 of 17,016** real patients. Past tense now, plus what to do:
+*"This dose was due at age 4 months in the routine 2, 4, 6 and 12–15 month series and is
+overdue — it can be given now."* The series is still named, because that is what the
+clause's citation supports. The "can be given now" half is conditional on the dose actually
+being due, so a card held to the first birthday does not contradict its own lead.
+Guard: `regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js`.
+
+**2. One date format on the screen.** The rec card printed *"eligible Dec 7, 2026"* while
+the dose chip beside it printed *"from 2026-09-25"* — **5,620 chip sentences** in computer
+format. Every patient date a clinician READS now goes through `fmtDate`. **The DATA fields
+stay ISO** — `earliestValidDate`, `repeatDueDate`, `earliestNextDate` and every corpus
+column — because they are compared, sorted and committed, and a display format in a data
+field is how a corpus starts failing on a copy edit. **One date is deliberately left raw:**
+*"an owner clinical determination dated 2026-10-11"* is provenance, not a patient date. The
+guard sweeps five patients for bare ISO dates, allows exactly that one shape, and asserts
+separately that the exception is still reachable so the filter cannot become dead code.
+Guard: `regression-2026-10-24-one-date-format-on-the-screen.test.js`.
+
+**And the prose sweep was extended with the disclosure.** `scripts/proseDiff.mjs` now
+renders each dose's `whys` alongside its reasons and detail. Those sentences are prose a
+clinician reads, one click away, and nothing else sees them — the corpora hold verdicts,
+and a reader who never opens the disclosure cannot notice a wrong sentence inside it. This
+is the "verdict corpora do not record prose" lesson applied to a channel as it was created
+rather than after it drifted.
 
 ### §K-NOPROMISE — A rejected dose does not name a date for a dose nobody is asking for (OWNER, 2026-10-25)
 

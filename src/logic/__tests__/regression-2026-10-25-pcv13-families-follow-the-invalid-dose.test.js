@@ -85,7 +85,7 @@ describe('decision 2 — A is treated the same as B', () => {
     for (const out of [a, b]) {
       expect(invalidOf(out)[0].repeatDueDate).toBe('2027-10-11');
       expect(out.recs[0].earliestNextDate).toBe('2027-10-11');
-      expect(out.recs[0].doseLabel).toContain('after the PPSV23 dose of 2026-10-11');
+      expect(out.recs[0].doseLabel).toContain('after the PPSV23 dose of Oct 11, 2026');
       expect(leadOf(out.recs[0])).toContain('was given too soon to count');
     }
     // The card A used to show — one year after the PCV13 — is gone from both

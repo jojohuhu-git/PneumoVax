@@ -109,14 +109,32 @@ describe('§K-CONJUGATE — patient A: PCV13 then PCV20 seven months later', () 
     expect(d.reasons.join(' ')).not.toMatch(/at the earliest/);
   });
 
-  it('explains CDC\'s year, and emphasises the clinical caveat', () => {
-    const text = lastPcv(PATIENT_A).reasons.join(' ');
-    expect(text).toContain('CDC advises PCV20 or PCV21 at least 1 year after the last PCV13 dose');
-    expect(text).toContain('does not say an earlier dose is invalid or must be repeated');
-    // Her three requirements: clinical, data-free, bold.
-    expect(text).toContain('no data establish that it performs as well');
-    expect(text).toContain('clinical judgement');
-    expect(text).toMatch(/\*\*[^*]*no data establish that it performs as well[^*]*\*\*/);
+  // OWNER REQUEST 2026-10-24, second round, after reading the first draft on
+  // screen: *"meningovax has an abbreviated explanation that you can expand.
+  // Do that here while also tailoring the language to sound more clinical yet
+  // succinct."* So the chip carries ONE short clinical line and the rationale
+  // sits behind "Why this". Both halves are asserted, because a split that
+  // dropped the rationale would also pass a test that only read the chip.
+  it('puts one short clinical line on the chip, bolding the disposition', () => {
+    const d = lastPcv(PATIENT_A);
+    expect(d.reasons).toHaveLength(1);
+    const text = d.reasons[0];
+    expect(text).toContain('Given 7 months after the PCV13 dose of Feb 10, 2026');
+    // The owner, reading patient C: *"the 5 years isn't being met right?"*
+    // A chip that recites the interval without saying this patient fell
+    // short of it leaves the reader to do the subtraction.
+    expect(text).toContain('shorter than the 1 year CDC advises');
+    expect(text).toContain('**Counted; no repeat indicated.**');
+    // Short enough to read at a glance — the whole point of the request.
+    expect(text.length).toBeLessThan(130);
+  });
+
+  it('keeps the data-free caveat, behind the disclosure', () => {
+    const why = (lastPcv(PATIENT_A).whys ?? []).join(' ');
+    expect(why).toContain('recommended timing, not a minimum');
+    expect(why).toContain('does not direct that a dose given inside it be repeated');
+    expect(why).toContain('Immunogenicity at shorter intervals has not been established');
+    expect(why).toContain('clinical judgement');
   });
 });
 
@@ -133,11 +151,14 @@ describe('§K-CONJUGATE — patient B: a conjugate after a conjugate, PPSV23 lon
     // The honesty requirement that keeps this row's authority at OWNER. If
     // the sentence ever starts attributing the year to CDC or ACIP, the row
     // is asserting something no document says.
-    const text = lastPcv(PATIENT_B).reasons.join(' ');
-    expect(text).toContain('No ACIP or CDC source states an interval between two adult conjugate doses');
-    expect(text).toContain('this app’s own convention');
-    expect(text).toMatch(/\*\*/);
-    expect(text).not.toMatch(/CDC advises at least 1 year between conjugate doses/);
+    const d = lastPcv(PATIENT_B);
+    const why = (d.whys ?? []).join(' ');
+    expect(why).toContain('No ACIP or CDC source specifies an interval between adult conjugate doses');
+    expect(why).toContain('this app’s own convention');
+    // The chip line is bolded and must never ATTRIBUTE the interval.
+    expect(d.reasons[0]).toMatch(/\*\*/);
+    expect(d.reasons.join(' ')).not.toMatch(/CDC advises/);
+    expect(why).not.toMatch(/CDC advises at least 1 year between conjugate doses/);
   });
 
   it('says ONE thing — her 5-year PPSV23 gap is met, so nothing speaks for it', () => {
@@ -158,9 +179,11 @@ describe('§K-CONJUGATE — patient C: inside two advised gaps, told about both'
   it('prints BOTH sentences — the owner\'s "mention both gaps"', () => {
     const r = lastPcv(PATIENT_C).reasons;
     expect(r).toHaveLength(2);
-    expect(r[0]).toContain('previous pneumococcal conjugate dose of 2026-01-15');
-    expect(r[1]).toContain('PPSV23 dose of 2024-06-01');
-    expect(r[1]).toContain('at least 5 years');
+    expect(r[0]).toContain('previous conjugate dose of Jan 15, 2026');
+    expect(r[1]).toContain('PPSV23 dose of Jun 1, 2024');
+    expect(r[1]).toContain('shorter than the 5 years ACIP advises');
+    // ...and one rationale behind the disclosure for each.
+    expect(lastPcv(PATIENT_C).whys).toHaveLength(2);
   });
 
   it('is the ONLY thing separating her from patient B', () => {

@@ -229,7 +229,7 @@ describe('RULING D — the advised repeat is measured from the invalid dose', ()
     // regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js.
     expect(rejected.repeatDueDate).toBe('2026-11-09');
     const sentence = rejected.reasons.find((r) => /next dose in this series/.test(r));
-    expect(sentence).toContain('2026-11-09');
+    expect(sentence).toContain('Nov 9, 2026');
     expect(sentence).not.toContain('2026-10-15');
     expect(sentence).not.toContain('2026-11-05');
     // And the card's advised date is never EARLIER than the floor the chip states.

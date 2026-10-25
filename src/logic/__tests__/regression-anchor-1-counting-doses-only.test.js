@@ -137,7 +137,7 @@ describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () =
     // because the recorded one did not count. If it ever reads complete, the
     // floor has been loosened — which is what the case above guards.
     expect(v.recText).toMatch(/PCV:due/);
-    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of 2018-03-01/);
+    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of Mar 1, 2018/);
     // And never PCV15, which she ruled out by name: "PCV15 adds nothing over
     // the patient's prior dose."
     expect(v.recText).not.toMatch(/PCV15/);

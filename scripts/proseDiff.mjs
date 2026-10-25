@@ -29,7 +29,8 @@
 //   • per rec card: vaccine, doseLabel, note (lead + detail if an object),
 //     and every citation LABEL (not URL — a URL changing is not a wording
 //     change a clinician would notice) from `citations` and `noteCites`.
-//   • per recorded dose: status, detail, and every reason sentence.
+//   • per recorded dose: status, detail, every reason sentence, and every
+//     `why` sentence behind the chip's "Why this" disclosure.
 //   • the hard-stop exclusion message, when excluded — which since
 //     2026-10-16 is what a transplant patient gets. This file used to also
 //     render that patient's post-transplant advisory block (its title, its
@@ -101,6 +102,13 @@ function doseProse(d) {
     d.status,
     d.detail ?? '',
     (d.reasons ?? []).join(' / '),
+    // `whys` — the sentences behind the chip's "Why this" disclosure, added
+    // 2026-10-24. They are PROSE A CLINICIAN READS, one click away, and
+    // nothing else sweeps them: the corpora hold verdicts, and a reader who
+    // never opens the disclosure cannot see a wrong sentence in it. That is
+    // the "verdict corpora do not record prose" lesson applied to a channel
+    // the moment it was created, rather than after it drifted.
+    (d.whys ?? []).join(' / '),
   ].join('¦');
 }
 

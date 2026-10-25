@@ -144,10 +144,12 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].status).toBe('valid');
     expect(a.perDose[1].earlyAdvisory).toBe(true);
     expect(a.perDose[1].intervalRuleId).toBe('ADULT-PCV20-21-5Y-AFTER-PPSV23');
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/at least 5 years/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 5 years ACIP advises/);
     // The note must say the dose counts, and must NOT claim the owner
     // enforces the gap — she no longer does, and the row now credits CDC.
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/still counts/);
+    // (2026-10-24: "still counts" moved into the short "Counted" wording.)
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/Counted; no repeat indicated/);
+    expect((a.perDose[1].whys ?? []).join(' ')).toMatch(/at least 5 years/);
     expect(a.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
@@ -468,8 +470,10 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(v.kind).toBe('recommendation');
     expect(v.ruleId).toBe('ADULT-PCV20-21-1Y-AFTER-PCV');
     expect(v.reasons).toHaveLength(2);
-    expect(v.reasons[0]).toMatch(/previous pneumococcal conjugate dose of 2026-01-05/);
-    expect(v.reasons[1]).toMatch(/PPSV23 dose of 2026-01-20/);
+    expect(v.reasons[0]).toMatch(/previous conjugate dose of Jan 5, 2026/);
+    expect(v.reasons[1]).toMatch(/PPSV23 dose of Jan 20, 2026/);
+    // One rationale per sentence, behind the chip's "Why this".
+    expect(v.whys).toHaveLength(2);
   });
 
   // CDC's grace applies to the FLOOR: 4 days short of the year still counts,

@@ -64,9 +64,25 @@ function describeDose(dose, idx, ageMonths, today, dob) {
 // a fourth status beyond MeningoVax's three — 'noncounting' — for PCV7,
 // which was validly given but per ACIP/immunize.org never counts toward the
 // series; it must not read as "Invalid".
+// OWNER REQUEST 2026-10-24, reading the first draft of the conjugate note on
+// screen: *"the bolded and nonbolded text on the card — meningovax has an
+// abbreviated explanation that you can expand. Do that here while also
+// tailoring the language to sound more clinical yet succinct."*
+//
+// So a recorded dose now gets the SAME disclosure the rec note has had since
+// P6-4: one clinical line on the chip, everything that explains it behind
+// "Why this". Two things go in there — `whys` (a rule's rationale, new) and
+// `detail` (the technical line: previous dose, minimum, grace), which used to
+// print unconditionally under every flagged dose.
+//
+// ⚠️ `reasonCites` IS INDEXED ACROSS `reasons` ONLY, in marker order
+// (validate.js's contract, and the C2 slicing below). `whys` carry no "[c]"
+// markers, so they take no slice and cannot shift the pairing. Do not put a
+// citable sentence in a `why` without extending `reasonCiteSlices` first.
 function DoseValidation({ result, seriesTotal, numberFor }) {
+  const [whyOpen, setWhyOpen] = useState(false);
   if (!result) return null;
-  const { reasons, detail, reasonCites, doesNotCount } = result;
+  const { reasons, detail, reasonCites, doesNotCount, whys } = result;
 
   // S14-2: the chip itself carries "Dose N of M" now — no separate span next
   // to it repeating the same count in different words.
@@ -100,7 +116,29 @@ function DoseValidation({ result, seriesTotal, numberFor }) {
               </span>
             ));
           })()}
-          {detail && <span className="dose-val-detail">{detail}</span>}
+          {(detail || whys?.length) && (
+            <>
+              <button
+                type="button"
+                className="rec-note-toggle dose-val-toggle"
+                data-testid="dose-val-toggle"
+                onClick={() => setWhyOpen((v) => !v)}
+                aria-expanded={whyOpen}
+              >
+                Why this<Chevron open={whyOpen} />
+              </button>
+              {whyOpen && (
+                <span className="dose-val-why">
+                  {whys?.map((w, i) => (
+                    <span key={`w${i}`} className="dose-val-reason">
+                      {renderNoteWithCites(w, [], numberFor)}
+                    </span>
+                  ))}
+                  {detail && <span className="dose-val-detail">{detail}</span>}
+                </span>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

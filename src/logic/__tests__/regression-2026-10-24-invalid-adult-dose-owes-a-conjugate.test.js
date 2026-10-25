@@ -137,7 +137,7 @@ describe('the second PPSV23 — the family she kept OUT of the new clock', () =>
     const text = second().reasons.join(' ');
     // Her two sentences, summarised, and the date from the shared clocks.
     expect(text).toContain('A repeat PPSV23 should wait at least 5 years after this dose');
-    expect(text).toContain('1 dose of PCV20 or PCV21 may be considered from 2019-01-01');
+    expect(text).toContain('1 dose of PCV20 or PCV21 may be considered from Jan 1, 2019');
     expect(text).toContain('ACIP schedules any conjugate at least 1 year after the last PPSV23');
     // Emphasised — she asked for the alternative bolded.
     expect(text).toMatch(/\*\*A repeat PPSV23[\s\S]*?last PPSV23\.\*\*/);

@@ -150,7 +150,7 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     // OWNER RULING 2026-10-24: the full 28 days from the dose of 2026-03-15,
     // with no 4-day grace — the grace decides what the app ACCEPTS, never what
     // it ADVISES. Was 2026-04-08.
-    expect(reasons).toMatch(/can be given from 2026-04-12 at the earliest/);
+    expect(reasons).toMatch(/can be given from Apr 12, 2026 at the earliest/);
     expect(reasons).not.toMatch(/2026-04-08/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
@@ -190,8 +190,9 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     // sentence must say what CDC states and must not dress the app's own
     // convention up as CDC's. This row's year IS CDC's, so it says so — and
     // it must not claim the owner determination it no longer rests on.
-    const text = a.perDose[1].reasons.join(' ');
-    expect(text).toMatch(/CDC advises PCV20 or PCV21 at least 1 year after the last PCV13 dose/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 1 year CDC advises/);
+    expect((a.perDose[1].whys ?? []).join(' '))
+      .toMatch(/recommended timing, not a minimum/);
     expect(a.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 });

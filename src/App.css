@@ -508,6 +508,22 @@ body {
 .dose-val-reasons { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 0; }
 .dose-val-reason { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.4; }
 .dose-val-detail { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.4; }
+/* OWNER REQUEST 2026-10-24: a recorded dose gets the SAME abbreviated-and-
+   expandable shape as a rec note, which is MeningoVax's pattern. The trigger
+   re-uses .rec-note-toggle outright rather than restating it, so the two
+   disclosures on one card cannot drift apart; .dose-val-toggle only shrinks it
+   to the chip's smaller scale and tightens its top margin, because it sits
+   under a sentence rather than under a note. The revealed block borrows
+   .rec-note-detail's left rule for the same reason. */
+.dose-val-toggle { font-size: var(--fs-xs); margin-top: var(--sp-4); align-self: flex-start; }
+.dose-val-why {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+  padding-left: var(--sp-8);
+  border-left: 2px solid var(--gy5);
+}
 /* Group headings inside the recorded-dose list: "Primary series" / "Boosters"
    (owner decision 2026-09-15). Ported from MeningoVax — the two apps share one
    design system, so the grouping reads identically in both. Deliberately quiet:

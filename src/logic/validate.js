@@ -506,12 +506,17 @@ function noncounting(reasons = [], reasonCites) { return withCites({ status: 'no
 // 2026-10-24: a dose can miss more than one advised interval, and each unmet
 // row contributes its own sentence. `intervalRuleId` still names the FIRST
 // one, so nothing that records a single rule id had to change.
-function advise(result, reasons, ruleId) {
+function advise(result, reasons, ruleId, whys = []) {
   return {
     ...result,
     earlyAdvisory: true,
     intervalRuleId: ruleId,
     reasons: [...(result.reasons ?? []), ...reasons],
+    // OWNER REQUEST 2026-10-24: the rationale sits behind the chip's "Why
+    // this" disclosure, as MeningoVax's rec notes already do, so the chip
+    // itself stays one clinical line. Absent when no rule supplied one, and
+    // `RecCard` renders no toggle then.
+    ...(whys.length ? { whys: [...(result.whys ?? []), ...whys] } : {}),
   };
 }
 
@@ -533,7 +538,7 @@ function applyIntervalRules(result, ctx) {
     r.conjugateAlternative = verdict.conjugateAlternative ?? null;
     return r;
   }
-  return advise(result, verdict.reasons, verdict.ruleId);
+  return advise(result, verdict.reasons, verdict.ruleId, verdict.whys);
 }
 
 // ── Validate one PCV dose ────────────────────────────────────────────────
@@ -791,7 +796,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const sameDayNote = sameDayDifferentBrandNote(dose, kept);
     // The two halves of the timing-rejection sentence. See the split below.
     const DOES_NOT_COUNT_LEAD = 'This dose does not count toward the series — given too soon after the dose it is measured from.';
-    const nextDoseClause = (r) => `the next dose in this series can be given from ${r.repeatDueDate ?? r.earliestValidDate} at the earliest.`;
+    const nextDoseClause = (r) => `the next dose in this series can be given from ${fmtDate(r.repeatDueDate ?? r.earliestValidDate)} at the earliest.`;
     const addNote = (entry) => (sameDayNote
       ? { ...entry, reasons: [...(entry.reasons ?? []), sameDayNote] }
       : entry);
@@ -867,7 +872,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // interval logic.
       const alt = result.recordProblem ? null : result.conjugateAlternative;
       const alternativeSentence = alt
-        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${alt.dueDate} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
+        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
         : null;
       perDose.push(addNote({
         ...result,

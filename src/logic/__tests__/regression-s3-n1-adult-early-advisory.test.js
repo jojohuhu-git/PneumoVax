@@ -99,13 +99,15 @@ describe('§K-CONJUGATE — an adult PCV20 inside the year after PCV13 COUNTS, w
     expect(second.earlyAdvisory).toBe(true);
 
     const text = second.reasons.join(' ');
-    expect(text).toMatch(/at least 1 year after the last PCV13 dose/);
+    expect(text).toMatch(/shorter than the 1 year CDC advises/);
     // The owner's wording instruction: clinical, nuanced, and emphasised.
-    // `**...**` is what renderNoteWithCites turns into <strong>.
-    expect(text).toMatch(/\*\*/);
-    expect(text).toMatch(/no data establish that it performs as well/);
-    expect(text).toMatch(/clinical judgement/);
-    expect(text).toMatch(/does not say an earlier dose is invalid or must be repeated/);
+    // `**...**` is what renderNoteWithCites turns into <strong>. Her second
+    // round (same day) moved the rationale behind the chip's disclosure.
+    expect(text).toMatch(/\*\*Counted; no repeat indicated\.\*\*/);
+    const why = (second.whys ?? []).join(' ');
+    expect(why).toMatch(/Immunogenicity at shorter intervals has not been established/);
+    expect(why).toMatch(/clinical judgement/);
+    expect(why).toMatch(/does not direct that a dose given inside it be repeated/);
 
     // A recommendation owes NO repeat date and no "earliest valid" date —
     // those belong to a floor and would contradict "the dose is counted".

@@ -104,6 +104,14 @@ import {
   adultPpsvShorterIntervalIsTheAdvice,
 } from '../data/riskFactors.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
+// C12 (2026-10-24, owner decision): one date format on the screen. Every
+// patient date a clinician READS goes through `fmtDate` — "Feb 10, 2026" —
+// because the rec card has always printed dates that way and the dose chips
+// printed raw ISO beside them. The DATA fields (`earliestValidDate`,
+// `repeatDueDate`, every corpus column) stay ISO and are untouched; only the
+// sentences change. ⚠️ A PROVENANCE date — "an owner clinical determination
+// dated 2026-10-11" — is NOT a patient date and must stay as it is written.
+import { fmtDate } from './format.js';
 
 // ── Plain-English gap formatting ─────────────────────────────────────────
 // Minimums read back the way the source states them: "4 weeks (28 days)".
@@ -330,7 +338,7 @@ export const DOSE_INTERVAL_RULES = [
             : 'at 12 months of age or older';
       return {
         reasons: [`Given ${fmtDayCount(gap)} after the previous dose — for dose ${ctx.doseNumber} of the series, when the earlier dose was given ${band}, CDC's minimum interval is ${min.words}.`],
-        detail: `Gap: ${fmtDayCount(gap)} since the dose of ${anchor.date}. Minimum: ${min.words} (doses up to 4 days early still count, per CDC).`,
+        detail: `Gap: ${fmtDayCount(gap)} since the dose of ${fmtDate(anchor.date)}. Minimum: ${min.words} (doses up to 4 days early still count, per CDC).`,
       };
     },
   },
@@ -379,7 +387,7 @@ export const DOSE_INTERVAL_RULES = [
       + '"If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23."',
     message: (ctx, anchor, min) => ({
       reasons: [`Given less than ${min.words} after the previous PPSV23 dose — a second PPSV23 is given at least ${min.words} after the first.`],
-      detail: `Previous PPSV23: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
+      detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
     }),
   },
 
@@ -448,7 +456,26 @@ export const DOSE_INTERVAL_RULES = [
       + '(PPSV23 2018-06-01, PCV13 2026-01-15, PCV20 2026-08-15) scored both ways she closed it: '
       + 'the dose counts and the card explains the timing. CDSI v4.64 sets absMinInt = 0 days for '
       + 'every adult pneumococcal interval. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose of ${anchor.date}. **No ACIP or CDC source states an interval between two adult conjugate doses; the spacing of ${min.words} shown here is this app’s own convention. The dose is counted. A shorter gap is not known to make it less effective, but no data establish that it performs as well, so whether to give a further conjugate dose is a clinical judgement.**`,
+    // ⚠️ THE CHIP LINE MUST SAY THE INTERVAL WAS NOT MET, not merely state
+    // what the interval is. The owner, reading patient C's card: *"the 5
+    // years isn't being met right?"* — her dose came 2 years 2 months after
+    // her PPSV23 against an advised 5 years, and the sentence quoted the rule
+    // and left the reader to do the subtraction. Hence "— shorter than the
+    // <interval> ...advises" on every one of these three rows. A note that
+    // recites a rule without saying how this patient sits against it is not
+    // a clinical note.
+    //
+    // OWNER REQUEST 2026-10-24, after reading the first draft on screen:
+    // *"the bolded and nonbolded text on the card — meningovax has an
+    // abbreviated explanation that you can expand. Do that here while also
+    // tailoring the language to sound more clinical yet succinct."* So the
+    // message is `{ reason, why }`: one clinical line on the chip, the
+    // rationale behind the "Why this" disclosure. The bold marks the
+    // disposition — the thing a clinician reads first.
+    message: (ctx, anchor, min) => ({
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous conjugate dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} applied here. **Counted; no repeat indicated.**`,
+      why: `No ACIP or CDC source specifies an interval between adult conjugate doses; the ${min.words} interval applied here is this app’s own convention. Immunogenicity at shorter intervals has not been established, so a further conjugate dose is a matter of clinical judgement.`,
+    }),
   },
   {
     id: 'ADULT-PCV20-21-5Y-AFTER-PPSV23',
@@ -487,7 +514,15 @@ export const DOSE_INTERVAL_RULES = [
       + 'ADULT-PCV20-21-1Y-AFTER-PCV, which is still a floor: the evaluator returns on the first '
       + 'unmet row, so a recommendation placed before a floor would let a dose missing both gaps '
       + 'escape the floor. See CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date}. With both PCV13 and PPSV23 already on the record, ACIP advises a PCV20 or PCV21 at least ${min.words} after the most recent pneumococcal dose. ACIP states that as recommended timing and does not say an earlier dose must be repeated, so this dose still counts.`,
+    // Split into chip line + disclosure on 2026-10-24, with the two conjugate
+    // rows beside it — the owner's *"abbreviated explanation that you can
+    // expand... more clinical yet succinct"*. Same wording shape as those
+    // rows, deliberately: a clinician meeting both on one card (patient C)
+    // should read two sentences built the same way, not two registers.
+    message: (ctx, anchor, min) => ({
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} ACIP advises. **Counted; no repeat indicated.**`,
+      why: `With PCV13 and PPSV23 both on the record, ACIP schedules PCV20 or PCV21 at least ${min.words} after the most recent pneumococcal dose, but states that as recommended timing and does not direct that an earlier dose given inside it be repeated.`,
+    }),
   },
   {
     id: 'ADULT-PCV20-21-AFTER-PCV13',
@@ -520,7 +555,11 @@ export const DOSE_INTERVAL_RULES = [
       + '(PCV13 2026-02-10, PCV20 2026-09-10) whose PCV20 was being thrown out and re-ordered for '
       + '2027-09-10, ruled that the dose counts and the card explains the timing. See '
       + 'CLINICAL_SPEC.md §K.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date}. CDC advises PCV20 or PCV21 at least ${min.words} after the last PCV13 dose. **CDC states that as recommended timing and does not say an earlier dose is invalid or must be repeated, so the dose is counted. A shorter gap is not known to make it less effective, but no data establish that it performs as well, so whether to give a further conjugate dose is a clinical judgement.**`,
+    // See the sibling row above for the owner's 2026-10-24 wording request.
+    message: (ctx, anchor, min) => ({
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} CDC advises. **Counted; no repeat indicated.**`,
+      why: `CDC states the ${min.words} interval after PCV13 as recommended timing, not a minimum, and does not direct that a dose given inside it be repeated. Immunogenicity at shorter intervals has not been established, so a further conjugate dose is a matter of clinical judgement.`,
+    }),
   },
   {
     id: 'ADULT-PCV-AFTER-PPSV23',
@@ -548,8 +587,8 @@ export const DOSE_INTERVAL_RULES = [
       + 'current. Both are recorded in '
       + 'docs/archive/decision-2026-10-24-invalid-adult-dose-repeat-rule.md. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${anchor.date} — a conjugate dose is given at least ${min.words} after PPSV23.`],
-      detail: `Previous PPSV23: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} — a conjugate dose is given at least ${min.words} after PPSV23.`],
+      detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -590,8 +629,8 @@ export const DOSE_INTERVAL_RULES = [
     // the clinician is already looking at. Duplicating it here is what let
     // this rule contradict itself three times.
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}.`],
-      detail: `Previous PCV15: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the shortest interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is on the recommendation card above. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV15 dose of ${fmtDate(anchor.date)} — for this patient the shortest interval CDC permits is ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)}.`],
+      detail: `Previous PCV15: ${fmtDate(anchor.date)}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the shortest interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). The recommended interval is on the recommendation card above. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -622,8 +661,8 @@ export const DOSE_INTERVAL_RULES = [
       + 'that has an implementation. Both are recorded in '
       + 'docs/archive/decision-2026-10-24-invalid-adult-dose-repeat-rule.md. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${anchor.date} — PPSV23 is given at least ${min.words} after PCV15.`],
-      detail: `Previous PCV15: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} minimum interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV15 dose of ${fmtDate(anchor.date)} — PPSV23 is given at least ${min.words} after PCV15.`],
+      detail: `Previous PCV15: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} minimum interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   // PPSV23 after PCV13 — the pair rr7203a1 spells out, added 2026-10-11 after
@@ -663,8 +702,8 @@ export const DOSE_INTERVAL_RULES = [
       + 'floor is the owner\'s: rr7203a1 says "should be repeated" 0 times and "not be counted" 0 '
       + 'times, and CDSI v4.64 gives every adult pneumococcal interval absMinInt = 0 days.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — for this patient PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after PCV13.`],
-      detail: `Previous PCV13: ${anchor.date}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PCV13 dose of ${fmtDate(anchor.date)} — for this patient PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after PCV13.`],
+      detail: `Previous PCV13: ${fmtDate(anchor.date)}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} — the interval ACIP recommends for an immunocompromising condition, cochlear implant or CSF leak (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -684,8 +723,8 @@ export const DOSE_INTERVAL_RULES = [
       + 'row above, other half: ">=1 year for adults without these conditions". Treating it as a '
       + 'validity floor is the owner\'s determination.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${anchor.date} — PPSV23 is given at least ${min.words} after PCV13.`],
-      detail: `Previous PCV13: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PCV13 dose of ${fmtDate(anchor.date)} — PPSV23 is given at least ${min.words} after PCV13.`],
+      detail: `Previous PCV13: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). The ${SHORTER_MINIMUM_ADJ} interval applies only to an adult with an immunocompromising condition, cochlear implant or CSF leak. Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
   {
@@ -731,8 +770,8 @@ export const DOSE_INTERVAL_RULES = [
       + 'recommendation engine\'s question, and keying the floor on risk class is what left this gap '
       + 'unchecked for adults in the first place. See CLINICAL_SPEC.md §K.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${anchor.date} — a second PPSV23 is given at least ${min.words} after the first.`],
-      detail: `Previous PPSV23: ${anchor.date}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${fmtDate(anchor.date)} — a second PPSV23 is given at least ${min.words} after the first.`],
+      detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). Enforced as a minimum by an owner clinical determination dated 2026-10-11, not by ACIP — see CLINICAL_SPEC.md §K.`,
     }),
   },
 
@@ -1178,7 +1217,8 @@ function intervalMet(rule, ctx, anchor) {
  * @param {string[]} ctx.riskIds
  * @returns {null
  *   | {kind:'floor', ruleId:string, authority:string, reasons:string[], detail:string, earliestValidDate:string}
- *   | {kind:'recommendation', ruleId:string, authority:string, reasons:string[]}}
+ *   | {kind:'recommendation', ruleId:string, authority:string, reasons:string[],
+ *      whys:string[]}}
  */
 export function evaluateDoseInterval(ctx) {
   const book = rulebookOf(ctx.ageAtDose);
@@ -1227,7 +1267,16 @@ export function evaluateDoseInterval(ctx) {
       // the generic "CDC advises at least 1 year" note talks over the
       // specific row, which is the A-P1-1 mistake the block above describes.
       namedByRule = namedByRule || !rule.catchAll;
-      advisories.push({ ruleId: rule.id, authority: rule.authority, reason: msg });
+      // A recommendation's `message` may return a plain string (one sentence
+      // on the chip, nothing behind the disclosure) or `{ reason, why }` —
+      // the short clinical line and the rationale, per the owner's request of
+      // 2026-10-24 for MeningoVax's abbreviated-and-expandable shape.
+      advisories.push({
+        ruleId: rule.id,
+        authority: rule.authority,
+        reason: typeof msg === 'string' ? msg : msg.reason,
+        why: typeof msg === 'string' ? null : (msg.why ?? null),
+      });
       continue;
     }
     {
@@ -1254,6 +1303,10 @@ export function evaluateDoseInterval(ctx) {
       ruleId: advisories[0].ruleId,
       authority: advisories[0].authority,
       reasons: advisories.map((a) => a.reason),
+      // One entry per sentence that HAS a rationale, in the same order. The
+      // chip's disclosure shows these; a row with nothing to expand adds
+      // nothing, so a dose whose rules are all plain strings has no toggle.
+      whys: advisories.map((a) => a.why).filter(Boolean),
     };
   }
   return null;

@@ -36,7 +36,7 @@ import {
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
-import { dobToAgeMonths } from './format.js';
+import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { pcvNextDoseMinIntervalCell, intervalPhrase } from './intervals.js';
@@ -753,6 +753,17 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     : dob
       ? addCalendarMonths(dob, routineAgeM)
       : addCalendarMonths(today, Math.max(0, routineAgeM - am));
+  // Has the routine age already gone by? A card may still be ADVISING the
+  // routine age when the child is long past it — a 12-month-old whose only
+  // PCV15 was at 2 months is owed dose 2, whose routine age is 4 months, and
+  // the `max` below picks that date because it is later than both the 4-week
+  // minimum and the 8-week spacing. The DATE is right; the old sentence read
+  // it out as an instruction ("The next dose is due at age 4 months") to a
+  // clinician looking at a one-year-old. 198 of 17,016 real patients read a
+  // routine age they had already passed. Wording only — this flag is used
+  // nowhere but the note. Guard:
+  // regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js
+  const routineAgePassed = routineAgeDate != null && routineAgeDate <= today;
   const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
@@ -800,7 +811,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     ? ''
     : minDate <= today
       ? `; it can be given today if needed, as the minimum interval of ${intervalPhrase({ days: minInterval })} has already passed${minMark}`
-      : `; it can be given from ${minDate} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
+      : `; it can be given from ${fmtDate(minDate)} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
   // The document that states the advised number itself. Each branch is credited
   // to the one source whose own words carry it:
   //   routineAge -> CDC's notes, "4-dose series at 2, 4, 6, and 12-15 months"
@@ -895,7 +906,14 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
       detail: `${!anchor
         ? 'There is no earlier dated dose to measure an interval from'
         : advisedReason === 'routineAge'
-          ? `The next dose is due at age ${routineAgeM} months, following the routine 2, 4, 6 and 12–15 month series`
+          ? (routineAgePassed
+            // Past tense, and it says what the clinician can do about it. The
+            // "can be given now" half is conditional because a card held back
+            // to the first birthday (`needs12moFloor`) is NOT due today, and
+            // its lead already says so — two clauses contradicting each other
+            // on one card is the fault this whole fix is about.
+            ? `This dose was due at age ${routineAgeM} months in the routine 2, 4, 6 and 12–15 month series and is overdue${due ? ' — it can be given now' : ''}`
+            : `The next dose is due at age ${routineAgeM} months, following the routine 2, 4, 6 and 12–15 month series`)
           : `The next dose is due ${intervalPhrase({
             days: advisedReason === 'spacing' ? RECOMMENDED_SPACING_DAYS : minInterval,
           })} after the most recent one`}${anchor ? advisedMark : ''}${minClause}; the final/booster dose is given at ≥12 months${target !== 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
@@ -2627,12 +2645,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
 
     return [rec({
       vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
-      doseLabel: `${productWords} ≥${ADULT_GAP_WORDS} after the ${gaveWhat} dose of ${invalidDate} — completes the series`,
+      doseLabel: `${productWords} ≥${ADULT_GAP_WORDS} after the ${gaveWhat} dose of ${fmtDate(invalidDate)} — completes the series`,
       dueToday, earliestNextDate: dueToday ? null : dueDate,
       minIntervalMonths: MO12,
       brands: products.map((k) => (k === 'PCV20' ? 'PCV20 (Prevnar 20)' : 'PCV21 (Capvaxive)')),
       note: {
-        lead: `The ${gaveWhat} dose of ${invalidDate} was given too soon to count, so the series is INCOMPLETE. Give 1 dose of ${productWords} ${dueToday ? 'now' : `on or after ${dueDate}`} and the series is complete [c].${standing}`,
+        lead: `The ${gaveWhat} dose of ${fmtDate(invalidDate)} was given too soon to count, so the series is INCOMPLETE. Give 1 dose of ${productWords} ${dueToday ? 'now' : `on or after ${fmtDate(dueDate)}`} and the series is complete [c].${standing}`,
         detail: `PPSV23 is not what is owed here: ACIP's only interval between two PPSV23 doses is 5 years, and a repeat conjugate completes the series on its own. PCV15 is not used either — it adds nothing over a conjugate already on the record, and it would itself require a PPSV23 afterwards.${ppsvOnlyRowNote}${pcv13OnlyRowNote}${substitutionNote}`,
       },
       noteCites: [

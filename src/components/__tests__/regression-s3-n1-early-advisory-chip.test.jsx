@@ -146,15 +146,14 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
       { product: 'PCV20', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/at least 1 year after the last PCV13 dose/i)).toBeInTheDocument();
+    expect(screen.getByText(/shorter than the 1 year CDC advises/i)).toBeInTheDocument();
 
     // THE BOLD IS THE OWNER'S REQUIREMENT, SO IT IS ASSERTED ON THE RENDERED
     // DOM, not on the string the engine produced. `**...**` in a reason is
     // turned into <strong class="note-emphasis"> by renderNoteWithCites;
     // a reason rendered as a bare string would print literal asterisks.
     const bold = [...container.querySelectorAll('.note-emphasis')].map((n) => n.textContent).join(' ');
-    expect(bold).toMatch(/no data establish that it performs as well/);
-    expect(bold).toMatch(/clinical judgement/);
+    expect(bold).toMatch(/Counted; no repeat indicated/);
     expect(container.textContent).not.toMatch(/\*\*/);
 
     // Counted, numbered, not struck through, not an error.
@@ -167,5 +166,41 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     expect(screen.queryByText(/at the earliest/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/2027-02-09/)).not.toBeInTheDocument();
     expect(screen.queryByText(/owner clinical determination/i)).not.toBeInTheDocument();
+  });
+
+  // OWNER REQUEST 2026-10-24, second round: *"meningovax has an abbreviated
+  // explanation that you can expand. Do that here."* The rationale must be
+  // OFF the screen until the clinician asks for it, and ON it when they do.
+  it('end to end: the rationale is hidden until "Why this" is clicked', () => {
+    const { container } = render(<Harness pcvDoses={[
+      { product: 'PCV13', date: '2026-01-05' },
+      { product: 'PCV20', date: '2026-02-09' },
+    ]} />);
+    openEveryCard(container);
+
+    const RATIONALE = /Immunogenicity at shorter intervals has not been established/i;
+    expect(screen.queryByText(RATIONALE)).not.toBeInTheDocument();
+
+    const toggle = screen.getByTestId('dose-val-toggle');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveTextContent('Why this');
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(RATIONALE)).toBeInTheDocument();
+
+    // And it closes again — a disclosure that only opens is a layout bug.
+    fireEvent.click(toggle);
+    expect(screen.queryByText(RATIONALE)).not.toBeInTheDocument();
+  });
+
+  // A dose with nothing to explain must not grow an empty control.
+  it('end to end: a dose with no note and no detail renders NO toggle', () => {
+    const { container } = render(<Harness pcvDoses={[
+      { product: 'PCV13', date: '2016-01-05' },
+      { product: 'PCV20', date: '2026-02-09' },
+    ]} />);
+    openEveryCard(container);
+    expect(screen.queryByTestId('dose-val-toggle')).not.toBeInTheDocument();
   });
 });

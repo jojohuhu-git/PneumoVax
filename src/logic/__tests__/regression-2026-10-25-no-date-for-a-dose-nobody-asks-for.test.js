@@ -122,7 +122,7 @@ describe('the boundary: a patient who IS owed something keeps her date', () => {
       const out = run(p);
       const chip = chipsOf(out).find((d) => d.forwardLookingReason);
       expect(textOf(chip)).toContain(FORWARD);
-      expect(textOf(chip)).toContain('2027-10-11');
+      expect(textOf(chip)).toContain('Oct 11, 2027');
       // the same date the card states — the whole point of her 2026-10-24 ruling
       expect(out.recs[0].earliestNextDate).toBe('2027-10-11');
     }
