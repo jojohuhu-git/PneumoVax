@@ -1,3 +1,10 @@
+> **⚠️ SUPERSEDED (2026-10-25)** — its queue has been worked. The three owner decisions it
+> listed under "Resuming" were all put to her and all answered, and the P0
+> (`ADULT-PPSV23-AFTER-PCV13`), the P1 paediatric question and the P1 corpus column are
+> **built, measured and shipped on [PR #86](https://github.com/jojohuhu-git/PneumoVax/pull/86)**.
+> Read `handoff-2026-10-25-four-decisions-shipped.md` instead. Its counts, its test count
+> (1,505) and its "flagged, not taken" status for the 402-patient family are all out of date.
+
 # PneumoVax — Handoff after the invalid-adult-dose rule was built (2026-10-24, session 2)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Sibling: `/Users/joannehuang/Downloads/MeningoVax-main`.
