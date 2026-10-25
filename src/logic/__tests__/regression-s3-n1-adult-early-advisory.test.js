@@ -80,29 +80,44 @@ function adultPpsv(ppsvDate, pcvDate, { product = 'PCV15', riskIds = [] } = {}) 
   });
 }
 
-describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', () => {
-  it('voids five weeks, and says the reason is the owner determination', () => {
+// ⚠️ REVERSED 2026-10-24 (§K-CONJUGATE), AND KEPT AS THE RECORD OF IT.
+// This block was called "an adult PCV20 inside the year after PCV13 does NOT
+// count" and asserted exactly that. The owner downgraded the row to a
+// recommendation: the dose COUNTS, keeps its number, and carries a sentence
+// that explains CDC's advised year and says plainly that no data establish a
+// shorter gap performs as well. Do not restore the old assertions.
+describe('§K-CONJUGATE — an adult PCV20 inside the year after PCV13 COUNTS, with a note', () => {
+  it('counts five weeks, and explains CDC\'s advised year without claiming a minimum', () => {
     const a = adultPcv(['2026-01-05', '2026-02-09'], ['PCV13', 'PCV20']);
     const second = a.perDose[1];
 
-    expect(second.status).toBe('invalid');
-    expect(second.effectiveDoseNum).toBeNull();
-    expect(second.doesNotCount).toBe(true);
-    expect(a.effective).toHaveLength(1);
-    expect(second.reasons.join(' ')).toMatch(/at least 1 year after the last PCV13 dose/);
-    // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
-    // only early — it is not "repeated". See
-    // regression-w1-too-soon-not-repeated.test.js for the dedicated coverage.
-    // OWNER RULING 2026-10-24: ungraced, because the app no longer
-    // recommends a date inside the 4-day grace. Was 2027-02-05 (the PCV20 of
-    // 2026-02-09 + 1 year - 4 days); now 2027-02-09.
-    expect(second.reasons.join(' ')).toMatch(/can be given from 2027-02-09 at the earliest/);
-    expect(second.reasons.join(' ')).not.toMatch(/2027-02-05/);
-    expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
-    // Must NOT keep the old reassurance — it is now false.
-    expect(second.reasons.join(' ')).not.toMatch(/still counts/);
-    // Honesty: the rule is the owner's, not ACIP's, and the detail says so.
-    expect(second.detail).toMatch(/owner clinical determination dated 2026-10-11/i);
+    // Was 'invalid', doesNotCount, effectiveDoseNum null, effective length 1.
+    expect(second.status).toBe('valid');
+    expect(second.doesNotCount).toBeFalsy();
+    expect(second.effectiveDoseNum).toBe(2);
+    expect(a.effective).toHaveLength(2);
+    expect(second.earlyAdvisory).toBe(true);
+
+    const text = second.reasons.join(' ');
+    expect(text).toMatch(/shorter than the 1 year CDC advises/);
+    // The owner's wording instruction: clinical, nuanced, and emphasised.
+    // `**...**` is what renderNoteWithCites turns into <strong>. Her second
+    // round (same day) moved the rationale behind the chip's disclosure.
+    expect(text).toMatch(/\*\*Counted; no repeat indicated\.\*\*/);
+    const why = (second.whys ?? []).join(' ');
+    expect(why).toMatch(/Immunogenicity at shorter intervals has not been established/);
+    expect(why).toMatch(/clinical judgement/);
+    expect(why).toMatch(/does not direct that a dose given inside it be repeated/);
+
+    // A recommendation owes NO repeat date and no "earliest valid" date —
+    // those belong to a floor and would contradict "the dose is counted".
+    expect(text).not.toMatch(/at the earliest/);
+    expect(second.earliestValidDate).toBeUndefined();
+    expect(second.repeatDueDate).toBeUndefined();
+    // And it no longer claims the owner's name for the number: the year is
+    // CDC's own sentence. (The sibling conjugate row, which has no CDC
+    // sentence, keeps OWNER and says so — see §K-CONJUGATE.)
+    expect(second.detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
   it('does not void a gap of exactly 1 calendar year, or longer', () => {
@@ -113,17 +128,23 @@ describe('S14-7 — an adult PCV20 inside the year after PCV13 does NOT count', 
       .perDose[1].status).toBe('valid');
   });
 
-  // The owner's decision names the 4-day grace explicitly: "with the 4-day
-  // grace around the 12-month interval". CDC's own sentence is the source of
-  // the grace itself — "doses administered ≤4 days before the minimum age or
-  // interval are considered valid ... ≥5 days earlier ... should be repeated".
-  it('applies CDC\'s 4-day grace to the owner floor: 4 days short counts, 5 days short does not', () => {
+  // THE GRACE IS GONE WITH THE FLOOR. It existed to let a dose up to 4 days
+  // early still COUNT; a recommendation counts every dose already, so the
+  // only thing a grace could still do here is move the day the note starts
+  // printing — which would be a second, invisible reading of the interval.
+  // 5 days short and 4 days short are now the same answer: counts, with the
+  // note. Only a full year silences it.
+  it('takes no grace any more: 4 and 5 days short both count, both noted', () => {
     const first = '2026-01-05';
     const anniversary = addCalendarMonths(first, 12);
-    expect(adultPcv([first, addDays(anniversary, -4)], ['PCV13', 'PCV20'])
-      .perDose[1].status).toBe('valid');
-    expect(adultPcv([first, addDays(anniversary, -5)], ['PCV13', 'PCV20'])
-      .perDose[1].status).toBe('invalid');
+    for (const offset of [-5, -4]) {
+      const d = adultPcv([first, addDays(anniversary, offset)], ['PCV13', 'PCV20']).perDose[1];
+      expect(d.status).toBe('valid');
+      expect(d.earlyAdvisory).toBe(true);
+    }
+    const onTime = adultPcv([first, anniversary], ['PCV13', 'PCV20']).perDose[1];
+    expect(onTime.status).toBe('valid');
+    expect(onTime.earlyAdvisory).toBeFalsy();
   });
 
   it('never judges the first dose — there is no previous dose to be early after', () => {
@@ -271,8 +292,12 @@ describe('S14-7 — the catch-all keeps an unenumerated adult pair from going si
   });
 });
 
-describe('S14-7 — a voided adult dose is dropped from the engine\'s count', () => {
-  it('a 70-year-old PCV13 + PCV20 five weeks apart is a ONE-dose history now', () => {
+// ⚠️ REVERSED 2026-10-24 (§K-CONJUGATE) — kept as the record. This block
+// was called "a voided adult dose is dropped from the engine's count" and
+// asserted that the same patient is a ONE-dose history owed her PCV20 again.
+// The dose is no longer voided, so she is a TWO-dose history and complete.
+describe('§K-CONJUGATE — the dose stays in the engine\'s count', () => {
+  it('a 72-year-old PCV13 + PCV20 five weeks apart is a TWO-dose history, and complete', () => {
     const out = recommend({
       ageMonths: AM, dob: DOB, today: TODAY,
       pcvDoses: [
@@ -281,12 +306,12 @@ describe('S14-7 — a voided adult dose is dropped from the engine\'s count', ()
       ],
       ppsv23Doses: [], riskIds: [],
     });
-    // The PCV20 does not count, so the patient is a PCV13-only adult and is
-    // owed the PCV20/PCV21 again — which is the whole point of calling the
-    // dose invalid rather than noting it.
-    expect(out.meta.pcvCount).toBe(1);
-    expect(out.perDose.pcv[1].status).toBe('invalid');
-    expect(out.perDose.pcv[1].effectiveDoseNum).toBeNull();
-    expect(out.recs.some((r) => r.status === 'complete')).toBe(false);
+    // The PCV20 counts, so her series includes a PCV20 and nothing is owed.
+    // That is the whole substance of the owner's decision: before it, this
+    // patient was told to come back on 2027-02-09 for a dose she had had.
+    expect(out.meta.pcvCount).toBe(2);
+    expect(out.perDose.pcv[1].status).toBe('valid');
+    expect(out.perDose.pcv[1].effectiveDoseNum).toBe(2);
+    expect(out.recs.every((r) => r.status === 'complete')).toBe(true);
   });
 });

@@ -165,21 +165,18 @@ describe('THE BOUNDARY — only the three families she worked through', () => {
     expect(card.doseLabel).not.toContain('after the conjugate dose of');
   });
 
-  it('a PPSV23 rejected after a PCV13 keeps its old card — flagged, not taken', () => {
-    // `ADULT-PPSV23-AFTER-PCV13`, 402 patients, the previous handoff's
-    // "clearest defect". Same clinical shape as family 3, but widening to it
-    // moves verdicts in a family she has not been shown, so her 2026-10-18
-    // rule sends it back to her. If this test ever goes green, that decision
-    // was taken by an agent rather than by her.
-    const out = run({
-      ageMonths: Y(60), riskIds: [],
-      pcvDoses: [{ product: 'PCV13', date: '2026-07-19' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }],
-    });
-    expect(invalidOf(out)[0].intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV13');
-    expect(out.recs[0].doseLabel).not.toContain('was given too soon');
-    expect(leadOf(out.recs[0])).not.toContain('given too soon to count');
-  });
+  // ── THE PCV13 HOLD-OUT WAS LIFTED BY THE OWNER ON 2026-10-25 ────────────
+  //
+  // A test stood here asserting that a PPSV23 rejected after a PCV13 KEEPS its
+  // old card — "flagged, not taken" — and saying that if it ever went green,
+  // the decision had been taken by an agent rather than by her. It went green
+  // because she took it: shown the PCV13 and PCV15 patients side by side she
+  // ruled *"A is treated the same as B"*, and then the same for the 8-week
+  // class. The assertion is inverted and moved, with her words and the worked
+  // patients, to
+  // `regression-2026-10-25-pcv13-families-follow-the-invalid-dose.test.js`.
+  // Kept as a comment rather than deleted so the hold-out, and the fact that
+  // it was lifted by her and not by an agent, stay on the record.
 
   it('a repaired series is NOT given a repeat card — her own proviso', () => {
     // "if a later dose given helps correct the mistake in giving a vaccine
@@ -198,11 +195,14 @@ describe('THE BOUNDARY — only the three families she worked through', () => {
     expect(leadOf(out.recs[0])).not.toContain('was given too soon to count');
   });
 
-  it('swept over the grid: the repeat card appears ONLY for those three rules', () => {
+  it('swept over the grid: the repeat card appears ONLY for those five rules', () => {
     const ALLOWED = new Set([
       'ADULT-PCV-AFTER-PPSV23',
       'ADULT-PPSV23-AFTER-PCV15',
       'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
+      // Added by the owner 2026-10-25, the two PCV13 twins.
+      'ADULT-PPSV23-AFTER-PCV13',
+      'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM',
     ]);
     let seen = 0;
     const offenders = [];
@@ -220,6 +220,14 @@ describe('THE BOUNDARY — only the three families she worked through', () => {
     expect(offenders).toEqual([]);
     // PINNED EXACTLY, not floored: the whole point is that widening this card
     // is an owner decision, so a rise must fail here and be explained.
-    expect(seen).toBe(188);
+    //
+    //   188  the three families of 2026-10-24
+    //   400  plus the two PCV13 rows she added on 2026-10-25
+    //        (+182 ADULT-PPSV23-AFTER-PCV13, +30 ...-SHORTER-MINIMUM = +212)
+    //
+    // The two families hold 402 and 210 patients; only the 212 whose INVALID
+    // dose is also their LAST dose reach this card, which is `adultRepeatOwed`'s
+    // "only an invalid last dose leaves something owing" and not a shortfall.
+    expect(seen).toBe(400);
   });
 });

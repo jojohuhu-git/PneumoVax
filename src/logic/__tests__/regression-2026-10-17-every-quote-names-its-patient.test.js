@@ -124,6 +124,17 @@ describe('the field itself', () => {
       'cdcCatchupDose2to3EightWeeks', // one row for every child; "regardless of risk"
       'cdcCatchupDose2to3FourWeeks',  // one row for every child; "regardless of risk"
       'cdcCatchupDose3to4',           // its own words: "regardless of risk ... with any risk"
+      // 2026-10-25. Both halves of Table 1's row in ACIP's 2023
+      // PCV20-in-children report. The row's own heading is "Children aged
+      // 2-18 years with ANY RISK CONDITION who completed a recommended PCV
+      // series before age 6 years", and the report's footnote lists the risk
+      // conditions in one list that mixes immunocompromising and
+      // non-immunocompromising ("Risk conditions include: cerebrospinal fluid
+      // leak; chronic heart disease; ... immunocompromising conditions ...").
+      // So both child groups is transcription, not inference. Read live
+      // 2026-10-25 from the Supplementary Report PDF, page 10.
+      'cdcPcv20Children2023CompleteWithPcv20',
+      'cdcPcv20Children2023CompleteWithoutPcv20',
       'immPCV7',                  // "older teen or adult ... at increased risk"
       // C8, document 2's CITEs (2026-10-17). Both are FOOTNOTES printed on all
       // four pages of the Adult Timing Job Aid — against every "None*" row and

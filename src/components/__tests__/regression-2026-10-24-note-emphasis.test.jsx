@@ -211,7 +211,7 @@ describe('a dose CHIP renders emphasis too — the owner\'s second-PPSV23 altern
     // A neutral card renders collapsed; the dose rows live in the body.
     container.querySelectorAll('.rec-card-head-toggle').forEach((b) => fireEvent.click(b));
     container.querySelectorAll('.dose-val-toggle, [class*="toggle"]').forEach((b) => fireEvent.click(b));
-    expect(document.body.textContent).toContain('may be considered from 2019-01-01');
+    expect(document.body.textContent).toContain('may be considered from Jan 1, 2019');
     expect(document.body.textContent).not.toContain('*');
     expect(document.querySelectorAll('.note-emphasis').length).toBeGreaterThan(0);
   });

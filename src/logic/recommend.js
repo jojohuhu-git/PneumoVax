@@ -36,7 +36,7 @@ import {
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
-import { dobToAgeMonths } from './format.js';
+import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { pcvNextDoseMinIntervalCell, intervalPhrase } from './intervals.js';
@@ -753,6 +753,17 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     : dob
       ? addCalendarMonths(dob, routineAgeM)
       : addCalendarMonths(today, Math.max(0, routineAgeM - am));
+  // Has the routine age already gone by? A card may still be ADVISING the
+  // routine age when the child is long past it — a 12-month-old whose only
+  // PCV15 was at 2 months is owed dose 2, whose routine age is 4 months, and
+  // the `max` below picks that date because it is later than both the 4-week
+  // minimum and the 8-week spacing. The DATE is right; the old sentence read
+  // it out as an instruction ("The next dose is due at age 4 months") to a
+  // clinician looking at a one-year-old. 198 of 17,016 real patients read a
+  // routine age they had already passed. Wording only — this flag is used
+  // nowhere but the note. Guard:
+  // regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js
+  const routineAgePassed = routineAgeDate != null && routineAgeDate <= today;
   const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
@@ -800,7 +811,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     ? ''
     : minDate <= today
       ? `; it can be given today if needed, as the minimum interval of ${intervalPhrase({ days: minInterval })} has already passed${minMark}`
-      : `; it can be given from ${minDate} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
+      : `; it can be given from ${fmtDate(minDate)} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
   // The document that states the advised number itself. Each branch is credited
   // to the one source whose own words carry it:
   //   routineAge -> CDC's notes, "4-dose series at 2, 4, 6, and 12-15 months"
@@ -895,7 +906,14 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
       detail: `${!anchor
         ? 'There is no earlier dated dose to measure an interval from'
         : advisedReason === 'routineAge'
-          ? `The next dose is due at age ${routineAgeM} months, following the routine 2, 4, 6 and 12–15 month series`
+          ? (routineAgePassed
+            // Past tense, and it says what the clinician can do about it. The
+            // "can be given now" half is conditional because a card held back
+            // to the first birthday (`needs12moFloor`) is NOT due today, and
+            // its lead already says so — two clauses contradicting each other
+            // on one card is the fault this whole fix is about.
+            ? `This dose was due at age ${routineAgeM} months in the routine 2, 4, 6 and 12–15 month series and is overdue${due ? ' — it can be given now' : ''}`
+            : `The next dose is due at age ${routineAgeM} months, following the routine 2, 4, 6 and 12–15 month series`)
           : `The next dose is due ${intervalPhrase({
             days: advisedReason === 'spacing' ? RECOMMENDED_SPACING_DAYS : minInterval,
           })} after the most recent one`}${anchor ? advisedMark : ''}${minClause}; the final/booster dose is given at ≥12 months${target !== 4 ? ' [c]' : ''}. If PCV15 is used, a PPSV23 follow-up is needed only for children with a risk condition.`,
@@ -1419,18 +1437,31 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // Group A. CDC's branch fits on both columns: the PCV series was before
       // age 6 and no PPSV23 has been given. The two risk classes word the
       // sub-bullet differently, so each quotes its own.
+      // OWNER DECISION 2026-10-25, and it is the 2026-10-23 "cite CDC; reach
+      // for p2016 only if you cannot" rule applied with a document that did
+      // not exist on these cards before. She had given the 2023 ACIP
+      // PCV20-in-children report herself -- *"You can reference this document
+      // for pediatric recommendations too"* -- and, shown this card and what
+      // it cites, chose to SWAP: p2016 off, the 2023 report on.
+      //
+      // Both documents state the whole claim, read live 2026-10-25:
+      //   p2016 Table 4  "Completed PCV series before age 6 years, including
+      //                   one or more doses of PCV20 | No additional doses"
+      //   ACIP 2023 T1   "No additional doses of any pneumococcal vaccine are
+      //                   indicated."
+      // So this is NOT a removal for silence -- p2016 has a fitting row and
+      // keeps it everywhere else. It is CDC/ACIP preferred over immunize.org
+      // where the two agree, which is her standing rule, and it leaves the
+      // card with two CDC sources rather than one CDC and one handout.
       note = {
         lead: complete,
-        detail: 'p2016 states the same for this history: a child 2-18 with any risk condition who completed the PCV series before age 6 including a PCV20 needs no additional doses [c].',
+        detail: "ACIP's 2023 PCV20-in-children report states the same for this history: for a child 2-18 with any risk condition whose completed series includes a PCV20, no additional doses of any pneumococcal vaccine are indicated [c].",
       };
       noteCites = [
         cite(isIC ? 'pedsIcPcv20Complete' : 'pedsRiskPcv20Complete'),
-        // p2016's row fits this patient on every column too, and is on the card
-        // as a chip, so it is credited rather than left as a grey button with no
-        // number -- the fault C8 exists to remove.
-        cite('p2016CompletedBefore6WithPcv20'),
+        cite('cdcPcv20Children2023CompleteWithPcv20'),
       ];
-      cardRefs = refs;
+      cardRefs = childRefsSwap('p2016', 'cdcPcv20Children2023');
     } else if (completedBefore6) {
       // Group B. The series was before age 6, but a PPSV23 HAS been given, and
       // CDC's branch is headed "but have not received PPSV23". p2016 Table 4
@@ -2034,25 +2065,44 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // recent PCV dose", read live 2026-10-18), and its risk-indications twin
       // names both products. Nothing is being substituted, so nothing needs
       // explaining.
-      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV (completes the series) [c].`,
-      noteCites: [before6Cite()],
+      // OWNER DECISION 2026-10-25 — ACIP's 2023 PCV20-in-children report is
+      // ADDED here (not swapped: p2016 is already off these cards, and CDC's
+      // child notes state the interval). Shown this card and asked where its
+      // Table 1 belongs, she chose to add it alongside.
+      //
+      // ⚠️ THE MARKER IS ON ITS OWN SENTENCE, AND THAT IS NOT TIDINESS.
+      // Table 1 states the CHOICE and no interval: "Either a single dose of
+      // PCV20 or PPSV23 using previously recommended dosing and schedules is
+      // recommended to complete the recommended vaccine series" (read live
+      // 2026-10-25, Supplementary Report p.10). The 8 weeks is CDC's child
+      // notes' number. Putting both markers on one sentence would give that
+      // sentence two numbers for two different claims — the thing
+      // `regression-c8-...-infant-catchup-credits-the-booster-row`'s "no card
+      // anywhere gives the SAME sentence two numbers" forbids outright.
+      note: `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} before age 6 (no PCV20, no PPSV23): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]. Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].`,
+      noteCites: [before6Cite(), cite('cdcPcv20Children2023CompleteWithoutPcv20')],
       // C10-1 (2026-10-23): CDC states this card's claim and is cited by
       // number above; nothing here rests on p2016, so it comes off.
-      refs: childRefsExcept('p2016'),
+      refs: childRefsSwap('p2016', 'cdcPcv20Children2023'),
     }));
     out.push(rec({
       vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B: 1 dose PPSV23 (≥8 weeks)',
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: ['PPSV23 (Pneumovax 23)'],
+      // The Option B half of the same owner decision, and the same discipline:
+      // Table 1's sentence is about the CHOICE completing the series, so it
+      // takes its own sentence. The IC card's "≥5 years later" clause belongs
+      // to `pedsSecondPpsv5y` and Table 1 is silent on it — never let the 2023
+      // marker drift onto that one.
       note: isIC
-        ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both.'
-        : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]. Choose Option A or B, not both.',
+        ? 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both. Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].'
+        : 'Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]. Choose Option A or B, not both. Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].',
       noteCites: isIC
-        ? [before6Cite(), cite('pedsSecondPpsv5y')]
-        : [before6Cite()],
+        ? [before6Cite(), cite('pedsSecondPpsv5y'), cite('cdcPcv20Children2023CompleteWithoutPcv20')]
+        : [before6Cite(), cite('cdcPcv20Children2023CompleteWithoutPcv20')],
       // C10-1 (2026-10-23): CDC states this card's claim and is cited by
       // number above; nothing here rests on p2016, so it comes off.
-      refs: childRefsExcept('p2016'),
+      refs: childRefsSwap('p2016', 'cdcPcv20Children2023'),
     }));
     return out;
   }
@@ -2584,19 +2634,56 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       ? [cite('mmwrPpsvOnlyThenPcv')]
       : [];
 
+    // THE SAME CORRECTION AGAIN, FOR THE FAMILIES ADDED 2026-10-25.
+    //
+    // Extending this card to the two PCV13 rows took mm7401a1 off **212**
+    // cards it speaks for, and the three C8 guards caught it the moment the
+    // change ran (3,795 -> 3,583). That is FINDING F's mirror for the third
+    // time on this one card, and the fix is the same shape as the two above:
+    // read the document, find the row that fits, cite it in its own sentence.
+    //
+    // The row: with the PPSV23 set aside, this patient's COUNTING history is a
+    // PCV13 and nothing else, which is precisely mm7401a1's "PCV13 only" row —
+    // "A single dose of PCV21 or PCV20 >=1 year after the PCV13 dose." It
+    // states her disposition outright, and it is the row the card she had
+    // before this change was built on.
+    //
+    // ⚠️ CITED FOR THE DISPOSITION, NOT FOR THE DATE — the same care the
+    // "PPSV23 only" sentence above takes, and for the same reason. The row's
+    // year runs from the PCV13; the card's date is later, because the repeat
+    // must also clear the spacing from the PPSV23 that did not count. That
+    // gap IS the owner's 2026-10-25 ruling (she was shown both dates and chose
+    // the later), so the sentence says which number belongs to the document
+    // and which to the ruling, and never lets the document carry the date.
+    //
+    // Mutually exclusive with both branches above: this one needs a counting
+    // PCV13 and no PCV15, `substitutingForOwedPpsv23` needs a PCV15, and
+    // `ppsvOnlyRowApplies` needs neither conjugate.
+    //
+    // `mmwrPcv13OnlyCite` is the existing picker (the 19-49 IC/CSF/cochlear
+    // block prints this row one word differently). Reused, never re-derived —
+    // a second risk-class test here would be the S14-RC fault.
+    const pcv13OnlyRowApplies = invalidVaccine === 'PPSV23' && pcv.hasPCV13 && !pcv.hasPCV15;
+    const pcv13OnlyRowNote = pcv13OnlyRowApplies
+      ? ` With only the PCV13 counting, ACIP's own row for this history gives a single dose of ${productWords} at least ${ADULT_GAP_WORDS} after that PCV13 [c] — the later date above is the further spacing CDC's general rule requires from the dose that did not count.`
+      : '';
+    const pcv13OnlyRowCites = pcv13OnlyRowApplies
+      ? [cite(mmwrPcv13OnlyCite)]
+      : [];
+
     const standing = basis === 'ppsv23ToConjugate'
       ? ` **ACIP states this interval itself — a conjugate dose comes at least ${ADULT_GAP_WORDS} after the last PPSV23, for every risk group, with no 8-week option [c]. Counting it from the dose that was given, rather than from the one before it, follows CDC's general rule that a repeat is spaced from the invalid dose.**`
       : ` **The ${ADULT_GAP_WORDS} is read across from the only adult conjugate-to-conjugate interval ACIP states — PCV20 or PCV21 at least ${ADULT_GAP_WORDS} after the last PCV13 dose [c] — and applied here to a conjugate that has to be repeated, which ACIP does not discuss. It is an interpretation, not a stated rule. The 8-week conjugate interval is paediatric: it is CDC's catch-up schedule, whose own scope line reads "Children age 4 months through 6 years", and no adult source states one.**`;
 
     return [rec({
       vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
-      doseLabel: `${productWords} ≥${ADULT_GAP_WORDS} after the ${gaveWhat} dose of ${invalidDate} — completes the series`,
+      doseLabel: `${productWords} ≥${ADULT_GAP_WORDS} after the ${gaveWhat} dose of ${fmtDate(invalidDate)} — completes the series`,
       dueToday, earliestNextDate: dueToday ? null : dueDate,
       minIntervalMonths: MO12,
       brands: products.map((k) => (k === 'PCV20' ? 'PCV20 (Prevnar 20)' : 'PCV21 (Capvaxive)')),
       note: {
-        lead: `The ${gaveWhat} dose of ${invalidDate} was given too soon to count, so the series is INCOMPLETE. Give 1 dose of ${productWords} ${dueToday ? 'now' : `on or after ${dueDate}`} and the series is complete [c].${standing}`,
-        detail: `PPSV23 is not what is owed here: ACIP's only interval between two PPSV23 doses is 5 years, and a repeat conjugate completes the series on its own. PCV15 is not used either — it adds nothing over a conjugate already on the record, and it would itself require a PPSV23 afterwards.${ppsvOnlyRowNote}${substitutionNote}`,
+        lead: `The ${gaveWhat} dose of ${fmtDate(invalidDate)} was given too soon to count, so the series is INCOMPLETE. Give 1 dose of ${productWords} ${dueToday ? 'now' : `on or after ${fmtDate(dueDate)}`} and the series is complete [c].${standing}`,
+        detail: `PPSV23 is not what is owed here: ACIP's only interval between two PPSV23 doses is 5 years, and a repeat conjugate completes the series on its own. PCV15 is not used either — it adds nothing over a conjugate already on the record, and it would itself require a PPSV23 afterwards.${ppsvOnlyRowNote}${pcv13OnlyRowNote}${substitutionNote}`,
       },
       noteCites: [
         cite('adultPcv20or21Complete'),
@@ -2604,6 +2691,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
           ? cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949')
           : cite('adultPcv13Only'),
         ...ppsvOnlyRowCites,
+        ...pcv13OnlyRowCites,
         ...substitutionCites,
       ],
       // ⚠️ CDC'S ADULT NOTES ALONE, and this is the fix for a real defect the
@@ -2619,11 +2707,17 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       // Each family carries the documents that speak for ITS sentences and no
       // others: CDC's notes always, mm7401a1 only where its "PPSV23 only" row
       // fits, the job aid only where its substitution footnote does.
+      // Each family carries the documents that speak for ITS sentences, and
+      // the branch order matches the four `...RowApplies` flags above.
+      // `pcv13OnlyRowApplies` (2026-10-25) keeps mm7401a1 for its "PCV13 only"
+      // row and drops the job aid, which says nothing about a repeat.
       refs: ppsvOnlyRowApplies
         ? adultRefsExcept('cdcAdultTimingJobAid')
-        : substitutingForOwedPpsv23
-          ? adultRefsExcept('mmwr7401a1')
-          : adultRefsExcept('cdcAdultTimingJobAid', 'mmwr7401a1'),
+        : pcv13OnlyRowApplies
+          ? adultRefsExcept('cdcAdultTimingJobAid')
+          : substitutingForOwedPpsv23
+            ? adultRefsExcept('mmwr7401a1')
+            : adultRefsExcept('cdcAdultTimingJobAid', 'mmwr7401a1'),
     })];
   }
 
@@ -3008,6 +3102,29 @@ const CARD_FOLLOWS_INVALID_DOSE = new Set([
   'ADULT-PCV-AFTER-PPSV23',
   'ADULT-PPSV23-AFTER-PCV15',
   'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
+  // OWNER DECISIONS 2026-10-25, the two PCV13 twins of the rows above.
+  //
+  // Shown two 60-year-olds alike in every particular but one — PCV13 on
+  // 2026-07-19 against PCV15 on the same day, each followed by a PPSV23 three
+  // months later — the owner ruled: *"A is treated the same as B."* The PCV15
+  // patient's screen had agreed with itself since 2026-10-24; the PCV13
+  // patient's card said 2027-07-19 while her own dose chip said 2027-10-11.
+  // Nothing in ACIP or CDC separates them: rr7203a1 states both halves in one
+  // sentence, and `CLINICAL_SPEC.md` §K already recorded the two rows as
+  // having "the same two-tier shape... for the same reason".
+  'ADULT-PPSV23-AFTER-PCV13',
+  // ...and the same for her 8-week class. Asked to confirm the number, she
+  // asked back whether the conjugate is owed "at least 1 year after the last
+  // PCV", which is ONE of the two clocks and the earlier one. Shown a
+  // 40-year-old with asplenia (PCV13 2026-08-30, PPSV23 2026-10-11) scored
+  // both ways — 2027-08-30 counting from the PCV13, 2027-10-11 counting from
+  // the PPSV23 that did not count, 2027-10-11 taking the later of the two —
+  // she chose the later of the two, *"and i want the rationale to be
+  // explained and cited when its recommended"*. That explanation is the
+  // sentence `invalidAdultDoseCard` already carries, which is why extending
+  // the set is the whole change: both intervals have to be satisfied, so the
+  // conjugate waits for whichever runs out last.
+  'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM',
 ]);
 
 /**
@@ -3213,10 +3330,55 @@ export function recommend(input) {
   // ── PCV21 geographic advisory ─────────────────────────────────────────
   const pcv21Geo = pcv21GeoNote(am, recs);
 
+  // ── OWNER DECISION 2026-10-25: a rejected dose does not promise a dose
+  //    nobody is asking for ───────────────────────────────────────────────
+  //
+  // The grey note under a dose rejected for TIMING ended with "the next dose
+  // in this series can be given from <date> at the earliest." Swept over the
+  // grid, that was being shown to **647 of the 814 children** whose PPSV23
+  // was rejected, on screens whose every card said the child was finished or
+  // needed nothing:
+  //
+  //   398  at risk, series complete, PCV20 in it   <- her Table 1 row exactly
+  //   111  PCV20 in the series, "Not indicated"
+  //   138  no PCV20, complete or not indicated
+  //
+  // Her ruling, with the document: *"Children aged 2–18 years with any risk
+  // condition who completed a recommended PCV series before age 6 years:
+  // Completed series includes >=1 dose of PCV20: No additional doses of any
+  // pneumococcal vaccine are indicated"* — CDC/ACIP, "Use of 20-Valent
+  // Pneumococcal Conjugate Vaccine Among U.S. Children", 22 September 2023,
+  // Table 1 (`cdcPcv20Children2023Table1`). The cards already honoured it; the
+  // note did not.
+  //
+  // ⚠️ THE TEST IS "IS ANYTHING OWED AT ALL", NOT "IS A DOSE OF THIS VACCINE
+  // OWED", and the difference is deliberate. An adult whose PPSV23 was
+  // rejected IS owed something — a conjugate, per the 2026-10-24/25 rulings —
+  // so her clause stays and keeps agreeing with her card's date. Keying on the
+  // stream instead would have stripped it from every one of those adults, two
+  // commits after the owner ruled the two surfaces must agree.
+  //
+  // It is also not an age test. CLAUDE.md forbids one deciding whether a rule
+  // bites, and none is needed: what makes these children different is that
+  // nothing is owed, which `recs` states directly.
+  //
+  // `complete` and `not-indicated` are the only two statuses that ask for
+  // nothing; `due`, `catchup`, `risk-based` and `shared-decision` all ask.
+  const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
+  const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
+  const withdrawForwardLook = (list) => (nothingIsOwed
+    ? list.map((d) => (d.forwardLookingReason
+      ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? d.withoutForwardLook : x)) }
+      : d))
+    : list);
+
   return {
     recs,
     pcv21Geo,
-    perDose: { pcv: pcvAnalysis.perDose, ppsv23: ppsvAnalysis.perDose },
+    perDose: {
+      pcv: withdrawForwardLook(pcvAnalysis.perDose),
+      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose),
+    },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH
     // from here; reading its own input array alongside `perDose` is what put

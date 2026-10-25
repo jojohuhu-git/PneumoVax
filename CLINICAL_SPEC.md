@@ -933,9 +933,9 @@ catch-up row**.
   | `CHILD-PCV-AFTER-PCV` | child | PCV | `prevSameStream` | dose 2 after a dose under 12 months: >=4 weeks; dose 2 after a dose from 12 months: >=8 weeks; dose 3 under 12 months after a dose under 7 months: >=4 weeks; dose 3 after a dose at 7-11 months: >=8 weeks; dose 4+ given under 12 months: >=4 weeks; dose 4+ given from 12 months: >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PCV` | child | PPSV23 | `lastPcv` | >=8 weeks | floor | CDC |
   | `CHILD-PPSV23-AFTER-PPSV23` | child | PPSV23 | `prevSameStream` | >=5 years | floor | CDC |
-  | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | floor | OWNER |
+  | `ADULT-PCV20-21-1Y-AFTER-PCV` | adult | PCV | `lastPcv` | >=1 year | recommendation | OWNER |
   | `ADULT-PCV20-21-5Y-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=5 years | recommendation | CDC |
-  | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | floor | OWNER |
+  | `ADULT-PCV20-21-AFTER-PCV13` | adult | PCV | `lastPcv13` | >=1 year | recommendation | CDC |
   | `ADULT-PCV-AFTER-PPSV23` | adult | PCV | `lastPpsv23` | >=1 year | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` | adult | PPSV23 | `lastPcv15` | >=8 weeks | floor | OWNER |
   | `ADULT-PPSV23-AFTER-PCV15` | adult | PPSV23 | `lastPcv15` | >=1 year | floor | OWNER |
@@ -951,13 +951,23 @@ catch-up row**.
   Reading the table:
   - **Enforcement** — `floor`: a shorter gap means the dose does not count and is owed a
     repeat. `recommendation`: the dose counts, keeps its number, and carries a sentence
-    explaining the gap. `none`: deliberately never flagged, with the reason in the row's
+    explaining the gap. **A dose may collect more than one such sentence** — since the
+    owner's *"mention both gaps"* decision of 2026-10-24 the walk no longer stops at the
+    first unmet recommendation, so a patient inside two advised intervals is told about
+    both. An unmet **floor** still ends the walk and discards any sentence collected before
+    it: every recommendation sentence ends by saying the dose counts, which would read as a
+    contradiction printed beside a rejection. `none`: deliberately never flagged, with the reason in the row's
     `source` field. A `none` row states no interval at all, because an interval it never
     reads would read as a live rule to the next person (asserted by P2-7).
   - **Authority** — ⚠️ `OWNER` means an **owner clinical determination dated 2026-10-11**,
     not ACIP's and not CDC's. Every adult floor is one; see the determination below. `CDC`
     appears only on the three paediatric floors, whose sources state the gap as a minimum in
     so many words, and on the rows that void nothing.
+    `ADULT-PCV20-21-1Y-AFTER-PCV` is the one row carrying `OWNER` that is **not** a floor:
+    it was downgraded on 2026-10-24 (§K-CONJUGATE below) and keeps the owner's name because,
+    unlike every other recommendation row, no ACIP or CDC source states its interval **in
+    any form** — not as a minimum and not as advice. Its message tells the clinician that
+    in words. Never relabel it `CDC` to make the pair of conjugate rows look symmetrical.
   - **Minimum gap** is the gap the rule *enforces*, which for adults is a different question
     from the gap the app *recommends*. The app recommends ≥1 year after a PCV15 for every
     adult (A-P1-1) and merely **names** the 8-week option; the two 8-week rows above judge a
@@ -1317,22 +1327,259 @@ assertion.
   requires ≥5 years between PPSV23 doses. PCV20 or PCV21 can be given ≥1 year after it,
   because ACIP schedules any conjugate ≥1 year after the last PPSV23."* Applying the general
   rule there would have moved 66 corpus rows FOUR YEARS earlier.
-- **Every adult family except three keeps the recommendation card it had.** The card follows
-  the invalid dose only for `ADULT-PCV-AFTER-PPSV23`, `ADULT-PPSV23-AFTER-PCV15` and
-  `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` — the three she worked through. Fired for every
-  adult floor it moved 667 of 17,016 verdicts and overrode cards reasoning from a richer
-  history: an immunocompromised adult with PCV13 + two PPSV23 doses lost her mm7401a1
-  "review again at age 50" card altogether. `ADULT-PPSV23-AFTER-PCV13` (402 patients) is the
-  same clinical shape and is **flagged, not taken** — widening to it moves verdicts in a
-  family she has not been shown.
+- **Every adult family except FIVE keeps the recommendation card it had.** The card follows
+  the invalid dose only for `ADULT-PCV-AFTER-PPSV23`, `ADULT-PPSV23-AFTER-PCV15`,
+  `ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM` (2026-10-24) and the two PCV13 rows added
+  2026-10-25 below. Fired for every adult floor it moved 667 of 17,016 verdicts and
+  overrode cards reasoning from a richer history: an immunocompromised adult with PCV13 +
+  two PPSV23 doses lost her mm7401a1 "review again at age 50" card altogether. That patient
+  is still out — her last dose is a second PPSV23, `ADULT-PPSV23-AFTER-PPSV23`.
+
+#### The two PCV13 families, added by the owner 2026-10-25
+
+`ADULT-PPSV23-AFTER-PCV13` (402 patients) stood here as **flagged, not taken** until she
+took it. Shown two 60-year-olds alike but for one product — PCV13 against PCV15 on
+2026-07-19, each followed by a PPSV23 on 2026-10-11 — she ruled *"yes A is treated the same
+as B."* The PCV15 patient's two surfaces had agreed since 2026-10-24; the PCV13 patient's
+card said 2027-07-19 against her own chip's 2027-10-11, and **200 of the 402 were being
+shown two different dates**. Nothing separates them: rr7203a1 states both halves in one
+sentence, and §K already recorded the two rows as having the same two-tier shape for the
+same reason. `ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM` (210, the 8-week class) came with
+it.
+
+**WHICH CLOCK — she was asked and chose the later one.** Confirming the second family she
+asked back *"to confirm is the recommendation PCV20/21 may be given at least 1 year after
+the last PCV?"*, which names one clock and the earlier one. Shown a 40-year-old with
+asplenia (PCV13 2026-08-30, PPSV23 2026-10-11) scored three ways — 2027-08-30 from the
+PCV13, 2027-10-11 from the PPSV23 that did not count, 2027-10-11 taking the later — she
+answered *"i am thinking it is third row. i want the rationale to be explained and cited
+when its recommended."* Both ACIP intervals have to be satisfied, so the conjugate waits for
+whichever runs out last; this is step 4 of her own four steps above, no longer inert for
+these families.
+
+**mm7401a1's "PCV13 only" row is CITED ON THESE CARDS, for the disposition and never for
+the date.** With the PPSV23 set aside the counting history is a PCV13 and nothing else, so
+the row — *"A single dose of PCV21 or PCV20 ≥1 year after the PCV13 dose"* (one word
+different in the 19–49 immunocompromising block) — states her disposition outright. Its
+year runs from the PCV13 and the card's date is later, so the claim gets its own sentence
+saying so. **Omitting it was the first draft's defect**: extending the card took mm7401a1
+off **212 cards it speaks for** (3,795 → 3,583), FINDING F's mirror on this card for the
+third time, caught by the three C8 guards. The job aid stays off — it says nothing about
+repeating a dose.
+
+Measured 2026-10-25: **212 cards changed wording** (0 added, 0 removed over 35,280 rendered
+lines), of which **179 of 17,016 moved a verdict** and 33 changed wording only — those 33
+are patients whose repeat date has already passed, so the card said "now" before and after.
+**0 of 18,264** record-problem rows moved.
 
 **A repaired series gets no repeat card**, per her proviso of 2026-10-23: *"if a later dose
 given helps correct the mistake in giving a vaccine early, this should be noted and marked
 as complete if appropriate."* Only an invalid dose that is the LAST dose on the record
 leaves anything owing.
 
-Guards: `regression-2026-10-24-invalid-adult-dose-owes-a-conjugate.test.js` and
-`regression-2026-10-24-card-and-chip-agree-after-an-invalid-dose.test.js`.
+Guards: `regression-2026-10-24-invalid-adult-dose-owes-a-conjugate.test.js`,
+`regression-2026-10-24-card-and-chip-agree-after-an-invalid-dose.test.js` (its per-family
+pin is now 400, was 188) and
+`regression-2026-10-25-pcv13-families-follow-the-invalid-dose.test.js`.
+
+---
+
+### §K-CONJUGATE — One adult conjugate soon after another is ADVICE, not a floor (OWNER, 2026-10-24)
+
+**The decision.** The last two adult rows asserting that a conjugate given sooner than a
+year after another conjugate **does not count** were downgraded to recommendations:
+`ADULT-PCV20-21-AFTER-PCV13` and `ADULT-PCV20-21-1Y-AFTER-PCV`. The dose now counts and the
+card explains the timing.
+
+**Why.** Both were owner clinical determinations of 2026-10-11, not minimums any source
+states — §K's determination below says so in capitals, and CDSI v4.64 sets
+`absMinInt = 0 days` for every adult pneumococcal interval. Reasoning about a different
+patient on 2026-10-24 the owner had already said an adult conjugate-to-conjugate interval
+*"exists in no document"*, and the rows were left standing as raised-not-decided. They were
+put to her again with two patients, each scored both ways through the real engine:
+
+| Patient | History | Before | After |
+|---|---|---|---|
+| 68 y, chronic heart disease | PCV13 2026-02-10, PCV20 2026-09-10 | PCV20 thrown out; return 2027-09-10 | PCV20 counts; series complete |
+| 70 y, no risk conditions | PPSV23 2018-06-01, PCV13 2026-01-15, PCV20 2026-08-15 | PCV20 thrown out; return 2027-08-15 | PCV20 counts; series complete |
+
+She chose to relax both, with a wording instruction: *"make the wording more clinical and
+nuanced since this is clinically likely ok but data free. Also bold it."*
+
+**The wording was then revised twice more the same day, reading the result on screen.**
+First: *"the bolded and nonbolded text on the card — meningovax has an abbreviated
+explanation that you can expand. Do that here while also tailoring the language to sound
+more clinical yet succinct."* So a recommendation's `message` may return
+`{ reason, why }` — one short clinical line on the dose chip, the rationale behind a
+"Why this" disclosure, the shape MeningoVax's rec notes have used since P6-4. The
+disposition is what carries the `**...**` emphasis, because it is what a clinician reads
+first. Second, shown patient C: *"the 5 years isn't being met right?"* — and it was not,
+2 years 2 months against an advised 5. **Every chip line now states the SHORTFALL, not
+just the interval** ("— shorter than the 5 years ACIP advises"); a note that recites a
+rule and leaves the reader to do the subtraction is not a clinical note. Both halves are
+guarded, because a split that silently dropped the rationale would pass a test that only
+read the chip.
+
+**⚠️ The two rows do not share an authority.** `ADULT-PCV20-21-AFTER-PCV13`'s year is CDC's
+own sentence — *"Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1
+year after the last PCV13 dose"* — so as a recommendation it carries `authority: 'CDC'`,
+the same relabelling Ruling F performed on `ADULT-PCV20-21-5Y-AFTER-PPSV23` and for the same
+reason: what was removed was an owner-invented **bar**, leaving CDC's advice behind.
+`ADULT-PCV20-21-1Y-AFTER-PCV` has no such sentence in any source. It keeps
+`authority: 'OWNER'` and its message tells the clinician, in words, that the interval is the
+app's own convention. Never relabel it to make the pair look symmetrical.
+
+**⚠️ Measured blast radius: 0 of 35,280.** Neither corpus can build a patient either row
+touches — the two above were typed by hand. "0 in the grid" is not "0 in a clinic"; the
+sweeps simply cannot see this change, which is why the guard holds named patients rather
+than a count.
+
+**And the walk changed with it.** Asked about a third patient — 70 y, PPSV23 2024-06-01,
+PCV13 2026-01-15, PCV20 2026-08-15 — who is inside the 1-year conjugate gap **and** inside
+the 5-year gap after her PPSV23, and who was being told only about the first, the owner
+chose *"mention both gaps"*. `evaluateDoseInterval` now collects unmet recommendations and
+keeps walking instead of returning at the first. An unmet **floor** still returns at once
+and discards anything collected before it — every recommendation sentence ends by saying
+the dose counts, which would contradict a rejection printed beside it.
+
+Guard: `regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js`.
+
+### §K-PCV20CHILD2023 — ACIP's 2023 PCV20-in-children report on the cards (OWNER, 2026-10-25)
+
+**The document.** *Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children:
+Updated Recommendations of the Advisory Committee on Immunization Practices — United
+States, 2023*, CDC/ACIP, Supplementary Report to MMWR 72(39), stacks date 2023-09-22, 19
+pages. **Table 1 is on page 10.** Downloaded and read live 2026-10-25 (477.11 KB):
+`https://stacks.cdc.gov/view/cdc/133252/cdc_133252_DS1.pdf`.
+
+**⚠️ THE MMWR PAGE IS NOT THIS DOCUMENT.** `cdc.gov/mmwr/volumes/72/wr/mm7239a5.htm`
+(the pre-existing `mmwr7239a5` entry) is a ONE-PARAGRAPH NOTICE, fetched live the same day:
+it records that ACIP voted on 22 June 2023 and points at the Supplementary Report. It
+contains no table and no recommendation text. Both entries are kept and they are different
+documents; **never cite the notice for a Table 1 row.**
+
+**Table 1's row, verbatim.** Heading: *"Children aged 2–18 years with any risk condition
+who completed a recommended PCV series before age 6 years"*. It then splits:
+
+| | Table 1 says | Where it goes |
+|---|---|---|
+| **Completed series includes ≥1 dose of PCV20** | *"No additional doses of any pneumococcal vaccine are indicated."* | the "PCV complete (includes PCV20)" card — **replacing immunize.org p2016**, 56 cards |
+| **Completed series using PCV13 or PCV15 (no PCV20)** | *"Either a single dose of PCV20 or PPSV23 using previously recommended dosing and schedules is recommended to complete the recommended vaccine series."* | the Option A and Option B cards — **added** beside CDC's child notes, 432 cards |
+
+**The swap is a RANKING, not a removal for silence — so it is not FINDING F.** p2016 Table 4
+has a fitting row and it was re-read live the same day: *"Completed PCV series before age 6
+years, including one or more doses of PCV20 | No additional doses"*. Both documents state
+the claim; the owner's standing rule of 2026-10-23 prefers CDC where both speak, which is
+the same disposition she gave the 840 at/after-6 cards.
+
+**⚠️ THE SWAP IS SCOPED, AND THE SCOPE IS THE PPSV23.** Only the **56** cards where no
+PPSV23 counts lose p2016. The **40** sibling cards where one HAS been given keep it — her
+decision of 2026-10-23, which turns on CDC's child-notes branch being headed *"but have not
+received PPSV23"* where p2016's row carries no such condition. 56 + 40 = the 96 that
+`regression-finding-j-...` previously pinned as one bucket; it now pins both halves
+separately. The p2016 footprint moves **3,459 → 3,403**.
+
+**⚠️ TABLE 1 STATES NO INTERVAL.** Half B offers the choice and says nothing about 8 weeks
+— that number is CDC's child notes' and p2016's. Its marker therefore sits on **its own
+sentence** ("Either a single dose of PCV20 or a PPSV23 completes the recommended series"),
+never on the clause carrying the interval, which would give one sentence two numbers for
+two claims. Likewise the IC card's "≥5 years later" clause belongs to `pedsSecondPpsv5y`;
+Table 1 is silent on it.
+
+**Both quotes are verbatim and contiguous bullets**, not a bullet joined to its heading
+(FINDING K) — the heading's conditions live in each entry's `label`. Both declare
+`population: ['child-nonIC','child-IC']`, which is transcription: the row is headed "any
+risk condition" and the report's footnote lists both classes in one list.
+
+### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
+
+Neither is a clinical rule; both are about whether a clinician can read the card correctly.
+No date, verdict or corpus column moves under either.
+
+**1. A card never advises an age the child has already passed.** A 12-month-old whose only
+PCV15 was at 2 months read *"The next dose is due at age 4 months"*. The date was right —
+`advisedDate` is the latest of the minimum, the 8-week spacing and the routine age (§L /
+C10-2), and the routine age genuinely was the latest here — but a past date was printed as
+a future instruction, on **198 of 17,016** real patients. Past tense now, plus what to do:
+*"This dose was due at age 4 months in the routine 2, 4, 6 and 12–15 month series and is
+overdue — it can be given now."* The series is still named, because that is what the
+clause's citation supports. The "can be given now" half is conditional on the dose actually
+being due, so a card held to the first birthday does not contradict its own lead.
+Guard: `regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js`.
+
+**2. One date format on the screen.** The rec card printed *"eligible Dec 7, 2026"* while
+the dose chip beside it printed *"from 2026-09-25"* — **5,620 chip sentences** in computer
+format. Every patient date a clinician READS now goes through `fmtDate`. **The DATA fields
+stay ISO** — `earliestValidDate`, `repeatDueDate`, `earliestNextDate` and every corpus
+column — because they are compared, sorted and committed, and a display format in a data
+field is how a corpus starts failing on a copy edit. **One date is deliberately left raw:**
+*"an owner clinical determination dated 2026-10-11"* is provenance, not a patient date. The
+guard sweeps five patients for bare ISO dates, allows exactly that one shape, and asserts
+separately that the exception is still reachable so the filter cannot become dead code.
+Guard: `regression-2026-10-24-one-date-format-on-the-screen.test.js`.
+
+**And the prose sweep was extended with the disclosure.** `scripts/proseDiff.mjs` now
+renders each dose's `whys` alongside its reasons and detail. Those sentences are prose a
+clinician reads, one click away, and nothing else sees them — the corpora hold verdicts,
+and a reader who never opens the disclosure cannot notice a wrong sentence inside it. This
+is the "verdict corpora do not record prose" lesson applied to a channel as it was created
+rather than after it drifted.
+
+### §K-NOPROMISE — A rejected dose does not name a date for a dose nobody is asking for (OWNER, 2026-10-25)
+
+**The defect.** A dose rejected for TIMING carried the sentence *"...It is not repeated; the
+next dose in this series can be given from `<date>` at the earliest."* Measured over the
+grid, **647 of the 814 children** whose PPSV23 was rejected were shown that date on a screen
+where every card said they were finished or needed nothing — 398 at risk with a complete
+PCV20-containing series, 111 with PCV20 whose card read "Not indicated", 138 with no PCV20
+and a complete or not-indicated card. The patient who found it: a 5-year-old with asplenia,
+PCV20 on 2026-06-01 and a PPSV23 21 days later.
+
+**The owner's ruling, and her document.** Asked what such a child is actually owed, she
+answered with CDC/ACIP's **Table 1** and told the app it may cite that document for
+paediatric recommendations:
+
+> *"Children aged 2–18 years with any risk condition who completed a recommended PCV series
+> before age 6 years: **Completed series includes ≥1 dose of PCV20:** No additional doses of
+> any pneumococcal vaccine are indicated."*
+
+**Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children: Updated
+Recommendations of the Advisory Committee on Immunization Practices — United States, 2023**,
+CDC/ACIP, published **22 September 2023**, Table 1 —
+`https://stacks.cdc.gov/view/cdc/133252`, verified live 2026-10-25. The table is in the PDF;
+the stacks landing page carries metadata only. Table 1's other half, for a completed series
+**without** PCV20, reads *"Either a single dose of PCV20 or PPSV23 using previously
+recommended dosing and schedules is recommended to complete the recommended vaccine
+series."*
+
+**The recommendation CARDS already honoured this** — `pcvInfant`'s complete branch has said
+"the series already includes PCV20, so no further pneumococcal dose is needed" since
+FINDING D. Only the dose note did not, so this is a wording fix and moves no dose.
+
+**THE TEST IS "IS ANYTHING OWED AT ALL", NOT "IS A DOSE OF THIS VACCINE OWED."** An adult
+whose PPSV23 was rejected IS owed something — a conjugate, per §K-INVALID — so her clause
+stays and goes on matching her card's date. Keying on the vaccine stream would have stripped
+it from every one of those adults one commit after the owner ruled that the two surfaces
+must agree. It is **not an age test** either: what separates these children is that nothing
+is owed, which `recs` states directly. `complete` and `not-indicated` are the only two card
+statuses that ask for nothing.
+
+**The lead always survives.** Only the forward-looking half goes; the dose still does not
+count, and it is still not repeated.
+
+**Where it lives.** `validate.js` emits both halves and hands `recommend.js` the exact
+sentence to swap and its replacement (`forwardLookingReason` / `withoutForwardLook`).
+`validate.js` cannot see the cards, and `recommend.js` must not match the sentence by text —
+string surgery on a sentence built elsewhere breaks silently when the wording changes.
+
+Measured 2026-10-25 over both grids: **3,282 of 35,280 rendered lines changed** (2,930 real
+patients, 352 impossible entries), 0 added, 0 removed, and **every changed line is explained
+entirely by the clause being withdrawn** — no line gained it and nothing else moved. **Both
+corpora are blind to this** (they record a reason COUNT, not its text, and the swap keeps the
+count), which is why the guard sweeps the rendered sentences instead.
+
+Guard: `regression-2026-10-25-no-date-for-a-dose-nobody-asks-for.test.js`, pinned on both
+sides — 2,930 withdrawn and 2,335 kept.
 
 ---
 

@@ -137,7 +137,7 @@ describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () =
     // because the recorded one did not count. If it ever reads complete, the
     // floor has been loosened — which is what the case above guards.
     expect(v.recText).toMatch(/PCV:due/);
-    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of 2018-03-01/);
+    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of Mar 1, 2018/);
     // And never PCV15, which she ruled out by name: "PCV15 adds nothing over
     // the patient's prior dose."
     expect(v.recText).not.toMatch(/PCV15/);
@@ -198,12 +198,21 @@ describe('ANCHOR-1 Case B — no child verdict moves', () => {
   // complete.
 });
 
-describe('ANCHOR-1 Case G — a PPSV23 behind a rejected PCV already counted', () => {
-  // Adult with HIV: PCV13 Jan 2024 counts, PCV20 Jun 2024 is rejected (short
-  // of a year after the PCV13), PPSV23 2024-06-15. The PPSV23 was already
-  // measured against the COUNTING PCV doses only, so it counts — this is the
-  // direction of the handoff that was always right, pinned here so the rework
-  // cannot regress it.
+// ⚠️ CASE G NO LONGER EXERCISES ANCHORING, AND SAYING SO IS THE POINT.
+// It was an adult with HIV: PCV13 Jan 2024 counts, PCV20 Jun 2024 REJECTED
+// (short of a year after the PCV13), PPSV23 2024-06-15 two weeks later. The
+// PPSV23 counted only because it was measured against the COUNTING PCV doses
+// — anchored to the rejected PCV20 its 14-day gap would have failed the
+// 8-week IC minimum. On 2026-10-24 the owner downgraded the conjugate floor
+// (§K-CONJUGATE), so the PCV20 counts, the series is complete, and the
+// PPSV23 is an extra dose no interval rule judges at all. The history still
+// ends the same way, for an entirely different reason — which is why this
+// block is kept and relabelled rather than quietly left green.
+//
+// THE ANCHOR-1 PROPERTY ITSELF IS UNAFFECTED and is pinned below, in "the
+// property behind the five cases", which uses a PPSV23 that is still
+// rejected. Do not read this block as coverage of it.
+describe('ANCHOR-1 Case G — the conjugate floor it rested on is gone (2026-10-24)', () => {
   const CASE_G = {
     ageMonths: Y(70),
     riskIds: ['hiv'],
@@ -211,12 +220,21 @@ describe('ANCHOR-1 Case G — a PPSV23 behind a rejected PCV already counted', (
     ppsv23Doses: [{ product: 'PPSV23', date: '2024-06-15' }],
   };
 
-  it('counts the PPSV23 and keeps rejecting the early PCV20', () => {
+  it('now counts the PCV20 too, and names the row that explains the timing', () => {
     const v = verdictsFor(CASE_G);
     expect(v.pcv[0].status).toBe('valid');
-    expect(v.pcv[1].status).toBe('invalid');
+    // Was 'invalid'.
+    expect(v.pcv[1].status).toBe('valid');
+    expect(v.pcv[1].earlyAdvisory).toBe(true);
     expect(v.pcv[1].intervalRuleId).toBe('ADULT-PCV20-21-AFTER-PCV13');
+  });
+
+  it('still counts the PPSV23 — now as a dose after a complete series', () => {
+    const v = verdictsFor(CASE_G);
     expect(v.ppsv23[0].status).toBe('valid');
+    // The reason changed with the cause: no interval rule judges it any more.
+    expect(v.ppsv23[0].reasons.join(' ')).toMatch(/series was already complete/i);
+    expect(v.ppsv23[0].intervalRuleId).toBeUndefined();
   });
 });
 

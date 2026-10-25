@@ -469,7 +469,7 @@ function adviseIfBeforeRecommendedAge(result, prod, ageAtDose, ageMonths) {
     : `The patient is currently ~${fmtAgeM(ageMonths)}, so this dose was given`;
   return advise(
     result,
-    `PCV21 (Capvaxive) is FDA-licensed from ${licensed}, but ACIP recommends it from ${recommended}. ${when} — before the recommended starting age. It counts and does not need repeating.`
+    [`PCV21 (Capvaxive) is FDA-licensed from ${licensed}, but ACIP recommends it from ${recommended}. ${when} — before the recommended starting age. It counts and does not need repeating.`]
   );
 }
 
@@ -502,12 +502,21 @@ function noncounting(reasons = [], reasonCites) { return withCites({ status: 'no
 // "Off-window" is reserved for MeningoVax's sense of the word — a dose that
 // does NOT count and is owed a repeat (doseChipLabel.js, S14-6) — and this
 // dose is the opposite of that: it counts.
-function advise(result, reason, ruleId) {
+// `reasons` is a LIST since the owner's *"mention both gaps"* decision of
+// 2026-10-24: a dose can miss more than one advised interval, and each unmet
+// row contributes its own sentence. `intervalRuleId` still names the FIRST
+// one, so nothing that records a single rule id had to change.
+function advise(result, reasons, ruleId, whys = []) {
   return {
     ...result,
     earlyAdvisory: true,
     intervalRuleId: ruleId,
-    reasons: [...(result.reasons ?? []), reason],
+    reasons: [...(result.reasons ?? []), ...reasons],
+    // OWNER REQUEST 2026-10-24: the rationale sits behind the chip's "Why
+    // this" disclosure, as MeningoVax's rec notes already do, so the chip
+    // itself stays one clinical line. Absent when no rule supplied one, and
+    // `RecCard` renders no toggle then.
+    ...(whys.length ? { whys: [...(result.whys ?? []), ...whys] } : {}),
   };
 }
 
@@ -529,7 +538,7 @@ function applyIntervalRules(result, ctx) {
     r.conjugateAlternative = verdict.conjugateAlternative ?? null;
     return r;
   }
-  return advise(result, verdict.reason, verdict.ruleId);
+  return advise(result, verdict.reasons, verdict.ruleId, verdict.whys);
 }
 
 // ── Validate one PCV dose ────────────────────────────────────────────────
@@ -785,6 +794,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // the only way it reaches a dose: a hand-typed second copy in one branch is
     // exactly the drift this file keeps warning about.
     const sameDayNote = sameDayDifferentBrandNote(dose, kept);
+    // The two halves of the timing-rejection sentence. See the split below.
+    const DOES_NOT_COUNT_LEAD = 'This dose does not count toward the series — given too soon after the dose it is measured from.';
+    const nextDoseClause = (r) => `the next dose in this series can be given from ${fmtDate(r.repeatDueDate ?? r.earliestValidDate)} at the earliest.`;
     const addNote = (entry) => (sameDayNote
       ? { ...entry, reasons: [...(entry.reasons ?? []), sameDayNote] }
       : entry);
@@ -826,7 +838,23 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // reading "can be given from 2026-11-09" — three dates for one dose.
           // The wording now echoes that note deliberately, and the date behind
           // it is the same ungraced minimum.
-          ? `This dose does not count toward the series — given too soon after the dose it is measured from. It is not repeated; the next dose in this series can be given from ${result.repeatDueDate ?? result.earliestValidDate} at the earliest.`
+          // ── SPLIT IN TWO, 2026-10-25 ────────────────────────────────
+          //
+          // The first half is about the dose already given and is always
+          // true. The second looks FORWARD, and for 647 of the 814 children
+          // with a mistimed PPSV23 it pointed at a dose the app was not
+          // asking for at all — a 5-year-old with asplenia whose PCV20 series
+          // covers her, or a healthy 12-year-old whose only card reads "Not
+          // indicated", each told "the next dose in this series can be given
+          // from ..." with a date.
+          //
+          // Whether another dose is owed is a RECOMMENDATION question, and
+          // this file cannot see the cards. So the clause is emitted here and
+          // WITHDRAWN in `recommend.js`, which has both. It is handed over as
+          // its own field rather than matched by text — string surgery on a
+          // sentence built somewhere else is the kind of coupling that breaks
+          // silently when the wording changes.
+          ? `${DOES_NOT_COUNT_LEAD} It is not repeated; ${nextDoseClause(result)}`
           : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       // OWNER RULING 2026-10-24 — the second sentence she asked for on a
       // mistimed SECOND PPSV23, emphasised, giving the conjugate option its
@@ -844,12 +872,20 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // interval logic.
       const alt = result.recordProblem ? null : result.conjugateAlternative;
       const alternativeSentence = alt
-        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${alt.dueDate} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
+        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
         : null;
       perDose.push(addNote({
         ...result,
         effectiveDoseNum: null,
         doesNotCount: true,
+        // The handover to `recommend.js`: the exact sentence to swap out, and
+        // the shorter one to put in its place when no card asks for a further
+        // dose. The LEAD always survives — the dose still does not count, and
+        // it is still not repeated; only the forward-looking date goes. Both
+        // null unless the split above produced them, so nothing else can be
+        // swapped by accident.
+        forwardLookingReason: result.recordProblem || !result.intervalRuleId ? null : closingSentence,
+        withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : `${DOES_NOT_COUNT_LEAD} It is not repeated.`,
         reasons: [...result.reasons, closingSentence, alternativeSentence].filter(Boolean),
       }));
       // RULING D (2026-10-23) — a mistimed dose anchors the next one, because

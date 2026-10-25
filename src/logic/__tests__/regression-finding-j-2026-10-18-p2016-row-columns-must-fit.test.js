@@ -88,7 +88,8 @@ const chipShorts = (rec) => (rec.citations ?? []).map((c) => c.short);
 
 describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
   it('p2016 is on the PCV20-complete card exactly when the series was completed before age 6', () => {
-    let fits = 0;        // row applies, p2016 present
+    let fits = 0;        // row applies AND a PPSV23 is on record: p2016 present
+    let swapped = 0;     // row applies, no PPSV23: p2016 off, 2023 report on
     let unfit = 0;       // row does not apply, p2016 absent
     const wrongly = [];  // row does not apply but p2016 is still there
     const missing = [];  // row applies but p2016 was taken off
@@ -103,12 +104,44 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
       // more doses of PCV20". An undated dose cannot establish that, so it does
       // not fit either.
       const rowFits = ages.length > 0 && ages.every((a) => a !== null && a < 72);
+      // ⚠️ OWNER DECISION 2026-10-25 SPLIT THE "ROW FITS" SIDE IN TWO, and
+      // this flag is the split. Where the row fits AND no PPSV23 is on record,
+      // CDC/ACIP's 2023 PCV20-in-children report states the whole claim
+      // ("No additional doses of any pneumococcal vaccine are indicated."), so
+      // under her standing "cite CDC; reach for p2016 only if you cannot" rule
+      // p2016 comes OFF and the 2023 report goes on — the same disposition she
+      // gave the 840 at/after-6 cards on 2026-10-23, where p2016's rows also
+      // fitted. Where a PPSV23 HAS been given, p2016 STAYS: that is her
+      // 2026-10-23 decision on the 40 Group-B cards, and it turns on CDC's
+      // child-notes branch carrying a "but have not received PPSV23" condition
+      // that p2016's row does not.
+      //
+      // This is NOT the FINDING F fault. p2016 is not being removed for
+      // silence — its row fits and was re-read live on 2026-10-25 ("Completed
+      // PCV series before age 6 years, including one or more doses of PCV20 |
+      // No additional doses"). It is being ranked below CDC where both speak.
+      //
+      // ⚠️ COUNTING DOSES, NOT ROWS. The engine's branch keys on `ppsv.count`
+      // — the EFFECTIVE count — so a PPSV23 given at 12 months, which is below
+      // the minimum age and does not count, leaves the child in the no-PPSV23
+      // group. Reading `c.input.ppsv23Doses.length` instead put 40 such
+      // patients on the wrong side of this split and reported them as a
+      // removal. "Count doses the way the document counts" — the same lesson
+      // the 60/72/12 split taught.
+      const hasPpsv = (result.perDose?.ppsv23 ?? [])
+        .some((v) => v && v.status !== 'invalid' && v.status !== 'noncounting');
 
       for (const rec of result.recs ?? []) {
         if (!noteOf(rec).includes(NEEDLE)) continue;
         const hasP2016 = chipShorts(rec).includes('immunize.org p2016');
-        if (rowFits) {
+        const has2023 = chipShorts(rec).includes('ACIP 2023 PCV20 Children');
+        if (rowFits && hasPpsv) {
           if (hasP2016) fits += 1; else missing.push(c.key);
+        } else if (rowFits) {
+          // The swapped group: p2016 must be gone and the 2023 report present.
+          if (hasP2016) wrongly.push(`${c.key}: p2016 kept after the 2026-10-25 swap`);
+          else if (!has2023) missing.push(`${c.key}: swapped but the 2023 report is absent`);
+          else swapped += 1;
         } else if (!hasP2016) {
           unfit += 1;
         } else {
@@ -128,7 +161,19 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
     // went to zero the assertions above would pass while the card had stopped
     // existing, or while p2016 had been stripped from every card including the
     // ones it speaks for.
-    expect(fits).toBe(96);
+    // ⚠️ RE-MEASURED 2026-10-25, AND THE OLD 96 SPLIT CLEANLY IN TWO:
+    //   40  the row fits AND a counting PPSV23 is on record -> p2016 STAYS.
+    //       Exactly the 40 `regression-finding-k-...` pins, reached here by a
+    //       different route, which is the cross-check that the two guards
+    //       agree about who those children are.
+    //   56  the row fits and no PPSV23 counts -> p2016 OFF, 2023 report ON
+    //       (owner, 2026-10-25).
+    //   96  = 40 + 56, the figure this line held before the swap.
+    // Pinned exactly, both of them: if the swap ever widened to the 40, or
+    // narrowed, one of these fails rather than the suite going quiet.
+    expect(fits).toBe(40);
+    expect(swapped).toBe(56);
+    expect(fits + swapped).toBe(96);
     expect(unfit).toBe(864);
   });
 
@@ -144,7 +189,9 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
   });
 
   describe('the owner\'s patient, built by hand', () => {
-    const patient = ({ ageMonths, riskIds, pcv }) => {
+    // `ppsv` is a list of ages in months, added 2026-10-25 so the Group A /
+    // Group B control pair below can differ in exactly one field.
+    const patient = ({ ageMonths, riskIds, pcv, ppsv = [] }) => {
       const dob = addCalendarMonths(CORPUS_TODAY, -ageMonths);
       return recommend({
         ageMonths,
@@ -152,7 +199,7 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
         today: CORPUS_TODAY,
         riskIds,
         pcvDoses: pcv.map(([product, mo]) => ({ product, date: addCalendarMonths(dob, mo) })),
-        ppsv23Doses: [],
+        ppsv23Doses: ppsv.map((mo) => ({ product: 'PPSV23', date: addCalendarMonths(dob, mo) })),
       });
     };
 
@@ -190,12 +237,38 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
       expect(noteOf(card)).toMatch(/that dose has been given/);
     });
 
-    it('6y, asplenia, PCV20 at age 5: p2016\'s row fits, so it stays', () => {
+    // ⚠️ THIS CASE REVERSED ON 2026-10-25, AND THE REVERSAL IS THE RECORD.
+    // It was called "p2016's row fits, so it stays" and asserted exactly that.
+    // p2016's row still fits — re-read live that day, "Completed PCV series
+    // before age 6 years, including one or more doses of PCV20 | No additional
+    // doses" — but CDC/ACIP's 2023 PCV20-in-children report states the whole
+    // claim too, and the owner's standing rule prefers CDC where both speak.
+    // So this is a RANKING, not a removal for silence, and not FINDING F.
+    it('6y, asplenia, PCV20 at age 5, no PPSV23: the 2023 ACIP report replaces p2016', () => {
       const r = patient({ ageMonths: 72, riskIds: ['asplenia'], pcv: [['PCV20', 60]] });
       const card = (r.recs ?? []).find((x) => noteOf(x).includes(NEEDLE));
       expect(card).toBeDefined();
       expect(card.status).toBe('complete');
+      expect(chipShorts(card)).toContain('ACIP 2023 PCV20 Children');
+      expect(chipShorts(card)).not.toContain('immunize.org p2016');
+      // The claim is still credited by number, to the sentence that states it.
+      expect((card.noteCites ?? []).map((x) => x.key))
+        .toContain('cdcPcv20Children2023CompleteWithPcv20');
+    });
+
+    // THE CONTROL, and the reason the swap is scoped rather than blanket. The
+    // same child WITH a PPSV23 is in Group B, where CDC's child-notes branch
+    // is headed "but have not received PPSV23" and p2016's row carries no such
+    // condition. That was the owner's decision of 2026-10-23, pinned at 40
+    // cards, and 2026-10-25 did not touch it.
+    it('...but the same child WITH a PPSV23 keeps p2016', () => {
+      const r = patient({
+        ageMonths: 72, riskIds: ['asplenia'], pcv: [['PCV20', 60]], ppsv: [62],
+      });
+      const card = (r.recs ?? []).find((x) => noteOf(x).includes(NEEDLE));
+      expect(card).toBeDefined();
       expect(chipShorts(card)).toContain('immunize.org p2016');
+      expect(chipShorts(card)).not.toContain('ACIP 2023 PCV20 Children');
     });
 
     it('a PCV20 given <8 weeks after a prior PCV is rejected, not called complete', () => {

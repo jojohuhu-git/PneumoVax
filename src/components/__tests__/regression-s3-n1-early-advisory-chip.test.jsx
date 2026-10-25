@@ -134,22 +134,73 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
   });
 
-  it('end to end: an adult five-week PCV13 → PCV20 gap now reads as a dose that does not count', () => {
+  // ⚠️ REVERSED 2026-10-24 (§K-CONJUGATE) — kept as the record of it. This
+  // case was called "...now reads as a dose that does not count" and asserted
+  // the rejection, the repeat date and the owner's name on the screen. The
+  // owner downgraded the row: the dose counts, and the explanation is bolded
+  // on her instruction — *"make the wording more clinical and nuanced since
+  // this is clinically likely ok but data free. Also bold it."*
+  it('end to end: an adult five-week PCV13 → PCV20 gap counts, and the caveat is BOLD', () => {
     const { container } = render(<Harness pcvDoses={[
       { product: 'PCV13', date: '2026-01-05' },
       { product: 'PCV20', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/at least 1 year after the last PCV13 dose/i)).toBeInTheDocument();
-    // W1 (owner-approved wording, 2026-10-11): this dose was never missing,
-    // only early — the UI must not tell the clinician to repeat it.
-    // OWNER RULING 2026-10-24: the chip names the ungraced minimum, and
-    // names it as the earliest rather than as the date the dose is due.
-    expect(screen.getByText(/can be given from 2027-02-09 at the earliest/i)).toBeInTheDocument();
-    expect(screen.queryByText(/repeat this dose only/i)).not.toBeInTheDocument();
-    // The clinician must be able to see this is the owner's rule, not ACIP's.
-    expect(screen.getByText(/owner clinical determination/i)).toBeInTheDocument();
-    // And it must NOT still claim the dose counts.
-    expect(screen.queryByText(/This dose still counts/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/shorter than the 1 year CDC advises/i)).toBeInTheDocument();
+
+    // THE BOLD IS THE OWNER'S REQUIREMENT, SO IT IS ASSERTED ON THE RENDERED
+    // DOM, not on the string the engine produced. `**...**` in a reason is
+    // turned into <strong class="note-emphasis"> by renderNoteWithCites;
+    // a reason rendered as a bare string would print literal asterisks.
+    const bold = [...container.querySelectorAll('.note-emphasis')].map((n) => n.textContent).join(' ');
+    expect(bold).toMatch(/Counted; no repeat indicated/);
+    expect(container.textContent).not.toMatch(/\*\*/);
+
+    // Counted, numbered, not struck through, not an error.
+    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
+    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(container.querySelector('.dose-val-dropped')).toBeNull();
+
+    // No repeat date, and no claim of the owner determination it no longer
+    // rests on — both would contradict "the dose is counted".
+    expect(screen.queryByText(/at the earliest/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/2027-02-09/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/owner clinical determination/i)).not.toBeInTheDocument();
+  });
+
+  // OWNER REQUEST 2026-10-24, second round: *"meningovax has an abbreviated
+  // explanation that you can expand. Do that here."* The rationale must be
+  // OFF the screen until the clinician asks for it, and ON it when they do.
+  it('end to end: the rationale is hidden until "Why this" is clicked', () => {
+    const { container } = render(<Harness pcvDoses={[
+      { product: 'PCV13', date: '2026-01-05' },
+      { product: 'PCV20', date: '2026-02-09' },
+    ]} />);
+    openEveryCard(container);
+
+    const RATIONALE = /Immunogenicity at shorter intervals has not been established/i;
+    expect(screen.queryByText(RATIONALE)).not.toBeInTheDocument();
+
+    const toggle = screen.getByTestId('dose-val-toggle');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveTextContent('Why this');
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(RATIONALE)).toBeInTheDocument();
+
+    // And it closes again — a disclosure that only opens is a layout bug.
+    fireEvent.click(toggle);
+    expect(screen.queryByText(RATIONALE)).not.toBeInTheDocument();
+  });
+
+  // A dose with nothing to explain must not grow an empty control.
+  it('end to end: a dose with no note and no detail renders NO toggle', () => {
+    const { container } = render(<Harness pcvDoses={[
+      { product: 'PCV13', date: '2016-01-05' },
+      { product: 'PCV20', date: '2026-02-09' },
+    ]} />);
+    openEveryCard(container);
+    expect(screen.queryByTestId('dose-val-toggle')).not.toBeInTheDocument();
   });
 });

@@ -150,7 +150,7 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     // OWNER RULING 2026-10-24: the full 28 days from the dose of 2026-03-15,
     // with no 4-day grace — the grace decides what the app ACCEPTS, never what
     // it ADVISES. Was 2026-04-08.
-    expect(reasons).toMatch(/can be given from 2026-04-12 at the earliest/);
+    expect(reasons).toMatch(/can be given from Apr 12, 2026 at the earliest/);
     expect(reasons).not.toMatch(/2026-04-08/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
@@ -164,26 +164,36 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     expect(a.effective).toHaveLength(2);
   });
 
-  // REVERSED BY S14-7 (owner decision 2026-10-11). This case used to assert
-  // that an adult PCV gap can never void a dose, because CDC states adult gaps
-  // as advice for the next dose rather than as minimum intervals. The owner
-  // reviewed that evidence — CDSI v4.64 sets absMinInt = 0 days for every adult
-  // pneumococcal interval, and the three current adult MMWRs never say a short
-  // gap means repeat the dose — and determined that an interval is an interval:
-  // a dose given inside one was not validly given, whatever the patient's age.
-  // The full new rule set lives in logic/doseIntervalRules.js; its header
-  // carries the sources and labels the owner-determined rows as such.
-  it('voids an adult PCV20 given less than a year after PCV13 (owner rule, S14-7)', () => {
+  // REVERSED TWICE, AND BOTH REVERSALS ARE RECORDED HERE BECAUSE THE SECOND
+  // RESTORES THE FIRST'S CONCLUSION BY A DIFFERENT ROUTE.
+  //
+  // Originally this case asserted that an adult PCV gap can never void a
+  // dose, because CDC states adult gaps as advice for the next dose rather
+  // than as minimum intervals. S14-7 (owner, 2026-10-11) reversed that: an
+  // interval is an interval, and a dose inside one was not validly given.
+  // §K-CONJUGATE (owner, 2026-10-24) reversed it back for THIS pair — shown
+  // a 68-year-old whose PCV20 was being thrown out and re-ordered a year
+  // later, she ruled the dose counts and the card explains the timing.
+  //
+  // The 2026-10-11 determination is NOT dead: it still stands for every other
+  // adult floor (PPSV23 after a conjugate, a conjugate after a PPSV23, a
+  // second PPSV23). Only the two conjugate-to-conjugate rows were relaxed.
+  it('counts an adult PCV20 given less than a year after PCV13, with a note (§K-CONJUGATE)', () => {
     const a = analyzeHistory('PCV', [
       { date: '2026-01-05', product: 'PCV13' },
       { date: '2026-02-09', product: 'PCV20' },
     ], 840, TODAY, '1956-01-01');
-    expect(statuses(a)).toEqual(['valid', 'invalid']);
-    expect(a.effective).toHaveLength(1);
-    // The reason has to name the owner determination, never ACIP — the app's
-    // honesty promise turns on a clinician being able to tell the two apart.
-    expect(a.perDose[1].detail).toMatch(/owner clinical determination/i);
-    expect(a.perDose[1].detail).not.toMatch(/ACIP recommends|per ACIP/i);
+    expect(statuses(a)).toEqual(['valid', 'valid']);
+    expect(a.effective).toHaveLength(2);
+    expect(a.perDose[1].earlyAdvisory).toBe(true);
+    // The honesty promise is unchanged in substance, only in direction: the
+    // sentence must say what CDC states and must not dress the app's own
+    // convention up as CDC's. This row's year IS CDC's, so it says so — and
+    // it must not claim the owner determination it no longer rests on.
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 1 year CDC advises/);
+    expect((a.perDose[1].whys ?? []).join(' '))
+      .toMatch(/recommended timing, not a minimum/);
+    expect(a.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 });
 

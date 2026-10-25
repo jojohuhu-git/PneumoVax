@@ -319,7 +319,11 @@ describe('a recorded-dose verdict says what it was judged against', () => {
     expect(late, 'expected a 5-year-gap verdict').toBeDefined();
     expect(late.status).toBe('valid');
     const noun = intervalPhrase({ months: PPSV23_REVACC_MIN_MONTHS });
-    expect(late.reasons.join(' ')).toContain(`at least ${noun}`);
+    // 2026-10-24: the chip states the number tersely ("ACIP advises >=5
+    // years") and the disclosure states it in full. The point of this test is
+    // that ONE place computes the words, so both are checked against `noun`.
+    expect(late.reasons.join(' ')).toContain(`shorter than the ${noun} ACIP advises`);
+    expect((late.whys ?? []).join(' ')).toContain(`at least ${noun}`);
     // The old floor sentence must not come back alongside the new one.
     expect(late.detail ?? '').not.toContain('gap is enforced');
   });

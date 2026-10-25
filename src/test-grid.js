@@ -275,7 +275,30 @@ function recVerdict(rec) {
   ].join('/');
 }
 
-/** One recorded dose's verdict. `reasons` contributes its COUNT, never its text. */
+/**
+ * One recorded dose's verdict. `reasons` contributes its COUNT, never its text.
+ *
+ * ── Why `repeatDueDate` is here (2026-10-25) ────────────────────────────
+ *
+ * It was MISSING, and the gap was measured before it was closed. A dose that
+ * does not count carries TWO dates and they answer different questions:
+ *
+ *   earliestValidDate  when THIS dose would have been valid   (the anchor + gap)
+ *   repeatDueDate      when the REPEAT may be given           (this dose + gap)
+ *
+ * Only the first was recorded. Shifting every `repeatDueDate` by 999 days moved
+ * **122 of 17,016** rows here and **0 of 18,264** in the record-problem corpus —
+ * and all 122 moved only as a SIDE EFFECT, through the recommendation card's
+ * `earliestNextDate`, on the families whose card reads the chip's date
+ * (`invalidAdultDoseCard`). The dose's own line did not move at all, for any
+ * patient. So the number a clinician reads under a rejected dose was guarded by
+ * nothing, which is why item 3 of the 2026-10-24 ruling shipped with mutation
+ * counts of 2 and 3 while the card's shipped with 20s.
+ *
+ * Adding the field moves every row that HAS a rejected dose, so the corpus
+ * regeneration that introduced it was proved inert field by field, not by the
+ * row count sweep:update prints. See the commit.
+ */
 function doseVerdict(d) {
   return [
     d.status,
@@ -284,6 +307,7 @@ function doseVerdict(d) {
     bool(d.doesNotCount),
     bool(d.earlyAdvisory),
     nn(d.earliestValidDate),
+    nn(d.repeatDueDate),
     `n${(d.reasons ?? []).length}`,
   ].join(':');
 }

@@ -16,6 +16,10 @@
 import { describe, it, expect } from 'vitest';
 import { analyzeHistory } from '../validate.js';
 import { addDays, addCalendarYears } from '../dateUtils.js';
+// C12 (2026-10-24): the SENTENCE prints "Apr 12, 2026"; the DATA field
+// (`repeatDueDate`) is still ISO. The expected text is built from the same
+// formatter the app uses, so a date arithmetic change still fails here.
+import { fmtDate } from '../format.js';
 
 describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () => {
   it('names the earliest valid date instead of saying "repeat", for a child PCV given too soon', () => {
@@ -42,12 +46,12 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // (dose 2 + 28 - 4); now 2026-04-12.
     const repeatDue = addDays('2026-03-15', 28);
     expect(repeatDue).toBe('2026-04-12');
-    expect(reasons).toMatch(new RegExp(`can be given from ${repeatDue} at the earliest`));
+    expect(reasons).toMatch(new RegExp(`can be given from ${fmtDate(repeatDue)} at the earliest`));
     // Both superseded dates, asserted as DATES rather than inside the old
     // sentence — a negative assertion that quotes wording the app no longer
     // prints anywhere passes for the wrong reason.
-    expect(reasons).not.toMatch(/2026-03-25/);
-    expect(reasons).not.toMatch(/2026-04-08/);
+    expect(reasons).not.toMatch(/Mar 25, 2026/);
+    expect(reasons).not.toMatch(/Apr 8, 2026/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
 
@@ -73,8 +77,8 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // 2022-12-28 (the 2018 dose + 5y - 4d); now 2023-01-01.
     const repeatDue = addCalendarYears('2018-01-01', 5);
     expect(repeatDue).toBe('2023-01-01');
-    expect(reasons).toMatch(new RegExp(`This dose does not count toward the series — given too soon after the dose it is measured from\\. It is not repeated; the next dose in this series can be given from ${repeatDue} at the earliest\\.`));
-    expect(reasons).not.toMatch(/2022-12-28/);
+    expect(reasons).toMatch(new RegExp(`This dose does not count toward the series — given too soon after the dose it is measured from\\. It is not repeated; the next dose in this series can be given from ${fmtDate(repeatDue)} at the earliest\\.`));
+    expect(reasons).not.toMatch(/Dec 28, 2022/);
     expect(reasons).not.toMatch(/repeat this dose only/);
   });
 
