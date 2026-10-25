@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import Rulebook from '../Rulebook.jsx';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_RULES, SOURCES, monthsInWords } from '../../data/rulebook.js';
+import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_TABLE, INTERVAL_GROUPS, SOURCE_GROUPS, monthsInWords } from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
 import { DOSE_INTERVAL_RULES } from '../../logic/doseIntervalRules.js';
 import { ALL_PRODUCTS } from '../../data/brands.js';
@@ -112,21 +112,54 @@ describe('C14 — the boundaries the page claims are the ones the engine actuall
 
 describe('C14 — every list on the page is the engine\'s own list', () => {
   it('the dose-spacing table is DOSE_INTERVAL_RULES, entry for entry', () => {
-    expect(INTERVAL_RULES.map((r) => r.id)).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id));
-    for (const r of INTERVAL_RULES) {
+    expect(INTERVAL_TABLE.map((r) => r.id)).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id));
+    for (const r of INTERVAL_TABLE) {
       const real = DOSE_INTERVAL_RULES.find((x) => x.id === r.id);
       expect(r.enforcement).toBe(real.enforcement);
       expect(r.authority ?? null).toBe(real.authority ?? null);
-      expect(r.rulebook).toBe(real.rulebook);
     }
+  });
+
+  it('regrouping the table loses no rule and duplicates none', () => {
+    // 2026-10-25: the flat list became a lookup grouped by patient. A regroup
+    // is exactly the kind of change that can silently drop a row, so the
+    // grouped view is checked back against the engine's own list as a SET.
+    const grouped = INTERVAL_GROUPS.flatMap((g) => g.rows.map((r) => r.id));
+    expect(grouped.slice().sort()).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id).sort());
+    expect(new Set(grouped).size).toBe(grouped.length);
   });
 
   it('every rule the engine can apply appears on the rendered page', () => {
     render(<Rulebook onClose={() => {}} />);
     // Section 4 is collapsed by default, so open it the way a reader would.
     fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
+    // ⚠ NOT by rule id any more. The ids used to print under every row and
+    // were removed on 2026-10-25 — the owner asked for a table to look a
+    // patient up in, and `CHILD-PCV-AFTER-PCV` is the most list-like thing
+    // that was on it. A row is now identified the way a reader identifies it:
+    // by the gap it states and what happens when it is missed.
+    for (const r of INTERVAL_TABLE) {
+      expect(screen.getAllByText(r.gap).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(`${r.ifShorter}.`).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('shows no internal rule id to a clinician', () => {
+    render(<Rulebook onClose={() => {}} />);
+    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
     for (const r of DOSE_INTERVAL_RULES) {
-      expect(screen.getAllByText(r.id).length).toBeGreaterThan(0);
+      expect(screen.queryAllByText(r.id).length).toBe(0);
+    }
+  });
+
+  it('carries each rule\'s own source sentence, so a reader need not open the document', () => {
+    // The owner's stated reason for the reorganisation: "It's confusing for me
+    // to go back to each reference document on my own." A row with no source
+    // sends her back to the document, so every row that HAS one in the engine
+    // must carry it here.
+    for (const real of DOSE_INTERVAL_RULES) {
+      const row = INTERVAL_TABLE.find((r) => r.id === real.id);
+      if (typeof real.source === 'string') expect(row.source).toBe(real.source);
     }
   });
 
@@ -149,12 +182,35 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
   });
 
   it('every source listed has a real URL and a date it was read', () => {
-    expect(SOURCES.length).toBeGreaterThan(10);
-    for (const s of SOURCES) {
+    const all = SOURCE_GROUPS.flatMap((g) => g.docs);
+    expect(all.length).toBeGreaterThan(10);
+    for (const s of all) {
       expect(s.url).toMatch(/^https?:\/\//);
       expect(s.url).not.toContain('#');
       expect(s.lastVerified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     }
+  });
+
+  it('files every document under exactly one heading, and CDC before the rest', () => {
+    // 2026-10-25: the list was alphabetical by an internal key, which the
+    // owner read as random. Grouping can lose a document or file it twice, so
+    // both are checked, and the publisher order is asserted because the
+    // authority rule in CLAUDE.md is what it encodes.
+    const names = SOURCE_GROUPS.flatMap((g) => g.docs.map((d) => d.name));
+    expect(new Set(names).size).toBe(names.length);
+    expect(SOURCE_GROUPS.map((g) => g.book)).toEqual(['child', 'adult', 'any']);
+    for (const g of SOURCE_GROUPS) {
+      const rank = g.docs.map((d) => (d.publisher === 'CDC / ACIP' ? 0 : 1));
+      expect(rank).toEqual(rank.slice().sort());
+    }
+  });
+
+  it('says how heavily each document is leaned on', () => {
+    // "Sentences quoted" is the column that tells the owner which documents
+    // are load-bearing. If every count were zero the column would be a lie.
+    const all = SOURCE_GROUPS.flatMap((g) => g.docs);
+    expect(all.filter((d) => d.quotes > 0).length).toBeGreaterThan(5);
+    expect(Math.max(...all.map((d) => d.quotes))).toBeGreaterThan(10);
   });
 });
 
