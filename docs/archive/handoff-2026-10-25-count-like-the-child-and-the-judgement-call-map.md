@@ -4,16 +4,19 @@ Branch: **`claude/beautiful-volta-gaw7c6`**, off `main` at `1c3fe52` — PR #87 
 squash-merged by the owner, so this branch is a clean descendant and is NOT stacked on
 anything unmerged.
 
-Baseline on `main` was 1,606 passing in 144 files; now **1,638 passing in 145 files, 0
+Baseline on `main` was 1,606 passing in 144 files; now **1,639 passing in 145 files, 0
 failures, 0 skips** (`npx vitest run`).
 
 ⚠️ **This session ran in a cloud container, not on the owner's Mac.** There is no
 `preview_start` / `preview_logs` here. The app was previewed by building it with
 `npx vite build --base ./` and inlining the bundle into one self-contained HTML file, which
 was sent to her to open in the side panel. The script is
-`scripts/…` — no, it is NOT in the repo; it was a scratchpad helper. If a future cloud
-session needs a preview, rebuild with `--base ./` and inline `assets/*.js` and `assets/*.css`
-into `index.html`; `dist/` is only ~360 KB, so the single file is ~345 KB and renders fine.
+The helper was a scratchpad script and is NOT in the repo. If a future cloud session needs a
+preview: `npx vite build --base ./ --outDir <tmp>`, then inline `assets/*.js` into a
+`<script type="module">` and `assets/*.css` into a `<style>`, and replace the logo's
+`import.meta.env.BASE_URL` reference with a data URI. `dist/` is only ~360 KB, so the single
+file is ~350 KB and renders fine. Playwright is preinstalled in the cloud container, so the
+page can also be driven headlessly — which is what caught the error in the third commit.
 
 ## What's done
 
@@ -82,6 +85,17 @@ The spacing table's "Who says so" column now reads **"This app's judgement"** ra
 "This app". Broken three ways: a judgement row silently dropped **1** test; a written claim
 the engine no longer makes **3**; the section rendering nothing **1**.
 
+**A third commit fixed an error DRIVING THE PAGE found, that no test could.** The section
+first carried one explanation for every judgement call — *"the interval is theirs; treating
+it as a cut-off is ours"* — which is true of the five floors and **false** of
+`ADULT-PCV20-21-1Y-AFTER-PCV`, whose own message tells the clinician that **no source states
+the interval at all**. They are two different kinds of judgement call. `authorityMeans` now
+branches on `enforcement`, the table has a third column saying which, and the guard asserts
+both kinds occur and that a row claiming "no source states this" really does carry *"not
+ACIP, not CDC"* in its own source text. A page that explains a rule wrongly is worse than one
+that omits it — and the suite was green throughout, because nothing compared the page's prose
+to the rule's.
+
 ## A FINDING worth carrying forward
 
 **The recommendation card's conjugate-to-conjugate read-across sentence is now unreachable** —
@@ -119,7 +133,7 @@ conjugate-after-PPSV23 row later fails a test rather than quietly outliving the 
 ## Resuming
 
 1. Branch fresh off `main` if the PR for this branch has merged. Never stack on an unmerged PR.
-2. `npx vitest run` — confirm **1,638 passing in 145 files** before any new work.
+2. `npx vitest run` — confirm **1,639 passing in 145 files** before any new work.
 3. Put the IC-child question to her with the two quotes side by side, then the Group-B cards
    and the three wording items.
 4. Per item: reproduce → failing test → fix → `CLINICAL_SPEC.md` in the same commit → full

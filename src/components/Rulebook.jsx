@@ -189,16 +189,18 @@ export default function Rulebook({ onClose }) {
           with a guideline, and may reasonably decide otherwise.
         </p>
 
-        <h3 className="rb-h3">Gaps that stop a dose counting, where no document says they should</h3>
+        <h3 className="rb-h3">Dose-spacing rules the app decides for itself</h3>
         <p className="rb-note">
-          CDC and ACIP publish these intervals as <em>recommended timing</em>. Neither says a
-          dose given inside one has to be repeated — CDC&rsquo;s own data file sets no minimum
-          for any adult pneumococcal interval. Treating them as cut-offs is this app&rsquo;s
-          decision, and the app says so on the dose itself as well as here.
+          These come in two kinds, and the last column says which. In most of them CDC or
+          ACIP publishes the interval as <em>recommended timing</em> and never says a dose
+          given inside it has to be repeated — CDC&rsquo;s own data file sets no minimum for
+          any adult pneumococcal interval — so the <em>cut-off</em> is this app&rsquo;s. In the
+          rest, no document states the interval at all, so the <em>number</em> is this
+          app&rsquo;s. Either way the app says so on the dose itself as well as here.
         </p>
         <table className="rb-table">
           <thead>
-            <tr><th>The gap being judged</th><th>Which patients</th></tr>
+            <tr><th>The gap being judged</th><th>Which patients</th><th>What is the app&rsquo;s own</th></tr>
           </thead>
           <tbody>
             {OWNER_INTERVAL_CALLS.map((r) => (
@@ -208,6 +210,7 @@ export default function Rulebook({ onClose }) {
                   {r.rulebook === 'child' ? 'Children' : r.rulebook === 'adult' ? 'Adults' : 'Any age'}
                   <span className="rb-sub">{r.enforcementMeans}</span>
                 </td>
+                <td>{r.authorityMeans}</td>
               </tr>
             ))}
           </tbody>

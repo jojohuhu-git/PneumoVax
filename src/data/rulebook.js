@@ -149,9 +149,21 @@ export const INTERVAL_RULES = DOSE_INTERVAL_RULES.map((r) => ({
   enforcement: r.enforcement,
   enforcementMeans: ENFORCEMENT_MEANS[r.enforcement],
   authority: r.authority ?? null,
-  authorityMeans: r.authority === 'OWNER'
-    ? 'This one is a clinical judgement of this app, not something CDC or ACIP states. The interval is theirs; treating it as a hard cut-off is ours, and the app says so on the dose itself.'
-    : 'CDC or ACIP state this interval themselves.',
+  // ⚠️ THE OWNER HALF USED TO BE ONE SENTENCE FOR EVERY ROW, AND IT WAS WRONG
+  // FOR ONE OF THEM. It read "The interval is theirs; treating it as a hard
+  // cut-off is ours" — true of the five floors, false of
+  // ADULT-PCV20-21-1Y-AFTER-PCV, where no source states the interval at all
+  // ("No ACIP or CDC source specifies an interval between adult conjugate
+  // doses; the 1 year interval applied here is this app's own convention",
+  // its own message to the clinician). Found by driving the page, not by a
+  // test: the sentence was accurate for the rows a reader was most likely to
+  // look at. The two are different KINDS of judgement call and the page now
+  // says which is which.
+  authorityMeans: r.authority !== 'OWNER'
+    ? 'CDC or ACIP state this interval themselves.'
+    : r.enforcement === 'floor'
+      ? 'The interval is CDC\'s or ACIP\'s. Treating it as a cut-off that stops the dose counting is this app\'s decision, and the app says so on the dose itself.'
+      : 'No CDC or ACIP source states this interval at all. The number applied is this app\'s own convention, and the note on the dose says so.',
   sourceKey: typeof r.source === 'string' ? r.source : null,
 }));
 

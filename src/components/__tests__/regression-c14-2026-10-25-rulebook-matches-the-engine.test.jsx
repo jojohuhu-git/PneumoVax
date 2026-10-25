@@ -174,6 +174,36 @@ describe('C14 — the judgement calls the page highlights are the engine\'s own'
     expect(fromEngine.length).toBeGreaterThan(0);
   });
 
+  it('tells the two KINDS of judgement call apart, and does not say the wrong one', () => {
+    // ⚠️ FOUND BY DRIVING THE PAGE, NOT BY A TEST, which is why this
+    // assertion exists. The first draft gave every OWNER row one sentence —
+    // "the interval is theirs; treating it as a cut-off is ours" — which is
+    // true of the five floors and FALSE of ADULT-PCV20-21-1Y-AFTER-PCV, whose
+    // own message tells the clinician that no source states the interval at
+    // all. A page that explains a rule wrongly is worse than one that omits
+    // it.
+    for (const r of OWNER_INTERVAL_CALLS) {
+      const real = DOSE_INTERVAL_RULES.find((x) => x.id === r.id);
+      if (real.enforcement === 'floor') {
+        expect(r.authorityMeans, r.id).toMatch(/cut-off that stops the dose counting/);
+        expect(r.authorityMeans, r.id).not.toMatch(/No CDC or ACIP source states/);
+      } else {
+        expect(r.authorityMeans, r.id).toMatch(/No CDC or ACIP source states this interval at all/);
+        expect(r.authorityMeans, r.id).not.toMatch(/cut-off/);
+        // And the page's claim is the row's own claim, not a second opinion:
+        // a row whose number has no source says so in its source text too.
+        expect(real.source, r.id).toMatch(/not ACIP, not CDC/);
+      }
+    }
+    // Anti-vacuity: both kinds must actually occur, or the branch above is
+    // only ever tested in one direction.
+    const kinds = new Set(OWNER_INTERVAL_CALLS.map((r) => {
+      return DOSE_INTERVAL_RULES.find((x) => x.id === r.id).enforcement;
+    }));
+    expect(kinds.has('floor')).toBe(true);
+    expect(kinds.has('recommendation')).toBe(true);
+  });
+
   it('and it lists no row the engine credits to CDC or ACIP', () => {
     for (const r of OWNER_INTERVAL_CALLS) {
       const real = DOSE_INTERVAL_RULES.find((x) => x.id === r.id);
