@@ -1342,7 +1342,29 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // directions.
   const anchorPcv = pcv.anchorDate;
   // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
-  const anchorPneumo = mostRecent(pcv.lastDate, ppsv.effective.find((d) => d.date)?.date || null);
+  //
+  // ⚠ `ppsv.lastDate`, NOT `ppsv.effective.find(...)` — 2026-10-26. `find`
+  // returns the FIRST counting PPSV23, so a child with two of them had her
+  // eight weeks measured from a dose up to seven years old and the wait had
+  // always already passed. Hana, 12, asplenia, no conjugate ever, PPSV23 on
+  // 1 Jan 2019 and 1 Sep 2026: told "due today" on 25 Oct, 54 days after her
+  // real last dose, on a card whose own label reads ">=8 weeks". A child with
+  // ONLY the 2026 dose was correctly held to 27 Oct — more history, earlier
+  // date.
+  //
+  // OWNER, 2026-10-26: "both statements are correct. 'Give PPSV23 dose 2 >=5
+  // years after dose 1 PPSV23' is the routine schedule when spacing out 2
+  // PPSV23 doses. 'Give the next conjugate >=8 weeks after the most recent
+  // pneumococcal vaccine' is correct when spacing out conjugate from PPSV23 or
+  // between conjugate vaccines." So NO INTERVAL CHANGES HERE — only which dose
+  // is fed into the 8-week one.
+  //
+  // The 5-year revaccination clock does run from dose 1, and the five call
+  // sites that want it keep reaching for `effective.find(...)` directly
+  // (`dueStateMonths(..., MO60, ...)` and `firstPpsv` in
+  // `icPostPpsv23DueState`). First and last are different questions; this line
+  // is the one that asks for the last.
+  const anchorPneumo = mostRecent(pcv.lastDate, ppsv.lastDate);
   // ── 2026-10-25: the 24-71-month catch-up card's 8 weeks ─────────────────
   //
   // CDC's at-risk catch-up row states TWO intervals and the card implemented
@@ -3429,16 +3451,22 @@ export function recommend(input) {
     // doses has them five years apart, so reading one for the other is a
     // five-year error.
     //
-    // ⚠ THE DIFFERENCE IS UNREACHABLE FROM TODAY'S ONLY CALLER, and that is
-    // recorded rather than hidden: swapping this line for `.find(...)` broke
-    // 0 of 1,607 tests. Its caller is the 24-71-month catch-up card, and a
-    // SECOND counting PPSV23 cannot exist there by arithmetic — a first
-    // PPSV23 cannot count before 24 months and a second needs >=5 years after
-    // it, so two counting doses are impossible before ~84 months, past the
-    // block's 71-month ceiling. The unreachability is pinned by a test
-    // instead, so moving that ceiling fails rather than silently reading the
-    // wrong dose. The field keeps the name it earns: a `lastDate` that
-    // returned the first dose is a trap for whoever calls it next.
+    // ⚠ THE DIFFERENCE IS NOW REACHABLE, and the trap this comment warned
+    // about had already been sprung elsewhere. When the field was added its
+    // one caller was the 24-71-month catch-up card, where a SECOND counting
+    // PPSV23 cannot exist by arithmetic — a first PPSV23 cannot count before
+    // 24 months and a second needs >=5 years after it, so two counting doses
+    // are impossible before ~84 months, past that block's 71-month ceiling.
+    // That remains true and is pinned by
+    // `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23`,
+    // so moving the ceiling fails a test. But `anchorPneumo` was reading
+    // `effective.find(...)` for the same question, and for a 6-18-year-old
+    // with two counting PPSV23 doses that was a seven-year error (fixed
+    // 2026-10-26; guard
+    // `regression-2026-10-26-eight-weeks-runs-from-the-last-ppsv23`). Both
+    // 8-week callers now read this field. The field keeps the name it earns:
+    // a `lastDate` that returned the first dose is a trap for whoever calls
+    // it next.
     lastDate: [...effectivePpsv].reverse().find((d) => d.date)?.date || null,
   };
 

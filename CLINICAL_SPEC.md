@@ -318,9 +318,11 @@ on a card quoting *"at least 8 weeks after the most recent dose"* underneath it.
 citation and the date contradicted each other on one screen.
 
 It was found by comparing two patients who differ only in age. The **6–18** block already
-anchors on the most recent pneumococcal dose, so an 8-year-old with that history was
-correctly told 26 Nov while a 4-year-old was told today. Measured over the grid: **225 of
-17,016**, every one of them aged 2 or 5, **none aged 6 or over**.
+anchors on a pneumococcal dose, so an 8-year-old with that history was correctly told 26 Nov
+while a 4-year-old was told today. Measured over the grid: **225 of 17,016**, every one of
+them aged 2 or 5, **none aged 6 or over**. (That block anchored on the **first** counting
+PPSV23, not the most recent — right for this one-dose patient and wrong for a child with two.
+Corrected 2026-10-26, §C-PPSV23LAST below.)
 
 **CDC's own tool reads it the same way.** PneumoRecs, for a 4-year-old with asplenia, a
 PPSV23 and no conjugate: *"Give 2 doses of PCV: first dose, given **8 weeks after the dose of
@@ -354,6 +356,71 @@ would make the number this app's own.
 Guard: `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
 which pins 33, splits it 11 / 22, and holds the 4-year-old and the 8-year-old to the same
 date.
+
+### §C-PPSV23LAST — The 8 weeks runs from the LAST counting PPSV23, not the first (2026-10-26)
+
+**OWNER, 2026-10-26,** shown the app's two schedule sentences side by side and asked which
+was wrong: *"both statements are correct. 'Give PPSV23 dose 2 ≥5 years after dose 1 PPSV23'
+is the routine schedule when spacing out 2 PPSV23 doses. 'Give the next conjugate ≥8 weeks
+after the most recent pneumococcal vaccine' is correct when spacing out conjugate from
+PPSV23 or between conjugate vaccines."*
+
+**So no interval changes here, and neither rule is in question.** The defect was which
+**dose** the app fed into the 8-week rule.
+
+`anchorPneumo` — the engine's "most recent pneumococcal vaccine" anchor for at-risk children,
+and its own comment said so — was built from `ppsv.effective.find((d) => d.date)`.
+JavaScript's `find` returns the **first** match. So for a child with two counting PPSV23
+doses the eight weeks were measured from a dose up to seven years old, and the wait had
+always already passed.
+
+**Hana, 12, asplenia, no conjugate ever. PPSV23 on 1 Jan 2019 and again on 1 Sep 2026.**
+The five-year spacing is satisfied (7 y 8 m apart), so both doses count.
+
+| | |
+|---|---|
+| her next conjugate is due | **27 Oct 2026** — 8 weeks after 1 Sep 2026 |
+| the app said, on 25 Oct | **due today**, 54 days after her real last dose, two short |
+| the card's own label reads | *"≥8 weeks"* |
+
+**The tell needs no clinical judgement at all.** A child whose **only** PPSV23 is that 1 Sep
+dose was correctly held to 27 Oct. Hana has the same dose plus an older one — more history,
+and the app gave her the **earlier** date.
+
+**The fix is one line**, and it reaches for a field that already existed and already meant
+this: `mostRecent(pcv.lastDate, ppsv.lastDate)`. The five call sites that want the **first**
+dose keep reaching for `effective.find(...)` directly, because the five-year revaccination
+clock genuinely runs from dose 1 — the rule the owner confirmed above. First and last are
+different questions; this line is the one that asks for the last.
+
+**Why the whole suite stayed green.** With one PPSV23 on record "first" and "most recent" are
+the same dose. No patient in the 17,016-row grid has two counting PPSV23 doses, and none of
+the 810 hand-built children of 2026-10-25 does either — the grid cannot build a vaccinated
+child aged 2–18 at all. The fix therefore had to be guarded by a hand-built patient or it
+would have come back silently.
+
+**Measured** over 21,327 card rows (the grid, the 810 children of 2026-10-25, and 2,660 rows
+of a new two-PPSV23 family): **408 rows moved, for 228 patients, every one of them LATER**;
+0 earlier, 0 back to "due today", and the **date is the only field that changed** — no
+status, no label, no verdict. **0 grid rows moved**, so both corpora are byte-identical, and
+the corpus records `earliestNextDate`, which makes that a real check. **No PPSV23 card moved
+at all**: the five-year clock is untouched in the measurement as well as in the code.
+
+**Mutations, each caught by a different set:** restoring `.find(...)` → **3** failing, all in
+the new guard and nothing else in the suite (which is exactly the point); dropping the PCV
+side of `mostRecent` → **1**, in §D-note's five-year guard; dropping the PPSV23 side, i.e.
+reverting §C-PPSV23ANCHOR → **9** across 5 files, including both corpora.
+
+Guard: `regression-2026-10-26-eight-weeks-runs-from-the-last-ppsv23.test.js` — Hana, the
+same-date comparison against the one-dose child, a direction sweep over every pair of dates
+that keeps both doses counting, and three controls: the five-year clock still runs from dose
+1, a dose that does **not** count (inside five years, or dated in the future) cannot push the
+conjugate out, and a child with no PPSV23 is untouched.
+
+**One related question the owner has NOT been asked.** A PPSV23 given 54 days ago but
+*rejected* for falling inside five years does **not** hold off a conjugate — ANCHOR-1, *"an
+unnecessary dose cannot reset a clock."* That is designed behaviour, pinned as a control in
+the guard above, not part of this defect.
 
 ---
 
