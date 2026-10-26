@@ -2249,7 +2249,33 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     return out;
   }
 
-  const anchorForA = noPriorPcv ? anchorPneumo : anchorPcv;
+  // ── 2026-10-25, the second half of the PPSV23-then-PCV ruling ──────────
+  //
+  // `noPriorPcv` counts doses that COUNTED, so the moment
+  // `CHILD-PCV-AFTER-PPSV23` became a floor this branch started catching a new
+  // patient: a child whose only conjugate WAS given and was then set aside.
+  // For her `anchorPneumo` is her PPSV23 — ANCHOR-1 keys it on counting doses
+  // — so the card advised 8 weeks from the PPSV23 while her chip promised the
+  // repeat 8 weeks from the dose she actually got. Maya, 8, asplenia (PPSV23
+  // 1 Oct, PCV20 15 Oct): card "eligible Nov 26", chip "from Dec 10".
+  //
+  // The card's date was the harmful one: the dose given on 26 Nov is rejected
+  // again by CHILD-PCV-AFTER-PCV (42 days, needs 56) and she still reads
+  // incomplete. ACIP's General Best Practices and RULING D both space the
+  // repeat from the invalid dose, which is 10 Dec.
+  //
+  // So take the LATER of the two anchors — the identical "later of two clocks"
+  // shape `anchorPneumoGiven` uses above, and for the identical reason. Both
+  // carry the same 8 weeks, so the later anchor is the later date and NO second
+  // interval is introduced.
+  //
+  // ⚠ A CHILD WITH NO CONJUGATE AT ALL IS UNTOUCHED: `anchorPcv` is null for
+  // her, `mostRecent` drops it, and the pneumococcal anchor stands. Nothing of
+  // hers was set aside, so there is no repeat to space from. Children aged 2–5
+  // never had the defect — their block already uses `anchorPneumoGiven` — and
+  // every one of the 375 patients this moved was in the 6–18 block.
+  // Guard: regression-2026-10-25-card-and-chip-name-one-date.test.js.
+  const anchorForA = noPriorPcv ? mostRecent(anchorPneumo, anchorPcv) : anchorPcv;
   const aState = dueState(anchorForA, WK8, today);
 
   out.push(rec({

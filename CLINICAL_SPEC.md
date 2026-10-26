@@ -1669,32 +1669,58 @@ them exactly.
 Guard: `regression-2026-10-25-child-conjugate-after-ppsv23-repeats.test.js` (renamed from
 `...-counts.test.js`, which asserted the opposite and is kept as the record of the reversal).
 
-**⚠ ONE THING THIS RULING CREATED IS NOT YET DECIDED, AND NOT YET FIXED — the
-RECOMMENDATION CARD still advises an earlier date than the chip.** Maya's chip says the
-repeat may be given from **10 Dec** (Ruling D: eight weeks from the dose she got). Her card
-says *"Not yet due — eligible **26 Nov**"* — eight weeks from her PPSV23, because
-`anchorPneumo` keys on **counting** doses (ANCHOR-1, *"an unnecessary dose cannot reset a
-clock"*) and her only conjugate no longer counts. Two dates for one dose, 14 days apart.
+**THE SECOND SURFACE, NOW FIXED — the card and the chip name ONE date (owner approved,
+2026-10-25).** Making this row a floor produced the **first case in the app where a dose is
+thrown out by a CROSS-STREAM rule**, and the recommendation card did not follow RULING D
+there. Maya's chip promised the repeat *"from 10 Dec"* while her card said *"Not yet due —
+eligible **26 Nov**"* — 14 days apart, for the same next dose. The card measured 8 weeks from
+her PPSV23, because `anchorPneumo` keys on doses that **COUNT** (ANCHOR-1, *"an unnecessary
+dose cannot reset a clock"*) and her only conjugate no longer counted, leaving the PCV side
+of its anchor empty.
 
-**It is this ruling that created them.** Measured over 810 hand-built children aged 2–18
-with a PPSV23 and a conjugate 1–55 days later (the grid cannot build these patients at all):
-on `main` **0** had a rejected dose, so 0 clashed; on this branch **600** are rejected and
-**375** carry a card earlier than the chip. The 11 grid patients that do reach the rule show
-0 clashes, which is why the suite is green — the guard class that would catch it cannot
-build the patient.
+**The card's date was the harmful one, checked in the engine rather than reasoned about.**
+PCV20 given on 26 Nov is rejected *again* by `CHILD-PCV-AFTER-PCV` (42 days, needs 56) and
+she still reads incomplete; given on 10 Dec it is valid and she reads **Complete**. ACIP's
+General Best Practices (*"The repeat dose should be spaced after the invalid dose by the
+recommended minimum interval"*) and RULING D both give 10 Dec; no document gives 26 Nov.
 
-**And the card's date is the wrong one.** A clinician who follows it gets a dose the app then
-throws away: Maya given PCV20 on 26 Nov is rejected by `CHILD-PCV-AFTER-PCV` (42 days, needs
-56) and her series still reads incomplete; given it on 10 Dec it is valid and she reads
-**Complete**. Both ACIP's General Best Practices (*"The repeat dose should be spaced after the
-invalid dose by the recommended minimum interval"*) and RULING D give 10 Dec; no document or
-ruling gives 26 Nov.
+**The fix is the LATER of two clocks — the same shape the 24–71-month block already used,
+and one line:**
 
-**Why it was not simply fixed.** The candidate fix is the *later of two clocks* shape the
-24–71-month block already uses — `anchorPneumoGiven = mostRecent(anchorPcv, ppsv.lastDate)`
-— applied to the 6–18 block's `anchorForA` and its Option B sibling. That **moves advised
-dates**, which is owner-decision case (c), and it means choosing which of several anchor
-sites in `recommend.js` move. **ASK BEFORE BUILDING IT.**
+```js
+const anchorForA = noPriorPcv ? mostRecent(anchorPneumo, anchorPcv) : anchorPcv;
+```
+
+| Anchor | Whose rule | What it is |
+|---|---|---|
+| `anchorPcv` | RULING D | the dose the patient **got**, including one that did not count |
+| `anchorPneumo` | ANCHOR-1 | the most recent pneumococcal dose that **counted** |
+
+Both carry the same 8 weeks, so the later anchor is simply the later date and **no second
+interval enters the engine**. All three cards in the 6–18 block read one `aState`, so one
+line moved all of them.
+
+**Measured: 750 card dates moved LATER, 0 earlier, 0 "due today" flips**, over 18,667 card
+rows from the grid plus 810 hand-built children. Every one is in the **6–18** block (ages 6,
+8, 11, 14, 17 — 150 each), two cards per patient across 375 patients. **No grid patient moved
+at all**, which is why both verdict corpora are byte-identical — and the corpus records
+`earliestNextDate`, so that is a real check and not a blind one. **A child with no conjugate
+at all is untouched**: `anchorPcv` is null, `mostRecent` drops it, and nothing of hers was set
+aside, so there is no repeat to space from.
+
+Guards: `regression-2026-10-25-card-and-chip-name-one-date.test.js` (Maya, two controls, and
+the hand-built sweep pinned at 810 built / 600 rejected / 0 clashes). Reverting the line fails
+3 tests; dropping the pneumococcal half fails 6, including both corpora and the no-conjugate
+control.
+
+**⚠ AND ONE BLIND SPOT IT DELIBERATELY DOES NOT CLOSE.** Substituting `anchorPneumoGiven` for
+`anchorPneumo` on that line **passes all 1,643 tests**: the two differ only in which PPSV23
+they take — the **first** counting dose against the **most recent** — and nothing in the suite
+builds a child with two counting PPSV23 doses. It matters: a 12-year-old with asplenia, PPSV23
+in 2019 and again 54 days ago and no conjugate, is told her PCV20 is **due today** on a card
+whose label reads "≥8 weeks". **Verified identical on `main`, so it predates this work** and is
+recorded as its own finding, not folded in here. This fix is unaffected — `mostRecent` can only
+push a date later — and the behaviour must **not** be pinned by a test, which would freeze it.
 
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 
