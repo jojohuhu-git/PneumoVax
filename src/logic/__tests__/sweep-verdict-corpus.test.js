@@ -205,13 +205,32 @@ describe('S8 sweep: the grid cannot pass by sweeping nothing', () => {
       + 'missing rules\' minimums.'
     ).toBeGreaterThanOrEqual(Math.ceil(known.size / 2));
 
-    // At least one ADULT floor must fire. Every adult floor is an owner clinical
-    // determination (2026-10-11); they are the newest rules in the app and the
-    // ones three of which were, until S14-7, checked by nothing at all.
+    // ⚠️ THE ADULT-FLOOR CLAUSE IS GONE, BY OWNER RULING 2026-10-25, and what
+    // replaced it is a more honest statement of what this grid can and cannot
+    // see. There are no adult floors left to fire. More than that: there never
+    // were any in the corpus — the committed file contains ZERO
+    // `invalid:ADULT-` verdicts, because the grid's fixed day-offsets never
+    // build a gap short enough to breach one. Removing all six therefore moved
+    // 0 of 17,016 lines.
+    //
+    // SO THIS CORPUS IS NOT A GUARD FOR ADULT INTERVAL GRADING AT ALL, and
+    // pretending otherwise is the trap. The guard for that is the hand-built
+    // patients in `regression-2026-10-25-every-early-adult-dose-counts.test.js`.
+    // What is asserted here instead is the blindness itself, so that if a
+    // future grid change DOES start building short adult gaps, this fails and
+    // tells the next session the corpus has become load-bearing for them.
     const adultFloors = DOSE_INTERVAL_RULES
       .filter((r) => r.rulebook === 'adult' && r.enforcement === 'floor')
       .map((r) => r.id);
-    expect(adultFloors.some((id) => fired.has(id))).toBe(true);
+    expect(adultFloors).toEqual([]);
+    expect(verdicts.some((v) => v.includes('invalid:ADULT-'))).toBe(false);
+
+    // At least one CHILD floor must still fire — the grid does build those,
+    // and that is what keeps this corpus meaningful.
+    const childFloors = DOSE_INTERVAL_RULES
+      .filter((r) => r.rulebook === 'child' && r.enforcement === 'floor')
+      .map((r) => r.id);
+    expect(childFloors.some((id) => fired.has(id))).toBe(true);
   });
 
   it('the grid covers every risk factor the app offers, and every product', () => {

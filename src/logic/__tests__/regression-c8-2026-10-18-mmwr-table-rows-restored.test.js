@@ -182,13 +182,23 @@ describe('FINDING F — over the whole grid', () => {
     // row, and 110 from the shared-clinical-decision row at >=65, which
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
-    expect(stats.ppsvOnly).toBe(1154);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. -132 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(stats.ppsvOnly).toBe(1154 - 132);
     // -110: the shared-decision cards whose PCV20 now counts.
-    expect(stats.shared).toBe(440 - 110);
+    expect(stats.shared).toBe(440 - 110 + 66);  // +66, 2026-10-25 (see above)
   });
 
   it('mm7401a1 stays fully credited — every restored button has a number', () => {
-    expect(stats.listing).toBe(2564 + 1154 + 440 - 363);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. -132 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132);
     expect(stats.uncredited).toBe(0);
   });
 });

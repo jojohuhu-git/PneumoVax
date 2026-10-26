@@ -158,6 +158,11 @@ describe('over the whole grid', () => {
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
     // 185 + 952 + 330 measured by effective dose count and age band,
     // then - 253: the flat-wording half of Ruling F's 363.
-    expect(counts.flat).toBe(185 + 952 + 330 - 253);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. +159 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(counts.flat).toBe(185 + 952 + 330 - 253 + 159);
   });
 });

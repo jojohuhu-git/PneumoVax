@@ -425,7 +425,12 @@ describe('swept over the whole grid — the counts that moved', () => {
   // the job aid also QUOTES it, and that stays 0 uncredited.
   it('3,869 cards gained a job-aid citation, and none is left uncredited', () => {
     const { gained, uncreditedPairs, uncreditedStatements } = sweep();
-    expect(gained).toBe(3616 + 253);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. +213 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(gained).toBe(3616 + 253 + 213);
     expect(uncreditedPairs).toBe(0);
     expect(uncreditedStatements.size).toBe(0);
   });

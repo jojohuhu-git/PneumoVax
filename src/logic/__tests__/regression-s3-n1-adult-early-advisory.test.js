@@ -175,12 +175,17 @@ describe('§K-CONJUGATE — an adult PCV20 inside the year after PCV13 COUNTS, w
 });
 
 describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', () => {
-  it('voids 3 months for an adult with no immunocompromising condition — their floor is the year', () => {
+  // ⚠️ 2026-10-25: the dose COUNTS now (her adult table removed every adult
+  // floor), and what this test was really for survives — the adult rule must
+  // speak, with the adult's own number, and never the paediatric wording.
+  it('flags 3 months for an adult with no immunocompromising condition — their interval is the year', () => {
     const a = adultPpsv('2026-04-05', '2026-01-05');
-    expect(a.perDose[0].status).toBe('invalid');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PCV15/);
-    expect(a.effective).toHaveLength(0);
-    expect(a.perDose[0].detail).toMatch(/owner clinical determination/i);
+    expect(a.perDose[0].status).toBe('valid');
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(a.effective).toHaveLength(1);
+    // No longer an owner determination: as advice the row asserts only CDC's
+    // own interval, so it carries CDC (Ruling F's relabelling).
+    expect(a.perDose[0].whys.join(' ')).toMatch(/CDC states the 1 year/);
   });
 
   it('keeps 3 months when the 8-week minimum may be considered — and SAYS it counts', () => {
@@ -201,7 +206,8 @@ describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', (
 
   it('voids 4 weeks even when the 8-week minimum applies — it is short of that too', () => {
     const a = adultPpsv('2026-02-02', '2026-01-05', { riskIds: ['hiv'] });
-    expect(a.perDose[0].status).toBe('invalid');
+    // 2026-10-25: counts, and still judged against THEIR 8 weeks, not the year.
+    expect(a.perDose[0].status).toBe('valid');
     expect(a.perDose[0].reasons.join(' ')).toMatch(/8 weeks/);
     // CORRECTED 2026-10-11, after reading rr7203a1 live. This floor was first
     // labelled CDC's on the grounds that the adult notes call 8 weeks a
@@ -210,8 +216,14 @@ describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', (
     // is permission to vaccinate SOONER, not a bar to fall below — and
     // rr7203a1 never says a dose given sooner stops counting. So the INTERVAL
     // is ACIP's and the FLOOR is the owner's, and the text must say so.
-    expect(a.perDose[0].detail).toMatch(/owner clinical determination/i);
-    expect(a.perDose[0].detail).toMatch(/shortest interval ACIP recommends/i);
+    // 2026-10-25: the row is a recommendation now, so the text lives in `whys`
+    // rather than `detail`, and it is CDC's rather than an owner determination
+    // — as advice it asserts only ACIP's own sentence. THE DISTINCTION THIS
+    // ASSERTION EXISTS FOR IS UNCHANGED and still checked: the 8 weeks is the
+    // shortest interval ACIP RECOMMENDS for this patient, not a minimum that
+    // voids a dose, and the text has to say which.
+    expect(a.perDose[0].whys.join(' ')).toMatch(/shortest interval ACIP recommends/i);
+    expect(a.perDose[0].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
   it('leaves a full year alone, with no note at all', () => {
@@ -251,12 +263,18 @@ describe('S14-7 — riskIds actually reach the validator from the engine', () =>
     expect(ppsvAfterPcv15(['cochlear_implant']).status).toBe('valid');
   });
 
-  it('but an adult with only a chronic condition has the dose voided', () => {
-    expect(ppsvAfterPcv15(['diabetes']).status).toBe('invalid');
+  // 2026-10-25: both count. The risk key still decides which interval the
+  // note quotes, which is what the pair above and below are really about.
+  it('an adult with only a chronic condition has the dose counted and flagged', () => {
+    const d = ppsvAfterPcv15(['diabetes']);
+    expect(d.status).toBe('valid');
+    expect(d.reasons.join(' ')).toMatch(/shorter than the 1 year/);
   });
 
   it('and so does an adult with no risk factors at all', () => {
-    expect(ppsvAfterPcv15([]).status).toBe('invalid');
+    const d = ppsvAfterPcv15([]);
+    expect(d.status).toBe('valid');
+    expect(d.reasons.join(' ')).toMatch(/shorter than the 1 year/);
   });
 });
 

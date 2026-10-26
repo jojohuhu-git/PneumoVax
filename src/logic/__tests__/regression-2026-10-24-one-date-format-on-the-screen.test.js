@@ -31,6 +31,7 @@ import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 import { analyzeBoth } from '../validate.js';
 import { fmtDate } from '../format.js';
+import { DOSE_INTERVAL_RULES } from '../doseIntervalRules.js';
 
 const TODAY = '2026-10-24';
 
@@ -130,15 +131,15 @@ describe('the sweep: no raw ISO date reaches a reader except one', () => {
     expect(offenders, `raw ISO reached the reader: ${offenders.join(' // ')}`).toEqual([]);
   });
 
+  // ⚠️ RETARGETED 2026-10-25. The exception exists because a PROVENANCE date
+  // ("an owner clinical determination dated 2026-10-11") is not a patient date
+  // and must stay in ISO. Its old example was an adult PPSV23 inside the year
+  // after a PCV15, which was an owner floor; that row is now a CDC
+  // recommendation and no longer prints the phrase, so the example moved to
+  // the 4-week conjugate row — the one remaining adult rule that is hers.
   it('the exception really is exercised, so the filter is not dead code', () => {
-    // An adult PPSV23 inside the year after a PCV15: an owner floor, whose
-    // detail cites the determination by date. If this ever stops matching,
-    // the sweep above has been passing for the wrong reason.
-    const dose = recommend({
-      today: TODAY, ageMonths: 70 * 12, riskIds: [],
-      pcvDoses: [{ product: 'PCV15', date: '2026-01-01' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2026-02-05' }],
-    }).perDose.ppsv23.at(-1);
-    expect(dose.detail).toMatch(/owner clinical determination dated \d{4}-\d{2}-\d{2}/);
+    const rule = DOSE_INTERVAL_RULES.find((r) => r.id === 'ADULT-PCV-AFTER-PCV-UNDER-4-WEEKS');
+    expect(rule.authority).toBe('OWNER');
+    expect(rule.source).toMatch(/OWNER CLINICAL DETERMINATION \d{4}-\d{2}-\d{2}/);
   });
 });

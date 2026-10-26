@@ -212,7 +212,11 @@ describe('S14-4C — the controls that bound it', () => {
     });
     const v = r.ppsv23.perDose[0];
 
-    expect(v.status).toBe('invalid');
+    // ⚠️ 2026-10-25: counted, not voided. S14-4C's claim is about `extraDose`
+    // — a PPSV23 beside a PCV20/PCV21 that completes the series on its own is
+    // an EXTRA dose — and a PCV15 does not complete a series, so this control
+    // must still show no `extraDose`. That is the part being guarded.
+    expect(v.status).toBe('valid');
     expect(v.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
     expect(v.extraDose).toBeUndefined();
   });

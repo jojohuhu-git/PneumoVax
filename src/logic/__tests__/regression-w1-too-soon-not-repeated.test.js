@@ -63,7 +63,11 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
       { date: '2018-01-01' },
     ], 840, '2026-06-01', '1945-01-01');
     const second = a.perDose[1];
-    expect(second.status).toBe('invalid');
+    // ⚠️ 2026-10-25: this ADULT dose now counts (her table removed every adult
+    // floor). The CHILD case above is untouched and still a floor — W1's
+    // finding was about WORDING, not about which doses are rejected, and the
+    // wording assertions below are the ones that carry it.
+    expect(second.status).toBe('valid');
     const reasons = second.reasons.join(' ');
 
     // RULING D (owner, 2026-10-23): the date in this sentence is now measured
@@ -75,11 +79,16 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // OWNER RULING 2026-10-24: ungraced, because this is advice about a dose
     // not yet given. Was 2019-12-28 (the 2015 dose + 5y - 4d), then
     // 2022-12-28 (the 2018 dose + 5y - 4d); now 2023-01-01.
-    const repeatDue = addCalendarYears('2018-01-01', 5);
-    expect(repeatDue).toBe('2023-01-01');
-    expect(reasons).toMatch(new RegExp(`This dose does not count toward the series — given too soon after the dose it is measured from\\. It is not repeated; the next dose in this series can be given from ${fmtDate(repeatDue)} at the earliest\\.`));
+    // The forward-looking sentence is gone with the rejection — there is no
+    // "next dose in this series" to date, because this one counted. What W1
+    // exists to prevent is still asserted, and is now stronger: the text must
+    // not tell the reader to repeat anything, and must not print the graced
+    // date W1 was filed about.
+    expect(reasons).not.toMatch(/does not count toward the series/);
     expect(reasons).not.toMatch(/Dec 28, 2022/);
     expect(reasons).not.toMatch(/repeat this dose only/);
+    expect(reasons).toMatch(/shorter than the 5 years/);
+    expect(reasons).toMatch(/never give a third/i);
   });
 
   it('keeps "repeat this dose only" for a dose rejected for a reason OTHER than timing', () => {
