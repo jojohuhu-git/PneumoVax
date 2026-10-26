@@ -663,7 +663,10 @@ Routine for ALL adults ≥50 regardless of risk.
     administered ≥5 days earlier than the minimum interval or age should not be counted
     as valid doses and should be repeated as age appropriate" — and the FDA approval for
     ages ≥18 (`mmwr7336a3`). It is **not** a record problem: the patient really received
-    it, so the "repeat as age appropriate" advice is correct here.
+    it, so a replacement dose **is** owed. **But the replacement is not another PCV21** —
+    see §I-REMEDY below, which corrects what this bullet used to say. CDC's own words are
+    "repeated **as age appropriate**", and PCV21 is not age-appropriate for a child at any
+    age below 18.
 - **A PCV21 dose given at 18–19 COUNTS, and says it was given before the recommended
   starting age.** **OWNER DECISION 2026-10-16 (N1), implemented.** PCV21 carries two ages
   a year apart, both from `mmwr7336a3` (read live 2026-10-16):
@@ -700,6 +703,56 @@ Routine for ALL adults ≥50 regardless of risk.
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.
+
+### §I-REMEDY — A child's rejected PCV21 names PCV20, not a repeat (2026-10-26)
+
+From the owner's children's table: PCV21 under 18 is *"rejected correctly; wording says
+'repeat this dose' where it should name PCV20."*
+
+**The chip contradicted itself.** Priya, 10, asplenia, PCV21 recorded 1 Jun 2026:
+
+> *"PCV21 (Capvaxive) is licensed for adults ≥18 years only. This dose was given at
+> ~10y 1m — it does not count."*
+> *"This dose does not count toward the series — **repeat this dose only** (do not restart
+> the series)."*
+
+Repeating it means giving her another PCV21, which the sentence above has just said is not
+licensed for her. Every repeat would be rejected again for the same reason, forever. The
+**verdict was right and is unchanged**; the advice under it was unusable.
+
+**It is a THIRD closing sentence, not one of the two that existed.** W1 (2026-10-11) split
+invalid doses in two: one rejected only for **timing** was never missing, so it takes *"the
+next dose can be given from…"*; every other invalid dose **is** missing and keeps *"repeat
+this dose only"*. A child's PCV21 is genuinely missing — she still needs a conjugate — but
+she needs a **different product**, so neither sentence fits. It now reads:
+
+> *"This dose does not count toward the series — **give a dose of PCV20 instead** (do not
+> restart the series)."*
+
+**CDC's own phrase is the grounding**: doses given too early *"should be repeated **as age
+appropriate**"*. PCV21 is not age-appropriate for anyone under 18, so "as age appropriate"
+is precisely what naming PCV20 does.
+
+**⚠ A FIELD, NOT STRING SURGERY.** `walk()` chooses the closing sentence from
+`recordProblem` and `intervalRuleId`, never by matching text — *"string surgery on a
+sentence built somewhere else is the kind of coupling that breaks silently when the wording
+changes"*, as its own comment puts it. The new branch keys on `remedyProduct`, set by
+`remedyIsAnotherProduct()` in `validate.js`, the same shape.
+
+**A near miss, recorded.** The first draft reused `DOES_NOT_COUNT_LEAD`, which carries the
+clause *"given too soon after the dose it is measured from"* — so the chip claimed a timing
+fault on a dose whose timing is irrelevant. Caught by driving the engine, not by the suite,
+and pinned by the guard.
+
+**Scope.** PCV20 is named because her row names it. PCV15 is also licensed for children,
+and the **four other rows** of her table saying the remedy is PCV20 rather than another
+dose of the same vaccine are a separate queue item (P3) that this does not build. **No
+verdict moves** — the dose was rejected before and is rejected now.
+
+Guard: `regression-2026-10-26-pcv21-for-a-child-names-pcv20.test.js`, with controls that an
+18-year-old's PCV21 still counts, a PCV20 below the minimum age still says *"repeat this
+dose only"*, a timing rejection still gets W1's sentence, and a grid sweep that no dose
+carries both sentences.
 
 ---
 
