@@ -12,9 +12,26 @@ squash-merges** (a session agent cannot).
 Baseline at session start: **1,632 passing**. Now: **1,643 passing in 148 files, 0 failing,
 0 skipped.**
 
-**PR [#91](https://github.com/jojohuhu-git/PneumoVax/pull/91) is OPEN and complete.** The
-open question it carried has been **answered by the owner and built** (`3c11c3c`). Confirm
-`gh pr checks 91` is green, then it is hers to squash-merge.
+**PR [#91](https://github.com/jojohuhu-git/PneumoVax/pull/91) is MERGED** — `main` is at
+`7feb43a`. Everything below the "What's done" heading is landed.
+
+> ## ⚠️ READ FIRST — three owner decisions of 2026-10-26, after #91 merged
+>
+> 1. **SKIP the eleven new references.** Closed, not deferred. Do not re-raise them, and do
+>    not add the 2014 *Vaccine* hyporesponsiveness paper to the new floor — it stays named
+>    in the row's `source` prose as her basis, with no citation chip. (Was P2 below.)
+> 2. **ADD the 2023 adult MMWR as a citation — but ASK WHICH CLAIM FIRST.** See the section
+>    below; this is not a straightforward add, because the document is already in the app
+>    and is uncited *by her own decision of 2026-10-16*.
+> 3. **The PPSV23 anchor: both schedule rules are correct.** The defect is which DOSE the
+>    app feeds into the 8-week rule, not the rule. Her words: *"both statements are
+>    correct"*. Rewritten below.
+>
+> **⚠️ BUDGET.** Her Pro weekly limit was **100% used on 2026-10-26, resetting 2026-10-29
+> ~16:00Z**, with about **$25** of the $200 monthly extra usage left. Prefer the small,
+> fully-specified items (the anchor fix, the P5 guard, the PCV21 wording) and **leave the
+> citation pass and P3 until the weekly resets** — the 2026-10-25 citation work alone moved
+> 24 pinned counts across 14 files.
 
 ---
 
@@ -89,29 +106,60 @@ Controls: a child with **no** conjugate is untouched, and so is one whose conjug
 Guard: `regression-2026-10-25-card-and-chip-name-one-date.test.js`. Live-verified: Maya's
 card and chip both read **Dec 10, 2026**.
 
-### ⚠️ NEW FINDING, NOT FIXED, and it PREDATES today — the card can anchor on the FIRST PPSV23
+### ⚠️ NOT FIXED, PREDATES 2026-10-25 — the 8-week rule is measured from the FIRST PPSV23
 
-Found by a mutation that **passed all 1,643 tests**: swapping `anchorPneumo` for
-`anchorPneumoGiven` changes nothing in the suite, because nothing anywhere builds a child
-with **two counting PPSV23 doses**.
+**Both schedule rules are correct and neither is in question** — owner, 2026-10-26: *"both
+statements are correct. 'Give PPSV23 dose 2 ≥5 years after dose 1 PPSV23' is the routine
+schedule when spacing out 2 PPSV23 doses. 'Give the next conjugate ≥8 weeks after the most
+recent pneumococcal vaccine' is correct when spacing out conjugate from PPSV23 or between
+conjugate vaccines."*
 
-It is a real defect. A 12-year-old with asplenia, **PPSV23 2019-01-01 and 2026-09-01, no
-conjugate**, is told her PCV20 is **due today** on a card whose label reads *"≥8 weeks"* —
-54 days after her most recent pneumococcal dose. `anchorPneumo` reads
-`ppsv.effective.find((d) => d.date)`, the **first** counting dose, though its own comment
-says *"latest of PCV or PPSV23"* (`recommend.js:1345`).
+**The defect is which DOSE the app feeds into the 8-week rule.** `anchorPneumo`
+(`recommend.js:1345`, inside `pcvRiskChild`, so **at-risk children only**) is built from
+`ppsv.effective.find((d) => d.date)` — the **first** counting PPSV23 — although its own
+comment says *"latest of PCV or PPSV23"*.
 
-**Verified identical on `main`** — not today's doing. To reproduce, one `recommend()` call:
+The worked patient, run on the engine:
+
+| | |
+|---|---|
+| asplenic 12-year-old, **no conjugate ever** | PPSV23 **1 Jan 2019** + PPSV23 **1 Sep 2026** |
+| 5-year spacing | 7y 8m apart — satisfied, both doses count |
+| next conjugate **should** be | **27 Oct 2026** (8 weeks after 1 Sep 2026) |
+| the app says | **DUE TODAY** on 25 Oct — it measured from 1 Jan 2019 |
+
+That is 54 days after her real last pneumococcal dose, two short, on a card whose own label
+reads *"≥8 weeks"*.
+
+**The 5-year card is NOT affected and must stay as it is.** It reaches for dose 1 directly
+(`ppsv.effective.find(...)` passed straight into `dueStateMonths(..., MO60, ...)` at lines
+1744 / 1975 / 2083 / 2241), which is right for *"dose 2 ≥5 years after dose 1"*. Only the
+three **8-week** callers read `anchorPneumo`: lines 342, 1690, 2094.
+
+**Why nothing caught it:** with one PPSV23 on record, "first" and "most recent" are the same
+dose, and no patient in the grid or in the 810 hand-built children has two counting PPSV23
+doses.
+
+**Candidate fix, trialled 2026-10-26 and reverted — nothing is committed:**
+
+```js
+const anchorPneumo = mostRecent(pcv.lastDate, ppsv.lastDate || null);
+```
+
+Gives the patient above **eligible 2026-10-27**, keeps **all 1,643 tests green**, and moves
+**0 of 18,667 card rows** — so it is safe but **completely unguarded**. It needs a hand-built
+patient like the one above or it will silently come back. Reproduce the defect with:
 
 ```js
 recommend({ today: '2026-10-25', dob: '2014-10-01', ageMonths: 144, riskIds: ['asplenia'],
   pcvDoses: [], ppsv23Doses: [{ date: '2019-01-01' }, { date: '2026-09-01' }] })
-// both PCV cards come back dueToday: true, earliestNextDate: null
+// both PCV cards: dueToday: true, earliestNextDate: null
 ```
 
-**Ask her before fixing** — it moves advised dates (case (c)) — and do **not** pin the
-current behaviour with a test, which would freeze it. The
-`regression-2026-10-25-card-and-chip-name-one-date.test.js` header records the whole thing.
+**One related question she has NOT been asked:** a PPSV23 given 54 days ago but *rejected*
+for falling inside 5 years currently does **not** hold off a conjugate (ANCHOR-1, *"an
+unnecessary dose cannot reset a clock"*). That is the designed behaviour, not this bug —
+raise it separately if it matters.
 
 ### P1 — the rest of her children's rows (unchanged from the previous handoff)
 
@@ -133,13 +181,37 @@ approved 2026-10-23 for infants.
 a third authority tier — "Who says so" has only "CDC / ACIP" and "This app", while her tables
 add **expert opinion / literature**.
 
-### P2 — eleven new reference entries (not started, **open owner decision**)
-AAP **Red Book 2024–2027**, *Pediatrics* 2025 (invalid doses), the paediatric **HIV OI
-guidelines**, *Pediatrics in Review*, and seven immunogenicity/hyporesponsiveness papers.
-**Ask: cite as given, or fetch and quote each one live?** It was in PR #90's body as a
-question and she has not answered it. The 2014 *Vaccine* paper is one of them and is
-**deliberately not yet cited** on the new floor, though it is named in the row's `source`
-prose as her basis.
+### (was P2) — the eleven new references: **SKIPPED, owner decision 2026-10-26**
+
+AAP Red Book 2024–2027, *Pediatrics* 2025, the paediatric HIV OI guidelines, *Pediatrics in
+Review* and the seven immunogenicity/hyporesponsiveness papers are **not being added**. This
+closes the question that sat in PR #90's and #91's bodies. The 2014 *Vaccine* paper is one of
+them: it stays named in `CHILD-PCV-AFTER-PPSV23`'s `source` prose as her stated basis, and
+gets **no citation chip**. Nothing to do; do not re-raise.
+
+### NEW — add the 2023 adult MMWR as a citation (owner decision 2026-10-26, **but ask which claim**)
+
+Her words: *"I do want to add the MMWR pneumococcal 19 and older 2023 document to cite."*
+That is **`mmwr7203a1`** — *ACIP, Use of pneumococcal vaccines among U.S. adults ≥19 years*,
+`rulebook: 'adult'`, `lastVerified: '2026-10-12'`, already in `src/data/refs.js`.
+
+**⚠ It is on NO card today, and that is deliberate — her own decision of 2026-10-16
+("option A"), recorded in `src/data/__tests__/citation-orphans.test.js`.** Two claims rested
+on it and both moved on:
+
+- the **adult PCV15→PPSV23 interval** → replaced by `mm7401a1` (Jan 2025) and the CDC Adult
+  Timing Job Aid (Mar 2025). CLAUDE.md states: *"rr7203a1 is superseded. Never cite it for an
+  adult interval again."*
+- the **adult risk-factor list** → it sat on only **4 of 17** risk conditions, so the sources
+  at the foot of an adult card changed with which box was ticked.
+
+**So do not just re-attach it.** Put to her, with patients rather than statement names
+(memory: *"Citation decisions need patients"*): **which claim should it carry?** If the
+answer is an interval, that reverses the 2026-10-16 decision and the CLAUDE.md line above
+must change in the same commit — confirm she means to before building. If it is a general
+adult source chip, decide which adult cards and measure the count, because the 4-of-17
+problem above is exactly what going back in naively would re-create. The orphan test will
+need its entry updated either way.
 
 ### Still open from `a66219a`
 Pinned by number in
@@ -162,9 +234,11 @@ and that is hers to approve. Nothing is half-applied and the tree is clean.
 1. `cd /Users/joannehuang/Downloads/PneumoVax && git checkout feature/2026-10-25-child-conjugate-after-ppsv23-repeat`
 2. `npx vitest run` — confirm **1,643 passing, 0 failing** before touching anything.
 3. `gh pr checks 91` — confirm green. #91 is complete and is hers to squash-merge.
-4. **Open decisions — ask, do not default:** (a) **the first-PPSV23 anchor finding above**;
-   (b) the eleven new references (cite as given vs. verify live); (c) has she looked at the
-   rules-map lookup; (d) the three `a66219a` questions.
+4. **Open decisions — ask, do not default:** (a) **which claim the 2023 adult MMWR should
+   carry** (see its section — it is uncited by her own 2026-10-16 decision); (b) has she
+   looked at the rules-map lookup; (c) the three `a66219a` questions. The eleven references
+   are **closed — skipped**, and the anchor finding is **explained and costed**, needing only
+   her go-ahead plus a hand-built guard.
 5. Per item: reproduce → failing test (confirm it fails) → fix → `CLINICAL_SPEC.md` in the
    same commit → full suite → break the fix more than one way and quote the counts (**mutate
    the `message` shape with the `enforcement`** — flipping `enforcement` alone tests nothing)
