@@ -58,12 +58,23 @@ describe('S14-7 symptom 1 — PCV15 and PPSV23 on the same day', () => {
     expect(a.perDose[0].reasons.join(' ')).toMatch(/same visit/i);
   });
 
-  it('an adult\'s dose does not count either — it used to be valid with a soft note', () => {
+  // ⚠️ REVERSED BY OWNER RULING 2026-10-25, and kept as the record of the
+  // reversal. S14-7's finding was SILENCE — an adult's early dose passed with
+  // no note at all — and that is still fixed and still asserted here. What
+  // changed is the disposition: her adult table gives the practical cutoff
+  // for COUNTING a dose in each sequence, and no adult sequence rejects one.
+  // So these assert "counts, and is never silent", which is the claim S14-7
+  // was actually about. See CLINICAL_SPEC.md §K.
+  it('an adult\'s dose COUNTS, and is never silent about the gap', () => {
     for (const riskIds of [['hiv'], ['diabetes'], []]) {
       const a = ppsvAfter(pcv, ['2026-01-10'], ADULT, riskIds);
-      expect(a.perDose[0].status).toBe('invalid');
-      expect(a.effective).toHaveLength(0);
-      expect(a.perDose[0].reasons.join(' ')).not.toMatch(/still counts/);
+      expect(a.perDose[0].status).toBe('valid');
+      expect(a.effective).toHaveLength(1);
+      // The whole point of S14-7: not silent. One sentence naming the gap,
+      // and a rationale behind "Why this".
+      expect(a.perDose[0].reasons.join(' ')).toMatch(/on the same day as/);
+      expect(a.perDose[0].reasons.join(' ')).toMatch(/Counted/);
+      expect(a.perDose[0].whys.length).toBeGreaterThan(0);
     }
   });
 });
@@ -75,18 +86,33 @@ describe('S14-7 symptom 2 — PCV15 then PPSV23 two weeks later', () => {
     expect(ppsvAfter(pcv, ['2026-01-24'], CHILD, ['hiv']).perDose[0].status).toBe('invalid');
   });
 
-  it('does not count for an adult, whatever their risk class', () => {
+  // ⚠️ REVERSED BY OWNER RULING 2026-10-25 — counts now, but still flagged.
+  it('counts for an adult of every risk class, and is flagged for every one', () => {
     for (const riskIds of [['hiv'], ['cochlear_implant'], ['diabetes'], []]) {
-      expect(ppsvAfter(pcv, ['2026-01-24'], ADULT, riskIds).perDose[0].status).toBe('invalid');
+      const d = ppsvAfter(pcv, ['2026-01-24'], ADULT, riskIds).perDose[0];
+      expect(d.status).toBe('valid');
+      expect(d.reasons.join(' ')).toMatch(/14 days after the PCV15 dose/);
     }
   });
 
-  it('but the adult floor is risk-keyed: 10 weeks counts for an immunocompromised adult only', () => {
+  // The risk-keying SURVIVES the 2026-10-25 relaxation — it just decides which
+  // sentence prints rather than whether the dose counts. At 10 weeks an
+  // immunocompromised adult has MET the interval ACIP recommends for them (8
+  // weeks), so a different row speaks and there is no shortfall to report; a
+  // non-immunocompromised adult is short of the year and is told so. Every
+  // dose counts. Flattening the risk key would make the first pair complain.
+  it('is risk-keyed in its WORDING: 10 weeks meets the recommendation for an immunocompromised adult only', () => {
     const tenWeeks = ['2026-03-21'];
-    expect(ppsvAfter(pcv, tenWeeks, ADULT, ['hiv']).perDose[0].status).toBe('valid');
-    expect(ppsvAfter(pcv, tenWeeks, ADULT, ['csf_leak']).perDose[0].status).toBe('valid');
-    expect(ppsvAfter(pcv, tenWeeks, ADULT, ['diabetes']).perDose[0].status).toBe('invalid');
-    expect(ppsvAfter(pcv, tenWeeks, ADULT, []).perDose[0].status).toBe('invalid');
+    for (const risk of [['hiv'], ['csf_leak'], ['diabetes'], []]) {
+      expect(ppsvAfter(pcv, tenWeeks, ADULT, risk).perDose[0].status).toBe('valid');
+    }
+    const met = ppsvAfter(pcv, tenWeeks, ADULT, ['hiv']).perDose[0];
+    expect(met.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED');
+    expect(met.reasons.join(' ')).not.toMatch(/shorter than/);
+
+    const short = ppsvAfter(pcv, tenWeeks, ADULT, ['diabetes']).perDose[0];
+    expect(short.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
+    expect(short.reasons.join(' ')).toMatch(/shorter than the 1 year/);
   });
 });
 
@@ -98,21 +124,37 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
     expect(a.perDose[1].status).toBe('invalid');
   });
 
-  it('an ADULT\'s second dose no longer passes in silence', () => {
+  // ⚠️ THE HEADLINE CASE, AND IT STILL HOLDS WHERE IT MATTERS. Before S14-7
+  // this read status 'valid', effectiveDoseNum 2, reasons [] — SILENT. Owner
+  // ruling 2026-10-25 counts the dose again, so 'valid' is back, but the
+  // silence is not: the dose carries the shortfall and the evidence behind it.
+  // She chose this disposition because setting the dose aside would only
+  // invite a third PPSV23, which is the harm rr7203a1 describes.
+  it('an ADULT\'s second dose counts, but no longer passes in SILENCE', () => {
     const a = ppsvAfter([], twoYears, ADULT);
-    // Before S14-7 this read: status 'valid', effectiveDoseNum 2, reasons [].
-    expect(a.perDose[1].status).toBe('invalid');
-    expect(a.perDose[1].effectiveDoseNum).toBeNull();
+    expect(a.perDose[1].status).toBe('valid');
+    expect(a.perDose[1].effectiveDoseNum).toBe(2);
+    expect(a.effective).toHaveLength(2);
     expect(a.perDose[1].reasons.length).toBeGreaterThan(0);
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/at least 5 years after the first/);
-    expect(a.effective).toHaveLength(1);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 5 years/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/never give a third/i);
   });
 
-  it('and the adult version is labelled as the owner\'s rule, the child version is not', () => {
-    expect(ppsvAfter([], twoYears, ADULT).perDose[1].detail)
-      .toMatch(/owner clinical determination/i);
-    expect(ppsvAfter([], twoYears, { ageMonths: 156, dob: '2013-10-11' }).perDose[1].detail ?? '')
-      .not.toMatch(/owner clinical determination/i);
+  // The two ages now differ in KIND, not in label. The adult row is a
+  // recommendation, so it has `whys` and no `detail`, and its rationale is the
+  // hyporesponsiveness evidence — the one adult interval with data behind it.
+  // The child row is still a floor, so it has a `detail` and no `whys`.
+  // Neither is labelled an owner determination any more: as advice the adult
+  // row asserts only ACIP's own sentence (Ruling F's relabelling).
+  it('the adult version cites the evidence as advice; the child version is still a floor', () => {
+    const adult = ppsvAfter([], twoYears, ADULT).perDose[1];
+    expect(adult.whys.join(' ')).toMatch(/lower with repeat|responses to a repeat PPSV23 were lower/i);
+    expect(adult.whys.join(' ')).toMatch(/rr7203a1/);
+    expect(adult.detail ?? '').not.toMatch(/owner clinical determination/i);
+
+    const child = ppsvAfter([], twoYears, { ageMonths: 156, dob: '2013-10-11' }).perDose[1];
+    expect(child.status).toBe('invalid');
+    expect(child.detail).toMatch(/Minimum: 5 years/);
   });
 
   it('5 years and 1 day apart counts, at either age', () => {
@@ -163,29 +205,38 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].earlyAdvisory).toBeFalsy();
   });
 
-  it('a PCV20 two months after a PPSV23, with no PCV history', () => {
+  // ⚠️ REVERSED BY OWNER RULING 2026-10-25. Her table's third sequence —
+  // "PPSV23, then PCV" — reads "Count; response blunted", and this is the
+  // patient it is about. She had rejected this same dose on 2026-10-24
+  // (afternoon) and reversed herself on the same patient a day later.
+  it('a PCV20 two months after a PPSV23 counts, and says the response is blunted', () => {
     const who = { ageMonths: 60 * 12, dob: '1966-05-01' };
     const a = analyzeHistory('PCV', [{ date: '2026-03-01', product: 'PCV20' }],
       who.ageMonths, TODAY, who.dob, { ppsv23Doses: [{ date: '2026-01-01' }] });
-    expect(a.perDose[0].status).toBe('invalid');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/at least 1 year after PPSV23/);
+    expect(a.perDose[0].status).toBe('valid');
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(a.perDose[0].whys.join(' ')).toMatch(/blunted/);
   });
 
-  it('a PPSV23 at 66 given three years after one at 63', () => {
+  // ⚠️ REVERSED BY OWNER RULING 2026-10-25 — counts, with the shortfall named.
+  it('a PPSV23 at 66 given three years after one at 63 counts, with the shortfall named', () => {
     const who = { ageMonths: 68 * 12, dob: '1958-05-01' };
     const a = ppsvAfter([], ['2021-06-01', '2024-06-01'], who);
-    expect(a.perDose[1].status).toBe('invalid');
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/at least 5 years/);
+    expect(a.perDose[1].status).toBe('valid');
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 5 years/);
   });
 
-  it('the engine sees the dropped dose, so the patient is owed it again', () => {
+  // ⚠️ REVERSED BY OWNER RULING 2026-10-25. Nothing is dropped any more, so
+  // the engine counts the dose and the patient is NOT owed it again — which is
+  // the practical difference her ruling makes to this patient.
+  it('the engine counts the dose, so the patient is not owed it again', () => {
     const out = recommend({
       ageMonths: 60 * 12, dob: '1966-05-01', today: TODAY, riskIds: [],
       pcvDoses: [{ date: '2026-03-01', product: 'PCV20' }],
       ppsv23Doses: [{ date: '2026-01-01' }],
     });
-    expect(out.meta.pcvCount).toBe(0);
-    expect(out.perDose.pcv[0].status).toBe('invalid');
+    expect(out.meta.pcvCount).toBe(1);
+    expect(out.perDose.pcv[0].status).toBe('valid');
   });
 });
 
@@ -281,7 +332,11 @@ describe('S14-7 — the table cannot drift back', () => {
     const owner = DOSE_INTERVAL_RULES.filter((r) => r.authority === 'OWNER');
     expect(owner.length).toBeGreaterThan(0);
     for (const r of owner) {
-      expect(r.source, r.id).toMatch(/OWNER CLINICAL DETERMINATION 2026-10-11/);
+      // ANY determination date, not just 2026-10-11 — the 4-week conjugate
+      // row is hers and dated 2026-10-25. Pinning the older date made a new
+      // owner row fail for having the wrong date rather than for being
+      // mislabelled, which is not what this guard is for.
+      expect(r.source, r.id).toMatch(/OWNER CLINICAL DETERMINATION 2026-\d\d-\d\d/);
       expect(r.source, r.id).toMatch(/not ACIP, not CDC/);
     }
   });
@@ -298,11 +353,18 @@ describe('S14-7 — the table cannot drift back', () => {
   // did not say. CLAUDE.md states this in capitals; nothing enforced it until
   // now, so a new adult row could have arrived carrying 'CDC' and the suite
   // would have stayed green.
-  it('no adult floor may cite CDC — every one of them is the owner\'s', () => {
+  // ⚠️ ITS PREMISE IS GONE, AND THE GUARD IS KEPT FOR WHAT IT NOW PROVES.
+  // S14-7b's invariant was "every adult floor is the owner's, because the
+  // sources state adult gaps as advice". Owner ruling 2026-10-25 took the last
+  // step that argument implies: there are no adult floors left at all. The
+  // assertion is therefore flipped to the stronger claim — none exists — and
+  // the OWNER check is kept as a conditional, so that if a future ruling ever
+  // re-adds an adult floor it must still carry her name and not CDC's.
+  it('there are NO adult floors at all, and any that returns must be the owner\'s', () => {
     const adultFloors = DOSE_INTERVAL_RULES.filter(
       (r) => r.rulebook === 'adult' && r.enforcement === 'floor',
     );
-    expect(adultFloors.length).toBeGreaterThan(0);
+    expect(adultFloors.map((r) => r.id)).toEqual([]);
     for (const r of adultFloors) expect(r.authority, r.id).toBe('OWNER');
   });
 
@@ -410,19 +472,21 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(evaluateDoseInterval(base)).toBeNull();
   });
 
+  // ⚠️ RETARGETED TO A CHILD ROW BY OWNER RULING 2026-10-25, which left no
+  // adult floor to exercise. The contract under test is the evaluator's, not
+  // any one rule's: a floor returns `kind: 'floor'` with the id and authority
+  // of the row that produced it. A 13-year-old's second PPSV23 two years after
+  // the first is CHILD-PPSV23-AFTER-PPSV23 — CDC's own 5 years, and a floor.
+  // (This case has now been retargeted twice: it began as a PCV13 → PCV20
+  // pair, which stopped being a floor on 2026-10-24.)
   it('returns a floor verdict with the rule id that produced it', () => {
-    // A PCV20 five weeks after a PPSV23, with nothing else on the record —
-    // ADULT-PCV-AFTER-PPSV23, still a floor. This used to be a PCV13 → PCV20
-    // pair; that row stopped being a floor on 2026-10-24 (§K-CONJUGATE), and
-    // the test below holds its new shape.
     const v = evaluateDoseInterval({
-      ...base,
-      priorPpsv23: [{ date: '2026-01-05' }],
-      prev: null,
+      ...base, vaccine: 'PPSV23', product: 'PPSV23', ageAtDose: 156,
+      prev: { date: '2024-02-09', ageAtDose: 132, product: 'PPSV23' },
     });
     expect(v.kind).toBe('floor');
-    expect(v.ruleId).toBe('ADULT-PCV-AFTER-PPSV23');
-    expect(v.authority).toBe('OWNER');
+    expect(v.ruleId).toBe('CHILD-PPSV23-AFTER-PPSV23');
+    expect(v.authority).toBe('CDC');
   });
 
   // OWNER DECISION 2026-10-24, §K-CONJUGATE. The PCV13 → PCV20 pair that used
@@ -476,27 +540,28 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     expect(v.whys).toHaveLength(2);
   });
 
-  // CDC's grace applies to the FLOOR: 4 days short of the year still counts,
-  // 5 days short does not. A graced dose says NOTHING — its own rule named it
-  // and was satisfied, and a catch-all may not then talk over that rule with a
-  // generic number (see the catchAll guard in the evaluator).
+  // CDC's grace applies to the FLOOR: 4 days short still counts, 5 days short
+  // does not. A graced dose says NOTHING — its own rule named it and was
+  // satisfied, and a catch-all may not then talk over that rule with a generic
+  // number (see the catchAll guard in the evaluator).
   //
-  // The pair used here USED TO BE the PCV13 → PCV20 row. That row lost both
-  // its floor and its grace on 2026-10-24 (§K-CONJUGATE: a recommendation
-  // counts every dose, so a grace would only move the day the note prints),
-  // so the still-graced ADULT-PCV-AFTER-PPSV23 row carries the case now.
+  // ⚠️ RETARGETED TWICE. It began on the PCV13 → PCV20 row, which lost its
+  // floor and its grace on 2026-10-24; it then moved to ADULT-PCV-AFTER-PPSV23,
+  // which lost both on 2026-10-25. No adult floor remains, so the case now
+  // rides on a CHILD calendar-month floor — a 13-year-old's second PPSV23, five
+  // years after the first — which is the only kind left. The evaluator contract
+  // being pinned is unchanged.
   it('applies the grace to a calendar-month floor: 4 days short counts, 5 does not', () => {
-    const anniversary = addCalendarMonths('2026-01-05', 12);
+    const anniversary = addCalendarMonths('2021-01-05', 60);
     const ctx = (doseDate) => ({
-      ...base, doseDate,
-      priorPpsv23: [{ date: '2026-01-05' }],
-      prev: null,
+      ...base, doseDate, vaccine: 'PPSV23', product: 'PPSV23', ageAtDose: 156,
+      prev: { date: '2021-01-05', ageAtDose: 96, product: 'PPSV23' },
     });
     expect(evaluateDoseInterval(ctx(addDays(anniversary, -4)))).toBeNull();
 
     const tooEarly = evaluateDoseInterval(ctx(addDays(anniversary, -5)));
     expect(tooEarly.kind).toBe('floor');
-    expect(tooEarly.ruleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    expect(tooEarly.ruleId).toBe('CHILD-PPSV23-AFTER-PPSV23');
 
     // A full year clears it, and says nothing at all.
     expect(evaluateDoseInterval(ctx(anniversary))).toBeNull();

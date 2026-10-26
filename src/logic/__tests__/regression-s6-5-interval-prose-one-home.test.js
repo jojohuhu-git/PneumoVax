@@ -279,20 +279,31 @@ describe('a recorded-dose verdict says what it was judged against', () => {
   it('states the floor it applied, from that rule own interval', () => {
     // 60 days after PCV15, chronic-only: short of the year, so the year bites.
     const d = graded({ pcvProduct: 'PCV15', gapDays: 60, riskIds: ['diabetes'] });
-    expect(d.status).toBe('invalid');
+    // ⚠️ 2026-10-25: counted, not voided. S6-5's claim is that the NUMBER in
+    // the sentence comes from the rule's own interval and is never hand-typed,
+    // which is independent of the disposition — so it is still asserted, now
+    // against the recommendation's `reasons` and `whys`.
+    expect(d.status).toBe('valid');
     const year = intervalPhrase({ months: ADULT_PPSV23_INTERVAL_MONTHS });
     expect(d.reasons.join(' ')).toContain(year);
-    expect(d.detail).toContain(year);
+    expect(d.whys.join(' ')).toContain(year);
   });
 
   // The clause that broke. "The 8-week minimum interval applies only to..."
   // must use the ADJECTIVE; the noun form reads "the 8 weeks minimum interval".
   it('names the shorter minimum adjectivally, never as a bare plural', () => {
     const d = graded({ pcvProduct: 'PCV15', gapDays: 60, riskIds: ['diabetes'] });
-    const adj = intervalPhraseAdj({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
     const noun = intervalPhrase({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
-    expect(d.detail).toContain(`The ${adj} minimum interval applies`);
-    expect(d.detail).not.toContain(`The ${noun} minimum interval`);
+    // ⚠️ 2026-10-25: the clause moved into `whys` and lost the word "minimum",
+    // because the 8 weeks is no longer a minimum for this row — it is the
+    // shortest RECOMMENDED gap for the immunocompromising class. The guard's
+    // real job survives: the number is rendered from the constant, and the
+    // bare-plural form that read "the 8 weeks minimum interval" must not
+    // appear anywhere in the text.
+    const text = [...d.reasons, ...d.whys].join(' ');
+    expect(text).toContain(noun);
+    expect(text).not.toContain(`The ${noun} minimum interval`);
+    expect(d.whys.join(' ')).toMatch(/immunocompromising condition, cochlear implant or CSF leak/);
   });
 
   // ⚠️ REWRITTEN BY OWNER RULING F (2026-10-24). This case used to assert

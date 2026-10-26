@@ -225,18 +225,20 @@ describe('§K-CONJUGATE — the rows themselves', () => {
 });
 
 describe('§K-CONJUGATE — the walk: what collecting must NOT break', () => {
+  // ⚠️ RETARGETED TO A CHILD, 2026-10-25. The contract is the EVALUATOR's: an
+  // unmet floor returns at once, so a dose that also missed a recommendation
+  // does not come back carrying a "counted" sentence. No adult floor exists
+  // to exercise it, so the case rides on a child's PPSV23 after a PCV — CDC's
+  // own 8 weeks, and still a floor.
   it('an unmet FLOOR still returns at once and discards collected advice', () => {
-    // A PPSV23 three weeks after a PCV15 for an adult outside the 8-week
-    // class: ADULT-PPSV23-AFTER-PCV15, still a floor. It must come back as a
-    // rejection with no "the dose is counted" sentence attached.
     const v = evaluateDoseInterval({
-      vaccine: 'PPSV23', product: 'PPSV23', doseDate: '2026-01-22', ageAtDose: Y(70),
+      vaccine: 'PPSV23', product: 'PPSV23', doseDate: '2026-01-22', ageAtDose: 60,
       prev: null,
-      priorPcv: [{ date: '2026-01-01', product: 'PCV15' }],
-      priorPpsv23: [], riskIds: [],
+      priorPcv: [{ date: '2026-01-01', product: 'PCV20' }],
+      priorPpsv23: [], riskIds: ['asplenia'],
     });
     expect(v.kind).toBe('floor');
-    expect(v.ruleId).toBe('ADULT-PPSV23-AFTER-PCV15');
+    expect(v.ruleId).toBe('CHILD-PPSV23-AFTER-PCV');
     expect(v.reasons.join(' ')).not.toMatch(/the dose is counted|still counts/i);
   });
 

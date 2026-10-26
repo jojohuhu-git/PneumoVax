@@ -290,6 +290,31 @@ export function pcvNextDoseMinIntervalCell({
 export const PCV_PPSV23_MIN_INTERVAL_DAYS = 56;      // 8 weeks
 
 /**
+ * Days below which an adult conjugate dose following another conjugate has NO
+ * schedule behind it (owner ruling 2026-10-25).
+ *
+ * Her words: "For conjugate after conjugate, ACIP's own HSCT schedule supports
+ * counting any dose given 4 weeks or more after the prior PCV. That is
+ * especially reasonable when PCV20 or PCV21 adds serotypes the patient has
+ * never received. Under 4 weeks, no ACIP schedule spaces pneumococcal
+ * conjugate doses that closely. An optional repeat (PCV20 or PCV21, at least 8
+ * weeks later) is reasonable, mainly for immunocompromised patients."
+ *
+ * ⚠️ IT DOES NOT VOID ANYTHING. No adult dose is set aside for timing (see
+ * `regression-2026-10-25-every-early-adult-dose-counts.test.js`); this number
+ * decides only whether the card OFFERS a repeat, and the repeat is optional.
+ * It is the shortest gap with supporting data, not a minimum interval.
+ *
+ * The two bases are hers, and neither is an adult routine sentence — which is
+ * why the row carries OWNER and not CDC. (a) The post-transplant schedules
+ * space adult conjugate doses 4 weeks apart; in THIS app's record that row was
+ * ASCO 2024, not ACIP — see
+ * docs/archive/retired-2026-10-16-post-transplant-pneumococcal-schedules.md.
+ * (b) Infant priming doses are 4 weeks apart (ACIP 2022, PCV15 in children).
+ */
+export const ADULT_CONJUGATE_SUPPORTED_MIN_DAYS = 28;  // 4 weeks
+
+/**
  * Calendar months CDC ADVISES between two adult PCV doses (S3-N1).
  *
  * This is not a minimum and must never be used as one — see the adult note in

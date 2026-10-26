@@ -63,11 +63,18 @@ describe('ANCHOR-1 Case A — a PCV20 behind someone else\'s early PPSV23', () =
     expect(v.pcv[0].effectiveDoseNum).toBe(1);
   });
 
-  it('still rejects the early second PPSV23 — that verdict was always right', () => {
+  // ⚠️ THE DISPOSITION FLIPPED ON 2026-10-25; ANCHOR-1's CLAIM DID NOT.
+  // ANCHOR-1 is about WHICH DOSE a gap is measured from — a dose that counted,
+  // never one the app had already set aside. That is untouched. Her adult
+  // table changed only what happens when the gap is short: the dose counts and
+  // carries a note instead of being rejected. The rule id is still recorded,
+  // so this still fails if the measurement moves to a non-counting dose.
+  it('counts the early second PPSV23, and still measures it from the first', () => {
     const v = verdictsFor(CASE_A);
     expect(v.ppsv23[0].status).toBe('valid');
-    expect(v.ppsv23[1].status).toBe('invalid');
+    expect(v.ppsv23[1].status).toBe('valid');
     expect(v.ppsv23[1].intervalRuleId).toBe('ADULT-PPSV23-AFTER-PPSV23');
+    expect(v.ppsv23[1].reasons.join(' ')).toMatch(/shorter than the 5 years/);
   });
 
   it('reads as a complete series, not as a PCV still due', () => {
@@ -116,10 +123,13 @@ describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () =
     ppsv23Doses: [{ product: 'PPSV23', date: '2018-01-01' }],
   };
 
-  it('still rejects the PCV20 given 2 months after a PPSV23 that counted', () => {
+  // Case H has now been rejected twice and counted twice — see
+  // `regression-2026-10-24-families-2-3-reverted-ruling-f-kept.test.js` for
+  // the four flips. What ANCHOR-1 asserts here is the ANCHOR, which never moved.
+  it('counts the PCV20 given 2 months after a PPSV23, measured from that PPSV23', () => {
     const v = verdictsFor(CASE_H);
     expect(v.ppsv23[0].status).toBe('valid');
-    expect(v.pcv[0].status).toBe('invalid');
+    expect(v.pcv[0].status).toBe('valid');
     expect(v.pcv[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
   });
 
@@ -136,10 +146,16 @@ describe('ANCHOR-1 Case H — the control: a real gap is still a real gap', () =
     // WHAT THIS CONTROL IS STILL FOR is unchanged: the PCV must still be DUE,
     // because the recorded one did not count. If it ever reads complete, the
     // floor has been loosened — which is what the case above guards.
-    expect(v.recText).toMatch(/PCV:due/);
-    expect(v.recText).toMatch(/PCV20 or PCV21 ≥1 year after the conjugate dose of Mar 1, 2018/);
-    // And never PCV15, which she ruled out by name: "PCV15 adds nothing over
-    // the patient's prior dose."
+    // ⚠️ IT NOW READS COMPLETE, BY HER RULING OF 2026-10-25, and the comment
+    // above is kept because it records what the control used to prove. The
+    // recorded PCV20 counts, so the series IS complete and nothing is due —
+    // the opposite reading from 2026-10-24, on the same patient.
+    //
+    // What survives: the card must never ask for a PCV15. She ruled that out
+    // by name — "PCV15 adds nothing over the patient's prior dose" — and that
+    // is independent of whether the dose counted, so it is still asserted.
+    expect(v.recText).toMatch(/PCV:complete/);
+    expect(v.recText).not.toMatch(/PCV:due/);
     expect(v.recText).not.toMatch(/PCV15/);
   });
 });
@@ -261,6 +277,11 @@ describe('ANCHOR-1 — the property behind the five cases', () => {
     expect(withRejected.pcv[0].effectiveDoseNum).toBe(without.pcv[0].effectiveDoseNum);
   });
 
+  // ANCHOR-1's core claim, and the one assertion in this file that is still
+  // about rejection — except that the PCV now counts. The claim it really
+  // makes is that the gap is measured from the 2021 PPSV23 (which counted) and
+  // not the 2015 one, so the note has to name 2021. Reading the wrong dose
+  // would print 2015 and the gap would look like six years.
   it('but a PPSV23 that COUNTS still anchors the PCV\'s clock', () => {
     // The same shape as above with the middle dose moved out to 2021, where
     // it clears the 5-year minimum and counts. The PCV20 is then measured
@@ -272,6 +293,10 @@ describe('ANCHOR-1 — the property behind the five cases', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2015-01-01' }, { product: 'PPSV23', date: '2021-01-01' }],
     });
     expect(v.ppsv23[1].status).toBe('valid');
-    expect(v.pcv[0].status).toBe('invalid');
+    expect(v.pcv[0].status).toBe('valid');
+    expect(v.pcv[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
+    // Jan 1, 2021 — the dose that counted. NOT Jan 1, 2015.
+    expect(v.pcv[0].reasons.join(' ')).toMatch(/Jan 1, 2021/);
+    expect(v.pcv[0].reasons.join(' ')).not.toMatch(/2015/);
   });
 });

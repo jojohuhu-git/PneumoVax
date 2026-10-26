@@ -343,7 +343,12 @@ describe('over the whole grid', () => {
     // row, and 110 from the shared-clinical-decision row at >=65, which
     // already carried a job-aid button. Measured with scripts/proseDiff.mjs
     // over both grids; see CLINICAL_SPEC.md section K, Ruling F.
-    expect(stats.listing).toBe(2564 + 1154 + 440 - 363);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. -132 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132);
     expect(stats.uncredited).toBe(0);
     expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });
@@ -365,7 +370,12 @@ describe('over the whole grid', () => {
         if (n === 1) seen.one++; else if (n === 2) seen.two++;
       }
     }
-    expect(seen).toEqual({ one: 165, two: 45 });
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. +20 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(seen).toEqual({ one: 165 + 20, two: 45 });
   });
 
   it('no card shows a quote at an age band it was not written about', () => {

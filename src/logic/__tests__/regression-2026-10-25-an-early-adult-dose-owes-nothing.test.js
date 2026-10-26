@@ -1,3 +1,18 @@
+// ⚠️ RENAMED AND INVERTED BY OWNER RULING 2026-10-25. It was
+// `regression-2026-10-24-invalid-adult-dose-owes-a-conjugate.test.js`, and the
+// rename is the finding: AN EARLY ADULT DOSE NOW OWES NOTHING, because no
+// adult dose is set aside for timing any more. Every one of her four worked
+// patients below is complete where she was previously owed a repeat.
+//
+// IT IS KEPT, NOT DELETED, for three reasons. Her four patients are the ones
+// the question was argued over, so they are the right ones to pin. The CHILD
+// half is untouched and still live — children keep real floors, so the repeat
+// clock, the 8-week number and the no-grace rule all still run for them. And
+// the adult machinery is now UNREACHABLE rather than removed, which is a thing
+// a test should say out loud: see the last describe block.
+//
+// ── what it used to hold ─────────────────────────────────────────────────
+//
 // OWNER RULING 2026-10-24 (afternoon) — THE REPEAT DATE AFTER AN INVALID ADULT
 // DOSE, and the one family she kept out of it.
 //
@@ -31,10 +46,10 @@ const run = (p) => recommend({ today: TODAY, ...p });
 const invalidOf = (out) => [...out.perDose.pcv, ...out.perDose.ppsv23]
   .filter((d) => d.status === 'invalid');
 
-describe('her four worked patients, to the day', () => {
-  // These are the ONLY four patients she gave dates for. Every one of them was
-  // wrong before this change or right only by coincidence, so they are
-  // asserted exactly rather than by shape.
+describe('her four worked patients are owed NOTHING now', () => {
+  // The same four, with the dates she gave on 2026-10-24 kept in the table as
+  // the record of what they used to be told. None of them has an invalid dose
+  // any more, so none has a repeat date at all.
   const CASES = [
     ['70y healthy, early conjugate 8 months after PPSV23', {
       ageMonths: Y(70), riskIds: [],
@@ -60,17 +75,16 @@ describe('her four worked patients, to the day', () => {
     }, '2027-10-11'],
   ];
 
-  for (const [name, patient, due] of CASES) {
-    it(`${name} -> repeat due ${due}`, () => {
-      const bad = invalidOf(run(patient));
-      expect(bad).toHaveLength(1);
-      expect(bad[0].repeatDueDate).toBe(due);
+  for (const [name, patient, wasDue] of CASES) {
+    it(`${name} -> no invalid dose, no repeat (was ${wasDue})`, () => {
+      expect(invalidOf(run(patient))).toHaveLength(0);
     });
   }
 
-  it('the asplenic patient is NOT given the 8 weeks she was given before', () => {
-    const bad = invalidOf(run(CASES[3][1]));
-    expect(bad[0].repeatDueDate).not.toBe('2026-12-06');
+  it('and every one of them reads complete', () => {
+    for (const [name, patient] of CASES) {
+      expect(run(patient).recs.some((r) => r.status === 'complete'), name).toBe(true);
+    }
   });
 });
 
@@ -87,9 +101,13 @@ describe('one number for every adult, which is what she chose', () => {
     return bad[0]?.repeatDueDate;
   });
 
-  it('healthy, chronic, immunocompromised and cochlear all get 2027-08-15', () => {
+  // Her "one number for every adult" is now moot at the sharpest possible
+  // point: there is no number, for any risk class, because there is no
+  // rejected dose to repeat. Kept as the record — risk-keying the clock back
+  // in would make this fail.
+  it('healthy, chronic, immunocompromised and cochlear are all owed nothing (all were 2027-08-15)', () => {
     const dates = sameDateAcrossRisk([[], ['chronic_heart'], ['asplenia'], ['cochlear_implant']]);
-    expect(dates).toEqual(['2027-08-15', '2027-08-15', '2027-08-15', '2027-08-15']);
+    expect(dates).toEqual([undefined, undefined, undefined, undefined]);
   });
 });
 
@@ -126,35 +144,49 @@ describe('the second PPSV23 — the family she kept OUT of the new clock', () =>
     'PPSV23', [{ date: '2015-01-01' }, { date: '2018-01-01' }], 840, '2026-06-01', '1945-01-01',
   ).perDose[1];
 
-  it('keeps the 5-year date — NOT the 1-year conjugate date', () => {
+  // ⚠️ REVERSED 2026-10-25: she was asked about this family directly (a
+  // 68-year-old with COPD, PPSV23 2024 and a second in 2026) and chose COUNT,
+  // NOTE THE SHORTFALL. Her reason is the one this row always rested on —
+  // rejecting the dose would only invite a THIRD PPSV23, which is the harm the
+  // evidence describes — so the dose counts and the card says never give a
+  // third.
+  it('counts the second dose, and tells the reader never to give a third', () => {
     const d = second();
-    expect(d.status).toBe('invalid');
-    expect(d.repeatDueDate).toBe('2023-01-01');
-    expect(d.repeatDueDate).not.toBe('2019-01-01');
+    expect(d.status).toBe('valid');
+    expect(d.effectiveDoseNum).toBe(2);
+    expect(d.reasons.join(' ')).toMatch(/shorter than the 5 years/);
+    expect(d.reasons.join(' ')).toMatch(/\*\*Counted; never give a third\.\*\*/);
   });
 
-  it('offers PCV20 or PCV21 from one year, emphasised, with both reasons', () => {
-    const text = second().reasons.join(' ');
-    // Her two sentences, summarised, and the date from the shared clocks.
-    expect(text).toContain('A repeat PPSV23 should wait at least 5 years after this dose');
-    expect(text).toContain('1 dose of PCV20 or PCV21 may be considered from Jan 1, 2019');
-    expect(text).toContain('ACIP schedules any conjugate at least 1 year after the last PPSV23');
-    // Emphasised — she asked for the alternative bolded.
-    expect(text).toMatch(/\*\*A repeat PPSV23[\s\S]*?last PPSV23\.\*\*/);
+  it('and the rationale is the hyporesponsiveness evidence, not a bare interval', () => {
+    // The quote the owner supplied on 2026-10-25 from rr7203a1's "Repeat
+    // PPSV23 administration" section. This is the ONE adult interval with
+    // direct data behind it, and the card has to say so or the reader cannot
+    // tell it apart from the ones that are only scheduling convention.
+    const why = second().whys.join(' ');
+    expect(why).toMatch(/lower than to the first dose for certain serotypes/);
+    expect(why).toMatch(/no hyporesponsiveness was seen at 5 years or more/);
+    expect(why).toMatch(/rr7203a1/);
+    expect(why).toMatch(/lifetime maximum/);
   });
 
   it('marker pairs are balanced, so the renderer cannot swallow the rest', () => {
     for (const r of second().reasons) expect(r.split('**').length % 2).toBe(1);
   });
 
-  it('the row carries the opt-in flag, and it is the ONLY row that does', () => {
+  it('NO row carries the opt-in flag any more', () => {
+    // It was only ever read in the evaluator's floor branch, and this row —
+    // its only user — stopped being a floor. A flag left set would read as
+    // live behaviour to the next session, so it was removed from the row.
     const optedIn = DOSE_INTERVAL_RULES.filter((r) => r.conjugateAlternativeAfterInvalid);
-    expect(optedIn.map((r) => r.id)).toEqual(['ADULT-PPSV23-AFTER-PPSV23']);
+    expect(optedIn.map((r) => r.id)).toEqual([]);
   });
 
-  it('and it is still a 5-year floor on her authority', () => {
+  it('it is now a recommendation, and THE INTERVAL IS UNCHANGED', () => {
     const rule = DOSE_INTERVAL_RULES.find((r) => r.id === 'ADULT-PPSV23-AFTER-PPSV23');
-    expect(rule.enforcement).toBe('floor');
+    expect(rule.enforcement).toBe('recommendation');
+    // The 5 years did not move. Only what happens below it did — which is the
+    // distinction her whole table is built on.
     expect(rule.interval).toEqual({ months: 60 });
   });
 });
@@ -206,15 +238,56 @@ describe('STEP 4 IS INERT TODAY, AND THAT IS GUARDED RATHER THAN HIDDEN', () => 
 });
 
 describe('the advice is never inside CDC\'s 4-day grace', () => {
-  // The 2026-10-24 morning ruling, which these new dates must not undo: the
+  // The 2026-10-24 morning ruling, which these changes must not undo: the
   // grace decides what the app ACCEPTS, never what it ADVISES.
+  //
+  // ⚠️ RETARGETED TO A CHILD on 2026-10-25, because the adult patient this
+  // used to use no longer has a rejected dose. The contract is unchanged and
+  // children are where it still runs.
   it('a repeat date is the full interval, not the interval minus four days', () => {
     const bad = invalidOf(run({
-      ageMonths: Y(70), riskIds: [],
-      pcvDoses: [{ product: 'PCV15', date: '2026-06-19' }],
-      ppsv23Doses: [{ product: 'PPSV23', date: '2025-10-11' }],
+      ageMonths: 60, riskIds: ['asplenia'],
+      pcvDoses: [{ product: 'PCV20', date: '2026-06-01' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2026-06-22' }],
     }));
-    expect(bad[0].repeatDueDate).toBe('2027-06-19');   // 1 year exactly
-    expect(bad[0].repeatDueDate).not.toBe('2027-06-15'); // 1 year less the grace
+    expect(bad).toHaveLength(1);
+    expect(bad[0].repeatDueDate).toBe('2026-08-17');   // 8 weeks exactly
+    expect(bad[0].repeatDueDate).not.toBe('2026-08-13'); // 8 weeks less the grace
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+describe('THE ADULT INVALID-DOSE CARD IS NOW UNREACHABLE, said out loud', () => {
+  // `adultInvalidDoseCard` in recommend.js is gated on
+  // `CARD_FOLLOWS_INVALID_DOSE`, a set of four adult rule ids. All four became
+  // recommendations on 2026-10-25, so no adult dose can carry one of those ids
+  // and be invalid at the same time, and the card can never build.
+  //
+  // CLAUDE.md's rule is that a branch nothing can execute cannot be tested, so
+  // the unreachability is the assertion. The code is LEFT IN PLACE rather than
+  // deleted, because it is the implementation of a ruling she might restore —
+  // but a future session must not read it as live behaviour. If a floor ever
+  // returns to one of those rows this test fails and says so.
+  it('no adult rule that the card follows is a floor any more', () => {
+    const followed = [
+      'ADULT-PCV-AFTER-PPSV23',
+      'ADULT-PPSV23-AFTER-PCV15',
+      'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
+      'ADULT-PPSV23-AFTER-PCV13',
+    ];
+    for (const id of followed) {
+      const rule = DOSE_INTERVAL_RULES.find((r) => r.id === id);
+      expect(rule, id).toBeDefined();
+      expect(rule.enforcement, id).toBe('recommendation');
+    }
+  });
+
+  it('and `adultRepeatAfterInvalidDose` still answers when called directly', () => {
+    // Pure function, still correct, still exercised by the two tests above.
+    // Its only PRODUCTION caller was the opt-in flag that no row now sets.
+    expect(adultRepeatAfterInvalidDose({
+      vaccine: 'PPSV23', doseDate: '2026-10-11', ageAtDose: Y(60), riskIds: [],
+      priorPcv: [], priorPpsv23: [{ date: '2026-10-11' }],
+    }).dueDate).toBe('2027-10-11');
   });
 });

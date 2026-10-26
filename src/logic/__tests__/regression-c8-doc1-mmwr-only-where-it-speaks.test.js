@@ -338,7 +338,12 @@ describe('swept over every patient the grid can build', () => {
     // stopped being shown on cards whose sentence changed. This is the same
     // 363 the ruling moves, counted independently here and in the verdict
     // corpus.
-    expect(mmwrCards).toBe(2564 + 1154 + 440 - 363);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. -132 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132);
   });
 
   it("the job aid is on 3,869 — 3,616 after document 2, plus Ruling F's 253", () => {
@@ -352,7 +357,12 @@ describe('swept over every patient the grid can build', () => {
     // card it appears on, so those 110 were already inside the 3,616. Not an
     // age split — `jobAidCompleteCites` is gated on `isOlderAdult` and all
     // 363 clear it.
-    expect(jobAidCards).toBe(6805 - 3189 + 253);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. +213 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(jobAidCards).toBe(6805 - 3189 + 253 + 213);
   });
 
   it('no adult card was left with no source at all', () => {

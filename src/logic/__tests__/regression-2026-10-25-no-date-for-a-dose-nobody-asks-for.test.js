@@ -103,9 +103,19 @@ describe('her worked child, and the sentence she should see', () => {
 });
 
 describe('the boundary: a patient who IS owed something keeps her date', () => {
-  // These two are the 2026-10-25 adult ruling, one commit earlier. If this
-  // change ever keys on the vaccine stream instead of "is anything owed",
-  // both of them lose the clause and go back to disagreeing with their cards.
+  // ── WHO USED TO HOLD THIS BOUNDARY, AND WHY THEY CANNOT ───────────────
+  //
+  // Two adults did, one commit earlier: a 60-year-old and an asplenic
+  // 40-year-old, each with a PCV13 and then a PPSV23 too soon after it. The
+  // point of keeping them here was that a PPSV23 rejected in an ADULT is
+  // followed by something — a conjugate — so her clause must survive, which
+  // an implementation keyed on the vaccine STREAM would have stripped.
+  //
+  // The owner's 2026-10-25 adult table then turned every adult floor into a
+  // recommendation, so neither of them has a rejected dose at all any more.
+  // They are kept below as the record of that, and the boundary itself moves
+  // onto the child who follows — who holds it just as well, because her only
+  // card is a PCV one while the clause she keeps is on a PPSV23.
   const A = {
     ageMonths: 720, riskIds: [],
     pcvDoses: [{ product: 'PCV13', date: '2026-07-19' }],
@@ -117,18 +127,26 @@ describe('the boundary: a patient who IS owed something keeps her date', () => {
     ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-11' }],
   };
 
-  it('the adults of the PCV13 ruling keep the clause, and it matches their card', () => {
+  it('the adults of the PCV13 ruling have no rejected dose left to promise from', () => {
     for (const p of [A, D4]) {
       const out = run(p);
-      const chip = chipsOf(out).find((d) => d.forwardLookingReason);
-      expect(textOf(chip)).toContain(FORWARD);
-      expect(textOf(chip)).toContain('Oct 11, 2027');
-      // the same date the card states — the whole point of her 2026-10-24 ruling
-      expect(out.recs[0].earliestNextDate).toBe('2027-10-11');
+      const chip = out.perDose.ppsv23[0];
+      // Counted now, with the shortfall stated — her Ruling F wording.
+      expect(chip.status).toBe('valid');
+      expect(chip.earlyAdvisory).toBe(true);
+      expect(textOf(chip)).toContain('Counted; no further PPSV23 indicated.');
+      // No rejected dose, so no forward-looking clause and no second date.
+      expect(chip.forwardLookingReason).toBeUndefined();
+      expect(textOf(chip)).not.toContain(FORWARD);
+      expect(chipsOf(out).some((d) => d.forwardLookingReason)).toBe(false);
+      // Their card now counts five years from the PPSV23 that COUNTS, where
+      // before it counted one year from the PCV13 and the PPSV23 was thrown
+      // away. One date on the screen, and it is the later one.
+      expect(out.recs[0].earliestNextDate).toBe('2031-10-11');
     }
   });
 
-  it('a child who still owes a dose keeps hers too', () => {
+  it('a child who still owes a dose keeps hers — and she is the boundary now', () => {
     // Same asplenic 5-year-old, but only ONE PCV20 — her series is unfinished,
     // so a dose IS owed and the forward-looking date is honest.
     const out = run({
@@ -139,6 +157,11 @@ describe('the boundary: a patient who IS owed something keeps her date', () => {
     });
     expect(out.recs.some((r) => !ASKS_FOR_NOTHING.has(r.status))).toBe(true);
     expect(textOf(out.perDose.ppsv23[0])).toContain(FORWARD);
+    // THIS is what makes her the replacement for the two adults above: the
+    // clause she keeps sits on a PPSV23, and nothing on her screen is a
+    // PPSV23 card. An implementation that asked "is a dose of THIS vaccine
+    // owed" would strip it from her, and only this assertion would notice.
+    expect(out.recs.map((r) => r.vaccine)).toEqual(['PCV']);
   });
 });
 
@@ -167,7 +190,14 @@ describe('swept over the grid', () => {
     // PINNED EXACTLY, both sides. A rise in `withdrawn` means the engine has
     // stopped asking for doses somewhere; a rise in `kept` means it has
     // started. Either is a clinical change and must be explained, not absorbed.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2930, kept: 2335 });
+    //
+    // RE-MEASURED 2026-10-25 after her adult table: was
+    // `{ withdrawn: 2930, kept: 2335 }` (5,265 patients with a rejected
+    // dose), now 4,422. The 843 that left are exactly the adult-rulebook
+    // rejections, because no adult floor survives — the assertion below
+    // pins that shape, so a drop like this cannot pass as a re-measurement
+    // again without the rules it came from being named.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2652, kept: 1770 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {
@@ -182,5 +212,22 @@ describe('swept over the grid', () => {
     }
     // anti-vacuity: the sweep above is worthless if nothing matches
     expect(seen).toBeGreaterThan(5000);
+  });
+
+  it('and every rejected dose left in the grid comes from a CHILD floor', () => {
+    // Added 2026-10-25 with the re-measurement above. Her adult table left
+    // three floors in the whole table and all three are child rows, so this
+    // is the complete inventory of what can still carry the clause. It is
+    // what explains the 843-patient drop, and a rule appearing here that is
+    // not in this list is an adult dose being set aside again.
+    const rules = new Set();
+    for (const c of buildCases()) {
+      let out; try { out = recommend(c.input); } catch { continue; }
+      for (const d of chipsOf(out).filter((x) => x.forwardLookingReason)) {
+        rules.add(d.intervalRuleId);
+      }
+    }
+    expect([...rules].sort())
+      .toEqual(['CHILD-PCV-AFTER-PCV', 'CHILD-PPSV23-AFTER-PCV']);
   });
 });

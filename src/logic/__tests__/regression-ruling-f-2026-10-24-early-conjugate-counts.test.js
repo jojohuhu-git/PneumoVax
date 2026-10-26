@@ -148,7 +148,10 @@ describe('RULING F — what became of the floor beside it (reversed 2026-10-24)'
       prev: { date: '2024-01-01', ageAtDose: Y(68) },
       priorPcv: [], priorPpsv23: [{ date: '2024-01-01' }], riskIds: [],
     });
-    expect(v.kind).toBe('floor');
+    // ⚠️ 2026-10-25: this row became a recommendation too. Ruling F's point —
+    // that it is a SEPARATE row with its own 5 years and must not be folded
+    // into the conjugate rows — survives, and is what the id still pins.
+    expect(v.kind).toBe('recommendation');
     expect(v.ruleId).toBe('ADULT-PPSV23-AFTER-PPSV23');
   });
 });

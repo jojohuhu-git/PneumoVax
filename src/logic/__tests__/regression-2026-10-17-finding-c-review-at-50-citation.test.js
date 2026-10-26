@@ -240,7 +240,12 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     expect(offenders).toEqual([]);
     // Anti-vacuity: if a later change stops producing this card at all, the
     // assertion above would pass on an empty set and say nothing.
-    expect(seen).toBe(210);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. +20 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(seen).toBe(210 + 20);
   });
 
   it('the review-at-50 card that DOES offer a dose leads with ACIP\u2019s two-dose row', () => {
@@ -278,7 +283,12 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     // the 16,008-row grid, 210 once FINDING D/E added the four-dose PCV13
     // history (which gives 19-year-olds another way to arrive here). Both
     // numbers are real; neither replaces the other.
-    expect(moved).toBe(210);
+      // 2026-10-25: her adult table removed every adult floor, so patients
+      // whose early adult dose was rejected now read a different card, and the
+      // buttons move with the card. +20 is the measured net movement on this
+      // count. The invariant beside it — zero uncredited — is unchanged, and
+      // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
+      expect(moved).toBe(210 + 20);
   });
 
   it('the new sentence never reaches a 50+ or a paediatric card', () => {

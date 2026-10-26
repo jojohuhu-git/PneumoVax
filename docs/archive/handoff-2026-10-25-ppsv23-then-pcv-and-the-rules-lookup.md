@@ -1,3 +1,21 @@
+> ## ⚠️ SUPERSEDED — 2026-10-25, later the same day
+>
+> Read **`handoff-2026-10-25-adult-interval-rules.md`** instead.
+>
+> The owner supplied six interval tables after this handoff was written, and they settle
+> the question this file lists as "⛔ THE ONE THING BLOCKING": the adult half of her A/B
+> answer. Her ruling is that **every early adult dose counts** — all six adult floors are
+> now recommendations on branch `feature/2026-10-25-interval-rules-reorganised`, so the
+> change described below as "built, verified and REVERTED" has effectively landed, in a
+> wider form than this file anticipated.
+>
+> One item below is also **reversed**: this file's commit 2 made a child's conjugate after
+> a PPSV23 COUNT with an optional repeat. Her updated paediatric table calls it a repeat,
+> and she confirmed that choice. It is P1 in the new handoff and is NOT yet done.
+>
+> Its three "Open questions" and the carried-over queue are still live and are restated in
+> the new handoff.
+
 # PneumoVax — Handoff after the PPSV23→PCV rules and the rules lookup (2026-10-25, cloud session)
 
 Branch: **`claude/amazing-brahmagupta-hq1wcd`**, off `main` at `1c3fe52` (PR #87 merged).
