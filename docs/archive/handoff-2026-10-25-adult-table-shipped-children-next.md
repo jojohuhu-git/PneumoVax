@@ -1,3 +1,22 @@
+> ## ⚠️ SUPERSEDED — 2026-10-25, later the same day
+>
+> Read **`handoff-2026-10-25-child-conjugate-floor-and-the-card-question.md`** instead.
+>
+> **PR #90 merged** (`main` is now at `84ffe45`), which was the one thing blocking this
+> file's P1. **P1 is DONE** — `CHILD-PCV-AFTER-PPSV23` is a floor on her ruling
+> *"Repeat — her table wins"*, with `authority: 'OWNER'`, and it is open as
+> **PR [#91](https://github.com/jojohuhu-git/PneumoVax/pull/91)**. Suite **1,637 passing in
+> 147 files, 0 failing**.
+>
+> ⚠️ **#91 is NOT ready to merge.** Making the row a floor created the first case where a
+> dose is rejected by a CROSS-STREAM rule, and the recommendation card now advises an
+> EARLIER date than the chip for the same dose (Maya: card 26 Nov, chip 10 Dec; 375 of 600
+> hand-built children affected, 0 on `main`). That is an open owner decision, recorded in
+> the new handoff, in #91's body and in `CLINICAL_SPEC.md` §K-PPSV23THENPCV.
+>
+> The rest of this file's queue (P2–P5, "also state the minimum", the rules map, the eleven
+> references) is restated there and is still accurate.
+
 # PneumoVax — Handoff after the adult interval table went green and shipped (2026-10-25, desktop session)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
