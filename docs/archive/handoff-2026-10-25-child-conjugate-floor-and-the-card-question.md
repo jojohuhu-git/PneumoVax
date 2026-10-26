@@ -101,9 +101,16 @@ conjugate**, is told her PCV20 is **due today** on a card whose label reads *"�
 `ppsv.effective.find((d) => d.date)`, the **first** counting dose, though its own comment
 says *"latest of PCV or PPSV23"* (`recommend.js:1345`).
 
-**Verified identical on `main`** — not today's doing. Probe: `$SCRATCH/probe10.mjs`
-(re-create it; 12 lines). **Ask her before fixing** — it moves advised dates (case (c)) —
-and do **not** pin the current behaviour with a test, which would freeze it. The
+**Verified identical on `main`** — not today's doing. To reproduce, one `recommend()` call:
+
+```js
+recommend({ today: '2026-10-25', dob: '2014-10-01', ageMonths: 144, riskIds: ['asplenia'],
+  pcvDoses: [], ppsv23Doses: [{ date: '2019-01-01' }, { date: '2026-09-01' }] })
+// both PCV cards come back dueToday: true, earliestNextDate: null
+```
+
+**Ask her before fixing** — it moves advised dates (case (c)) — and do **not** pin the
+current behaviour with a test, which would freeze it. The
 `regression-2026-10-25-card-and-chip-name-one-date.test.js` header records the whole thing.
 
 ### P1 — the rest of her children's rows (unchanged from the previous handoff)
