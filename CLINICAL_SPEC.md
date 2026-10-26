@@ -1406,6 +1406,50 @@ catch-up row**.
   entered as Years/Months has no birthday and keeps the approximation. Applies on all three
   surfaces that print an infant age — `StepAge`, `Results`, `RecCard`.
 
+### §K-INFANTFLOORS — The infant floors are 38 / 66 / 94 for a routinely-vaccinated child (2026-10-26)
+
+**P5 of the owner's children's table**: doses 1–3 are invalid before **38 / 66 / 94 days**.
+The previous handoff marked the row *"already correct, no work needed — 38+28+28 = 94
+exactly. Zero slack, so it deserves a guard."* **The conclusion is right and the arithmetic
+is not**, which measuring the engine shows:
+
+| | dose 1 | dose 2 | dose 3 |
+|---|---|---|---|
+| Her row: invalid before | 38 | 66 | 94 |
+| App, prior doses at the **routine** ages (42 / 70) | **38** ✓ | **66** ✓ | **94** ✓ |
+| App, each prior dose at **its own earliest** | **38** | **62** | **86** |
+
+The app does not add 28. For a dose **already given** it adds 28 − 4, because the grace
+applies to the interval as well as to the age — so the chain from each dose's own earliest
+is 38 + 24 + 24 = **86**, eight days under her row.
+
+**That is not a defect.** CDC, General Best Practices, *Timing and Spacing of
+Immunobiologics*, fetched live 2026-10-26:
+
+> *"grace period", vaccine doses administered ≤4 days before the minimum interval or age
+> are considered valid.*
+
+**"the minimum interval OR age"** — each minimum gets the grace, independently. The page's
+DTaP-4 footnote applies it to both at once for a single dose (the minimum age of 15 months
+**and** the minimum interval between DTaP-3 and DTaP-4), and nothing on the page bars a dose
+validated by the grace from anchoring the next interval; CDC measures the next interval from
+the dose the patient **got**, which is the sentence Ruling D rests on (§L).
+
+So **both readings are right about different children**. Her 38 / 66 / 94 describes a child
+vaccinated on the routine schedule, and the app matches it exactly there. A child whose
+earlier doses were themselves four days early is a different child, and her floors move with
+her doses.
+
+**No code changed.** The floors are a composition of three constants — `PCV_MIN_AGE_DAYS`
+42, `PCV_MIN_INTERVAL_DAYS_UNDER_12M` 28, `GRACE_DAYS` 4 — and nothing asserted the result,
+so changing any one of them moved every floor in silence. The guard pins the day numbers a
+clinician actually sees, **both chains**, and states the shortfall as arithmetic (one grace
+per earlier interval) rather than as three magic numbers. Proved load-bearing: grace 4 → 0
+fails **52** tests, minimum age 42 → 41 fails **9**, interval 28 → 27 fails **28**, each
+including this guard.
+
+Guard: `regression-2026-10-26-infant-dose-floors-38-66-94.test.js`.
+
 ### §K-INVALID — What an invalid ADULT dose leaves owing, and when (OWNER, 2026-10-24)
 
 **OWNER CLINICAL DETERMINATION dated 2026-10-24.** Never cite ACIP or CDC for the
