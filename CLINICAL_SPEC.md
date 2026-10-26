@@ -1669,6 +1669,33 @@ them exactly.
 Guard: `regression-2026-10-25-child-conjugate-after-ppsv23-repeats.test.js` (renamed from
 `...-counts.test.js`, which asserted the opposite and is kept as the record of the reversal).
 
+**⚠ ONE THING THIS RULING CREATED IS NOT YET DECIDED, AND NOT YET FIXED — the
+RECOMMENDATION CARD still advises an earlier date than the chip.** Maya's chip says the
+repeat may be given from **10 Dec** (Ruling D: eight weeks from the dose she got). Her card
+says *"Not yet due — eligible **26 Nov**"* — eight weeks from her PPSV23, because
+`anchorPneumo` keys on **counting** doses (ANCHOR-1, *"an unnecessary dose cannot reset a
+clock"*) and her only conjugate no longer counts. Two dates for one dose, 14 days apart.
+
+**It is this ruling that created them.** Measured over 810 hand-built children aged 2–18
+with a PPSV23 and a conjugate 1–55 days later (the grid cannot build these patients at all):
+on `main` **0** had a rejected dose, so 0 clashed; on this branch **600** are rejected and
+**375** carry a card earlier than the chip. The 11 grid patients that do reach the rule show
+0 clashes, which is why the suite is green — the guard class that would catch it cannot
+build the patient.
+
+**And the card's date is the wrong one.** A clinician who follows it gets a dose the app then
+throws away: Maya given PCV20 on 26 Nov is rejected by `CHILD-PCV-AFTER-PCV` (42 days, needs
+56) and her series still reads incomplete; given it on 10 Dec it is valid and she reads
+**Complete**. Both ACIP's General Best Practices (*"The repeat dose should be spaced after the
+invalid dose by the recommended minimum interval"*) and RULING D give 10 Dec; no document or
+ruling gives 26 Nov.
+
+**Why it was not simply fixed.** The candidate fix is the *later of two clocks* shape the
+24–71-month block already uses — `anchorPneumoGiven = mostRecent(anchorPcv, ppsv.lastDate)`
+— applied to the 6–18 block's `anchorForA` and its Option B sibling. That **moves advised
+dates**, which is owner-decision case (c), and it means choosing which of several anchor
+sites in `recommend.js` move. **ASK BEFORE BUILDING IT.**
+
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 
 Neither is a clinical rule; both are about whether a clinician can read the card correctly.
