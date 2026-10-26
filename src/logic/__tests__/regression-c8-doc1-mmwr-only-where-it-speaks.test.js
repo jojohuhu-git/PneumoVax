@@ -343,7 +343,11 @@ describe('swept over every patient the grid can build', () => {
       // buttons move with the card. -132 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132);
+      // +30, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132 + 30);
   });
 
   it("the job aid is on 3,869 — 3,616 after document 2, plus Ruling F's 253", () => {
@@ -362,7 +366,11 @@ describe('swept over every patient the grid can build', () => {
       // buttons move with the card. +213 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(jobAidCards).toBe(6805 - 3189 + 253 + 213);
+      // -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(jobAidCards).toBe(6805 - 3189 + 253 + 213 - 5);
   });
 
   it('no adult card was left with no source at all', () => {

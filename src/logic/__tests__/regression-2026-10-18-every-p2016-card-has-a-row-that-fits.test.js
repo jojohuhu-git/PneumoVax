@@ -225,7 +225,11 @@ describe("every card citing p2016 has a p2016 row whose columns all fit", () => 
     //
     // If this fails, do not edit the number until you can say which cards moved
     // and why — then edit it and add the line.
-    expect(carrying).toBe(3403);
+    // +128, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+    // counting conjugate and her card family changes with it. The invariant
+    // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(carrying).toBe(3403 + 128);
     expect([...noRowFits.entries()].slice(0, 8)).toEqual([]);
     expect([...noRowFits.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });

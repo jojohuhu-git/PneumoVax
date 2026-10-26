@@ -430,7 +430,11 @@ describe('swept over the whole grid — the counts that moved', () => {
       // buttons move with the card. +213 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(gained).toBe(3616 + 253 + 213);
+      // -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(gained).toBe(3616 + 253 + 213 - 5);
     expect(uncreditedPairs).toBe(0);
     expect(uncreditedStatements.size).toBe(0);
   });

@@ -145,7 +145,11 @@ describe('over the whole grid', () => {
   })();
 
   it('exactly the 45 two-dose 19-49 cards changed', () => {
-    expect(counts.acipOrder).toBe(45);
+    // was 45; -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+    // counting conjugate and her card family changes with it. The invariant
+    // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(counts.acipOrder).toBe(40);
   });
 
   it('the other 1,467 PCV13 + PPSV23 cards keep the flat wording', () => {

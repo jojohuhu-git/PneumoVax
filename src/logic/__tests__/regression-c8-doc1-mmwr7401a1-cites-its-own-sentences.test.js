@@ -197,7 +197,24 @@ describe('each card credits the row that was written about its own patient', () 
   const ONE_PPSV = [{ product: 'PPSV23', date: '2021-10-11' }];
   // Two EFFECTIVE PPSV23 doses: the PCV13 pair is late enough that both
   // polysaccharide doses clear their intervals.
-  const TWO_PCV13 = [{ product: 'PCV13', date: '2021-10-12' }, { product: 'PCV13', date: '2021-11-09' }];
+  // ⚠ RE-DATED 2026-10-25, and the ASSERTIONS ARE UNTOUCHED. These were
+  // PCV13 on 2021-10-12 and 2021-11-09 — one day and 29 days after the PPSV23
+  // of 2021-10-11. The dates had been picked for the CITATION question and
+  // nothing then graded the gap, but this patient was 14 at those doses, so
+  // `CHILD-PCV-AFTER-PPSV23` now judges them, and the owner's ruling of
+  // 2026-10-25 makes that 8 weeks a BAR: the first dose was set aside, the
+  // second cascaded (rejected by `CHILD-PCV-AFTER-PCV`, since a dose that did
+  // not count is not a previous dose), and the fixture stopped being an adult
+  // with PCV13 on her record at all — her card became "Give 1 dose of PCV15,
+  // PCV20, or PCV21 >=1 year after the PPSV23 dose" and the row this file
+  // exists to check was no longer exercised.
+  //
+  // So the doses move to the ordinary clinical order — both conjugates a year
+  // apart and well before either PPSV23 — which is the shape the sibling file
+  // `regression-c8-2026-10-18-ic-two-ppsv-follows-acip-order.test.js` already
+  // used. The patient the test describes is unchanged: PCV13 twice, PPSV23
+  // twice five years apart, read at 19.
+  const TWO_PCV13 = [{ product: 'PCV13', date: '2014-10-13' }, { product: 'PCV13', date: '2015-10-13' }];
   const TWO_PPSV = [{ product: 'PPSV23', date: '2016-10-13' }, { product: 'PPSV23', date: '2021-10-11' }];
 
   it('S1 · 50+ with PCV13 + PPSV23 quotes the >=50 row', () => {
@@ -348,7 +365,11 @@ describe('over the whole grid', () => {
       // buttons move with the card. -132 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132);
+      // +30, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30);
     expect(stats.uncredited).toBe(0);
     expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });
@@ -375,7 +396,11 @@ describe('over the whole grid', () => {
       // buttons move with the card. +20 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(seen).toEqual({ one: 165 + 20, two: 45 });
+      // two was 45; -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(seen).toEqual({ one: 165 + 20, two: 40 });
   });
 
   it('no card shows a quote at an age band it was not written about', () => {

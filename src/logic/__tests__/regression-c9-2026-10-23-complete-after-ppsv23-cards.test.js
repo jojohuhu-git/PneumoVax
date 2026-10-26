@@ -162,7 +162,11 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
   });
 
   it('CASE 1: no card in the grid shows that sentence with a p2016 button (840 cards)', () => {
-    expect(FOUND.case1.length).toBe(840);
+    // was 840; -30, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+    // counting conjugate and her card family changes with it. The invariant
+    // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(FOUND.case1.length).toBe(810);
     const withP2016 = FOUND.case1.filter(({ rec }) => chipShorts(rec).includes('immunize.org p2016'));
     expect(withP2016.length).toBe(0);
     // Anti-overreach: CDC must still be there on every one of them.
@@ -274,7 +278,11 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
 
   it('the three families still produce the same number of cards as before', () => {
     // No verdict moved: this change is citations and wording only.
-    expect(FOUND.case1.length).toBe(840);
+    // was 840; -30, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+    // counting conjugate and her card family changes with it. The invariant
+    // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(FOUND.case1.length).toBe(810);
     expect(FOUND.case2catchup.length).toBe(15);
     expect(FOUND.case2series.length).toBe(5);
   });

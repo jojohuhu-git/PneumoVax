@@ -221,7 +221,11 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
       else missing.push(c.key);
     });
     expect(missing.slice(0, 5)).toEqual([]);
-    expect(cited).toBe(288);
+    // +32, 2026-10-25 (the PPSV23-then-PCV floor), was 288. A conjugate set
+    // aside stops being an EARLIER conjugate, so 32 more children read their
+    // PCV20 as their first one and land in this branch. The mirror of the -48
+    // in the next test — the same children, counted out of the other parent.
+    expect(cited).toBe(320);
   });
 
   it('a 6-18y at-risk child with an earlier conjugate at/after age 6 is cited the row that PCV20 satisfied', () => {
@@ -241,7 +245,10 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
     });
     expect(missing.slice(0, 5)).toEqual([]);
     expect(strayRiskBasedChip.slice(0, 5)).toEqual([]);
-    expect(cited).toBe(576);
+    // -48, 2026-10-25 (the PPSV23-then-PCV floor), was 576. The other side of
+    // the +32 above: a child whose at/after-6 conjugate was set aside no longer
+    // has one, so this parent branch stops covering her.
+    expect(cited).toBe(528);
   });
 
   it('the card says the PCV20 has been given, so the cited row is not read as still owing a dose', () => {

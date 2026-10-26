@@ -245,7 +245,11 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
       // buttons move with the card. +20 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(seen).toBe(210 + 20);
+      // -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(seen).toBe(210 + 20 - 5);
   });
 
   it('the review-at-50 card that DOES offer a dose leads with ACIP\u2019s two-dose row', () => {
@@ -262,7 +266,11 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     // The 45 two-dose 19-49 immunocompromising cards, all citing the row that
     // states the review at 50 -- not CDC's Adult Notes, which say only the
     // dose and its five years.
-    expect(found).toHaveLength(45);
+    // was 45; -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+    // counting conjugate and her card family changes with it. The invariant
+    // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(found).toHaveLength(40);
     expect([...new Set(found)]).toEqual(['mmwrIc1949TwoPpsv']);
   });
 
@@ -288,7 +296,11 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
       // buttons move with the card. +20 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(moved).toBe(210 + 20);
+      // -5, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(moved).toBe(210 + 20 - 5);
   });
 
   it('the new sentence never reaches a 50+ or a paediatric card', () => {

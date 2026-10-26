@@ -193,11 +193,18 @@ describe('swept over the grid', () => {
     //
     // RE-MEASURED 2026-10-25 after her adult table: was
     // `{ withdrawn: 2930, kept: 2335 }` (5,265 patients with a rejected
-    // dose), now 4,422. The 843 that left are exactly the adult-rulebook
+    // dose), then 4,422. The 843 that left were exactly the adult-rulebook
     // rejections, because no adult floor survives — the assertion below
     // pins that shape, so a drop like this cannot pass as a re-measurement
     // again without the rules it came from being named.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2652, kept: 1770 });
+    //
+    // RE-MEASURED AGAIN the same day, and this time it ROSE: 4,422 -> 4,521.
+    // Her second ruling of 2026-10-25 ("Repeat — her table wins") made
+    // `CHILD-PCV-AFTER-PPSV23` a floor, so a child's conjugate given inside 8
+    // weeks of a PPSV23 is now set aside. The 99 added patients are
+    // +18 withdrawn and +81 kept; the inventory below names the new rule,
+    // which is what distinguishes this rise from an adult floor creeping back.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2670, kept: 1851 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {
@@ -216,10 +223,20 @@ describe('swept over the grid', () => {
 
   it('and every rejected dose left in the grid comes from a CHILD floor', () => {
     // Added 2026-10-25 with the re-measurement above. Her adult table left
-    // three floors in the whole table and all three are child rows, so this
+    // four floors in the whole table and all four are child rows, so this
     // is the complete inventory of what can still carry the clause. It is
-    // what explains the 843-patient drop, and a rule appearing here that is
-    // not in this list is an adult dose being set aside again.
+    // what explains the 843-patient drop and then the 99-patient rise, and a
+    // rule appearing here that is not in this list is an adult dose being set
+    // aside again.
+    //
+    // `CHILD-PCV-AFTER-PPSV23` joined the list later the same day, when her
+    // second ruling made it a floor, and it accounts for 231 rejected doses.
+    // `CHILD-PPSV23-AFTER-PPSV23` is the fourth floor and is NOT here because
+    // the grid REJECTS NOTHING by it at all — measured over every case, the
+    // rejected-dose tally is `CHILD-PCV-AFTER-PCV` 6,281,
+    // `CHILD-PPSV23-AFTER-PCV` 814, `CHILD-PCV-AFTER-PPSV23` 231 and that row
+    // 0. So its absence here says nothing about the clause; the grid simply
+    // never dates two PPSV23 doses inside five years of each other.
     const rules = new Set();
     for (const c of buildCases()) {
       let out; try { out = recommend(c.input); } catch { continue; }
@@ -228,6 +245,6 @@ describe('swept over the grid', () => {
       }
     }
     expect([...rules].sort())
-      .toEqual(['CHILD-PCV-AFTER-PCV', 'CHILD-PPSV23-AFTER-PCV']);
+      .toEqual(['CHILD-PCV-AFTER-PCV', 'CHILD-PCV-AFTER-PPSV23', 'CHILD-PPSV23-AFTER-PCV']);
   });
 });
