@@ -8,11 +8,10 @@
 > **PR [#91](https://github.com/jojohuhu-git/PneumoVax/pull/91)**. Suite **1,637 passing in
 > 147 files, 0 failing**.
 >
-> ⚠️ **#91 is NOT ready to merge.** Making the row a floor created the first case where a
-> dose is rejected by a CROSS-STREAM rule, and the recommendation card now advises an
-> EARLIER date than the chip for the same dose (Maya: card 26 Nov, chip 10 Dec; 375 of 600
-> hand-built children affected, 0 on `main`). That is an open owner decision, recorded in
-> the new handoff, in #91's body and in `CLINICAL_SPEC.md` §K-PPSV23THENPCV.
+> **#91 is complete.** Making the row a floor created the first case where a dose is
+> rejected by a CROSS-STREAM rule, and the card briefly advised an EARLIER date than the
+> chip; the owner approved the fix and it is built (`3c11c3c`) — 750 advised dates moved
+> later, 0 earlier, 0 grid patients. Suite **1,643 passing in 148 files**.
 >
 > The rest of this file's queue (P2–P5, "also state the minimum", the rules map, the eleven
 > references) is restated there and is still accurate.

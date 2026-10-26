@@ -9,13 +9,12 @@ Branch: **`feature/2026-10-25-child-conjugate-after-ppsv23-repeat`**, off `main`
 tree clean at `3133cd7`.** `main` is protected, so work lands branch → PR → **the owner
 squash-merges** (a session agent cannot).
 
-Baseline at session start: **1,632 passing**. Now: **1,637 passing in 147 files, 0 failing,
+Baseline at session start: **1,632 passing**. Now: **1,643 passing in 148 files, 0 failing,
 0 skipped.**
 
-**PR [#91](https://github.com/jojohuhu-git/PneumoVax/pull/91) is OPEN.** Its `test` check was
-still **pending** when this was written — confirm with `gh pr checks 91` before doing
-anything else. **It is NOT ready to merge**: there is one open owner question in its body,
-described below, and the PR title says so.
+**PR [#91](https://github.com/jojohuhu-git/PneumoVax/pull/91) is OPEN and complete.** The
+open question it carried has been **answered by the owner and built** (`3c11c3c`). Confirm
+`gh pr checks 91` is green, then it is hers to squash-merge.
 
 ---
 
@@ -71,38 +70,41 @@ See `CLINICAL_SPEC.md` §K-PPSV23THENPCV, final block, and PR #91's body.
 
 ## What's NOT done
 
-### ⚠️ P0 — THE CARD AND THE CHIP DISAGREE. **Ask her; do not pick an anchor yourself.**
+### (was P0, now DONE) — the card and the chip name one date, commit `3c11c3c`
 
-Making this row a floor produced the **first case in the app where a dose is rejected by a
-CROSS-STREAM rule**, and the recommendation card does not follow Ruling D there.
+The owner answered: *"make the card use the later of the two clocks so it says 10 Dec, and
+measure how many patients' advised dates move."*
 
-Maya, 8, asplenia — PPSV23 1 Oct, PCV20 15 Oct:
+One line in `recommend.js` — `anchorForA` takes `mostRecent(anchorPneumo, anchorPcv)` when
+the child has no **counting** conjugate. Both anchors already existed and carry the same
+8 weeks, so no second reading of the interval entered the engine; it is the shape
+`anchorPneumoGiven` already used for the 24–71-month block. All three cards in the 6–18
+block read one `aState`, so one line moved them all.
 
-| Surface | Date | Measured from |
-|---|---|---|
-| the chip under the rejected dose | **10 Dec 2026** | the dose she got + 8 weeks (Ruling D) |
-| her recommendation card | *"Not yet due — eligible **26 Nov 2026**"* | her PPSV23 + 8 weeks (`anchorPneumo`, which keys on **counting** doses per ANCHOR-1) |
+**Measured: 750 advised dates moved LATER, 0 earlier, 0 "due today" flips**, over 18,667
+card rows (grid + 810 hand-built children). All in the 6–18 block: 375 patients × 2 cards,
+150 at each of ages 6/8/11/14/17. **0 grid patients moved**, so both corpora are
+byte-identical — and the corpus records `earliestNextDate`, so that is a real check.
+Controls: a child with **no** conjugate is untouched, and so is one whose conjugate counted.
+Guard: `regression-2026-10-25-card-and-chip-name-one-date.test.js`. Live-verified: Maya's
+card and chip both read **Dec 10, 2026**.
 
-**The card's date is the wrong one, verified in the engine:** PCV20 given 26 Nov is rejected
-by `CHILD-PCV-AFTER-PCV` (42 days, needs 56) and she still reads incomplete; given 10 Dec it
-is valid and she reads **Complete**. ACIP's General Best Practices and Ruling D both give
-10 Dec; nothing gives 26 Nov.
+### ⚠️ NEW FINDING, NOT FIXED, and it PREDATES today — the card can anchor on the FIRST PPSV23
 
-**This change created it.** Over **810 hand-built children** aged 2–18 with a PPSV23 and a
-conjugate 1–55 days later: on `main` **0** had a rejected dose, so 0 clashed; on this branch
-**600** are rejected and **375** carry a card earlier than the chip. **The grid cannot build
-these children** — only 11 patients reach the rule and none of those 11 clash, which is why
-the suite is green. Probe kept at
-`/private/tmp/claude-501/-Users-joannehuang-Downloads-PneumoVax/9f3395ae-680f-45bf-ba1b-27629d01466a/scratchpad/probe8.mjs`
-(scratchpad — re-create it if gone; it is 40 lines).
+Found by a mutation that **passed all 1,643 tests**: swapping `anchorPneumo` for
+`anchorPneumoGiven` changes nothing in the suite, because nothing anywhere builds a child
+with **two counting PPSV23 doses**.
 
-**The candidate fix, NOT built:** the *later of two clocks* shape the 24–71-month block
-already uses — `anchorPneumoGiven = mostRecent(anchorPcv, ppsv.lastDate)`,
-`recommend.js:1371` — applied to the 6–18 block's `anchorForA` (`recommend.js:2252`) and its
-Option B sibling. It moves advised dates **later, never earlier**. It is owner-decision case
-(c) (*a change that moves a verdict*), and it means choosing which of the other
-`anchorPneumo` sites move (`recommend.js` lines 1690, 1728, 1953, 2071, 2094, 2224). **Do not
-widen it past what she approves** — memory *"Scope a ruling to the patients she worked"*.
+It is a real defect. A 12-year-old with asplenia, **PPSV23 2019-01-01 and 2026-09-01, no
+conjugate**, is told her PCV20 is **due today** on a card whose label reads *"≥8 weeks"* —
+54 days after her most recent pneumococcal dose. `anchorPneumo` reads
+`ppsv.effective.find((d) => d.date)`, the **first** counting dose, though its own comment
+says *"latest of PCV or PPSV23"* (`recommend.js:1345`).
+
+**Verified identical on `main`** — not today's doing. Probe: `$SCRATCH/probe10.mjs`
+(re-create it; 12 lines). **Ask her before fixing** — it moves advised dates (case (c)) —
+and do **not** pin the current behaviour with a test, which would freeze it. The
+`regression-2026-10-25-card-and-chip-name-one-date.test.js` header records the whole thing.
 
 ### P1 — the rest of her children's rows (unchanged from the previous handoff)
 
@@ -151,12 +153,11 @@ and that is hers to approve. Nothing is half-applied and the tree is clean.
 ## Resuming
 
 1. `cd /Users/joannehuang/Downloads/PneumoVax && git checkout feature/2026-10-25-child-conjugate-after-ppsv23-repeat`
-2. `npx vitest run` — confirm **1,637 passing, 0 failing** before touching anything.
-3. `gh pr checks 91` — it was **pending** when this was written. If it is red, that is the
-   first job.
-4. **Open decisions — ask, do not default:** (a) **the card/chip anchor above, which blocks
-   #91 merging**; (b) the eleven new references (cite as given vs. verify live); (c) has she
-   looked at the rules-map lookup; (d) the three `a66219a` questions.
+2. `npx vitest run` — confirm **1,643 passing, 0 failing** before touching anything.
+3. `gh pr checks 91` — confirm green. #91 is complete and is hers to squash-merge.
+4. **Open decisions — ask, do not default:** (a) **the first-PPSV23 anchor finding above**;
+   (b) the eleven new references (cite as given vs. verify live); (c) has she looked at the
+   rules-map lookup; (d) the three `a66219a` questions.
 5. Per item: reproduce → failing test (confirm it fails) → fix → `CLINICAL_SPEC.md` in the
    same commit → full suite → break the fix more than one way and quote the counts (**mutate
    the `message` shape with the `enforcement`** — flipping `enforcement` alone tests nothing)
