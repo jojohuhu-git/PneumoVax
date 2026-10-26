@@ -1,3 +1,14 @@
+> ## ⚠️ SUPERSEDED — 2026-10-25, later the same day
+>
+> Read **`handoff-2026-10-25-adult-table-shipped-children-next.md`** instead.
+>
+> Its P0 queue — the three red test files — is **DONE** (commit `2d82595`). The suite is
+> **green at 1,632 passing in 147 files**, and the adult half is open as
+> **PR #90**, whose `test` check passes. The remaining queue (the children's rows, "also
+> state the minimum", the rules map, the eleven new references) is restated in the new file,
+> with P1 scoped in detail and one hard constraint this file did not know: **P1 must not
+> start until #90 merges**, because both edit `doseIntervalRules.js` and `CLINICAL_SPEC.md`.
+
 # PneumoVax — Handoff after reorganising the ADULT interval rules (2026-10-25, desktop session)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
