@@ -141,8 +141,12 @@ describe('every no-prior-PCV 6-18 card in the grid is balanced and credited', ()
     // Anti-vacuity, with the real shape of the block: Option A appears once per
     // patient, Option B's PCV15 card likewise, and the PPSV23 step only while
     // no PPSV23 is on record — so its count is legitimately lower.
-    expect(counts.optionA).toBe(528);
-    expect(counts.optionB).toBe(528);
+    // +64 on each, 2026-10-25 (the PPSV23-then-PCV floor): both were 528. This
+    // block is the NO-PRIOR-PCV one, so it grows for exactly the right reason —
+    // a child whose only conjugate was set aside has no prior PCV any more.
+    // CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(counts.optionA).toBe(592);
+    expect(counts.optionB).toBe(592);
     expect(counts.ppsvStep).toBe(96);
     expect(unbalanced.slice(0, 5)).toEqual([]);
     expect(uncredited.slice(0, 5)).toEqual([]);

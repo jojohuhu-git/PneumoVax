@@ -1007,7 +1007,7 @@ catch-up row**.
   | Patient | Risk group | Already on the record | Dose being given | Measured from | Shortest acceptable gap | If it is shorter | Who says so | Rule |
   |---|---|---|---|---|---|---|---|---|
   | Child (under 19 years) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | Dose 2, when dose 1 was given before the first birthday: at least 4 weeks; Dose 2, when dose 1 was given at the first birthday or later: at least 8 weeks; Dose 3, given under 12 months, previous dose before 7 months: at least 4 weeks; Dose 3, previous dose at 7–11 months: at least 8 weeks; Dose 4 or later, given under 12 months (an extra infant dose): at least 4 weeks; Dose 4 or later, given at 12 months or over (the booster): at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PCV-AFTER-PCV` |
-  | Child (under 19 years) | Any | Anything | Any PCV | the most recent PPSV23 that counted | at least 8 weeks | Counts, with a note | CDC / ACIP | `CHILD-PCV-AFTER-PPSV23` |
+  | Child (under 19 years) | Any | Anything | Any PCV | the most recent PPSV23 that counted | at least 8 weeks | Does not count | This app | `CHILD-PCV-AFTER-PPSV23` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the most recent PCV that counted | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PCV` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine — including one that did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PPSV23` |
   | Adult (19 years and over) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | at least 4 weeks | Counts, with a note | This app | `ADULT-PCV-AFTER-PCV-UNDER-4-WEEKS` |
@@ -1569,66 +1569,105 @@ Table 1 is silent on it.
 `population: ['child-nonIC','child-IC']`, which is transcription: the row is headed "any
 risk condition" and the report's footnote lists both classes in one list.
 
-### §K-PPSV23THENPCV — A child's conjugate soon after a PPSV23 COUNTS, and the card offers the repeat (OWNER, 2026-10-25)
+### §K-PPSV23THENPCV — A child's conjugate soon after a PPSV23 DOES NOT COUNT (OWNER, 2026-10-25)
 
-**The gap.** The app had **no rule at all** for a conjugate given after a PPSV23 in a child.
-An 8-year-old with asplenia, PPSV23 on 1 Oct and PCV20 on 15 Oct, was accepted in **total
-silence** — no note, no number, nothing — on a screen whose other card quoted an 8-week
-interval. It was found from the advice side (§C-PPSV23ANCHOR) and the two halves shipped
-together.
+**⚠ THIS SECTION REVERSED ON THE DAY IT WAS WRITTEN, AND BOTH RULINGS ARE THE OWNER'S.**
+It shipped in `a66219a` as *"the dose COUNTS, and the card offers the repeat"*, on her
+morning answer: *"I think this a grey zone where it could be considered complete but an
+alternative suggest should be listed that allows a clinician to repeat the dose 8 weeks
+after the early PCV20 if conservative due to lack of direct CDC/ACIP guidance."* She was
+then asked directly — **"Child's PCV <52 days after a PPSV23 — count (this morning's
+ruling) or repeat?"** — and answered **"Repeat — her table wins."** Her interval table gives
+the row the basis **"ACIP rule"** plus the **2014 *Vaccine*** report on a blunted conjugate
+response after PPSV23. The repeat is what is built. Do not re-raise it.
 
-**The document states the PPSV23 anchor outright.** ACIP's *Use of 20-Valent Pneumococcal
-Conjugate Vaccine Among U.S. Children*, 22 September 2023, under *"Children 6–18 years with
-any risk condition with no previous PCV13, PCV15, or PCV20 vaccination"*:
+**The gap it was built for.** The app had **no rule at all** for a conjugate given after a
+PPSV23 in a child. An 8-year-old with asplenia, PPSV23 on 1 Oct and PCV20 on 15 Oct, was
+accepted in **total silence** — no note, no number, nothing — on a screen whose other card
+quoted an 8-week interval. It was found from the advice side (§C-PPSV23ANCHOR).
+
+**The interval is ACIP's.** *Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S.
+Children*, 22 September 2023, under *"Children 6–18 years with any risk condition with no
+previous PCV13, PCV15, or PCV20 vaccination"*:
 
 > *"a single dose of PCV15 or PCV20 is recommended **≥8 weeks after the most recent dose of
 > pneumococcal vaccination, regardless of whether the child has previously received PPSV23**,
 > even if PCV7 was received."*
 
-Table 1 states it again. That clause is why the row carries **CDC's** name and not the
-owner's: the document names the PPSV23 as the anchor in its own words. CDC's PneumoRecs
-reads it the same way for the younger band.
+Table 1 states it again; CDC's Child & Adolescent Schedule Notes say the same for the
+younger band (*"Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after the most recent
+dose …)"*), and CDC's PneumoRecs names the PPSV23 as the anchor for a 4-year-old.
 
-**A RECOMMENDATION, NOT A FLOOR — OWNER RULING 2026-10-25.** Asked whether the early dose is
-thrown away or flagged, she answered: *"I think this a grey zone where it could be considered
-complete but an alternative suggest should be listed that allows a clinician to repeat the
-dose 8 weeks after the early PCV20 if conservative due to lack of direct CDC/ACIP guidance."*
-The sentence above is timing for the **next** dose; no source says a dose given inside it must
-be repeated. This is **Ruling F's reading applied to a second row**.
+**⚠ BUT THE BAR IS HERS — `authority: 'OWNER'`, the FIRST paediatric floor that is.** Every
+sentence above states **the interval**. None of them says a dose given inside it **stops
+counting**. That is the distinction §K's header draws between ACIP's *"minimum **recommended**
+interval"* and the General Best Practices *"minimum interval"* that carries the
+repeat-the-dose consequence, and it is why:
 
-**The card offers the repeat, and the chip gains no new word.** Her instruction on the chips:
-*"I want to keep the dose chips to a limited variety for ease of maintaining and understanding
-… then yes you can update chip and give alternative schedule in the expander."* So the chip
-vocabulary is untouched — the dose reads `Dose N of M` as any counted dose does — and the
-alternative lives behind **"Why this"**:
+- the row carries her name, not CDC's — relabelling it CDC would make the app cite ACIP for
+  a consequence ACIP does not state;
+- **the dose's own text discloses it**: *"ACIP states the 8 weeks as the timing for the next
+  pneumococcal dose and does not direct that an earlier dose be repeated; setting the dose
+  aside is an owner clinical determination of this app, made because immunogenicity at the
+  shorter interval has not been established."* The phrase **"owner clinical determination"**
+  had been removed from the whole app hours earlier, when her adult table turned every adult
+  floor into a recommendation. It is back for **exactly one row**, and
+  `regression-2026-10-24-note-emphasis.test.jsx` now asserts **both halves** — absent on
+  every adult card, present on this child's.
 
-> *"A clinician who prefers the conservative course may repeat the conjugate dose from
-> Dec 10, 2026 — 8 weeks after the dose given."*
+This is **Ruling F's relabelling run backwards**: Ruling F took her name *off* rows whose bar
+was removed; this puts it *on* a row that has gained one.
 
-**THE DATE IS NOT COMPUTED BY THE MESSAGE.** `evaluateDoseInterval` passes it in as a fourth
-argument, from `intervalFrom(rule, anchor, ctx, ctx.doseDate)` — the same arithmetic as
-`repeatDueDate`'s child branch, and the same grace decision: **no grace**, because the ruling
-of 2026-10-24 keeps every *advised* date outside the four-day window. A message that did its
-own date arithmetic would be the P0 bug's shape.
+**Two dates, and each answers its own question.** Maya, 8, asplenia — PPSV23 1 Oct 2026,
+PCV20 15 Oct 2026:
 
-**⚠ DELIBERATELY ASYMMETRIC WITH `CHILD-PPSV23-AFTER-PCV`,** which is a **floor** at the same
-8 weeks in the opposite direction. The difference is in the documents, not in the engine: CDC
-instructs the PPSV23 itself (*"administer 1 dose PPSV23 at least 8 weeks after the most recent
-PCV dose"*, nine times, plus *"PCV15 and PPSV23 should not be administered during the same
-visit"*), while for a conjugate **following** a PPSV23 it states only the timing of the next
-dose. Never collapse the two enforcements without a new owner ruling.
+| | Date | Measured from | Grace |
+|---|---|---|---|
+| when **this** dose would have counted | **22 Nov 2026** | the PPSV23 (1 Oct) + 8 weeks | **−4 days**, because the dose was already given |
+| when the **repeat** may be given | **10 Dec 2026** | the dose she **got** (15 Oct) + 8 weeks | none — advice stays outside the grace |
 
-**Measured.** **231 of 17,016** verdicts and **22 of 18,264** record-problem rows moved, and
-every moved line is the SAME substitution on one dose:
+The first is RULING D's anchor (*"the repeat dose should be spaced from the invalid dose by
+the minimum interval"*); the second is the 2026-10-24 ruling that no **advised** date sits
+inside the four-day window. Both come from `intervalFrom`, one arithmetic path.
 
-> `valid:-:N:0:0:-:-:n0` → `valid:CHILD-PCV-AFTER-PPSV23:N:0:1:-:-:n1`
+**`optionalRepeat` is gone from the row.** It existed so a *recommendation* could name a date
+for a repeat nobody owed. A floor owes the repeat outright and `repeatDueDate` already
+carries its date, so leaving the flag on would put **two clocks on one dose** — the P0 bug's
+own shape.
 
-The dose stays **valid**, keeps its number, keeps `doesNotCount: 0`, and gains an early
-advisory and one reason. **No dose changed status, no dose number moved, and the `R=`
-recommendation field is byte-identical on all 231 lines** — nobody's schedule changed, which
-is what "counted, with a note" has to mean.
+**⚠ NO LONGER ASYMMETRIC WITH `CHILD-PPSV23-AFTER-PCV` IN `enforcement` — BUT STILL A
+DIFFERENT RULE.** Both are now floors at the same 8 weeks in opposite directions. The
+difference moved to **`authority`**: CDC instructs the PPSV23 itself (*"administer 1 dose
+PPSV23 at least 8 weeks after the most recent PCV dose"*, nine times, plus *"PCV15 and PPSV23
+should not be administered during the same visit"*), so that bar is CDC's. Two rows, two
+authorities, one number — never collapsed into one row, and the 8 weeks stays in a single
+constant (`PCV_PPSV23_MIN_INTERVAL_DAYS`).
 
-Guard: `regression-2026-10-25-child-conjugate-after-ppsv23-counts.test.js`.
+**Measured.** **231 of 17,016** verdicts and **22 of 18,264** record-problem rows moved —
+exactly the 231 doses the rule flags across the grid. Three consequences, all intended:
+
+| What moved | How many | Why |
+|---|---|---|
+| the judged dose, `valid` → `invalid` | **231** | the ruling itself |
+| a **later** dose's number, e.g. dose 2 → dose 1 | **66** | a dose that did not count is not a "previous dose" |
+| the **recommendation card** | **115** | the series is no longer complete, so a dose is owed. 35 of those gain the PCV21 serotype-4 note, because a card now offers PCV21 |
+
+**⚠ THE RULING REACHES ADULTS, by design.** `rulebookOf` keys on the age **at the dose**, so
+a 19-year-old whose PCV13 came three weeks after a PPSV23 at 14 is judged by this child row
+and now has **no counting conjugate**. Every one of the 231 grid patients is aged 216–228
+months for that reason — the grid builds no vaccinated 5-to-18-year-old (see
+`docs/archive/` and the hand-built Maya and Noor in the guard). One rejection can
+cascade: a second conjugate 29 days after the first is then rejected by
+`CHILD-PCV-AFTER-PCV`, which ACIP's General Best Practices expressly allows (*"The repeat
+dose should be spaced after the invalid dose by the recommended minimum interval"*).
+
+**24 pinned card counts moved** across 14 citation guards, each re-measured with its delta
+written beside it. **Every "zero uncredited" and "zero unfitting row" invariant beside them
+is unchanged** — only the sizes of the card families moved, which is the point of pinning
+them exactly.
+
+Guard: `regression-2026-10-25-child-conjugate-after-ppsv23-repeats.test.js` (renamed from
+`...-counts.test.js`, which asserted the opposite and is kept as the record of the reversal).
 
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 

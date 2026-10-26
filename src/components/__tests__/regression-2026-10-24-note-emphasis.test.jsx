@@ -166,30 +166,48 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
     }
   });
 
-  it('no card discloses an owner determination any more, because no floor is one', () => {
-    // ── WHAT THIS ASSERTED, AND WHY IT FLIPPED ───────────────────────
+  it('no ADULT card discloses an owner determination, because no adult floor is one — but the one child floor that is HAS to', () => {
+    // ── WHAT THIS ASSERTED, AND WHY IT HAS FLIPPED TWICE ─────────────
     //
-    // It demanded the phrase "owner clinical determination" on families 2 and
-    // 3, as the positive half of the narrowing above: strip the parenthetical
-    // she objected to, but do not silence a FLOOR's disclosure that the bar it
-    // enforces is hers and not ACIP's.
+    // Draft 1 forbade the phrase everywhere; that was wrong while two adult
+    // rows were floors, and is recorded in the comment above. Draft 2 (the
+    // morning of 2026-10-25) demanded it NOWHERE, because her adult table had
+    // turned every adult floor into a recommendation and a recommendation
+    // asserts only CDC's own interval — nothing of hers left to disclose.
     //
-    // Her 2026-10-25 adult table turned both of those rows — and every other
-    // adult floor — into recommendations, and a recommendation asserts only
-    // CDC's own interval (Ruling F's relabelling), so there is nothing of hers
-    // left to disclose. The phrase is gone from the whole app.
+    // Draft 3, the same day: `CHILD-PCV-AFTER-PPSV23` became a FLOOR on her
+    // ruling "Repeat — her table wins", and it is the FIRST paediatric floor
+    // carrying her name (ACIP states the 8 weeks as timing for the next dose
+    // and nowhere says an earlier dose stops counting). So the phrase is
+    // required again — on exactly one row. Both halves are asserted, because
+    // either one alone goes quiet in the wrong direction.
     for (const p of patients) {
       expect(everythingFor(p)).not.toMatch(/owner clinical determination/i);
     }
-    // THE STRUCTURAL REASON, so this cannot go quiet by accident: every floor
-    // left in the table is CDC's. If an OWNER-authored floor is ever added
-    // back, this fails and its disclosure has to come back with it.
+    // THE POSITIVE HALF. Maya, 8, asplenia: PPSV23 1 Oct, PCV20 15 Oct. Her
+    // dose is set aside by a bar that is the owner's, so her card must say so
+    // rather than let a clinician read the rejection as ACIP's.
+    const maya = {
+      ageMonths: 96,
+      dob: '2018-10-01',
+      riskIds: ['asplenia'],
+      pcvDoses: [{ product: 'PCV20', date: '2026-10-15' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-01' }],
+    };
+    expect(everythingFor(maya)).toMatch(/owner clinical determination/i);
+    // and she is still not told a date is a ruling at her
+    expect(everythingFor(maya)).not.toMatch(/owner ruling/i);
+
+    // THE STRUCTURAL REASON, so neither half can go quiet by accident: the
+    // table's floors and their authorities, pinned by name. Three CDC rows
+    // whose sources state the gap as a minimum in words, and one of hers.
     expect(DOSE_INTERVAL_RULES.filter((r) => r.enforcement === 'floor')
       .map((r) => `${r.id}/${r.authority}`))
       .toEqual([
         'CHILD-PCV-AFTER-PCV/CDC',
         'CHILD-PPSV23-AFTER-PCV/CDC',
         'CHILD-PPSV23-AFTER-PPSV23/CDC',
+        'CHILD-PCV-AFTER-PPSV23/OWNER',
       ]);
   });
 

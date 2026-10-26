@@ -93,7 +93,11 @@ describe('C8 — the five-year step cites its row on both cards', () => {
       }
     }
     // Anti-vacuity, and the measured size of the family.
-    expect(cards).toBe(1206);
+    // was 1206; -36, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+    // counting conjugate and her card family changes with it. The invariant
+    // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(cards).toBe(1170);
     expect([...strays.entries()]).toEqual([]);
   });
 
@@ -123,7 +127,11 @@ describe('C8 — the five-year step cites its row on both cards', () => {
     // Identical on both cards, which is the symmetry the previous test checks
     // case by case; these are the measured totals behind it.
     for (const label of [PCV20_CARD, ALTERNATIVE_CARD]) {
-      expect(tally.get(`${label}|pedsIcPcv13AndPpsvAt6`), label).toBe(504);
+      // was 504; -18, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(tally.get(`${label}|pedsIcPcv13AndPpsvAt6`), label).toBe(486);
       expect(tally.get(`${label}|pedsIcBefore6NoPcv20At6to18`), label).toBe(87);
       expect(tally.get(`${label}|pedsIcPcv20orPpsv23`), label).toBe(12);
     }

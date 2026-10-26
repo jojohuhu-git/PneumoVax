@@ -273,8 +273,15 @@ describe('swept over every patient the grid can build', () => {
       // buttons move with the card. +33 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(tally.complete20or21.total).toBe(2610 + 363 + 33);
-    expect(tally.complete15plus.total).toBe(914 + 188);  // +183 at 50+, +5 under 50
+      expect(tally.complete20or21.total).toBe(2610 + 363 + 33 - 10);
+    // ⚠ -10 and -20 on the two lines above and below, 2026-10-25, SECOND
+    // RULING: `CHILD-PCV-AFTER-PPSV23` became a floor, so a child's conjugate
+    // given inside 8 weeks of a PPSV23 is set aside and she has one fewer
+    // counting conjugate. Her card family changes with it. BOTH movements are
+    // ENTIRELY UNDER 50 — the `ge50` tallies in the next test are untouched,
+    // which is what says these are children's doses being re-graded and not
+    // an adult card moving. See CLINICAL_SPEC.md §K-PPSV23THENPCV.
+    expect(tally.complete15plus.total).toBe(914 + 188 - 20);  // +183 at 50+, +5 under 50, then -20
     expect(tally.routineAt50.total).toBe(180);
   });
 
@@ -299,13 +306,15 @@ describe('swept over every patient the grid can build', () => {
   });
 
   it('the 1,115 cards it does not speak for have lost it', () => {
-    expect(tally.complete20or21.under50).toBe(630);
+    // -10 here and -20 below: the PPSV23-then-PCV floor of 2026-10-25. These
+    // are the under-50 halves of the two movements explained in the first test.
+    expect(tally.complete20or21.under50).toBe(630 - 10);
       // 2026-10-25: her adult table removed every adult floor, so patients
       // whose early adult dose was rejected now read a different card, and the
       // buttons move with the card. +5 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(tally.complete15plus.under50).toBe(305 + 5);
+      expect(tally.complete15plus.under50).toBe(305 + 5 - 20);
     expect(tally.routineAt50.under50).toBe(180);
     expect(tally.complete20or21.jobAidUnder50).toBe(0);
     expect(tally.complete15plus.jobAidUnder50).toBe(0);
@@ -327,7 +336,9 @@ describe('swept over every patient the grid can build', () => {
       // buttons move with the card. +213 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(adultCards).toBe(6805 - 3189 + 253 + 213);
+      // -5, 2026-10-25 second ruling (the PPSV23-then-PCV floor): five cards
+      // left the job aid altogether when their child's conjugate was set aside.
+      expect(adultCards).toBe(6805 - 3189 + 253 + 213 - 5);
     // 'Elsewhere' is every job-aid card that is NOT one of the two matched
     // statements, so Ruling F moves it twice: the total rose by 253, and
     // the MATCHED group rose by 363 — the 110 shared-decision cards that
@@ -335,6 +346,9 @@ describe('swept over every patient the grid can build', () => {
     // 2026-10-25: the total rose by 213 and the MATCHED group by 33 + 183,
     // so "elsewhere" falls by 3. Both legs are written out rather than
     // netted, because the two movements have different causes.
-    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 213) - (2589 + 363 + 33 + 183));
+    // 2026-10-25 second ruling: the total fell by 5 and the MATCHED group in
+    // this expression is a 50+ figure, which did not move at all — so the
+    // whole -5 lands in 'elsewhere'. 4,077 - 3,168 = 909.
+    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 213 - 5) - (2589 + 363 + 33 + 183));
   });
 });

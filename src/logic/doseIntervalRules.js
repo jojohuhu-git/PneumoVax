@@ -37,10 +37,17 @@
 // ── Authority ────────────────────────────────────────────────────────────
 //
 // `authority: 'CDC'`  — the source states this gap as a MINIMUM in so many
-// words, so voiding a dose below it claims no more than the source does. The
-// three **paediatric** floors, and only those. The adult rows that carry 'CDC'
-// are the ones that void nothing — `enforcement: 'none'` and the catch-all
-// `'recommendation'` rows — where CDC really is the one speaking.
+// words, so voiding a dose below it claims no more than the source does. Three
+// of the four **paediatric** floors, and only those. The adult rows that carry
+// 'CDC' are the ones that void nothing — `enforcement: 'none'` and the
+// catch-all `'recommendation'` rows — where CDC really is the one speaking.
+//
+// ⚠ The FOURTH paediatric floor, `CHILD-PCV-AFTER-PPSV23`, is **not** CDC's.
+// It was added 2026-10-25 and is the first child row to carry the owner's
+// name: ACIP states its 8 weeks as the timing for the NEXT dose and nowhere
+// says a dose given inside it stops counting, so the interval is ACIP's and
+// the BAR is hers. See the row's own comment and CLINICAL_SPEC.md
+// §K-PPSV23THENPCV. Never relabel it CDC to make the four look uniform.
 //
 // ⚠️ **No adult FLOOR is CDC's.** An earlier draft of this header claimed the
 // 8-week PCV15→PPSV23 gap as a CDC-stated adult floor, because "minimum
@@ -54,8 +61,12 @@
 // that carries the repeat-the-dose consequence. Corrected in S14-7b; two tests
 // now hold both the rows and this paragraph to it.
 //
-// `authority: 'OWNER'` — ⚠️ **OWNER CLINICAL DETERMINATION, 2026-10-11. Never
-// cite ACIP or CDC for these rows.** The published sources disagree, and were
+// `authority: 'OWNER'` — ⚠️ **AN OWNER CLINICAL DETERMINATION. Never cite ACIP
+// or CDC for these rows.** Most are dated 2026-10-11 and are about ADULT gaps;
+// the evidence below is theirs. Two later rows are hers for the same REASON but
+// on their own evidence, so do not read the 2026-10-11 material as covering
+// them: `ADULT-PCV-AFTER-PCV-UNDER-4-WEEKS` (2026-10-25) and the one child row,
+// `CHILD-PCV-AFTER-PPSV23` (2026-10-25). The adult sources disagree, and were
 // re-checked live on 2026-10-11 before the owner reaffirmed:
 //
 //   • CDSI v4.64 (CDC's own machine-readable rule set) carries two fields per
@@ -392,15 +403,14 @@ export const DOSE_INTERVAL_RULES = [
     }),
   },
   {
-    // ── NEW 2026-10-25 ───────────────────────────────────────────────────
+    // ── NEW 2026-10-25, AND REVERSED THE SAME DAY ───────────────────────
     //
-    // Until today the app had NO rule here. A child given a conjugate two
-    // weeks after her PPSV23 was accepted in silence — no note, no number,
+    // Until this morning the app had NO rule here. A child given a conjugate
+    // two weeks after her PPSV23 was accepted in silence — no note, no number,
     // nothing — while the card beside her quoted an 8-week interval. It was
-    // found from the advice side: the 6-18 block held the next dose to 8
-    // weeks after a PPSV23 and the 24-71-month block did not, and checking
-    // which was right turned up that NEITHER side graded a dose already
-    // given.
+    // found from the advice side: the 6-18 block held the next dose to 8 weeks
+    // after a PPSV23 and the 24-71-month block did not, and checking which was
+    // right turned up that NEITHER side graded a dose already given.
     //
     // THE DOCUMENT STATES THE PPSV23 ANCHOR OUTRIGHT. ACIP's 2023 PCV20-in-
     // children report, "Children 6-18 years with any risk condition with no
@@ -410,27 +420,41 @@ export const DOSE_INTERVAL_RULES = [
     //    most recent dose of pneumococcal vaccination, REGARDLESS OF WHETHER
     //    THE CHILD HAS PREVIOUSLY RECEIVED PPSV23, even if PCV7 was received."
     //
-    // That clause is why this is a CDC row and not an owner determination:
-    // the document names the PPSV23 as the anchor in its own words, and its
-    // Table 1 repeats it.
+    // ⚠ A FLOOR, AND THAT IS AN OWNER RULING THAT REVERSES AN EARLIER ONE OF
+    // THE SAME DAY. It shipped in `a66219a` as a RECOMMENDATION, on her
+    // morning answer: *"I think this a grey zone where it could be considered
+    // complete but an alternative suggest should be listed that allows a
+    // clinician to repeat the dose 8 weeks after the early PCV20 if
+    // conservative due to lack of direct CDC/ACIP guidance."* She was then
+    // asked directly — "count (this morning's ruling) or repeat?" — and
+    // answered **"Repeat — her table wins."** Her interval table gives this row
+    // the basis "ACIP rule" plus the 2014 *Vaccine* report on a blunted
+    // conjugate response following PPSV23: hyporesponsiveness is her reason
+    // for turning ACIP's timing sentence into a bar.
     //
-    // ⚠ A RECOMMENDATION, NOT A FLOOR, AND THAT IS AN OWNER RULING.
-    // 2026-10-25, asked whether the early dose is thrown away or flagged:
-    // *"I think this a grey zone where it could be considered complete but an
-    // alternative suggest should be listed that allows a clinician to repeat
-    // the dose 8 weeks after the early PCV20 if conservative due to lack of
-    // direct CDC/ACIP guidance."* The sentence above is advice for the NEXT
-    // dose; no source anywhere says a dose given inside it must be repeated.
-    // That is Ruling F's reading applied to a second row.
+    // ⚠ SO THE AUTHORITY IS HERS, NOT CDC'S — and this is the FIRST paediatric
+    // floor that is. The quoted sentence states the INTERVAL and stops there;
+    // "a dose given inside it does not count" is a further claim no document
+    // makes. That is exactly the distinction this file's header draws between
+    // ACIP's "minimum RECOMMENDED interval" and the General Best Practices
+    // "minimum interval" that carries the repeat-the-dose consequence, and it
+    // is why `authority` is OWNER and the per-dose text says so to the
+    // clinician. This is Ruling F's relabelling run BACKWARDS: Ruling F took
+    // the owner's name off rows whose bar was removed, and this puts it on a
+    // row that has gained one. Never relabel it CDC to make the four
+    // paediatric floors look uniform — the app would then cite ACIP for a
+    // consequence ACIP does not state.
     //
-    // ⚠ IT IS DELIBERATELY ASYMMETRIC WITH CHILD-PPSV23-AFTER-PCV, which is a
-    // FLOOR at the same 8 weeks in the opposite direction. The difference is
-    // in the documents, not in this file: CDC instructs the PPSV23 itself
-    // ("administer 1 dose PPSV23 at least 8 weeks after the most recent PCV
-    // dose", nine times) and adds "PCV15 and PPSV23 should not be
-    // administered during the same visit", while for a conjugate following a
-    // PPSV23 it states only the timing of the next dose. Never "tidy" the two
-    // into one enforcement without a new owner ruling.
+    // ⚠ IT IS NO LONGER ASYMMETRIC WITH CHILD-PPSV23-AFTER-PCV IN
+    // `enforcement` — both are now floors at the same 8 weeks — BUT THE TWO
+    // ROWS STILL DIFFER, and must stay separate. The difference moved to
+    // `authority`: CDC instructs the PPSV23 itself ("administer 1 dose PPSV23
+    // at least 8 weeks after the most recent PCV dose", nine times) and adds
+    // "PCV15 and PPSV23 should not be administered during the same visit",
+    // while for a conjugate following a PPSV23 it states only the timing of
+    // the next dose. Two authorities, one number. Never "tidy" them into one
+    // row, and never merge the interval either — `PCV_PPSV23_MIN_INTERVAL_DAYS`
+    // is already the single home for the 8 weeks.
     id: 'CHILD-PCV-AFTER-PPSV23',
     what: 'A PCV dose given after a PPSV23 dose, under the child schedule',
     rulebook: 'child',
@@ -438,33 +462,44 @@ export const DOSE_INTERVAL_RULES = [
     products: null,
     from: 'lastPpsv23',
     interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
-    // No grace, like every other recommendation row: the grace decides whether
-    // a dose that missed a MINIMUM still counts, and a recommendation counts
-    // every dose already. A grace here would only move the day the note starts
-    // printing.
-    grace: false,
-    enforcement: 'recommendation',
-    authority: 'CDC',
-    // The alternative the owner asked for. The DATE comes from this row's own
-    // clock, measured from the dose the patient got — never recomputed by a
-    // caller, which is the P0 bug's shape.
-    optionalRepeat: true,
-    source: 'ACIP, "Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children: Updated '
-      + 'Recommendations of the Advisory Committee on Immunization Practices - United States, '
-      + '2023" (published 22 September 2023), under "Children 6-18 years with any risk condition '
-      + 'with no previous PCV13, PCV15, or PCV20 vaccination": "a single dose of PCV15 or PCV20 is '
-      + 'recommended >=8 weeks after the most recent dose of pneumococcal vaccination, regardless '
-      + 'of whether the child has previously received PPSV23, even if PCV7 was received." Table 1 '
-      + 'states it again. CDC\'s Child & Adolescent Schedule Notes say the same for the younger '
-      + 'band - "Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after the most recent dose '
-      + '...)" - and CDC\'s own PneumoRecs tool names the PPSV23 as the anchor for a 4-year-old. '
-      + 'OWNER RULING 2026-10-25 made it a RECOMMENDATION rather than a floor: the sources state '
-      + 'the gap as timing for the next dose and none says an earlier dose must be repeated, so '
-      + 'the dose counts and the card offers the repeat as an option. See CLINICAL_SPEC.md '
-      + '\u00a7K-PPSV23THENPCV.',
-    message: (ctx, anchor, min, repeatFrom) => ({
-      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} \u2014 shorter than the ${min.words} CDC advises. **Counted; a repeat is optional \u2014 see \u201cWhy this\u201d.**`,
-      why: `CDC and ACIP state the ${min.words} as the timing for the next pneumococcal dose and do not direct that a dose given inside it be repeated, so this dose counts toward the series. Immunogenicity at the shorter interval has not been established. A clinician who prefers the conservative course may repeat the conjugate dose from ${fmtDate(repeatFrom)} \u2014 ${min.words} after the dose given.`,
+    // CDC's 4-day grace, like every other floor: the grace decides whether a
+    // dose that missed a MINIMUM still counts, which is a question only a
+    // floor asks. `rule-docs-match-code` holds the whole table to
+    // floor <=> grace, so this flag moved with the enforcement.
+    grace: true,
+    enforcement: 'floor',
+    // OWNER, not CDC — see the block above. Relabelling this CDC would make
+    // the app cite ACIP for a consequence ACIP does not state.
+    authority: 'OWNER',
+    // No `optionalRepeat`. It existed so a RECOMMENDATION could name a date
+    // for a repeat nobody owed; a floor owes the repeat outright and
+    // `repeatDueDate` already carries its date (Ruling D's clock, measured
+    // from the dose the patient got). Leaving the flag on would put a second
+    // clock on one dose, which is the P0 bug's own shape.
+    source: 'OWNER CLINICAL DETERMINATION 2026-10-25 that this interval is a BAR and not only a '
+      + 'timing recommendation. The BAR is hers - not ACIP, not CDC, in either form - and rests on '
+      + 'her hyporesponsiveness evidence; the INTERVAL it enforces is ACIP\'s. Neither ACIP nor CDC '
+      + 'states that a dose given inside the 8 weeks stops counting. '
+      + 'The interval itself: "Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. '
+      + 'Children: Updated Recommendations of the Advisory Committee on Immunization Practices - '
+      + 'United States, 2023" (published 22 September 2023), under "Children 6-18 years with any '
+      + 'risk condition with no previous PCV13, PCV15, or PCV20 vaccination": "a single dose of '
+      + 'PCV15 or PCV20 is recommended >=8 weeks after the most recent dose of pneumococcal '
+      + 'vaccination, regardless of whether the child has previously received PPSV23, even if PCV7 '
+      + 'was received." Table 1 states it again. CDC\'s Child & Adolescent Schedule Notes say the '
+      + 'same for the younger band - "Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after '
+      + 'the most recent dose ...)" - and CDC\'s own PneumoRecs tool names the PPSV23 as the anchor '
+      + 'for a 4-year-old. None of those says a dose given inside the 8 weeks must be repeated. '
+      + 'The owner\'s interval table gives this row the basis "ACIP rule" plus the 2014 Vaccine '
+      + 'report on a blunted conjugate response after PPSV23; shipped as a RECOMMENDATION in '
+      + 'a66219a on her earlier "grey zone" answer of the same morning, she reversed it the same '
+      + 'day - "Repeat - her table wins". See CLINICAL_SPEC.md §K-PPSV23THENPCV.',
+    message: (ctx, anchor, min) => ({
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} between a PPSV23 and a following conjugate dose.`],
+      // The disclosure. ACIP states the 8 weeks as the timing for the next
+      // dose and nowhere says an earlier dose must be repeated, so the app
+      // must not let a clinician read this rejection as CDC's.
+      detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC). ACIP states the ${min.words} as the timing for the next pneumococcal dose and does not direct that an earlier dose be repeated; setting the dose aside is an owner clinical determination of this app, made because immunogenicity at the shorter interval has not been established.`,
     }),
   },
 

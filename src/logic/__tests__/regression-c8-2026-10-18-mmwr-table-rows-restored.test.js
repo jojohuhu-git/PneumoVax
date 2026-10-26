@@ -187,7 +187,11 @@ describe('FINDING F — over the whole grid', () => {
       // buttons move with the card. -132 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(stats.ppsvOnly).toBe(1154 - 132);
+      // +40, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(stats.ppsvOnly).toBe(1154 - 132 + 40);
     // -110: the shared-decision cards whose PCV20 now counts.
     expect(stats.shared).toBe(440 - 110 + 66);  // +66, 2026-10-25 (see above)
   });
@@ -198,7 +202,11 @@ describe('FINDING F — over the whole grid', () => {
       // buttons move with the card. -132 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132);
+      // +30, 2026-10-25 (the PPSV23-then-PCV floor): a child's conjugate
+      // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
+      // counting conjugate and her card family changes with it. The invariant
+      // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30);
     expect(stats.uncredited).toBe(0);
   });
 });
