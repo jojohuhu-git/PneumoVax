@@ -318,9 +318,11 @@ on a card quoting *"at least 8 weeks after the most recent dose"* underneath it.
 citation and the date contradicted each other on one screen.
 
 It was found by comparing two patients who differ only in age. The **6–18** block already
-anchors on the most recent pneumococcal dose, so an 8-year-old with that history was
-correctly told 26 Nov while a 4-year-old was told today. Measured over the grid: **225 of
-17,016**, every one of them aged 2 or 5, **none aged 6 or over**.
+anchors on a pneumococcal dose, so an 8-year-old with that history was correctly told 26 Nov
+while a 4-year-old was told today. Measured over the grid: **225 of 17,016**, every one of
+them aged 2 or 5, **none aged 6 or over**. (That block anchored on the **first** counting
+PPSV23, not the most recent — right for this one-dose patient and wrong for a child with two.
+Corrected 2026-10-26, §C-PPSV23LAST below.)
 
 **CDC's own tool reads it the same way.** PneumoRecs, for a 4-year-old with asplenia, a
 PPSV23 and no conjugate: *"Give 2 doses of PCV: first dose, given **8 weeks after the dose of
@@ -354,6 +356,71 @@ would make the number this app's own.
 Guard: `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
 which pins 33, splits it 11 / 22, and holds the 4-year-old and the 8-year-old to the same
 date.
+
+### §C-PPSV23LAST — The 8 weeks runs from the LAST counting PPSV23, not the first (2026-10-26)
+
+**OWNER, 2026-10-26,** shown the app's two schedule sentences side by side and asked which
+was wrong: *"both statements are correct. 'Give PPSV23 dose 2 ≥5 years after dose 1 PPSV23'
+is the routine schedule when spacing out 2 PPSV23 doses. 'Give the next conjugate ≥8 weeks
+after the most recent pneumococcal vaccine' is correct when spacing out conjugate from
+PPSV23 or between conjugate vaccines."*
+
+**So no interval changes here, and neither rule is in question.** The defect was which
+**dose** the app fed into the 8-week rule.
+
+`anchorPneumo` — the engine's "most recent pneumococcal vaccine" anchor for at-risk children,
+and its own comment said so — was built from `ppsv.effective.find((d) => d.date)`.
+JavaScript's `find` returns the **first** match. So for a child with two counting PPSV23
+doses the eight weeks were measured from a dose up to seven years old, and the wait had
+always already passed.
+
+**Hana, 12, asplenia, no conjugate ever. PPSV23 on 1 Jan 2019 and again on 1 Sep 2026.**
+The five-year spacing is satisfied (7 y 8 m apart), so both doses count.
+
+| | |
+|---|---|
+| her next conjugate is due | **27 Oct 2026** — 8 weeks after 1 Sep 2026 |
+| the app said, on 25 Oct | **due today**, 54 days after her real last dose, two short |
+| the card's own label reads | *"≥8 weeks"* |
+
+**The tell needs no clinical judgement at all.** A child whose **only** PPSV23 is that 1 Sep
+dose was correctly held to 27 Oct. Hana has the same dose plus an older one — more history,
+and the app gave her the **earlier** date.
+
+**The fix is one line**, and it reaches for a field that already existed and already meant
+this: `mostRecent(pcv.lastDate, ppsv.lastDate)`. The five call sites that want the **first**
+dose keep reaching for `effective.find(...)` directly, because the five-year revaccination
+clock genuinely runs from dose 1 — the rule the owner confirmed above. First and last are
+different questions; this line is the one that asks for the last.
+
+**Why the whole suite stayed green.** With one PPSV23 on record "first" and "most recent" are
+the same dose. No patient in the 17,016-row grid has two counting PPSV23 doses, and none of
+the 810 hand-built children of 2026-10-25 does either — the grid cannot build a vaccinated
+child aged 2–18 at all. The fix therefore had to be guarded by a hand-built patient or it
+would have come back silently.
+
+**Measured** over 21,327 card rows (the grid, the 810 children of 2026-10-25, and 2,660 rows
+of a new two-PPSV23 family): **408 rows moved, for 228 patients, every one of them LATER**;
+0 earlier, 0 back to "due today", and the **date is the only field that changed** — no
+status, no label, no verdict. **0 grid rows moved**, so both corpora are byte-identical, and
+the corpus records `earliestNextDate`, which makes that a real check. **No PPSV23 card moved
+at all**: the five-year clock is untouched in the measurement as well as in the code.
+
+**Mutations, each caught by a different set:** restoring `.find(...)` → **3** failing, all in
+the new guard and nothing else in the suite (which is exactly the point); dropping the PCV
+side of `mostRecent` → **1**, in §D-note's five-year guard; dropping the PPSV23 side, i.e.
+reverting §C-PPSV23ANCHOR → **9** across 5 files, including both corpora.
+
+Guard: `regression-2026-10-26-eight-weeks-runs-from-the-last-ppsv23.test.js` — Hana, the
+same-date comparison against the one-dose child, a direction sweep over every pair of dates
+that keeps both doses counting, and three controls: the five-year clock still runs from dose
+1, a dose that does **not** count (inside five years, or dated in the future) cannot push the
+conjugate out, and a child with no PPSV23 is untouched.
+
+**One related question the owner has NOT been asked.** A PPSV23 given 54 days ago but
+*rejected* for falling inside five years does **not** hold off a conjugate — ANCHOR-1, *"an
+unnecessary dose cannot reset a clock."* That is designed behaviour, pinned as a control in
+the guard above, not part of this defect.
 
 ---
 
@@ -596,7 +663,10 @@ Routine for ALL adults ≥50 regardless of risk.
     administered ≥5 days earlier than the minimum interval or age should not be counted
     as valid doses and should be repeated as age appropriate" — and the FDA approval for
     ages ≥18 (`mmwr7336a3`). It is **not** a record problem: the patient really received
-    it, so the "repeat as age appropriate" advice is correct here.
+    it, so a replacement dose **is** owed. **But the replacement is not another PCV21** —
+    see §I-REMEDY below, which corrects what this bullet used to say. CDC's own words are
+    "repeated **as age appropriate**", and PCV21 is not age-appropriate for a child at any
+    age below 18.
 - **A PCV21 dose given at 18–19 COUNTS, and says it was given before the recommended
   starting age.** **OWNER DECISION 2026-10-16 (N1), implemented.** PCV21 carries two ages
   a year apart, both from `mmwr7336a3` (read live 2026-10-16):
@@ -633,6 +703,56 @@ Routine for ALL adults ≥50 regardless of risk.
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.
+
+### §I-REMEDY — A child's rejected PCV21 names PCV20, not a repeat (2026-10-26)
+
+From the owner's children's table: PCV21 under 18 is *"rejected correctly; wording says
+'repeat this dose' where it should name PCV20."*
+
+**The chip contradicted itself.** Priya, 10, asplenia, PCV21 recorded 1 Jun 2026:
+
+> *"PCV21 (Capvaxive) is licensed for adults ≥18 years only. This dose was given at
+> ~10y 1m — it does not count."*
+> *"This dose does not count toward the series — **repeat this dose only** (do not restart
+> the series)."*
+
+Repeating it means giving her another PCV21, which the sentence above has just said is not
+licensed for her. Every repeat would be rejected again for the same reason, forever. The
+**verdict was right and is unchanged**; the advice under it was unusable.
+
+**It is a THIRD closing sentence, not one of the two that existed.** W1 (2026-10-11) split
+invalid doses in two: one rejected only for **timing** was never missing, so it takes *"the
+next dose can be given from…"*; every other invalid dose **is** missing and keeps *"repeat
+this dose only"*. A child's PCV21 is genuinely missing — she still needs a conjugate — but
+she needs a **different product**, so neither sentence fits. It now reads:
+
+> *"This dose does not count toward the series — **give a dose of PCV20 instead** (do not
+> restart the series)."*
+
+**CDC's own phrase is the grounding**: doses given too early *"should be repeated **as age
+appropriate**"*. PCV21 is not age-appropriate for anyone under 18, so "as age appropriate"
+is precisely what naming PCV20 does.
+
+**⚠ A FIELD, NOT STRING SURGERY.** `walk()` chooses the closing sentence from
+`recordProblem` and `intervalRuleId`, never by matching text — *"string surgery on a
+sentence built somewhere else is the kind of coupling that breaks silently when the wording
+changes"*, as its own comment puts it. The new branch keys on `remedyProduct`, set by
+`remedyIsAnotherProduct()` in `validate.js`, the same shape.
+
+**A near miss, recorded.** The first draft reused `DOES_NOT_COUNT_LEAD`, which carries the
+clause *"given too soon after the dose it is measured from"* — so the chip claimed a timing
+fault on a dose whose timing is irrelevant. Caught by driving the engine, not by the suite,
+and pinned by the guard.
+
+**Scope.** PCV20 is named because her row names it. PCV15 is also licensed for children,
+and the **four other rows** of her table saying the remedy is PCV20 rather than another
+dose of the same vaccine are a separate queue item (P3) that this does not build. **No
+verdict moves** — the dose was rejected before and is rejected now.
+
+Guard: `regression-2026-10-26-pcv21-for-a-child-names-pcv20.test.js`, with controls that an
+18-year-old's PCV21 still counts, a PCV20 below the minimum age still says *"repeat this
+dose only"*, a timing rejection still gets W1's sentence, and a grid sweep that no dose
+carries both sentences.
 
 ---
 
@@ -1338,6 +1458,50 @@ catch-up row**.
   the age in months, so this changes the number of weeks and never the unit; a patient
   entered as Years/Months has no birthday and keeps the approximation. Applies on all three
   surfaces that print an infant age — `StepAge`, `Results`, `RecCard`.
+
+### §K-INFANTFLOORS — The infant floors are 38 / 66 / 94 for a routinely-vaccinated child (2026-10-26)
+
+**P5 of the owner's children's table**: doses 1–3 are invalid before **38 / 66 / 94 days**.
+The previous handoff marked the row *"already correct, no work needed — 38+28+28 = 94
+exactly. Zero slack, so it deserves a guard."* **The conclusion is right and the arithmetic
+is not**, which measuring the engine shows:
+
+| | dose 1 | dose 2 | dose 3 |
+|---|---|---|---|
+| Her row: invalid before | 38 | 66 | 94 |
+| App, prior doses at the **routine** ages (42 / 70) | **38** ✓ | **66** ✓ | **94** ✓ |
+| App, each prior dose at **its own earliest** | **38** | **62** | **86** |
+
+The app does not add 28. For a dose **already given** it adds 28 − 4, because the grace
+applies to the interval as well as to the age — so the chain from each dose's own earliest
+is 38 + 24 + 24 = **86**, eight days under her row.
+
+**That is not a defect.** CDC, General Best Practices, *Timing and Spacing of
+Immunobiologics*, fetched live 2026-10-26:
+
+> *"grace period", vaccine doses administered ≤4 days before the minimum interval or age
+> are considered valid.*
+
+**"the minimum interval OR age"** — each minimum gets the grace, independently. The page's
+DTaP-4 footnote applies it to both at once for a single dose (the minimum age of 15 months
+**and** the minimum interval between DTaP-3 and DTaP-4), and nothing on the page bars a dose
+validated by the grace from anchoring the next interval; CDC measures the next interval from
+the dose the patient **got**, which is the sentence Ruling D rests on (§L).
+
+So **both readings are right about different children**. Her 38 / 66 / 94 describes a child
+vaccinated on the routine schedule, and the app matches it exactly there. A child whose
+earlier doses were themselves four days early is a different child, and her floors move with
+her doses.
+
+**No code changed.** The floors are a composition of three constants — `PCV_MIN_AGE_DAYS`
+42, `PCV_MIN_INTERVAL_DAYS_UNDER_12M` 28, `GRACE_DAYS` 4 — and nothing asserted the result,
+so changing any one of them moved every floor in silence. The guard pins the day numbers a
+clinician actually sees, **both chains**, and states the shortfall as arithmetic (one grace
+per earlier interval) rather than as three magic numbers. Proved load-bearing: grace 4 → 0
+fails **52** tests, minimum age 42 → 41 fails **9**, interval 28 → 27 fails **28**, each
+including this guard.
+
+Guard: `regression-2026-10-26-infant-dose-floors-38-66-94.test.js`.
 
 ### §K-INVALID — What an invalid ADULT dose leaves owing, and when (OWNER, 2026-10-24)
 

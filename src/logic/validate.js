@@ -473,6 +473,45 @@ function adviseIfBeforeRecommendedAge(result, prod, ageAtDose, ageMonths) {
   );
 }
 
+// ── When repeating the dose is not the remedy ────────────────────────────
+//
+// 2026-10-26, from the owner's children's table: a PCV21 recorded for a child
+// is "rejected correctly", but the wording "says 'repeat this dose' where it
+// should name PCV20".
+//
+// The two sentences on the chip CONTRADICTED EACH OTHER. A 10-year-old given
+// PCV21 read:
+//
+//   "PCV21 (Capvaxive) is licensed for adults >=18 years only. This dose was
+//    given at ~10y 1m — it does not count."
+//   "This dose does not count toward the series — repeat this dose only (do
+//    not restart the series)."
+//
+// Repeating it means giving her another PCV21, which the first sentence has
+// just said is not licensed for her. Every repeat would be rejected for the
+// same reason, forever.
+//
+// This is NOT the W1 timing case. A dose rejected for TIMING was never
+// missing, so it takes the "next dose is due" sentence; a dose rejected for
+// the PRODUCT genuinely is missing — the child still needs a conjugate — but
+// she needs a DIFFERENT one. So it is a third closing sentence, not either of
+// the two that existed.
+//
+// ⚠ A FIELD, NOT STRING SURGERY. The closing sentence is chosen in
+// `walk()` below, which already keys on `recordProblem` and `intervalRuleId`
+// rather than matching text — "string surgery on a sentence built somewhere
+// else is the kind of coupling that breaks silently when the wording
+// changes", as the comment there puts it. This is the same shape.
+//
+// PCV20 is named because the owner's row names it. PCV15 is also licensed for
+// children, and the four other rows of her table that say "the remedy is
+// PCV20, not another dose of the same vaccine" are a separate, larger queue
+// item (P3) that this does not build.
+const REMEDY_PRODUCT = 'PCV20';
+function remedyIsAnotherProduct(result, product = REMEDY_PRODUCT) {
+  return { ...result, remedyProduct: product };
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
@@ -583,15 +622,15 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   if (prod && prod.key === 'PCV21' && ageMonths < Y18_MONTHS) {
     const atDose = dose.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
     if (atDose != null && atDose >= 0) {
-      return invalid(
+      return remedyIsAnotherProduct(invalid(
         [`PCV21 (Capvaxive) is licensed for adults ≥18 years only. This dose was given at ~${fmtAgeM(atDose)} — it does not count.`],
         `Age at administration: ~${fmtAgeM(atDose)}. PCV21 minimum age: 18 years.`
-      );
+      ));
     }
-    return invalid(
+    return remedyIsAnotherProduct(invalid(
       [`PCV21 (Capvaxive) is licensed for adults ≥18 years only. The patient is currently ~${fmtAgeM(ageMonths)} — this dose does not count.`],
       `PCV21 minimum age: 18 years. Current age (upper bound on age at administration): ~${fmtAgeM(ageMonths)}.`
-    );
+    ));
   }
 
   // Min-age check.
@@ -855,7 +894,15 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // sentence built somewhere else is the kind of coupling that breaks
           // silently when the wording changes.
           ? `${DOES_NOT_COUNT_LEAD} It is not repeated; ${nextDoseClause(result)}`
-          : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
+          // 2026-10-26 — the product, not the timing, is what is wrong, so
+          // repeating THIS dose would be rejected again for the same reason.
+          // See `remedyIsAnotherProduct` above.
+          // ⚠ NOT `DOES_NOT_COUNT_LEAD`, which carries the TIMING clause
+          // "given too soon after the dose it is measured from". Nothing is
+          // wrong with this dose's timing.
+          : result.remedyProduct
+            ? `This dose does not count toward the series — give a dose of ${result.remedyProduct} instead (do not restart the series).`
+            : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       // OWNER RULING 2026-10-24 — the second sentence she asked for on a
       // mistimed SECOND PPSV23, emphasised, giving the conjugate option its
       // own date and its own reason. Her words: "bold the alternative option
