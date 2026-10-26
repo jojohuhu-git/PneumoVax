@@ -24,6 +24,7 @@ import { renderNoteWithCites, makeCiteNumberer } from '../citations.jsx';
 import { recommend } from '../../logic/recommend.js';
 import { analyzeHistory } from '../../logic/validate.js';
 import RecCard from '../RecCard.jsx';
+import { DOSE_INTERVAL_RULES } from '../../logic/doseIntervalRules.js';
 
 const CITE = (key) => ({ key, page: key, url: `https://example.test/${key}`, label: key, short: key });
 
@@ -165,11 +166,47 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
     }
   });
 
-  it('but a FLOOR still discloses that it is an owner determination, not ACIP', () => {
-    // families 2 and 3, the two rows the afternoon ruling restored. If this
-    // ever goes quiet, the narrowing above has been over-applied.
-    for (const p of patients.slice(1)) {
-      expect(everythingFor(p)).toMatch(/owner clinical determination/i);
+  it('no card discloses an owner determination any more, because no floor is one', () => {
+    // ── WHAT THIS ASSERTED, AND WHY IT FLIPPED ───────────────────────
+    //
+    // It demanded the phrase "owner clinical determination" on families 2 and
+    // 3, as the positive half of the narrowing above: strip the parenthetical
+    // she objected to, but do not silence a FLOOR's disclosure that the bar it
+    // enforces is hers and not ACIP's.
+    //
+    // Her 2026-10-25 adult table turned both of those rows — and every other
+    // adult floor — into recommendations, and a recommendation asserts only
+    // CDC's own interval (Ruling F's relabelling), so there is nothing of hers
+    // left to disclose. The phrase is gone from the whole app.
+    for (const p of patients) {
+      expect(everythingFor(p)).not.toMatch(/owner clinical determination/i);
+    }
+    // THE STRUCTURAL REASON, so this cannot go quiet by accident: every floor
+    // left in the table is CDC's. If an OWNER-authored floor is ever added
+    // back, this fails and its disclosure has to come back with it.
+    expect(DOSE_INTERVAL_RULES.filter((r) => r.enforcement === 'floor')
+      .map((r) => `${r.id}/${r.authority}`))
+      .toEqual([
+        'CHILD-PCV-AFTER-PCV/CDC',
+        'CHILD-PPSV23-AFTER-PCV/CDC',
+        'CHILD-PPSV23-AFTER-PPSV23/CDC',
+      ]);
+  });
+
+  it('and the narrowing did not silence the rationale — each of the three says why', () => {
+    // The replacement positive half. What the reader must still get is the
+    // clinical reason the dose counted, which lives in `whys` and is what the
+    // "Why this" disclosure shows. If a later tidy-up strips THAT, the cards
+    // go back to stating a shortfall and explaining nothing.
+    for (const p of patients) {
+      const out = recommend({ today: '2026-10-24', ...p });
+      const chip = [...out.perDose.pcv, ...out.perDose.ppsv23]
+        .find((d) => d.earlyAdvisory);
+      expect(chip.whys?.length).toBeGreaterThan(0);
+      expect(chip.whys.join(' ').length).toBeGreaterThan(80);
+      // and the shortfall itself is still bolded on the chip, which is the
+      // emphasis this whole file is about
+      expect(chip.reasons.join(' ')).toMatch(/\*\*Counted;[^*]+\*\*/);
     }
   });
 });
@@ -206,13 +243,34 @@ describe('a dose CHIP renders emphasis too — the owner\'s second-PPSV23 altern
     />,
   );
 
-  it('shows the alternative in bold and never a literal asterisk', () => {
+  it('shows the bolded verdict and never a literal asterisk', () => {
     const { container } = renderChip();
     // A neutral card renders collapsed; the dose rows live in the body.
     container.querySelectorAll('.rec-card-head-toggle').forEach((b) => fireEvent.click(b));
     container.querySelectorAll('.dose-val-toggle, [class*="toggle"]').forEach((b) => fireEvent.click(b));
-    expect(document.body.textContent).toContain('may be considered from Jan 1, 2019');
+    // ⚠ THE SENTENCE CHANGED ON 2026-10-25, THE DEFECT IT GUARDS DID NOT.
+    // This used to read "may be considered from Jan 1, 2019" — the conjugate
+    // alternative a FLOOR offered beside a dose it had thrown away. Her adult
+    // table made ADULT-PPSV23-AFTER-PPSV23 a recommendation, so the dose is
+    // counted and the emphasised span is the verdict itself; the conjugate
+    // alternative moved into `whys`, asserted below. What is being guarded is
+    // unchanged: a reason with no citations in it must still go through
+    // `renderNoteWithCites`, or a clinician reads raw `**`.
+    expect(document.body.textContent).toContain('Counted; never give a third.');
     expect(document.body.textContent).not.toContain('*');
-    expect(document.querySelectorAll('.note-emphasis').length).toBeGreaterThan(0);
+    const ems = [...document.querySelectorAll('.note-emphasis')].map((n) => n.textContent);
+    expect(ems).toContain('Counted; never give a third.');
+  });
+
+  it("and the conjugate alternative is still on the screen, in \"Why this\"", () => {
+    const { container } = renderChip();
+    container.querySelectorAll('.rec-card-head-toggle').forEach((b) => fireEvent.click(b));
+    container.querySelectorAll('.dose-val-toggle, [class*="toggle"]').forEach((b) => fireEvent.click(b));
+    container.querySelectorAll('details').forEach((d) => { d.open = true; });
+    // The owner's own alternative, verbatim from the rule's rationale. It left
+    // the bolded span but it did not leave the card.
+    expect(document.body.textContent)
+      .toContain('the next dose is a conjugate — PCV20 or PCV21');
+    expect(document.body.textContent).not.toContain('*');
   });
 });
