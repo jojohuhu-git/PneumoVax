@@ -1,3 +1,8 @@
+> **⚠️ SUPERSEDED (2026-10-29, later the same day) — do not resume from this file.**
+> Its queue has moved on: P3 (the PCV20 remedy) is built and in PR #95, the 2023 adult MMWR
+> citation question is **answered and closed** by her, and PR #89 is closed. Resume from
+> `docs/archive/handoff-2026-10-29-pcv20-remedy-and-the-citation-closed.md`.
+
 # PneumoVax — Handoff after the three children's items shipped (2026-10-29)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
