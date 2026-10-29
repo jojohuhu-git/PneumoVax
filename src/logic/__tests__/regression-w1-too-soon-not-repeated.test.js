@@ -92,13 +92,38 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
   });
 
   it('keeps "repeat this dose only" for a dose rejected for a reason OTHER than timing', () => {
-    // Below the 6-week minimum age for PCV — not a timing-between-doses
-    // rejection, so the old sentence is still the correct advice.
+    // A PPSV23 below its 2-year minimum age — not a timing-between-doses
+    // rejection, so the dose really is missing and must be re-given.
+    //
+    // ⚠ THIS FIXTURE CHANGED on 2026-10-29, from a too-young PCV13 to a
+    // too-young PPSV23, and the swap is not a convenience. W1's point is that
+    // a NON-timing rejection still tells the clinician the dose must be
+    // re-given; the owner's decision of that date took the product-naming
+    // sentence off every age-rejected CONJUGATE (CDC gives PCV15 and PCV20 one
+    // minimum age and no preference, so the product was never what was wrong),
+    // while a child whose PPSV23 came at 18 months still needs a PPSV23 once
+    // she is 2 and no conjugate substitutes. So the PPSV23 is now the family
+    // that demonstrates W1. The conjugate is asserted below, on its new
+    // sentence, so neither case is simply dropped.
+    const a = analyzeHistory('PPSV23', [
+      { date: '2026-01-10', product: 'PPSV23' },
+    ], 12, '2026-01-20', '2025-01-01');
+    const first = a.perDose[0];
+    expect(first.status).toBe('invalid');
+    expect(first.reasons.join(' ')).toMatch(/repeat this dose only/);
+  });
+
+  it('gives a too-young CONJUGATE the product-free sentence instead', () => {
+    // The fixture W1 used to assert the sentence above. It is still a
+    // non-timing rejection and the dose is still missing; what changed is that
+    // the app no longer implies it must be the same vaccine. See
+    // regression-2026-10-29-age-rejection-names-no-product.test.js.
     const a = analyzeHistory('PCV', [
       { date: '2026-01-10', product: 'PCV13' },
     ], 0, '2026-01-20', '2026-01-01');
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
-    expect(first.reasons.join(' ')).toMatch(/repeat this dose only/);
+    expect(first.reasons.join(' ')).toMatch(/any PCV approved/i);
+    expect(first.reasons.join(' ')).not.toMatch(/repeat this dose only/);
   });
 });

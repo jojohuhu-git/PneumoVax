@@ -750,9 +750,92 @@ dose of the same vaccine are a separate queue item (P3) that this does not build
 verdict moves** — the dose was rejected before and is rejected now.
 
 Guard: `regression-2026-10-26-pcv21-for-a-child-names-pcv20.test.js`, with controls that an
-18-year-old's PCV21 still counts, a PCV20 below the minimum age still says *"repeat this
-dose only"*, a timing rejection still gets W1's sentence, and a grid sweep that no dose
-carries both sentences.
+18-year-old's PCV21 still counts, a PCV20 below the minimum age names **no product at all**
+(that control said *"repeat this dose only"* until §I-AGEREMEDY below replaced it), a timing
+rejection still gets W1's sentence, and a grid sweep that no dose carries both sentences.
+
+---
+
+### §I-AGEREMEDY — A conjugate rejected on AGE names no product (OWNER DECISION 2026-10-29)
+
+**This REVERSES an owner decision taken hours earlier the same day**, and the reversal is
+the point of the section. PR #95 ("always PCV20") was **closed unmerged** rather than landed
+and undone, so `main` never carried it.
+
+**What went wrong with the earlier question.** She was asked whether a thrown-out conjugate
+should be replaced by PCV20, using **Mia** — 2, cochlear implant, PCV15 on 1 June and a
+second PCV15 19 days later — described as a patient the app tells to *"repeat this dose"*.
+**Mia is not such a patient.** Her dose is rejected for **timing**, and since W1
+(2026-10-11) a timing rejection reads *"It is not repeated; the next dose in this series can
+be given from <date>"* and names no product at all. Her answer was therefore given about one
+family and applied to another: babies whose conjugate was thrown out for being below the
+minimum **age**. **Re-run the patient the question is built on; a described chip is not a
+chip.**
+
+**The patient who settled it.** Ayla, born 24 Sep 2026, PCV15 on 29 Oct at 35 days old —
+three days below the 38 days CDC's 4-day grace allows against the 42-day minimum. Her chip
+said PCV20 while the card above it offered *"PCV20 or PCV15 — choose one"*; **390 of the 462
+affected cards looked like that**. Shown her, the owner asked **whether PCV20 is indicated
+at that age at all**. Fetched live 2026-10-29:
+
+| Source | Sentence |
+|---|---|
+| CDC Child/Adolescent Schedule Notes, pneumococcal | *"(minimum age: 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])"* |
+| CDC Pneumococcal Vaccine Recommendations | *"Administer a 4-dose PCV series (PCV15 or PCV20)"* |
+
+The two conjugates share **one** minimum age, **neither page states a preference**, and the
+dose failed on age rather than on product. Her words: *"only recommend vaccines that are
+approved for their age"*, then **"either is fine here"**.
+
+**What a card now says.** An age-rejected conjugate carries a product-free sentence, in two
+forms because a patient who has since passed the floor must not be shown a bar she has
+cleared:
+
+> still below the minimum today — *"This dose does not count toward the series — a further
+> dose can be given from the **6 weeks** minimum age at the earliest, and **any PCV approved
+> for that age** may be used (do not restart the series)."*
+>
+> already old enough — *"This dose does not count toward the series — give a further dose
+> when due; **any PCV approved for the patient's age** may be used (do not restart the
+> series)."*
+
+**⚠ NO DATE IS STATED HERE.** The chip names the minimum **age**, which
+`validateOnePCV` already holds; it never names a date. Per the owner ruling of 2026-10-24
+the rec card is the only surface that states a **due** date and a chip states an
+**earliest**. Ayla's card says **26 Nov** — four weeks after the dose she actually got, per
+Ruling D — which is **later** than her 6-week birthday, so a date here would contradict it.
+
+**Three families are deliberately untouched, each for its own reason:**
+
+| Family | Keeps | Why |
+|---|---|---|
+| a child's **PCV21** | *"give a dose of PCV20 instead"* | barred at her age whatever the date, so a repeat fails again. §I-REMEDY, already on `main`. **This is the one case her rule selects.** |
+| a too-young **PPSV23** | *"repeat this dose only"* | a child whose PPSV23 came at 18 months needs a **PPSV23** at 2; no conjugate substitutes |
+| a **record problem** | its own wording | not an age rejection; the field is set at the two minimum-age call sites only, never by text matching |
+
+**A PCV21 given just before an 18th birthday is NOT a gap, and was checked.** 198 grid chips
+showed a PCV21 still saying *"repeat this dose only"*. They are patients **now 18 or older**
+whose dose was given at 17y 11m: the PCV21 branch keys on **current** age, so it correctly
+does not fire, and repeating PCV21 is genuinely fine for them. They take the product-free
+sentence's second form.
+
+**Measured over the whole grid, 2026-10-29** (re-measure, never quote from here): **748**
+conjugate chips moved off *"repeat this dose only"* onto the product-free sentence; chips
+naming PCV20 stay at **264**, every one a child's PCV21; the **1,848** too-young PPSV23 chips
+are unchanged. **0 verdicts moved** — both corpora byte-identical, because a dose rejected
+before is rejected now.
+
+**A GUARD THAT PASSED FOR THE WRONG REASON, found by mutating.** The first draft asserted
+`/6 weeks minimum age/` on Ayla's chip — but her **first** line already reads *"below the 6
+weeks minimum age for PCV15"*, so the regex matched text that predates the change. Forcing
+`stillTooYoung` to a constant `false` broke **nothing** in all 1,684 tests. The assertion now
+quotes the whole clause. Mutations that do bite: never attaching the field at the dated call
+site fails **8**; the `stillTooYoung` constant fails **1**; re-applying #95 fails **3**.
+
+Guard: `regression-2026-10-29-age-rejection-names-no-product.test.js`. Two existing tests
+were **widened, not loosened**: §I-REMEDY's control moved onto the new sentence, and W1's
+non-timing example moved from a too-young PCV13 to a too-young **PPSV23** — the family that
+still demonstrates W1's point — with the PCV13 kept beside it asserting the new wording.
 
 ---
 
