@@ -40,6 +40,9 @@ import { buildCases } from '../../test-grid.js';
 const TODAY = '2026-10-25';
 const REPEAT = /repeat this dose only/i;
 const GIVE_PCV20 = /give a dose of PCV20 instead/i;
+// The sentence an age-rejected CONJUGATE carries since OWNER DECISION
+// 2026-10-29 — product-free, because the product is not what was wrong.
+const ANY_APPROVED = /any PCV approved/i;
 const TOO_SOON = /given too soon after the dose it is measured from/i;
 
 /** A child of `ageMonths` with one PCV21 on record. */
@@ -106,16 +109,22 @@ describe('controls — the other invalid doses keep their own sentences', () => 
     expect((d.reasons ?? []).join(' ')).not.toMatch(GIVE_PCV20);
   });
 
-  it('a PCV20 below the minimum age still says "repeat this dose only"', () => {
-    // Rejected for AGE, not for product: repeating it is correct advice,
-    // because the same product given later is valid.
+  it('a PCV20 below the minimum age names no product at all', () => {
+    // Rejected for AGE, not for product. This test used to assert "repeat this
+    // dose only" here; OWNER DECISION 2026-10-29 replaced that sentence for
+    // every age-rejected conjugate, because the product is not what was wrong
+    // and CDC gives PCV15 and PCV20 the same 6-week minimum. The point this
+    // test exists for is unchanged and still asserted: an age rejection must
+    // NOT carry the PCV20 remedy sentence, which belongs to a child's PCV21.
+    // See regression-2026-10-29-age-rejection-names-no-product.test.js.
     const res = recommend({
       today: TODAY, dob: '2026-09-01', ageMonths: 1, riskIds: [],
       pcvDoses: [{ product: 'PCV20', date: '2026-09-20' }], ppsv23Doses: [],
     });
     const d = firstDose(res);
     expect(d.status).toBe('invalid');
-    expect((d.reasons ?? []).join(' ')).toMatch(REPEAT);
+    expect((d.reasons ?? []).join(' ')).toMatch(ANY_APPROVED);
+    expect((d.reasons ?? []).join(' ')).not.toMatch(REPEAT);
     expect((d.reasons ?? []).join(' ')).not.toMatch(GIVE_PCV20);
   });
 
@@ -137,7 +146,7 @@ describe('controls — the other invalid doses keep their own sentences', () => 
 
 describe('swept over the grid', () => {
   it('no dose anywhere carries both sentences, and PCV20 advice only ever follows a PCV21', () => {
-    let pcv21Child = 0; let repeats = 0;
+    let pcv21Child = 0; let conjugateRepeats = 0; let ppsv23Repeats = 0;
     for (const c of buildCases()) {
       const out = recommend(c.input);
       if (out.excluded) continue;
@@ -151,12 +160,22 @@ describe('swept over the grid', () => {
           expect(out.orderedDoses.pcv[i].product).toBe('PCV21');
           pcv21Child += 1;
         }
-        if (saysRepeat) repeats += 1;
+        if (saysRepeat) conjugateRepeats += 1;
+      }
+      for (const d of out.perDose?.ppsv23 ?? []) {
+        if (REPEAT.test((d.reasons ?? []).join(' '))) ppsv23Repeats += 1;
       }
     }
-    // PINNED. A fall in `repeats` means the ordinary advice has gone missing;
     // `pcv21Child` is the family this change speaks to.
     expect(pcv21Child).toBeGreaterThan(0);
-    expect(repeats).toBeGreaterThan(0);
+    // THE CANARY MOVED, 2026-10-29, and this is why. It used to read
+    // `repeats > 0` over conjugates alone, to catch the ordinary repeat advice
+    // going missing. Her decision of that date deliberately took it off EVERY
+    // age-rejected conjugate, so over conjugates the honest expectation is now
+    // zero — asserting "> 0" there would demand wording she removed. The
+    // advice itself is alive on the too-young PPSV23, where a conjugate is no
+    // substitute, so the canary watches that family instead.
+    expect(conjugateRepeats).toBe(0);
+    expect(ppsv23Repeats).toBeGreaterThan(0);
   });
 });

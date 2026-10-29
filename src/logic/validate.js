@@ -512,6 +512,34 @@ function remedyIsAnotherProduct(result, product = REMEDY_PRODUCT) {
   return { ...result, remedyProduct: product };
 }
 
+// OWNER DECISION 2026-10-29 — a conjugate thrown out on AGE names no product.
+//
+// Her words: "only recommend vaccines that are approved for their age", and
+// then, shown Ayla (PCV15 three days before she turned 6 weeks), "either is
+// fine here". CDC gives PCV15 and PCV20 the SAME minimum age — "(minimum age:
+// 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])" — and names both for the
+// series — "Administer a 4-dose PCV series (PCV15 or PCV20)" — with no
+// preference stated on either page (both fetched live 2026-10-29). The dose
+// failed on age, not on product, so nothing about her age prefers one.
+//
+// ⚠ THIS REVERSES the "always PCV20" answer given earlier the same day. That
+// answer was asked with Mia, whose dose is rejected for TIMING and who
+// therefore never sees a repeat-the-product sentence at all; the answer was
+// then applied to a family she was never shown. PR #95 was closed unmerged.
+// `remedyIsAnotherProduct` stays for a child's PCV21 — the one product that is
+// barred at her age whatever the date, so repeating it would fail again.
+//
+// WHY THE MINIMUM AGE AND NOT A DATE. `stillTooYoung` is read here because the
+// phrasing differs: a patient who has since passed the minimum needs no age
+// clause, and quoting a floor she is already past reads as a bar. The chip
+// names the AGE and never a date — per the owner ruling of 2026-10-24 the rec
+// card is the only surface that states a due date, and Ayla's card says 26 Nov
+// (four weeks after the dose she got, per Ruling D), which is LATER than her
+// 6-week birthday. A date here would contradict it.
+function repeatWithAnyApprovedProduct(result, minAgeM, stillTooYoung) {
+  return { ...result, ageRemedy: { minAgeText: fmtMinAge(minAgeM), stillTooYoung } };
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
@@ -639,11 +667,12 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!dose.date) {
     // Dateless: current age is an upper bound on age at administration.
     if (ageMonths < minAgeM) {
-      return invalid(
+      // Dateless and below the minimum TODAY, so still too young by definition.
+      return repeatWithAnyApprovedProduct(invalid(
         [withMarker(`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
         `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${fmtMinAge(minAgeM)}.`,
         ageCites
-      );
+      ), minAgeM, true);
     }
     return adviseIfBeforeRecommendedAge(
       unknown([
@@ -664,11 +693,13 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     ? ageMeetsMinimumDays(ageAtDoseDays, minDays)
     : ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob });
   if (!oldEnough) {
-    return invalid(
+    // The dose was below the minimum WHEN GIVEN; whether the patient is still
+    // below it today is a separate question, and the one the wording turns on.
+    return repeatWithAnyApprovedProduct(invalid(
       [withMarker(`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
       `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`,
       ageCites
-    );
+    ), minAgeM, ageMonths < minAgeM);
   }
 
   // Age is settled; now the dose's timing, against the one rule table.
@@ -902,7 +933,16 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // wrong with this dose's timing.
           : result.remedyProduct
             ? `This dose does not count toward the series — give a dose of ${result.remedyProduct} instead (do not restart the series).`
-            : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
+            // OWNER DECISION 2026-10-29 — see `repeatWithAnyApprovedProduct`.
+            // The dose failed on AGE, so the product is not what was wrong and
+            // CDC's own choice between the conjugates is left standing. A
+            // patient still below the floor is told where the floor is; one
+            // who has passed it is not shown a bar she has already cleared.
+            : result.ageRemedy
+              ? (result.ageRemedy.stillTooYoung
+                ? `This dose does not count toward the series — a further dose can be given from the ${result.ageRemedy.minAgeText} minimum age at the earliest, and any PCV approved for that age may be used (do not restart the series).`
+                : 'This dose does not count toward the series — give a further dose when due; any PCV approved for the patient\'s age may be used (do not restart the series).')
+              : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
       // OWNER RULING 2026-10-24 — the second sentence she asked for on a
       // mistimed SECOND PPSV23, emphasised, giving the conjugate option its
       // own date and its own reason. Her words: "bold the alternative option

@@ -90,13 +90,44 @@ describe('an at-risk child\'s catch-up waits 8 weeks after a PPSV23', () => {
     expect(lead).toContain('apart');
   });
 
-  it('leaves a healthy child\'s catch-up alone — no document states it there', () => {
+  // ── OWNER DECISION 2026-10-29 — the two pinned exclusions are REVERSED ──
+  //
+  // The two cases below were deliberately left on their PCV anchor on
+  // 2026-10-25, because no document states the PPSV23 clock for them. The
+  // owner was shown all three children side by side on 2026-10-29 — the
+  // healthy child, the 3-infant-doses child, and Noor as the control who was
+  // already waiting — and ruled that BOTH should wait too. Her reason is the
+  // inconsistency itself: one PPSV23, three children, two different answers.
+  //
+  // ⚠ SO THE PPSV23 CLOCK IS HERS ON THESE TWO CARDS, NOT CDC'S, and each
+  // card says so in its own words. No document's quote was widened to cover
+  // it. See CLINICAL_SPEC.md §C-PPSV23ANCHOR.
+  it('holds a healthy child\'s catch-up to 8 weeks after her PPSV23', () => {
     const healthy = { ...noor, riskIds: [] };
     const card = pcvCards(recommend(healthy))[0];
-    expect(card.dueToday).toBe(true);
+    expect(card.dueToday).toBe(false);
+    expect(card.earliestNextDate).toBe('2026-11-26');
   });
 
-  it('leaves the 3-doses-before-12-months row on its PCV anchor', () => {
+  it('gives the healthy child and her at-risk twin the SAME date', () => {
+    // The inconsistency she ruled on, asserted directly: the only difference
+    // between these two children is a risk condition, and the PPSV23 clock
+    // does not depend on it.
+    const healthy = pcvCards(recommend({ ...noor, riskIds: [] }))[0];
+    const atRisk = pcvCards(recommend(noor))[0];
+    expect(healthy.earliestNextDate).toBe(atRisk.earliestNextDate);
+  });
+
+  it('says on the healthy card that the PPSV23 is what is holding the dose', () => {
+    // A date that moved with no sentence explaining it is the defect this
+    // whole file exists about, pointed the other way.
+    const card = pcvCards(recommend({ ...noor, riskIds: [] }))[0];
+    const lead = typeof card.note === 'string' ? card.note : card.note.lead;
+    expect(lead).toMatch(/Held to 8 weeks after this child's PPSV23 of Oct 1, 2026/);
+    expect(card.note.detail).toMatch(/this app's own determination/);
+  });
+
+  it('holds the 3-doses-before-12-months row to its PPSV23 too', () => {
     // Three conjugate doses in infancy, then a PPSV23 three weeks ago.
     const child = {
       dob: '2022-10-01', ageMonths: 48, today: TODAY,
@@ -109,8 +140,42 @@ describe('an at-risk child\'s catch-up waits 8 weeks after a PPSV23', () => {
       riskIds: ['asplenia'],
     };
     const card = pcvCards(recommend(child))[0];
-    // ACIP 2023 measures this one from the last PCV, which is long past.
+    expect(card.dueToday).toBe(false);
+    // 4 Oct + 56 days. Her last PCV was April 2023, so before this ruling the
+    // clock had long since run out and the card said "due today".
+    expect(card.earliestNextDate).toBe('2026-11-29');
+    expect(card.note.lead).toMatch(/Held to 8 weeks after this child's PPSV23 of Oct 4, 2026/);
+    expect(card.note.detail).toMatch(/this app's own determination/);
+  });
+
+  it('leaves both cards alone for a child with no PPSV23 at all', () => {
+    // The control. `mostRecent` drops a null, so a child with nothing to wait
+    // for is untouched — and these two cards are the ones this ruling moved,
+    // so if the anchor were wired wrongly she would be held for no reason.
+    //
+    // ⚠ BOTH CARDS' WORDING IS ASSERTED, not just their dates, and not just
+    // the at-risk one. The first draft checked the healthy card's date and
+    // only the at-risk card's sentence — so forcing the healthy card's
+    // `ppsvHolds` to a constant `true` broke NOTHING, and a child with no
+    // PPSV23 at all would have been shown "Held to 8 weeks after this child's
+    // PPSV23 of" followed by a formatted null. Found by mutating.
+    const healthyNoPpsv = { ...noor, riskIds: [], ppsv23Doses: [] };
+    const healthyCard = pcvCards(recommend(healthyNoPpsv))[0];
+    expect(healthyCard.dueToday).toBe(true);
+    expect(healthyCard.note.lead).not.toMatch(/Held to/);
+    expect(healthyCard.note.detail).not.toMatch(/this app's own determination/);
+    const riskyNoPpsv = {
+      dob: '2022-10-01', ageMonths: 48, today: TODAY,
+      pcvDoses: [
+        { product: 'PCV13', date: '2022-12-01' },
+        { product: 'PCV13', date: '2023-02-01' },
+        { product: 'PCV13', date: '2023-04-01' },
+      ],
+      ppsv23Doses: [], riskIds: ['asplenia'],
+    };
+    const card = pcvCards(recommend(riskyNoPpsv))[0];
     expect(card.dueToday).toBe(true);
+    expect(card.note.lead).not.toMatch(/Held to/);
   });
 });
 
@@ -134,14 +199,36 @@ describe('the whole grid', () => {
     if (early) rows.push({ key: c.key, risky: (inp.riskIds ?? []).length > 0 });
   }
 
-  it('advises no at-risk child a PCV inside 8 weeks of a PPSV23, except the pinned rows', () => {
-    // 33, not 0: 11 healthy children and 22 on the 3-doses-before-12-months
-    // row. PINNED EXACTLY. If a later change anchors those too the number
-    // drops and this fails — which is the point, because that change needs the
-    // owner's word and a document, not a quiet improvement.
-    expect(rows.length).toBe(33);
-    expect(rows.filter((r) => !r.risky).length).toBe(11);
-    expect(rows.filter((r) => r.risky).length).toBe(22);
+  it('advises NO child a PCV inside 8 weeks of a counting PPSV23', () => {
+    // ZERO. This read 33 until 2026-10-29, pinned exactly so that anchoring
+    // those rows could not happen quietly, because it needed the owner's
+    // word. She gave it on 2026-10-29, having been shown all three children
+    // together, so the exception is closed. The pin stays a pin, pointing the
+    // other way: a rise here means a card has slipped off the PPSV23 clock.
+    expect(rows.length).toBe(0);
+  });
+
+  it('records that the 33 were ALL the healthy catch-up card, not two rows', () => {
+    // ⚠ A CORRECTION, 2026-10-29. The comment above this sweep used to split
+    // the 33 as "11 healthy children and 22 on the 3-doses-before-12-months
+    // row", and that split was WRONG — `rows` tags a patient `risky` with
+    // `riskIds.length > 0`, and **smoking and alcoholism are adult-only risk
+    // factors**, so a 24-month-old with alcoholism ticked was counted as
+    // at-risk. Measured after the fix: all 33 moved verdicts are the healthy
+    // catch-up card; 11 have a literally empty risk list and 22 have only an
+    // adult-only id. ZERO are the 3-doses row.
+    //
+    // That row is reached by **0 grid patients** — asserted below — so the
+    // sweep is not a guard for it and the hand-built child in the block above
+    // is its only coverage. Quoting the sweep as cover for both rows is the
+    // mistake this assertion exists to stop.
+    let reaches = 0;
+    for (const c of buildCases()) {
+      const out = recommend(c.input);
+      if (out.excluded) continue;
+      if ((out.recs ?? []).some((r) => r.doseLabel === '1 dose PCV (at-risk catch-up)')) reaches += 1;
+    }
+    expect(reaches).toBe(0);
   });
 
   it('cannot reach a SECOND counting PPSV23 on this card — pinned, not assumed', () => {
@@ -167,14 +254,13 @@ describe('the whole grid', () => {
   });
 
   it('never advises a child EARLIER than before — the fix only moves dates later', () => {
-    // The direction check. A `mostRecent` that returned the earlier anchor
-    // would still satisfy the count above on some rows; it cannot satisfy
-    // this, because every PCV card in the grid is compared against the
-    // PPSV23 floor it must respect.
-    for (const r of rows) {
-      // The pinned rows are the only ones allowed to sit below the floor, and
-      // they are the two documented cases — never a card that used to wait.
-      expect(r.key).toMatch(/\|a?24\||^a24\|/);
-    }
+    // The direction check. A `mostRecent` that returned the EARLIER anchor
+    // would put rows back below the floor, and `rows` is built by comparing
+    // every PCV card in the grid against the PPSV23 floor it must respect.
+    // With the 2026-10-29 exceptions closed there is nothing left that may sit
+    // below it, so the assertion is simply that the list is empty — which the
+    // test above states, and this one restates as a direction claim: no key
+    // whatsoever, not merely no UNEXPECTED key.
+    expect(rows.map((r) => r.key)).toEqual([]);
   });
 });

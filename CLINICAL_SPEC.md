@@ -341,21 +341,94 @@ call sites use for the **first** PPSV23 because the five-year revaccination cloc
 dose 1. First and last are different questions, and a child with two PPSV23 doses has them
 five years apart — reading one for the other is a five-year error.
 
-**TWO CASES ARE DELIBERATELY LEFT ON THE PCV ANCHOR, because no document states the
-interval for them.** 192 of the 225 are fixed; the remaining **33** are pinned by number in
-the guard so that widening the anchor fails a test rather than passing quietly:
+**TWO CASES WERE LEFT ON THE PCV ANCHOR on 2026-10-25, because no document states the
+interval for them.** 192 of the 225 were fixed; the remaining **33** were pinned by number
+so that widening the anchor would fail a test rather than pass quietly:
 
-| Left alone | Count | What the documents say |
-|---|---|---|
-| the **3-doses-before-12-months** row | 22 | ACIP 2023: *"one dose of either PCV15 or PCV20 is recommended at least 8 weeks after the last **PCV** dose"*; CDC's neighbouring rows say *"the most recent **PCV** dose"* |
-| a **healthy** child's catch-up | 11 | CDC's healthy row states no interval; p2016 says *"after most recent **PCV** dose"*; the CDC PCV Catch-up Job Aid (Jan 2025) counts previous **PCV** doses only and says *"Give Dose 1 today"* |
+| Left alone | What the documents say |
+|---|---|
+| the **3-doses-before-12-months** row | ACIP 2023: *"one dose of either PCV15 or PCV20 is recommended at least 8 weeks after the last **PCV** dose"*; CDC's neighbouring rows say *"the most recent **PCV** dose"* |
+| a **healthy** child's catch-up | CDC's healthy row states no interval; p2016 says *"after most recent **PCV** dose"*; the CDC PCV Catch-up Job Aid (Jan 2025) counts previous **PCV** doses only and says *"Give Dose 1 today"* |
 
-Both are **open questions for the owner**, not oversights. Anchoring either on a PPSV23
-would make the number this app's own.
+**BOTH EXCEPTIONS ARE NOW CLOSED — OWNER DECISION 2026-10-29.** See §C-PPSV23ANCHOR29 below.
 
-Guard: `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
-which pins 33, splits it 11 / 22, and holds the 4-year-old and the 8-year-old to the same
-date.
+### §C-PPSV23ANCHOR29 — Both pinned exceptions close; the PPSV23 clock is the app's own on those two cards (OWNER DECISION 2026-10-29)
+
+**What she was shown.** Three children, each with a PPSV23 about a month ago, run through the
+engine on 2026-10-29 — two of them advised a conjugate **today**, the third held eight weeks:
+
+| Child | 2026-10-25 behaviour |
+|---|---|
+| healthy 4-year-old, PPSV23 on 1 Oct, no conjugate ever | **due today** |
+| the **same** child with asplenia (the control) | held to **26 Nov** |
+| 4-year-old with asplenia, 3 × PCV13 in 2022–23, PPSV23 on 8 Oct | **due today** |
+
+Asked which of the two should also wait, she chose **both**. The reason is the inconsistency
+itself: one PPSV23, three children, two different answers, and in the first pair the only
+difference between them is a risk condition that the PPSV23 clock does not depend on.
+
+**⚠ ON THESE TWO CARDS THE PPSV23 CLOCK IS HERS, NOT CDC'S, AND THE CARD SAYS SO.** The
+documents listed in the table above are unchanged and still say **PCV**; none was re-quoted
+to cover her ruling, which is the FINDING F / "narrowing card sources" hazard run forwards.
+Instead each card gains its own sentence, printed **only when the PPSV23 is what is actually
+holding the dose back**:
+
+> lead — *"…≥8 weeks after the most recent PCV [c] [c]. **Held to 8 weeks after this child's
+> PPSV23 of Oct 1, 2026.**"*
+>
+> "Why this" — *"The 8 weeks above is CDC's, measured in every source on this card from the
+> most recent PCV. Measuring it from a PPSV23 as well is this app's own determination on the
+> owner's instruction of 2026-10-29, so that a healthy child and an at-risk child with the
+> same recent PPSV23 are not given different dates."*
+
+**Still one `max`, still no second interval.** Both clocks carry the same 8 weeks, so the
+later anchor is simply the later date — `mostRecent(anchor, ppsv.lastDate)` in
+`pcvHealthyChild`, and `anchorPneumoGiven` (which already existed) on the `target === 1` row
+in `pcvRiskChild`. A child with no PPSV23 is untouched, because `mostRecent` drops a null.
+
+**Measured, 2026-10-29** (re-measure, never quote from here):
+
+| Corpus | Rows moved | Direction | Fields changed |
+|---|---|---|---|
+| `verdict-corpus.tsv` | **33 of 17,016** | all **later**, 0 earlier | `dueToday` and `earliestNextDate` only |
+| `record-problem-corpus.tsv` | **24 of 18,264** | all **later**, 0 earlier | the same two |
+
+No dose status, label, verdict or series total moved in either corpus, and the key sets are
+identical — checked field by field rather than trusting `sweep:update`, which reports every
+regenerated row.
+
+**⚠ A CORRECTION THE MEASUREMENT FORCED, AND IT CHANGES WHAT THIS RULING REACHED.** The
+2026-10-25 table above split the 33 as **22** on the 3-doses row and **11** healthy. **That
+split was wrong.** The guard tagged a patient at-risk with `riskIds.length > 0`, and
+**smoking and alcoholism are adult-only risk factors**, so a 24-month-old with alcoholism
+ticked was counted as at-risk. All 33 moved verdicts are the **healthy catch-up card**: 11
+with an empty risk list, 22 with only an adult-only id. **Zero** are the 3-doses row — which
+**0 grid patients reach at all**, now asserted. So the sweep is no guard for that row, and
+the hand-built 4-year-old (3 × PCV13, PPSV23 on 4 Oct, held to **29 Nov**) is its only
+coverage. This is the `populationOf()` rule of §"Healthy is not an empty risk list" costing a
+number in a spec table, exactly as it has before.
+
+**A SECOND GUARD THAT PASSED FOR THE WRONG REASON, also found by mutating.** The no-PPSV23
+control checked the healthy card's **date** and only the at-risk card's **sentence**. So
+forcing `ppsvHolds` to a constant `true` broke **nothing** — and a child with no PPSV23 at
+all would have read *"Held to 8 weeks after this child's PPSV23 of"* followed by a formatted
+`null`. The control now asserts both cards' wording. This is the second time in one day that
+a date-only assertion hid a prose defect, which is the standing lesson that the verdict
+corpora do not record prose.
+
+**Mutations that bite**, over the guard file: taking the PPSV23 side off the healthy card
+fails **4**; putting the 3-doses row back on its PCV anchor fails **1** (only the hand-built
+child can see it — the grid reaches that row 0 times); taking the **earlier** of the two
+anchors fails **2**; printing "Held to" unconditionally fails **1** once the control above
+was fixed, and **0** before it. The corpus sweeps are a mutation check in their own right:
+both failed before regeneration, which is how the 33 and 24 were counted.
+
+Guard: the same file, `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
+rewritten — the healthy child and her at-risk twin asserted to the **same** date, both cards
+asserted to carry the "Held to" sentence and the "this app's own determination" reason, a
+child with no PPSV23 asserted untouched on both cards **in date and in wording**, the sweep
+pinned at **0**, and the 3-doses row's grid reach pinned at **0** so that quoting the sweep
+as cover for it fails.
 
 ### §C-PPSV23LAST — The 8 weeks runs from the LAST counting PPSV23, not the first (2026-10-26)
 
@@ -750,9 +823,92 @@ dose of the same vaccine are a separate queue item (P3) that this does not build
 verdict moves** — the dose was rejected before and is rejected now.
 
 Guard: `regression-2026-10-26-pcv21-for-a-child-names-pcv20.test.js`, with controls that an
-18-year-old's PCV21 still counts, a PCV20 below the minimum age still says *"repeat this
-dose only"*, a timing rejection still gets W1's sentence, and a grid sweep that no dose
-carries both sentences.
+18-year-old's PCV21 still counts, a PCV20 below the minimum age names **no product at all**
+(that control said *"repeat this dose only"* until §I-AGEREMEDY below replaced it), a timing
+rejection still gets W1's sentence, and a grid sweep that no dose carries both sentences.
+
+---
+
+### §I-AGEREMEDY — A conjugate rejected on AGE names no product (OWNER DECISION 2026-10-29)
+
+**This REVERSES an owner decision taken hours earlier the same day**, and the reversal is
+the point of the section. PR #95 ("always PCV20") was **closed unmerged** rather than landed
+and undone, so `main` never carried it.
+
+**What went wrong with the earlier question.** She was asked whether a thrown-out conjugate
+should be replaced by PCV20, using **Mia** — 2, cochlear implant, PCV15 on 1 June and a
+second PCV15 19 days later — described as a patient the app tells to *"repeat this dose"*.
+**Mia is not such a patient.** Her dose is rejected for **timing**, and since W1
+(2026-10-11) a timing rejection reads *"It is not repeated; the next dose in this series can
+be given from <date>"* and names no product at all. Her answer was therefore given about one
+family and applied to another: babies whose conjugate was thrown out for being below the
+minimum **age**. **Re-run the patient the question is built on; a described chip is not a
+chip.**
+
+**The patient who settled it.** Ayla, born 24 Sep 2026, PCV15 on 29 Oct at 35 days old —
+three days below the 38 days CDC's 4-day grace allows against the 42-day minimum. Her chip
+said PCV20 while the card above it offered *"PCV20 or PCV15 — choose one"*; **390 of the 462
+affected cards looked like that**. Shown her, the owner asked **whether PCV20 is indicated
+at that age at all**. Fetched live 2026-10-29:
+
+| Source | Sentence |
+|---|---|
+| CDC Child/Adolescent Schedule Notes, pneumococcal | *"(minimum age: 6 weeks [PCV15], [PCV 20]; 2 years [PPSV23])"* |
+| CDC Pneumococcal Vaccine Recommendations | *"Administer a 4-dose PCV series (PCV15 or PCV20)"* |
+
+The two conjugates share **one** minimum age, **neither page states a preference**, and the
+dose failed on age rather than on product. Her words: *"only recommend vaccines that are
+approved for their age"*, then **"either is fine here"**.
+
+**What a card now says.** An age-rejected conjugate carries a product-free sentence, in two
+forms because a patient who has since passed the floor must not be shown a bar she has
+cleared:
+
+> still below the minimum today — *"This dose does not count toward the series — a further
+> dose can be given from the **6 weeks** minimum age at the earliest, and **any PCV approved
+> for that age** may be used (do not restart the series)."*
+>
+> already old enough — *"This dose does not count toward the series — give a further dose
+> when due; **any PCV approved for the patient's age** may be used (do not restart the
+> series)."*
+
+**⚠ NO DATE IS STATED HERE.** The chip names the minimum **age**, which
+`validateOnePCV` already holds; it never names a date. Per the owner ruling of 2026-10-24
+the rec card is the only surface that states a **due** date and a chip states an
+**earliest**. Ayla's card says **26 Nov** — four weeks after the dose she actually got, per
+Ruling D — which is **later** than her 6-week birthday, so a date here would contradict it.
+
+**Three families are deliberately untouched, each for its own reason:**
+
+| Family | Keeps | Why |
+|---|---|---|
+| a child's **PCV21** | *"give a dose of PCV20 instead"* | barred at her age whatever the date, so a repeat fails again. §I-REMEDY, already on `main`. **This is the one case her rule selects.** |
+| a too-young **PPSV23** | *"repeat this dose only"* | a child whose PPSV23 came at 18 months needs a **PPSV23** at 2; no conjugate substitutes |
+| a **record problem** | its own wording | not an age rejection; the field is set at the two minimum-age call sites only, never by text matching |
+
+**A PCV21 given just before an 18th birthday is NOT a gap, and was checked.** 198 grid chips
+showed a PCV21 still saying *"repeat this dose only"*. They are patients **now 18 or older**
+whose dose was given at 17y 11m: the PCV21 branch keys on **current** age, so it correctly
+does not fire, and repeating PCV21 is genuinely fine for them. They take the product-free
+sentence's second form.
+
+**Measured over the whole grid, 2026-10-29** (re-measure, never quote from here): **748**
+conjugate chips moved off *"repeat this dose only"* onto the product-free sentence; chips
+naming PCV20 stay at **264**, every one a child's PCV21; the **1,848** too-young PPSV23 chips
+are unchanged. **0 verdicts moved** — both corpora byte-identical, because a dose rejected
+before is rejected now.
+
+**A GUARD THAT PASSED FOR THE WRONG REASON, found by mutating.** The first draft asserted
+`/6 weeks minimum age/` on Ayla's chip — but her **first** line already reads *"below the 6
+weeks minimum age for PCV15"*, so the regex matched text that predates the change. Forcing
+`stillTooYoung` to a constant `false` broke **nothing** in all 1,684 tests. The assertion now
+quotes the whole clause. Mutations that do bite: never attaching the field at the dated call
+site fails **8**; the `stillTooYoung` constant fails **1**; re-applying #95 fails **3**.
+
+Guard: `regression-2026-10-29-age-rejection-names-no-product.test.js`. Two existing tests
+were **widened, not loosened**: §I-REMEDY's control moved onto the new sentence, and W1's
+non-timing example moved from a too-young PCV13 to a too-young **PPSV23** — the family that
+still demonstrates W1's point — with the PCV13 kept beside it asserting the new wording.
 
 ---
 
