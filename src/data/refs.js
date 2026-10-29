@@ -196,7 +196,14 @@ export const REFS = {
     label: 'CDC Adult Schedule Notes — pneumococcal, routine vaccination at age 50+ with no prior PCV or unknown history',
     short: 'CDC Adult Notes',
     quote: 'Not previously received a dose of PCV13, PCV15, PCV20, or PCV21 or whose previous vaccination history is unknown: 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21.',
-    lastVerified: '2026-10-10',
+    // Re-read live 2026-10-29 (browser pane, accordions expanded — an
+    // un-expanded fetch of this page returns 8k of menu and looks like it
+    // worked). It occurs EXACTLY ONCE in the page's HTML, inside the panel
+    // `accordion-panel-pneumo-routine`, under the parent bullet "Age 50 years
+    // or older who have:". That parent is why this key, and not a 19-49 "review
+    // at 50" sentence, is what C12 cites for "routine vaccination begins at
+    // age 50" on the healthy 5-18 child's card.
+    lastVerified: '2026-10-29',
   },
   adultPcv15ThenPpsv: {
     rulebook: 'adult',

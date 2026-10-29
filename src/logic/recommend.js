@@ -1206,7 +1206,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
     doseLabel: 'Not indicated (healthy 5–18y)',
     note: {
       lead: 'No PCV is indicated — healthy children 5–18 years are not routinely caught up [c].',
-      detail: 'CDC\'s catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c].',
+      detail: 'CDC\'s catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c]. Re-evaluate at age 50, when routine pneumococcal vaccination begins for every adult [c].',
     },
     noteCites: [
       cite('pedsHealthyCatchup'),
@@ -1218,6 +1218,21 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
       // source pretending its scope is wider than it is.
       cite('cdcChildSpecialSituations', {
         aboutAnotherGroup: 'names the risk conditions this child does NOT have, which is why no dose is indicated',
+      }),
+      // OWNER REQUEST 2026-10-29, on the card for a healthy 10-year-old: "add a
+      // comment to re-evaluate pneumococcal vaccines once the patient turns 50
+      // years old and cite the necessary adult reference."
+      //
+      // The second declared cross-reference on this card, and the ONE place in
+      // the app where a child's card carries an adult source. That is the N6
+      // rule crossed deliberately rather than by accident: the sentence is
+      // ABOUT the adult schedule, so the adult schedule is the only document
+      // that can carry it, and `aboutAnotherGroup` is what says so out loud.
+      // The key is already one of the four pinned cross-references, and the
+      // same sentence is already on the adult 19-49 no-risk card -- one
+      // wording, one source, both sides of the boundary.
+      cite('adultRoutine50', {
+        aboutAnotherGroup: 'states where routine adult vaccination begins, which is the age this child should be re-assessed at',
       }),
     ],
     // C9 (2026-10-23). p2016 is NOT listed here, and the reason is an OWNER
@@ -1240,10 +1255,32 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
     // removing it (the FINDING F discipline) -- Table 4 is risk conditions, and
     // Table 5 is HSCT.
     //
-    // ⚠ The Catch-up Job Aid chip STAYS. It is a different (document,
-    // statement) pair on the same card and is the owner's do-not-re-raise
-    // decision; `healthyRefsExcept` drops p2016 and nothing else.
-    refs: healthyRefsExcept('p2016'),
+    // C12 (2026-10-29) — THE CATCH-UP JOB AID COMES OFF, and this closes the
+    // LAST uncredited (document, statement) pair in the app. The chip used to
+    // stay here as the owner's do-not-re-raise decision; she lifted that
+    // herself on 2026-10-29 by asking for the last citation to be worked, was
+    // shown this very card for a healthy 10-year-old, and chose: "Take chip
+    // off."
+    //
+    // WHAT READING THE DOCUMENT FOUND (the FINDING F discipline; the local PDF
+    // is 95,267 bytes, byte-for-byte what cdc.gov serves, all 3 pages read):
+    // its oldest row is "24 through 59 months" and the table ENDS there, its
+    // title is "Catch-Up Guidance for Healthy Children 4 Months through 4 Years
+    // of Age", and footnote 1 hands at-risk children to CDC's notes. So the
+    // document has NO row for a child of 5-18 -- its own title is the only
+    // thing on it that touches this card, and a title describes what a document
+    // covers rather than stating a recommendation.
+    //
+    // That is the shape the owner already ruled on for the ADULT job aid on
+    // 2026-10-18 ("use MMWR table"): where a job aid's claim is not in the
+    // document's own words, the job aid comes off and the document that states
+    // it in words is cited. CDC's Child/Adolescent Notes row -- the one that
+    // stops at age 4 -- is quoted on the lead and carries the claim alone.
+    //
+    // ⚠ MIRROR GUARD. A removal is only safe while the document stays credited
+    // where it DOES speak: it keeps its place, with its cells cited, on the 144
+    // healthy 24-59-month cards. Asserted in the guard, not assumed.
+    refs: healthyRefsExcept('p2016', 'cdcCatchupJobAid'),
   })];
 }
 
