@@ -1007,6 +1007,13 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   // RULING D (2026-10-23) — same-stream PCV→PCV gap, so the anchor is the dose
   // given, not the last that counted.
   const anchor = pcv.anchorDate;
+  // OWNER DECISION 2026-10-29 — a healthy child's catch-up waits 8 weeks after
+  // a PPSV23 too. See `catchupAnchor` below; this is the later of the two
+  // clocks, the same shape `anchorPneumoGiven` uses in `pcvRiskChild`.
+  const catchupAnchor = mostRecent(anchor, ppsv.lastDate);
+  /** True when the PPSV23 is what is actually holding the dose back. */
+  const ppsvHolds = ppsv.lastDate != null && catchupAnchor === ppsv.lastDate
+    && (anchor == null || ppsv.lastDate > anchor);
   const b = pcv.band;
 
   // Completeness for a HEALTHY child is age-band driven, NOT "has any PCV20."
@@ -1114,7 +1121,26 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         refs,
       })];
     }
-    const { dueToday, earliestNextDate } = dueState(anchor, WK8, today);
+    // OWNER DECISION 2026-10-29 — the healthy child's catch-up waits 8 weeks
+    // after her most recent PNEUMOCOCCAL dose, a PPSV23 included.
+    //
+    // She was shown a healthy 4-year-old with a PPSV23 four weeks ago and no
+    // conjugate ever, told her first conjugate was due TODAY, beside the same
+    // child with asplenia, who was correctly held eight weeks. Two children,
+    // one PPSV23, two answers. Her ruling: both wait.
+    //
+    // ⚠ THIS IS HERS, NOT CDC'S, AND THE CARD MUST SAY SO. Every document on
+    // this card measures the 8 weeks from a PCV — CDC's healthy row states no
+    // interval at all, p2016's says "after most recent PCV dose", and the
+    // catch-up job aid says "Give Dose 1 today". So the documents keep their
+    // sentence, and the PPSV23 clause is added separately, in the app's own
+    // words, exactly where it is doing work. Never widen a document's quote to
+    // cover it.
+    //
+    // ⚠ ONE `max`, NO SECOND INTERVAL. Both clocks carry the same 8 weeks, so
+    // the later anchor is the later date; nothing new is invented. A child with
+    // no PPSV23 is untouched — `mostRecent` drops a null.
+    const { dueToday, earliestNextDate } = dueState(catchupAnchor, WK8, today);
 
     // C8, document 5. The catch-up job aid was listed on this card and credited
     // with nothing, for all 144 of its cards. It cannot be credited with ONE
@@ -1159,8 +1185,8 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         // the job aid has a cell for this history. `noteCiteSlices` pairs
         // markers to cites by POSITION, so the count here and the array below
         // must move together.
-        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c]${jobAidKey ? ' [c]' : ''}.`,
-        detail: 'This is the catch-up for a healthy child 24–59 months whose PCV schedule was not complete by 24 months. If PCV15 is used, a PPSV23 follow-up is NOT routine for a healthy child — PPSV23 here is risk-based only.',
+        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c]${jobAidKey ? ' [c]' : ''}.${ppsvHolds ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.lastDate)}.**` : ''}`,
+        detail: `This is the catch-up for a healthy child 24–59 months whose PCV schedule was not complete by 24 months. If PCV15 is used, a PPSV23 follow-up is NOT routine for a healthy child — PPSV23 here is risk-based only.${ppsvHolds ? ' The 8 weeks above is CDC\'s, measured in every source on this card from the most recent PCV. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that a healthy child and an at-risk child with the same recent PPSV23 are not given different dates.' : ''}`,
       },
       // p2016 Table 2's row states this card's whole sentence — the single dose
       // AND the 8 weeks — and is the only source on the card that states the
@@ -1777,18 +1803,30 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       }));
       return out;
     }
-    // ⚠ THE ANCHOR FOLLOWS THE ROW, and the two rows word it differently.
+    // ⚠ BOTH ROWS NOW ANCHOR ON THE MOST RECENT PNEUMOCOCCAL DOSE, but for
+    // two different reasons, and the difference is what the card must say.
     //
     // `target === 2` is CDC's "Less than 3 PCV doses" row, whose own words are
-    // "at least 8 weeks after the most recent DOSE" — so a PPSV23 anchors it.
+    // "at least 8 weeks after the most recent DOSE" — so a PPSV23 anchors it
+    // on CDC's authority, and the card cites CDC for it.
+    //
     // `target === 1` is the 3-doses-before-12-months row, and every document
     // that states its interval says PCV: ACIP 2023, "one dose of either PCV15
     // or PCV20 is recommended at least 8 weeks after the last PCV dose", and
     // CDC's neighbouring rows, "at least 8 weeks after the most recent PCV
-    // dose". Anchoring that one on a PPSV23 would be this app's own number.
-    const { dueToday, earliestNextDate } = dueState(
-      target === 2 ? anchorPneumoGiven : anchorPcv, WK8, today,
-    );
+    // dose". OWNER DECISION 2026-10-29 anchors it on a PPSV23 anyway — she was
+    // shown a 4-year-old with asplenia, three PCV13 doses in 2022–23 and a
+    // PPSV23 three weeks ago, told her extra conjugate was due TODAY while the
+    // child beside her waited eight weeks — so on THIS row the PPSV23 clock is
+    // the app's own and the card says so in its own words. The documents keep
+    // their PCV sentence untouched; nothing is re-quoted to cover her ruling.
+    //
+    // ⚠ ONE `max`, NO SECOND INTERVAL, on both rows: the same 8 weeks on both
+    // clocks, so the later anchor is simply the later date.
+    const ppsvHoldsRow1 = target === 1 && ppsv.lastDate != null
+      && anchorPneumoGiven === ppsv.lastDate
+      && (anchorPcv == null || ppsv.lastDate > anchorPcv);
+    const { dueToday, earliestNextDate } = dueState(anchorPneumoGiven, WK8, today);
     const doseNum = target - remaining + 1;
     out.push(rec({
       vaccine: 'PCV', status: 'risk-based',
@@ -1811,11 +1849,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // so the key follows `target` and needs no second test of its own.
       note: target === 1
         ? {
-          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c].`,
+          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c].${ppsvHoldsRow1 ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.lastDate)}.**` : ''}`,
           // FINDING G: "all before 12 months", which is what p2016's row says.
           // It used to read "before 24 months" — a looser claim than the row,
           // and one that described 32 children the row is not about.
-          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`,
+          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].${ppsvHoldsRow1 ? ' The 8 weeks above is ACIP\'s, measured from the last PCV dose. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that this child and one on the neighbouring row with the same recent PPSV23 are not given different dates.' : ''}`,
         }
         : {
           // Both halves of CDC's row, 2026-10-25. It states two intervals --

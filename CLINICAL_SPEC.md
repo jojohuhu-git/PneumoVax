@@ -341,21 +341,94 @@ call sites use for the **first** PPSV23 because the five-year revaccination cloc
 dose 1. First and last are different questions, and a child with two PPSV23 doses has them
 five years apart — reading one for the other is a five-year error.
 
-**TWO CASES ARE DELIBERATELY LEFT ON THE PCV ANCHOR, because no document states the
-interval for them.** 192 of the 225 are fixed; the remaining **33** are pinned by number in
-the guard so that widening the anchor fails a test rather than passing quietly:
+**TWO CASES WERE LEFT ON THE PCV ANCHOR on 2026-10-25, because no document states the
+interval for them.** 192 of the 225 were fixed; the remaining **33** were pinned by number
+so that widening the anchor would fail a test rather than pass quietly:
 
-| Left alone | Count | What the documents say |
-|---|---|---|
-| the **3-doses-before-12-months** row | 22 | ACIP 2023: *"one dose of either PCV15 or PCV20 is recommended at least 8 weeks after the last **PCV** dose"*; CDC's neighbouring rows say *"the most recent **PCV** dose"* |
-| a **healthy** child's catch-up | 11 | CDC's healthy row states no interval; p2016 says *"after most recent **PCV** dose"*; the CDC PCV Catch-up Job Aid (Jan 2025) counts previous **PCV** doses only and says *"Give Dose 1 today"* |
+| Left alone | What the documents say |
+|---|---|
+| the **3-doses-before-12-months** row | ACIP 2023: *"one dose of either PCV15 or PCV20 is recommended at least 8 weeks after the last **PCV** dose"*; CDC's neighbouring rows say *"the most recent **PCV** dose"* |
+| a **healthy** child's catch-up | CDC's healthy row states no interval; p2016 says *"after most recent **PCV** dose"*; the CDC PCV Catch-up Job Aid (Jan 2025) counts previous **PCV** doses only and says *"Give Dose 1 today"* |
 
-Both are **open questions for the owner**, not oversights. Anchoring either on a PPSV23
-would make the number this app's own.
+**BOTH EXCEPTIONS ARE NOW CLOSED — OWNER DECISION 2026-10-29.** See §C-PPSV23ANCHOR29 below.
 
-Guard: `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
-which pins 33, splits it 11 / 22, and holds the 4-year-old and the 8-year-old to the same
-date.
+### §C-PPSV23ANCHOR29 — Both pinned exceptions close; the PPSV23 clock is the app's own on those two cards (OWNER DECISION 2026-10-29)
+
+**What she was shown.** Three children, each with a PPSV23 about a month ago, run through the
+engine on 2026-10-29 — two of them advised a conjugate **today**, the third held eight weeks:
+
+| Child | 2026-10-25 behaviour |
+|---|---|
+| healthy 4-year-old, PPSV23 on 1 Oct, no conjugate ever | **due today** |
+| the **same** child with asplenia (the control) | held to **26 Nov** |
+| 4-year-old with asplenia, 3 × PCV13 in 2022–23, PPSV23 on 8 Oct | **due today** |
+
+Asked which of the two should also wait, she chose **both**. The reason is the inconsistency
+itself: one PPSV23, three children, two different answers, and in the first pair the only
+difference between them is a risk condition that the PPSV23 clock does not depend on.
+
+**⚠ ON THESE TWO CARDS THE PPSV23 CLOCK IS HERS, NOT CDC'S, AND THE CARD SAYS SO.** The
+documents listed in the table above are unchanged and still say **PCV**; none was re-quoted
+to cover her ruling, which is the FINDING F / "narrowing card sources" hazard run forwards.
+Instead each card gains its own sentence, printed **only when the PPSV23 is what is actually
+holding the dose back**:
+
+> lead — *"…≥8 weeks after the most recent PCV [c] [c]. **Held to 8 weeks after this child's
+> PPSV23 of Oct 1, 2026.**"*
+>
+> "Why this" — *"The 8 weeks above is CDC's, measured in every source on this card from the
+> most recent PCV. Measuring it from a PPSV23 as well is this app's own determination on the
+> owner's instruction of 2026-10-29, so that a healthy child and an at-risk child with the
+> same recent PPSV23 are not given different dates."*
+
+**Still one `max`, still no second interval.** Both clocks carry the same 8 weeks, so the
+later anchor is simply the later date — `mostRecent(anchor, ppsv.lastDate)` in
+`pcvHealthyChild`, and `anchorPneumoGiven` (which already existed) on the `target === 1` row
+in `pcvRiskChild`. A child with no PPSV23 is untouched, because `mostRecent` drops a null.
+
+**Measured, 2026-10-29** (re-measure, never quote from here):
+
+| Corpus | Rows moved | Direction | Fields changed |
+|---|---|---|---|
+| `verdict-corpus.tsv` | **33 of 17,016** | all **later**, 0 earlier | `dueToday` and `earliestNextDate` only |
+| `record-problem-corpus.tsv` | **24 of 18,264** | all **later**, 0 earlier | the same two |
+
+No dose status, label, verdict or series total moved in either corpus, and the key sets are
+identical — checked field by field rather than trusting `sweep:update`, which reports every
+regenerated row.
+
+**⚠ A CORRECTION THE MEASUREMENT FORCED, AND IT CHANGES WHAT THIS RULING REACHED.** The
+2026-10-25 table above split the 33 as **22** on the 3-doses row and **11** healthy. **That
+split was wrong.** The guard tagged a patient at-risk with `riskIds.length > 0`, and
+**smoking and alcoholism are adult-only risk factors**, so a 24-month-old with alcoholism
+ticked was counted as at-risk. All 33 moved verdicts are the **healthy catch-up card**: 11
+with an empty risk list, 22 with only an adult-only id. **Zero** are the 3-doses row — which
+**0 grid patients reach at all**, now asserted. So the sweep is no guard for that row, and
+the hand-built 4-year-old (3 × PCV13, PPSV23 on 4 Oct, held to **29 Nov**) is its only
+coverage. This is the `populationOf()` rule of §"Healthy is not an empty risk list" costing a
+number in a spec table, exactly as it has before.
+
+**A SECOND GUARD THAT PASSED FOR THE WRONG REASON, also found by mutating.** The no-PPSV23
+control checked the healthy card's **date** and only the at-risk card's **sentence**. So
+forcing `ppsvHolds` to a constant `true` broke **nothing** — and a child with no PPSV23 at
+all would have read *"Held to 8 weeks after this child's PPSV23 of"* followed by a formatted
+`null`. The control now asserts both cards' wording. This is the second time in one day that
+a date-only assertion hid a prose defect, which is the standing lesson that the verdict
+corpora do not record prose.
+
+**Mutations that bite**, over the guard file: taking the PPSV23 side off the healthy card
+fails **4**; putting the 3-doses row back on its PCV anchor fails **1** (only the hand-built
+child can see it — the grid reaches that row 0 times); taking the **earlier** of the two
+anchors fails **2**; printing "Held to" unconditionally fails **1** once the control above
+was fixed, and **0** before it. The corpus sweeps are a mutation check in their own right:
+both failed before regeneration, which is how the 33 and 24 were counted.
+
+Guard: the same file, `regression-2026-10-25-at-risk-catchup-waits-eight-weeks-after-ppsv23.test.js`,
+rewritten — the healthy child and her at-risk twin asserted to the **same** date, both cards
+asserted to carry the "Held to" sentence and the "this app's own determination" reason, a
+child with no PPSV23 asserted untouched on both cards **in date and in wording**, the sweep
+pinned at **0**, and the 3-doses row's grid reach pinned at **0** so that quoting the sweep
+as cover for it fails.
 
 ### §C-PPSV23LAST — The 8 weeks runs from the LAST counting PPSV23, not the first (2026-10-26)
 
