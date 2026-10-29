@@ -78,7 +78,15 @@ const KNOWN_UNCITED = {
     + 'the same list and says the 19-49 risk recommendations "have not changed '
     + 'from previous recommendations". The owner chose to drop the link.\n'
     + 'Kept as the primary-source record: it is the document the adult risk '
-    + 'list came from, and mm7401a1 points back to it.',
+    + 'list came from, and mm7401a1 points back to it.\n'
+    + 'RE-OPENED AND CLOSED AGAIN (OWNER DECISION 2026-10-29). On 2026-10-26 she '
+    + 'said "I do want to add the MMWR pneumococcal 19 and older 2023 document to '
+    + 'cite." Putting it on a card means choosing which of the two claims above it '
+    + 'carries; an interval answer would also reverse her 2026-10-16 decision and '
+    + 'rewrite CLAUDE.md. Shown that, she chose on 2026-10-29: leave it off for '
+    + 'now, given the amount of work it takes. So this page stays uncited and the '
+    + 'question is SETTLED — do not re-raise it. If it is ever revisited, the claim '
+    + 'it carries is the first thing to decide.',
 };
 
 const SRC = resolve(process.cwd(), 'src');
