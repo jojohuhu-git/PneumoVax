@@ -136,8 +136,14 @@ describe('controls — the other invalid doses keep their own sentences', () => 
 });
 
 describe('swept over the grid', () => {
-  it('no dose anywhere carries both sentences, and PCV20 advice only ever follows a PCV21', () => {
-    let pcv21Child = 0; let repeats = 0;
+  // WIDENED 2026-10-29 (P3). This used to assert that PCV20 advice "only ever
+  // follows a PCV21", which was true the day it was written and became false
+  // when her "Always PCV20" ruling reached the minimum-age rejections too — a
+  // guard failing on correct cards, the hazard recorded in memory as
+  // "card absence guards break on two-sentence cards". It now names BOTH
+  // families and counts them separately, so either one going missing fails.
+  it('no dose carries both sentences, and PCV20 advice follows only the two families that earn it', () => {
+    let pcv21Child = 0; let tooYoung = 0; let repeats = 0;
     for (const c of buildCases()) {
       const out = recommend(c.input);
       if (out.excluded) continue;
@@ -147,16 +153,26 @@ describe('swept over the grid', () => {
         const saysRepeat = REPEAT.test(text);
         expect(namesPcv20 && saysRepeat).toBe(false);
         if (namesPcv20) {
-          // Only ever on a PCV21 given to someone under 18.
-          expect(out.orderedDoses.pcv[i].product).toBe('PCV21');
-          pcv21Child += 1;
+          const product = out.orderedDoses.pcv[i].product;
+          const belowMinAge = /below the .*minimum age/.test(text);
+          // Either the PRODUCT is wrong for this patient (PCV21 under 18) or
+          // the dose came before the product's minimum age. Nothing else.
+          expect(product === 'PCV21' || belowMinAge).toBe(true);
+          // And a PCV20 is never told to give a PCV20 "instead".
+          expect(product).not.toBe('PCV20');
+          if (product === 'PCV21' && !belowMinAge) pcv21Child += 1;
+          if (belowMinAge) tooYoung += 1;
         }
         if (saysRepeat) repeats += 1;
       }
     }
     // PINNED. A fall in `repeats` means the ordinary advice has gone missing;
-    // `pcv21Child` is the family this change speaks to.
-    expect(pcv21Child).toBeGreaterThan(0);
-    expect(repeats).toBeGreaterThan(0);
+    // the other two are the families this sentence speaks to.
+    // Measured 2026-10-29 over the whole grid; re-measure, never adjust to
+    // make a change pass. Before P3 the split was 264 / 0 / 748 — the 660
+    // too-young doses held the repeat sentence.
+    expect(pcv21Child).toBe(264);
+    expect(tooYoung).toBe(660);
+    expect(repeats).toBe(88);
   });
 });

@@ -512,6 +512,30 @@ function remedyIsAnotherProduct(result, product = REMEDY_PRODUCT) {
   return { ...result, remedyProduct: product };
 }
 
+// P3, OWNER DECISION 2026-10-29 — "Always PCV20".
+//
+// Five rows of her children's table say the remedy is PCV20 rather than
+// another dose of the same vaccine. Those rows are not transcribed anywhere in
+// this repo, so the question was put to her as a patient: Mia, 2, with a
+// cochlear implant, PCV15 on 1 June and a second PCV15 19 days later, thrown
+// out and told to "repeat this dose" — i.e. another PCV15. Offered "PCV20 or
+// PCV15", she chose **PCV20, whatever product was given**.
+//
+// WHAT IT REACHES. After W1 (2026-10-11) a dose rejected for TIMING no longer
+// gets the repeat sentence at all, so the only verdicts left holding it are
+// the four minimum-age ones: a conjugate below 6 weeks and a PPSV23 below 2
+// years, each dated and dateless. This applies to the two CONJUGATE ones. The
+// PPSV23 pair is left alone deliberately — her ruling names a conjugate, and a
+// child whose PPSV23 came at 18 months needs a PPSV23 at 2, not a PCV20.
+//
+// WHY A PCV20 KEEPS THE OLD WORDING. "Give a dose of PCV20 instead" reads as a
+// different product; when the dose thrown out was itself a PCV20, repeating it
+// IS giving PCV20. Same remedy, and the sentence that reads correctly for it is
+// the old one. So the field is attached only when the products differ.
+function remedyIsPcv20Unless(result, key) {
+  return key === REMEDY_PRODUCT ? result : remedyIsAnotherProduct(result);
+}
+
 // 'noncounting' — recorded, acknowledged, but excluded from the series (PCV7).
 function noncounting(reasons = [], reasonCites) { return withCites({ status: 'noncounting', reasons }, reasonCites); }
 
@@ -639,11 +663,11 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!dose.date) {
     // Dateless: current age is an upper bound on age at administration.
     if (ageMonths < minAgeM) {
-      return invalid(
+      return remedyIsPcv20Unless(invalid(
         [withMarker(`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
         `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${fmtMinAge(minAgeM)}.`,
         ageCites
-      );
+      ), key);
     }
     return adviseIfBeforeRecommendedAge(
       unknown([
@@ -664,11 +688,11 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     ? ageMeetsMinimumDays(ageAtDoseDays, minDays)
     : ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob });
   if (!oldEnough) {
-    return invalid(
+    return remedyIsPcv20Unless(invalid(
       [withMarker(`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
       `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`,
       ageCites
-    );
+    ), key);
   }
 
   // Age is settled; now the dose's timing, against the one rule table.

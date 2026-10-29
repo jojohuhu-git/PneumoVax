@@ -94,11 +94,34 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
   it('keeps "repeat this dose only" for a dose rejected for a reason OTHER than timing', () => {
     // Below the 6-week minimum age for PCV — not a timing-between-doses
     // rejection, so the old sentence is still the correct advice.
+    //
+    // ⚠ THE PRODUCT HERE IS LOAD-BEARING, changed from PCV13 on 2026-10-29.
+    // Her "Always PCV20" ruling (P3) sends every OTHER too-young conjugate to
+    // "give a dose of PCV20 instead", so a PCV13 no longer demonstrates W1's
+    // point. A too-young PCV20 still does: repeating it IS giving PCV20, so
+    // the remedy is unchanged and the repeat sentence is the one that reads
+    // correctly. W1's own claim — a non-timing rejection is a MISSING dose and
+    // never takes the "next dose is due" sentence — is what is asserted.
     const a = analyzeHistory('PCV', [
-      { date: '2026-01-10', product: 'PCV13' },
+      { date: '2026-01-10', product: 'PCV20' },
     ], 0, '2026-01-20', '2026-01-01');
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
     expect(first.reasons.join(' ')).toMatch(/repeat this dose only/);
+    // The W1 sentence it must NOT have taken.
+    expect(first.reasons.join(' ')).not.toMatch(/can be given from/);
+  });
+
+  it('...and a too-young PCV15 takes the PCV20 remedy instead (P3, 2026-10-29)', () => {
+    // The other half of the same baby's record: the dose is still missing, so
+    // it still gets repeat-style advice and not the "next dose" sentence — but
+    // the product named is PCV20.
+    const a = analyzeHistory('PCV', [
+      { date: '2026-01-10', product: 'PCV15' },
+    ], 0, '2026-01-20', '2026-01-01');
+    const first = a.perDose[0];
+    expect(first.status).toBe('invalid');
+    expect(first.reasons.join(' ')).toMatch(/give a dose of PCV20 instead/);
+    expect(first.reasons.join(' ')).not.toMatch(/can be given from/);
   });
 });

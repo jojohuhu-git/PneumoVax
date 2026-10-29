@@ -754,6 +754,72 @@ Guard: `regression-2026-10-26-pcv21-for-a-child-names-pcv20.test.js`, with contr
 dose only"*, a timing rejection still gets W1's sentence, and a grid sweep that no dose
 carries both sentences.
 
+### §I-REMEDY20 — Every rejected conjugate names PCV20 (OWNER DECISION 2026-10-29)
+
+This is P3, the item §I-REMEDY above deferred, and it **widens that section's scope** from
+PCV21 alone to every conjugate the app throws out for age.
+
+**Her five rows were never transcribed into this repo** — three handoffs in a row record
+only *"five rows say the remedy is PCV20, not another dose of the same vaccine"*, with no
+list of which rows. So the question was put to her as a patient instead, on 2026-10-29:
+
+> Mia, 2, with a cochlear implant, had PCV15 on 1 June and a second PCV15 on 20 June — only
+> 19 days later. The app throws out the June 20 dose and says *"repeat this dose"*, meaning
+> another PCV15. Five rows of your table say the remedy is PCV20 instead.
+
+Offered **"Always PCV20"**, **"PCV20 or PCV15"** or *"it depends — I'll resend the table"*,
+she chose **"Always PCV20"**: any conjugate dose the app throws out is replaced by PCV20,
+whatever product was given.
+
+**What the ruling reaches is narrower than it sounds, and the arithmetic is the reason.**
+`walk()` has exactly **one** sentence that tells a clinician to give the same vaccine again
+— *"repeat this dose only (do not restart the series)"* — and since W1 (2026-10-11) a dose
+rejected for **timing** no longer gets it: it takes *"the next dose in this series can be
+given from …"*, which names **no product at all** and leaves the product to the rec card. So
+the sentence survives on exactly four verdicts:
+
+| Verdict | Before | After |
+|---|---|---|
+| conjugate below its minimum age, dated | repeat this dose | **give a dose of PCV20 instead** |
+| conjugate below its minimum age, dateless | repeat this dose | **give a dose of PCV20 instead** |
+| PPSV23 below 2 years, dated | repeat this dose | unchanged |
+| PPSV23 below 2 years, dateless | repeat this dose | unchanged |
+
+**The PPSV23 pair is left alone deliberately.** Her ruling names a conjugate; a child whose
+PPSV23 came at 18 months needs a **PPSV23** once she is 2, and PCV20 is not a substitute for
+it. This is the "scope a ruling to the patients she worked" rule.
+
+**A PCV20 thrown out keeps the old wording, and that is not an exception.** *"Give a dose of
+PCV20 instead"* reads as a different product; when the dose thrown out was itself a PCV20,
+repeating it **is** giving PCV20 — the same clinical act. The remedy is PCV20 in both cases;
+only the word for it differs. So `remedyIsPcv20Unless(result, key)` attaches the field only
+when the products differ, and the grid sweep asserts a PCV20 is never told to give a PCV20
+"instead".
+
+**Measured over the whole grid, 2026-10-29** (re-measure, never quote from here):
+
+| | before | after |
+|---|---|---|
+| dose chips reading *"give a dose of PCV20 instead"* | 264 | **924** |
+| dose chips reading *"repeat this dose only"* | 748 | **88** |
+
+**660 dose chips moved**, every one from the repeat sentence to the PCV20 sentence, and
+**0 verdicts moved** — both corpora are byte-identical, because a dose rejected before is
+rejected now. The 88 that remain are the too-young PCV20s and the PPSV23 pair.
+
+**A judgement call, stated rather than buried.** A baby whose **PCV15** came four days too
+early is now advised a **PCV20**, where repeating the PCV15 would also have been clinically
+fine. That follows from her answer, which she gave with "PCV20 or PCV15" on the table in
+front of her.
+
+Guard: `regression-2026-10-29-rejected-conjugate-names-pcv20.test.js`. The 2026-10-26 sweep
+was **widened, not loosened** — it used to assert PCV20 advice *"only ever follows a
+PCV21"*, which became false on correct cards, so it now names both families and pins each
+count exactly (264 / 660 / 88). `regression-w1-too-soon-not-repeated.test.js`'s non-timing
+case changed product from PCV13 to **PCV20**, because that is now the only too-young
+conjugate that still demonstrates W1's point; a PCV15 case was added beside it for the new
+sentence.
+
 ---
 
 ## §J — Adult risk catalog (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`)
