@@ -1,3 +1,13 @@
+> # ⛔ SUPERSEDED — do not resume this queue
+>
+> **Replaced by [`handoff-2026-10-29-three-childrens-items-shipped.md`](handoff-2026-10-29-three-childrens-items-shipped.md).**
+> Its three named items were all built and merged in PR #93 on 2026-10-26: the PPSV23
+> anchor fix, P5 (the infant floors), and the PCV21 wording. **Two of its factual claims
+> are now known to be wrong** and are corrected in the new file — P5's *"38+28+28 = 94
+> exactly"* arithmetic, and the statement that the 6–18 block already anchored on the most
+> recent pneumococcal dose (it anchored on the first). Read the new handoff instead; this
+> one is kept only as the record of what was decided on 2026-10-25.
+
 # PneumoVax — Handoff after P1, the child conjugate floor (2026-10-25, desktop session)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
