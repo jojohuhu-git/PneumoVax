@@ -1,3 +1,13 @@
+> **⚠️ SUPERSEDED (2026-10-29, evening) — do not resume from this file.**
+> Its queue has moved on. **PR #95 was CLOSED UNMERGED, not merged**: the owner reversed
+> "always PCV20" the same day, because the patient the question was built on (Mia) turned
+> out not to be affected at all, and because CDC gives PCV15 and PCV20 the same 6-week
+> minimum age with no preference stated. Her "question 1" below (PCV15 beside PCV20 on the
+> card) is therefore ANSWERED — either is fine — and the three pinned questions are
+> answered too. Resume from
+> `docs/archive/handoff-2026-10-29-age-wording-and-the-eight-week-wait.md`, which is on
+> PR #96.
+
 # PneumoVax — Handoff after the PCV20 remedy shipped and two questions closed (2026-10-29, afternoon)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
