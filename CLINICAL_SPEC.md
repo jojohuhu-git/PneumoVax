@@ -948,11 +948,40 @@ repeated."* Same status, same due date, no other card.
 Hand-built only: the grid has no adult with two thrown-out childhood shots, so **0** verdicts and
 **0** rendered lines move on it. Guard: `regression-2026-10-31-adult-ivy-no-third-ppsv23.test.js`.
 
-**Not asked, not built:** an adult who has **already had a PCV15** (as an adult) beside the same
-two thrown-out shots. Their card orders *"PPSV23 (≥1 year after PCV15) — completes the series"*
-(≥8 weeks at 19–49 with an immunocompromising condition, cochlear implant or CSF leak), which is
-the third shot. The only way round it is a PCV20 or PCV21 after the PCV15, and no document has been
-read that says so — case (a) of the 2026-10-18 rule, so it goes to the owner with a source.
+### §C-P2-NOTHIRD for adults who already had a PCV15 (owner, 2026-10-31)
+
+**Ivy at 20 with a PCV15** (2026-09-20) beside the same two thrown-out shots. Her card ordered
+*"PPSV23 (≥8 weeks after PCV15) — completes the series"* — the third shot. The owner's ruling,
+quoting ACIP: *"PCV20 or PCV21 can be used per the MMWR for adults: For adults who have received
+PCV15 but have not completed their recommended pneumococcal vaccine series with PPSV23, 1 dose of
+PCV21 or PCV20 may be used if PPSV23 is not available."*
+
+**Read live 2026-10-31.** That sentence is footnote `*` in **mm7401a1** (ACIP 2025) and, word for
+word, in **mm7336a3** (ACIP 2024); in both it is attached to the "PPSV23*" of every *"None or PCV7
+only at any age"* row (≥50, 19–49 IC/CSF/cochlear, 19–49 chronic). CDC's Adult Notes say the same
+under *"PPSV23 not available"* — *"adults aged 19 years or older who received PCV15 but have not yet
+completed PPSV23 series, can complete the series with either 1 dose of PCV20 or 1 dose of PCV21 if
+they no longer have access to PPSV23"* — and so do the job aid's footnote `¶` and PneumoRecs'
+footnote 1. **None of the five states a timing for the stand-in dose.**
+
+**The timing is an OWNER CLINICAL DETERMINATION**, asked with Ivy: *"Use PPSV23's timing"* — the
+date the PPSV23 would have had. So the card keeps the PPSV23 card's status, interval and due date
+(Ivy: Nov 15, 2026, 8 weeks after the PCV15; a year at 19–49 chronic-only and at every 50+, with
+ACIP's 8-week option still named at 50+ for IC / cochlear / CSF) and only the vaccine moves:
+*"**Give 1 dose of PCV20 or PCV21** ≥8 weeks after the PCV15 dose, in place of the PPSV23; it
+completes the series. No further PPSV23: 2 PPSV23 doses have been given and neither counted."* and
+under "Why this", *"The timing is the PPSV23's: ACIP gives the PPSV23 ≥8 weeks after a PCV15, and no
+document states a separate timing for the PCV20 or PCV21 that replaces it."* The substitution cites
+mm7401a1's footnote and the job aid's; "completes" cites CDC's notes; the timing cites the PPSV23
+interval sentence. mm7401a1 goes back ON this card (the PPSV23 version leaves it off, as none of
+its sentences are mm7401a1's). The second chip reads *"It is not repeated."*
+
+**Unchanged:** a PCV20 or PCV21 already given after a PCV15 is never flagged, whatever the gap
+(`ADULT-PCV20-21-AFTER-PCV15-NO-INTERVAL`) — the ruling sets the ADVICE, not a floor. One
+thrown-out shot, or none: the PPSV23 is still owed (it is not a third). Only PCV15 reaches this:
+a PCV13, PCV20, PCV21 or PCV7 history beside the two shots already offers no PPSV23 (swept
+2026-10-31, ages 20/55/70 × four risk classes). Hand-built only, like the card above. Guard:
+`regression-2026-10-31-adult-pcv15-no-third-ppsv23.test.js`.
 
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **128 / 35,280** rendered
 lines against `main` (116 like the twin, 12 like Leo — the 2026-10-25 date-promise sweep's pinned

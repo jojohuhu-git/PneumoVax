@@ -108,6 +108,7 @@ describe('the field itself', () => {
       'adultPcv15ThenPpsv',       // printed identically in both adult blocks
       'adultPcv20or21Complete',   // its own words: "Adults aged 19 years and older"
       'adultPcv7Only',            // printed identically in both adult blocks
+      'adultPpsv23Unavailable',   // 2026-10-31, its own words: "adults aged 19 years or older who received PCV15"
       // C10-2 (2026-10-23). CDC's catch-up table draws no healthy/at-risk split
       // in its pneumococcal row — one row, one set of minimum intervals, for
       // every child it covers — and it says so in its own words: the dose-3-to-4
@@ -173,6 +174,7 @@ describe('the field itself', () => {
       // separate entry rather than a widened population, which is the whole
       // point of this list.
       'mmwrPcv13OnlyThenPcv',     // the same row, verbatim, in the >=50 and 19-49 chronic blocks
+      'mmwrPpsv23Unavailable',    // 2026-10-31, footnote * on the PCV15 row of all three adult blocks: "adults who have received PCV15"
       'mmwrPpsvOnlyThenPcv',      // the same row, verbatim, in all three adult blocks
       // FINDING K (2026-10-18). p2016 Table 4's row is headed "(any risk
       // condition)" in its own first column -- the document says so, where its

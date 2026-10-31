@@ -1151,7 +1151,9 @@ const NO_PRIOR_PCV_ROWS = new Set(['pedsIc6to18NoPcv', 'pedsRisk6to18NoPcv']);
 // Ivy grown up (20, no spleen, the same two shots, no PCV): "Same as a child:
 // PCV20/21 only". The adult no-history card registers its own PCV15-free
 // version here, because only its builder knows the interval and citation.
-const NO_PCV15_ALTERNATIVE = new WeakMap();
+// The PCV15-then-PPSV23 card registers its PPSV23-free version too (same day:
+// an adult who already had the PCV15 gets PCV20 or PCV21 in its place).
+const NO_THIRD_ALTERNATIVE = new WeakMap();
 function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   if (ppsvCount !== 0) return null;
   // No status test: with no PPSV23 counted, every one was thrown out (a
@@ -1234,11 +1236,12 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     })) };
   }
 
-  // Ivy grown up: the adult no-history card, at any adult age.
-  const adultCard = recs.find((x) => NO_PCV15_ALTERNATIVE.has(x));
+  // Ivy grown up: the adult no-history card, or the PCV15-then-PPSV23 card,
+  // at any adult age. Only one adult card is ever built.
+  const adultCard = recs.find((x) => NO_THIRD_ALTERNATIVE.has(x));
   if (adultCard) {
     const r = result('');
-    const swapped = NO_PCV15_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
+    const swapped = NO_THIRD_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
     return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
   }
   return null;
@@ -3239,7 +3242,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   // ── PCV15 only, no PPSV23 → INCOMPLETE: give PPSV23 ─────────────────
   if (pcv.hasPCV15 && !ppsvGiven) {
     const { dueToday, earliestNextDate } = ppsvDueState(pcv.lastDate);
-    return [rec({
+    const pcv15Card = rec({
       vaccine: 'PPSV23', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: `PPSV23 (≥${ppsvIntervalLabel} after PCV15) — completes the series`,
       dueToday, earliestNextDate,
@@ -3263,7 +3266,36 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         cite('jobAidPpsv23Unavailable'),
       ],
       refs: refsWithoutMmwr,
-    })];
+    });
+    // §C-P2-NOTHIRD for an adult who already had a PCV15 (OWNER RULINGS
+    // 2026-10-31). With two or more childhood PPSV23 shots, none counted, the
+    // PPSV23 above would be her THIRD. Her ruling quotes mm7401a1's footnote *:
+    // PCV20 or PCV21 "may be used if PPSV23 is not available". No document
+    // states when; shown Ivy at 20, she chose "Use PPSV23's timing" — so the
+    // date, status and interval are the PPSV23's, and only the vaccine moves.
+    // `noThirdPpsv23()` decides whether this version is used.
+    NO_THIRD_ALTERNATIVE.set(pcv15Card, ({ neither, third, detailGrey, greyCites }) => ({
+      ...pcv15Card,
+      vaccine: 'PCV',
+      doseLabel: `1 dose PCV (PCV20 or PCV21) ≥${ppsvIntervalLabel} after PCV15 — completes the series`,
+      brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
+      note: {
+        lead: `**Give 1 dose of PCV20 or PCV21** ≥${ppsvIntervalLabel} after the PCV15 dose, in place of the PPSV23 [c] [c]; it completes the series [c]. No further PPSV23: ${neither}.${shorterMinimumNote}`,
+        detail: `The timing is the PPSV23's: ACIP gives the PPSV23 ≥${ppsvIntervalLabel} after a PCV15 [c], and no document states a separate timing for the PCV20 or PCV21 that replaces it. A PPSV23 is not given: it would be ${third}.${detailGrey}`,
+      },
+      noteCites: [
+        cite('mmwrPpsv23Unavailable'),
+        cite('jobAidPpsv23Unavailable'),
+        cite('adultPpsv23Unavailable'),
+        ...shorterMinimumCites,
+        cite(ppsvIntervalCite),
+        ...greyCites,
+      ],
+      // All three adult documents state a sentence on this card; the PPSV23
+      // version above leaves mm7401a1 off, as it states none of that card's.
+      citations: resolveRefs(adultRefs()),
+    }));
+    return [pcv15Card];
   }
 
   // ── PPSV23 given, no PCV15/PCV13 (no prior PCV OR unknown-product PCV) →
@@ -3561,7 +3593,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   // built here because only this block knows the interval and its citation.
   // The PCV15 sentence keeps its own citations, as the reason. The 8-week
   // option at 50+ goes with it: it is about a PCV15 no longer offered.
-  NO_PCV15_ALTERNATIVE.set(noHistoryCard, ({ neither, third, detailGrey, greyCites }) => ({
+  NO_THIRD_ALTERNATIVE.set(noHistoryCard, ({ neither, third, detailGrey, greyCites }) => ({
     ...noHistoryCard,
     doseLabel: '1 dose PCV (PCV20 or PCV21)',
     brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
