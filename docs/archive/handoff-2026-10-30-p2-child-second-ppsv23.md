@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-10-31** by `handoff-2026-10-31-noah-ava-maya-rulings.md`. Its three owner
+> questions (Ava widening, Ruling D on a PPSV23, Group B) were all answered and built. Do not resume
+> from this file.
+
 # PneumoVax — Handoff after P2, a child's second PPSV23 (2026-10-30)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
