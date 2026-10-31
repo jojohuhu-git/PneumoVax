@@ -49,6 +49,7 @@ import { cite } from '../data/refs.js';
 // drift guard that fails if one appears here.
 import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
+import { hasIC } from '../data/riskFactors.js';
 import { evaluateDoseInterval } from './doseIntervalRules.js';
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
 // dose. Dropped HERE, at the walk, so that no caller can count one by
@@ -1100,6 +1101,60 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       }));
       // Validly given, with a real date — worth anchoring the next dose's gap
       // check, same as an invalid dose does.
+      anchorOn(dose);
+      return;
+    }
+
+    // P2 (2026-10-30, OWNER RULING on "Ava"): a CHILD with no immunocompromising
+    // condition is owed ONE PPSV23. CDC's non-immunocompromising list never
+    // mentions a second (child-adolescent-notes.html, read live 2026-10-30), so
+    // a second one given inside five years is an EXTRA dose — her words for
+    // it, from the extra infant PCV dose of 2026-10-23: not needed, not
+    // harmful, not counted, nothing to repeat. Before P2 the dose was thrown
+    // out as "too soon" and the chip pointed at another one five years later,
+    // beside a card that said the series was complete.
+    //
+    // THREE LIMITS, each deliberate:
+    //   • an EARLIER PPSV23 must have COUNTED — guaranteed twice over: the
+    //     row only measures from a counted dose (`anchorCounted: true`; a
+    //     repeat of a rejected one is `CHILD-PPSV23-AFTER-INVALID-PPSV23`, a
+    //     floor), and `kept.length` is checked here as well, so a child whose
+    //     first PPSV23 was thrown out never has her only real dose called
+    //     extra.
+    //   • only when `CHILD-PPSV23-AFTER-PPSV23` fired — more than CDC's 4-day
+    //     grace early, which is exactly the dose that used to be THROWN OUT
+    //     (the row keeps the grace: owner decision 2026-10-30). A non-IC
+    //     child's on-time second PPSV23 is just as unneeded, but she ruled on
+    //     the early one; widening is her call (§C-P2).
+    //   • `hasIC` is the engine's one IC test. An immunocompromised child's
+    //     early second dose COUNTS instead (her ruling of 2026-10-29), which the
+    //     row's own recommendation note already says.
+    //
+    // AND A THIRD (2026-10-30, found by the suite's sickle-cell patient: PPSV23
+    // at 2, 9 and 11). An immunocompromised child with TWO counted PPSV23 doses
+    // is finished with PPSV23 — CDC's child notes print "dose 2 PPSV23" three
+    // times and no third anywhere. Her ruling counts an early SECOND dose; an
+    // early third is the same extra dose, with its own reason.
+    const icChild = hasIC(riskIds);
+    if (vaccine === 'PPSV23' && !isAdultDose && kept.length >= (icChild ? 2 : 1)
+      && result.earlyAdvisory && result.intervalRuleId === 'CHILD-PPSV23-AFTER-PPSV23') {
+      // Drop the row's own "Counted; never give a third" sentence and its
+      // "Why this" — both say the dose counts, which is no longer true here.
+      // The row's are the LAST of each, as in the adult block above.
+      const { earlyAdvisory, intervalRuleId, reasons: rowReasons, whys: rowWhys, ...rest } = result;
+      const otherWhys = (rowWhys ?? []).slice(0, -1);
+      perDose.push(addNote({
+        ...rest,
+        ...(otherWhys.length ? { whys: otherWhys } : {}),
+        effectiveDoseNum: null,
+        extraDose: true,
+        reasons: [
+          ...rowReasons.slice(0, -1),
+          icChild
+            ? `Not needed: two PPSV23 doses have already been given (${fmtDate(kept[0].date)} and ${fmtDate(kept[1].date)}), and CDC never gives a third. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.`
+            : `Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition; the first was given on ${fmtDate(kept[0].date)}. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.`,
+        ],
+      }));
       anchorOn(dose);
       return;
     }

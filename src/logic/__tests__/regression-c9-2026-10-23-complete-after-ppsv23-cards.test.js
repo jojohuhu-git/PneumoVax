@@ -215,7 +215,16 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
     expect(chipShorts(card)).not.toContain('immunize.org p2016');
   });
 
-  it('CASE 2: no immunocompromised child can reach the 24\u201371-month card at all', () => {
+  it('CASE 2: an immunocompromised child CAN now reach the 24\u201371-month card, and is worded as one', () => {
+    // ⚠️ P2 (2026-10-30) MADE THIS REACHABLE — the event this guard existed to
+    // catch. An immunocompromised child's early second PPSV23 now COUNTS
+    // (owner ruling 2026-10-29), so the arithmetic below no longer holds and
+    // 43 of the combinations searched land on this card. The card was given an
+    // IC wording in the same change (recommend.js, "Noah"), so this test now
+    // asserts the opposite of its old claim and pins the count, and the
+    // wording every one of them gets. The old reasoning is kept below, because
+    // it is why the wording did not exist until today.
+    //
     // THE CORRECTION. An earlier draft of this change added an `isIC` wording
     // branch to that card, on the premise that its gate
     // (`isIC ? ppsv.count >= 2 : ppsv.count >= 1`) let an IC child through to a
@@ -247,12 +256,20 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
               { product: 'PPSV23', date: addCalendarMonths(dob, a2) },
             ],
           });
-          if ((r.recs ?? []).some((rec) => FAMILIES.case2catchup.test(noteOf(rec)))) reachable++;
+          const hit = (r.recs ?? []).find((rec) => FAMILIES.case2catchup.test(noteOf(rec)));
+          if (hit) {
+            reachable++;
+            expect(noteOf(hit)).toMatch(/^At-risk immunocompromised child 24–71 months/);
+            expect(noteOf(hit)).not.toMatch(/non-immunocompromising/);
+            expect(hit.noteCites.map((c) => c.key)).toEqual(['pedsIcPcv20orPpsv23']);
+          }
         }
       }
     }
-    expect(reachable).toBe(0);
-    // And in the grid, every card of this family is a non-IC patient.
+    expect(reachable).toBe(43);
+    // And in the GRID every card of this family is still a non-IC patient: the
+    // grid dates no two PPSV23 doses inside five years, so it cannot build the
+    // 43 above. That is why they are asserted here by exhaustive search.
     const IC = new Set(['asplenia', 'hiv']);
     const icCards = FOUND.case2catchup.filter(({ c }) => c.input.riskIds.some((x) => IC.has(x)));
     expect(icCards.length).toBe(0);

@@ -272,6 +272,13 @@ function lastOf(list) {
 //                 shorterMinimum. It is NOT an inline age test deciding whether
 //                 a rule may bite — that was the S14-RC root cause. A row that
 //                 needs to speak only to one age band declares it here.
+//   anchorCounted true  → only when the anchor dose COUNTED
+//                 false → only when it did NOT (it was set aside)
+//                 undefined → regardless
+//                 Added by P2 (2026-10-30) so one pair of doses can get two
+//                 answers: a second PPSV23 after a counted first is her P2
+//                 ruling (count it), a repeat after a rejected one is Ruling D
+//                 (space it from the dose given, or it does not count).
 //   interval      { days } | { months } | { daysFrom: fn(anchor, ctx) }
 //   grace         does CDC's 4-day grace apply? (floors: yes. recommendations:
 //                 no — the grace governs whether a dose that missed a MINIMUM
@@ -391,12 +398,79 @@ export const DOSE_INTERVAL_RULES = [
     vaccine: 'PPSV23',
     products: null,
     from: 'prevSameStream',
+    // Only after a PPSV23 that COUNTED. A repeat of a rejected one is the next
+    // row's, and stays a floor (Ruling D) — P2's rulings are about a SECOND
+    // dose, and a dose after a set-aside first is not one.
+    anchorCounted: true,
+    interval: { months: PPSV23_REVACC_MIN_MONTHS },
+    // What the rules page and CLINICAL_SPEC.md §K say happens — in words,
+    // because the enforcement alone ("Counts, with a note") is untrue of Ava.
+    ifShorter: {
+      short: 'Immunocompromised: counts, with a note. Otherwise: an extra dose, not counted',
+      means: 'For a child with an immunocompromising condition the dose counts and the app notes the shorter gap — a third PPSV23 is never given. For any other child a second PPSV23 is never needed, so it is recorded as an extra dose: not harmful, not counted, nothing to repeat.',
+    },
+    // P2 (2026-10-30): a RECOMMENDATION, no longer a floor — the adult twin's
+    // relaxation of 2026-10-25 (`ADULT-PPSV23-AFTER-PPSV23`), run on the child
+    // row. OWNER RULING 2026-10-29: a 2nd PPSV23 inside 5 years to an
+    // immunocompromised child COUNTS, and she is never offered a third. As a
+    // floor this row asserted that an early dose stops counting, which CDC
+    // does not state; as a recommendation it asserts only CDC's interval,
+    // which it does — so the authority stays CDC's.
+    //
+    // A child with NO immunocompromising condition is never owed a second
+    // PPSV23 at all, so for her this row's note is replaced by validate.js's
+    // extra-dose sentence (OWNER RULING 2026-10-30, on Ava). The row still
+    // fires for both: whether a second PPSV23 was indicated is the risk
+    // class's question, not the interval's.
+    //
+    // ⚠ THE ONE RECOMMENDATION ROW THAT KEEPS CDC'S 4-DAY GRACE — OWNER
+    // DECISION 2026-10-30, and the floor⇔grace rule's only exception (pinned
+    // by name in rule-docs-match-code). Without it the line between "on time"
+    // and "early" moved: the test grid dates a second PPSV23 two days short of
+    // five years, which counted silently on main, and dropping the grace moved
+    // 708 of 17,016 patients — 22 of them ADULTS whose card changed because of
+    // a PPSV23 given in childhood. Shown that, she chose to keep the grace: a
+    // dose up to 4 days early is on time, as it was, and only a dose that used
+    // to be THROWN OUT gets the new answer. 96 move with it, all one family
+    // (see recommend.js, "Sofia").
+    grace: true,
+    enforcement: 'recommendation',
+    authority: 'CDC',
+    source: 'CDC Child & Adolescent Schedule Notes, pneumococcal, immunocompromising conditions: '
+      + '"If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23." '
+      + '(read live 2026-10-30). The non-immunocompromising list gives one PPSV23 and no second. '
+      + 'OWNER RULINGS 2026-10-29 (immunocompromised: count, never a third) and 2026-10-30 '
+      + '(not immunocompromised: an extra dose). See CLINICAL_SPEC.md §K and §C-P2.',
+    message: (ctx, anchor, min) => ({
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} advised between PPSV23 doses. **Counted; never give a third.**`,
+      why: `CDC's child schedule gives an immunocompromised child a second PPSV23 at least ${min.words} after the first, and never a third. The dose counts because setting it aside would only invite a third PPSV23.`,
+    }),
+  },
+  {
+    // P2 (2026-10-30). The old floor, kept EXACTLY as it was on main, for the
+    // one case her P2 rulings do not reach: a PPSV23 given inside five years of
+    // an earlier PPSV23 that did NOT count (say, given under 8 weeks after a
+    // PCV). That later dose is a REPEAT of a rejected dose, not a second dose,
+    // and RULING D (2026-10-23) governs it: "the repeat dose should be spaced
+    // from the invalid dose by the minimum interval. This should be followed."
+    // Without this row the recommendation above would have counted it with a
+    // note saying "never give a third" — on what is the child's FIRST counted
+    // PPSV23.
+    id: 'CHILD-PPSV23-AFTER-INVALID-PPSV23',
+    what: 'A PPSV23 dose given after an earlier PPSV23 that did not count, under the child schedule',
+    rulebook: 'child',
+    vaccine: 'PPSV23',
+    products: null,
+    from: 'prevSameStream',
+    anchorCounted: false,
     interval: { months: PPSV23_REVACC_MIN_MONTHS },
     grace: true,
     enforcement: 'floor',
     authority: 'CDC',
     source: 'CDC Child & Adolescent Schedule Notes, pneumococcal, immunocompromising conditions: '
-      + '"If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23."',
+      + '"If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23." '
+      + 'Measured from the dose given, not the dose that counted: ACIP General Best Practices, "The repeat '
+      + 'dose should be spaced after the invalid dose by the recommended minimum interval" (RULING D, 2026-10-23).',
     message: (ctx, anchor, min) => ({
       reasons: [`Given less than ${min.words} after the previous PPSV23 dose — a second PPSV23 is given at least ${min.words} after the first.`],
       detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
@@ -1177,8 +1251,17 @@ function ruleApplies(rule, ctx, book) {
 // PCV13" stops describing someone once they have had a PCV15 as well. Checked
 // after the anchor resolves, because it is a fact about the anchor, not the
 // judged dose.
-function anchorAllowed(rule, anchor) {
-  return !rule.anchorMustBeProduct || anchor.product === rule.anchorMustBeProduct;
+function anchorAllowed(rule, anchor, ctx) {
+  if (rule.anchorMustBeProduct && anchor.product !== rule.anchorMustBeProduct) return false;
+  if (rule.anchorCounted != null) {
+    // The anchor is a fresh {date, ageAtDose, product} record (validate.js
+    // `anchorOn`), so "did it count" is answered by DATE against this stream's
+    // counting doses — the list `ctx` already carries for every other row.
+    const own = rule.vaccine === 'PPSV23' ? ctx.priorPpsv23 : ctx.priorPcv;
+    const counted = (own ?? []).some((d) => d.date === anchor.date);
+    if (counted !== rule.anchorCounted) return false;
+  }
+  return true;
 }
 
 // W1 (2026-10-11): the earliest date a floor's dose could have validly been
@@ -1478,7 +1561,7 @@ export function evaluateDoseInterval(ctx) {
     if (!ruleApplies(rule, ctx, book)) continue;
     const anchor = ANCHORS[rule.from](ctx);
     if (!anchor || !anchor.date || anchor.date > ctx.doseDate) continue;
-    if (!anchorAllowed(rule, anchor)) continue;
+    if (!anchorAllowed(rule, anchor, ctx)) continue;
 
     // A matching never-flagged row stops the walk — that is its whole job.
     if (rule.enforcement === 'none') return null;

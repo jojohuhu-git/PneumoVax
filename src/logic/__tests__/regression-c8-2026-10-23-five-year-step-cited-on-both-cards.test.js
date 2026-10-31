@@ -97,7 +97,11 @@ describe('C8 — the five-year step cites its row on both cards', () => {
     // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
     // counting conjugate and her card family changes with it. The invariant
     // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(cards).toBe(1170);
+    // was 1170; -96, 2026-10-30 (P2, OWNER RULING on "Sofia"): an IC child
+    // with TWO counted PPSV23 doses is never offered a third, so the 96
+    // 18-year-olds who had both before their conjugate keep the PCV20 card and
+    // lose the "2nd PPSV23" alternative. CLINICAL_SPEC.md §C-P2.
+    expect(cards).toBe(1074);
     expect([...strays.entries()]).toEqual([]);
   });
 
@@ -111,7 +115,10 @@ describe('C8 — the five-year step cites its row on both cards', () => {
         mismatched.push(`${c.key}: PCV20 cites ${rowOf(pcv20)}, alternative cites ${rowOf(alt)}`);
       }
     }
-    expect(compared).toBeGreaterThan(500);
+    // P2 (2026-10-30): 585 -> 489 pairs — the 96 Sofias have no alternative
+    // card left to compare. Pinned exactly, not floored, so that a family
+    // quietly losing its alternative shows up here as a number.
+    expect(compared).toBe(489);
     expect(mismatched.slice(0, 5)).toEqual([]);
   });
 
@@ -131,7 +138,13 @@ describe('C8 — the five-year step cites its row on both cards', () => {
       // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
       // counting conjugate and her card family changes with it. The invariant
       // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-      expect(tally.get(`${label}|pedsIcPcv13AndPpsvAt6`), label).toBe(486);
+      //
+      // P2 (2026-10-30): the two cards no longer move together on this row.
+      // 96 of the 486 are Sofias (two counted PPSV23 doses, then a conjugate):
+      // they keep the PCV20 card and lose the alternative, which would have
+      // been a third PPSV23. Every one quotes this same row.
+      expect(tally.get(`${label}|pedsIcPcv13AndPpsvAt6`), label)
+        .toBe(label === PCV20_CARD ? 486 : 390);
       expect(tally.get(`${label}|pedsIcBefore6NoPcv20At6to18`), label).toBe(87);
       expect(tally.get(`${label}|pedsIcPcv20orPpsv23`), label).toBe(12);
     }

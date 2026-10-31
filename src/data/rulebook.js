@@ -172,6 +172,14 @@ const ENFORCEMENT_SHORT = {
   none: 'Never flagged',
 };
 
+/**
+ * What happens to a dose given inside the gap. A row may state it in its own
+ * words (`ifShorter`) when the enforcement alone would say something untrue —
+ * P2's child PPSV23 row counts the dose for an immunocompromised child and
+ * calls it an extra dose for any other, so "Counts, with a note" is half true.
+ */
+export function ruleIfShorter(r) { return r.ifShorter?.short ?? ENFORCEMENT_SHORT[r.enforcement]; }
+
 /** Which patients a row is for. */
 export function ruleWho(r) {
   if (r.rulebook === 'child') return `Child (under ${monthsInWords(ADULT_SCHED_MIN_M)})`;
@@ -182,10 +190,10 @@ export function ruleWho(r) {
 /**
  * Which risk group, when a row has one.
  *
- * Only TWO of the eighteen rules read the risk conditions at all, and both are
- * adult PPSV23-after-PCV15 rows. Saying "Any" everywhere else is not padding:
+ * Only SIX of the twenty rules read the risk conditions at all, and every one
+ * is an adult PPSV23-after-PCV13/15 row (re-measured 2026-10-30). Saying "Any" everywhere else is not padding:
  * it is the answer to "does my patient\'s asplenia change this interval", and
- * for sixteen rows it is no.
+ * for fourteen rows it is no.
  */
 export function ruleRisk(r) {
   if (r.shorterMinimum === true || r.shorterIsTheAdvice === true) {
@@ -221,7 +229,18 @@ const FROM_WORDS = {
   lastPcv15: 'the most recent PCV15 that counted',
   lastPpsv23: 'the most recent PPSV23 that counted',
 };
-export function ruleFrom(r) { return FROM_WORDS[r.from] ?? r.from; }
+// P2 (2026-10-30): one pair of doses, two rows, split on whether the earlier
+// dose COUNTED (`anchorCounted`). Without these words the page printed the two
+// rows identically and a reader could not tell which one applied.
+export function ruleFrom(r) {
+  if (r.from === 'prevSameStream' && r.anchorCounted === true) {
+    return 'the previous dose of the same vaccine, when that dose counted';
+  }
+  if (r.from === 'prevSameStream' && r.anchorCounted === false) {
+    return 'the previous dose of the same vaccine, when that dose did not count';
+  }
+  return FROM_WORDS[r.from] ?? r.from;
+}
 
 const weeksWords = (d) => (d % 7 === 0 ? `at least ${d / 7} weeks` : `at least ${d} days`);
 const monthsWords = (m) => (m % 12 === 0
@@ -294,8 +313,8 @@ export const INTERVAL_TABLE = DOSE_INTERVAL_RULES.map((r) => ({
   from: ruleFrom(r),
   gap: ruleGap(r),
   grid: childPcvGrid(r),
-  ifShorter: ENFORCEMENT_SHORT[r.enforcement],
-  ifShorterMeans: ENFORCEMENT_MEANS[r.enforcement],
+  ifShorter: ruleIfShorter(r),
+  ifShorterMeans: r.ifShorter?.means ?? ENFORCEMENT_MEANS[r.enforcement],
   enforcement: r.enforcement,
   authority: r.authority ?? null,
   authorityMeans: r.authority === 'OWNER'
