@@ -510,20 +510,23 @@ baby's series too.
 
 A card may quote another group's rule **deliberately** — to state a boundary, or to say what
 the patient is not — via `cite(key, { aboutAnotherGroup: 'why' })`. There are exactly four
-(`adultRoutine50`, `adultBothNotAt65`, `cdcChildSpecialSituations`, `immPCV7`) and the set is
-pinned by name, as is the set of sources spanning more than one group. **Never widen a
+(`adultRoutine50`, `adultBothNotAt65`, `cdcChildSpecialSituations`, `immPCV7`), plus the four
+"at 19" rows C13 added on 2026-10-30 (§B-AT19), and the set is pinned by name, as is the set of sources spanning more than one group. **Never widen a
 source's `population` to make a wrong quote legal** — that is the one mutation that made the
 sweep go quiet, which is why both lists are pinned. Fix the call site instead.
 
-**One of the four now crosses the CHILD/ADULT line, and it is the only card in the app that
-does** (C12, 2026-10-29). The healthy 5–18 card ends with *"Re-evaluate at age 50, when
+**Adult sources on CHILD cards are allowed in exactly two places** — C12's age-50 line
+(2026-10-29) and C13's "at 19" lines on the four Group B cards (2026-10-30, `CLINICAL_SPEC.md`
+§B-AT19). The healthy 5–18 card ends with *"Re-evaluate at age 50, when
 routine pneumococcal vaccination begins for every adult"* — the owner's request — and cites
 `adultRoutine50`, an **adult** source on a **child's** card. That is the N6 rule crossed
 deliberately: the sentence is ABOUT the adult schedule, so only the adult schedule can carry
 it. **N6's own sweep cannot see this** — it ticks one risk condition at a time and so never
 reaches the healthy card — so C12's guard holds the line instead: no OTHER child card may
 carry an adult source. Never answer a future "an adult source is on a child's card" by
-widening N6; add the card to that guard's exception, or fix the call site.
+widening N6; add the card to that guard's exception, or fix the call site. C13's lines are
+a second reading of the adult rules, held to the first by
+`regression-c13-2026-10-30-what-happens-at-19.test.js` (every card run forward to 19).
 
 ### The App Advises And Grades By One Number — CDC Catch-up Table 2
 **OWNER DECISION 2026-10-23, and it REVERSES owner decision 2 of 2026-10-11.** A PCV dose

@@ -222,10 +222,11 @@ alike, and that is the whole rule — **the line goes only where 50 is really th
 | Group | Families / cards | What the app does at 19 and at 50 | Disposition |
 |---|---|---|---|
 | **A — healthy** | *Not indicated (healthy 5–18y)* 1,584; *PCV series complete* (healthy 24–59 mo) 12 | 19: nothing indicated. **50: a dose is due.** | **The line, on both** |
-| **B — at-risk** | *Complete (PCV13 + PPSV23 at/after 6)* 450; *unrecorded-product PCV + PPSV23 at/after 6* 70; *at-risk catch-up done* 15; *PCV series + PPSV23* 5 — **640** | **19: a dose is due** (adult special-situations row), and again at 50 | **PARKED by the owner** |
+| **B — at-risk** | *Complete (PCV13 + PPSV23 at/after 6)* 450; *unrecorded-product PCV + PPSV23 at/after 6* 70; *at-risk catch-up done* 15; *PCV series + PPSV23* 5 — **540** (the "640" first written here added its own four counts wrong) | **depends on the group — see §B-AT19** | **DECIDED 2026-10-30: one line per group (§B-AT19)** |
 | **C — complete for life** | *includes PCV20* 944; *PCV15 + PPSV23 at/after 6* 290; *PCV before age 6 + PPSV23* 145 — **1,379** | complete at 19 and at 50 | **No line — nothing is ever due** |
 
-⚠ **GROUP B IS AN OPEN OWNER QUESTION, NOT A GAP TO TIDY.** *Maya — 18, cochlear implant,
+⚠ **GROUP B WAS PARKED, THEN DECIDED THE SAME DAY — see §B-AT19 below.** What follows is the
+record of why it was parked. *Maya — 18, cochlear implant,
 PCV13 at 7y11m, PPSV23 at 12y11m* — reads *"no further doses of any PCV or PPSV23 are
 indicated"*, and one year later the app says *"Due today: PCV20 or PCV21 ≥5 years after the
 last pneumococcal dose"*. Both are correct: the paediatric schedule does finish her, and the
@@ -242,6 +243,41 @@ the next card to earn it must be one whose patient, run forward, really does not
 never prose. Guard:
 `regression-c12-2026-10-29-last-citation-and-the-age-50-note.test.js`; C9's guard keeps its
 now-reversed line as the record of the reversal.
+
+### §B-AT19 — Group B: each card says what the adult schedule does at 19 (owner, 2026-10-30)
+
+**OWNER RULING 2026-10-30, "One line per group".** Before she was asked, all 540 Group B
+cards were run forward to 19 in the engine. They do not share one answer, and that finding —
+not the handoff's "a dose is due at 19" — is what she decided on:
+
+| Group | Cards | What the adult card says at 19 | The line on the child's card | Cited to |
+|---|---|---|---|---|
+| (1) cochlear implant / CSF leak, one PPSV23 | 156 | PCV20 or PCV21 ≥5 years after the last dose | *"At 19, the adult schedule gives 1 dose of PCV20 or PCV21, at least 5 years after the last pneumococcal dose."* | CDC Adult Notes (`adultIc1949BothPcv13Ppsv`) |
+| (2) chronic condition only | 282 | No dose now — review at age 50 | *"At 19, the adult schedule gives no dose now; re-evaluate at age 50."* | CDC Adult Notes (`adultChronicOnlyReviewAt50`) |
+| (3) cochlear implant / CSF leak, **two** PPSV23 received | 32 | Review at 50 — or PCV20 or PCV21 ≥5 years | *"At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21 at least 5 years after the last pneumococcal dose."* | ACIP 2025 (`mmwrIc1949TwoPpsv`) — CDC's notes give only the dose |
+| (4) a conjugate of unrecorded product | 70 | PCV15, PCV20 or PCV21 ≥1 year after the PPSV23 | *"At 19, because the earlier conjugate's product is not recorded, the adult schedule gives 1 dose of PCV15, PCV20 or PCV21, at least 1 year after the PPSV23."* | CDC Adult Notes (`adultPpsvOnly1949`) |
+
+All four sentences read live 2026-10-30 (CDC adult notes, accordions open, each exactly
+once; mm7401a1's row exactly once). Each is an adult row on a child's card, so each is a
+declared `aboutAnotherGroup` cross-reference, pinned by name.
+
+**(3) counts PPSV23 doses RECEIVED** (`ppsv.given`), an extra dose included — the count
+ACIP's adult rows read. A non-IC child's second PPSV23 is now an extra dose on her own card
+(§C-P2-ONTIME), and she is still a two-PPSV23 adult at 19. Reading the effective count there
+put the one-dose line on those 32; a mutation proves it.
+
+**Judgements within her ruling, dose unchanged:**
+- The at/after-6 card's label is built from the product, so the same template makes
+  *"Complete (PCV15 + PPSV23 at/after age 6)"* — Group **C**, complete for life. It gets no
+  line; only the PCV13 and unrecorded-product labels she was shown do.
+- Only the non-immunocompromised branches carry a line. The IC twin of the "at-risk
+  catch-up done" card (reachable since P2, 0 grid patients) was not in her nine families.
+
+**THIS IS A SECOND READING OF THE ADULT RULES** (`atNineteen()` in `recommend.js`). It is held
+to the first by `regression-c13-2026-10-30-what-happens-at-19.test.js`, which runs **every**
+card carrying a line forward to 19 and fails if the adult card says something else — and
+pins the four counts exactly. Measured: 540 cards gained a line and nothing else changed
+(`proseDiff`); **0** verdicts moved in either corpus; 0 uncredited citation pairs.
 
 ### What "completed by 24 months" means — FINDING M, 2026-10-22
 
