@@ -924,11 +924,35 @@ thrown out here, because the adult rows count an adult's own PPSV23 with a note.
 against `main`: **0** verdicts, **0** record-problem rows, **88** grid patients, all
 19-year-olds. Guard: `regression-2026-10-31-adult-chip-points-to-the-later-ppsv23.test.js`.
 
-**Not asked, not built:** an adult whose two childhood PPSV23 shots were BOTH too young. The
-first now points to the second; the second still reads *"repeat this dose only"*, beside a
-card offering PCV20, PCV15 or PCV21. For a child, her Ivy ruling gives PCV20 only and no third
-shot (§C-P2-NOTHIRD); for an adult, PCV15 → PPSV23 is a real path, so the sentence may be
-right. Hand-built only: the grid has no such adult.
+**And Ivy grown up** (same night, §C-P2-NOTHIRD for adults below): the second of two thrown-out
+childhood shots now reads *"It is not repeated."*
+
+### §C-P2-NOTHIRD for adults — "Ivy, grown up" (owner, 2026-10-31)
+
+**Ivy at 20**, no spleen, no PCV on record, PPSV23 at 13 and 20 months — both thrown out for
+being under 2. Her card offered *"Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen,
+follow with PPSV23 ≥8 weeks later"* — after a PCV15, her **third** PPSV23 shot — and her second
+chip said *"repeat this dose only"*. Asked whether to treat her as the child Ivy ruling does, the
+owner chose **"Same as a child: PCV20/21 only"**, at every adult age.
+
+The adult no-history card, for an adult with two or more PPSV23 shots none of which counted (the
+child rule's own test, `noThirdPpsv23()`): *"**Give 1 dose of PCV20 or PCV21**; either completes
+the series alone. No further PPSV23: 2 PPSV23 doses have been given and neither counted."* and
+under "Why this", *"PCV15 is not offered: after it a PPSV23 would be owed ≥<interval> later — a
+third PPSV23 shot."* The PCV15 sentence keeps its own citations (the interval's), as the reason.
+At 50+ the 8-week option goes with it — it is about a PCV15 no longer offered — and CDC's 50+
+routine row stays on the instruction. A repeat thrown out by the 8-week repeat rule after a
+too-young first dose gets the grey-area note, as for a child. The second chip: *"It is not
+repeated."* Same status, same due date, no other card.
+
+Hand-built only: the grid has no adult with two thrown-out childhood shots, so **0** verdicts and
+**0** rendered lines move on it. Guard: `regression-2026-10-31-adult-ivy-no-third-ppsv23.test.js`.
+
+**Not asked, not built:** an adult who has **already had a PCV15** (as an adult) beside the same
+two thrown-out shots. Their card orders *"PPSV23 (≥1 year after PCV15) — completes the series"*
+(≥8 weeks at 19–49 with an immunocompromising condition, cochlear implant or CSF leak), which is
+the third shot. The only way round it is a PCV20 or PCV21 after the PCV15, and no document has been
+read that says so — case (a) of the 2026-10-18 rule, so it goes to the owner with a source.
 
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **128 / 35,280** rendered
 lines against `main` (116 like the twin, 12 like Leo — the 2026-10-25 date-promise sweep's pinned

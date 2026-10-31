@@ -1147,6 +1147,11 @@ const NO_PRIOR_PCV_ROWS = new Set(['pedsIc6to18NoPcv', 'pedsRisk6to18NoPcv']);
 // `duplicateEntry()` does not label the twin of a dose that did not count.
 // Undated rows never reach here — they are not walked into `perDose` — so a
 // clause for them was found unreachable by mutation and removed.
+//
+// Ivy grown up (20, no spleen, the same two shots, no PCV): "Same as a child:
+// PCV20/21 only". The adult no-history card registers its own PCV15-free
+// version here, because only its builder knows the interval and citation.
+const NO_PCV15_ALTERNATIVE = new WeakMap();
 function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   if (ppsvCount !== 0) return null;
   // No status test: with no PPSV23 counted, every one was thrown out (a
@@ -1227,6 +1232,14 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
       },
       noteCites: [...c.noteCites, ...greyCites],
     })) };
+  }
+
+  // Ivy grown up: the adult no-history card, at any adult age.
+  const adultCard = recs.find((x) => NO_PCV15_ALTERNATIVE.has(x));
+  if (adultCard) {
+    const r = result('');
+    const swapped = NO_PCV15_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
+    return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
   }
   return null;
 }
@@ -3500,7 +3513,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
 
   // ── None / unknown / PCV7-only → start a PCV ────────────────────────
   // (PCV7-only is handled by validate.js dropping PCV7 → pcv.count===0 here.)
-  return [rec({
+  const noHistoryCard = rec({
     vaccine: 'PCV', status: anyRisk && !isOlderAdult ? 'risk-based' : 'due',
     doseLabel: '1 dose PCV (PCV20, PCV15, or PCV21)',
     dueToday: true, earliestNextDate: null,
@@ -3540,7 +3553,33 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       cite('adultPcv20or21Complete'),
     ],
     refs,
-  })];
+  });
+  // §C-P2-NOTHIRD for adults ("Ivy, grown up", OWNER RULING 2026-10-31): the
+  // same card with PCV15 taken off, for an adult with two or more childhood
+  // PPSV23 shots none of which counted — after a PCV15 a PPSV23 would be
+  // owed, her THIRD shot. `noThirdPpsv23()` decides whether it is used; it is
+  // built here because only this block knows the interval and its citation.
+  // The PCV15 sentence keeps its own citations, as the reason. The 8-week
+  // option at 50+ goes with it: it is about a PCV15 no longer offered.
+  NO_PCV15_ALTERNATIVE.set(noHistoryCard, ({ neither, third, detailGrey, greyCites }) => ({
+    ...noHistoryCard,
+    doseLabel: '1 dose PCV (PCV20 or PCV21)',
+    brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
+    note: {
+      lead: `**Give 1 dose of PCV20 or PCV21**${isOlderAdult ? ' [c]' : ''}; either completes the series alone [c]. No further PPSV23: ${neither}.`,
+      detail: `PCV15 is not offered: after it a PPSV23 would be owed ≥${ppsvIntervalLabel} later [c]${mmwrNoneRowMarker} — ${third}. A PCV7-only history counts as no PCV history [c] [c].${detailGrey}`,
+    },
+    noteCites: [
+      ...(isOlderAdult ? [cite('adultRoutine50')] : []),
+      cite('adultPcv20or21Complete'),
+      cite(ppsvIntervalCite),
+      ...mmwrNoneRowCites,
+      cite('adultPcv7Only'),
+      cite('jobAidPcv7CountsAsNone'),
+      ...greyCites,
+    ],
+  }));
+  return [noHistoryCard];
 }
 
 // Most recent dose date across PCV + PPSV23 effective lists.
@@ -3924,8 +3963,8 @@ export function recommend(input) {
     pathStep('Risk conditions', riskWords(riskIds), null),
   ];
   let recs;
-  // §C-P2-GREY / §C-P2-NOTHIRD: set only on the at-risk child path, read
-  // again for the chip.
+  // §C-P2-GREY / §C-P2-NOTHIRD: set on the at-risk child path and (Ivy grown
+  // up) the adult path, read again for the chip.
   let noThird = null;
   if (am < M.m24) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
@@ -3978,6 +4017,8 @@ export function recommend(input) {
         ? `${ageWords(M.y18)} and over but under ${ageWords(M.y50)}, so a vaccine is recommended only with a qualifying risk condition`
         : `${ageWords(M.y50)} and over, so a vaccine is recommended whatever the risk conditions`));
     recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob, adultRepeat);
+    noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
+    if (noThird) recs = noThird.recs;
   }
   path.push(pathStep('Doses already given', doseWords(pcvAnalysis, ppsvAnalysis), null));
 
