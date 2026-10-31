@@ -33,7 +33,6 @@ import {
   ADULT_PPSV23_SHORTER_MINIMUM_WEEKS,
   pedsRiskRowClass,
   pedsRiskIds,
-  populationOf,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
@@ -4035,10 +4034,13 @@ export function recommend(input) {
   // evening (18, no spleen, a PPSV23 on the day of a PCV at 10, thrown out,
   // and one at 15 that counted, his chip still promising a date in 2017), she
   // chose the same answer for him — 128 grid patients, all that family.
-  // Adults were not asked about.
-  const ppsvChild = populationOf(am, riskIds).startsWith('child-');
+  // And at EVERY AGE: shown "Leo at 19" (the same history a year on, whose
+  // chip still promised Dec 27, 2016) and a 25-year-old whose too-young
+  // PPSV23 at 15 months was repeated at 2, she chose the same again. There is
+  // no age test, because none is needed: only a CHILDHOOD dose can be thrown
+  // out here (the adult rows count an adult's own PPSV23 with a note). 88
+  // grid patients, all 19-year-olds; 0 verdicts.
   const withLaterShot = (d, i) => {
-    if (!ppsvChild) return d;
     const at = ppsvAnalysis.doses[i].date;
     const k = ppsvAnalysis.doses.findIndex((x, j) => x.date > at && !ppsvAnalysis.perDose[j].recordProblem);
     if (k < 0) return d;

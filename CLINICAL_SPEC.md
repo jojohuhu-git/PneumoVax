@@ -912,7 +912,23 @@ family: **18-year-olds with a risk condition whose PPSV23 was given on the day o
 out) and again five years later (counted)**. Shown **Leo** — 18, no spleen, PCV13 and PPSV23 on
 Nov 1, 2017, PPSV23 again Oct 30, 2022, his chip still promising *"from Dec 27, 2017"* — and his
 twin with a cochlear implant (chip *"It is not repeated."*), she chose **"Point to the later
-dose"** for both. Adults were not asked about and are untouched.
+dose"** for both.
+
+**And every adult** (same evening). Built for children, the rule flipped back at 19: **Leo at
+19** (no spleen, PCV13 and PPSV23 at the same visit Nov 1, 2016, PPSV23 again Oct 30, 2021,
+card PCV20 or PCV21) still read *"the next dose in this series can be given from Dec 27, 2016
+at the earliest"*, and a 25-year-old whose PPSV23 at 15 months (too young) was repeated at 2
+still read *"repeat this dose only"*. Shown both, she chose **"Point to the later dose"** at
+every age. No age test is left, and none is needed: only a dose given in **childhood** can be
+thrown out here, because the adult rows count an adult's own PPSV23 with a note. Measured
+against `main`: **0** verdicts, **0** record-problem rows, **88** grid patients, all
+19-year-olds. Guard: `regression-2026-10-31-adult-chip-points-to-the-later-ppsv23.test.js`.
+
+**Not asked, not built:** an adult whose two childhood PPSV23 shots were BOTH too young. The
+first now points to the second; the second still reads *"repeat this dose only"*, beside a
+card offering PCV20, PCV15 or PCV21. For a child, her Ivy ruling gives PCV20 only and no third
+shot (§C-P2-NOTHIRD); for an adult, PCV15 → PPSV23 is a real path, so the sentence may be
+right. Hand-built only: the grid has no such adult.
 
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **128 / 35,280** rendered
 lines against `main` (116 like the twin, 12 like Leo — the 2026-10-25 date-promise sweep's pinned
