@@ -1110,16 +1110,25 @@ function atNineteen(adultCard) {
 // IC row owes a follow-on dose five years after a counted PPSV23, the non-IC
 // row does not, so if Max's repeat counted he would already be finished.
 //
+// Noah, no spleen: his first PPSV23 thrown out for SPACING, the repeat 6
+// weeks later thrown out too — "PCV20 only", and no grey-area note, because
+// CDC spaces a repeat from the invalid dose plainly. So the trigger is the
+// REPEAT rule having thrown the dose out, whatever voided the first; the grey
+// note is added only when the first was too young.
+//
 // The row Option A cites IS the risk-class test (each class has its own CDC
 // sentence); a separate `hasIC` here was found redundant by mutation.
 const PAIR_ROW_IS_IC = new Map([
   ['pedsIcPcv20orPpsv23', true], ['pedsIcBefore6NoPcv20At6to18', true],
   ['pedsRiskPcv20orPpsv23', false], ['pedsRiskBefore6NoPcv20At6to18', false],
 ]);
-function greyAreaRepeat(recs, ppsvAnalysis, ppsvCount) {
+function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   if (ppsvCount !== 0) return null;
-  const i = (ppsvAnalysis?.perDose ?? []).findIndex((d) => d.repeatOfUnderAgeDose);
+  // No status test: with no PPSV23 counted, every one was thrown out (a
+  // `status === 'invalid'` clause here was found redundant by mutation).
+  const i = (ppsvAnalysis?.perDose ?? []).findIndex((d) => d.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
   if (i < 0) return null;
+  const isGrey = Boolean(ppsvAnalysis.perDose[i].repeatOfUnderAgeDose);
   const optionA = recs.find((r) => r.vaccine === 'PCV' && r.doseLabel?.startsWith('Option A: 1 dose PCV20'));
   const optionB = recs.find((r) => r.vaccine === 'PPSV23' && r.doseLabel?.startsWith('Option B: 1 dose PPSV23'));
   if (!optionA || !optionB || recs.length !== 2 || !PAIR_ROW_IS_IC.has(optionA.noteCites?.[0]?.key)) return null;
@@ -1130,21 +1139,23 @@ function greyAreaRepeat(recs, ppsvAnalysis, ppsvCount) {
   const grey = `This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted. ${isIC
     ? `If it were counted, PCV20 would be due on or after ${fmtDate(ifCounted)} and would complete the series.`
     : 'If it were counted, the series would already be complete.'}`;
+  const third = given === 2 ? 'a third PPSV23 shot' : `PPSV23 shot number ${given + 1}`;
   return {
     index: i,
-    chip: `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${grey}`,
+    chip: !isGrey ? null : `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${grey}`,
     recs: [{
       ...optionA,
       doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`,
       note: {
         lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; that completes the series [c]. No further PPSV23: ${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted.`,
-        detail: `Grey area: CDC says a dose given under the minimum age is repeated on or after that age [c], and states no gap from the invalid dose for a vaccine that is not live [c]. ACIP does not address this case. ${grey}`,
+        detail: isGrey
+          ? `Grey area: CDC says a dose given under the minimum age is repeated on or after that age [c], and states no gap from the invalid dose for a vaccine that is not live [c]. ACIP does not address this case. ${grey}`
+          : `A PPSV23 is not offered: it would be ${third}.`,
       },
       noteCites: [
         optionA.noteCites[0],
         cite('cdcPcv20Children2023CompleteWithoutPcv20'),
-        cite('cdcGbpRepeatUnderMinAge'),
-        cite('cdcGbpLiveVaccine28Days'),
+        ...(isGrey ? [cite('cdcGbpRepeatUnderMinAge'), cite('cdcGbpLiveVaccine28Days')] : []),
       ],
     }],
   };
@@ -3843,8 +3854,9 @@ export function recommend(input) {
     pathStep('Risk conditions', riskWords(riskIds), null),
   ];
   let recs;
-  // §C-P2-GREY: set only on the at-risk child path, read again for the chip.
-  let greyArea = null;
+  // §C-P2-GREY / §C-P2-NOTHIRD: set only on the at-risk child path, read
+  // again for the chip.
+  let noThird = null;
   if (am < M.m24) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
@@ -3882,8 +3894,8 @@ export function recommend(input) {
         today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
       }).recs[0]);
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today).map((r) => withAtNineteen(r, at19));
-      greyArea = greyAreaRepeat(recs, ppsvAnalysis, ppsv.count);
-      if (greyArea) recs = greyArea.recs;
+      noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
+      if (noThird) recs = noThird.recs;
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
@@ -3949,11 +3961,11 @@ export function recommend(input) {
     pcv21Geo,
     perDose: {
       pcv: withdrawForwardLook(pcvAnalysis.perDose),
-      // §C-P2-GREY: the chip under Sam's repeat names the grey area instead of
-      // "the next dose in this series can be given from …" — a PPSV23 his
-      // card no longer offers.
-      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose).map((d, i) => (greyArea && i === greyArea.index && d.forwardLookingReason
-        ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? `${d.withoutForwardLook} ${greyArea.chip}` : x)) }
+      // §C-P2-GREY / §C-P2-NOTHIRD: the chip under the thrown-out repeat drops
+      // "the next dose in this series can be given from …" — a PPSV23 the
+      // card no longer offers — and names the grey area where there is one.
+      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose).map((d, i) => (noThird && i === noThird.index && d.forwardLookingReason
+        ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? [d.withoutForwardLook, noThird.chip].filter(Boolean).join(' ') : x)) }
         : d)),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was

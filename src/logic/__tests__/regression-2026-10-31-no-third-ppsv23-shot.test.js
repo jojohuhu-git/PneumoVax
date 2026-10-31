@@ -9,6 +9,13 @@
 //   Max  — Sam's twin with a cochlear implant (NOT immunocompromised):
 //          "PCV20 only + note". If his repeat counted he would already be
 //          finished, so the note's last sentence says that instead.
+//   Noah — no spleen; his first PPSV23 thrown out for SPACING (4 weeks after a
+//          PCV), the repeat 6 weeks later thrown out too: "PCV20 only". No
+//          grey-area note — CDC spaces a repeat from the invalid dose, plainly.
+//
+// Noah's twin who is NOT immunocompromised is not a patient she saw. Both of
+// her rulings that reach him (Max: not IC; Noah: spacing) point the same way,
+// so he gets PCV20 only too — a judgement within them, listed in the PR.
 //
 // ⚠ Hand-built: the grid holds no child with two PPSV23 doses this close.
 
@@ -71,5 +78,52 @@ describe('Max — Sam\'s twin, cochlear implant, not immunocompromised', () => {
 
   it('Sam himself is unchanged — his tail still names the five-year PCV20', () => {
     expect(recommend(SAM).recs[0].note.detail).toContain('If it were counted, PCV20 would be due on or after Jan 5, 2030 and would complete the series.');
+  });
+});
+
+describe('Noah — first PPSV23 thrown out for spacing, the repeat thrown out too', () => {
+  const NOAH = {
+    dob: '2021-01-01', ageMonths: 69, today: '2026-10-30', riskIds: ['asplenia'],
+    pcvDoses: d('PCV13', ['2023-02-01', '2023-04-01']),
+    ppsv23Doses: d('PPSV23', ['2023-04-29', '2023-06-10']),
+  };
+  const out = recommend(NOAH);
+
+  it('both PPSV23 shots stay thrown out (Ruling D, unchanged)', () => {
+    expect(out.perDose.ppsv23.map((x) => x.intervalRuleId)).toEqual([
+      'CHILD-PPSV23-AFTER-PCV', 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST',
+    ]);
+  });
+
+  it('his card offers PCV20 only, and says why the PPSV23 is not offered', () => {
+    expect(out.recs.map((r) => [r.vaccine, r.doseLabel])).toEqual([['PCV', ONE_PCV20]]);
+    expect(out.recs[0].note.lead).toBe(SAM_LEAD);
+    expect(out.recs[0].note.detail).toBe('A PPSV23 is not offered: it would be a third PPSV23 shot.');
+    expect(out.recs[0].noteCites.map((c) => c.key)).toEqual([
+      'pedsIcPcv20orPpsv23', 'cdcPcv20Children2023CompleteWithoutPcv20',
+    ]);
+  });
+
+  it('no grey-area note anywhere — the rule is clear for him', () => {
+    expect(JSON.stringify(out)).not.toContain('Grey area');
+  });
+
+  it('the chip under his repeat no longer promises a PPSV23 from Aug 5, 2023', () => {
+    const chip = out.perDose.ppsv23[1].reasons.join(' ');
+    expect(chip).toContain('It is not repeated.');
+    expect(chip).not.toContain('Aug 5, 2023');
+  });
+
+  it('his twin who is NOT immunocompromised gets PCV20 only too (a judgement)', () => {
+    const twin = recommend({ ...NOAH, riskIds: ['cochlear_implant'] });
+    expect(twin.recs.map((r) => r.doseLabel)).toEqual([ONE_PCV20]);
+    expect(twin.recs[0].noteCites[0].key).toBe('pedsRiskPcv20orPpsv23');
+  });
+
+  it('ONE thrown-out PPSV23 is untouched — the repeat is still offered', () => {
+    const one = recommend({ ...NOAH, ppsv23Doses: d('PPSV23', ['2023-04-29']) });
+    expect(one.recs.map((r) => r.doseLabel)).toEqual([
+      'Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)',
+    ]);
   });
 });

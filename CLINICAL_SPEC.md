@@ -828,6 +828,21 @@ immunocompromised is owed one PPSV23 and no follow-on, so *"If it were counted, 
 would already be complete."* Sam's tail (PCV20 five years on) is the IC row's follow-on and
 must not reach him. The card's lead is Sam's word for word.
 
+**Noah** — 5, no spleen, PCV13 ×2 at age 2. His first PPSV23 came 4 weeks after a PCV (thrown
+out for spacing); the repeat 6 weeks later was thrown out too (`CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`,
+8 weeks from the invalid dose — Ruling D, which CDC states plainly, so **no grey area**). His
+card offered PCV20 or PPSV23. She chose **"PCV20 only"**. His card is Sam's PCV20 card with
+"Why this" reading *"A PPSV23 is not offered: it would be a third PPSV23 shot."*; the chip under
+his repeat drops its promise of a further PPSV23 and gains no note.
+
+So the trigger is **the repeat rule having thrown the dose out**, whatever voided the first
+dose; the grey-area note is added only when the first was too young (`repeatOfUnderAgeDose`).
+*A judgement within her rulings, listed in the PR:* **Noah's twin who is not
+immunocompromised** gets PCV20 only as well — he is not a patient she saw, but both rulings
+that reach him (Max: not IC; Noah: spacing) say the same. **Not ruled, untouched:** a child
+whose two PPSV23 shots were BOTH thrown out for being too young (the second is not a "repeat
+after an invalid first", so this rule does not fire, and the card still offers PPSV23).
+
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **0 / 35,280** rendered
 lines (`proseDiff` against `main`) — the grid holds no child with two PPSV23 shots this close.
 Guard: `regression-2026-10-31-no-third-ppsv23-shot.test.js`.
