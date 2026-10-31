@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-10-31 (afternoon)** by [handoff-2026-10-31-max-kai-noah-zoe.md](handoff-2026-10-31-max-kai-noah-zoe.md).
+> Its owner questions 1–4 were answered and built (Max, Kai, Noah, Zoe). Do not resume from
+> this file.
+
 # PneumoVax — Handoff after Lily, Noah, Eli/Rosa and Sam (2026-10-31)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal

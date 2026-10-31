@@ -126,12 +126,14 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
   // not get a silent pass, which is what this describe block exists for.
   const CHILD13 = { ageMonths: 156, dob: '2013-10-11' };
   it('a child\'s second dose: an extra dose without an IC condition, counted with one', () => {
-    // No risk condition — CDC never gives this child a second PPSV23.
-    const healthy = ppsvAfter([], twoYears, CHILD13).perDose[1];
-    expect(healthy.status).toBe('valid');
-    expect(healthy.extraDose).toBe(true);
-    expect(healthy.effectiveDoseNum).toBeNull();
-    expect(healthy.reasons.join(' ')).toMatch(/^Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition/);
+    // Cochlear implant (not immunocompromised) — CDC never gives this child a
+    // second PPSV23. It used to be a child with NO risk condition; since
+    // §C-P2-HEALTHY (2026-10-31, Zoe) that child is owed no PPSV23 at all.
+    const nonIC = ppsvAfter([], twoYears, CHILD13, ['cochlear_implant']).perDose[1];
+    expect(nonIC.status).toBe('valid');
+    expect(nonIC.extraDose).toBe(true);
+    expect(nonIC.effectiveDoseNum).toBeNull();
+    expect(nonIC.reasons.join(' ')).toMatch(/^Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition/);
     // Asplenia — her ruling of 2026-10-29: count it, never a third.
     const ic = ppsvAfter([], twoYears, CHILD13, ['asplenia']).perDose[1];
     expect(ic.status).toBe('valid');

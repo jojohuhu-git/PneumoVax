@@ -810,15 +810,107 @@ would be due on or after Jan 5, 2030 and would complete the series."*
 
 **Scoped to the card she was shown:** an immunocompromised child whose card is that Option A /
 Option B pair (CDC's IC rows `pedsIcPcv20orPpsv23` at 2–5 and `pedsIcBefore6NoPcv20At6to18` at
-6–18). **Not ruled, and untouched:** the same history in a child who is not immunocompromised
-(both options stay; if counted, the series would already be complete, so the note's last
-sentence would be untrue); a child still owed catch-up conjugates; and the 6–18 no-prior-PCV
-card (Option A PCV20 / B-1 PCV15 / B-2 PPSV23). The flag is set by validate.js only when the
-earlier dose's own verdict says it was below the minimum age (`belowMinAge`), never re-tested.
+6–18). The flag is set by validate.js only when the earlier dose's own verdict says it was
+below the minimum age (`belowMinAge`), never re-tested. **The three limits this paragraph
+listed as not ruled were each put to her the same afternoon — §C-P2-NOTHIRD below.**
+
+### §C-P2-NOTHIRD — two PPSV23 shots, neither counted: no third shot is offered (owner, 2026-10-31)
+
+Sam's ruling left out three kinds of child. Shown one patient for each, the owner ruled every
+one the same way: **offer PCV20 only**, because the other path is a THIRD PPSV23 shot.
+
+**Max** — Sam's twin with a cochlear implant, **not** immunocompromised: same two PPSV23 shots
+(23 months, then 5 weeks later), both thrown out. His card offered Option A PCV20 / Option B
+PPSV23 with no note. She chose **"PCV20 only + note"**. The card and chip are Sam's, citing
+CDC's non-immunocompromising rows (`pedsRiskPcv20orPpsv23` at 2–5,
+`pedsRiskBefore6NoPcv20At6to18` at 6–18), except the note's last sentence: a child who is not
+immunocompromised is owed one PPSV23 and no follow-on, so *"If it were counted, the series
+would already be complete."* Sam's tail (PCV20 five years on) is the IC row's follow-on and
+must not reach him. The card's lead is Sam's word for word.
+
+**Noah** — 5, no spleen, PCV13 ×2 at age 2. His first PPSV23 came 4 weeks after a PCV (thrown
+out for spacing); the repeat 6 weeks later was thrown out too (`CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`,
+8 weeks from the invalid dose — Ruling D, which CDC states plainly, so **no grey area**). His
+card offered PCV20 or PPSV23. She chose **"PCV20 only"**. His card is Sam's PCV20 card with
+"Why this" reading *"A PPSV23 is not offered: it would be a third PPSV23 shot."*; the chip under
+his repeat drops its promise of a further PPSV23 and gains no note.
+
+So the trigger is **the repeat rule having thrown the dose out**, whatever voided the first
+dose; the grey-area note is added only when the first was too young (`repeatOfUnderAgeDose`).
+*A judgement within her rulings, listed in the PR:* **Noah's twin who is not
+immunocompromised** gets PCV20 only as well — he is not a patient she saw, but both rulings
+that reach him (Max: not IC; Noah: spacing) say the same. **Kai** — 8, no spleen, **never a PCV**, Sam's two PPSV23 shots. His card was the 6–18
+no-prior-PCV trio — Option A PCV20 / B-1 PCV15 / B-2 PPSV23, B-2 a third shot — and a 2-year-old
+like him got the 24–71-month at-risk catch-up, *"2 doses of PCV20 or PCV15"* with a PPSV23
+after PCV15. She chose **"PCV20 only + note"** for both. On both the third shot hides behind
+PCV15, so PCV15 goes and "Why this" says why before the grey-area note:
+
+| Card | Now | Grey note's last sentence |
+|---|---|---|
+| 6–18 no-prior-PCV (IC `pedsIc6to18NoPcv` / non-IC `pedsRisk6to18NoPcv`) | **1 dose PCV20 (≥8 weeks)**, Option B dropped; *"PCV15 is not offered: after it a PPSV23 would be owed — a third PPSV23 shot."* | *"If it were counted, PCV15 could be offered too, with no PPSV23 after it."* — CDC follows PCV15 with a PPSV23 only "if … no previous receipt of PPSV23" |
+| 24–71-month catch-up, both rows (`pedsRiskIncompleteCatchup`) | **PCV20** only, as product and in the lead; the PCV15 sentence becomes *"PCV15 is not offered: it would need a PPSV23 after it [p2016 ‡] — a third PPSV23 shot."* | **none** — an immunocompromised child would still owe a dose five years on, so no "if counted" sentence is true for every child on this card |
+
+The catch-up card's two PCV15 sentences are constants shared by its builder and this swap
+(`CATCHUP_PCV15_SENTENCE_ROW1/2`), so a reworded sentence cannot slip past it. *Judgements
+within her rulings, listed in the PR:* the **non-immunocompromised** child on the 6–18 card
+(her Max ruling reaches him), and a **repeat thrown out for spacing** on the catch-up card
+(her Noah ruling; no grey note) — each has its own test.
+
+**Not ruled, untouched:** a child
+whose two PPSV23 shots were BOTH thrown out for being too young (the second is not a "repeat
+after an invalid first", so this rule does not fire, and the card still offers PPSV23).
+
+Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **0 / 35,280** rendered
+lines (`proseDiff` against `main`) — the grid holds no child with two PPSV23 shots this close.
+Guard: `regression-2026-10-31-no-third-ppsv23-shot.test.js`.
 
 New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
 `cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem
 rows. Guard: `regression-2026-10-31-sam-grey-area-repeat-of-a-too-young-ppsv23.test.js`.
+
+### §C-P2-HEALTHY — a healthy child's PPSV23 is not needed, at any age (owner, 2026-10-31)
+
+**Zoe**, 3, healthy, four PCV20 doses, given a PPSV23 by mistake at 12 months. Her card read
+*"PCV series complete"* while the chip under the PPSV23 said *"repeat this dose only (do not
+restart the series)"* — an order for a dose a healthy child is not owed. The same mistake at 2½
+was marked "valid" and counted with no comment. Asked, the owner chose **"Not needed" at any
+age**, in Ava's words (§C-P2-ONTIME).
+
+CDC, read live 2026-10-31. PPSV23 Vaccine Information Statement (5/29/25,
+`cdc.gov/vaccines/hcp/current-vis/pneumococcal-polysaccharide.html`): *"PPSV23 is recommended as
+an option for some children and adolescents with certain medical conditions or risk factors."*
+CDC's pneumococcal recommendations page (updated Feb 25, 2026) gives routine childhood
+vaccination as a 4-dose PCV series only, with PPSV23 under "Risk-based recommendations".
+
+The sentence, on every PPSV23 of a child with no risk condition: *"Not needed: PPSV23 is given
+only to children with certain medical conditions or risk factors, per CDC, and none is recorded
+for this child. This dose isn't harmful, it isn't counted, and nothing needs to be repeated."*
+
+| The dose | Before | Now |
+|---|---|---|
+| Old enough, would have counted | "valid", dose 1, no comment | **extra dose** + the sentence; still holds off a conjugate for 8 weeks (Ben's ruling — the weaker response follows the dose received) |
+| Too young | invalid + "repeat this dose only" | **still invalid** (so it still holds off nothing — ANCHOR-1, re-confirmed on Rosa) + the sentence instead of "repeat" |
+| Too soon after a PCV | invalid + "the next dose in this series can be given from …" | still invalid + the sentence; no date, because no PPSV23 is owed |
+
+**Who is "healthy"** is `populationOf(...) === 'child-routine'` — the engine's one answer: it
+ignores adult-only ticks (smoking, alcohol use disorder) and stops at 19, so an adult's childhood
+PPSV23, which ACIP's adult rows count, is untouched. A record problem (future date, before birth,
+duplicate) keeps its own wording.
+
+**A side effect found and fixed.** The duplicate-entry check compared a row only with doses that
+COUNTED, so a healthy child's PPSV23 typed twice on one day lost its "duplicate" once the first
+became an extra dose (12 impossible-entry rows). An extra dose was really given, so it now joins
+that comparison. Six older tests used a child with **no** risk condition to stand for "a child
+who is not immunocompromised"; they now use a cochlear implant, which keeps their point.
+
+Measured against `main`: **1,164 / 17,016** verdicts moved — every one a healthy child aged
+2–18, every one only the PPSV23 going from "dose 1" to an extra dose (same status, 0 cards).
+**126 / 18,264** record-problem rows, the same family. Rendered text (`proseDiff`): **1,752**
+real patients' PPSV23 notes (1,098 counted→extra, 504 too young, 150 too soon) and 1,131
+impossible entries — **0** cards, **0** children with a risk condition, **0** adults. Pinned
+counts re-measured with reasons: forward-looking dates withdrawn 2,670 → 2,544; too-young
+PPSV23 chips saying "repeat" 1,848 → 1,344. Guard:
+`regression-2026-10-31-healthy-child-ppsv23-not-needed.test.js`.
 
 ### §C-P2-THIRD — an immunocompromised child's on-time third PPSV23 is an extra dose (owner, 2026-10-31)
 

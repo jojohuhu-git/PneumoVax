@@ -203,11 +203,15 @@ describe('queue P1-0 — PPSV23 revaccination interval', () => {
   // rather than a rejected one, and nothing is owed. Until P2 it read
   // 'invalid' and pointed at a "next dose" five years on. An IC child's early
   // second dose COUNTS instead (owner ruling 2026-10-29; CLINICAL_SPEC §C-P2).
+  // §C-P2-HEALTHY (2026-10-31, Zoe): a child with NO risk condition is owed
+  // no PPSV23 at all, so even her first is an extra dose. These cases are
+  // about the second PPSV23 of a child who is owed one — a cochlear implant.
+  const NON_IC = { riskIds: ['cochlear_implant'] };
   it('a second PPSV23 inside 5 years does not count', () => {
     const a = analyzeHistory('PPSV23', [
       { date: '2020-07-06' },
       { date: '2021-07-06' },
-    ], 156, TODAY, '2014-01-01');
+    ], 156, TODAY, '2014-01-01', NON_IC);
     expect(a.effective).toHaveLength(1);
     expect(a.perDose[1].extraDose).toBe(true);
     expect(a.perDose[1].repeatDueDate).toBeUndefined();
@@ -216,15 +220,15 @@ describe('queue P1-0 — PPSV23 revaccination interval', () => {
   it('counts a second PPSV23 at 5 calendar years, and 4 days inside it', () => {
     const first = '2020-07-06';
     const at5y = addCalendarYears(first, 5);
-    const ok = analyzeHistory('PPSV23', [{ date: first }, { date: at5y }], 156, TODAY, '2014-01-01');
+    const ok = analyzeHistory('PPSV23', [{ date: first }, { date: at5y }], 156, TODAY, '2014-01-01', NON_IC);
     expect(statuses(ok)).toEqual(['valid', 'valid']);
 
-    const graced = analyzeHistory('PPSV23', [{ date: first }, { date: addDays(at5y, -4) }], 156, TODAY, '2014-01-01');
+    const graced = analyzeHistory('PPSV23', [{ date: first }, { date: addDays(at5y, -4) }], 156, TODAY, '2014-01-01', NON_IC);
     expect(statuses(graced)).toEqual(['valid', 'valid']);
 
     // P2: five days short is outside the grace — not counted, as before,
-    // now as an extra dose for this child (no risk condition).
-    const tooSoon = analyzeHistory('PPSV23', [{ date: first }, { date: addDays(at5y, -5) }], 156, TODAY, '2014-01-01');
+    // now as an extra dose for this child (not immunocompromised).
+    const tooSoon = analyzeHistory('PPSV23', [{ date: first }, { date: addDays(at5y, -5) }], 156, TODAY, '2014-01-01', NON_IC);
     expect(tooSoon.effective).toHaveLength(1);
     expect(tooSoon.perDose[1].extraDose).toBe(true);
   });

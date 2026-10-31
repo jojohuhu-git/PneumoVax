@@ -49,7 +49,7 @@ import { cite } from '../data/refs.js';
 // drift guard that fails if one appears here.
 import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
-import { hasIC } from '../data/riskFactors.js';
+import { hasIC, populationOf } from '../data/riskFactors.js';
 import { evaluateDoseInterval, lastPpsv23HoldingAConjugate } from './doseIntervalRules.js';
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
 // dose. Dropped HERE, at the walk, so that no caller can count one by
@@ -241,6 +241,8 @@ function futureDated(dose, today) {
 //     than every row walked is what makes that row the first REAL one on its
 //     date rather than a duplicate of a dose the patient never effectively had.
 //     Measured: 84 cases in the impossible-entry grid take exactly that path.
+//     An EXTRA child PPSV23 is the exception: it was really given, and the
+//     caller adds it to `kept` for this check (§C-P2-HEALTHY, 2026-10-31).
 //
 // Undated rows share no date and are never duplicates: two undated rows on a
 // paper record with no dates are two real doses.
@@ -891,10 +893,29 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // A record problem — an impossible ENTRY — is settled before any
     // vaccine-specific rule runs: there is no dose to GRADE when the date
     // itself is wrong, whatever the schedule says.
-    const result = recordProblemFor(dose, { ageMonths, today, dob, kept })
+    // §C-P2-HEALTHY: an EXTRA child PPSV23 was really given, so a second row
+    // on its date is one dose typed twice — it joins `kept` for this check
+    // only. Without it, a healthy child's PPSV23 entered twice (now an extra
+    // dose, not a counted one) lost its "duplicate" and was graded instead:
+    // 12 rows of the impossible-entry grid.
+    const result = recordProblemFor(dose, { ageMonths, today, dob, kept: [...kept, ...st.extraChildPpsv23] })
       || (vaccine === 'PCV'
         ? validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts)
         : validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts));
+
+    // §C-P2-HEALTHY (OWNER RULING 2026-10-31, on "Zoe": "Not needed" at any
+    // age). A child with no risk condition is never owed a PPSV23 — CDC's
+    // PPSV23 VIS (5/29/25): "PPSV23 is recommended as an option for some
+    // children and adolescents with certain medical conditions or risk
+    // factors." Zoe's PPSV23 at 12 months was told "repeat this dose only";
+    // the same dose at 2½ counted in silence. `populationOf` is the engine's
+    // one answer to "is this a healthy child TODAY" — it strips adult-only
+    // ticks and stops at ADULT_SCHED_MIN_M, so an adult's childhood PPSV23,
+    // which ACIP's adult rows count, is untouched. A record problem keeps its
+    // own wording: it is not a dose the patient had.
+    const healthyChildPpsv23 = vaccine === 'PPSV23' && !result.recordProblem
+      && populationOf(ageMonths, riskIds) === 'child-routine';
+    const NOT_NEEDED_HEALTHY_CHILD = 'Not needed: PPSV23 is given only to children with certain medical conditions or risk factors, per CDC, and none is recorded for this child. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.';
 
     if (result.status === 'invalid') {
       // W1 (owner-approved wording, 2026-10-11): a dose rejected only for
@@ -988,6 +1009,19 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       const alternativeSentence = alt
         ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
         : null;
+      // §C-P2-HEALTHY: a thrown-out PPSV23 in a healthy child STAYS thrown
+      // out — so it still holds off nothing (ANCHOR-1, re-confirmed on Rosa) —
+      // and only its closing sentence changes: nothing is to be repeated.
+      if (healthyChildPpsv23) {
+        perDose.push(addNote({
+          ...result,
+          effectiveDoseNum: null,
+          doesNotCount: true,
+          reasons: [...result.reasons, NOT_NEEDED_HEALTHY_CHILD],
+        }));
+        anchorOn(dose);
+        return;
+      }
       perDose.push(addNote({
         ...result,
         effectiveDoseNum: null,
@@ -1168,6 +1202,25 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // is finished with PPSV23 — CDC's child notes print "dose 2 PPSV23" three
     // times and no third anywhere. Her ruling counts an early SECOND dose; an
     // early third is the same extra dose, with its own reason.
+    // §C-P2-HEALTHY: a healthy child's PPSV23 that would have counted is an
+    // extra dose — Ava's label, and like hers it still holds off a conjugate
+    // for 8 weeks (Ben's ruling: the weaker response follows the dose the
+    // child RECEIVED). No row sentence to drop, unlike Ava's block below: the
+    // rows that keep a PPSV23 with a note measure from a COUNTED PPSV23, and a
+    // healthy child has none — 0 of 1,952 such doses over both grids carried
+    // one (measured 2026-10-31; a branch to drop it was removed by mutation).
+    if (healthyChildPpsv23) {
+      perDose.push(addNote({
+        ...result,
+        effectiveDoseNum: null,
+        extraDose: true,
+        reasons: [...result.reasons, NOT_NEEDED_HEALTHY_CHILD],
+      }));
+      st.extraChildPpsv23.push(dose);
+      anchorOn(dose);
+      return;
+    }
+
     const icChild = hasIC(riskIds);
     const ppsvRowFired = !!result.earlyAdvisory && result.intervalRuleId === 'CHILD-PPSV23-AFTER-PPSV23';
     if (vaccine === 'PPSV23' && !isAdultDose && kept.length >= (icChild ? 2 : 1)

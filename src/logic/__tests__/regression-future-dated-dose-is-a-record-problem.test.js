@@ -18,8 +18,8 @@ const TODAY = '2026-01-01';
 const DOB = '2020-01-01';
 const REPEAT = /repeat this dose only/i;
 
-function run({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = DOB, today = TODAY }) {
-  return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds: [] });
+function run({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = DOB, today = TODAY, riskIds = [] }) {
+  return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds });
 }
 const allText = (v) => [...v.reasons, v.detail ?? ''].join(' ');
 
@@ -86,8 +86,11 @@ describe('a dose dated in the future is a record problem', () => {
 });
 
 describe('controls — a real dose is still graded the old way', () => {
+  // §C-P2-HEALTHY (2026-10-31, Zoe): a HEALTHY child's PPSV23 is "not needed",
+  // never "repeat", so this control now uses a child with a risk condition —
+  // the patient W1's repeat sentence is still about.
   it('a PPSV23 genuinely given too young still says to repeat it', () => {
-    const v = run({ ppsv23Doses: [{ date: '2021-06-01', product: 'PPSV23' }] }).ppsv23.perDose[0];
+    const v = run({ ppsv23Doses: [{ date: '2021-06-01', product: 'PPSV23' }], riskIds: ['cochlear_implant'] }).ppsv23.perDose[0];
     expect(v.status).toBe('invalid');
     expect(v.recordProblem).toBeUndefined();
     expect(allText(v)).toMatch(REPEAT);

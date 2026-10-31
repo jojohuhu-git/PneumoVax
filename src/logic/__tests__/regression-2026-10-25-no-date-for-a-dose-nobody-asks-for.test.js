@@ -204,7 +204,13 @@ describe('swept over the grid', () => {
     // weeks of a PPSV23 is now set aside. The 99 added patients are
     // +18 withdrawn and +81 kept; the inventory below names the new rule,
     // which is what distinguishes this rise from an adult floor creeping back.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2670, kept: 1851 });
+    //
+    // RE-MEASURED 2026-10-31 and it FELL by 126: 2670 -> 2544 withdrawn, kept
+    // unchanged. §C-P2-HEALTHY (Zoe): a HEALTHY child's mistimed PPSV23 now
+    // carries no forward-looking clause at all — it is "not needed", so there
+    // is no next dose in its series to withdraw. Kept is untouched, so no
+    // child who is owed a further dose lost her date.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2544, kept: 1851 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {
