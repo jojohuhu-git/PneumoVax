@@ -12,7 +12,7 @@
 // Scoped at first to children none of whose PPSV23 shots counted; widened to
 // EVERY CHILD the same evening, on "Leo" below. A healthy child's
 // thrown-out PPSV23 already reads "nothing needs to be repeated"
-// (§C-P2-HEALTHY); adults were not asked about.
+// (§C-P2-HEALTHY). Widened to ADULTS on "Leo at 19" the same evening.
 //
 // ⚠ Hand-built: the grid holds no child with two PPSV23 doses this close.
 
@@ -98,12 +98,16 @@ describe('limits', () => {
     expect(chips[0].reasons[1]).toContain('It was repeated on Jan 5, 2025');
   });
 
-  it('an adult whose two PPSV23 shots were given as a baby is untouched — not asked about', () => {
+  // Until "Leo at 19" (same day) this asserted the adult was untouched, as
+  // the record that adults had not been asked about. She has been now, and
+  // chose the same answer at every age — see
+  // regression-2026-10-31-adult-chip-points-to-the-later-ppsv23.test.js.
+  it('an adult whose two PPSV23 shots were given as a baby: the first points to the second', () => {
     const adult = { dob: '2005-01-01', ageMonths: 249, today: '2025-10-01', riskIds: ['asplenia'],
       pcvDoses: [], ppsv23Doses: d('PPSV23', ['2006-02-01', '2006-09-01']) };
     const chips = recommend(adult).perDose.ppsv23;
     expect(chips.map((x) => x.status)).toEqual(['invalid', 'invalid']);
-    expect(JSON.stringify(chips)).not.toContain('see that dose');
+    expect(chips[0].reasons[1]).toBe('This dose does not count toward the series. It was repeated on Sep 1, 2006 — see that dose.');
   });
 
   // The field the 2026-10-25 sweep reads to find a chip still promising a

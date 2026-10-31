@@ -912,7 +912,47 @@ family: **18-year-olds with a risk condition whose PPSV23 was given on the day o
 out) and again five years later (counted)**. Shown **Leo** — 18, no spleen, PCV13 and PPSV23 on
 Nov 1, 2017, PPSV23 again Oct 30, 2022, his chip still promising *"from Dec 27, 2017"* — and his
 twin with a cochlear implant (chip *"It is not repeated."*), she chose **"Point to the later
-dose"** for both. Adults were not asked about and are untouched.
+dose"** for both.
+
+**And every adult** (same evening). Built for children, the rule flipped back at 19: **Leo at
+19** (no spleen, PCV13 and PPSV23 at the same visit Nov 1, 2016, PPSV23 again Oct 30, 2021,
+card PCV20 or PCV21) still read *"the next dose in this series can be given from Dec 27, 2016
+at the earliest"*, and a 25-year-old whose PPSV23 at 15 months (too young) was repeated at 2
+still read *"repeat this dose only"*. Shown both, she chose **"Point to the later dose"** at
+every age. No age test is left, and none is needed: only a dose given in **childhood** can be
+thrown out here, because the adult rows count an adult's own PPSV23 with a note. Measured
+against `main`: **0** verdicts, **0** record-problem rows, **88** grid patients, all
+19-year-olds. Guard: `regression-2026-10-31-adult-chip-points-to-the-later-ppsv23.test.js`.
+
+**And Ivy grown up** (same night, §C-P2-NOTHIRD for adults below): the second of two thrown-out
+childhood shots now reads *"It is not repeated."*
+
+### §C-P2-NOTHIRD for adults — "Ivy, grown up" (owner, 2026-10-31)
+
+**Ivy at 20**, no spleen, no PCV on record, PPSV23 at 13 and 20 months — both thrown out for
+being under 2. Her card offered *"Give 1 dose of PCV15, PCV20, or PCV21. If PCV15 is chosen,
+follow with PPSV23 ≥8 weeks later"* — after a PCV15, her **third** PPSV23 shot — and her second
+chip said *"repeat this dose only"*. Asked whether to treat her as the child Ivy ruling does, the
+owner chose **"Same as a child: PCV20/21 only"**, at every adult age.
+
+The adult no-history card, for an adult with two or more PPSV23 shots none of which counted (the
+child rule's own test, `noThirdPpsv23()`): *"**Give 1 dose of PCV20 or PCV21**; either completes
+the series alone. No further PPSV23: 2 PPSV23 doses have been given and neither counted."* and
+under "Why this", *"PCV15 is not offered: after it a PPSV23 would be owed ≥<interval> later — a
+third PPSV23 shot."* The PCV15 sentence keeps its own citations (the interval's), as the reason.
+At 50+ the 8-week option goes with it — it is about a PCV15 no longer offered — and CDC's 50+
+routine row stays on the instruction. A repeat thrown out by the 8-week repeat rule after a
+too-young first dose gets the grey-area note, as for a child. The second chip: *"It is not
+repeated."* Same status, same due date, no other card.
+
+Hand-built only: the grid has no adult with two thrown-out childhood shots, so **0** verdicts and
+**0** rendered lines move on it. Guard: `regression-2026-10-31-adult-ivy-no-third-ppsv23.test.js`.
+
+**Not asked, not built:** an adult who has **already had a PCV15** (as an adult) beside the same
+two thrown-out shots. Their card orders *"PPSV23 (≥1 year after PCV15) — completes the series"*
+(≥8 weeks at 19–49 with an immunocompromising condition, cochlear implant or CSF leak), which is
+the third shot. The only way round it is a PCV20 or PCV21 after the PCV15, and no document has been
+read that says so — case (a) of the 2026-10-18 rule, so it goes to the owner with a source.
 
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **128 / 35,280** rendered
 lines against `main` (116 like the twin, 12 like Leo — the 2026-10-25 date-promise sweep's pinned
@@ -1657,6 +1697,13 @@ catch-up row**.
   2. **PCV → PPSV23 = ≥8 weeks**, and never the same visit. CDC Child Notes:
      > "administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV
      > dose" … "PCV15 and PPSV23 should not be administered during the same visit."
+
+     The same-visit chip names the PCV **the record shows** (2026-10-31): *"Given on the
+     same day as a PCV13 dose — PPSV23 is given at least 8 weeks (56 days) after a PCV
+     dose."* CDC's same-visit sentence names PCV15 alone, so it is added for a PCV15 and for
+     nothing else. Until then every same-day chip said "PCV15", and on the grid none of its
+     583 showings sat beside one (PCV13 297, unknown product 154, PCV20 121, PCV21 11).
+     Wording only. Guard: `regression-2026-10-31-same-day-ppsv23-names-the-pcv-given.test.js`.
   3. **PPSV23 dose 2 = ≥5 calendar years** after dose 1. CDC Child Notes: *"administer
      either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23."*
 

@@ -219,7 +219,13 @@ describe('swept over the grid', () => {
     // with a PPSV23 on the day of a PCV and another five years later — 116
     // owed nothing (Leo's twin) and 12 owed a dose (Leo, whose chip promised a
     // date in 2017). No chip that still carries the clause lost it.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2428, kept: 1839 });
+    //
+    // RE-MEASURED 2026-10-31 (night) and it FELL by 88: 2428 -> 2350
+    // withdrawn, 1839 -> 1829 kept. §C-P2-LATER widened to ADULTS ("Leo at
+    // 19"): the same family one year older — 19-year-olds whose PPSV23 at 9
+    // was given on the day of a PCV and again five years later. 78 owed
+    // nothing, 10 owed a conjugate (Leo at 19, promised Dec 2016).
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2350, kept: 1829 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {
