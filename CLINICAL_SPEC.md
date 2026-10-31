@@ -317,6 +317,42 @@ sweep: a line appears exactly when the adult card at 19 is not complete for life
 that card's row) and `regression-c13-2026-10-30-what-happens-at-19.test.js` (the grid, every
 line run forward, counts pinned: 186 / 327 / 32 / 80, plus the 60 without).
 
+### §B-PCV20-AFTER-BEFORE6 — baby doses, then a PCV20 at 6 or later (2026-10-31)
+
+An 8-year-old with diabetes: four PCV13 doses as a baby, then a PCV20 at 7. Her card said
+"complete" (right) and explained it as *"The conjugate on record before the PCV20 was PCV13
+only, given at or after age 6 years"*, quoting CDC's "Received PCV13 only at or after age 6
+years" row. Every one of her PCV13 doses was given before her first birthday. Shown her, the
+owner said *fix it first*.
+
+**Cause.** The PCV20-complete card asked whether *every* counting dose was given before 6 —
+the PCV20 included — so a PCV20 at 7 failed the test and the card fell to the branch written
+for a child whose **first** conjugate came at 6 or later (the 17-year-old with PCV13 at 8,
+PCV20 at 17; OWNER DECISION 2026-10-18, unchanged).
+
+**Fix.** `summarizePcv()` now also counts, for the doses that are **not** PCV20/PCV21, how many
+were given at or after 6 and how many are undated (`priorBand`). When none was either, the
+card says *"The conjugate doses before the PCV20 (PCV13 only) were all given before age 6"*
+and cites the row she **followed**: CDC's "Received PCV before age 6 years but have not
+received PPSV23 → Not previously received PCV20" — the non-IC or IC instance (the IC one adds
+*"if PPSV23 is used, … at least 5 years after dose 1 PPSV23"*, and the card says so), in the
+patient's own age band (FINDING N). That age choice is now one function,
+`before6NoPcv20RowKey()`, shared with rows 4/5, so there is still one age test. CDC's row names
+no product ("Received PCV"), so no PCV13/PCV15 bridge, as for rows 4/5. An undated earlier dose
+is not assumed to be before 6, and keeps the old branch.
+
+**The dose, status and source buttons are unchanged**, so under the 2026-10-18 rule this is a
+citation choice decided without asking. Measured against untouched `main`: **0 / 17,016**
+verdicts, **0 / 18,264** record-problem rows, **0 / 35,280** rendered lines — the grid builds no
+child aged 5–18 with an infant dose. Guard:
+`regression-2026-10-31-pcv20-after-baby-doses-says-before-6.test.js` (hand-built; eight
+mutations, each caught).
+
+**Not settled here — a mixed history.** PCV13 as a baby **and** again at 8, then PCV20 at 10:
+some doses before 6 and some after. CDC's "PCV13 only at or after age 6" row does not fit (not
+*only*), and neither does the before-6 row in full. The card keeps the old wording until the
+owner rules on that history.
+
 ### What "completed by 24 months" means — FINDING M, 2026-10-22
 
 p2016 Table 2 splits on the word **completed** and never defines it. CDC's catch-up Table 2

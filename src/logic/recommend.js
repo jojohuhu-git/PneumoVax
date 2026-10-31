@@ -110,6 +110,17 @@ const earlySecondPpsv23 = (ppsv) => (ppsv.secondCameEarly
   ? ` The second PPSV23 came less than ${LONG_GAP_WORDS} after the first; it is counted, and no third PPSV23 is given.`
   : '');
 
+// FINDING N (2026-10-23): CDC prints its "series before age 6, no PCV20" row
+// four times — each at-risk list, under "Age 2-5 years" and again under "Age
+// 6-18 years", in different words — and a card quotes its own patient's band.
+// The ONE age test for that choice; two cards ask it (rows 4/5, and since
+// §B-PCV20-AFTER-BEFORE6 the PCV20-complete card for baby doses + a later PCV20).
+function before6NoPcv20RowKey(am, isIC) {
+  return am >= M.m72
+    ? (isIC ? 'pedsIcBefore6NoPcv20At6to18' : 'pedsRiskBefore6NoPcv20At6to18')
+    : (isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23');
+}
+
 // ── rec() helper ──────────────────────────────────────────────────────────
 function rec(o) {
   return {
@@ -215,8 +226,15 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
   // CDC Catch-up Table 2 keys the dose 2->3 interval on it too (P0-2). Both
   // are DATED-ONLY; see the undated policy where the ladder consumes them.
   const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
+  // The same before/after-6 split for every dose that is NOT a PCV20/PCV21 —
+  // the conjugates a completing dose was given on top of. §B-PCV20-AFTER-
+  // BEFORE6 (2026-10-31): `band.ge72` counts the PCV20 itself, so a child whose
+  // baby doses were all before 6 read as "at or after age 6" once her PCV20
+  // came at 7. An unrecorded product is counted here: it is not a PCV20.
+  const priorBand = { ge72: 0, undated: 0 };
   for (const d of pcvDoses) {
-    if (!d.date || !today) { band.undated += 1; continue; }
+    const isPrior = d.product !== 'PCV20' && d.product !== 'PCV21';
+    if (!d.date || !today) { band.undated += 1; if (isPrior) priorBand.undated += 1; continue; }
     // P3-3 (S10): measured from the birthday when one is on file, instead of
     // subtracting two spans counted on different rulers. These bands decide HOW
     // MANY doses a child needs, so a fraction of a month moved the dose count in
@@ -229,6 +247,7 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     } else if (ageAtDose < M.m24) band.m12to23 += 1;
     else if (ageAtDose < M.m72) band.m24to71 += 1;
     else band.ge72 += 1;
+    if (isPrior && ageAtDose >= M.m72) priorBand.ge72 += 1;
   }
   // Doses "by 24 months" (p2016 Table 4 rows 1/2 split). Undated doses are folded
   // in here — an undated historical dose is assumed to be an infant dose.
@@ -287,6 +306,7 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
         ? ageAtDoseMonths(lastDated, { dob, ageMonths: am }, today)
         : null),
     band,
+    priorBand,
   };
 }
 
@@ -1825,6 +1845,14 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // 2026-10-18), so it is an earlier conjugate for this question.
       && pcv.products.length === pcv.count;
     const completedBefore6 = allCountingPcvBefore72mo;
+    // Every conjugate under the PCV20 was dated and given before age 6; the
+    // PCV20 came at 6 or later (else `completedBefore6` would hold) or is
+    // undated. Undated earlier doses fail it, as they fail
+    // `allCountingPcvBefore72mo`: no card asserts an age nobody recorded.
+    //
+    // No "at least one earlier dose" clause: a series of PCV20/PCV21 alone is
+    // `pcv20IsFirstConjugate`, whose branch runs first.
+    const priorsAllBefore6 = pcv.priorBand.ge72 === 0 && pcv.priorBand.undated === 0;
     const complete = 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed [c].';
     // The conjugates on record BEFORE the completing dose -- the only ones
     // CDC's "PCV13 only, given at or after age 6 years" row is about. The
@@ -1927,6 +1955,30 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'),
       ];
       cardRefs = collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child');
+    } else if (priorsAllBefore6) {
+      // §B-PCV20-AFTER-BEFORE6 (2026-10-31). Baby doses, then the PCV20 at 6
+      // or later — an 8-year-old with diabetes, four PCV13 as a baby, PCV20 at
+      // 7. Until today she fell to the branch below and read "given at or after
+      // age 6 years" about doses given before her first birthday, citing a row
+      // about the opposite history.
+      //
+      // The row she FOLLOWED is CDC's Age 6-18 "Received PCV before age 6
+      // years but have not received PPSV23 -> Not previously received PCV20",
+      // in her class's own words (FINDING N). Cite it and say its dose has been
+      // given (owner, 2026-10-18 / 2026-10-23). The row names no product
+      // ("Received PCV"), so no PCV13/PCV15 bridge, as for rows 4/5.
+      //
+      // The IC sentence is true whichever came first: if a PPSV23 preceded the
+      // PCV20, the PCV20 is the five-year dose (an early one is the chip's
+      // business); if not, the PCV20 alone met the row.
+      note = {
+        lead: 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed.',
+        detail: `The conjugate doses before the PCV20 (${priorWords.phrase}) were all given before age 6. ${isIC
+          ? "CDC's row for an immunocompromised child with this history — PCV before age 6, no PCV20 — calls for one dose of PCV20 or PPSV23 — and, if PPSV23 is used, a PCV20 or a second PPSV23 at least 5 years later. The PCV20 on record completes that row [c]."
+          : "CDC's row for a child with this history — PCV before age 6, no PCV20 — calls for one dose of PCV20 or PPSV23, and the PCV20 has been given [c]."}`,
+      };
+      noteCites = [cite(before6NoPcv20RowKey(am, isIC))];
+      cardRefs = collectRefs(riskIds, ['cdcChildPneumo'], 'child');
     } else {
       // The 576, and an OWNER DECISION of 2026-10-18. A conjugate at age 8-13,
       // then the PCV20 at 17: no document states a completion for that history
@@ -2430,11 +2482,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     // instruction is the same either way, so no dose, date or verdict moves —
     // only which sentence the number quotes and where its deep link lands.
     //
-    // ONE age test, here, reading the engine's own `M.m72` boundary. Do not add
-    // a second one at any of the three call sites below.
-    const before6Cite = () => cite(am >= M.m72
-      ? (isIC ? 'pedsIcBefore6NoPcv20At6to18' : 'pedsRiskBefore6NoPcv20At6to18')
-      : (isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23'));
+    // ONE age test, in `before6NoPcv20RowKey()`, reading the engine's own
+    // `M.m72` boundary. Do not add a second one at any call site.
+    const before6Cite = () => cite(before6NoPcv20RowKey(am, isIC));
     if (ppsvGiven) {
       // non-IC: PPSV23 already given → complete.
       if (!isIC) {
