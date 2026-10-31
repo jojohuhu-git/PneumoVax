@@ -56,8 +56,22 @@ describe('Ava, on time — the second PPSV23 is an extra dose', () => {
     expect(analyzeBoth(AVA_ON_TIME).ppsv23.effective.map((x) => x.date)).toEqual(['2018-01-15']);
   });
 
-  it('her card is word-for-word the card of a child with one PPSV23', () => {
-    expect(recommend(AVA_ON_TIME).recs).toEqual(recommend(AVA_ONE_DOSE).recs);
+  it('her card is word-for-word the card of a child with one PPSV23 — but for the "at 19" line', () => {
+    // §B-AT19 (2026-10-31): the line repeats the adult card at 19, and there
+    // the two children DIFFER — ACIP's adult rows count every PPSV23 received
+    // (the "child today" limit above), so Ava is a two-PPSV23 adult and the
+    // one-dose child is not. Same dose either way (PCV20 or PCV21, 5 years);
+    // the two-dose row leads with the review at 50.
+    const strip = (recs) => recs.map((r) => ({
+      ...r,
+      note: { ...r.note, lead: r.note.lead.replace(/ At 19, [^[]*\[c\]\./, '') },
+      noteCites: r.noteCites.filter((c) => !['mmwrIc1949TwoPpsv', 'adultIc1949BothPcv13Ppsv'].includes(c.key)),
+    }));
+    const ava = recommend(AVA_ON_TIME).recs;
+    const one = recommend(AVA_ONE_DOSE).recs;
+    expect(strip(ava)).toEqual(strip(one));
+    expect(ava[0].noteCites.map((c) => c.key)).toContain('mmwrIc1949TwoPpsv');
+    expect(one[0].noteCites.map((c) => c.key)).toContain('adultIc1949BothPcv13Ppsv');
   });
 });
 

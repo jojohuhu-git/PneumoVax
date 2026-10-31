@@ -340,6 +340,13 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
           'Complete (a PCV of unrecorded product + PPSV23 at/after age 6)',
           'PCV complete (at-risk catch-up done)',
           'Complete (PCV series + PPSV23)',
+          // 2026-10-31 (§B-AT19): the line now comes from the adult card at 19
+          // for every at-risk "complete" card — the before-6 card C13 missed,
+          // and the immunocompromised cards (owner ruling on Noah).
+          'PCV series complete (PCV before age 6 + PPSV23)',
+          'Complete (PCV series + 2 PPSV23)',
+          'Complete (PCV13 + 2 PPSV23 at/after age 6)',
+          'Complete (a PCV of unrecorded product + 2 PPSV23 at/after age 6)',
         ].includes(r.doseLabel)) continue;
         for (const name of chipNames(r)) {
           if (name === 'CDC Adult Notes') offenders.add(`${r.vaccine} / ${r.doseLabel}`);

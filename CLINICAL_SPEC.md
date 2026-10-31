@@ -272,12 +272,50 @@ put the one-dose line on those 32; a mutation proves it.
   line; only the PCV13 and unrecorded-product labels she was shown do.
 - Only the non-immunocompromised branches carry a line. The IC twin of the "at-risk
   catch-up done" card (reachable since P2, 0 grid patients) was not in her nine families.
+  **Superseded 2026-10-31** — see below.
 
-**THIS IS A SECOND READING OF THE ADULT RULES** (`atNineteen()` in `recommend.js`). It is held
-to the first by `regression-c13-2026-10-30-what-happens-at-19.test.js`, which runs **every**
-card carrying a line forward to 19 and fails if the adult card says something else — and
-pins the four counts exactly. Measured: 540 cards gained a line and nothing else changed
-(`proseDiff`); **0** verdicts moved in either corpus; 0 uncredited citation pairs.
+**IT WAS A SECOND READING OF THE ADULT RULES; SINCE 2026-10-31 IT IS NOT.** C13 worked the line
+out from the risk class and a PPSV23 count, held to the adult card only by a grid sweep — and
+the grid cannot build a vaccinated child over 2.
+
+### §B-AT19, 2026-10-31 — every at-risk "complete" card, and the line is the adult card's own answer
+
+**OWNER RULING 2026-10-31, on Noah** (4, no spleen; catch-up PCV13 ×2 at 2; PPSV23 at 29 and 32
+months, the second counted under P2): *"Yes, add the line"* — an immunocompromised child's
+"complete" card says what happens at 19 too. Run forward, Noah's adult card at 19 reads
+*"Review at age 50 — or PCV20 or PCV21 ≥5 years after the last pneumococcal dose"*.
+
+**Running the hand-built children forward found the second reading wrong in three more
+families**, all invisible to the grid's 540:
+
+| Family | The line said | The adult card at 19 says |
+|---|---|---|
+| PCV15 baby series + PPSV23 (`Complete (PCV series + PPSV23)`) | a dose, or "re-evaluate at 50" | **Complete (PCV15 + PPSV23)** |
+| cochlear implant / CSF leak, an EARLY second PPSV23 (an extra dose, which the adult rows also leave uncounted) | "review again at age 50, or …" | PCV20 or PCV21 ≥5 years — completes the series |
+| `PCV series complete (PCV before age 6 + PPSV23)`, any risk class | **no line** | often a dose |
+
+578 of the hand-built "complete" cards disagreed with their own adult card. So `recommend()`
+now runs the **same patient**, nothing more given, forward to the day they turn 19, and
+`atNineteen()` prints the sentence for the row **that card cites** — one of her four above,
+never a new one — or **nothing** when the card cites none of them, which is every card saying
+the series is complete. `withAtNineteen()` adds it to every at-risk child's "complete" card in
+one place (the end of the lead, its citation numbered in order); no card writes it itself.
+The sentences, citations and every dose are unchanged.
+
+**On the grid:** the 540 lines she was shown are unchanged. The before-6 card was a Group B
+card C13 missed — the sweep's own label list was its filter — and the grid reaches it 145
+times: **85 gain a line** (30 dose, 45 none, 10 unrecorded) and **60** with a PCV15 series are
+complete at 19 and get none. **0 / 17,016** verdicts, **0 / 18,264** record-problem rows.
+
+*Judgement within her ruling, dose unchanged:* Ava's card (cochlear implant; her on-time second
+PPSV23 an extra dose) and a one-PPSV23 child's card are no longer word-for-word the same: at 19
+the adult rows count Ava's second dose (§C-P2-ONTIME's "child today" limit), so her line leads
+with the review at 50 and the other child's with the dose. Same dose, same five years.
+
+Guards: `regression-2026-10-31-at-19-line-is-the-adult-cards-own-answer.test.js` (a hand-built
+sweep: a line appears exactly when the adult card at 19 is not complete for life, and cites
+that card's row) and `regression-c13-2026-10-30-what-happens-at-19.test.js` (the grid, every
+line run forward, counts pinned: 186 / 327 / 32 / 80, plus the 60 without).
 
 ### What "completed by 24 months" means — FINDING M, 2026-10-22
 

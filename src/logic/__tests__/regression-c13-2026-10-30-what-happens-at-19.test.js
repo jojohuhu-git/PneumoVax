@@ -40,11 +40,20 @@ const GROUP_B = new Set([
   'Complete (a PCV of unrecorded product + PPSV23 at/after age 6)',
   'PCV complete (at-risk catch-up done)',
   'Complete (PCV series + PPSV23)',
+  // 2026-10-31 (§B-AT19): a Group B card C13 missed. The grid reaches it 145
+  // times and it carried no line, because this list was the sweep's filter and
+  // it was not on it. The line now comes from the adult card at 19 for every
+  // "complete" card: 85 of the 145 gain one (30 "dose", 45 "none", 10
+  // "unrecorded"), and the 60 with a PCV15 series are complete at 19 and get
+  // none. The 540 cards she was shown on 2026-10-30 are unchanged.
+  'PCV series complete (PCV before age 6 + PPSV23)',
 ]);
+const FINISHED_COUNT = 60; // the before-6 card with a PCV15 series, 2026-10-31
 const noteText = (r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`);
 const lineOf = (r) => Object.keys(LINES).filter((k) => noteText(r).includes(LINES[k].replace(' [c].', '')));
 
 // One pass over the grid, shared by every test below.
+const FINISHED = [];
 const SWEEP = (() => {
   const rows = [];
   for (const c of buildCases()) {
@@ -54,6 +63,10 @@ const SWEEP = (() => {
     for (const r of out.recs ?? []) {
       const lines = lineOf(r);
       if (!lines.length && !GROUP_B.has(r.doseLabel)) continue;
+      // 2026-10-31: a Group B LABEL can be complete for life — the before-6
+      // card with a PCV15 series reads "Complete (PCV15 + PPSV23)" at 19 — and
+      // then carries no line. Set aside, and checked below.
+      if (!lines.length) { FINISHED.push({ c, r }); continue; }
       rows.push({ c, r, lines });
     }
   }
@@ -68,13 +81,27 @@ describe('C13 — every at-risk "complete" card says what happens at 19', () => 
     }
   });
 
+  it('a Group B label with no line is one whose adult card at 19 says the series is complete', () => {
+    for (const { c, r } of FINISHED) {
+      const at19 = recommend({
+        ...c.input, ageMonths: 228,
+        today: addCalendarMonths(c.input.today, 228 - c.input.ageMonths),
+      }).recs[0];
+      expect(at19.status, `${c.key}: ${r.doseLabel}`).toBe('complete');
+      expect(at19.doseLabel).not.toBe(AT_19.none[0]);
+    }
+    expect(FINISHED.length).toBe(FINISHED_COUNT);
+  });
+
   it('the counts she was shown, pinned exactly', () => {
     const n = {};
     for (const { lines } of SWEEP) n[lines[0]] = (n[lines[0]] ?? 0) + 1;
-    expect(n).toEqual({ dose: 156, none: 282, twoPpsv: 32, unrecorded: 70 });
+    // 2026-10-30: 156 / 282 / 32 / 70 = 540. +30 / +45 / +10 on 2026-10-31 —
+    // the before-6 card above.
+    expect(n).toEqual({ dose: 186, none: 327, twoPpsv: 32, unrecorded: 80 });
   });
 
-  it('run forward to 19, the adult card says what the line said — every one of the 540', () => {
+  it('run forward to 19, the adult card says what the line said — every one of the 625', () => {
     let checked = 0;
     for (const { c, r, lines } of SWEEP) {
       const k = lines[0];
@@ -83,12 +110,14 @@ describe('C13 — every at-risk "complete" card says what happens at 19', () => 
         today: addCalendarMonths(c.input.today, 228 - c.input.ageMonths),
       }).recs[0];
       expect(at19.doseLabel, `${c.key}: ${r.doseLabel}`).toBe(AT_19[k][0]);
-      // The line cites the row the adult card itself cites.
-      expect(r.noteCites.at(-1).key).toBe(AT_19[k][1]);
+      // The line cites the row the adult card itself cites. (Not always the
+      // LAST cite since 2026-10-31: on a lead + "Why this" card the line ends
+      // the lead, so its cite sits before the detail's.)
+      expect(r.noteCites.map((x) => x.key)).toContain(AT_19[k][1]);
       expect(at19.noteCites.map((x) => x.key)).toContain(AT_19[k][1]);
       checked++;
     }
-    expect(checked).toBe(540);
+    expect(checked).toBe(625);
   });
 
   it('every marker still has its citation', () => {
