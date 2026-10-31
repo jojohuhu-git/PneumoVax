@@ -20,7 +20,7 @@ sessions to skip the one command that proves a claim. **Run the full suite every
 
 ### P2 — `6fcbaab` — a child's second PPSV23 inside five years
 Full write-up: `CLINICAL_SPEC.md` **§C-P2**. Guard:
-`regression-p2-2026-10-30-child-second-ppsv23.test.js` (24 tests, all hand-built children —
+`regression-p2-2026-10-30-child-second-ppsv23.test.js` (21 tests, all hand-built children —
 the grid dates no two PPSV23 doses inside five years).
 
 | Child | Now | Ruling |
