@@ -1559,6 +1559,36 @@ export const REFS = {
     quote: 'If PPSV23 is not available, PCV20 or PCV21 may be used',
     lastVerified: '2026-10-17',
   },
+  // §C-P2-NOTHIRD for an adult who already had a PCV15 (OWNER RULING
+  // 2026-10-31, quoting this footnote): two childhood PPSV23 shots, none
+  // counted, so the PPSV23 owed after the PCV15 would be the third. Read live
+  // 2026-10-31 in BOTH ACIP papers — mm7401a1 and mm7336a3 print it word for
+  // word as footnote * to the "PPSV23*" in every "None or PCV7 only at any age"
+  // row (>=50, 19-49 IC/CSF/cochlear, 19-49 chronic). The current paper is
+  // cited. It states NO timing; the card's timing is the owner's ruling.
+  mmwrPpsv23Unavailable: {
+    rulebook: 'adult',
+    // Patients this sentence is about: "adults who have received PCV15", footnoting all three adult blocks
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/mmwr/volumes/74/wr/mm7401a1.htm',
+    label: 'ACIP 2025 (MMWR mm7401a1) — clinical guidance table, footnote * to every "PPSV23*" after a PCV15: PCV20 or PCV21 may stand in for an unavailable PPSV23',
+    short: 'ACIP 2025 Adult MMWR',
+    quote: 'For adults who have received PCV15 but have not completed their recommended pneumococcal vaccine series with PPSV23, 1 dose of PCV21 or PCV20 may be used if PPSV23 is not available.',
+    lastVerified: '2026-10-31',
+  },
+  // The same substitution in CDC's own words, and the sentence that says the
+  // stand-in COMPLETES the series. Read live 2026-10-31, the paragraph headed
+  // "PPSV23 not available" (the heading is not quoted: it is a separate run).
+  adultPpsv23Unavailable: {
+    rulebook: 'adult',
+    // Patients this sentence is about: "adults aged 19 years or older who received PCV15"
+    population: ['adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    label: 'CDC Adult Schedule Notes — pneumococcal, "PPSV23 not available": after a PCV15, 1 dose of PCV20 or PCV21 completes the series',
+    short: 'CDC Adult Notes',
+    quote: 'adults aged 19 years or older who received PCV15 but have not yet completed PPSV23 series, can complete the series with either 1 dose of PCV20 or 1 dose of PCV21 if they no longer have access to PPSV23',
+    lastVerified: '2026-10-31',
+  },
   // ── C8, document 1's CITEs (2026-10-17): mm7401a1's own sentences ─────
   //
   // Document 1's REMOVALS landed first: mm7401a1 came off the 5,331 cards it
