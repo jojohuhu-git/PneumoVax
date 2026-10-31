@@ -1101,26 +1101,35 @@ function atNineteen(adultCard) {
 // weeks and asked for the grey area to be highlighted and the rulebook to say
 // so; then "PCV20 only" — no Option B, which would be his THIRD PPSV23 shot.
 //
-// SCOPED TO HER PATIENT'S CARD: an immunocompromised child whose card is the
-// "Option A PCV20 / Option B PPSV23" pair. Two other cards a child like him can
-// reach — a conjugate catch-up still owed, or the 6-18 no-prior-PCV trio —
-// are untouched: for both, "if it were counted, PCV20 would complete the
-// series" is untrue, and she was not shown them.
+// SCOPED TO HER PATIENT'S CARD at first: an immunocompromised child whose card
+// is the "Option A PCV20 / Option B PPSV23" pair.
 //
-// The two CDC rows below are the IMMUNOCOMPROMISING list's, so matching them is
-// the risk-class test; a separate `hasIC` here was found redundant by mutation.
-const GREY_ROW_KEYS = new Set(['pedsIcPcv20orPpsv23', 'pedsIcBefore6NoPcv20At6to18']);
+// §C-P2-NOTHIRD (OWNER RULINGS 2026-10-31, the same afternoon): Max, Sam's twin
+// with a cochlear implant — NOT immunocompromised — "PCV20 only + note". So the
+// non-IC list's two rows join. What differs is the note's last sentence: the
+// IC row owes a follow-on dose five years after a counted PPSV23, the non-IC
+// row does not, so if Max's repeat counted he would already be finished.
+//
+// The row Option A cites IS the risk-class test (each class has its own CDC
+// sentence); a separate `hasIC` here was found redundant by mutation.
+const PAIR_ROW_IS_IC = new Map([
+  ['pedsIcPcv20orPpsv23', true], ['pedsIcBefore6NoPcv20At6to18', true],
+  ['pedsRiskPcv20orPpsv23', false], ['pedsRiskBefore6NoPcv20At6to18', false],
+]);
 function greyAreaRepeat(recs, ppsvAnalysis, ppsvCount) {
   if (ppsvCount !== 0) return null;
   const i = (ppsvAnalysis?.perDose ?? []).findIndex((d) => d.repeatOfUnderAgeDose);
   if (i < 0) return null;
   const optionA = recs.find((r) => r.vaccine === 'PCV' && r.doseLabel?.startsWith('Option A: 1 dose PCV20'));
   const optionB = recs.find((r) => r.vaccine === 'PPSV23' && r.doseLabel?.startsWith('Option B: 1 dose PPSV23'));
-  if (!optionA || !optionB || recs.length !== 2 || !GREY_ROW_KEYS.has(optionA.noteCites?.[0]?.key)) return null;
+  if (!optionA || !optionB || recs.length !== 2 || !PAIR_ROW_IS_IC.has(optionA.noteCites?.[0]?.key)) return null;
+  const isIC = PAIR_ROW_IS_IC.get(optionA.noteCites[0].key);
   const repeatDate = ppsvAnalysis.doses[i].date;
   const given = ppsvAnalysis.perDose.length;
   const ifCounted = addCalendarMonths(repeatDate, MO60);
-  const grey = `This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted. If it were counted, PCV20 would be due on or after ${fmtDate(ifCounted)} and would complete the series.`;
+  const grey = `This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted. ${isIC
+    ? `If it were counted, PCV20 would be due on or after ${fmtDate(ifCounted)} and would complete the series.`
+    : 'If it were counted, the series would already be complete.'}`;
   return {
     index: i,
     chip: `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${grey}`,

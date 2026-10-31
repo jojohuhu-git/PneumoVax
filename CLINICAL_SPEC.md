@@ -810,11 +810,27 @@ would be due on or after Jan 5, 2030 and would complete the series."*
 
 **Scoped to the card she was shown:** an immunocompromised child whose card is that Option A /
 Option B pair (CDC's IC rows `pedsIcPcv20orPpsv23` at 2–5 and `pedsIcBefore6NoPcv20At6to18` at
-6–18). **Not ruled, and untouched:** the same history in a child who is not immunocompromised
-(both options stay; if counted, the series would already be complete, so the note's last
-sentence would be untrue); a child still owed catch-up conjugates; and the 6–18 no-prior-PCV
-card (Option A PCV20 / B-1 PCV15 / B-2 PPSV23). The flag is set by validate.js only when the
-earlier dose's own verdict says it was below the minimum age (`belowMinAge`), never re-tested.
+6–18). The flag is set by validate.js only when the earlier dose's own verdict says it was
+below the minimum age (`belowMinAge`), never re-tested. **The three limits this paragraph
+listed as not ruled were each put to her the same afternoon — §C-P2-NOTHIRD below.**
+
+### §C-P2-NOTHIRD — two PPSV23 shots, neither counted: no third shot is offered (owner, 2026-10-31)
+
+Sam's ruling left out three kinds of child. Shown one patient for each, the owner ruled every
+one the same way: **offer PCV20 only**, because the other path is a THIRD PPSV23 shot.
+
+**Max** — Sam's twin with a cochlear implant, **not** immunocompromised: same two PPSV23 shots
+(23 months, then 5 weeks later), both thrown out. His card offered Option A PCV20 / Option B
+PPSV23 with no note. She chose **"PCV20 only + note"**. The card and chip are Sam's, citing
+CDC's non-immunocompromising rows (`pedsRiskPcv20orPpsv23` at 2–5,
+`pedsRiskBefore6NoPcv20At6to18` at 6–18), except the note's last sentence: a child who is not
+immunocompromised is owed one PPSV23 and no follow-on, so *"If it were counted, the series
+would already be complete."* Sam's tail (PCV20 five years on) is the IC row's follow-on and
+must not reach him. The card's lead is Sam's word for word.
+
+Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **0 / 35,280** rendered
+lines (`proseDiff` against `main`) — the grid holds no child with two PPSV23 shots this close.
+Guard: `regression-2026-10-31-no-third-ppsv23-shot.test.js`.
 
 New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
 `cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem

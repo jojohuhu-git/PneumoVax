@@ -72,9 +72,11 @@ describe('limits — only the card she was shown', () => {
     expect(recs[0].noteCites[0].key).toBe('pedsIcBefore6NoPcv20At6to18');
   });
 
-  it('a child who is NOT immunocompromised keeps both options (not ruled)', () => {
+  // REVERSED the same day by the owner, on "Max" (§C-P2-NOTHIRD): this limit
+  // stood until she was shown him. Kept, inverted, as the record of it.
+  it('a child who is NOT immunocompromised — REVERSED 2026-10-31: PCV20 only too (Max)', () => {
     const recs = recommend({ ...SAM, riskIds: ['cochlear_implant'] }).recs;
-    expect(recs.map((r) => r.doseLabel)).toEqual(['Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)']);
+    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
   });
 
   it('a child still owed catch-up conjugates keeps her catch-up card', () => {
