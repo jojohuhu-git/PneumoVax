@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-10-31** by [handoff-2026-10-31-lily-noah-eli-sam.md](handoff-2026-10-31-lily-noah-eli-sam.md).
+> All four owner questions below were answered and built (Lily, Noah, Eli/Rosa, Sam). Do not
+> resume from this file.
+
 # PneumoVax — Handoff after three owner rulings: Noah, Ava, Maya (2026-10-31)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
