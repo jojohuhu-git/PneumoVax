@@ -2959,6 +2959,27 @@ Table 2, free to drift from the figure it cites; two readings is precisely the P
 `regression-c10-2-2026-10-23-routine-date-recommended-minimum-commented.test.js`, proved
 load-bearing four ways (4 / 3 / 3 / 2 failing tests when each clause is broken separately).
 
+#### Not extended past infants — OWNER DECISION 2026-10-31
+
+The queue carried "every card advising a date also states the true earliest date" as its
+largest item. Measured first: over the grid, **3,235** cards outside the infant block advise a
+future date. For each, a dose of that vaccine was added on every later day until it would
+count:
+
+| Cards | Earliest date it would count | Example |
+|---|---|---|
+| 511 | 1–4 days before the advised date | the 4-day grace, which the 2026-10-24 ruling keeps out of advice |
+| ~2,080 | **any day** — adult rows count an early dose with a note | 66, PCV13 at 60, PPSV23 a year ago: advised PCV20/21 in Oct 2030; one given tomorrow counts |
+| ~590 | any day for a second PPSV23 (§C-P2); 8 weeks after the PPSV23 for a PCV20 | 6, no spleen, PCV13 as a baby, PPSV23 a year ago: advised Oct 2030 |
+| 48 | an artefact — 18-year-olds who turn 19 before the date, so the adult rows take over | |
+
+So outside babies' cards the "true earliest date" is almost always *any time*. Shown that, the
+owner chose **"Leave them"**: an earliest date is stated only where a real minimum exists,
+which is the infant block above. Printing "could be given tomorrow" beside "wait 5 years"
+would argue against the card's own advice, and the chip under a dose already explains an
+early one. The same session added that note for the one place it was missing
+(§K-IC-PCV20-5Y). **Closed; do not re-open without a new owner decision.**
+
 ### §L-3 — RULING D (2026-10-23): the repeat is measured from the dose the patient GOT
 
 **OWNER RULING D, 2026-10-23:** *"the repeat dose should be spaced from the invalid dose by
