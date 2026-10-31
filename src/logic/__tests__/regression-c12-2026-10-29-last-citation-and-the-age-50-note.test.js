@@ -223,25 +223,96 @@ describe('C12: the age-50 note the owner asked for', () => {
   });
 });
 
-describe('C12: the note is scoped to the card the owner was shown', () => {
-  // Her ruling was given on ONE card. Applying it to every child who is not due
-  // today would put a 40-year-old reminder on a 3-year-old's catch-up card,
-  // which she has not seen. Pinned exactly so widening it fails here.
-  it('no other card in the grid carries the age-50 sentence', () => {
-    let onThisCard = 0;
-    const strays = [];
+describe('C12: the note goes on the two cards where 50 is really the next event', () => {
+  // ── THE WHOLE RULING, 2026-10-30 ─────────────────────────────────────────
+  //
+  // Asked whether the age-50 line should spread to the other children's cards
+  // that end in "nothing needed", the owner was shown all nine families with
+  // each one's own patient taken forward to 19 and to 50 in the running app.
+  // They do not behave alike, and that is the finding:
+  //
+  //   GROUP A — 50 really is the next event. THESE TWO GET THE LINE.
+  //     Not indicated (healthy 5-18y)  1,584  → 19: nothing. 50: a dose is due.
+  //     PCV series complete (healthy 24-59mo)  12  → the same, for a toddler.
+  //
+  //   GROUP B — the next event is NINETEEN, not 50. 640 cards, all at-risk:
+  //     Complete (PCV13 + PPSV23 at/after age 6)                        450
+  //     Complete (unrecorded-product PCV + PPSV23 at/after age 6)        70
+  //     PCV complete (at-risk catch-up done)                             15
+  //     Complete (PCV series + PPSV23)                                    5
+  //     Maya — 18, cochlear implant, PCV13 at 7y11m, PPSV23 at 12y11m —
+  //     reads "no further doses of any PCV or PPSV23 are indicated", and at 19
+  //     the app says "Due today: PCV20 or PCV21 >=5 years after the last
+  //     pneumococcal dose". Both are right; the card just names no age.
+  //     OWNER 2026-10-30: PARKED, deliberately — "think about it". Not decided,
+  //     and NOT to be quietly fixed by widening the sentence below: the age
+  //     would be wrong. It is written up in the handoff with Maya.
+  //
+  //   GROUP C — complete for life, so no "come back" line belongs at all:
+  //     PCV complete (includes PCV20) 944; Complete (PCV15 + PPSV23 at/after 6)
+  //     290; PCV series complete (PCV before age 6 + PPSV23) 145.
+  //
+  // Both counts are PINNED EXACTLY. Widening the sentence to a third card
+  // fails here, which is the point: the next card to get it must be one whose
+  // patient, run forward, is really doing nothing until 50.
+  it('exactly the two healthy families carry the age-50 sentence', () => {
+    const byCard = new Map();
     for (const c of buildCases()) {
       let out;
       try { out = recommend(c.input); } catch { continue; }
       if (out.excluded) continue;
       for (const r of out.recs ?? []) {
         if (!noteText(r).includes('Re-evaluate at age 50')) continue;
-        if (r.doseLabel === 'Not indicated (healthy 5–18y)') onThisCard += 1;
-        else strays.push(`${r.vaccine} / ${r.doseLabel}`);
+        byCard.set(r.doseLabel, (byCard.get(r.doseLabel) ?? 0) + 1);
       }
     }
-    expect(onThisCard).toBe(1584);
-    expect([...new Set(strays)]).toEqual([]);
+    expect(Object.fromEntries([...byCard.entries()].sort())).toEqual({
+      'Not indicated (healthy 5–18y)': 1584,
+      'PCV series complete': 12,
+    });
+  });
+
+  it('and it says the same thing in both places, from one constant', () => {
+    // Two copies of a sentence are two things that can drift. The engine holds
+    // it once; this asserts the cards really do print the identical wording.
+    const ivy = pcvCard(recommend({
+      ageMonths: 24, dob: '2024-10-30', today: TODAY, riskIds: [], ppsv23Doses: [],
+      pcvDoses: [
+        { product: 'PCV13', date: '2026-03-01' },
+        { product: 'PCV13', date: '2026-04-26' },
+        { product: 'PCV13', date: '2026-06-21' },
+      ],
+    }));
+    expect(ivy.doseLabel).toBe('PCV series complete');
+    expect(noteText(ivy)).toContain(AGE_50_SENTENCE);
+    expect(notIndicated(nora()).note.detail).toContain(AGE_50_SENTENCE);
+    // Her citation is the last one on the card, so the last marker is hers.
+    expect(ivy.noteCites[ivy.noteCites.length - 1].key).toBe('adultRoutine50');
+    expect(chipNames(ivy)).toContain('CDC Adult Notes');
+  });
+
+  it('Maya keeps her card unchanged — group B is parked, not quietly fixed', () => {
+    // The control for the ruling's LIMIT. If a later change spreads the
+    // sentence to the at-risk families, this fails with her name on it.
+    const maya = pcvCard(recommend({
+      ageMonths: 216, dob: '2008-10-30', today: TODAY, riskIds: ['cochlear_implant'],
+      pcvDoses: [{ product: 'PCV13', date: '2016-10-13' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-11' }],
+    }));
+    expect(maya.doseLabel).toBe('Complete (PCV13 + PPSV23 at/after age 6)');
+    expect(noteText(maya)).not.toContain('Re-evaluate at age 50');
+    expect(chipNames(maya)).not.toContain('CDC Adult Notes');
+
+    // And the reason it is parked rather than ignored: one year later the app
+    // gives her a dose. Asserted so the open question cannot quietly stop
+    // being true without someone noticing.
+    const atNineteen = pcvCard(recommend({
+      ageMonths: 228, dob: '2008-10-30', today: '2027-10-30', riskIds: ['cochlear_implant'],
+      pcvDoses: [{ product: 'PCV13', date: '2016-10-13' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-11' }],
+    }));
+    expect(atNineteen.status).toBe('risk-based');
+    expect(atNineteen.dueToday).toBe(true);
   });
 
   it('and no other CHILD card gains an adult source', () => {
@@ -254,7 +325,10 @@ describe('C12: the note is scoped to the card the owner was shown', () => {
       try { out = recommend(c.input); } catch { continue; }
       if (out.excluded) continue;
       for (const r of out.recs ?? []) {
+        // The two healthy cards that carry the age-50 line are the exception,
+        // by name. Any THIRD child card showing an adult document fails here.
         if (r.doseLabel === 'Not indicated (healthy 5–18y)') continue;
+        if (r.doseLabel === 'PCV series complete') continue;
         for (const name of chipNames(r)) {
           if (name === 'CDC Adult Notes') offenders.add(`${r.vaccine} / ${r.doseLabel}`);
         }

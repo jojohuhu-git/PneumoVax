@@ -990,6 +990,33 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   })];
 }
 
+// ── "Come back at 50" — ONE wording, ONE source, for the cards that earn it ──
+//
+// OWNER REQUEST 2026-10-29 (Nora, a healthy 10-year-old): "add a comment to
+// re-evaluate pneumococcal vaccines once the patient turns 50 years old and
+// cite the necessary adult reference." Extended 2026-10-30 to the healthy
+// 24-59-month child whose series is complete, after she was shown what the app
+// says to each of the nine children's cards that end in "nothing needed", taken
+// forward to 19 and to 50.
+//
+// ⚠ IT GOES ONLY WHERE 50 IS REALLY THE NEXT EVENT. Of those nine families:
+//   • 2 (these) are HEALTHY children — nothing at 19, a dose due at 50.
+//   • 4 are AT-RISK children, 640 cards, where the app gives a dose at NINETEEN,
+//     not 50. Printing "re-evaluate at age 50" there would name the wrong age.
+//     Owner 2026-10-30: parked, deliberately, not decided — see the handoff.
+//   • 3 are complete for life (a PCV20 in the series, or PCV15 + PPSV23): no
+//     such line belongs on them at all.
+// So this is not a sentence to spread. Before putting it on a new card, run
+// that patient forward and check that 50 is the age the app itself acts on.
+//
+// Kept here as one constant rather than typed twice, because two copies of a
+// sentence are two things that can drift — the fault this file keeps paying
+// for. The marker and the cite move together.
+const REVIEW_AT_50_SENTENCE = 'Re-evaluate at age 50, when routine pneumococcal vaccination begins for every adult [c].';
+const reviewAt50Cite = () => cite('adultRoutine50', {
+  aboutAnotherGroup: 'states where routine adult vaccination begins, which is the age this child should be re-assessed at',
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1111,12 +1138,16 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         vaccine: 'PCV', status: 'complete',
         // Markers are paired to cites by POSITION (`noteCiteSlices`), so the
         // count here and the array below must move together.
-        note: `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.)`,
+        note: `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.) ${REVIEW_AT_50_SENTENCE}`,
         doseLabel: 'PCV series complete',
         noteCites: [
           cite('pedsNoPcv20IfComplete'),
           cite('p2016HealthyComplete24to59'),
           ...(jobAidEndsItHere ? [cite('jobAidPedsCatchupNoneNeeded')] : []),
+          // OWNER DECISION 2026-10-30. This child and Nora are the two healthy
+          // families where the app itself does nothing until 50: at 19 she
+          // reads "not indicated (no risk, <50y)", at 50 a dose falls due.
+          reviewAt50Cite(),
         ],
         refs,
       })];
@@ -1206,7 +1237,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
     doseLabel: 'Not indicated (healthy 5–18y)',
     note: {
       lead: 'No PCV is indicated — healthy children 5–18 years are not routinely caught up [c].',
-      detail: 'CDC\'s catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c]. Re-evaluate at age 50, when routine pneumococcal vaccination begins for every adult [c].',
+      detail: `CDC's catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c]. ${REVIEW_AT_50_SENTENCE}`,
     },
     noteCites: [
       cite('pedsHealthyCatchup'),
@@ -1231,9 +1262,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
       // The key is already one of the four pinned cross-references, and the
       // same sentence is already on the adult 19-49 no-risk card -- one
       // wording, one source, both sides of the boundary.
-      cite('adultRoutine50', {
-        aboutAnotherGroup: 'states where routine adult vaccination begins, which is the age this child should be re-assessed at',
-      }),
+      reviewAt50Cite(),
     ],
     // C9 (2026-10-23). p2016 is NOT listed here, and the reason is an OWNER
     // RULE rather than this card alone: "Ok to cite p2016 if you cannot just

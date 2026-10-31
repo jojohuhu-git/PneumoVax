@@ -171,10 +171,10 @@ Catch-up grid by current age band × # previous PCV13/15/20 doses × age-at-prio
 
 - 24–59 mo, **completed any PCV schedule (incl. all-PCV13) by 24mo** → no additional doses.
 - 24–59 mo, **no/incomplete schedule by 24mo** → **1 dose** PCV15/PCV20 ≥8wk after most recent PCV.
-- 5–18 y healthy → **no additional doses** (healthy older children are not caught up), and
-  the card adds **"Re-evaluate at age 50, when routine pneumococcal vaccination begins for
-  every adult"**. (CDC Child/Adolescent Notes for the first; `adultRoutine50` for the
-  second — see §B-5TO18 below.)
+- 5–18 y healthy → **no additional doses** (healthy older children are not caught up).
+- Both **healthy** "nothing needed" cards — the 5–18 one and the complete 24–59 month one —
+  add **"Re-evaluate at age 50, when routine pneumococcal vaccination begins for every
+  adult"** (`adultRoutine50`). **No at-risk card does** — see §B-50NOTE.
 
 ### §B-5TO18 — the healthy 5–18 card: what it cites, and the age-50 note
 
@@ -212,10 +212,34 @@ words from the other side. **Not used:** `mmwrChronic1949ReviewAt50` and
 `jobAidChronic1949ReviewAt50` — both are printed about a 19–49 adult **with chronic
 conditions** and tell you to review a risk-based decision, which is a different claim.
 
-**Scoped to this card only** (1,584), on the rule that a ruling is scoped to the patients
-she worked: no other card gains the sentence, pinned exactly so widening it fails.
-**0 verdicts moved** in either corpus — the corpora record status, brands and dates, never
-prose. Guard:
+### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
+
+**OWNER DECISION 2026-10-30.** Asked whether the age-50 line should spread to the other
+children's cards that end in "nothing needed", she was shown **all nine families**, each
+with its own patient taken forward to 19 and to 50 in the running app. They do not behave
+alike, and that is the whole rule — **the line goes only where 50 is really the next event.**
+
+| Group | Families / cards | What the app does at 19 and at 50 | Disposition |
+|---|---|---|---|
+| **A — healthy** | *Not indicated (healthy 5–18y)* 1,584; *PCV series complete* (healthy 24–59 mo) 12 | 19: nothing indicated. **50: a dose is due.** | **The line, on both** |
+| **B — at-risk** | *Complete (PCV13 + PPSV23 at/after 6)* 450; *unrecorded-product PCV + PPSV23 at/after 6* 70; *at-risk catch-up done* 15; *PCV series + PPSV23* 5 — **640** | **19: a dose is due** (adult special-situations row), and again at 50 | **PARKED by the owner** |
+| **C — complete for life** | *includes PCV20* 944; *PCV15 + PPSV23 at/after 6* 290; *PCV before age 6 + PPSV23* 145 — **1,379** | complete at 19 and at 50 | **No line — nothing is ever due** |
+
+⚠ **GROUP B IS AN OPEN OWNER QUESTION, NOT A GAP TO TIDY.** *Maya — 18, cochlear implant,
+PCV13 at 7y11m, PPSV23 at 12y11m* — reads *"no further doses of any PCV or PPSV23 are
+indicated"*, and one year later the app says *"Due today: PCV20 or PCV21 ≥5 years after the
+last pneumococcal dose"*. Both are correct: the paediatric schedule does finish her, and the
+adult schedule does give her a dose. The card simply names no age. Shown that, the owner
+chose **"think about it"** on 2026-10-30. **Never close it by putting the age-50 sentence on
+these cards — the age would be wrong; the number for them is 19.** Maya is asserted in the
+guard, including the dose she gets at 19, so the question cannot quietly stop being true.
+
+**The sentence lives in ONE constant** (`REVIEW_AT_50_SENTENCE` + `reviewAt50Cite()` in
+`recommend.js`) rather than being typed on each card — two copies of a sentence are two
+things that can drift. Both counts are **pinned exactly**, so adding a third card fails;
+the next card to earn it must be one whose patient, run forward, really does nothing until
+50. **0 verdicts moved** in either corpus — the corpora record status, brands and dates,
+never prose. Guard:
 `regression-c12-2026-10-29-last-citation-and-the-age-50-note.test.js`; C9's guard keeps its
 now-reversed line as the record of the reversal.
 
