@@ -155,6 +155,9 @@ describe('C8 — the complete card credits the row that ordered the dose', () =>
     expect(card, 'no complete card for the IC patient').toBeTruthy();
     expect(shownKeys(card)).toEqual([
       'pedsBefore6NoPcv20',
+      // §B-AT19 (2026-10-31): the "at 19" line ends the lead, so its row sits
+      // between the lead's citation and the detail's.
+      'mmwrIc1949TwoPpsv',
       'pedsIcBefore6NoPcv20At6to18',
       'p2016Before6PpsvGivenIcOptions',
     ]);

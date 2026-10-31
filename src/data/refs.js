@@ -2068,6 +2068,42 @@ export const REFS = {
     lastVerified: '2026-10-12',
   },
 
+  // CDC General Best Practices — repeating a dose given too young ---------
+  //
+  // §C-P2-GREY (OWNER RULING 2026-10-31, on "Sam"). Both sentences read live
+  // 2026-10-31 from the page below, each found exactly once. The first says
+  // when a dose given under the minimum age is repeated; the second gives a
+  // gap from the invalid dose for a LIVE vaccine only. PPSV23 is not live, so
+  // CDC states no gap at all for its repeat — the grey area the owner asked
+  // to have highlighted, where the app keeps its own 8 weeks.
+  cdcGbpTimingSpacing: {
+    rulebook: 'any',
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    label: 'CDC General Best Practice Guidelines — Timing and Spacing of Immunobiologics',
+    short: 'CDC Timing and Spacing',
+    lastVerified: '2026-10-31',
+  },
+  cdcGbpRepeatUnderMinAge: {
+    rulebook: 'any',
+    // Patients this sentence is about: its own words, "the child"
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    label: 'CDC General Best Practices, Timing and Spacing — a first dose given too young is repeated on or after the minimum age',
+    short: 'CDC Timing and Spacing',
+    quote: 'If the first dose in a series is given ≥5 days before the recommended minimum age, the dose should be repeated on or after the date when the child reaches at least the minimum age',
+    lastVerified: '2026-10-31',
+  },
+  cdcGbpLiveVaccine28Days: {
+    rulebook: 'any',
+    // Patients this sentence is about: anyone given a live vaccine too young; carries no age of its own
+    population: ['child-routine', 'child-nonIC', 'child-IC', 'adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    label: 'CDC General Best Practices, Timing and Spacing — a gap from the invalid dose is stated for a LIVE vaccine only',
+    short: 'CDC Timing and Spacing',
+    quote: 'If the vaccine is a live vaccine, ensuring that a minimum interval of 28 days has elapsed from the invalid dose is recommended',
+    lastVerified: '2026-10-31',
+  },
+
   // CAR-T / B-cell malignancy / B-cell-depleting therapy hard stop -------
   cdcAlteredImmunocompetence: {
     rulebook: 'any',

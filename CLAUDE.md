@@ -525,8 +525,12 @@ it. **N6's own sweep cannot see this** — it ticks one risk condition at a time
 reaches the healthy card — so C12's guard holds the line instead: no OTHER child card may
 carry an adult source. Never answer a future "an adult source is on a child's card" by
 widening N6; add the card to that guard's exception, or fix the call site. C13's lines are
-a second reading of the adult rules, held to the first by
-`regression-c13-2026-10-30-what-happens-at-19.test.js` (every card run forward to 19).
+**no longer a second reading of the adult rules** (2026-10-31, §B-AT19): `recommend()` runs
+the same patient forward to 19 and the line repeats the row that card cites — the second
+reading had disagreed with the adult card on 578 hand-built children the grid never reaches.
+**Never hand-write an "at 19" line into a card**; `withAtNineteen()` adds it to every at-risk
+"complete" card. Guards: `regression-2026-10-31-at-19-line-is-the-adult-cards-own-answer`
+(hand-built) and `regression-c13-2026-10-30-what-happens-at-19.test.js` (the grid).
 
 ### The App Advises And Grades By One Number — CDC Catch-up Table 2
 **OWNER DECISION 2026-10-23, and it REVERSES owner decision 2 of 2026-10-11.** A PCV dose

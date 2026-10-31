@@ -272,12 +272,50 @@ put the one-dose line on those 32; a mutation proves it.
   line; only the PCV13 and unrecorded-product labels she was shown do.
 - Only the non-immunocompromised branches carry a line. The IC twin of the "at-risk
   catch-up done" card (reachable since P2, 0 grid patients) was not in her nine families.
+  **Superseded 2026-10-31** — see below.
 
-**THIS IS A SECOND READING OF THE ADULT RULES** (`atNineteen()` in `recommend.js`). It is held
-to the first by `regression-c13-2026-10-30-what-happens-at-19.test.js`, which runs **every**
-card carrying a line forward to 19 and fails if the adult card says something else — and
-pins the four counts exactly. Measured: 540 cards gained a line and nothing else changed
-(`proseDiff`); **0** verdicts moved in either corpus; 0 uncredited citation pairs.
+**IT WAS A SECOND READING OF THE ADULT RULES; SINCE 2026-10-31 IT IS NOT.** C13 worked the line
+out from the risk class and a PPSV23 count, held to the adult card only by a grid sweep — and
+the grid cannot build a vaccinated child over 2.
+
+### §B-AT19, 2026-10-31 — every at-risk "complete" card, and the line is the adult card's own answer
+
+**OWNER RULING 2026-10-31, on Noah** (4, no spleen; catch-up PCV13 ×2 at 2; PPSV23 at 29 and 32
+months, the second counted under P2): *"Yes, add the line"* — an immunocompromised child's
+"complete" card says what happens at 19 too. Run forward, Noah's adult card at 19 reads
+*"Review at age 50 — or PCV20 or PCV21 ≥5 years after the last pneumococcal dose"*.
+
+**Running the hand-built children forward found the second reading wrong in three more
+families**, all invisible to the grid's 540:
+
+| Family | The line said | The adult card at 19 says |
+|---|---|---|
+| PCV15 baby series + PPSV23 (`Complete (PCV series + PPSV23)`) | a dose, or "re-evaluate at 50" | **Complete (PCV15 + PPSV23)** |
+| cochlear implant / CSF leak, an EARLY second PPSV23 (an extra dose, which the adult rows also leave uncounted) | "review again at age 50, or …" | PCV20 or PCV21 ≥5 years — completes the series |
+| `PCV series complete (PCV before age 6 + PPSV23)`, any risk class | **no line** | often a dose |
+
+578 of the hand-built "complete" cards disagreed with their own adult card. So `recommend()`
+now runs the **same patient**, nothing more given, forward to the day they turn 19, and
+`atNineteen()` prints the sentence for the row **that card cites** — one of her four above,
+never a new one — or **nothing** when the card cites none of them, which is every card saying
+the series is complete. `withAtNineteen()` adds it to every at-risk child's "complete" card in
+one place (the end of the lead, its citation numbered in order); no card writes it itself.
+The sentences, citations and every dose are unchanged.
+
+**On the grid:** the 540 lines she was shown are unchanged. The before-6 card was a Group B
+card C13 missed — the sweep's own label list was its filter — and the grid reaches it 145
+times: **85 gain a line** (30 dose, 45 none, 10 unrecorded) and **60** with a PCV15 series are
+complete at 19 and get none. **0 / 17,016** verdicts, **0 / 18,264** record-problem rows.
+
+*Judgement within her ruling, dose unchanged:* Ava's card (cochlear implant; her on-time second
+PPSV23 an extra dose) and a one-PPSV23 child's card are no longer word-for-word the same: at 19
+the adult rows count Ava's second dose (§C-P2-ONTIME's "child today" limit), so her line leads
+with the review at 50 and the other child's with the dose. Same dose, same five years.
+
+Guards: `regression-2026-10-31-at-19-line-is-the-adult-cards-own-answer.test.js` (a hand-built
+sweep: a line appears exactly when the adult card at 19 is not complete for life, and cites
+that card's row) and `regression-c13-2026-10-30-what-happens-at-19.test.js` (the grid, every
+line run forward, counts pinned: 186 / 327 / 32 / 80, plus the 60 without).
 
 ### What "completed by 24 months" means — FINDING M, 2026-10-22
 
@@ -698,6 +736,7 @@ CDC's General Best Practices puts that repeat "on or after the date when the chi
 least the minimum age", and asks for a 28-day spacing only for live vaccines — so for a dose
 given at 22–24 months, this row's 8 weeks is stricter than CDC by up to 8 weeks. Main asked for
 5 years there, so the change only loosens it. 0 grid patients either way.
+**Ruled 2026-10-31 — the 8 weeks stays, and the grey area is stated: §C-P2-GREY below.**
 
 Measured: **0 / 17,016** verdicts and **0 / 18,264** record-problem rows moved (the grid never
 dates a rejected PPSV23 and a repeat); 0 uncredited citation pairs over 17,311 cards.
@@ -720,10 +759,11 @@ Her card is word-for-word the card of a child with one PPSV23, as before.
 | **An extra PPSV23 still holds off a conjugate for 8 weeks** — `CHILD-PCV-AFTER-PPSV23` measures from the most recent PPSV23 that counted **or was an extra dose** | 72 conjugate doses began to count, and 34 cards went from "dose owed" to "Complete" | OWNER RULING 2026-10-30, on **Ben** (18, diabetes; PPSV23 at 8 and 13, PCV13 the next day): *"Yes, still wait 8 weeks"* — the reason for her 8-week bar, a weaker conjugate response soon after a PPSV23, is about the dose the child received, needed or not |
 | **Only a patient who is a child TODAY** | 16 nineteen-year-olds with a cochlear implant or CSF leak, both PPSV23 doses given in childhood, had their card switch from ACIP's "PCV13 and 2 doses of PPSV23" row to the one-dose row — a history they do not have. Same dose, same date | ACIP's adult rows count every PPSV23 received; she ruled on a child. *A judgement within her ruling, dose unchanged — listed in the PR* |
 
-A REJECTED PPSV23 still holds off nothing across streams (ANCHOR-1, unchanged): only a dose
-that was validly given and recorded as extra joins the 8-week anchor. An immunocompromised
-child's on-time THIRD PPSV23 still counts silently (CDC never gives a third) — **not ruled;
-asked in the PR.**
+A REJECTED PPSV23 still holds off nothing across streams (ANCHOR-1, unchanged — and put to the
+owner and RE-CONFIRMED 2026-10-31, §K-PPSV23THENPCV "Rosa and Eli"): only a dose that was
+validly given and recorded as extra joins the 8-week anchor. **That anchor reached the dose
+check only, not the card, until 2026-10-31** (same section). An immunocompromised
+child's on-time THIRD PPSV23 is an extra dose too — ruled 2026-10-31, §C-P2-THIRD below.
 
 Measured: **464 / 17,016** verdicts moved — every one a child, every one only the label under
 the second PPSV23 (0 conjugate verdicts, 0 cards, 0 changed card sentences by `proseDiff`).
@@ -736,6 +776,74 @@ dose with status `valid`, extra or not — wrong since that panel was written, f
 dose in the app (infant PCV extras, adult doses after a completed series, P2's early PPSV23).
 It now reads *"1 of 2 PPSV23 doses counted — 1 an extra dose, not needed, with the reason on
 the dose itself."* No corpus records that panel, so no count moved.
+
+### §C-P2-GREY — the repeat of a too-young first PPSV23: the 8 weeks stays, and the card says it is a grey area (owner, 2026-10-31)
+
+**Sam**, 2, no spleen, a full infant PCV13 series: PPSV23 on Dec 1, 2024 at 23 months — under
+the 2-year minimum, thrown out — and again on Jan 5, 2025, just past his 2nd birthday and 5
+weeks later. `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` throws the repeat out too (8 weeks from
+the invalid dose). CDC General Best Practices, Timing and Spacing (read live 2026-10-31, each
+sentence once):
+
+> *"If the first dose in a series is given ≥5 days before the recommended minimum age, the dose
+> should be repeated on or after the date when the child reaches at least the minimum age"* —
+> and the gap from the invalid dose is given only *"If the vaccine is a live vaccine"* (28 days).
+> PPSV23 is not live, so CDC states no gap for its repeat.
+
+Asked whether Sam's repeat should count, the owner answered: *"There is another issue that won't
+have a clear answer. Is it possible to highlight this grey area and use the latter rule and
+update the rulebook with such."* The latter rule is the app's 8 weeks. Shown the reading back
+with a drafted note, she confirmed it and chose **"PCV20 only"**: the card's Option B would be
+his THIRD PPSV23 shot. Her answer on Rosa the same day agrees: spacing from an invalid dose
+*"applies when the repeat dose is the same as the invalid dose"*, and Sam's is.
+
+| Surface | Before | Now |
+|---|---|---|
+| Card | Option A PCV20 / Option B PPSV23 | **1 dose PCV20 (≥8 weeks) — completes the series**; "Why this" carries the grey-area note, citing both CDC sentences |
+| Chip under the Jan 5 dose | *"… It is not repeated; the next dose in this series can be given from Mar 2, 2025 at the earliest."* | *"… It is not repeated."* + the grey-area note |
+
+The note, her draft word for word with the dates filled in: *"Grey area: CDC says a dose given
+under the minimum age is repeated on or after that age, and states no gap from the invalid dose
+for a vaccine that is not live. ACIP does not address this case. This app spaces the repeat 8
+weeks from the invalid dose, so the Jan 5, 2025 dose is not counted. If it were counted, PCV20
+would be due on or after Jan 5, 2030 and would complete the series."*
+
+**Scoped to the card she was shown:** an immunocompromised child whose card is that Option A /
+Option B pair (CDC's IC rows `pedsIcPcv20orPpsv23` at 2–5 and `pedsIcBefore6NoPcv20At6to18` at
+6–18). **Not ruled, and untouched:** the same history in a child who is not immunocompromised
+(both options stay; if counted, the series would already be complete, so the note's last
+sentence would be untrue); a child still owed catch-up conjugates; and the 6–18 no-prior-PCV
+card (Option A PCV20 / B-1 PCV15 / B-2 PPSV23). The flag is set by validate.js only when the
+earlier dose's own verdict says it was below the minimum age (`belowMinAge`), never re-tested.
+
+New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
+`cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem
+rows. Guard: `regression-2026-10-31-sam-grey-area-repeat-of-a-too-young-ppsv23.test.js`.
+
+### §C-P2-THIRD — an immunocompromised child's on-time third PPSV23 is an extra dose (owner, 2026-10-31)
+
+**Lily**, 18 years 10 months, no spleen: PCV13 ×2 at age 2, PPSV23 at 2y4m, 7y5m and 12y6m —
+each clear of five years. The third counted silently as "dose 3", on a card reading *"both
+PPSV23 doses have been received"*. CDC's child notes print "dose 2 PPSV23" and no third
+(read live 2026-10-30). Asked, the owner chose **"Extra dose"**: the same label P2 already gave
+an EARLY third — *"Not needed: two PPSV23 doses have already been given (…), and CDC never
+gives a third."* The early/on-time split is gone for both risk classes; the limits of
+§C-P2-ONTIME (dated dose, a child today) and Ben's 8-week hold on a conjugate apply unchanged.
+
+**The knock-on at 19, which was in the question she answered.** At 19 the adult rows count every
+PPSV23 received (§C-P2-ONTIME's "child today" limit), so Lily holds three — and mm7401a1 prints
+rows for one and two only. Before, a 19–49 IC / cochlear / CSF adult with three fell to the
+fallback *"PCV20 or PCV21 ≥5 years … completes the series"* with **no ACIP number at all**; the
+two-dose girl got *"Review at age 50 — or PCV20 or PCV21"*. Now **two or more** reads the
+two-dose row, and the card names the real count (*"PCV13 and 3 doses of PPSV23"*).
+*A judgement within her ruling, dose unchanged* — same products, same five years, same status,
+same due date; only the words and the citation move. The card now ASKS
+`mmwrBothPcv13PpsvKey()` which row speaks instead of re-testing the count, so the two cannot
+drift (a mutation of the selector alone now fails 2 tests; before, it failed none).
+
+Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows — the grid holds at most
+two PPSV23 doses, so every patient here is hand-built. Guard:
+`regression-2026-10-31-ic-child-third-ppsv23-is-extra.test.js`.
 
 ---
 
@@ -2288,6 +2396,47 @@ in 2019 and again 54 days ago and no conjugate, is told her PCV20 is **due today
 whose label reads "≥8 weeks". **Verified identical on `main`, so it predates this work** and is
 recorded as its own finding, not folded in here. This fix is unaffected — `mostRecent` can only
 push a date later — and the behaviour must **not** be pinned by a test, which would freeze it.
+
+#### §K-PPSV23THENPCV, 2026-10-31 — a THROWN-OUT PPSV23 holds off nothing; an EXTRA one now holds the card too
+
+**Three owner answers in one day, the later two withdrawing the first.**
+
+1. **Eli** (asplenia; catch-up PCV13 Feb 1 and Apr 1, 2023; PPSV23 Apr 29, thrown out — 28 days
+   after the PCV13; PCV20 Jun 1, 33 days after that PPSV23): *"Yes, 8 weeks after any PPSV23."*
+2. Built, that moved **22 / 17,016** verdicts and **66 / 18,264** record-problem rows — **every
+   one a baby given PPSV23 under age 2** (thrown out for AGE), and **0** of Eli's own kind
+   (thrown out for spacing). Asked with **Rosa** (PCV13 at 2, 4, 6 months; PPSV23 given by
+   mistake at 12 months; PCV13 booster a week later): *"The Sep 8 PCV13 dose should count as a
+   valid dose 4, and no repeat is needed. Per CDC: repeat dose should be spaced after the invalid
+   dose by the recommended minimum interval. This means this rule applies when the repeat dose
+   is the same as the invalid dose."*
+3. Her reason covers Eli too, so he was put back to her dose by dose, on/off schedule marked:
+   *"Count it."*
+
+**So ANCHOR-1 stands for this direction**: a PPSV23 thrown out — for spacing or for age — holds
+off no conjugate. The answer-1 change was reverted before commit; nothing of it shipped.
+
+**What the question found, and what DID change.** Ben's ruling of 2026-10-30 (an EXTRA PPSV23
+holds a conjugate 8 weeks) had reached the dose check and not the card. The check measured
+from the last PPSV23 that counted **or was extra**; every card's 8-week hold measured from the
+last that **counted**. A diabetic 5-year-old whose extra PPSV23 was 3 weeks old was told her
+catch-up conjugate was **due today** — and the app threw that dose out when it was given: the
+P0 bug's shape (CLAUDE.md, "advises and grades by one number"). Both sides now call one
+function, `lastPpsv23HoldingAConjugate()` in `doseIntervalRules.js`; validate.js returns its
+answer as `conjugateHold` and `recommend.js` reads it as `ppsv.holdDate` at all ten places
+that held a conjugate after a PPSV23 (the old `ppsv.lastDate` is gone). A hand-built sweep
+gives every child the conjugate on the date its card advises: **22 were thrown out before, 0
+now.** **0 / 17,016** verdicts and **0 / 18,264** record-problem rows moved — the grid builds
+no child with an extra PPSV23 and a conjugate still owed.
+
+One older control asserted the bug: `regression-2026-10-26-eight-weeks-runs-from-the-last-ppsv23`
+used a cochlear-implant child's EXTRA dose as its example of "a dose that does not count cannot
+push the conjugate out". It now asserts Ben's ruling (held to 8 weeks after the extra dose).
+
+Guard: `regression-2026-10-31-card-holds-a-conjugate-after-an-extra-ppsv23.test.js` (Eli and
+Rosa as she ruled them, the extra-dose child, and the advice-equals-grading sweep). Mutations:
+the card reading counted doses only fails 3; dropping extras on both sides fails 19; on the
+card side only, 4.
 
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 

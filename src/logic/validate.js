@@ -50,7 +50,7 @@ import { cite } from '../data/refs.js';
 import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 import { hasIC } from '../data/riskFactors.js';
-import { evaluateDoseInterval } from './doseIntervalRules.js';
+import { evaluateDoseInterval, lastPpsv23HoldingAConjugate } from './doseIntervalRules.js';
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
 // dose. Dropped HERE, at the walk, so that no caller can count one by
 // forgetting to filter — the UI sweeps them too, but only for tidiness.
@@ -767,11 +767,16 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
-    return invalid(
-      [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
-      ageCites
-    );
+    return {
+      ...invalid(
+        [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
+        `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
+        ageCites
+      ),
+      // §C-P2-GREY (2026-10-31): read by `stepStream` to name the repeat of a
+      // dose given too young, whose spacing CDC does not state.
+      belowMinAge: true,
+    };
   }
   // Age is settled; now the dose's timing, against the one rule table. Rule
   // ORDER decides which message a dose that breaks two rules gets — the table
@@ -970,6 +975,15 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // The date is `result.conjugateAlternative.dueDate`, computed by the
       // rules table's own clocks. Never recompute it here; this file owns no
       // interval logic.
+      // §C-P2-GREY (OWNER RULING 2026-10-31, on "Sam"). The repeat of a first
+      // PPSV23 given TOO YOUNG, thrown out only because it came inside 8 weeks
+      // of that dose. CDC states no gap for it (a gap from the invalid dose is
+      // given for live vaccines only), so `recommend.js` highlights the grey
+      // area on this chip and on the card. Read off the earlier dose's own
+      // verdict — never re-tested here.
+      const repeatOfUnderAgeDose = result.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST'
+        && st.perDose.some((v, i) => v.belowMinAge && st.doses[i]?.date === st.prev?.date)
+        ? st.prev.date : null;
       const alt = result.recordProblem ? null : result.conjugateAlternative;
       const alternativeSentence = alt
         ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
@@ -986,6 +1000,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         // swapped by accident.
         forwardLookingReason: result.recordProblem || !result.intervalRuleId ? null : closingSentence,
         withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : `${DOES_NOT_COUNT_LEAD} It is not repeated.`,
+        ...(repeatOfUnderAgeDose ? { repeatOfUnderAgeDose } : {}),
         reasons: [...result.reasons, closingSentence, alternativeSentence].filter(Boolean),
       }));
       // RULING D (2026-10-23) — a mistimed dose anchors the next one, because
@@ -1133,11 +1148,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     //     floor), and `kept.length` is checked here as well, so a child whose
     //     first PPSV23 was thrown out never has her only real dose called
     //     extra.
-    //   • for an IC child's THIRD, only when `CHILD-PPSV23-AFTER-PPSV23` fired
-    //     — more than CDC's 4-day grace early, which is exactly the dose that
-    //     used to be THROWN OUT (the row keeps the grace: owner decision
-    //     2026-10-30). For a non-IC child's SECOND, early OR ON TIME — WIDENED
-    //     the same day (OWNER RULING 2026-10-30, "Yes, extra dose too"): the
+    //   • early OR ON TIME, for a non-IC child's SECOND (OWNER RULING
+    //     2026-10-30, "Yes, extra dose too") and an IC child's THIRD (OWNER
+    //     RULING 2026-10-31, on "Lily": "Extra dose", §C-P2-THIRD): the
     //     on-time dose is just as unneeded, and used to count in silence. It
     //     must carry a date, so the walk's order really says which came first,
     //     and the patient must still be a CHILD TODAY: an adult's history is
@@ -1158,7 +1171,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const icChild = hasIC(riskIds);
     const ppsvRowFired = !!result.earlyAdvisory && result.intervalRuleId === 'CHILD-PPSV23-AFTER-PPSV23';
     if (vaccine === 'PPSV23' && !isAdultDose && kept.length >= (icChild ? 2 : 1)
-      && (ppsvRowFired || (!icChild && !!dose.date && ageMonths < ADULT_SCHED_MIN_M))) {
+      && (ppsvRowFired || (!!dose.date && ageMonths < ADULT_SCHED_MIN_M))) {
       // Drop the row's own "Counted; never give a third" sentence and its
       // "Why this" — both say the dose counts, which is no longer true here.
       // The row's are the LAST of each, as in the adult block above. An
@@ -1271,6 +1284,10 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
     },
     ppsv23: {
       perDose: ppsv23.perDose, effective: ppsv23.kept, doses: ppsv23.doses, anchor: ppsv23.prev,
+      // The PPSV23 a child's next conjugate waits 8 weeks after — counted or
+      // extra, never thrown out. Read off the same function the dose check's
+      // row uses, so `recommend.js` never decides it a second time.
+      conjugateHold: lastPpsv23HoldingAConjugate(ppsv23.kept, ppsv23.extraChildPpsv23)?.date ?? null,
     },
   };
 }

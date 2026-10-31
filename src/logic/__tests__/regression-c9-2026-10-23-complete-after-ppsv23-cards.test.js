@@ -261,7 +261,8 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
             reachable++;
             expect(noteOf(hit)).toMatch(/^At-risk immunocompromised child 24–71 months/);
             expect(noteOf(hit)).not.toMatch(/non-immunocompromising/);
-            expect(hit.noteCites.map((c) => c.key)).toEqual(['pedsIcPcv20orPpsv23']);
+            // + the "at 19" line's row (§B-AT19, owner ruling 2026-10-31 on Noah).
+            expect(hit.noteCites.map((c) => c.key)).toEqual(['pedsIcPcv20orPpsv23', 'mmwrIc1949TwoPpsv']);
           }
         }
       }

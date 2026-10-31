@@ -243,12 +243,35 @@ const ANCHORS = {
   // Read by ONE row, `CHILD-PCV-AFTER-PPSV23`: its 8-week wait rests on a
   // weaker conjugate response after a PPSV23, which a dose that was not
   // needed causes as much as one that was. A REJECTED PPSV23 still anchors
-  // nothing across streams (ANCHOR-1).
-  lastPpsv23Received: (ctx) => lastOf(
-    [...(ctx.priorPpsv23 ?? []), ...(ctx.ppsv23ExtraGiven ?? [])]
-      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)),
-  ),
+  // nothing across streams (ANCHOR-1) — RE-CONFIRMED 2026-10-31 on Rosa and
+  // Eli, below `lastPpsv23HoldingAConjugate`.
+  lastPpsv23Received: (ctx) => lastPpsv23HoldingAConjugate(ctx.priorPpsv23, ctx.ppsv23ExtraGiven),
 };
+
+/**
+ * The PPSV23 a child's next conjugate is held 8 weeks after: the most recent
+ * one that COUNTED or was an EXTRA dose. The ONE definition — the dose check
+ * (`CHILD-PCV-AFTER-PPSV23`) and the card's advised date (`recommend.js`, via
+ * validate.js's `conjugateHold`) both call this, so the app advises the date
+ * it accepts. Until 2026-10-31 the card read counted doses only, and a child
+ * whose EXTRA PPSV23 was 3 weeks old was told her conjugate was due today,
+ * then had it thrown out.
+ *
+ * A THROWN-OUT PPSV23 holds off nothing — OWNER RULINGS 2026-10-31. Rosa (a
+ * PPSV23 given by mistake at 12 months, the PCV13 booster a week later): "The
+ * Sep 8 PCV13 dose should count ... Per CDC: repeat dose should be spaced
+ * after the invalid dose by the recommended minimum interval. This means this
+ * rule applies when the repeat dose is the same as the invalid dose." Then Eli
+ * (a PPSV23 thrown out for spacing, a PCV20 33 days later), shown dose by
+ * dose: "Count it" — which withdrew her first answer on Eli that morning.
+ */
+export function lastPpsv23HoldingAConjugate(counted, extra) {
+  return lastOf(
+    [...(counted ?? []), ...(extra ?? [])]
+      .filter((d) => d && d.date)
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)),
+  );
+}
 
 function lastOf(list) {
   return list && list.length ? list[list.length - 1] : null;
