@@ -905,15 +905,18 @@ toward the series."*, or for a timing rejection its *"— given too soon after t
 measured from."*). The later dose is the next row that is no record problem and on a later
 day. Guard: `regression-2026-10-31-first-chip-points-to-the-later-ppsv23.test.js`.
 
-**Scope: a child NONE of whose PPSV23 shots counted** — Sam, Noah, Ivy, Max, Kai. Her option
-kept today's wording for a child with one thrown-out PPSV23. Widened to any child with a later
-PPSV23 it measured **128** grid patients, all one family she has not seen: **18-year-olds with a
-risk condition whose PPSV23 was given on the day of a PCV (thrown out) and again five years
-later (counted)** — 116 reading *"It is not repeated."*, 12 still promising a date in 2016.
-**Not ruled; held for her.** Adults were not asked about either.
+**Scope: every child, whether or not the later dose counted.** Built first for a child none of
+whose PPSV23 shots counted (Sam, Noah, Ivy, Max, Kai), because her option kept today's wording
+for a child with one thrown-out PPSV23. Widened, it measured **128** grid patients, all one
+family: **18-year-olds with a risk condition whose PPSV23 was given on the day of a PCV (thrown
+out) and again five years later (counted)**. Shown **Leo** — 18, no spleen, PCV13 and PPSV23 on
+Nov 1, 2017, PPSV23 again Oct 30, 2022, his chip still promising *"from Dec 27, 2017"* — and his
+twin with a cochlear implant (chip *"It is not repeated."*), she chose **"Point to the later
+dose"** for both. Adults were not asked about and are untouched.
 
-Measured as scoped: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **0 / 35,280**
-rendered lines against `main`.
+Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **128 / 35,280** rendered
+lines against `main` (116 like the twin, 12 like Leo — the 2026-10-25 date-promise sweep's pinned
+counts fell by exactly those, 2544 → 2428 withdrawn and 1851 → 1839 kept).
 
 ### §C-P2-HEALTHY — a healthy child's PPSV23 is not needed, at any age (owner, 2026-10-31)
 

@@ -4029,13 +4029,14 @@ export function recommend(input) {
   // A later row is a SHOT only if it is no record problem and on a later day
   // (`duplicateEntry()` leaves the twin of a thrown-out dose unlabelled);
   // the doses are in date order, so the first such row is the next shot. A
-  // `closingSentence` test and a `j > i` test were found redundant by mutation.
-  // Scoped to the patients she was shown: a CHILD none of whose PPSV23 shots
-  // counted. Her option kept today's wording for a child with one thrown-out
-  // PPSV23, and widening it measured 128 grid 18-year-olds (a PPSV23 on the
-  // day of a PCV, then one five years later that counted) — a family she has
-  // not seen, so it waits for her. Adults were not asked about.
-  const ppsvChild = populationOf(am, riskIds).startsWith('child-') && ppsv.count === 0;
+  // `j > i` test and a `closingSentence` test were found redundant by
+  // mutation: a dose with no closing sentence has nothing to swap.
+  // Every CHILD, whether or not the later dose counted: shown "Leo" the same
+  // evening (18, no spleen, a PPSV23 on the day of a PCV at 10, thrown out,
+  // and one at 15 that counted, his chip still promising a date in 2017), she
+  // chose the same answer for him — 128 grid patients, all that family.
+  // Adults were not asked about.
+  const ppsvChild = populationOf(am, riskIds).startsWith('child-');
   const withLaterShot = (d, i) => {
     if (!ppsvChild) return d;
     const at = ppsvAnalysis.doses[i].date;

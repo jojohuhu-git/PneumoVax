@@ -9,8 +9,8 @@
 // "It was repeated on <date> — see that dose." A child with only ONE
 // thrown-out PPSV23 keeps today's wording.
 //
-// Scoped to CHILDREN NONE OF WHOSE PPSV23 SHOTS COUNTED, the patients she was
-// shown. A healthy child's
+// Scoped at first to children none of whose PPSV23 shots counted; widened to
+// EVERY CHILD the same evening, on "Leo" below. A healthy child's
 // thrown-out PPSV23 already reads "nothing needs to be repeated"
 // (§C-P2-HEALTHY); adults were not asked about.
 //
@@ -54,6 +54,27 @@ describe('the patients she was shown', () => {
   });
 });
 
+// Shown the same evening, after the first scope held him back: a thrown-out
+// PPSV23 followed by one that COUNTED, five years on. "Point to the later
+// dose" — for him, his twin, and the 128 grid patients like them.
+const LEO = {
+  dob: '2007-11-01', ageMonths: 216, today: '2025-11-01', riskIds: ['asplenia'],
+  pcvDoses: d('PCV13', ['2017-11-01']), ppsv23Doses: d('PPSV23', ['2017-11-01', '2022-10-30']),
+};
+const LEO_CHIP = 'This dose does not count toward the series — given too soon after the dose it is measured from. It was repeated on Oct 30, 2022 — see that dose.';
+
+describe('Leo and his twin', () => {
+  it('Leo: his 2017 PPSV23 points to his 2022 dose, and no longer promises Dec 27, 2017', () => {
+    const chip = firstChip(LEO);
+    expect(chip[1]).toBe(LEO_CHIP);
+    expect(chip.join(' ')).not.toContain('Dec 27, 2017');
+  });
+
+  it('his twin with a cochlear implant (card: complete) reads the same, not "It is not repeated."', () => {
+    expect(firstChip({ ...LEO, riskIds: ['cochlear_implant'] })[1]).toBe(LEO_CHIP);
+  });
+});
+
 describe('limits', () => {
   it('ONE thrown-out PPSV23 keeps "repeat this dose only"', () => {
     expect(firstChip({ ...SAM, ppsv23Doses: d('PPSV23', ['2024-12-01']) })).toContain(TOO_YOUNG_REPEAT);
@@ -67,11 +88,9 @@ describe('limits', () => {
     expect(firstChip({ ...SAM, ppsv23Doses: d('PPSV23', ['2024-12-01', '2026-03-01']) })).toContain(TOO_YOUNG_REPEAT);
   });
 
-  // Her option kept today's wording for a child with ONE thrown-out PPSV23.
-  // Widening it reached 128 grid 18-year-olds she has not seen (a PPSV23 on
-  // the day of a PCV, then one five years later that counted): held for her.
-  it('ONE thrown-out PPSV23 followed by one that COUNTED keeps today\'s wording — not yet ruled', () => {
-    expect(firstChip({ ...SAM, ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-26']) })).toContain(TOO_YOUNG_REPEAT);
+  it('a repeat that COUNTED is pointed to as well', () => {
+    expect(firstChip({ ...SAM, ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-26']) })[1])
+      .toBe('This dose does not count toward the series. It was repeated on Jan 26, 2025 — see that dose.');
   });
 
   it('with three shots, each points to the NEXT one', () => {

@@ -210,7 +210,16 @@ describe('swept over the grid', () => {
     // carries no forward-looking clause at all — it is "not needed", so there
     // is no next dose in its series to withdraw. Kept is untouched, so no
     // child who is owed a further dose lost her date.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2544, kept: 1851 });
+    //
+    // RE-MEASURED 2026-10-31 (evening) and it FELL by 128: 2544 -> 2428
+    // withdrawn, 1851 -> 1839 kept. §C-P2-LATER ("Leo"): a child's thrown-out
+    // PPSV23 with a later PPSV23 on the record now points to it ("It was
+    // repeated on <date> — see that dose") and carries no forward-looking
+    // clause to withdraw or keep. All 128 are one grid family — 18-year-olds
+    // with a PPSV23 on the day of a PCV and another five years later — 116
+    // owed nothing (Leo's twin) and 12 owed a dose (Leo, whose chip promised a
+    // date in 2017). No chip that still carries the clause lost it.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2428, kept: 1839 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {
