@@ -209,6 +209,10 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
         // P2 (2026-10-30): the second-PPSV23 floor survives only for a repeat of
         // a REJECTED PPSV23 (Ruling D); after a counted one it is advice now.
         'CHILD-PPSV23-AFTER-INVALID-PPSV23/CDC',
+        // 2026-10-30 (owner ruling, Noah): the repeat of a rejected FIRST
+        // PPSV23 is the first PPSV23, spaced 8 weeks from the dose given —
+        // CDC's General Best Practices rule with CDC's own first-dose interval.
+        'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST/CDC',
         'CHILD-PCV-AFTER-PPSV23/OWNER',
       ]);
   });

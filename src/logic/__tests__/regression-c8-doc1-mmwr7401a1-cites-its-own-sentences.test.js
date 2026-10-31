@@ -428,6 +428,13 @@ describe('over the whole grid', () => {
   it('none of the seven is a declared cross-reference', () => {
     // `aboutAnotherGroup` is the sanctioned way to quote another group's rule.
     // These seven are not exceptions, and must not quietly become ones.
+    //
+    // ONE PINNED EXCEPTION (C13, OWNER RULING 2026-10-30): an at-risk child
+    // with a cochlear implant or CSF leak and TWO PPSV23 received, whose card
+    // says what happens at 19 — ACIP's two-dose row is the only source that
+    // states it (CDC's notes give only the dose). Exactly 32 cards, all
+    // children; anything else still fails.
+    let crossRefs = 0;
     for (const c of buildCases()) {
       let r;
       try { r = recommend(c.input); } catch { continue; }
@@ -435,9 +442,14 @@ describe('over the whole grid', () => {
       for (const rec of r.recs ?? []) {
         for (const ct of rec.noteCites ?? []) {
           if (!QUOTES[ct.key]) continue;
+          if (ct.key === 'mmwrIc1949TwoPpsv' && ct.aboutAnotherGroup && c.input.ageMonths < 228) {
+            crossRefs++;
+            continue;
+          }
           expect(ct.aboutAnotherGroup, `${ct.key} must stand on its own`).toBeUndefined();
         }
       }
     }
+    expect(crossRefs).toBe(32);
   });
 });

@@ -717,6 +717,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     prev,
     priorPcv,
     priorPpsv23: (ctxParts.priorPpsv23 ?? []).filter((d) => d.date && d.date <= dose.date),
+    ppsv23ExtraGiven: (ctxParts.ppsv23ExtraGiven ?? []).filter((d) => d.date <= dose.date),
     riskIds: ctxParts.riskIds ?? [],
     // Two FACTS about this patient, added 2026-10-23 for CDC's Catch-up Table 2
     // — which keys the PCV interval on the dose number as well as the two ages.
@@ -807,6 +808,14 @@ function freshStreamState() {
     // it is a properly given dose of a superseded product rather than a
     // mistimed one, and no source states an interval from it.
     prev: null,
+    // 2026-10-30 (OWNER RULING, on Ben): PPSV23 doses the child branch below
+    // records as EXTRA — given, not counted. They stay out of `kept`, so no
+    // dose count and no CDC prior-vaccine row sees them; but a conjugate
+    // given after one is still held to the 8-week wait
+    // (`CHILD-PCV-AFTER-PPSV23`), because the reason for that wait — a weaker
+    // response to a conjugate given soon after a PPSV23 — is about the dose
+    // the child received, needed or not.
+    extraChildPpsv23: [],
   };
 }
 
@@ -829,7 +838,7 @@ function freshStreamState() {
 // for sitting too close to a PPSV23 that had itself been rejected. The owner's
 // words: that dose "is rejected not because it is too soon but because it was
 // unnecessary", and an unnecessary dose cannot reset a clock.
-function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds) {
+function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds, otherExtra = []) {
   // P0 (2026-10-12): the dose is recorded here, at the single entry point
   // that also produces its verdict, so `st.doses[i]` is BY CONSTRUCTION the
   // dose `st.perDose[i]` was computed for. The UI used to hold its own copy
@@ -856,7 +865,10 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const kept = st.kept;
     const prev = st.prev;
     const ctxParts = vaccine === 'PCV'
-      ? { priorPcv: kept, priorPpsv23: crossStream, riskIds }
+      ? {
+        priorPcv: kept, priorPpsv23: crossStream, riskIds,
+        ppsv23ExtraGiven: (otherExtra ?? []).filter((d) => d && d.date),
+      }
       : { priorPcv: crossStream, priorPpsv23: kept, riskIds };
     // Two different products on one day. A SENTENCE added to whatever verdict
     // this dose gets, never a verdict of its own (owner decision, 2026-10-12)
@@ -1121,11 +1133,19 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     //     floor), and `kept.length` is checked here as well, so a child whose
     //     first PPSV23 was thrown out never has her only real dose called
     //     extra.
-    //   • only when `CHILD-PPSV23-AFTER-PPSV23` fired — more than CDC's 4-day
-    //     grace early, which is exactly the dose that used to be THROWN OUT
-    //     (the row keeps the grace: owner decision 2026-10-30). A non-IC
-    //     child's on-time second PPSV23 is just as unneeded, but she ruled on
-    //     the early one; widening is her call (§C-P2).
+    //   • for an IC child's THIRD, only when `CHILD-PPSV23-AFTER-PPSV23` fired
+    //     — more than CDC's 4-day grace early, which is exactly the dose that
+    //     used to be THROWN OUT (the row keeps the grace: owner decision
+    //     2026-10-30). For a non-IC child's SECOND, early OR ON TIME — WIDENED
+    //     the same day (OWNER RULING 2026-10-30, "Yes, extra dose too"): the
+    //     on-time dose is just as unneeded, and used to count in silence. It
+    //     must carry a date, so the walk's order really says which came first,
+    //     and the patient must still be a CHILD TODAY: an adult's history is
+    //     read by ACIP's adult rows, which count every PPSV23 RECEIVED
+    //     (mm7401a1, "PCV13 and 2 doses of PPSV23"). Without that limit 16
+    //     nineteen-year-olds with a cochlear implant or CSF leak — both PPSV23
+    //     doses given in childhood — had their card switch to the ONE-dose row,
+    //     a history they do not have. Same dose either way (§C-P2-ONTIME).
     //   • `hasIC` is the engine's one IC test. An immunocompromised child's
     //     early second dose COUNTS instead (her ruling of 2026-10-29), which the
     //     row's own recommendation note already says.
@@ -1136,25 +1156,28 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // times and no third anywhere. Her ruling counts an early SECOND dose; an
     // early third is the same extra dose, with its own reason.
     const icChild = hasIC(riskIds);
+    const ppsvRowFired = !!result.earlyAdvisory && result.intervalRuleId === 'CHILD-PPSV23-AFTER-PPSV23';
     if (vaccine === 'PPSV23' && !isAdultDose && kept.length >= (icChild ? 2 : 1)
-      && result.earlyAdvisory && result.intervalRuleId === 'CHILD-PPSV23-AFTER-PPSV23') {
+      && (ppsvRowFired || (!icChild && !!dose.date && ageMonths < ADULT_SCHED_MIN_M))) {
       // Drop the row's own "Counted; never give a third" sentence and its
       // "Why this" — both say the dose counts, which is no longer true here.
-      // The row's are the LAST of each, as in the adult block above.
-      const { earlyAdvisory, intervalRuleId, reasons: rowReasons, whys: rowWhys, ...rest } = result;
-      const otherWhys = (rowWhys ?? []).slice(0, -1);
+      // The row's are the LAST of each, as in the adult block above. An
+      // on-time dose has no row sentence to drop.
+      const { earlyAdvisory, intervalRuleId, reasons: rowReasons = [], whys: rowWhys, ...rest } = result;
+      const otherWhys = ppsvRowFired ? (rowWhys ?? []).slice(0, -1) : (rowWhys ?? []);
       perDose.push(addNote({
         ...rest,
         ...(otherWhys.length ? { whys: otherWhys } : {}),
         effectiveDoseNum: null,
         extraDose: true,
         reasons: [
-          ...rowReasons.slice(0, -1),
+          ...(ppsvRowFired ? rowReasons.slice(0, -1) : rowReasons),
           icChild
             ? `Not needed: two PPSV23 doses have already been given (${fmtDate(kept[0].date)} and ${fmtDate(kept[1].date)}), and CDC never gives a third. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.`
             : `Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition; the first was given on ${fmtDate(kept[0].date)}. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.`,
         ],
       }));
+      st.extraChildPpsv23.push(dose);
       anchorOn(dose);
       return;
     }
@@ -1229,7 +1252,7 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
   for (const { dose, vaccine } of queue) {
     const self = vaccine === 'PCV' ? pcv : ppsv23;
     const other = vaccine === 'PCV' ? ppsv23 : pcv;
-    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds);
+    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds, other.extraChildPpsv23);
   }
 
   // `anchor` is the stream's last DATED dose — the one a same-stream interval

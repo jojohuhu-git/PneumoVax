@@ -246,11 +246,16 @@ describe("CDC's 4-day grace still decides what is on time", () => {
     expect(dz.reasons ?? []).toEqual([]);
   });
 
-  it('Ava, two days short: counted, not an extra dose, exactly as on main', () => {
+  // ⚠ REVERSED THE SAME DAY (OWNER RULING 2026-10-30, "Yes, extra dose too"):
+  // a non-IC child's on-time second PPSV23 is an extra dose as well, so the
+  // grace no longer decides HER label — only the reason it gives. Kept,
+  // renamed, as the record. Guard: regression-2026-10-30-on-time-second-ppsv23-is-extra.
+  it('Ava, two days short: on time, and now an extra dose all the same', () => {
     const dz = secondPpsv(AVA_TWO_DAYS_SHORT);
     expect(dz.status).toBe('valid');
-    expect(dz.extraDose).toBeUndefined();
-    expect(dz.effectiveDoseNum).toBe(2);
+    expect(dz.extraDose).toBe(true);
+    expect(dz.effectiveDoseNum).toBeNull();
+    expect(dz.earlyAdvisory).toBeUndefined();
   });
 });
 
@@ -278,17 +283,23 @@ describe('the two cases P2 does not cover keep their own answers', () => {
     expect(recs[0].brands).toEqual(['PCV20 (Prevnar 20)']);
   });
 
-  // RULING D: a PPSV23 given inside five years of a PPSV23 that was REJECTED
-  // is a repeat, spaced from the dose given — still thrown out, as on main.
+  // RULING D: a PPSV23 given after a PPSV23 that was REJECTED is a repeat,
+  // spaced from the dose given — not P2's "second dose".
+  //
+  // ⚠ REVERSED THE SAME DAY (OWNER RULING 2026-10-30, on Noah). When P2
+  // shipped, this child's repeat was thrown out at FIVE years, as a second
+  // PPSV23. But no PPSV23 had counted, so the repeat is her FIRST: it counts
+  // once it is 8 weeks after the rejected dose. Kept, renamed, as the record
+  // of the reversal. Guard: regression-2026-10-30-repeat-of-a-rejected-first-ppsv23.
   const REPEAT_OF_A_REJECTED_PPSV23 = child(['asplenia'], ['2018-01-29', '2019-02-01']);
   REPEAT_OF_A_REJECTED_PPSV23.pcvDoses = d('PCV13', ['2016-03-01', '2016-05-01', '2016-07-01', '2018-01-01']);
 
-  it('a repeat of a rejected PPSV23 is still a floor (Ruling D), not P2', () => {
+  it('a repeat of a rejected FIRST PPSV23 is not P2 — and it now counts as the first', () => {
     const [first, second] = analyzeBoth(REPEAT_OF_A_REJECTED_PPSV23).ppsv23.perDose;
     expect(first.status).toBe('invalid');
     expect(first.intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
-    expect(second.status).toBe('invalid');
-    expect(second.intervalRuleId).toBe('CHILD-PPSV23-AFTER-INVALID-PPSV23');
-    expect(second.reasons.join(' ')).not.toContain('never give a third');
+    expect(second.status).toBe('valid');
+    expect(second.effectiveDoseNum).toBe(1);
+    expect(JSON.stringify(second)).not.toContain('never give a third');
   });
 });

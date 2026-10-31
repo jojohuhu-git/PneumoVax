@@ -192,8 +192,11 @@ constant — the old age gate on that rule was pure loss — and a test fails if
 **One recommendation keeps CDC's 4-day grace: `CHILD-PPSV23-AFTER-PPSV23`** (owner
 decision 2026-10-30, `CLINICAL_SPEC.md` §C-P2). It is advice for an immunocompromised child
 and an extra dose for any other, so its firing decides whether a dose counts; dropping the
-grace moved 708 grid patients. A repeat of a REJECTED PPSV23 is a separate floor,
-`CHILD-PPSV23-AFTER-INVALID-PPSV23` (Ruling D). Pinned by name in `rule-docs-match-code`.
+grace moved 708 grid patients. A repeat of a REJECTED PPSV23 is a separate floor, split
+on whether a PPSV23 has COUNTED yet (owner ruling 2026-10-30, §C-P2): the repeat of a
+rejected FIRST dose is the first PPSV23, 8 weeks from the dose given
+(`CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`); the repeat of a rejected SECOND dose keeps
+the 5 years (`CHILD-PPSV23-AFTER-INVALID-PPSV23`). Pinned by name in `rule-docs-match-code`.
 
 ⚠️ **The adult floors are an OWNER CLINICAL DETERMINATION dated 2026-10-11, not ACIP and
 not CDC.** CDSI v4.64 sets `absMinInt = 0 days` for every adult pneumococcal interval, and

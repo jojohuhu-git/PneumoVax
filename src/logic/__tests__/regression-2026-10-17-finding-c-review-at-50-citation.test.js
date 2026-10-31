@@ -280,7 +280,10 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
       const out = recommend(c.input);
       if (out.excluded) continue;
       for (const r of out.recs ?? []) {
-        if ((r.noteCites ?? []).some((x) => x.key === 'adultChronicOnlyReviewAt50')) moved++;
+        // C13 (2026-10-30): a CHILD's card may now quote this row about her own
+        // 19th birthday, declared `aboutAnotherGroup` — that is a different
+        // claim and is counted (282) in its own guard, not here.
+        if ((r.noteCites ?? []).some((x) => x.key === 'adultChronicOnlyReviewAt50' && !x.aboutAnotherGroup)) moved++;
       }
     }
     // Every one of them is 19y in the grid: 228 months is the only adult age
@@ -308,7 +311,10 @@ describe('FINDING C — swept over the whole grid, with the count that moved', (
     for (const c of cases) {
       const out = recommend(c.input);
       if (out.excluded) continue;
-      const carries = (out.recs ?? []).some((r) => (r.noteCites ?? []).some((x) => x.key === 'adultChronicOnlyReviewAt50'));
+      // C13 (2026-10-30): the child's "at 19" line quotes it deliberately, as a
+      // declared cross-reference; this guard is about the row standing as the
+      // patient's OWN rule, which still never happens outside 19-49.
+      const carries = (out.recs ?? []).some((r) => (r.noteCites ?? []).some((x) => x.key === 'adultChronicOnlyReviewAt50' && !x.aboutAnotherGroup));
       if (!carries) continue;
       const am = c.input.ageMonths;
       if (am < ADULT_SCHED_MIN_M || am >= ROUTINE_ADULT_MIN_M) wrongAges.push(`${c.key} @${am}m`);

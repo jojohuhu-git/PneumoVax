@@ -291,9 +291,12 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
     expect(chipNames(ivy)).toContain('CDC Adult Notes');
   });
 
-  it('Maya keeps her card unchanged — group B is parked, not quietly fixed', () => {
-    // The control for the ruling's LIMIT. If a later change spreads the
-    // sentence to the at-risk families, this fails with her name on it.
+  // ⚠ GROUP B WAS DECIDED THE SAME DAY (C13, OWNER RULING 2026-10-30, "One
+  // line per group"). Maya's card now says what happens at 19 — but still NOT
+  // the age-50 line, which would name the wrong age for her. Kept, renamed:
+  // the limit it guarded (no age-50 sentence on group B) still holds.
+  // Guard for the new lines: regression-c13-2026-10-30-what-happens-at-19.
+  it('Maya gets the at-19 line, never the age-50 line', () => {
     const maya = pcvCard(recommend({
       ageMonths: 216, dob: '2008-10-30', today: TODAY, riskIds: ['cochlear_implant'],
       pcvDoses: [{ product: 'PCV13', date: '2016-10-13' }],
@@ -301,7 +304,7 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
     }));
     expect(maya.doseLabel).toBe('Complete (PCV13 + PPSV23 at/after age 6)');
     expect(noteText(maya)).not.toContain('Re-evaluate at age 50');
-    expect(chipNames(maya)).not.toContain('CDC Adult Notes');
+    expect(noteText(maya)).toContain('At 19, the adult schedule gives 1 dose of PCV20 or PCV21');
 
     // And the reason it is parked rather than ignored: one year later the app
     // gives her a dose. Asserted so the open question cannot quietly stop
@@ -329,6 +332,15 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
         // by name. Any THIRD child card showing an adult document fails here.
         if (r.doseLabel === 'Not indicated (healthy 5–18y)') continue;
         if (r.doseLabel === 'PCV series complete') continue;
+        // C13 (2026-10-30): the four Group B cards, by name, whose "at 19" line
+        // quotes the adult row for that birthday. The PCV15 twin of the
+        // at/after-6 card is complete for life and is NOT excused.
+        if ([
+          'Complete (PCV13 + PPSV23 at/after age 6)',
+          'Complete (a PCV of unrecorded product + PPSV23 at/after age 6)',
+          'PCV complete (at-risk catch-up done)',
+          'Complete (PCV series + PPSV23)',
+        ].includes(r.doseLabel)) continue;
         for (const name of chipNames(r)) {
           if (name === 'CDC Adult Notes') offenders.add(`${r.vaccine} / ${r.doseLabel}`);
         }

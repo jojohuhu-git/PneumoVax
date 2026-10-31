@@ -437,8 +437,19 @@ describe('the guard — swept over every patient the grid can build', () => {
     //   immPCV7                   a rule the owner extended past its source's
     //                             stated scope (2026-10-12), declared rather
     //                             than hidden by widening the source
+    //
+    // C13 (OWNER RULING 2026-10-30, on Maya) adds FOUR, one per line, all the
+    // same kind: an at-risk child's "complete" card says what the ADULT
+    // schedule gives her at 19, which only the adult row can state. Each is
+    // held to the adult card itself by `regression-c13-2026-10-30-what-happens-at-19`.
+    //   adultIc1949BothPcv13Ppsv   (1) cochlear implant / CSF leak: the dose at 19
+    //   adultChronicOnlyReviewAt50 (2) chronic only: nothing at 19, review at 50
+    //   mmwrIc1949TwoPpsv          (3) cochlear / CSF with two PPSV23 received
+    //   adultPpsvOnly1949          (4) a conjugate of unrecorded product
     expect([...seen.keys()].sort()).toEqual([
-      'adultBothNotAt65', 'adultRoutine50', 'cdcChildSpecialSituations', 'immPCV7',
+      'adultBothNotAt65', 'adultChronicOnlyReviewAt50', 'adultIc1949BothPcv13Ppsv',
+      'adultPpsvOnly1949', 'adultRoutine50', 'cdcChildSpecialSituations', 'immPCV7',
+      'mmwrIc1949TwoPpsv',
     ]);
   });
 
