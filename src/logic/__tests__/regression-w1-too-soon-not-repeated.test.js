@@ -107,7 +107,9 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // sentence, so neither case is simply dropped.
     const a = analyzeHistory('PPSV23', [
       { date: '2026-01-10', product: 'PPSV23' },
-    ], 12, '2026-01-20', '2025-01-01');
+    // §C-P2-HEALTHY (2026-10-31, Zoe): only a child with a risk condition
+    // is owed that PPSV23; a healthy one's reads "not needed" instead.
+    ], 12, '2026-01-20', '2025-01-01', { riskIds: ['cochlear_implant'] });
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
     expect(first.reasons.join(' ')).toMatch(/repeat this dose only/);

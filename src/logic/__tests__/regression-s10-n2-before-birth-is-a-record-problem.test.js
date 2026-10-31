@@ -19,8 +19,8 @@ import { analyzeBoth } from '../validate.js';
 
 const REPEAT = /repeat this dose only/i;
 
-function verdicts({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = '2020-01-01', today = '2026-01-01' }) {
-  return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds: [] });
+function verdicts({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = '2020-01-01', today = '2026-01-01', riskIds = [] }) {
+  return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds });
 }
 const allText = (v) => [...v.reasons, v.detail ?? ''].join(' ');
 
@@ -98,8 +98,11 @@ describe('S10-N2 — a date before birth is a record problem, not a missing dose
 });
 
 describe('S10-N2 controls — W1 still stands for a dose that was really given', () => {
+  // §C-P2-HEALTHY (2026-10-31, Zoe): a HEALTHY child's PPSV23 is "not needed",
+  // never "repeat", so this control now uses a child with a risk condition —
+  // the patient W1's repeat sentence is still about.
   it('a PPSV23 genuinely given below the minimum age still says to repeat it', () => {
-    const v = verdicts({ ppsv23Doses: [{ date: '2021-06-01', product: 'PPSV23' }] }).ppsv23.perDose[0];
+    const v = verdicts({ ppsv23Doses: [{ date: '2021-06-01', product: 'PPSV23' }], riskIds: ['cochlear_implant'] }).ppsv23.perDose[0];
     expect(v.status).toBe('invalid');
     expect(allText(v)).toMatch(REPEAT);
     expect(v.recordProblem).toBeUndefined();

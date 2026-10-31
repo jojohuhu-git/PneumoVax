@@ -196,7 +196,11 @@ describe('the whole grid', () => {
     expect(tally.anyApproved).toBe(748);
   });
 
+  // RE-MEASURED 2026-10-31: 1848 -> 1344. §C-P2-HEALTHY (Zoe, "Not needed" at
+  // any age): the 504 that left are HEALTHY children, whose too-young PPSV23
+  // now reads "not needed" instead of "repeat this dose only". An at-risk
+  // child's too-young PPSV23 still says to repeat it.
   it('leaves the too-young PPSV23 chips exactly where they were', () => {
-    expect(tally.ppsv23RepeatOnly).toBe(1848);
+    expect(tally.ppsv23RepeatOnly).toBe(1344);
   });
 });

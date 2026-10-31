@@ -868,6 +868,50 @@ New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
 `cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem
 rows. Guard: `regression-2026-10-31-sam-grey-area-repeat-of-a-too-young-ppsv23.test.js`.
 
+### §C-P2-HEALTHY — a healthy child's PPSV23 is not needed, at any age (owner, 2026-10-31)
+
+**Zoe**, 3, healthy, four PCV20 doses, given a PPSV23 by mistake at 12 months. Her card read
+*"PCV series complete"* while the chip under the PPSV23 said *"repeat this dose only (do not
+restart the series)"* — an order for a dose a healthy child is not owed. The same mistake at 2½
+was marked "valid" and counted with no comment. Asked, the owner chose **"Not needed" at any
+age**, in Ava's words (§C-P2-ONTIME).
+
+CDC, read live 2026-10-31. PPSV23 Vaccine Information Statement (5/29/25,
+`cdc.gov/vaccines/hcp/current-vis/pneumococcal-polysaccharide.html`): *"PPSV23 is recommended as
+an option for some children and adolescents with certain medical conditions or risk factors."*
+CDC's pneumococcal recommendations page (updated Feb 25, 2026) gives routine childhood
+vaccination as a 4-dose PCV series only, with PPSV23 under "Risk-based recommendations".
+
+The sentence, on every PPSV23 of a child with no risk condition: *"Not needed: PPSV23 is given
+only to children with certain medical conditions or risk factors, per CDC, and none is recorded
+for this child. This dose isn't harmful, it isn't counted, and nothing needs to be repeated."*
+
+| The dose | Before | Now |
+|---|---|---|
+| Old enough, would have counted | "valid", dose 1, no comment | **extra dose** + the sentence; still holds off a conjugate for 8 weeks (Ben's ruling — the weaker response follows the dose received) |
+| Too young | invalid + "repeat this dose only" | **still invalid** (so it still holds off nothing — ANCHOR-1, re-confirmed on Rosa) + the sentence instead of "repeat" |
+| Too soon after a PCV | invalid + "the next dose in this series can be given from …" | still invalid + the sentence; no date, because no PPSV23 is owed |
+
+**Who is "healthy"** is `populationOf(...) === 'child-routine'` — the engine's one answer: it
+ignores adult-only ticks (smoking, alcohol use disorder) and stops at 19, so an adult's childhood
+PPSV23, which ACIP's adult rows count, is untouched. A record problem (future date, before birth,
+duplicate) keeps its own wording.
+
+**A side effect found and fixed.** The duplicate-entry check compared a row only with doses that
+COUNTED, so a healthy child's PPSV23 typed twice on one day lost its "duplicate" once the first
+became an extra dose (12 impossible-entry rows). An extra dose was really given, so it now joins
+that comparison. Six older tests used a child with **no** risk condition to stand for "a child
+who is not immunocompromised"; they now use a cochlear implant, which keeps their point.
+
+Measured against `main`: **1,164 / 17,016** verdicts moved — every one a healthy child aged
+2–18, every one only the PPSV23 going from "dose 1" to an extra dose (same status, 0 cards).
+**126 / 18,264** record-problem rows, the same family. Rendered text (`proseDiff`): **1,752**
+real patients' PPSV23 notes (1,098 counted→extra, 504 too young, 150 too soon) and 1,131
+impossible entries — **0** cards, **0** children with a risk condition, **0** adults. Pinned
+counts re-measured with reasons: forward-looking dates withdrawn 2,670 → 2,544; too-young
+PPSV23 chips saying "repeat" 1,848 → 1,344. Guard:
+`regression-2026-10-31-healthy-child-ppsv23-not-needed.test.js`.
+
 ### §C-P2-THIRD — an immunocompromised child's on-time third PPSV23 is an extra dose (owner, 2026-10-31)
 
 **Lily**, 18 years 10 months, no spleen: PCV13 ×2 at age 2, PPSV23 at 2y4m, 7y5m and 12y6m —
