@@ -124,6 +124,11 @@ describe('the field itself', () => {
       'cdcCatchupDose2to3EightWeeks', // one row for every child; "regardless of risk"
       'cdcCatchupDose2to3FourWeeks',  // one row for every child; "regardless of risk"
       'cdcCatchupDose3to4',           // its own words: "regardless of risk ... with any risk"
+      // §C-P2-GREY (2026-10-31). CDC General Best Practices, read live: the
+      // first says "the child" with no risk class; the second names no age
+      // or patient at all ("If the vaccine is a live vaccine ...").
+      'cdcGbpLiveVaccine28Days',
+      'cdcGbpRepeatUnderMinAge',
       // 2026-10-25. Both halves of Table 1's row in ACIP's 2023
       // PCV20-in-children report. The row's own heading is "Children aged
       // 2-18 years with ANY RISK CONDITION who completed a recommended PCV

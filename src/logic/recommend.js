@@ -1090,6 +1090,57 @@ function atNineteen(adultCard) {
   return { sentence: hit[1], cite: cite(hit[0], { aboutAnotherGroup: why }) };
 }
 
+// ── §C-P2-GREY (OWNER RULING 2026-10-31, on "Sam") ──────────────────────
+//
+// Sam, no spleen, a full infant PCV13 series: PPSV23 at 23 months (too young,
+// thrown out) and again 5 weeks later, just past his 2nd birthday — thrown out
+// by `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`, 8 weeks from the invalid dose.
+// CDC says a dose given too young "should be repeated on or after the date
+// when the child reaches at least the minimum age", and states a gap from the
+// invalid dose only "If the vaccine is a live vaccine". Asked, she kept the 8
+// weeks and asked for the grey area to be highlighted and the rulebook to say
+// so; then "PCV20 only" — no Option B, which would be his THIRD PPSV23 shot.
+//
+// SCOPED TO HER PATIENT'S CARD: an immunocompromised child whose card is the
+// "Option A PCV20 / Option B PPSV23" pair. Two other cards a child like him can
+// reach — a conjugate catch-up still owed, or the 6-18 no-prior-PCV trio —
+// are untouched: for both, "if it were counted, PCV20 would complete the
+// series" is untrue, and she was not shown them.
+//
+// The two CDC rows below are the IMMUNOCOMPROMISING list's, so matching them is
+// the risk-class test; a separate `hasIC` here was found redundant by mutation.
+const GREY_ROW_KEYS = new Set(['pedsIcPcv20orPpsv23', 'pedsIcBefore6NoPcv20At6to18']);
+function greyAreaRepeat(recs, ppsvAnalysis, ppsvCount) {
+  if (ppsvCount !== 0) return null;
+  const i = (ppsvAnalysis?.perDose ?? []).findIndex((d) => d.repeatOfUnderAgeDose);
+  if (i < 0) return null;
+  const optionA = recs.find((r) => r.vaccine === 'PCV' && r.doseLabel?.startsWith('Option A: 1 dose PCV20'));
+  const optionB = recs.find((r) => r.vaccine === 'PPSV23' && r.doseLabel?.startsWith('Option B: 1 dose PPSV23'));
+  if (!optionA || !optionB || recs.length !== 2 || !GREY_ROW_KEYS.has(optionA.noteCites?.[0]?.key)) return null;
+  const repeatDate = ppsvAnalysis.doses[i].date;
+  const given = ppsvAnalysis.perDose.length;
+  const ifCounted = addCalendarMonths(repeatDate, MO60);
+  const grey = `This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted. If it were counted, PCV20 would be due on or after ${fmtDate(ifCounted)} and would complete the series.`;
+  return {
+    index: i,
+    chip: `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${grey}`,
+    recs: [{
+      ...optionA,
+      doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`,
+      note: {
+        lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; that completes the series [c]. No further PPSV23: ${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted.`,
+        detail: `Grey area: CDC says a dose given under the minimum age is repeated on or after that age [c], and states no gap from the invalid dose for a vaccine that is not live [c]. ACIP does not address this case. ${grey}`,
+      },
+      noteCites: [
+        optionA.noteCites[0],
+        cite('cdcPcv20Children2023CompleteWithoutPcv20'),
+        cite('cdcGbpRepeatUnderMinAge'),
+        cite('cdcGbpLiveVaccine28Days'),
+      ],
+    }],
+  };
+}
+
 /** Add the "at 19" line to a child's "complete" card: the end of its lead. */
 function withAtNineteen(card, at19) {
   if (!at19 || card.status !== 'complete') return card;
@@ -3783,6 +3834,8 @@ export function recommend(input) {
     pathStep('Risk conditions', riskWords(riskIds), null),
   ];
   let recs;
+  // §C-P2-GREY: set only on the at-risk child path, read again for the chip.
+  let greyArea = null;
   if (am < M.m24) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
@@ -3820,6 +3873,8 @@ export function recommend(input) {
         today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
       }).recs[0]);
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today).map((r) => withAtNineteen(r, at19));
+      greyArea = greyAreaRepeat(recs, ppsvAnalysis, ppsv.count);
+      if (greyArea) recs = greyArea.recs;
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
@@ -3885,7 +3940,12 @@ export function recommend(input) {
     pcv21Geo,
     perDose: {
       pcv: withdrawForwardLook(pcvAnalysis.perDose),
-      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose),
+      // §C-P2-GREY: the chip under Sam's repeat names the grey area instead of
+      // "the next dose in this series can be given from …" — a PPSV23 his
+      // card no longer offers.
+      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose).map((d, i) => (greyArea && i === greyArea.index && d.forwardLookingReason
+        ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? `${d.withoutForwardLook} ${greyArea.chip}` : x)) }
+        : d)),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH

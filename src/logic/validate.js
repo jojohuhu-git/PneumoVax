@@ -767,11 +767,16 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
   // applied by asking whether the dose would have cleared it 4 days later.
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
-    return invalid(
-      [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
-      ageCites
-    );
+    return {
+      ...invalid(
+        [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
+        `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
+        ageCites
+      ),
+      // §C-P2-GREY (2026-10-31): read by `stepStream` to name the repeat of a
+      // dose given too young, whose spacing CDC does not state.
+      belowMinAge: true,
+    };
   }
   // Age is settled; now the dose's timing, against the one rule table. Rule
   // ORDER decides which message a dose that breaks two rules gets — the table
@@ -970,6 +975,15 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // The date is `result.conjugateAlternative.dueDate`, computed by the
       // rules table's own clocks. Never recompute it here; this file owns no
       // interval logic.
+      // §C-P2-GREY (OWNER RULING 2026-10-31, on "Sam"). The repeat of a first
+      // PPSV23 given TOO YOUNG, thrown out only because it came inside 8 weeks
+      // of that dose. CDC states no gap for it (a gap from the invalid dose is
+      // given for live vaccines only), so `recommend.js` highlights the grey
+      // area on this chip and on the card. Read off the earlier dose's own
+      // verdict — never re-tested here.
+      const repeatOfUnderAgeDose = result.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST'
+        && st.perDose.some((v, i) => v.belowMinAge && st.doses[i]?.date === st.prev?.date)
+        ? st.prev.date : null;
       const alt = result.recordProblem ? null : result.conjugateAlternative;
       const alternativeSentence = alt
         ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
@@ -986,6 +1000,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         // swapped by accident.
         forwardLookingReason: result.recordProblem || !result.intervalRuleId ? null : closingSentence,
         withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : `${DOES_NOT_COUNT_LEAD} It is not repeated.`,
+        ...(repeatOfUnderAgeDose ? { repeatOfUnderAgeDose } : {}),
         reasons: [...result.reasons, closingSentence, alternativeSentence].filter(Boolean),
       }));
       // RULING D (2026-10-23) — a mistimed dose anchors the next one, because

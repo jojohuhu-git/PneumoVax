@@ -736,6 +736,7 @@ CDC's General Best Practices puts that repeat "on or after the date when the chi
 least the minimum age", and asks for a 28-day spacing only for live vaccines — so for a dose
 given at 22–24 months, this row's 8 weeks is stricter than CDC by up to 8 weeks. Main asked for
 5 years there, so the change only loosens it. 0 grid patients either way.
+**Ruled 2026-10-31 — the 8 weeks stays, and the grey area is stated: §C-P2-GREY below.**
 
 Measured: **0 / 17,016** verdicts and **0 / 18,264** record-problem rows moved (the grid never
 dates a rejected PPSV23 and a repeat); 0 uncredited citation pairs over 17,311 cards.
@@ -775,6 +776,49 @@ dose with status `valid`, extra or not — wrong since that panel was written, f
 dose in the app (infant PCV extras, adult doses after a completed series, P2's early PPSV23).
 It now reads *"1 of 2 PPSV23 doses counted — 1 an extra dose, not needed, with the reason on
 the dose itself."* No corpus records that panel, so no count moved.
+
+### §C-P2-GREY — the repeat of a too-young first PPSV23: the 8 weeks stays, and the card says it is a grey area (owner, 2026-10-31)
+
+**Sam**, 2, no spleen, a full infant PCV13 series: PPSV23 on Dec 1, 2024 at 23 months — under
+the 2-year minimum, thrown out — and again on Jan 5, 2025, just past his 2nd birthday and 5
+weeks later. `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` throws the repeat out too (8 weeks from
+the invalid dose). CDC General Best Practices, Timing and Spacing (read live 2026-10-31, each
+sentence once):
+
+> *"If the first dose in a series is given ≥5 days before the recommended minimum age, the dose
+> should be repeated on or after the date when the child reaches at least the minimum age"* —
+> and the gap from the invalid dose is given only *"If the vaccine is a live vaccine"* (28 days).
+> PPSV23 is not live, so CDC states no gap for its repeat.
+
+Asked whether Sam's repeat should count, the owner answered: *"There is another issue that won't
+have a clear answer. Is it possible to highlight this grey area and use the latter rule and
+update the rulebook with such."* The latter rule is the app's 8 weeks. Shown the reading back
+with a drafted note, she confirmed it and chose **"PCV20 only"**: the card's Option B would be
+his THIRD PPSV23 shot. Her answer on Rosa the same day agrees: spacing from an invalid dose
+*"applies when the repeat dose is the same as the invalid dose"*, and Sam's is.
+
+| Surface | Before | Now |
+|---|---|---|
+| Card | Option A PCV20 / Option B PPSV23 | **1 dose PCV20 (≥8 weeks) — completes the series**; "Why this" carries the grey-area note, citing both CDC sentences |
+| Chip under the Jan 5 dose | *"… It is not repeated; the next dose in this series can be given from Mar 2, 2025 at the earliest."* | *"… It is not repeated."* + the grey-area note |
+
+The note, her draft word for word with the dates filled in: *"Grey area: CDC says a dose given
+under the minimum age is repeated on or after that age, and states no gap from the invalid dose
+for a vaccine that is not live. ACIP does not address this case. This app spaces the repeat 8
+weeks from the invalid dose, so the Jan 5, 2025 dose is not counted. If it were counted, PCV20
+would be due on or after Jan 5, 2030 and would complete the series."*
+
+**Scoped to the card she was shown:** an immunocompromised child whose card is that Option A /
+Option B pair (CDC's IC rows `pedsIcPcv20orPpsv23` at 2–5 and `pedsIcBefore6NoPcv20At6to18` at
+6–18). **Not ruled, and untouched:** the same history in a child who is not immunocompromised
+(both options stay; if counted, the series would already be complete, so the note's last
+sentence would be untrue); a child still owed catch-up conjugates; and the 6–18 no-prior-PCV
+card (Option A PCV20 / B-1 PCV15 / B-2 PPSV23). The flag is set by validate.js only when the
+earlier dose's own verdict says it was below the minimum age (`belowMinAge`), never re-tested.
+
+New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
+`cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem
+rows. Guard: `regression-2026-10-31-sam-grey-area-repeat-of-a-too-young-ppsv23.test.js`.
 
 ### §C-P2-THIRD — an immunocompromised child's on-time third PPSV23 is an extra dose (owner, 2026-10-31)
 

@@ -50,6 +50,12 @@ const KNOWN_UNCITED = {
     + 'fail across 2 files — 3 in that file (the PCV7 button, the whole-page '
     + 'totality property, and the all-cards sweep) and this file\'s own '
     + '"allowlist does not outlive its entries".',
+  cdcGbpTimingSpacing:
+    '§C-P2-GREY (2026-10-31). The WHOLE-PAGE entry for CDC General Best Practices, '
+    + 'Timing and Spacing, which `cdcGbpRepeatUnderMinAge` and `cdcGbpLiveVaccine28Days` '
+    + 'quote one sentence each of. Named by no file because `documentRefFor()` finds '
+    + 'it by URL — the same reason as `immPCV7Page` above, and guarded the same way '
+    + 'by `regression-c2-c3-numbered-sources.test.jsx`.',
   cdcPneumoIndex:
     'CDC\'s pneumococcal landing page. Kept as the general "where this all comes '
     + 'from" pointer; every specific rule cites the schedule notes or an MMWR '
