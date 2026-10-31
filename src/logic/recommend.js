@@ -990,6 +990,33 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   })];
 }
 
+// ── "Come back at 50" — ONE wording, ONE source, for the cards that earn it ──
+//
+// OWNER REQUEST 2026-10-29 (Nora, a healthy 10-year-old): "add a comment to
+// re-evaluate pneumococcal vaccines once the patient turns 50 years old and
+// cite the necessary adult reference." Extended 2026-10-30 to the healthy
+// 24-59-month child whose series is complete, after she was shown what the app
+// says to each of the nine children's cards that end in "nothing needed", taken
+// forward to 19 and to 50.
+//
+// ⚠ IT GOES ONLY WHERE 50 IS REALLY THE NEXT EVENT. Of those nine families:
+//   • 2 (these) are HEALTHY children — nothing at 19, a dose due at 50.
+//   • 4 are AT-RISK children, 640 cards, where the app gives a dose at NINETEEN,
+//     not 50. Printing "re-evaluate at age 50" there would name the wrong age.
+//     Owner 2026-10-30: parked, deliberately, not decided — see the handoff.
+//   • 3 are complete for life (a PCV20 in the series, or PCV15 + PPSV23): no
+//     such line belongs on them at all.
+// So this is not a sentence to spread. Before putting it on a new card, run
+// that patient forward and check that 50 is the age the app itself acts on.
+//
+// Kept here as one constant rather than typed twice, because two copies of a
+// sentence are two things that can drift — the fault this file keeps paying
+// for. The marker and the cite move together.
+const REVIEW_AT_50_SENTENCE = 'Re-evaluate at age 50, when routine pneumococcal vaccination begins for every adult [c].';
+const reviewAt50Cite = () => cite('adultRoutine50', {
+  aboutAnotherGroup: 'states where routine adult vaccination begins, which is the age this child should be re-assessed at',
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1111,12 +1138,16 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         vaccine: 'PCV', status: 'complete',
         // Markers are paired to cites by POSITION (`noteCiteSlices`), so the
         // count here and the array below must move together.
-        note: `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.)`,
+        note: `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.) ${REVIEW_AT_50_SENTENCE}`,
         doseLabel: 'PCV series complete',
         noteCites: [
           cite('pedsNoPcv20IfComplete'),
           cite('p2016HealthyComplete24to59'),
           ...(jobAidEndsItHere ? [cite('jobAidPedsCatchupNoneNeeded')] : []),
+          // OWNER DECISION 2026-10-30. This child and Nora are the two healthy
+          // families where the app itself does nothing until 50: at 19 she
+          // reads "not indicated (no risk, <50y)", at 50 a dose falls due.
+          reviewAt50Cite(),
         ],
         refs,
       })];
@@ -1206,7 +1237,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
     doseLabel: 'Not indicated (healthy 5–18y)',
     note: {
       lead: 'No PCV is indicated — healthy children 5–18 years are not routinely caught up [c].',
-      detail: 'CDC\'s catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c].',
+      detail: `CDC's catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c]. ${REVIEW_AT_50_SENTENCE}`,
     },
     noteCites: [
       cite('pedsHealthyCatchup'),
@@ -1219,6 +1250,19 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
       cite('cdcChildSpecialSituations', {
         aboutAnotherGroup: 'names the risk conditions this child does NOT have, which is why no dose is indicated',
       }),
+      // OWNER REQUEST 2026-10-29, on the card for a healthy 10-year-old: "add a
+      // comment to re-evaluate pneumococcal vaccines once the patient turns 50
+      // years old and cite the necessary adult reference."
+      //
+      // The second declared cross-reference on this card, and the ONE place in
+      // the app where a child's card carries an adult source. That is the N6
+      // rule crossed deliberately rather than by accident: the sentence is
+      // ABOUT the adult schedule, so the adult schedule is the only document
+      // that can carry it, and `aboutAnotherGroup` is what says so out loud.
+      // The key is already one of the four pinned cross-references, and the
+      // same sentence is already on the adult 19-49 no-risk card -- one
+      // wording, one source, both sides of the boundary.
+      reviewAt50Cite(),
     ],
     // C9 (2026-10-23). p2016 is NOT listed here, and the reason is an OWNER
     // RULE rather than this card alone: "Ok to cite p2016 if you cannot just
@@ -1240,10 +1284,32 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
     // removing it (the FINDING F discipline) -- Table 4 is risk conditions, and
     // Table 5 is HSCT.
     //
-    // ⚠ The Catch-up Job Aid chip STAYS. It is a different (document,
-    // statement) pair on the same card and is the owner's do-not-re-raise
-    // decision; `healthyRefsExcept` drops p2016 and nothing else.
-    refs: healthyRefsExcept('p2016'),
+    // C12 (2026-10-29) — THE CATCH-UP JOB AID COMES OFF, and this closes the
+    // LAST uncredited (document, statement) pair in the app. The chip used to
+    // stay here as the owner's do-not-re-raise decision; she lifted that
+    // herself on 2026-10-29 by asking for the last citation to be worked, was
+    // shown this very card for a healthy 10-year-old, and chose: "Take chip
+    // off."
+    //
+    // WHAT READING THE DOCUMENT FOUND (the FINDING F discipline; the local PDF
+    // is 95,267 bytes, byte-for-byte what cdc.gov serves, all 3 pages read):
+    // its oldest row is "24 through 59 months" and the table ENDS there, its
+    // title is "Catch-Up Guidance for Healthy Children 4 Months through 4 Years
+    // of Age", and footnote 1 hands at-risk children to CDC's notes. So the
+    // document has NO row for a child of 5-18 -- its own title is the only
+    // thing on it that touches this card, and a title describes what a document
+    // covers rather than stating a recommendation.
+    //
+    // That is the shape the owner already ruled on for the ADULT job aid on
+    // 2026-10-18 ("use MMWR table"): where a job aid's claim is not in the
+    // document's own words, the job aid comes off and the document that states
+    // it in words is cited. CDC's Child/Adolescent Notes row -- the one that
+    // stops at age 4 -- is quoted on the lead and carries the claim alone.
+    //
+    // ⚠ MIRROR GUARD. A removal is only safe while the document stays credited
+    // where it DOES speak: it keeps its place, with its cells cited, on the 144
+    // healthy 24-59-month cards. Asserted in the guard, not assumed.
+    refs: healthyRefsExcept('p2016', 'cdcCatchupJobAid'),
   })];
 }
 

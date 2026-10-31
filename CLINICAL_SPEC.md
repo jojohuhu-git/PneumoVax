@@ -171,8 +171,77 @@ Catch-up grid by current age band × # previous PCV13/15/20 doses × age-at-prio
 
 - 24–59 mo, **completed any PCV schedule (incl. all-PCV13) by 24mo** → no additional doses.
 - 24–59 mo, **no/incomplete schedule by 24mo** → **1 dose** PCV15/PCV20 ≥8wk after most recent PCV.
-- 5–18 y healthy, no/incomplete by 24mo → **no additional doses** (healthy older children
-  are not caught up). (`p2016` Table 2)
+- 5–18 y healthy → **no additional doses** (healthy older children are not caught up).
+- Both **healthy** "nothing needed" cards — the 5–18 one and the complete 24–59 month one —
+  add **"Re-evaluate at age 50, when routine pneumococcal vaccination begins for every
+  adult"** (`adultRoutine50`). **No at-risk card does** — see §B-50NOTE.
+
+### §B-5TO18 — the healthy 5–18 card: what it cites, and the age-50 note
+
+**C12, 2026-10-29. This closed the LAST uncredited source in the app**: measured over
+17,407 cards, `scripts/uncreditedSources.mjs` reports **0** (document, statement) pairs, so
+every grey chip on every card now has a number pointing at it. The card carried the CDC PCV
+Catch-up Job Aid with nothing citing it, worth **1,584 cards** — C7's "document 4, statement
+1", formally an owner decision, put to her twice in October and parked at her request.
+
+**OWNER DECISION 2026-10-29.** Shown this card for a healthy 10-year-old with no risk
+conditions and no doses, she chose: *"Take chip off - can you add a comment to re-evaluate
+pneumococcal vaccines once the patient turns 50 years old and cite the necessary adult
+reference?"*
+
+**Why the job aid came off** (read in full first — the FINDING F discipline; the saved PDF
+is 95,267 bytes, byte-for-byte what cdc.gov serves, sha256 `65aec99a…`, all three pages):
+its oldest row is *"24 through 59 months"* and the table **ends** there, its title is
+*"Catch-Up Guidance for Healthy Children 4 Months through 4 Years of Age"*, and footnote 1
+hands at-risk children to CDC's notes. **It has no row for a child of 5–18.** Its title is
+the only thing on it that touches this card, and a title says what a document covers rather
+than stating a recommendation — the same shape the owner ruled on for the ADULT job aid on
+2026-10-18 (*"use MMWR table"*). CDC's Child/Adolescent Notes row that stops at age 4
+(`pedsHealthyCatchup`) carries the claim alone.
+
+⚠ **MIRROR GUARD.** The job aid keeps its place on the **144** healthy 24–59-month cards
+whose cells it states, pinned exactly. `scripts/uncreditedSources.mjs` is blind to that
+direction — it only sees a document that is ON a card.
+
+**The age-50 note is the ONE place in the app where a child's card carries an adult
+source**, and the N6 rule is crossed deliberately: the sentence is *about* the adult
+schedule, so only the adult schedule can carry it, and `aboutAnotherGroup` says so rather
+than widening a source's scope. The key is `adultRoutine50`, already one of the four pinned
+cross-references, and the adult 19–49 no-risk card states the same boundary in the same
+words from the other side. **Not used:** `mmwrChronic1949ReviewAt50` and
+`jobAidChronic1949ReviewAt50` — both are printed about a 19–49 adult **with chronic
+conditions** and tell you to review a risk-based decision, which is a different claim.
+
+### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
+
+**OWNER DECISION 2026-10-30.** Asked whether the age-50 line should spread to the other
+children's cards that end in "nothing needed", she was shown **all nine families**, each
+with its own patient taken forward to 19 and to 50 in the running app. They do not behave
+alike, and that is the whole rule — **the line goes only where 50 is really the next event.**
+
+| Group | Families / cards | What the app does at 19 and at 50 | Disposition |
+|---|---|---|---|
+| **A — healthy** | *Not indicated (healthy 5–18y)* 1,584; *PCV series complete* (healthy 24–59 mo) 12 | 19: nothing indicated. **50: a dose is due.** | **The line, on both** |
+| **B — at-risk** | *Complete (PCV13 + PPSV23 at/after 6)* 450; *unrecorded-product PCV + PPSV23 at/after 6* 70; *at-risk catch-up done* 15; *PCV series + PPSV23* 5 — **640** | **19: a dose is due** (adult special-situations row), and again at 50 | **PARKED by the owner** |
+| **C — complete for life** | *includes PCV20* 944; *PCV15 + PPSV23 at/after 6* 290; *PCV before age 6 + PPSV23* 145 — **1,379** | complete at 19 and at 50 | **No line — nothing is ever due** |
+
+⚠ **GROUP B IS AN OPEN OWNER QUESTION, NOT A GAP TO TIDY.** *Maya — 18, cochlear implant,
+PCV13 at 7y11m, PPSV23 at 12y11m* — reads *"no further doses of any PCV or PPSV23 are
+indicated"*, and one year later the app says *"Due today: PCV20 or PCV21 ≥5 years after the
+last pneumococcal dose"*. Both are correct: the paediatric schedule does finish her, and the
+adult schedule does give her a dose. The card simply names no age. Shown that, the owner
+chose **"think about it"** on 2026-10-30. **Never close it by putting the age-50 sentence on
+these cards — the age would be wrong; the number for them is 19.** Maya is asserted in the
+guard, including the dose she gets at 19, so the question cannot quietly stop being true.
+
+**The sentence lives in ONE constant** (`REVIEW_AT_50_SENTENCE` + `reviewAt50Cite()` in
+`recommend.js`) rather than being typed on each card — two copies of a sentence are two
+things that can drift. Both counts are **pinned exactly**, so adding a third card fails;
+the next card to earn it must be one whose patient, run forward, really does nothing until
+50. **0 verdicts moved** in either corpus — the corpora record status, brands and dates,
+never prose. Guard:
+`regression-c12-2026-10-29-last-citation-and-the-age-50-note.test.js`; C9's guard keeps its
+now-reversed line as the record of the reversal.
 
 ### What "completed by 24 months" means — FINDING M, 2026-10-22
 

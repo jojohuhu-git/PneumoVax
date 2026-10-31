@@ -49,10 +49,13 @@
 // it establishes it identically for a child with no doses, an incomplete
 // series, or a complete one. Nothing on this card needed p2016. It comes off.
 //
-// ⚠ THE JOB AID BUTTON STAYS. The third chip is a DIFFERENT (document,
-// statement) pair on the same card, and it is the one the owner has asked not
-// to be re-raised. This change does not touch it, and the test below pins it
-// so a later tidy-up cannot take it with p2016.
+// ⚠ THE JOB AID BUTTON STAYED — UNTIL C12 (2026-10-29), WHICH TOOK IT OFF.
+// When this test was written the third chip was a DIFFERENT (document,
+// statement) pair on the same card and was the one the owner had asked not to
+// be re-raised, so C9 pinned it present. On 2026-10-29 she asked for the last
+// citation to be worked, was shown this card for a healthy 10-year-old, and
+// chose "Take chip off" — so the assertion below is now the mirror of what it
+// was. Both lines are kept, and the reasoning is in C12's own guard.
 //
 // ⚠ THE GRID CANNOT BUILD THE PATIENT THIS TURNS ON. Measured over all 17,016
 // grid cases: 1,584 land on this card, and p2016's 5–18 row fits every one of
@@ -93,14 +96,21 @@ describe('C9: the healthy 5–18 card cites CDC, not p2016', () => {
     ['CHILD A — healthy 10y, never vaccinated', CHILD_A],
     ['CHILD B — healthy 10y, complete series at 2/4/6/12 months', CHILD_B],
     ['CHILD C — healthy 10y, one PCV13 at 2 months then nothing', CHILD_C],
-  ])('%s: no p2016 button, CDC kept, Job Aid untouched', (_label, doses) => {
+  ])('%s: no p2016 button, CDC kept', (_label, doses) => {
     const card = notIndicated(run(doses));
     expect(card).toBeTruthy();
     const chips = chipShorts(card);
     expect(chips).not.toContain('immunize.org p2016');
     expect(chips).toContain('CDC Child/Adolescent Notes');
-    // The owner's do-not-re-raise chip. Pinned so a tidy-up cannot remove it.
-    expect(chips).toContain('CDC PCV Catch-up Job Aid');
+    // ⚠ C12 (2026-10-29) REVERSES what this line used to assert. It pinned the
+    // Job Aid chip as present, because statement 1 was the open decision the
+    // owner had asked twice not to be pushed at her. She lifted that herself on
+    // 2026-10-29 by asking for the last citation to be worked, was shown this
+    // card for a healthy 10-year-old, and chose "Take chip off". The reasons
+    // and the mirror guard live in
+    // `regression-c12-2026-10-29-last-citation-and-the-age-50-note.test.js`;
+    // this line is kept rather than deleted so the reversal is visible here.
+    expect(chips).not.toContain('CDC PCV Catch-up Job Aid');
   });
 
   it('CHILD B is the patient p2016 had no row for, and she still needs nothing', () => {

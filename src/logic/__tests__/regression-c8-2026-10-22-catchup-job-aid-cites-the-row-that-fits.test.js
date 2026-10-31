@@ -152,6 +152,12 @@ describe('the completed card credits the rows that end the series', () => {
     ['3 doses with one at 12 months or later', 30, [5, 14, 17]],
   ];
 
+  // ⚠ `adultRoutine50` is the LAST key on every one of these lists since C12
+  // (owner decision 2026-10-30): this card now ends "Re-evaluate at age 50,
+  // when routine pneumococcal vaccination begins for every adult", because the
+  // app gives this healthy child nothing at 19 and a dose at 50. It is listed
+  // here rather than filtered out, so that a change to the job aid's own rows
+  // still has to come through this exact list.
   it.each(ended)('%s → the job aid cell that gives nothing', (_label, ageMonths, doses) => {
     const rec = pcvCard(healthyChild(ageMonths, doses));
     expect(rec.status).toBe('complete');
@@ -159,13 +165,18 @@ describe('the completed card credits the rows that end the series', () => {
       'pedsNoPcv20IfComplete',
       'p2016HealthyComplete24to59',
       'jobAidPedsCatchupNoneNeeded',
+      'adultRoutine50',
     ]);
   });
 
   it('an undated completing dose gets NO job aid number: the table needs documented doses', () => {
     const rec = pcvCard(healthyChild(30, ['undated'], 'PCV20'));
     expect(rec.status).toBe('complete');
-    expect(citeKeys(rec)).toEqual(['pedsNoPcv20IfComplete', 'p2016HealthyComplete24to59']);
+    expect(citeKeys(rec)).toEqual([
+      'pedsNoPcv20IfComplete',
+      'p2016HealthyComplete24to59',
+      'adultRoutine50',
+    ]);
   });
 
   it('the two p2016 rows are the two halves of Table 2 and say opposite things', () => {

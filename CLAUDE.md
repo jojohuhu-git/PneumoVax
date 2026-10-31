@@ -95,10 +95,19 @@ and so has no other disposition for that history. **The job aid is FINISHED too*
 cell is the two text runs "≥5 years" and "PCV20 or PCV21" at different x positions — and the
 owner ruled 2026-10-18 *"use MMWR table"*, so mm7401a1's sentences are cited and the job aid
 comes off those cards. **CDC's Child/Adolescent Notes are FINISHED too** — 8 statements over
-1,107 cards cleared on 2026-10-23 (FINDING N plus four C8 commits), so **three of six
-documents now carry zero uncredited pairs**. Documents 3, 5 and 6
-have proposed removals still waiting, and **doc 4 statement 1 is an
-open owner decision she has asked not to be re-raised.** Readings, dispositions and counts:
+1,107 cards cleared on 2026-10-23 (FINDING N plus four C8 commits).
+
+**ALL SIX DOCUMENTS NOW CARRY ZERO UNCREDITED PAIRS — the job is DONE** (C12, 2026-10-29).
+Measured over 17,407 cards: **0** pairs. The last one was doc 4 statement 1, the CDC PCV
+Catch-up Job Aid listed on the healthy 5–18 "not indicated" card (1,584 cards) with nothing
+citing it. It had stood open since 2026-10-17 as the one decision **she asked twice not to
+have pushed at her**; she lifted that herself on 2026-10-29 by asking for the last citation
+to be worked, was shown the card for a healthy 10-year-old, and ruled **"Take chip off"**
+plus a new sentence: *"add a comment to re-evaluate pneumococcal vaccines once the patient
+turns 50 years old and cite the necessary adult reference."* `CLINICAL_SPEC.md` §B-5TO18.
+**The measurement, not this file, is the authority — re-run it rather than trusting this
+sentence, and if a pair ever reappears, the document was put on a card before its row was
+read.** Readings, dispositions and counts:
 `docs/archive/c7-2026-10-17-source-readings.md`. Measure with
 `npx vite-node scripts/uncreditedSources.mjs` and `scripts/citationMapping.mjs` — never
 quote a count from the log, which predates the IC-children fix and reads low.
@@ -505,6 +514,16 @@ the patient is not — via `cite(key, { aboutAnotherGroup: 'why' })`. There are 
 pinned by name, as is the set of sources spanning more than one group. **Never widen a
 source's `population` to make a wrong quote legal** — that is the one mutation that made the
 sweep go quiet, which is why both lists are pinned. Fix the call site instead.
+
+**One of the four now crosses the CHILD/ADULT line, and it is the only card in the app that
+does** (C12, 2026-10-29). The healthy 5–18 card ends with *"Re-evaluate at age 50, when
+routine pneumococcal vaccination begins for every adult"* — the owner's request — and cites
+`adultRoutine50`, an **adult** source on a **child's** card. That is the N6 rule crossed
+deliberately: the sentence is ABOUT the adult schedule, so only the adult schedule can carry
+it. **N6's own sweep cannot see this** — it ticks one risk condition at a time and so never
+reaches the healthy card — so C12's guard holds the line instead: no OTHER child card may
+carry an adult source. Never answer a future "an adult source is on a child's card" by
+widening N6; add the card to that guard's exception, or fix the call site.
 
 ### The App Advises And Grades By One Number — CDC Catch-up Table 2
 **OWNER DECISION 2026-10-23, and it REVERSES owner decision 2 of 2026-10-11.** A PCV dose

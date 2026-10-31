@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-10-30)** by
+> `docs/archive/handoff-2026-10-30-last-citation-closed-and-group-b.md`.
+> PR #96 is merged; the citation work described here as remaining is FINISHED
+> (0 uncredited pairs over 17,407 cards). Do not resume from this file.
+
 # PneumoVax — Handoff after the age-rejection wording and the eight-week wait (2026-10-29, evening)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal
