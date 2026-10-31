@@ -79,6 +79,14 @@ const CHILD = {
 // immunocompromised child — the months arm of the grace has no home left and
 // this file's coverage of it goes with it. Say so rather than deleting it.
 //
+// ⚠️ IT WAS DOWNGRADED (P2, 2026-10-30), AND THE ARM DID FIND A HOME. A second
+// PPSV23 after a COUNTED first is now a recommendation. The old floor survives
+// as `CHILD-PPSV23-AFTER-INVALID-PPSV23` — a repeat of a REJECTED PPSV23,
+// Ruling D's case — months-stated and graced. So her PCV20 moved from
+// 2019-01-01 to 2019-03-04, four weeks before her first PPSV23, which makes
+// that first dose rejected (`CHILD-PPSV23-AFTER-PCV`) and puts her second on
+// the surviving floor. Every date below is unchanged.
+//
 // Her second PPSV23 is 2024-02-05, about two months inside the five years:
 //   earliestValidDate  2024-03-28   (2019-04-01 + 5y, MINUS the grace)
 //   repeatDueDate      2029-02-05   (2024-02-05 + 5y, NO grace — pre-fix 02-01)
@@ -87,10 +95,10 @@ const CHILD_MONTHS = {
   ageMonths: 129,
   today: '2026-10-23',
   riskIds: ['asplenia'],
-  pcvDoses: [{ product: 'PCV20', date: '2019-01-01' }],
+  pcvDoses: [{ product: 'PCV20', date: '2019-03-04' }],
   ppsv23Doses: [
-    { product: 'PPSV23', date: '2019-04-01' },
-    { product: 'PPSV23', date: '2024-02-05' }, // under 5 years — rejected
+    { product: 'PPSV23', date: '2019-04-01' }, // 28 days after the PCV20 — rejected
+    { product: 'PPSV23', date: '2024-02-05' }, // under 5 years of a rejected dose — rejected (Ruling D)
   ],
 };
 
@@ -138,7 +146,7 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
   it('the months-stated rule loses the grace too', () => {
     const dose = lastPpsvDose(CHILD_MONTHS);
     expect(dose.status).toBe('invalid');
-    expect(dose.intervalRuleId).toBe('CHILD-PPSV23-AFTER-PPSV23');
+    expect(dose.intervalRuleId).toBe('CHILD-PPSV23-AFTER-INVALID-PPSV23');
     // 2024-02-05 + 5 calendar years. Pre-fix: 2029-02-01.
     expect(dose.repeatDueDate).toBe('2029-02-05');
     expect(dose.reasons.at(-1))
@@ -209,9 +217,16 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
     // own case here; if it empties, say so (see CHILD_MONTHS's comment).
     expect(DOSE_INTERVAL_RULES.filter((r) => r.rulebook === 'adult' && r.grace))
       .toEqual([]);
+    // P2 (2026-10-30): two rows now, and only one is a FLOOR. The months arm
+    // of a repeat date lives on the floor (CHILD_MONTHS above); the graced
+    // RECOMMENDATION never sets a dose aside, so it never names a repeat.
     expect(
       DOSE_INTERVAL_RULES.filter((r) => r.grace && r.interval?.months).map((r) => r.id),
-    ).toEqual(['CHILD-PPSV23-AFTER-PPSV23']);
+    ).toEqual(['CHILD-PPSV23-AFTER-PPSV23', 'CHILD-PPSV23-AFTER-INVALID-PPSV23']);
+    expect(
+      DOSE_INTERVAL_RULES.filter((r) => r.grace && r.interval?.months && r.enforcement === 'floor')
+        .map((r) => r.id),
+    ).toEqual(['CHILD-PPSV23-AFTER-INVALID-PPSV23']);
   });
 });
 

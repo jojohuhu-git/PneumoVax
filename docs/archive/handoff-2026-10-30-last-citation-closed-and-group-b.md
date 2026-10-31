@@ -1,3 +1,9 @@
+> **⚠ SUPERSEDED 2026-10-30** by
+> [`handoff-2026-10-30-p2-child-second-ppsv23.md`](handoff-2026-10-30-p2-child-second-ppsv23.md).
+> PR #97 below is merged; P2 is done (PR #98); its "non-IC early second PPSV23" question was
+> answered ("extra dose"). The Group B question is carried into the new file. Also: the
+> "~25–40 minutes" suite time below is wrong — it takes ~41 seconds. Resume from the new file.
+
 # PneumoVax — Handoff: the citation work is FINISHED, and one open question (2026-10-30)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Client-side React SPA for pneumococcal

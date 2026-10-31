@@ -157,7 +157,9 @@ describe('the row is a floor on the owner\'s authority', () => {
       .toEqual([
         'CHILD-PCV-AFTER-PCV/CDC',
         'CHILD-PPSV23-AFTER-PCV/CDC',
-        'CHILD-PPSV23-AFTER-PPSV23/CDC',
+        // P2 (2026-10-30): the second-PPSV23 floor survives only for a repeat of
+        // a REJECTED PPSV23 (Ruling D); after a counted one it is advice now.
+        'CHILD-PPSV23-AFTER-INVALID-PPSV23/CDC',
         'CHILD-PCV-AFTER-PPSV23/OWNER',
       ]);
   });

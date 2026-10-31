@@ -198,13 +198,19 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
 });
 
 describe('queue P1-0 — PPSV23 revaccination interval', () => {
+  // P2 (2026-10-30): still not counted — but for this child (no risk
+  // condition, so CDC never gives a second PPSV23) it is now an EXTRA dose
+  // rather than a rejected one, and nothing is owed. Until P2 it read
+  // 'invalid' and pointed at a "next dose" five years on. An IC child's early
+  // second dose COUNTS instead (owner ruling 2026-10-29; CLINICAL_SPEC §C-P2).
   it('a second PPSV23 inside 5 years does not count', () => {
     const a = analyzeHistory('PPSV23', [
       { date: '2020-07-06' },
       { date: '2021-07-06' },
     ], 156, TODAY, '2014-01-01');
-    expect(statuses(a)).toEqual(['valid', 'invalid']);
     expect(a.effective).toHaveLength(1);
+    expect(a.perDose[1].extraDose).toBe(true);
+    expect(a.perDose[1].repeatDueDate).toBeUndefined();
   });
 
   it('counts a second PPSV23 at 5 calendar years, and 4 days inside it', () => {
@@ -216,8 +222,11 @@ describe('queue P1-0 — PPSV23 revaccination interval', () => {
     const graced = analyzeHistory('PPSV23', [{ date: first }, { date: addDays(at5y, -4) }], 156, TODAY, '2014-01-01');
     expect(statuses(graced)).toEqual(['valid', 'valid']);
 
+    // P2: five days short is outside the grace — not counted, as before,
+    // now as an extra dose for this child (no risk condition).
     const tooSoon = analyzeHistory('PPSV23', [{ date: first }, { date: addDays(at5y, -5) }], 156, TODAY, '2014-01-01');
-    expect(statuses(tooSoon)).toEqual(['valid', 'invalid']);
+    expect(tooSoon.effective).toHaveLength(1);
+    expect(tooSoon.perDose[1].extraDose).toBe(true);
   });
 });
 

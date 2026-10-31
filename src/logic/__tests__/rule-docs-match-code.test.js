@@ -111,7 +111,10 @@ function expectedRow(rule) {
     giving: ruleGiving(rule),
     from: ruleFrom(rule),
     gap: ruleGapExact(rule),
-    enforcement: ENFORCEMENT_WORDS[rule.enforcement],
+    // A row's own `ifShorter` words win (P2, 2026-10-30): the enforcement
+    // alone would say "Counts, with a note" of a dose that, for a child with
+    // no immunocompromising condition, is an extra dose and is not counted.
+    enforcement: rule.ifShorter?.short ?? ENFORCEMENT_WORDS[rule.enforcement],
     authority: rule.authority === 'OWNER' ? 'This app' : 'CDC / ACIP',
   });
 }
@@ -288,8 +291,24 @@ describe('P2-7: the invariants the rulebook states in words hold in the code', (
     )).toEqual([]);
   });
 
+  // ONE EXCEPTION, BY NAME (OWNER DECISION 2026-10-30, CLINICAL_SPEC.md §C-P2).
+  // `CHILD-PPSV23-AFTER-PPSV23` is a recommendation that keeps the grace, and
+  // the reason is the premise below failing for it alone: when it fires for a
+  // child with no immunocompromising condition, validate.js makes the dose an
+  // EXTRA dose, which does not count. So the grace does rescue something here,
+  // and dropping it moved 708 grid patients (22 adults) across that line.
+  // Pinned as a list so a second recommendation cannot pick up a grace quietly.
+  const GRACED_RECOMMENDATIONS = ['CHILD-PPSV23-AFTER-PPSV23'];
+
+  it('the graced recommendations are exactly the pinned list', () => {
+    expect(DOSE_INTERVAL_RULES
+      .filter((r) => r.enforcement === 'recommendation' && r.grace === true)
+      .map((r) => r.id)).toEqual(GRACED_RECOMMENDATIONS);
+  });
+
   it('every row that voids a dose gets CDC\'s grace, and no row that only advises does', () => {
     const wrong = DOSE_INTERVAL_RULES
+      .filter((r) => !GRACED_RECOMMENDATIONS.includes(r.id))
       .filter((r) => (r.enforcement === 'floor') !== (r.grace === true))
       .map((r) => `${r.id} (enforcement: ${r.enforcement}, grace: ${r.grace})`);
     expect(wrong, why(

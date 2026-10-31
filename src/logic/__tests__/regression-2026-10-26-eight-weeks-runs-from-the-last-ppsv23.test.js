@@ -132,9 +132,28 @@ describe('a child\'s 8-week conjugate wait runs from her LAST counting PPSV23', 
     // record-problem rule, "a dose the patient never had". Both second doses
     // below are 54 days ago; neither may hold the conjugate, because neither
     // is a dose the engine credits.
-    const insideFiveYears = hana([{ date: '2024-01-01' }, { date: '2026-09-01' }]);
-    expect(ppsvStatuses(insideFiveYears)).toEqual(['valid', 'invalid']);
-    for (const card of pcvCards(insideFiveYears)) expect(card.dueToday).toBe(true);
+    //
+    // ⚠️ P2 (2026-10-30) MOVED WHICH CHILD SHOWS IT. Hana has no spleen, and
+    // an immunocompromised child's early second PPSV23 now COUNTS (owner
+    // ruling 2026-10-29) — so for her it is a credited dose and DOES hold the
+    // conjugate, to 8 weeks after it, exactly as this file's own ruling says
+    // of a last counting PPSV23. The same dose for a child with a cochlear
+    // implant is an EXTRA dose (owner ruling 2026-10-30) — not credited — so
+    // the control's principle is now shown by her.
+    const twoDoses = [{ date: '2024-01-01' }, { date: '2026-09-01' }];
+    const cochlear = recommend({
+      today: TODAY, dob: '2014-10-01', ageMonths: 144, riskIds: ['cochlear_implant'],
+      pcvDoses: [], ppsv23Doses: twoDoses,
+    });
+    expect(cochlear.perDose.ppsv23[1].extraDose).toBe(true);
+    expect(pcvCards(cochlear).length).toBeGreaterThan(0);
+    for (const card of pcvCards(cochlear)) expect(card.dueToday).toBe(true);
+
+    // ...and Hana's counted dose holds her to 2026-09-01 + 56 days.
+    const insideFiveYears = hana(twoDoses);
+    expect(ppsvStatuses(insideFiveYears)).toEqual(['valid', 'valid']);
+    expect(pcvCards(insideFiveYears).length).toBeGreaterThan(0);
+    for (const card of pcvCards(insideFiveYears)) expect(advised(card)).toBe('2026-10-27');
 
     const futureDated = hana([{ date: '2019-01-01' }, { date: '2027-09-01' }]);
     expect((futureDated.perDose?.ppsv23 ?? [])[1]?.recordProblem).toBeTruthy();

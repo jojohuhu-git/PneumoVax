@@ -562,7 +562,73 @@ conjugate out, and a child with no PPSV23 is untouched.
 **One related question the owner has NOT been asked.** A PPSV23 given 54 days ago but
 *rejected* for falling inside five years does **not** hold off a conjugate — ANCHOR-1, *"an
 unnecessary dose cannot reset a clock."* That is designed behaviour, pinned as a control in
-the guard above, not part of this defect.
+the guard above, not part of this defect. **P2 (2026-10-30, below) narrowed who that is:** an
+immunocompromised child's early second PPSV23 now COUNTS, so it does hold off a conjugate; a
+child with no immunocompromising condition's is an extra dose and still does not.
+
+### §C-P2 — A child's second PPSV23 inside five years (2026-10-30)
+
+**Two owner rulings, one per risk class, and a third on order.** CDC's child notes, read live
+2026-10-30 with the accordions open (pneumococcal section 5,106 characters; positive control
+"dose 2 PPSV23", 3 occurrences; no "dose 3", "third dose" or "3rd" anywhere):
+
+> Immunocompromising list: *"If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at
+> least 5 years after dose 1 PPSV23."*
+>
+> Non-immunocompromising list (cochlear implant, CSF leak, chronic heart/lung/liver/kidney
+> disease, diabetes): *"Not previously received PCV20: 1 dose PCV20 or 1 dose PPSV23
+> administer at least 8 weeks after the most recent PCV dose"* — and no second PPSV23 at all.
+
+Neither says a dose given inside the five years stops counting. As a FLOOR,
+`CHILD-PPSV23-AFTER-PPSV23` asserted that; it is now a RECOMMENDATION, which asserts only
+CDC's interval — the adult twin's relabelling of 2026-10-25 run on the child row.
+
+| Child | History | Before | Now | Ruling |
+|---|---|---|---|---|
+| **Leo**, 10, no spleen (IC) | PCV13 ×4 as a baby; PPSV23 at 2 and at 6y10m | 2nd PPSV23 thrown out; card offered PCV20 or a "2nd PPSV23" — his **third** | Counts, note *"…shorter than the 5 years advised… Counted; never give a third"*; card complete and says the second came early | OWNER 2026-10-29: count, never a third |
+| **Ava**, 10, cochlear implant (not IC) | same | thrown out; chip *"next dose … from Nov 15, 2027"* beside a "complete" card | **Extra dose**: *"Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition…"* | OWNER 2026-10-30, chose "Extra dose" from her own 2026-10-23 words |
+| **Sofia**, 18, no spleen | PPSV23 at 8 and 13, **then** PCV13 at 17 | PCV20 **or** "2nd PPSV23" (third) | **PCV20 only**, and the card says why | OWNER 2026-10-30 |
+| **Zoe**, 14, no spleen | PCV13 at 7, **then** PPSV23 at 7y3m and 12y3m | PCV20 or "2nd PPSV23" — wrong on main, on time | **Complete** | control she was shown with Sofia |
+
+**The grace stays — OWNER DECISION 2026-10-30.** A recommendation row normally gets no 4-day
+grace. Dropping it here moved **708** of 17,016 grid patients — 22 of them adults whose card
+date changed because of a PPSV23 given in childhood — because the grid dates a second PPSV23
+two days short of five years, which counted silently on main. She kept the grace: a dose up
+to 4 days early is on time, as before, and only a dose that used to be **thrown out** gets
+the new answer. This is the one exception to "floor ⇔ grace", pinned by name.
+
+**Order decides whether CDC's row is finished.** CDC's rows give the PPSV23 *after* the
+conjugate. An IC child with two counted PPSV23 doses is complete only when **every** counted
+PPSV23 came after the last counted PCV (`icTwoPpsv23Done`); otherwise the PCV20 is still owed,
+alone (`IC_TWO_PPSV23_PCV20_LEAD`). A patient whose doses straddle the conjugate (the suite's
+sickle-cell patient: PPSV23 at 2, PCV13 at 7, PPSV23 at 9) is read cautiously and keeps the
+PCV20 — never a harmful answer. *This is a judgement within her Sofia ruling, not a ruling
+of its own; it moves no grid patient.*
+
+**Three limits, each guarded:**
+- **A third PPSV23 is an extra dose** for an IC child (*"two PPSV23 doses have already been
+  given … and CDC never gives a third"*). Her rulings count a *second*.
+- **A repeat of a REJECTED PPSV23 is not P2.** `CHILD-PPSV23-AFTER-INVALID-PPSV23` is the old
+  floor, kept exactly (RULING D: spaced from the dose given). The two rows split on
+  `anchorCounted`. Measured on a hand-built child: byte-identical chip text to main, only the
+  rule id differs.
+- **An on-time second PPSV23 for a non-IC child still counts**, though it was just as
+  unneeded. She ruled on the early one; widening is hers to decide.
+
+**The card sentence.** Her chosen preview read *"Ava was already complete after her first
+PPSV23"*. The shipped sentence gives CDC's reason instead — "complete" is not always true (a
+2–5-year-old's conjugate series can still be open) and "one PPSV23" is false for a healthy
+child, who gets none. The four points she chose are kept: not needed, not harmful, not
+counted, nothing to repeat.
+
+**Measured blast radius: 96 of 17,016**, every one the Sofia family (IC 18-year-olds, PPSV23
+×2 then a conjugate), "PCV20 or 2nd PPSV23" → "PCV20". No chip under any dose moved; no adult
+and no healthy child moved. Record-problem corpus: see the PR.
+
+Guard: `regression-p2-2026-10-30-child-second-ppsv23.test.js` — Leo, Ava, Maya (4, the
+completed-series card), Noah (4, the catch-up card, which used to be unreachable for an IC
+child), Zoe early and on time, Sofia, the two-days-short pair, the third dose and the
+rejected-first repeat.
 
 ---
 
@@ -1308,7 +1374,8 @@ catch-up row**.
   `rulebook` (child / adult / any — which schedule states the rule, so which interval and
   which citation apply) and `enforcement` (`'floor'` → a short gap voids the dose and CDC's
   4-day grace applies; `'recommendation'` → the dose counts and carries a note, no grace;
-  `'none'` → explicitly never flagged, with the reason written down). **No age test decides
+  `'none'` → explicitly never flagged, with the reason written down — with ONE exception to
+"no grace", `CHILD-PPSV23-AFTER-PPSV23`, by owner decision 2026-10-30, §C-P2). **No age test decides
   whether a rule may bite.** `CHILD-PPSV23-AFTER-PPSV23` and `ADULT-PPSV23-AFTER-PPSV23`
   read the *same* 5-year constant — proof the old age gate on that rule was pure loss — and
   a test asserts they cannot drift apart.
@@ -1324,13 +1391,15 @@ catch-up row**.
   to look at it.
 
   **"Already on the record" is a column because the rules demand it.** Her three axes were
-  age, risk and the last dose. Fourteen of the eighteen rules actually split on a FOURTH
+  age, risk and the last dose. Five of the twenty rules actually split on a FOURTH
   thing — a 55-year-old and a 70-year-old with the same PPSV23 get different gaps because
   one of them also has a PCV13 on file. Leave it out and the table has rows that look
   identical and disagree.
 
-  **Risk is "Any" on sixteen of the eighteen, and that is the answer, not padding.** Only
-  two rules read the risk conditions at all, both adult PPSV23-after-PCV15 rows. "Does my
+  **Risk is "Any" on fourteen of the twenty, and that is the answer, not padding.** Only
+  six rules read the risk conditions at all, every one an adult PPSV23-after-PCV13/15 row.
+  (Counts re-measured 2026-10-30 from the describers; the earlier "eighteen / fourteen /
+  sixteen / two" had already drifted on main, which had 19 / 5 / 13 / 6.) "Does my
   patient's asplenia change this interval?" is a question the table now answers.
 
   **This table mirrors `DOSE_INTERVAL_RULES` exactly, and a test
@@ -1354,7 +1423,8 @@ catch-up row**.
   | Child (under 19 years) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | Dose 2, when dose 1 was given before the first birthday: at least 4 weeks; Dose 2, when dose 1 was given at the first birthday or later: at least 8 weeks; Dose 3, given under 12 months, previous dose before 7 months: at least 4 weeks; Dose 3, previous dose at 7–11 months: at least 8 weeks; Dose 4 or later, given under 12 months (an extra infant dose): at least 4 weeks; Dose 4 or later, given at 12 months or over (the booster): at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PCV-AFTER-PCV` |
   | Child (under 19 years) | Any | Anything | Any PCV | the most recent PPSV23 that counted | at least 8 weeks | Does not count | This app | `CHILD-PCV-AFTER-PPSV23` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the most recent PCV that counted | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PCV` |
-  | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine — including one that did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PPSV23` |
+  | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine, when that dose counted | at least 5 years | Immunocompromised: counts, with a note. Otherwise: an extra dose, not counted | CDC / ACIP | `CHILD-PPSV23-AFTER-PPSV23` |
+  | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-INVALID-PPSV23` |
   | Adult (19 years and over) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | at least 4 weeks | Counts, with a note | This app | `ADULT-PCV-AFTER-PCV-UNDER-4-WEEKS` |
   | Adult (19 years and over) | Any | PCV13, PPSV23 | PCV20 or PCV21 | the most recent PCV that counted | at least 1 year | Counts, with a note | This app | `ADULT-PCV20-21-1Y-AFTER-PCV` |
   | Adult (19 years and over) | Any | PCV13, PPSV23 | PCV20 or PCV21 | the most recent PPSV23 that counted | at least 5 years | Counts, with a note | CDC / ACIP | `ADULT-PCV20-21-5Y-AFTER-PPSV23` |

@@ -239,6 +239,12 @@ describe('the whole grid', () => {
     // before ~84 months, past this block's 71-month ceiling. Pinning it here
     // means that moving the ceiling fails a test instead of quietly making the
     // engine read the wrong dose.
+    //
+    // ⚠️ P2 (2026-10-30) ENDED THE ARITHMETIC, outside the grid. An
+    // immunocompromised child's early second PPSV23 now counts, so the state is
+    // real; the grid still dates no two PPSV23 doses inside five years, which is
+    // why this sweep still reads 0. The hand-built child in the next test is
+    // where the first-vs-last mistake is now caught.
     let reached = 0;
     for (const c of buildCases()) {
       const inp = c.input;
@@ -262,5 +268,20 @@ describe('the whole grid', () => {
     // test above states, and this one restates as a direction claim: no key
     // whatsoever, not merely no UNEXPECTED key.
     expect(rows.map((r) => r.key)).toEqual([]);
+  });
+
+  it('P2: a 4-year-old with TWO counted PPSV23 doses is held 8 weeks from the LAST', () => {
+    // No spleen; one PCV13 at 25 months; PPSV23 at 27 months and an early
+    // second 45 days ago, which counts (owner ruling 2026-10-29). Reading the
+    // FIRST PPSV23 would make the catch-up dose due today.
+    const out = recommend({
+      dob: '2022-01-01', ageMonths: 57, today: '2026-10-30', riskIds: ['asplenia'],
+      pcvDoses: [{ product: 'PCV13', date: '2024-02-01' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2024-04-01' }, { product: 'PPSV23', date: '2026-09-15' }],
+    });
+    expect(out.perDose.ppsv23.map((d) => d.effectiveDoseNum)).toEqual([1, 2]);
+    const card = out.recs.find((r) => r.doseLabel === 'PCV dose 2 of 2 (at-risk catch-up)');
+    expect(card.dueToday).toBe(false);
+    expect(card.earliestNextDate).toBe('2026-11-10'); // 2026-09-15 + 56 days
   });
 });

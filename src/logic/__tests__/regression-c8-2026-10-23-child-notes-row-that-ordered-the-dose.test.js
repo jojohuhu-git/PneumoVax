@@ -162,12 +162,14 @@ describe('C8 — the complete card credits the row that ordered the dose', () =>
     expect(uncredited(card)).toEqual([]);
   });
 
-  it('a second PPSV23 given too early is not a second dose, so the card does not appear', () => {
-    // The documents count doses that COUNTED, and `CHILD-PPSV23-AFTER-PPSV23`
-    // is a floor with CDC's 4-day grace — so the boundary is not five years
-    // exactly. Both sides of it are asserted, because an engine that counted
-    // every recorded row would call a child complete on a dose CDC rejects,
-    // and one that ignored the grace would reject a dose CDC accepts.
+  // ⚠️ REVERSED BY P2 (2026-10-30), kept as the record. This test was named
+  // "a second PPSV23 given too early is not a second dose, so the card does
+  // not appear" and asserted exactly that, on `CHILD-PPSV23-AFTER-PPSV23` as a
+  // floor. The owner ruled on 2026-10-29 that an immunocompromised child's
+  // early second PPSV23 COUNTS and no third is given, so the card now appears
+  // either side of the line. What still differs is what the card SAYS — and
+  // the line is still CDC's 4-day grace, which she chose to keep (2026-10-30).
+  it('a second PPSV23 given too early still completes her, and the card says it came early', () => {
     const withSecondDoseOn = (date) => recommend({
       ageMonths: 96,
       dob: '2018-10-11',
@@ -179,11 +181,16 @@ describe('C8 — the complete card credits the row that ordered the dose', () =>
         { product: 'PPSV23', date },
       ],
     });
-    // Four days early: inside CDC's grace, so it counts and the series is done.
-    expect(cardOf(withSecondDoseOn('2026-10-07'))).toBeTruthy();
-    // Five days early: outside the grace, so there is no second dose to be
-    // complete on, and this card must not appear.
-    expect(cardOf(withSecondDoseOn('2026-10-06'))).toBeFalsy();
+    const EARLY = 'The second PPSV23 came less than 5 years after the first; it is counted, and no third PPSV23 is given.';
+    // Four days early: inside CDC's grace, so it is ON TIME — no sentence.
+    const onTime = cardOf(withSecondDoseOn('2026-10-07'));
+    expect(onTime).toBeTruthy();
+    expect(onTime.note.detail).not.toContain(EARLY);
+    // Five days early: outside the grace — counted all the same, and said so.
+    const early = cardOf(withSecondDoseOn('2026-10-06'));
+    expect(early).toBeTruthy();
+    expect(early.note.detail).toContain(EARLY);
+    expect(uncredited(early)).toEqual([]);
   });
 
   it('every one of these cards in the grid is fully credited, and there are 145', () => {
