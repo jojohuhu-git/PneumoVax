@@ -1034,6 +1034,12 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         // swapped by accident.
         forwardLookingReason: result.recordProblem || !result.intervalRuleId ? null : closingSentence,
         withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : `${DOES_NOT_COUNT_LEAD} It is not repeated.`,
+        // §C-P2-NOTHIRD (Ivy, 2026-10-31): the same handover for EVERY closing
+        // sentence, not only the timing one, so `recommend.js` can say "It is
+        // not repeated" under a too-young shot whose card offers no further
+        // PPSV23. `closingLead` is the half that is always true.
+        closingSentence,
+        closingLead: result.intervalRuleId ? DOES_NOT_COUNT_LEAD : 'This dose does not count toward the series.',
         ...(repeatOfUnderAgeDose ? { repeatOfUnderAgeDose } : {}),
         reasons: [...result.reasons, closingSentence, alternativeSentence].filter(Boolean),
       }));
