@@ -1657,6 +1657,13 @@ catch-up row**.
   2. **PCV → PPSV23 = ≥8 weeks**, and never the same visit. CDC Child Notes:
      > "administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV
      > dose" … "PCV15 and PPSV23 should not be administered during the same visit."
+
+     The same-visit chip names the PCV **the record shows** (2026-10-31): *"Given on the
+     same day as a PCV13 dose — PPSV23 is given at least 8 weeks (56 days) after a PCV
+     dose."* CDC's same-visit sentence names PCV15 alone, so it is added for a PCV15 and for
+     nothing else. Until then every same-day chip said "PCV15", and on the grid none of its
+     583 showings sat beside one (PCV13 297, unknown product 154, PCV20 121, PCV21 11).
+     Wording only. Guard: `regression-2026-10-31-same-day-ppsv23-names-the-pcv-given.test.js`.
   3. **PPSV23 dose 2 = ≥5 calendar years** after dose 1. CDC Child Notes: *"administer
      either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23."*
 

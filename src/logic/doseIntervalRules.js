@@ -412,9 +412,15 @@ export const DOSE_INTERVAL_RULES = [
       const gap = daysBetween(anchor.date, ctx.doseDate);
       // Same-visit is the 0-day case of the same minimum, named separately
       // because it is the mistake a clinician is most likely to have made.
+      // It names the PCV the RECORD shows (2026-10-31): it said "PCV15 and
+      // PPSV23 should not be given at the same visit" for every product, and
+      // on the grid none of its 583 showings sat beside a PCV15. CDC's
+      // same-visit sentence names PCV15 alone, so it stays for a PCV15 only.
       if (gap === 0) {
+        const given = anchor.product ? `a ${anchor.product} dose` : 'a PCV dose';
+        const pcv15 = anchor.product === 'PCV15' ? 'PCV15 and PPSV23 should not be given at the same visit, and ' : '';
         return {
-          reasons: [`Given on the same day as a PCV dose — PCV15 and PPSV23 should not be given at the same visit, and PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after a PCV dose.`],
+          reasons: [`Given on the same day as ${given} — ${pcv15}PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after a PCV dose.`],
           detail: `Gap: same day. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after the PCV dose.`,
         };
       }
