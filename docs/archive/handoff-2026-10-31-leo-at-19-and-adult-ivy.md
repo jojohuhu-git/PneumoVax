@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-10-31** by `handoff-2026-10-31-adult-pcv15-no-third-ppsv23.md`. PR #103 is merged and owner question 1 below is answered and built (`bf3f311`). Do not resume from this file.
+
 # PneumoVax — Handoff after Leo at 19, the same-day "PCV15" chip, and Ivy grown up (2026-10-31, night)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
