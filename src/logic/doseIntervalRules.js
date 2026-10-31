@@ -210,7 +210,7 @@ function fmtGap(fromISO, toISO) {
 // misread as "no gap was required". Same-visit is the single most likely
 // real-world co-administration error on these pairs, so it is the one phrase
 // that most needs to land.
-function fmtSince(fromISO, toISO) {
+export function fmtSince(fromISO, toISO) {
   return daysBetween(fromISO, toISO) === 0
     ? 'on the same day as'
     : `${fmtGap(fromISO, toISO)} after`;

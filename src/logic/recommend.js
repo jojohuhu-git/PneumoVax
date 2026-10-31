@@ -41,7 +41,7 @@ import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { pcvNextDoseMinIntervalCell, intervalPhrase } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
-import { ADULT_OWED_AFTER_INVALID_DOSE } from './doseIntervalRules.js';
+import { ADULT_OWED_AFTER_INVALID_DOSE, fmtSince } from './doseIntervalRules.js';
 
 // Age bands (months)
 // y18 is the ADULT SCHEDULE boundary (228 = 19y), not the PCV21 product gate (216 = 18y).
@@ -4172,6 +4172,60 @@ export function recommend(input) {
     return { ...d, forwardLookingReason: null, reasons: d.reasons.map((x) => (x === d.closingSentence ? said : x)) };
   };
 
+  // ── §K-IC-PCV20-5Y (OWNER RULING 2026-10-31) ───────────────────────────
+  //
+  // A 6-year-old with no spleen, PCV13 as a baby, PPSV23 a year ago: her card
+  // advises PCV20 or a second PPSV23 five years after the first PPSV23. Given
+  // the second PPSV23 a year early, her chip said "shorter than the 5 years
+  // advised … Counted"; given the PCV20 a year early instead, it said
+  // NOTHING. Shown both, she chose "Add a note". The dose counts either way.
+  //
+  // ⚠ THE CARD'S OWN ANSWER, NOT A SECOND READING OF IT. A first draft put a
+  // row in `DOSE_INTERVAL_RULES` describing when the five years applies, and
+  // swept against the card it disagreed both ways: 105 grid children got the
+  // note on a CATCH-UP PCV20 the card was asking for at 8 weeks, and 159 the
+  // card WAS holding to five years (PPSV23 given before the conjugates) got
+  // none. So, as §B-AT19 does, the same patient is run on the day of the
+  // dose with only the doses before it, and the note is added exactly when
+  // THAT card was holding a PCV20 to five years and the dose came first. No
+  // interval is computed here: the date is the card's, the first PPSV23 is
+  // the walk's.
+  //
+  // A child dose only: an adult's PCV20 has its own row
+  // (`ADULT-PCV20-21-5Y-AFTER-PPSV23`). Only a dose that COUNTED: a PCV20
+  // thrown out by the 8-week floor already says why.
+  const earlyFiveYearPcv20 = (d, i) => {
+    const dose = pcvAnalysis.doses[i];
+    // No undated, extra-dose, record-problem, "the card names PCV20" or "the
+    // card is a PCV card" tests: each was found redundant by mutation (an
+    // undated dose is never 'valid'; an extra or future dose is never what a
+    // card on that day was holding; every child five-year card holds PCV20).
+    if (d.status !== 'valid' || dose.product !== 'PCV20') return d;
+    const ageAtDose = ageAtDoseMonths(dose, { dob, ageMonths: am }, today);
+    if (ageAtDose >= ADULT_SCHED_MIN_M) return d;
+    const earlier = (list) => list.filter((x) => x && x.date && x.date < dose.date);
+    const then = recommend({
+      ...input, today: dose.date, ageMonths: ageAtDose,
+      pcvDoses: earlier(rawPcv), ppsv23Doses: earlier(rawPpsv),
+    });
+    // `earliestNextDate` is set only while the date is still ahead, so a
+    // dose on or after it finds nothing here.
+    const held = then.recs.find((r) => r.minIntervalMonths === MO60 && r.earliestNextDate);
+    if (!held) return d;
+    const k = then.perDose.ppsv23.findIndex((x) => x.effectiveDoseNum === 1);
+    // Never reached on the grid (a card holding five years always has a
+    // counted first PPSV23 — mutation-checked); kept so a later card change
+    // cannot crash the dose list.
+    if (k < 0) return d;
+    const first = then.orderedDoses.ppsv23[k].date;
+    return {
+      ...d,
+      earlyAdvisory: true,
+      reasons: [...(d.reasons ?? []), `Given ${fmtSince(first, dose.date)} the first PPSV23 dose of ${fmtDate(first)} — shorter than the ${LONG_GAP_WORDS} CDC advises. **Counted; no repeat indicated.**`],
+      whys: [...(d.whys ?? []), `CDC's child schedule gives an immunocompromised child who has had PPSV23 a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, but states that as the timing of the next dose and does not direct that an earlier one be repeated.`],
+    };
+  };
+
   const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
   const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
   const withdrawForwardLook = (list) => (nothingIsOwed
@@ -4184,7 +4238,7 @@ export function recommend(input) {
     recs,
     pcv21Geo,
     perDose: {
-      pcv: withdrawForwardLook(pcvAnalysis.perDose),
+      pcv: withdrawForwardLook(pcvAnalysis.perDose.map(earlyFiveYearPcv20)),
       // §C-P2-GREY / §C-P2-NOTHIRD: the chip under the thrown-out repeat drops
       // "the next dose in this series can be given from …" — a PPSV23 the
       // card no longer offers — and names the grey area where there is one.

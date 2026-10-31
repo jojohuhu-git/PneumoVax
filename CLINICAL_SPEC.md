@@ -2692,6 +2692,41 @@ Rosa as she ruled them, the extra-dose child, and the advice-equals-grading swee
 the card reading counted doses only fails 3; dropping extras on both sides fails 19; on the
 card side only, 4.
 
+### §K-IC-PCV20-5Y — An immunocompromised child's early PCV20 counts, and says so (OWNER, 2026-10-31)
+
+A 6-year-old with no spleen, PCV13 as a baby, PPSV23 a year ago. Her card advises PCV20 or a
+second PPSV23 five years after the first PPSV23. Given the **second PPSV23** a year early, her
+chip read *"shorter than the 5 years advised between PPSV23 doses. **Counted; never give a
+third.**"* (§C-P2); given the **PCV20** a year early instead, it read **nothing**. Adults get a
+note for the same mistake (`ADULT-PCV20-21-5Y-AFTER-PPSV23`). Shown both, the owner chose
+**"Add a note"**. The dose counts either way — the 8-week floor after a PPSV23
+(§K-PPSV23THENPCV) is untouched and still runs first.
+
+CDC, Summary of Risk-based Pneumococcal Vaccination Recommendations, immunocompromising
+condition, "Received PPSV23", **read live 2026-10-31**: *"Then no pneumococcal vaccines are
+recommended at this time. Wait until at least 5 years have passed since they received their
+first PPSV23 dose. Then give 1 dose of PCV20 or PPSV23."* Nothing CDC prints says an earlier
+PCV20 must be repeated, so the note says *"Counted; no repeat indicated."*
+
+**The note is the CARD's answer, not a second reading of it — and not a row in
+`DOSE_INTERVAL_RULES`.** The first draft was a table row describing when the five years
+applies; swept against the card it disagreed both ways — **105** grid children got the note on
+a catch-up PCV20 the card was asking for at 8 weeks, and **159** whose card WAS holding the
+PCV20 to five years (PPSV23 given before the conjugates) got none. So, as §B-AT19 does,
+`recommend()` runs the same patient on the day of the dose with only the doses before it, and
+adds the note exactly when that card was holding a PCV20 to five years and the dose came
+before its date. No interval is computed: the date is the card's, the first PPSV23 is the
+walk's. Child doses only (an adult's PCV20 has the adult row); only a dose that counted.
+
+**Moved: 108 / 17,016** verdicts — every one a PCV20 dose gaining the note (`earlyAdvisory`
+0→1, one more reason), no card, count or date changed; all are 18–19-year-olds with asplenia
+whose PCV20 at 17–18 came ~4 years after their PPSV23. **0 / 18,264** record-problem rows.
+**108 / 35,280** rendered lines, each differing **only** by the note and its "Why this".
+Guard: `regression-2026-10-31-ic-child-early-pcv20-gets-a-note.test.js` — her, the
+second-PPSV23 control, five patients who must get no note, and a grid sweep pinned both ways
+(612 notes, 102 inside the floor, 0 false, 0 missed). Ten mutations; six checks found
+redundant by mutation were removed rather than left untested.
+
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 
 Neither is a clinical rule; both are about whether a clinician can read the card correctly.
