@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-10-31 (night)** by [handoff-2026-10-31-leo-at-19-and-adult-ivy.md](handoff-2026-10-31-leo-at-19-and-adult-ivy.md).
+> Its owner question 1 (adults with a thrown-out PPSV23 and a later one) was answered and built,
+> along with the adult version of Ivy. Do not resume from this file.
+
 # PneumoVax — Handoff after Ivy, the first-chip ruling and Leo (2026-10-31, evening)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
