@@ -33,6 +33,7 @@ import {
   ADULT_PPSV23_SHORTER_MINIMUM_WEEKS,
   pedsRiskRowClass,
   pedsRiskIds,
+  populationOf,
 } from '../data/riskFactors.js';
 import { productByKey, pcvRecBrands } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
@@ -4018,6 +4019,33 @@ export function recommend(input) {
   //
   // `complete` and `not-indicated` are the only two statuses that ask for
   // nothing; `due`, `catchup`, `risk-based` and `shared-decision` all ask.
+  // ── §C-P2-LATER (OWNER RULING 2026-10-31, on Sam and Noah) ─────────────
+  //
+  // A thrown-out PPSV23 with a LATER PPSV23 already on the record was told
+  // "repeat this dose only" (Sam — it had been repeated) or "the next dose …
+  // can be given from Jun 24, 2023" (Noah — a date three years gone). Her
+  // choice: point to the later dose. Its sentence swaps for "It was repeated
+  // on <date> — see that dose", in front of which the always-true lead stays.
+  // A later row is a SHOT only if it is no record problem and on a later day
+  // (`duplicateEntry()` leaves the twin of a thrown-out dose unlabelled);
+  // the doses are in date order, so the first such row is the next shot. A
+  // `closingSentence` test and a `j > i` test were found redundant by mutation.
+  // Scoped to the patients she was shown: a CHILD none of whose PPSV23 shots
+  // counted. Her option kept today's wording for a child with one thrown-out
+  // PPSV23, and widening it measured 128 grid 18-year-olds (a PPSV23 on the
+  // day of a PCV, then one five years later that counted) — a family she has
+  // not seen, so it waits for her. Adults were not asked about.
+  const ppsvChild = populationOf(am, riskIds).startsWith('child-') && ppsv.count === 0;
+  const withLaterShot = (d, i) => {
+    if (!ppsvChild) return d;
+    const at = ppsvAnalysis.doses[i].date;
+    const k = ppsvAnalysis.doses.findIndex((x, j) => x.date > at && !ppsvAnalysis.perDose[j].recordProblem);
+    if (k < 0) return d;
+    const said = `${d.closingLead} It was repeated on ${fmtDate(ppsvAnalysis.doses[k].date)} — see that dose.`;
+    // No forward-looking clause is left, so the field that marks one goes too.
+    return { ...d, forwardLookingReason: null, reasons: d.reasons.map((x) => (x === d.closingSentence ? said : x)) };
+  };
+
   const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
   const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
   const withdrawForwardLook = (list) => (nothingIsOwed
@@ -4041,7 +4069,7 @@ export function recommend(input) {
       // card offering PCV20 owes something, so the withdrawal never runs.
       ppsv23: withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
         ? { ...d, reasons: d.reasons.map((x) => (x === d.closingSentence ? [`${d.closingLead} It is not repeated.`, noThird.chip].filter(Boolean).join(' ') : x)) }
-        : d))),
+        : withLaterShot(d, i)))),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH
