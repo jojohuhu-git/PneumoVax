@@ -856,13 +856,38 @@ within her rulings, listed in the PR:* the **non-immunocompromised** child on th
 (her Max ruling reaches him), and a **repeat thrown out for spacing** on the catch-up card
 (her Noah ruling; no grey note) — each has its own test.
 
-**Not ruled, untouched:** a child
-whose two PPSV23 shots were BOTH thrown out for being too young (the second is not a "repeat
-after an invalid first", so this rule does not fire, and the card still offers PPSV23).
+**Ivy** (ruled 2026-10-31, evening) — 2y10m, no spleen, a full infant PCV13 series, PPSV23 at
+13 and 20 months, **both thrown out for being too young**. Her second is not a "repeat after an
+invalid first" (it came 7 months on, so the repeat rule passed; it failed on age), so the rule
+above did not fire and her card still offered Option B PPSV23 — a third shot. Shown the
+trade-off (a PPSV23 today would be her first one that counts, and CDC's Option B is not wrong
+by its own rules), she chose **"PCV20 only"**. So the trigger is now **two or more PPSV23 shots
+given, none counted**, whatever threw them out; the grey-area note still comes only from a
+too-young first dose's repeat (`repeatOfUnderAgeDose`), so Ivy gets none. Her card is Noah's. The
+chip under her second shot — found reading *"repeat this dose only"* when the app was driven,
+beside a card offering no PPSV23 — now reads *"This dose does not count toward the series. It is
+not repeated."*, as Noah's repeat does (his ruling: the chip under the repeat drops its promise of
+a further PPSV23). `validate.js` hands over every dose's `closingSentence` and `closingLead`, so
+the swap works for a shot thrown out on age as well as on timing.
+
+A row that is not a shot is not counted as one: a dose dated in the future or before birth (a
+record problem), or **a second row on the same date** — `duplicateEntry()` deliberately does
+not label the twin of a dose that did not count, so the count dedupes by date itself. That also
+fixed Sam-plus-a-duplicate-row reading *"3 PPSV23 doses have been given"*. *Judgements within
+her rulings, listed in the PR:* Ivy's twin who is not immunocompromised, and Ivy with no
+conjugate on record (the catch-up card, PCV20 only), each tested. Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **0 /
+35,280** rendered lines against `main` — the grid holds no child with two PPSV23 shots under 2.
+
+**Checked for her the same evening, no change:** whether Sam's second PPSV23 should be judged
+against the **5-year** PPSV23 interval. No — CDC's 5 years runs from *"dose 1 PPSV23"*, a dose
+that counted; Sam's too-young shot is not his dose 1, so his Jan 5 shot was a second try at
+dose 1. CDC General Best Practices (read live 2026-10-31) states no gap from a too-young
+non-live dose, and CDSI v4.64 puts its 5-year intervals only between two PPSV23 slots. He is
+thrown out by the 8-week rule she kept; either rule gives the same answer for him.
 
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **0 / 35,280** rendered
 lines (`proseDiff` against `main`) — the grid holds no child with two PPSV23 shots this close.
-Guard: `regression-2026-10-31-no-third-ppsv23-shot.test.js`.
+Guard: `regression-2026-10-31-no-third-ppsv23-shot.test.js`. Ivy: `regression-2026-10-31-ivy-two-too-young-ppsv23.test.js`.
 
 New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
 `cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem

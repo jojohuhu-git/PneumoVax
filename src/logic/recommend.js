@@ -1137,15 +1137,35 @@ const PAIR_ROW_IS_IC = new Map([
 const CATCHUP_PCV15_SENTENCE_ROW1 = `If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`;
 const CATCHUP_PCV15_SENTENCE_ROW2 = `If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`;
 const NO_PRIOR_PCV_ROWS = new Set(['pedsIc6to18NoPcv', 'pedsRisk6to18NoPcv']);
+//
+// Ivy, no spleen: PPSV23 at 13 and 20 months, BOTH too young — her second is
+// not a repeat thrown out by the repeat rule (it was 7 months on), it failed
+// on age. "PCV20 only". So the trigger is two or more SHOTS, none counted,
+// whatever threw them out. A dose dated in the future or before birth is a
+// record problem — not a shot — and is not counted. Nor is a second row on
+// the same date: two doses of one vaccine are never given on one day, and
+// `duplicateEntry()` does not label the twin of a dose that did not count.
+// Undated rows never reach here — they are not walked into `perDose` — so a
+// clause for them was found unreachable by mutation and removed.
 function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   if (ppsvCount !== 0) return null;
   // No status test: with no PPSV23 counted, every one was thrown out (a
   // `status === 'invalid'` clause here was found redundant by mutation).
-  const i = (ppsvAnalysis?.perDose ?? []).findIndex((d) => d.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
-  if (i < 0) return null;
-  const isGrey = Boolean(ppsvAnalysis.perDose[i].repeatOfUnderAgeDose);
+  const perDose = ppsvAnalysis?.perDose ?? [];
+  const seen = new Set();
+  const shots = perDose.map((d, k) => k).filter((k) => {
+    if (perDose[k].recordProblem) return false;
+    const date = ppsvAnalysis.doses[k].date;
+    if (seen.has(date)) return false;
+    seen.add(date);
+    return true;
+  });
+  const given = shots.length;
+  if (given < 2) return null;
+  const repeatAt = perDose.findIndex((d) => d.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
+  const i = repeatAt >= 0 ? repeatAt : shots[given - 1];
+  const isGrey = Boolean(perDose[i].repeatOfUnderAgeDose);
   const repeatDate = ppsvAnalysis.doses[i].date;
-  const given = ppsvAnalysis.perDose.length;
   const third = given === 2 ? 'a third PPSV23 shot' : `PPSV23 shot number ${given + 1}`;
   const neither = `${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted`;
   const greyHead = (cites) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age${cites ? ' [c]' : ''}, and states no gap from the invalid dose for a vaccine that is not live${cites ? ' [c]' : ''}. ACIP does not address this case. This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted.`;
@@ -4014,9 +4034,14 @@ export function recommend(input) {
       // §C-P2-GREY / §C-P2-NOTHIRD: the chip under the thrown-out repeat drops
       // "the next dose in this series can be given from …" — a PPSV23 the
       // card no longer offers — and names the grey area where there is one.
-      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose).map((d, i) => (noThird && i === noThird.index && d.forwardLookingReason
-        ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? [d.withoutForwardLook, noThird.chip].filter(Boolean).join(' ') : x)) }
-        : d)),
+      // Ivy: the shot may have failed on AGE, so the sentence swapped is the
+      // dose's own `closingSentence`, whichever kind it is. No null test on it
+      // and no clearing of `forwardLookingReason`: both found redundant by
+      // mutation — this dose is never a record problem (it is a shot), and a
+      // card offering PCV20 owes something, so the withdrawal never runs.
+      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
+        ? { ...d, reasons: d.reasons.map((x) => (x === d.closingSentence ? [`${d.closingLead} It is not repeated.`, noThird.chip].filter(Boolean).join(' ') : x)) }
+        : d))),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH
