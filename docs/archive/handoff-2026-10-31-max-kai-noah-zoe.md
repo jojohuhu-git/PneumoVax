@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-10-31 (evening)** by [handoff-2026-10-31-ivy-sam-leo-chips.md](handoff-2026-10-31-ivy-sam-leo-chips.md).
+> Its owner questions 1–2 were answered and built (the first-chip ruling, Ivy, and Leo). Do not
+> resume from this file.
+
 # PneumoVax — Handoff after Max, Kai, Noah and Zoe (2026-10-31, afternoon)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
