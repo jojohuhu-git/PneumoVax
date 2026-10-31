@@ -3504,16 +3504,27 @@ function riskWords(riskIds) {
 
 /** What the engine made of the doses on the record: how many it counted, and
  *  how many it set aside. The REASON each one was set aside stays on the dose
- *  itself, where the clinician reads it; it is not repeated here. */
+ *  itself, where the clinician reads it; it is not repeated here.
+ *
+ *  2026-10-30: an EXTRA dose is validly given and NOT counted, so it is
+ *  neither. Found by driving Ava's screen: her second PPSV23 read "it isn't
+ *  counted" above a panel reading "2 of 2 PPSV23 doses counted". The old test
+ *  (`status === 'valid'`) let every extra dose through — the infant's extra
+ *  PCV, the adult's dose after a completed series, and P2's early PPSV23. */
 function doseWords(pcvAnalysis, ppsvAnalysis) {
   const parts = [];
   for (const [name, a] of [['PCV', pcvAnalysis], ['PPSV23', ppsvAnalysis]]) {
     const all = a?.perDose ?? [];
     if (!all.length) continue;
-    const kept = all.filter((d) => d.status === 'valid' || d.status === 'counted').length;
-    const set = all.length - kept;
+    const extra = all.filter((d) => d.extraDose).length;
+    const kept = all.filter((d) => !d.extraDose && (d.status === 'valid' || d.status === 'counted')).length;
+    const set = all.length - kept - extra;
+    const asides = [
+      ...(extra ? [`${extra} an extra dose, not needed`] : []),
+      ...(set ? [`${set} set aside`] : []),
+    ];
     parts.push(`${kept} of ${all.length} ${name} dose${all.length === 1 ? '' : 's'} counted`
-      + (set ? ` — ${set} set aside, with the reason on the dose itself` : ''));
+      + (asides.length ? ` — ${asides.join(', ')}, with the reason on the dose itself` : ''));
   }
   return parts.length ? parts.join('. ') : 'None on the record';
 }

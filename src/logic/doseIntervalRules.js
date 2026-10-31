@@ -238,6 +238,16 @@ const ANCHORS = {
   lastPcv13: (ctx) => lastOf(ctx.priorPcv.filter((d) => d.product === 'PCV13')),
   lastPcv15: (ctx) => lastOf(ctx.priorPcv.filter((d) => d.product === 'PCV15')),
   lastPpsv23: (ctx) => lastOf(ctx.priorPpsv23),
+  // 2026-10-30 (OWNER RULING, on Ben): the most recent PPSV23 that counted OR
+  // was recorded as an extra dose — a PPSV23 the child received, either way.
+  // Read by ONE row, `CHILD-PCV-AFTER-PPSV23`: its 8-week wait rests on a
+  // weaker conjugate response after a PPSV23, which a dose that was not
+  // needed causes as much as one that was. A REJECTED PPSV23 still anchors
+  // nothing across streams (ANCHOR-1).
+  lastPpsv23Received: (ctx) => lastOf(
+    [...(ctx.priorPpsv23 ?? []), ...(ctx.ppsv23ExtraGiven ?? [])]
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)),
+  ),
 };
 
 function lastOf(list) {
@@ -580,7 +590,8 @@ export const DOSE_INTERVAL_RULES = [
     rulebook: 'child',
     vaccine: 'PCV',
     products: null,
-    from: 'lastPpsv23',
+    // 2026-10-30: counted OR extra — see `lastPpsv23Received`.
+    from: 'lastPpsv23Received',
     interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
     // CDC's 4-day grace, like every other floor: the grace decides whether a
     // dose that missed a MINIMUM still counts, which is a question only a

@@ -246,11 +246,16 @@ describe("CDC's 4-day grace still decides what is on time", () => {
     expect(dz.reasons ?? []).toEqual([]);
   });
 
-  it('Ava, two days short: counted, not an extra dose, exactly as on main', () => {
+  // ⚠ REVERSED THE SAME DAY (OWNER RULING 2026-10-30, "Yes, extra dose too"):
+  // a non-IC child's on-time second PPSV23 is an extra dose as well, so the
+  // grace no longer decides HER label — only the reason it gives. Kept,
+  // renamed, as the record. Guard: regression-2026-10-30-on-time-second-ppsv23-is-extra.
+  it('Ava, two days short: on time, and now an extra dose all the same', () => {
     const dz = secondPpsv(AVA_TWO_DAYS_SHORT);
     expect(dz.status).toBe('valid');
-    expect(dz.extraDose).toBeUndefined();
-    expect(dz.effectiveDoseNum).toBe(2);
+    expect(dz.extraDose).toBe(true);
+    expect(dz.effectiveDoseNum).toBeNull();
+    expect(dz.earlyAdvisory).toBeUndefined();
   });
 });
 

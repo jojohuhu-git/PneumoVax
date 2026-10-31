@@ -613,8 +613,8 @@ of its own; it moves no grid patient.*
   2026-10-30, on Noah below**: the 5-year floor `CHILD-PPSV23-AFTER-INVALID-PPSV23` now applies
   only once a PPSV23 has COUNTED, and the repeat of a rejected FIRST dose is
   `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` at 8 weeks.
-- **An on-time second PPSV23 for a non-IC child still counts**, though it was just as
-  unneeded. She ruled on the early one; widening is hers to decide.
+- **An on-time second PPSV23 for a non-IC child** — WIDENED the same day (OWNER RULING
+  2026-10-30, §C-P2-ONTIME below): an extra dose too, for a patient who is a child today.
 
 **The card sentence.** Her chosen preview read *"Ava was already complete after her first
 PPSV23"*. The shipped sentence gives CDC's reason instead — "complete" is not always true (a
@@ -666,6 +666,40 @@ given at 22–24 months, this row's 8 weeks is stricter than CDC by up to 8 week
 Measured: **0 / 17,016** verdicts and **0 / 18,264** record-problem rows moved (the grid never
 dates a rejected PPSV23 and a repeat); 0 uncredited citation pairs over 17,311 cards.
 Guard: `regression-2026-10-30-repeat-of-a-rejected-first-ppsv23.test.js`.
+
+### §C-P2-ONTIME — a non-IC child's on-time second PPSV23 is an extra dose (owner, 2026-10-30)
+
+**Ava**, 10, cochlear implant: PCV13 ×4 as a baby, PPSV23 at 2 and again at 7y1m — on time.
+P2 made her EARLY second PPSV23 an extra dose; the on-time one still read "valid, dose 2" with
+no comment, though CDC's non-immunocompromising list gives one PPSV23 and never a second.
+Asked whether to widen, the owner chose **"Yes, extra dose too"**: early or on time, the same
+label — *"Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising
+condition… This dose isn't harmful, it isn't counted, and nothing needs to be repeated."*
+Her card is word-for-word the card of a child with one PPSV23, as before.
+
+**Two limits, each measured over the grid before it was drawn:**
+
+| Limit | Without it | Why |
+|---|---|---|
+| **An extra PPSV23 still holds off a conjugate for 8 weeks** — `CHILD-PCV-AFTER-PPSV23` measures from the most recent PPSV23 that counted **or was an extra dose** | 72 conjugate doses began to count, and 34 cards went from "dose owed" to "Complete" | OWNER RULING 2026-10-30, on **Ben** (18, diabetes; PPSV23 at 8 and 13, PCV13 the next day): *"Yes, still wait 8 weeks"* — the reason for her 8-week bar, a weaker conjugate response soon after a PPSV23, is about the dose the child received, needed or not |
+| **Only a patient who is a child TODAY** | 16 nineteen-year-olds with a cochlear implant or CSF leak, both PPSV23 doses given in childhood, had their card switch from ACIP's "PCV13 and 2 doses of PPSV23" row to the one-dose row — a history they do not have. Same dose, same date | ACIP's adult rows count every PPSV23 received; she ruled on a child. *A judgement within her ruling, dose unchanged — listed in the PR* |
+
+A REJECTED PPSV23 still holds off nothing across streams (ANCHOR-1, unchanged): only a dose
+that was validly given and recorded as extra joins the 8-week anchor. An immunocompromised
+child's on-time THIRD PPSV23 still counts silently (CDC never gives a third) — **not ruled;
+asked in the PR.**
+
+Measured: **464 / 17,016** verdicts moved — every one a child, every one only the label under
+the second PPSV23 (0 conjugate verdicts, 0 cards, 0 changed card sentences by `proseDiff`).
+**0 / 18,264** record-problem rows. Guard:
+`regression-2026-10-30-on-time-second-ppsv23-is-extra.test.js`.
+
+**And a fault on a third surface, found by driving the app.** "How this was worked out" read
+*"2 of 2 PPSV23 doses counted"* under a dose reading *"it isn't counted"*. It counted every
+dose with status `valid`, extra or not — wrong since that panel was written, for every extra
+dose in the app (infant PCV extras, adult doses after a completed series, P2's early PPSV23).
+It now reads *"1 of 2 PPSV23 doses counted — 1 an extra dose, not needed, with the reason on
+the dose itself."* No corpus records that panel, so no count moved.
 
 ---
 
@@ -1458,7 +1492,7 @@ catch-up row**.
   | Patient | Risk group | Already on the record | Dose being given | Measured from | Shortest acceptable gap | If it is shorter | Who says so | Rule |
   |---|---|---|---|---|---|---|---|---|
   | Child (under 19 years) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | Dose 2, when dose 1 was given before the first birthday: at least 4 weeks; Dose 2, when dose 1 was given at the first birthday or later: at least 8 weeks; Dose 3, given under 12 months, previous dose before 7 months: at least 4 weeks; Dose 3, previous dose at 7–11 months: at least 8 weeks; Dose 4 or later, given under 12 months (an extra infant dose): at least 4 weeks; Dose 4 or later, given at 12 months or over (the booster): at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PCV-AFTER-PCV` |
-  | Child (under 19 years) | Any | Anything | Any PCV | the most recent PPSV23 that counted | at least 8 weeks | Does not count | This app | `CHILD-PCV-AFTER-PPSV23` |
+  | Child (under 19 years) | Any | Anything | Any PCV | the most recent PPSV23 that counted or was an extra dose | at least 8 weeks | Does not count | This app | `CHILD-PCV-AFTER-PPSV23` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the most recent PCV that counted | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PCV` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine, when that dose counted | at least 5 years | Immunocompromised: counts, with a note. Otherwise: an extra dose, not counted | CDC / ACIP | `CHILD-PPSV23-AFTER-PPSV23` |
   | Child (under 19 years) | Any | a PPSV23 that counted | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-INVALID-PPSV23` |

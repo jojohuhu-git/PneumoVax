@@ -234,6 +234,7 @@ const FROM_WORDS = {
   lastPcv13: 'the most recent PCV13 that counted',
   lastPcv15: 'the most recent PCV15 that counted',
   lastPpsv23: 'the most recent PPSV23 that counted',
+  lastPpsv23Received: 'the most recent PPSV23 that counted or was an extra dose',
 };
 // P2 (2026-10-30): one pair of doses, two rows, split on whether the earlier
 // dose COUNTED (`anchorCounted`). Without these words the page printed the two
