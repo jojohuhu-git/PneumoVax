@@ -503,6 +503,10 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     const v = evaluateDoseInterval({
       ...base, vaccine: 'PPSV23', product: 'PPSV23', ageAtDose: 156,
       prev: { date: '2024-02-09', ageAtDose: 132, product: 'PPSV23' },
+      // 2026-10-30: an even earlier PPSV23 that COUNTED, so the dose judged is
+      // the repeat of a rejected SECOND dose — the 5-year row. With no counted
+      // PPSV23 it is the repeat of a rejected first, and the 8-week row.
+      priorPpsv23: [{ date: '2019-01-07', product: 'PPSV23' }],
     });
     expect(v.kind).toBe('floor');
     // P2 (2026-10-30): retargeted a THIRD time. `base` lists no counted
@@ -590,6 +594,9 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     const ctx = (doseDate) => ({
       ...base, doseDate, vaccine: 'PPSV23', product: 'PPSV23', ageAtDose: 156,
       prev: { date: '2021-01-05', ageAtDose: 96, product: 'PPSV23' },
+      // 2026-10-30: a counted PPSV23 before the rejected one keeps this on the
+      // 5-year row (the repeat of a rejected SECOND dose).
+      priorPpsv23: [{ date: '2016-01-04', product: 'PPSV23' }],
     });
     expect(evaluateDoseInterval(ctx(addDays(anniversary, -4)))).toBeNull();
 

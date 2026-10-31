@@ -97,6 +97,11 @@ const CHILD_MONTHS = {
   riskIds: ['asplenia'],
   pcvDoses: [{ product: 'PCV20', date: '2019-03-04' }],
   ppsv23Doses: [
+    // 2026-10-30 (owner ruling, Noah): a PPSV23 that COUNTED, added so the
+    // last dose stays the repeat of a rejected SECOND PPSV23 — the 5-year row
+    // this case exists for. Without it the 2024 dose is the repeat of a
+    // rejected FIRST PPSV23, which is now her first PPSV23 and counts.
+    { product: 'PPSV23', date: '2018-03-01' },
     { product: 'PPSV23', date: '2019-04-01' }, // 28 days after the PCV20 — rejected
     { product: 'PPSV23', date: '2024-02-05' }, // under 5 years of a rejected dose — rejected (Ruling D)
   ],

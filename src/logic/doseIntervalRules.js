@@ -456,13 +456,19 @@ export const DOSE_INTERVAL_RULES = [
     // Without this row the recommendation above would have counted it with a
     // note saying "never give a third" — on what is the child's FIRST counted
     // PPSV23.
+    //
+    // NARROWED 2026-10-30 (OWNER RULING, on Noah): only when an earlier PPSV23
+    // HAS counted. The 5 years is the gap from dose 1 to dose 2, so it can only
+    // govern the repeat of a rejected SECOND dose. The repeat of a rejected
+    // FIRST dose is the child's first PPSV23 and is the next row's.
     id: 'CHILD-PPSV23-AFTER-INVALID-PPSV23',
-    what: 'A PPSV23 dose given after an earlier PPSV23 that did not count, under the child schedule',
+    what: 'A PPSV23 dose given after an earlier PPSV23 that did not count, when an even earlier PPSV23 did, under the child schedule',
     rulebook: 'child',
     vaccine: 'PPSV23',
     products: null,
     from: 'prevSameStream',
     anchorCounted: false,
+    needsPriorPpsv23: true,
     interval: { months: PPSV23_REVACC_MIN_MONTHS },
     grace: true,
     enforcement: 'floor',
@@ -474,6 +480,46 @@ export const DOSE_INTERVAL_RULES = [
     message: (ctx, anchor, min) => ({
       reasons: [`Given less than ${min.words} after the previous PPSV23 dose — a second PPSV23 is given at least ${min.words} after the first.`],
       detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
+    }),
+  },
+  {
+    // ── 2026-10-30, OWNER RULING ON NOAH — "Counts as 1st PPSV23" ──────────
+    //
+    // A PPSV23 given after a PPSV23 that did NOT count, when no PPSV23 has
+    // counted yet. It is the REPEAT of a rejected first dose, so it takes that
+    // dose's place: CDC's own example of the rule ends "The repeat dose is
+    // counted as the valid second dose." It is spaced from the dose given by
+    // the interval that governs a FIRST PPSV23 — CDC's 8 weeks — which is the
+    // date the rejected dose's chip already prints (RULING D, `repeatDueDate`
+    // of `CHILD-PPSV23-AFTER-PCV`). The PCV row above still judges the gap
+    // from the PCV, so the repeat must clear both.
+    //
+    // Until today the row above judged it, as a SECOND dose, at 5 years: Noah
+    // (asplenia, PPSV23 4 weeks after his PCV13, repeated 10 weeks later) was
+    // told his repeat was too soon "until Jul 10, 2028", beside a chip saying
+    // "from Jun 24, 2023", and his card offered PPSV23 again — his third shot.
+    // Guard: regression-2026-10-30-repeat-of-a-rejected-first-ppsv23.test.js.
+    id: 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST',
+    what: 'A PPSV23 dose repeating an earlier PPSV23 that did not count, when no PPSV23 has counted yet, under the child schedule',
+    rulebook: 'child',
+    vaccine: 'PPSV23',
+    products: null,
+    from: 'prevSameStream',
+    anchorCounted: false,
+    needsNoPriorPpsv23: true,
+    interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
+    grace: true,
+    enforcement: 'floor',
+    authority: 'CDC',
+    source: 'CDC General Best Practices, Timing and Spacing of Immunobiologics (read live 2026-10-30): '
+      + '"The repeat dose should be spaced after the invalid dose by the recommended minimum interval" and, '
+      + 'in its worked example, "The repeat dose is counted as the valid second dose." The interval for a '
+      + 'first PPSV23, CDC Child & Adolescent Schedule Notes, pneumococcal: "1 dose PPSV23 at least 8 weeks '
+      + 'after the most recent PCV dose" (read live 2026-10-30). OWNER RULING 2026-10-30: the repeat of a '
+      + 'rejected first PPSV23 counts as the first PPSV23. See CLINICAL_SPEC.md §C-P2.',
+    message: (ctx, anchor, min) => ({
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)}, which did not count — the repeat of a PPSV23 that did not count is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after it.`],
+      detail: `Previous PPSV23 (did not count): ${fmtDate(anchor.date)}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} later (doses up to 4 days early still count, per CDC).`,
     }),
   },
   {

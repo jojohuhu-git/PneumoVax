@@ -190,10 +190,10 @@ export function ruleWho(r) {
 /**
  * Which risk group, when a row has one.
  *
- * Only SIX of the twenty rules read the risk conditions at all, and every one
+ * Only SIX of the twenty-one rules read the risk conditions at all, and every one
  * is an adult PPSV23-after-PCV13/15 row (re-measured 2026-10-30). Saying "Any" everywhere else is not padding:
  * it is the answer to "does my patient\'s asplenia change this interval", and
- * for fourteen rows it is no.
+ * for fifteen rows it is no.
  */
 export function ruleRisk(r) {
   if (r.shorterMinimum === true || r.shorterIsTheAdvice === true) {
@@ -210,8 +210,14 @@ export function ruleRecord(r) {
   const parts = [];
   if (r.needsPriorPcv) parts.push(r.needsPriorPcv.join(' and '));
   if (r.needsNoPriorPcv) parts.push('no PCV of any kind');
-  if (r.needsPriorPpsv23) parts.push('PPSV23');
-  if (r.needsNoPriorPpsv23) parts.push('no PPSV23');
+  // 2026-10-30: a row measured from a PPSV23 that did NOT count always has one
+  // on the record, so a bare "no PPSV23" would read as false. These history
+  // conditions are about the doses that COUNTED, and for these two rows the
+  // difference is the whole point (the repeat of a rejected first dose vs. of
+  // a rejected second one).
+  const ppsvWords = r.vaccine === 'PPSV23' && r.anchorCounted === false ? ' that counted' : '';
+  if (r.needsPriorPpsv23) parts.push(ppsvWords ? `a PPSV23${ppsvWords}` : 'PPSV23');
+  if (r.needsNoPriorPpsv23) parts.push(`no PPSV23${ppsvWords}`);
   return parts.length ? parts.join(', ') : 'Anything';
 }
 
