@@ -722,8 +722,7 @@ Her card is word-for-word the card of a child with one PPSV23, as before.
 
 A REJECTED PPSV23 still holds off nothing across streams (ANCHOR-1, unchanged): only a dose
 that was validly given and recorded as extra joins the 8-week anchor. An immunocompromised
-child's on-time THIRD PPSV23 still counts silently (CDC never gives a third) — **not ruled;
-asked in the PR.**
+child's on-time THIRD PPSV23 is an extra dose too — ruled 2026-10-31, §C-P2-THIRD below.
 
 Measured: **464 / 17,016** verdicts moved — every one a child, every one only the label under
 the second PPSV23 (0 conjugate verdicts, 0 cards, 0 changed card sentences by `proseDiff`).
@@ -736,6 +735,31 @@ dose with status `valid`, extra or not — wrong since that panel was written, f
 dose in the app (infant PCV extras, adult doses after a completed series, P2's early PPSV23).
 It now reads *"1 of 2 PPSV23 doses counted — 1 an extra dose, not needed, with the reason on
 the dose itself."* No corpus records that panel, so no count moved.
+
+### §C-P2-THIRD — an immunocompromised child's on-time third PPSV23 is an extra dose (owner, 2026-10-31)
+
+**Lily**, 18 years 10 months, no spleen: PCV13 ×2 at age 2, PPSV23 at 2y4m, 7y5m and 12y6m —
+each clear of five years. The third counted silently as "dose 3", on a card reading *"both
+PPSV23 doses have been received"*. CDC's child notes print "dose 2 PPSV23" and no third
+(read live 2026-10-30). Asked, the owner chose **"Extra dose"**: the same label P2 already gave
+an EARLY third — *"Not needed: two PPSV23 doses have already been given (…), and CDC never
+gives a third."* The early/on-time split is gone for both risk classes; the limits of
+§C-P2-ONTIME (dated dose, a child today) and Ben's 8-week hold on a conjugate apply unchanged.
+
+**The knock-on at 19, which was in the question she answered.** At 19 the adult rows count every
+PPSV23 received (§C-P2-ONTIME's "child today" limit), so Lily holds three — and mm7401a1 prints
+rows for one and two only. Before, a 19–49 IC / cochlear / CSF adult with three fell to the
+fallback *"PCV20 or PCV21 ≥5 years … completes the series"* with **no ACIP number at all**; the
+two-dose girl got *"Review at age 50 — or PCV20 or PCV21"*. Now **two or more** reads the
+two-dose row, and the card names the real count (*"PCV13 and 3 doses of PPSV23"*).
+*A judgement within her ruling, dose unchanged* — same products, same five years, same status,
+same due date; only the words and the citation move. The card now ASKS
+`mmwrBothPcv13PpsvKey()` which row speaks instead of re-testing the count, so the two cannot
+drift (a mutation of the selector alone now fails 2 tests; before, it failed none).
+
+Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows — the grid holds at most
+two PPSV23 doses, so every patient here is hand-built. Guard:
+`regression-2026-10-31-ic-child-third-ppsv23-is-extra.test.js`.
 
 ---
 

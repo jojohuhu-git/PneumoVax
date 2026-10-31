@@ -1133,11 +1133,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     //     floor), and `kept.length` is checked here as well, so a child whose
     //     first PPSV23 was thrown out never has her only real dose called
     //     extra.
-    //   • for an IC child's THIRD, only when `CHILD-PPSV23-AFTER-PPSV23` fired
-    //     — more than CDC's 4-day grace early, which is exactly the dose that
-    //     used to be THROWN OUT (the row keeps the grace: owner decision
-    //     2026-10-30). For a non-IC child's SECOND, early OR ON TIME — WIDENED
-    //     the same day (OWNER RULING 2026-10-30, "Yes, extra dose too"): the
+    //   • early OR ON TIME, for a non-IC child's SECOND (OWNER RULING
+    //     2026-10-30, "Yes, extra dose too") and an IC child's THIRD (OWNER
+    //     RULING 2026-10-31, on "Lily": "Extra dose", §C-P2-THIRD): the
     //     on-time dose is just as unneeded, and used to count in silence. It
     //     must carry a date, so the walk's order really says which came first,
     //     and the patient must still be a CHILD TODAY: an adult's history is
@@ -1158,7 +1156,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const icChild = hasIC(riskIds);
     const ppsvRowFired = !!result.earlyAdvisory && result.intervalRuleId === 'CHILD-PPSV23-AFTER-PPSV23';
     if (vaccine === 'PPSV23' && !isAdultDose && kept.length >= (icChild ? 2 : 1)
-      && (ppsvRowFired || (!icChild && !!dose.date && ageMonths < ADULT_SCHED_MIN_M))) {
+      && (ppsvRowFired || (!!dose.date && ageMonths < ADULT_SCHED_MIN_M))) {
       // Drop the row's own "Counted; never give a third" sentence and its
       // "Why this" — both say the dose counts, which is no longer true here.
       // The row's are the LAST of each, as in the adult block above. An

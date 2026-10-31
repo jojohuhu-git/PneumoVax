@@ -2782,7 +2782,11 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
     if (isOlderAdult) return 'mmwrBothPcv13Ppsv50plus';
     if (!icRow) return 'mmwrChronic1949ReviewAt50';
     if (ppsv.count === 1) return 'mmwrIc1949OnePpsv';
-    if (ppsv.count === 2) return 'mmwrIc1949TwoPpsv';
+    // TWO OR MORE (§C-P2-THIRD, 2026-10-31). ACIP prints no row for a third
+    // PPSV23; an adult who had one as a child (the "child today" limit lets the
+    // adult rows count it) is given the two-dose row's dose either way, so the
+    // row that names it is cited rather than none.
+    if (ppsv.count >= 2) return 'mmwrIc1949TwoPpsv';
     return null;
   };
   // One cite per marker, so a caller spreads both or neither.
@@ -3283,11 +3287,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
     // with the dose would contradict the body. The verdict corpora record no
     // prose and no dose labels, by design, so neither moves.
     //
-    // `ppsv.count` is the EFFECTIVE count, read here and in
-    // `mmwrBothPcv13PpsvKey()` from the same place, so the wording and the
-    // quote cannot drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M
+    // `ppsv.count` is the EFFECTIVE count. The card asks
+    // `mmwrBothPcv13PpsvKey()` which row speaks rather than re-testing the
+    // count (§C-P2-THIRD, 2026-10-31), so the wording and the quote cannot
+    // drift apart. `isOlderAdult` IS the ROUTINE_ADULT_MIN_M
     // predicate -- never a second age test.
-    if (!isOlderAdult && ppsv.count === 2) {
+    if (mmwrBothPcv13PpsvKey(true) === 'mmwrIc1949TwoPpsv') {
       return [rec({
         vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
         doseLabel: `Review at age 50 — or PCV20 or PCV21 ≥${LONG_GAP_WORDS} after the last pneumococcal dose`,
@@ -3295,7 +3300,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
         note: {
           lead: `Review the pneumococcal recommendations again at age 50 [c]. Alternatively, 1 dose of PCV20 or PCV21 may be given now, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c] — that completes the series.`,
-          detail: 'This is an adult aged 19–49 with an immunocompromising condition, a cochlear implant or a CSF leak who has already received PCV13 and two doses of PPSV23. ACIP states the review at 50 first and the further dose as the alternative; both are recommended options.',
+          detail: `This is an adult aged 19–49 with an immunocompromising condition, a cochlear implant or a CSF leak who has already received PCV13 and ${ppsv.count === 2 ? 'two' : ppsv.count} doses of PPSV23. ACIP states the review at 50 first and the further dose as the alternative; both are recommended options.`,
         },
         // One citation per claim. The review at 50 is stated only by ACIP's
         // two-dose row -- CDC's Adult Notes give the dose and its five years
