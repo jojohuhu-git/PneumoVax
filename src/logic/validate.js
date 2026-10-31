@@ -50,7 +50,7 @@ import { cite } from '../data/refs.js';
 import { ageMeetsMinimum, ageMeetsMinimumDays } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 import { hasIC } from '../data/riskFactors.js';
-import { evaluateDoseInterval } from './doseIntervalRules.js';
+import { evaluateDoseInterval, lastPpsv23HoldingAConjugate } from './doseIntervalRules.js';
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
 // dose. Dropped HERE, at the walk, so that no caller can count one by
 // forgetting to filter — the UI sweeps them too, but only for tidiness.
@@ -1269,6 +1269,10 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
     },
     ppsv23: {
       perDose: ppsv23.perDose, effective: ppsv23.kept, doses: ppsv23.doses, anchor: ppsv23.prev,
+      // The PPSV23 a child's next conjugate waits 8 weeks after — counted or
+      // extra, never thrown out. Read off the same function the dose check's
+      // row uses, so `recommend.js` never decides it a second time.
+      conjugateHold: lastPpsv23HoldingAConjugate(ppsv23.kept, ppsv23.extraChildPpsv23)?.date ?? null,
     },
   };
 }

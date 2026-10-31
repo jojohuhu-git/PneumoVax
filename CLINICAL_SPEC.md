@@ -758,8 +758,10 @@ Her card is word-for-word the card of a child with one PPSV23, as before.
 | **An extra PPSV23 still holds off a conjugate for 8 weeks** — `CHILD-PCV-AFTER-PPSV23` measures from the most recent PPSV23 that counted **or was an extra dose** | 72 conjugate doses began to count, and 34 cards went from "dose owed" to "Complete" | OWNER RULING 2026-10-30, on **Ben** (18, diabetes; PPSV23 at 8 and 13, PCV13 the next day): *"Yes, still wait 8 weeks"* — the reason for her 8-week bar, a weaker conjugate response soon after a PPSV23, is about the dose the child received, needed or not |
 | **Only a patient who is a child TODAY** | 16 nineteen-year-olds with a cochlear implant or CSF leak, both PPSV23 doses given in childhood, had their card switch from ACIP's "PCV13 and 2 doses of PPSV23" row to the one-dose row — a history they do not have. Same dose, same date | ACIP's adult rows count every PPSV23 received; she ruled on a child. *A judgement within her ruling, dose unchanged — listed in the PR* |
 
-A REJECTED PPSV23 still holds off nothing across streams (ANCHOR-1, unchanged): only a dose
-that was validly given and recorded as extra joins the 8-week anchor. An immunocompromised
+A REJECTED PPSV23 still holds off nothing across streams (ANCHOR-1, unchanged — and put to the
+owner and RE-CONFIRMED 2026-10-31, §K-PPSV23THENPCV "Rosa and Eli"): only a dose that was
+validly given and recorded as extra joins the 8-week anchor. **That anchor reached the dose
+check only, not the card, until 2026-10-31** (same section). An immunocompromised
 child's on-time THIRD PPSV23 is an extra dose too — ruled 2026-10-31, §C-P2-THIRD below.
 
 Measured: **464 / 17,016** verdicts moved — every one a child, every one only the label under
@@ -2350,6 +2352,47 @@ in 2019 and again 54 days ago and no conjugate, is told her PCV20 is **due today
 whose label reads "≥8 weeks". **Verified identical on `main`, so it predates this work** and is
 recorded as its own finding, not folded in here. This fix is unaffected — `mostRecent` can only
 push a date later — and the behaviour must **not** be pinned by a test, which would freeze it.
+
+#### §K-PPSV23THENPCV, 2026-10-31 — a THROWN-OUT PPSV23 holds off nothing; an EXTRA one now holds the card too
+
+**Three owner answers in one day, the later two withdrawing the first.**
+
+1. **Eli** (asplenia; catch-up PCV13 Feb 1 and Apr 1, 2023; PPSV23 Apr 29, thrown out — 28 days
+   after the PCV13; PCV20 Jun 1, 33 days after that PPSV23): *"Yes, 8 weeks after any PPSV23."*
+2. Built, that moved **22 / 17,016** verdicts and **66 / 18,264** record-problem rows — **every
+   one a baby given PPSV23 under age 2** (thrown out for AGE), and **0** of Eli's own kind
+   (thrown out for spacing). Asked with **Rosa** (PCV13 at 2, 4, 6 months; PPSV23 given by
+   mistake at 12 months; PCV13 booster a week later): *"The Sep 8 PCV13 dose should count as a
+   valid dose 4, and no repeat is needed. Per CDC: repeat dose should be spaced after the invalid
+   dose by the recommended minimum interval. This means this rule applies when the repeat dose
+   is the same as the invalid dose."*
+3. Her reason covers Eli too, so he was put back to her dose by dose, on/off schedule marked:
+   *"Count it."*
+
+**So ANCHOR-1 stands for this direction**: a PPSV23 thrown out — for spacing or for age — holds
+off no conjugate. The answer-1 change was reverted before commit; nothing of it shipped.
+
+**What the question found, and what DID change.** Ben's ruling of 2026-10-30 (an EXTRA PPSV23
+holds a conjugate 8 weeks) had reached the dose check and not the card. The check measured
+from the last PPSV23 that counted **or was extra**; every card's 8-week hold measured from the
+last that **counted**. A diabetic 5-year-old whose extra PPSV23 was 3 weeks old was told her
+catch-up conjugate was **due today** — and the app threw that dose out when it was given: the
+P0 bug's shape (CLAUDE.md, "advises and grades by one number"). Both sides now call one
+function, `lastPpsv23HoldingAConjugate()` in `doseIntervalRules.js`; validate.js returns its
+answer as `conjugateHold` and `recommend.js` reads it as `ppsv.holdDate` at all ten places
+that held a conjugate after a PPSV23 (the old `ppsv.lastDate` is gone). A hand-built sweep
+gives every child the conjugate on the date its card advises: **22 were thrown out before, 0
+now.** **0 / 17,016** verdicts and **0 / 18,264** record-problem rows moved — the grid builds
+no child with an extra PPSV23 and a conjugate still owed.
+
+One older control asserted the bug: `regression-2026-10-26-eight-weeks-runs-from-the-last-ppsv23`
+used a cochlear-implant child's EXTRA dose as its example of "a dose that does not count cannot
+push the conjugate out". It now asserts Ben's ruling (held to 8 weeks after the extra dose).
+
+Guard: `regression-2026-10-31-card-holds-a-conjugate-after-an-extra-ppsv23.test.js` (Eli and
+Rosa as she ruled them, the extra-dose child, and the advice-equals-grading sweep). Mutations:
+the card reading counted doses only fails 3; dropping extras on both sides fails 19; on the
+card side only, 4.
 
 ### §K-READING — Two rules about what a card may say (OWNER, 2026-10-24)
 

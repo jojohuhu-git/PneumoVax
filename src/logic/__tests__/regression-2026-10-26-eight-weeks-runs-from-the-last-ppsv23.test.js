@@ -138,8 +138,18 @@ describe('a child\'s 8-week conjugate wait runs from her LAST counting PPSV23', 
     // ruling 2026-10-29) — so for her it is a credited dose and DOES hold the
     // conjugate, to 8 weeks after it, exactly as this file's own ruling says
     // of a last counting PPSV23. The same dose for a child with a cochlear
-    // implant is an EXTRA dose (owner ruling 2026-10-30) — not credited — so
-    // the control's principle is now shown by her.
+    // implant is an EXTRA dose (owner ruling 2026-10-30) — not credited.
+    //
+    // ⚠ 2026-10-31: THIS CONTROL USED TO ASSERT THE BUG. It said the extra
+    // dose could not hold the conjugate (`dueToday` true). But the owner's Ben
+    // ruling of 2026-10-30 is that an EXTRA PPSV23 DOES hold a conjugate for 8
+    // weeks — and the dose check already enforced it, so a conjugate given on
+    // the day this card advised was thrown out. The card now reads the dose
+    // check's own `conjugateHold` (§K-PPSV23THENPCV), and her extra dose holds
+    // her exactly as Hana's counted one holds Hana. What may NOT hold a
+    // conjugate is a THROWN-OUT PPSV23 (owner, 2026-10-31, Rosa and Eli —
+    // `regression-2026-10-31-card-holds-a-conjugate-after-an-extra-ppsv23`)
+    // and a record problem, below.
     const twoDoses = [{ date: '2024-01-01' }, { date: '2026-09-01' }];
     const cochlear = recommend({
       today: TODAY, dob: '2014-10-01', ageMonths: 144, riskIds: ['cochlear_implant'],
@@ -147,7 +157,7 @@ describe('a child\'s 8-week conjugate wait runs from her LAST counting PPSV23', 
     });
     expect(cochlear.perDose.ppsv23[1].extraDose).toBe(true);
     expect(pcvCards(cochlear).length).toBeGreaterThan(0);
-    for (const card of pcvCards(cochlear)) expect(card.dueToday).toBe(true);
+    for (const card of pcvCards(cochlear)) expect(advised(card)).toBe('2026-10-27');
 
     // ...and Hana's counted dose holds her to 2026-09-01 + 56 days.
     const insideFiveYears = hana(twoDoses);

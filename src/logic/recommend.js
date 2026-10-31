@@ -1126,10 +1126,10 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
   // OWNER DECISION 2026-10-29 — a healthy child's catch-up waits 8 weeks after
   // a PPSV23 too. See `catchupAnchor` below; this is the later of the two
   // clocks, the same shape `anchorPneumoGiven` uses in `pcvRiskChild`.
-  const catchupAnchor = mostRecent(anchor, ppsv.lastDate);
+  const catchupAnchor = mostRecent(anchor, ppsv.holdDate);
   /** True when the PPSV23 is what is actually holding the dose back. */
-  const ppsvHolds = ppsv.lastDate != null && catchupAnchor === ppsv.lastDate
-    && (anchor == null || ppsv.lastDate > anchor);
+  const ppsvHolds = ppsv.holdDate != null && catchupAnchor === ppsv.holdDate
+    && (anchor == null || ppsv.holdDate > anchor);
   const b = pcv.band;
 
   // Completeness for a HEALTHY child is age-band driven, NOT "has any PCV20."
@@ -1305,7 +1305,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         // the job aid has a cell for this history. `noteCiteSlices` pairs
         // markers to cites by POSITION, so the count here and the array below
         // must move together.
-        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c]${jobAidKey ? ' [c]' : ''}.${ppsvHolds ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.lastDate)}.**` : ''}`,
+        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c]${jobAidKey ? ' [c]' : ''}.${ppsvHolds ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.holdDate)}.**` : ''}`,
         detail: `This is the catch-up for a healthy child 24–59 months whose PCV schedule was not complete by 24 months. If PCV15 is used, a PPSV23 follow-up is NOT routine for a healthy child — PPSV23 here is risk-based only.${ppsvHolds ? ' The 8 weeks above is CDC\'s, measured in every source on this card from the most recent PCV. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that a healthy child and an at-risk child with the same recent PPSV23 are not given different dates.' : ''}`,
       },
       // p2016 Table 2's row states this card's whole sentence — the single dose
@@ -1527,7 +1527,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   const anchorPcv = pcv.anchorDate;
   // Anchor for "most recent pneumococcal vaccine" = latest of PCV or PPSV23.
   //
-  // ⚠ `ppsv.lastDate`, NOT `ppsv.effective.find(...)` — 2026-10-26. `find`
+  // ⚠ The LAST PPSV23, NOT `ppsv.effective.find(...)` — 2026-10-26. `find`
   // returns the FIRST counting PPSV23, so a child with two of them had her
   // eight weeks measured from a dose up to seven years old and the wait had
   // always already passed. Hana, 12, asplenia, no conjugate ever, PPSV23 on
@@ -1548,7 +1548,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // (`dueStateMonths(..., MO60, ...)` and `firstPpsv` in
   // `icPostPpsv23DueState`). First and last are different questions; this line
   // is the one that asks for the last.
-  const anchorPneumo = mostRecent(pcv.lastDate, ppsv.lastDate);
+  const anchorPneumo = mostRecent(pcv.lastDate, ppsv.holdDate);
   // ── 2026-10-25: the 24-71-month catch-up card's 8 weeks ─────────────────
   //
   // CDC's at-risk catch-up row states TWO intervals and the card implemented
@@ -1565,8 +1565,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // It is the LATER of the two clocks, not a third reading of either:
   //   `anchorPcv`      the PCV side, which is RULING D's anchor (the dose the
   //                    patient GOT, including one that did not count)
-  //   `ppsv.lastDate`  the PPSV23 side, which is ANCHOR-1's (counting doses
-  //                    only — "an unnecessary dose cannot reset a clock")
+  //   `ppsv.holdDate`  the PPSV23 side — the last PPSV23 that counted or was
+  //                    an extra dose (Ben, 2026-10-30), never one thrown out
+  //                    (ANCHOR-1, "an unnecessary dose cannot reset a clock",
+  //                    re-confirmed on Rosa and Eli 2026-10-31)
   // Both carry the same 8 weeks, so the later anchor is the later date and no
   // second interval is introduced.
   //
@@ -1574,7 +1576,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // document states it there: CDC's healthy row gives no interval, p2016's
   // says "after most recent PCV dose", and the catch-up job aid says "Give
   // Dose 1 today". See CLINICAL_SPEC.md §C-PPSV23ANCHOR.
-  const anchorPneumoGiven = mostRecent(anchorPcv, ppsv.lastDate);
+  const anchorPneumoGiven = mostRecent(anchorPcv, ppsv.holdDate);
   const ppsvGiven = ppsv.count > 0;
   // IC-1/IC-2/IC-3 (2026-10-17). Once an at-risk child's conjugate series is
   // done, CDC and p2016 ask ONE more question — has the post-series dose been
@@ -2011,9 +2013,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     //
     // ⚠ ONE `max`, NO SECOND INTERVAL, on both rows: the same 8 weeks on both
     // clocks, so the later anchor is simply the later date.
-    const ppsvHoldsRow1 = target === 1 && ppsv.lastDate != null
-      && anchorPneumoGiven === ppsv.lastDate
-      && (anchorPcv == null || ppsv.lastDate > anchorPcv);
+    const ppsvHoldsRow1 = target === 1 && ppsv.holdDate != null
+      && anchorPneumoGiven === ppsv.holdDate
+      && (anchorPcv == null || ppsv.holdDate > anchorPcv);
     const { dueToday, earliestNextDate } = dueState(anchorPneumoGiven, WK8, today);
     const doseNum = target - remaining + 1;
     out.push(rec({
@@ -2037,7 +2039,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // so the key follows `target` and needs no second test of its own.
       note: target === 1
         ? {
-          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c].${ppsvHoldsRow1 ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.lastDate)}.**` : ''}`,
+          lead: `Give 1 dose of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c].${ppsvHoldsRow1 ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.holdDate)}.**` : ''}`,
           // FINDING G: "all before 12 months", which is what p2016's row says.
           // It used to read "before 24 months" — a looser claim than the row,
           // and one that described 32 children the row is not about.
@@ -3727,7 +3729,8 @@ export function recommend(input) {
     // for a child's own series; that is `count`.
     given: (ppsvAnalysis?.perDose ?? []).filter((d) => d.extraDose || d.status === 'valid' || d.status === 'counted').length,
     effective: effectivePpsv,
-    // The most recent COUNTING PPSV23, mirroring `pcv.lastDate`. Added
+    // `holdDate` below. Until 2026-10-31 this was `lastDate`, the most
+    // recent COUNTING PPSV23, mirroring `pcv.lastDate`; it was added
     // 2026-10-25 for the at-risk catch-up card's 8 weeks, which CDC measures
     // from "the most recent dose" and not from the most recent PCV.
     //
@@ -3752,7 +3755,17 @@ export function recommend(input) {
     // 8-week callers now read this field. The field keeps the name it earns:
     // a `lastDate` that returned the first dose is a trap for whoever calls
     // it next.
-    lastDate: [...effectivePpsv].reverse().find((d) => d.date)?.date || null,
+    // The PPSV23 a child's next conjugate is held 8 weeks after: the most
+    // recent one that COUNTED or was an EXTRA dose (OWNER RULING 2026-10-30,
+    // Ben), never one thrown out (OWNER RULINGS 2026-10-31, Rosa and Eli).
+    // validate.js's `conjugateHold`, read here and never re-derived — the same
+    // function its `CHILD-PCV-AFTER-PPSV23` row calls. EVERY 8-week "next
+    // conjugate after a PPSV23" hold on a card reads this, so the card advises
+    // the date the dose check accepts. Before 2026-10-31 the cards read the
+    // last COUNTED PPSV23 only, and a child whose EXTRA PPSV23 was 3 weeks old
+    // was told her conjugate was due today, then had it thrown out.
+    holdDate: ppsvAnalysis?.conjugateHold
+      ?? ([...effectivePpsv].reverse().find((d) => d.date)?.date || null),
     // P2 (2026-10-30): a COUNTED PPSV23 that came inside the five years. Read
     // off validate.js's own verdict — never re-test the interval here, which
     // would be a second reading of one rule (the P0 bug's shape). Only an
