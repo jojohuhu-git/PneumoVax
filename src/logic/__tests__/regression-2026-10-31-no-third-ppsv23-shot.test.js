@@ -12,6 +12,10 @@
 //   Noah — no spleen; his first PPSV23 thrown out for SPACING (4 weeks after a
 //          PCV), the repeat 6 weeks later thrown out too: "PCV20 only". No
 //          grey-area note — CDC spaces a repeat from the invalid dose, plainly.
+//   Kai  — 8, no spleen, NEVER a PCV; Sam's two PPSV23 shots. His card was
+//          Option A PCV20 / B-1 PCV15 / B-2 PPSV23 (a third shot), and a
+//          2-year-old like him was offered "2 doses of PCV20 or PCV15", with a
+//          PPSV23 after PCV15. "PCV20 only + note", both cards.
 //
 // Noah's twin who is NOT immunocompromised is not a patient she saw. Both of
 // her rulings that reach him (Max: not IC; Noah: spacing) point the same way,
@@ -125,5 +129,87 @@ describe('Noah — first PPSV23 thrown out for spacing, the repeat thrown out to
     expect(one.recs.map((r) => r.doseLabel)).toEqual([
       'Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)',
     ]);
+  });
+});
+
+const greyHead = (date) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. This app spaces the repeat 8 weeks from the invalid dose, so the ${date} dose is not counted.`;
+
+describe('Kai — 8, no spleen, never a PCV: the 6-18 three-option card', () => {
+  const KAI = {
+    dob: '2017-01-01', ageMonths: 106, today: '2025-11-01', riskIds: ['asplenia'],
+    pcvDoses: [], ppsv23Doses: d('PPSV23', ['2018-12-01', '2019-01-05']),
+  };
+  const out = recommend(KAI);
+  const TAIL = ' If it were counted, PCV15 could be offered too, with no PPSV23 after it.';
+
+  it('one card: PCV20 only — no PCV15, no PPSV23', () => {
+    expect(out.recs.map((r) => [r.vaccine, r.doseLabel, r.brands])).toEqual([
+      ['PCV', '1 dose PCV20 (≥8 weeks)', ['PCV20 (Prevnar 20)']],
+    ]);
+    expect(out.recs[0].dueToday).toBe(true);
+  });
+
+  it('the card says why, then the grey area, ending in what is true for him', () => {
+    expect(out.recs[0].note.lead).toBe('**Give 1 dose of PCV20**, ≥8 weeks after the most recent pneumococcal vaccine [c] [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
+    expect(out.recs[0].note.detail).toBe(`PCV15 is not offered: after it a PPSV23 would be owed — a third PPSV23 shot. ${withCites(greyHead('Jan 5, 2019'))}${TAIL}`);
+    expect(out.recs[0].noteCites.map((c) => c.key)).toEqual([
+      'pedsIc6to18NoPcv', 'p2016NoPriorPcv6to18OptionA',
+      'cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days',
+    ]);
+  });
+
+  it('the chip under his repeat names the grey area and promises no PPSV23', () => {
+    const chip = out.perDose.ppsv23[1].reasons.join(' ');
+    expect(chip).toContain(greyHead('Jan 5, 2019') + TAIL);
+    expect(chip).not.toContain('Mar 2, 2019');
+  });
+
+  it('his twin who is NOT immunocompromised reads the same, with the non-IC row (a judgement)', () => {
+    const twin = recommend({ ...KAI, riskIds: ['cochlear_implant'] });
+    expect(twin.recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks)']);
+    expect(twin.recs[0].noteCites[0].key).toBe('pedsRisk6to18NoPcv');
+  });
+});
+
+describe('Kai at 2 — the at-risk catch-up card', () => {
+  const KAI2 = { ...SAM, pcvDoses: [] };
+  const out = recommend(KAI2);
+
+  it('2 doses of PCV20 — PCV15 no longer offered', () => {
+    expect(out.recs.map((r) => [r.doseLabel, r.brands])).toEqual([
+      ['PCV dose 1 of 2 (at-risk catch-up)', ['PCV20 (Prevnar 20)']],
+    ]);
+    expect(out.recs[0].note.lead).toBe('Give 2 doses of PCV20, ≥8 weeks after the most recent pneumococcal dose and ≥8 weeks apart [c] [c].');
+  });
+
+  it('"Why this" swaps the PCV15 sentence for why it is not offered, then the grey area', () => {
+    expect(out.recs[0].note.detail).toBe(`This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot. ${withCites(greyHead('Jan 5, 2025'))}`);
+    expect(out.recs[0].noteCites.map((c) => c.key)).toEqual([
+      'pedsRiskIncompleteCatchup', 'p2016AtRiskCatchup24to71Incomplete', 'p2016Pcv15NeedsFurtherDoses',
+      'cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days',
+    ]);
+  });
+
+  it('the chip names the grey area, with no "if it were counted" sentence (none is true for every child here)', () => {
+    const chip = out.perDose.ppsv23[1].reasons.join(' ');
+    expect(chip).toContain(greyHead('Jan 5, 2025'));
+    expect(chip).not.toContain('If it were counted');
+    expect(chip).not.toContain('Mar 2, 2025');
+  });
+
+  it('the 3-doses-before-12-months row reads the same way', () => {
+    const r = recommend({ ...SAM, pcvDoses: d('PCV13', ['2023-03-01', '2023-05-01', '2023-07-01']) }).recs;
+    expect(r.map((x) => [x.doseLabel, x.brands])).toEqual([['1 dose PCV (at-risk catch-up)', ['PCV20 (Prevnar 20)']]]);
+    expect(r[0].note.lead).toBe('Give 1 dose of PCV20, ≥8 weeks after the most recent PCV [c] [c].');
+    expect(r[0].note.detail).toBe(`This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot. ${withCites(greyHead('Jan 5, 2025'))}`);
+  });
+
+  it('a repeat thrown out for SPACING on this card: PCV20 only, no grey area (a judgement)', () => {
+    const r = recommend({ ...SAM, pcvDoses: d('PCV13', ['2023-03-01', '2023-05-01', '2025-02-01']),
+      ppsv23Doses: d('PPSV23', ['2025-02-15', '2025-04-05']) });
+    expect(r.perDose.ppsv23[1].intervalRuleId).toBe('CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
+    expect(r.recs.map((x) => x.brands)).toEqual([['PCV20 (Prevnar 20)']]);
+    expect(r.recs[0].note.detail).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot.');
+    expect(JSON.stringify(r)).not.toContain('Grey area');
   });
 });

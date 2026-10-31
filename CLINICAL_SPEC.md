@@ -839,7 +839,24 @@ So the trigger is **the repeat rule having thrown the dose out**, whatever voide
 dose; the grey-area note is added only when the first was too young (`repeatOfUnderAgeDose`).
 *A judgement within her rulings, listed in the PR:* **Noah's twin who is not
 immunocompromised** gets PCV20 only as well — he is not a patient she saw, but both rulings
-that reach him (Max: not IC; Noah: spacing) say the same. **Not ruled, untouched:** a child
+that reach him (Max: not IC; Noah: spacing) say the same. **Kai** — 8, no spleen, **never a PCV**, Sam's two PPSV23 shots. His card was the 6–18
+no-prior-PCV trio — Option A PCV20 / B-1 PCV15 / B-2 PPSV23, B-2 a third shot — and a 2-year-old
+like him got the 24–71-month at-risk catch-up, *"2 doses of PCV20 or PCV15"* with a PPSV23
+after PCV15. She chose **"PCV20 only + note"** for both. On both the third shot hides behind
+PCV15, so PCV15 goes and "Why this" says why before the grey-area note:
+
+| Card | Now | Grey note's last sentence |
+|---|---|---|
+| 6–18 no-prior-PCV (IC `pedsIc6to18NoPcv` / non-IC `pedsRisk6to18NoPcv`) | **1 dose PCV20 (≥8 weeks)**, Option B dropped; *"PCV15 is not offered: after it a PPSV23 would be owed — a third PPSV23 shot."* | *"If it were counted, PCV15 could be offered too, with no PPSV23 after it."* — CDC follows PCV15 with a PPSV23 only "if … no previous receipt of PPSV23" |
+| 24–71-month catch-up, both rows (`pedsRiskIncompleteCatchup`) | **PCV20** only, as product and in the lead; the PCV15 sentence becomes *"PCV15 is not offered: it would need a PPSV23 after it [p2016 ‡] — a third PPSV23 shot."* | **none** — an immunocompromised child would still owe a dose five years on, so no "if counted" sentence is true for every child on this card |
+
+The catch-up card's two PCV15 sentences are constants shared by its builder and this swap
+(`CATCHUP_PCV15_SENTENCE_ROW1/2`), so a reworded sentence cannot slip past it. *Judgements
+within her rulings, listed in the PR:* the **non-immunocompromised** child on the 6–18 card
+(her Max ruling reaches him), and a **repeat thrown out for spacing** on the catch-up card
+(her Noah ruling; no grey note) — each has its own test.
+
+**Not ruled, untouched:** a child
 whose two PPSV23 shots were BOTH thrown out for being too young (the second is not a "repeat
 after an invalid first", so this rule does not fire, and the card still offers PPSV23).
 

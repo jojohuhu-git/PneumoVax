@@ -1122,6 +1122,21 @@ const PAIR_ROW_IS_IC = new Map([
   ['pedsIcPcv20orPpsv23', true], ['pedsIcBefore6NoPcv20At6to18', true],
   ['pedsRiskPcv20orPpsv23', false], ['pedsRiskBefore6NoPcv20At6to18', false],
 ]);
+// Kai, 8, no spleen, never a PCV, Sam's two PPSV23 shots: "PCV20 only + note"
+// on BOTH cards a child with no counted conjugate reaches — the 6-18
+// three-option card (Option A PCV20 / B-1 PCV15 / B-2 PPSV23) and the 24-71-
+// month catch-up ("PCV20 or PCV15", PPSV23 after PCV15). On both the third
+// shot hides behind PCV15, so PCV15 goes and the card says why. The catch-up
+// card's PCV15 sentences are the constants below, shared with its builder, so
+// this swap cannot miss a reworded sentence.
+//
+// Each card's "if it were counted" sentence is only the one TRUE for every
+// child on it. 6-18: CDC's row follows PCV15 with a PPSV23 only "if … no
+// previous receipt of PPSV23", so PCV15 alone would do. Catch-up: none — an
+// immunocompromised child would still owe a dose five years on — so none.
+const CATCHUP_PCV15_SENTENCE_ROW1 = `If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`;
+const CATCHUP_PCV15_SENTENCE_ROW2 = `If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`;
+const NO_PRIOR_PCV_ROWS = new Set(['pedsIc6to18NoPcv', 'pedsRisk6to18NoPcv']);
 function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   if (ppsvCount !== 0) return null;
   // No status test: with no PPSV23 counted, every one was thrown out (a
@@ -1129,36 +1144,71 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   const i = (ppsvAnalysis?.perDose ?? []).findIndex((d) => d.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
   if (i < 0) return null;
   const isGrey = Boolean(ppsvAnalysis.perDose[i].repeatOfUnderAgeDose);
-  const optionA = recs.find((r) => r.vaccine === 'PCV' && r.doseLabel?.startsWith('Option A: 1 dose PCV20'));
-  const optionB = recs.find((r) => r.vaccine === 'PPSV23' && r.doseLabel?.startsWith('Option B: 1 dose PPSV23'));
-  if (!optionA || !optionB || recs.length !== 2 || !PAIR_ROW_IS_IC.has(optionA.noteCites?.[0]?.key)) return null;
-  const isIC = PAIR_ROW_IS_IC.get(optionA.noteCites[0].key);
   const repeatDate = ppsvAnalysis.doses[i].date;
   const given = ppsvAnalysis.perDose.length;
-  const ifCounted = addCalendarMonths(repeatDate, MO60);
-  const grey = `This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted. ${isIC
-    ? `If it were counted, PCV20 would be due on or after ${fmtDate(ifCounted)} and would complete the series.`
-    : 'If it were counted, the series would already be complete.'}`;
   const third = given === 2 ? 'a third PPSV23 shot' : `PPSV23 shot number ${given + 1}`;
-  return {
+  const neither = `${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted`;
+  const greyHead = (cites) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age${cites ? ' [c]' : ''}, and states no gap from the invalid dose for a vaccine that is not live${cites ? ' [c]' : ''}. ACIP does not address this case. This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted.`;
+  const greyCites = isGrey ? [cite('cdcGbpRepeatUnderMinAge'), cite('cdcGbpLiveVaccine28Days')] : [];
+  const result = (tail) => ({
     index: i,
-    chip: !isGrey ? null : `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${grey}`,
-    recs: [{
+    chip: isGrey ? `${greyHead(false)}${tail}` : null,
+    detailGrey: isGrey ? ` ${greyHead(true)}${tail}` : '',
+  });
+
+  const optionA = recs.find((r) => r.vaccine === 'PCV' && r.doseLabel?.startsWith('Option A: 1 dose PCV20'));
+  const rowA = optionA?.noteCites?.[0]?.key;
+
+  // Sam, Max, Noah: the Option A PCV20 / Option B PPSV23 pair.
+  const optionB = recs.find((r) => r.vaccine === 'PPSV23' && r.doseLabel?.startsWith('Option B: 1 dose PPSV23'));
+  if (optionA && optionB && recs.length === 2 && PAIR_ROW_IS_IC.has(rowA)) {
+    const tail = PAIR_ROW_IS_IC.get(rowA)
+      ? ` If it were counted, PCV20 would be due on or after ${fmtDate(addCalendarMonths(repeatDate, MO60))} and would complete the series.`
+      : ' If it were counted, the series would already be complete.';
+    const r = result(tail);
+    return { ...r, recs: [{
       ...optionA,
       doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`,
       note: {
-        lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; that completes the series [c]. No further PPSV23: ${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted.`,
-        detail: isGrey
-          ? `Grey area: CDC says a dose given under the minimum age is repeated on or after that age [c], and states no gap from the invalid dose for a vaccine that is not live [c]. ACIP does not address this case. ${grey}`
-          : `A PPSV23 is not offered: it would be ${third}.`,
+        lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; that completes the series [c]. No further PPSV23: ${neither}.`,
+        detail: isGrey ? r.detailGrey.trim() : `A PPSV23 is not offered: it would be ${third}.`,
       },
-      noteCites: [
-        optionA.noteCites[0],
-        cite('cdcPcv20Children2023CompleteWithoutPcv20'),
-        ...(isGrey ? [cite('cdcGbpRepeatUnderMinAge'), cite('cdcGbpLiveVaccine28Days')] : []),
-      ],
-    }],
-  };
+      noteCites: [optionA.noteCites[0], cite('cdcPcv20Children2023CompleteWithoutPcv20'), ...greyCites],
+    }] };
+  }
+
+  // Kai at 6-18: the no-prior-PCV three-option card. Option A is rebuilt and
+  // Option B (B-1 PCV15, B-2 PPSV23) dropped; any other card is left alone.
+  if (optionA && NO_PRIOR_PCV_ROWS.has(rowA)) {
+    const r = result(' If it were counted, PCV15 could be offered too, with no PPSV23 after it.');
+    return { ...r, recs: recs.filter((x) => !x.doseLabel?.startsWith('Option B-')).map((x) => (x !== optionA ? x : {
+      ...optionA,
+      doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS})`,
+      note: {
+        lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine [c] [c]. No further PPSV23: ${neither}.`,
+        detail: `PCV15 is not offered: after it a PPSV23 would be owed — ${third}.${r.detailGrey}`,
+      },
+      noteCites: [...optionA.noteCites, ...greyCites],
+    })) };
+  }
+
+  // Kai at 2: the 24-71-month at-risk catch-up card, either row. Only that
+  // card is rebuilt; any other card is left alone.
+  const c = recs.find((x) => x.noteCites?.[0]?.key === 'pedsRiskIncompleteCatchup');
+  if (c) {
+    const r = result('');
+    const why = `PCV15 is not offered: it would need a PPSV23 after it [c] — ${third}.${r.detailGrey}`;
+    return { ...r, recs: recs.map((x) => (x !== c ? x : {
+      ...c,
+      brands: ['PCV20 (Prevnar 20)'],
+      note: {
+        lead: c.note.lead.replace('PCV20 or PCV15', 'PCV20'),
+        detail: c.note.detail.replace(CATCHUP_PCV15_SENTENCE_ROW1, why).replace(CATCHUP_PCV15_SENTENCE_ROW2, why),
+      },
+      noteCites: [...c.noteCites, ...greyCites],
+    })) };
+  }
+  return null;
 }
 
 /** Add the "at 19" line to a child's "complete" card: the end of its lead. */
@@ -2114,7 +2164,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           // FINDING G: "all before 12 months", which is what p2016's row says.
           // It used to read "before 24 months" — a looser claim than the row,
           // and one that described 32 children the row is not about.
-          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].${ppsvHoldsRow1 ? ' The 8 weeks above is ACIP\'s, measured from the last PCV dose. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that this child and one on the neighbouring row with the same recent PPSV23 are not given different dates.' : ''}`,
+          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. ${CATCHUP_PCV15_SENTENCE_ROW1}${ppsvHoldsRow1 ? ' The 8 weeks above is ACIP\'s, measured from the last PCV dose. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that this child and one on the neighbouring row with the same recent PPSV23 are not given different dates.' : ''}`,
         }
         : {
           // Both halves of CDC's row, 2026-10-25. It states two intervals --
@@ -2122,7 +2172,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           // least 8 weeks apart" -- and this lead printed only the second,
           // while the card's date was computed from neither.
           lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal dose and ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
-          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`,
+          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. ${CATCHUP_PCV15_SENTENCE_ROW2}`,
         },
       noteCites: [
         cite('pedsRiskIncompleteCatchup'),
