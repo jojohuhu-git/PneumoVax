@@ -83,7 +83,10 @@ describe('limits', () => {
     expect(card({ ...IVY_20, ppsv23Doses: d('PPSV23', ['2007-02-01']) })[0].doseLabel).toBe('1 dose PCV (PCV20, PCV15, or PCV21)');
   });
 
+  // §C-P2-FIVE (owner ruling 2026-10-31): a PPSV23 after a thrown-out one
+  // waits 5 years, so the second dose moved from 2010 (3 years — it counted
+  // under the old 8 weeks, and would now be thrown out) to 2012.
   it('a PPSV23 that COUNTED: not this card at all', () => {
-    expect(card({ ...IVY_20, ppsv23Doses: d('PPSV23', ['2007-02-01', '2010-02-01']) })[0].doseLabel).not.toBe('1 dose PCV (PCV20 or PCV21)');
+    expect(card({ ...IVY_20, ppsv23Doses: d('PPSV23', ['2007-02-01', '2012-02-01']) })[0].doseLabel).not.toBe('1 dose PCV (PCV20 or PCV21)');
   });
 });

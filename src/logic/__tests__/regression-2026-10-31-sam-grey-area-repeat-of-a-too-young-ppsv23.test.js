@@ -26,7 +26,7 @@ const SAM = {
   pcvDoses: d('PCV13', ['2023-03-01', '2023-05-01', '2023-07-01', '2024-01-05']),
   ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-05']),
 };
-const GREY = 'This app spaces the repeat 8 weeks from the invalid dose, so the Jan 5, 2025 dose is not counted. If it were counted, PCV20 would be due on or after Jan 5, 2030 and would complete the series.';
+const GREY = 'This app spaces any PPSV23 at least 5 years from the PPSV23 before it, so the Jan 5, 2025 dose is not counted. If it were counted, PCV20 would be due on or after Jan 5, 2030 and would complete the series.';
 
 describe('Sam', () => {
   const out = recommend(SAM);
@@ -93,8 +93,17 @@ describe('limits — only the card she was shown', () => {
     expect(JSON.stringify(out)).not.toContain('Grey area');
   });
 
-  it('a repeat 8 weeks after the too-young dose COUNTS — no grey area at all', () => {
+  // REVERSED the same evening by the owner (§C-P2-FIVE): "PPSV23 to PPSV23 is
+  // 5 years." A repeat 8 weeks after the too-young dose used to COUNT; it is
+  // now thrown out like Sam's. Kept, inverted, as the record of it.
+  it('a repeat 8 weeks after the too-young dose — REVERSED 2026-10-31: thrown out too', () => {
     const p = { ...SAM, ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-26']) };
+    expect(recommend(p).perDose.ppsv23[1].status).toBe('invalid');
+  });
+
+  it('a repeat 5 years after the too-young dose COUNTS — no grey area at all', () => {
+    const p = { ...SAM, ageMonths: 34 + 60, today: '2030-11-01',
+      ppsv23Doses: d('PPSV23', ['2024-12-01', '2029-12-01']) };
     const out = recommend(p);
     expect(out.perDose.ppsv23[1].status).toBe('valid');
     expect(JSON.stringify(out)).not.toContain('Grey area');

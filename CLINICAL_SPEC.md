@@ -876,6 +876,9 @@ rejected-first repeat.
 
 ### §C-P2-REPEAT — the repeat of a rejected FIRST PPSV23 is the first PPSV23 (owner, 2026-10-30)
 
+**⚠ REVERSED 2026-10-31 by the owner — §C-P2-FIVE.** The repeat now waits 5 years, not 8
+weeks, and Noah's Jul 10, 2023 repeat is thrown out. Kept below as the record.
+
 **Noah**, 5, no spleen (the child she was shown — not P2's 4-year-old Noah above): catch-up PCV13 at 25 and 27 months (2023-02-01, 2023-04-01); PPSV23 on
 2023-04-29, 4 weeks after the PCV13 — rejected; repeated on 2023-07-10, 10 weeks after it.
 
@@ -947,6 +950,10 @@ It now reads *"1 of 2 PPSV23 doses counted — 1 an extra dose, not needed, with
 the dose itself."* No corpus records that panel, so no count moved.
 
 ### §C-P2-GREY — the repeat of a too-young first PPSV23: the 8 weeks stays, and the card says it is a grey area (owner, 2026-10-31)
+
+**⚠ THE 8 WEEKS IS REVERSED (owner, later 2026-10-31) — §C-P2-FIVE.** Sam's verdict, his
+PCV20-only card and the grey-area note all stand; the note's sentence about the app's rule now
+reads *"This app spaces any PPSV23 at least 5 years from the PPSV23 before it"*.
 
 **Sam**, 2, no spleen, a full infant PCV13 series: PPSV23 on Dec 1, 2024 at 23 months — under
 the 2-year minimum, thrown out — and again on Jan 5, 2025, just past his 2nd birthday and 5
@@ -1196,6 +1203,63 @@ a PCV13, PCV20, PCV21 or PCV7 history beside the two shots already offers no PPS
 Measured: **0 / 17,016** verdicts, **0 / 18,264** record-problem rows, **128 / 35,280** rendered
 lines against `main` (116 like the twin, 12 like Leo — the 2026-10-25 date-promise sweep's pinned
 counts fell by exactly those, 2544 → 2428 withdrawn and 1851 → 1839 kept).
+
+### §C-P2-FIVE — a child's PPSV23 after ANY earlier PPSV23 waits 5 years (owner, 2026-10-31)
+
+**Reverses** the 8 weeks of §C-P2-REPEAT (Noah, 2026-10-30) and of §C-P2-GREY (Sam, earlier
+2026-10-31). Found from the rules-page review: a **25-month-old with diabetes** (PCV15 at 2, 4, 6
+and 12 months; PPSV23 at 23 months, too young, thrown out 46 days ago) was offered *"Option B: 1
+dose PPSV23"* **due today** — and the dose check would then have thrown that PPSV23 out (8 weeks
+from the invalid dose, as it then stood). Shown her, the owner answered *"PPSV23 can only be
+repeated 5 years after the last invalid PPSV23"*, and then, of Noah and Sam: *"PPSV23 to PCV is 8
+weeks, but PPSV23 to PPSV23 is 5 years. For Noah and Sam - they should be given PCV20 8 weeks after
+the second PPSV23 dose to avoid getting 3 PPSV23. They would need to meet the minimum requirement
+interval for PCV to PCV as well as PPSV23 to PCV."*
+
+**Sources, read live 2026-10-31.** CDC Child & Adolescent Notes, pneumococcal: *"…dose 2 PPSV23
+at least 5 years after dose 1 PPSV23"* (4 times) and *"…at least 8 weeks after the most recent PCV
+dose"* (6 times). CDC General Best Practices, Timing and Spacing: *"The repeat dose should be
+spaced after the invalid dose by the recommended minimum interval"*, and *"If PPSV23 has been
+administered first, PCV13 should be administered no earlier than 8 weeks later in children 6–18
+years"*. **Neither document says which interval governs the repeat of a thrown-out FIRST
+PPSV23** — the 8 weeks a first PPSV23 keeps from a PCV, or the 5 years between PPSV23 doses. The
+choice is hers; the row keeps `authority: 'CDC'` because both numbers are CDC's and she added no
+consequence a document does not state.
+
+| Patient | Before | Now |
+|---|---|---|
+| **Noah**, 5, no spleen; PPSV23 4 weeks after a PCV13 (thrown out), repeated 10 weeks later | repeat **counted** as PPSV23 dose 1; card PCV20 or a 2nd PPSV23 in 2028 | repeat **thrown out**; card **PCV20 only** — a PPSV23 would be his third |
+| **Sam**, 2, no spleen; PPSV23 at 23 months, repeated 5 weeks later | both thrown out; PCV20 only; grey note "spaces the repeat 8 weeks" | same verdict and card; grey note *"spaces any PPSV23 at least 5 years from the PPSV23 before it"* |
+| **The toddler** above | Option A PCV20 / Option B PPSV23, **both due today** | Option A PCV20 due today; Option B PPSV23 **held to Sep 15, 2031**, saying why |
+| **An IC teenager**, first PPSV23 counted, second thrown out a day after a PCV13 | "2nd PPSV23" due today (5 years from the FIRST) — accepted only inside the 4-day grace | held to 5 years after the thrown-out dose |
+
+**What changed in the code — one rule, read in three places:**
+- `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`: 8 weeks → **5 years** (still a floor, still graced).
+- `repeatDueDate` for a child's thrown-out PPSV23 is **5 years** from the dose given, whichever
+  row threw it out. Spending the rejecting row's own 8 weeks printed a date that row refused.
+- `holdPpsv23AfterThrownOut()` (recommend.js): any child PPSV23 card is held to 5 years after the
+  last PPSV23 **given** when that dose did not count — read off validate.js's `anchor`, never
+  re-derived. **A conjugate is not held**: a thrown-out PPSV23 holds off no conjugate (§K-PPSV23THENPCV,
+  Eli and Rosa) — see "still open" below.
+- `earlyFiveYearPcv20` now reads only the **PCV** card's hold; reading the PPSV23 hold would have
+  written "shorter than the 5 years" under 9 grid PCV20s given 9 years after the first PPSV23.
+
+**Measured against `main`.** **934 / 17,016** verdicts and **312 / 18,264** record-problem rows
+moved, in three families and nothing else: (1) **814** doses — the repeat date under a child's
+PPSV23 thrown out for coming too soon after a PCV, 8 weeks → 5 years after the dose (no dose's
+status, count or validity date moved); (2) **120** — a child whose only PPSV23 was given under
+age 2: the PPSV23 option moves from due today to 5 years after it; (3) **12** — the IC teenager
+family. **369 / 35,280** rendered lines changed (193 real, 176 impossible), every one either the
+"Held to 5 years" sentence or the 8-week date → 5-year date in the chip. No PCV card and no PCV
+dose verdict moved.
+
+**Still open, asked:** whether *"PCV20 8 weeks after the second PPSV23"* means the card should
+ADVISE a conjugate 8 weeks after a thrown-out PPSV23 (with an earlier one still counting, as Eli's
+did), or whether a conjugate inside those 8 weeks should no longer count — which would reverse Eli
+and Rosa. For Noah and Sam the 8 weeks passed long ago, so neither answer changes their cards.
+
+Guard: `regression-2026-10-31-ppsv23-repeat-waits-five-years.test.js` (Noah, Sam, the toddler,
+the IC teenager, the grace, a 5-year repeat that counts, a child with no thrown-out dose).
 
 ### §C-P2-HEALTHY — a healthy child's PPSV23 is not needed, at any age (owner, 2026-10-31)
 
@@ -2094,7 +2158,7 @@ catch-up row**.
   | Child (under 19 years) | Any | Anything | PPSV23 | the most recent PCV that counted | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PCV` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine, when that dose counted | at least 5 years | Immunocompromised: counts, with a note. Otherwise: an extra dose, not counted | CDC / ACIP | `CHILD-PPSV23-AFTER-PPSV23` |
   | Child (under 19 years) | Any | a PPSV23 that counted | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-INVALID-PPSV23` |
-  | Child (under 19 years) | Any | no PPSV23 that counted | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` |
+  | Child (under 19 years) | Any | no PPSV23 that counted | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` |
   | Adult (19 years and over) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | at least 4 weeks | Counts, with a note | This app | `ADULT-PCV-AFTER-PCV-UNDER-4-WEEKS` |
   | Adult (19 years and over) | Any | PCV13, PPSV23 | PCV20 or PCV21 | the most recent PCV that counted | at least 1 year | Counts, with a note | This app | `ADULT-PCV20-21-1Y-AFTER-PCV` |
   | Adult (19 years and over) | Any | PCV13, PPSV23 | PCV20 or PCV21 | the most recent PPSV23 that counted | at least 5 years | Counts, with a note | CDC / ACIP | `ADULT-PCV20-21-5Y-AFTER-PPSV23` |

@@ -227,11 +227,16 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
     // RECOMMENDATION never sets a dose aside, so it never names a repeat.
     expect(
       DOSE_INTERVAL_RULES.filter((r) => r.grace && r.interval?.months).map((r) => r.id),
-    ).toEqual(['CHILD-PPSV23-AFTER-PPSV23', 'CHILD-PPSV23-AFTER-INVALID-PPSV23']);
+    ).toEqual(['CHILD-PPSV23-AFTER-PPSV23', 'CHILD-PPSV23-AFTER-INVALID-PPSV23',
+      'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST']);
+    // §C-P2-FIVE (owner ruling 2026-10-31): the repeat of a thrown-out FIRST
+    // PPSV23 is months-stated too now (5 years, was 8 weeks). Its own case —
+    // the advised date carries no grace — is Noah's in
+    // regression-2026-10-31-ppsv23-repeat-waits-five-years.test.js.
     expect(
       DOSE_INTERVAL_RULES.filter((r) => r.grace && r.interval?.months && r.enforcement === 'floor')
         .map((r) => r.id),
-    ).toEqual(['CHILD-PPSV23-AFTER-INVALID-PPSV23']);
+    ).toEqual(['CHILD-PPSV23-AFTER-INVALID-PPSV23', 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST']);
   });
 });
 

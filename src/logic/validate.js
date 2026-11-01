@@ -1002,8 +1002,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       // rules table's own clocks. Never recompute it here; this file owns no
       // interval logic.
       // §C-P2-GREY (OWNER RULING 2026-10-31, on "Sam"). The repeat of a first
-      // PPSV23 given TOO YOUNG, thrown out only because it came inside 8 weeks
-      // of that dose. CDC states no gap for it (a gap from the invalid dose is
+      // PPSV23 given TOO YOUNG, thrown out only because it came inside 5 years
+      // of that dose (8 weeks until the owner's ruling of 2026-10-31, §C-P2-FIVE).
+      // CDC states no gap for it (a gap from the invalid dose is
       // given for live vaccines only), so `recommend.js` highlights the grey
       // area on this chip and on the card. Read off the earlier dose's own
       // verdict — never re-tested here.

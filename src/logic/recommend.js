@@ -1159,7 +1159,8 @@ function atNineteen(adultCard) {
 //
 // Sam, no spleen, a full infant PCV13 series: PPSV23 at 23 months (too young,
 // thrown out) and again 5 weeks later, just past his 2nd birthday — thrown out
-// by `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`, 8 weeks from the invalid dose.
+// by `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST`, then 8 weeks from the invalid
+// dose and 5 years since the owner's ruling of 2026-10-31 (§C-P2-FIVE).
 // CDC says a dose given too young "should be repeated on or after the date
 // when the child reaches at least the minimum age", and states a gap from the
 // invalid dose only "If the vaccine is a live vaccine". Asked, she kept the 8
@@ -1246,7 +1247,7 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     : given === 2 ? 'a third PPSV23 shot' : `PPSV23 shot number ${given + 1}`;
   const neither = given === 1 ? '1 PPSV23 dose has been given and it did not count'
     : `${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted`;
-  const greyHead = (cites) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age${cites ? ' [c]' : ''}, and states no gap from the invalid dose for a vaccine that is not live${cites ? ' [c]' : ''}. ACIP does not address this case. This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted.`;
+  const greyHead = (cites) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age${cites ? ' [c]' : ''}, and states no gap from the invalid dose for a vaccine that is not live${cites ? ' [c]' : ''}. ACIP does not address this case. This app spaces any PPSV23 at least ${LONG_GAP_WORDS} from the PPSV23 before it, so the ${fmtDate(repeatDate)} dose is not counted.`;
   const greyCites = isGrey ? [cite('cdcGbpRepeatUnderMinAge'), cite('cdcGbpLiveVaccine28Days')] : [];
   const result = (tail) => ({
     index: i,
@@ -1329,6 +1330,38 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
   }
   return null;
+}
+
+// ── §C-P2-FIVE (OWNER RULING 2026-10-31) ─────────────────────────────────
+//
+// "PPSV23 to PCV is 8 weeks, but PPSV23 to PPSV23 is 5 years." Since that
+// ruling `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` throws out a PPSV23 given
+// inside 5 years of a thrown-out one. The cards were never told: a 25-month-old
+// with diabetes and a too-young PPSV23 46 days ago was offered "Option B: 1
+// dose PPSV23" due TODAY — and the 8-week rule it then had would have thrown
+// that dose out too. Every child's PPSV23 card is held here to 5 years after
+// the last PPSV23 GIVEN when that dose did not count, read off validate.js's
+// own anchor (RULING D: the dose given, never a record problem), never
+// re-derived. That also covers an immunocompromised child whose FIRST PPSV23
+// counted and whose second was thrown out: her "2nd PPSV23" card counted 5
+// years from the first, while the dose check (CHILD-PPSV23-AFTER-INVALID-PPSV23)
+// counts from the thrown-out one — 12 grid patients advised inside the grace.
+// A conjugate is NOT held — a thrown-out PPSV23 holds off no conjugate
+// (ANCHOR-1, OWNER RULINGS 2026-10-31 on Eli and Rosa).
+function holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today) {
+  const last = ppsvAnalysis?.anchor?.date;
+  const counted = (ppsvAnalysis?.effective ?? []).some((e) => e.date === last);
+  const thrownOut = last && !counted ? last : null;
+  if (!thrownOut) return recs;
+  const hold = dueStateMonths(thrownOut, MO60, today);
+  if (hold.dueToday) return recs;
+  const why = ` **Held to ${LONG_GAP_WORDS} after this child's PPSV23 of ${fmtDate(thrownOut)}, which did not count — a PPSV23 after another PPSV23 waits ${LONG_GAP_WORDS}.**`;
+  return recs.map((r) => {
+    if (r.vaccine !== 'PPSV23' || r.status === 'complete' || r.status === 'not-indicated') return r;
+    if (!r.dueToday && r.earliestNextDate && r.earliestNextDate >= hold.earliestNextDate) return r;
+    const note = typeof r.note === 'string' ? `${r.note}${why}` : { ...r.note, lead: `${r.note.lead}${why}` };
+    return { ...r, dueToday: false, earliestNextDate: hold.earliestNextDate, note };
+  });
 }
 
 /** Add the "at 19" line to a child's "complete" card: the end of its lead. */
@@ -4189,6 +4222,7 @@ export function recommend(input) {
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today).map((r) => withAtNineteen(r, at19));
       noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
       if (noThird) recs = noThird.recs;
+      recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
@@ -4311,8 +4345,11 @@ export function recommend(input) {
       pcvDoses: earlier(rawPcv), ppsv23Doses: earlier(rawPpsv),
     });
     // `earliestNextDate` is set only while the date is still ahead, so a
-    // dose on or after it finds nothing here.
-    const held = then.recs.find((r) => r.minIntervalMonths === MO60 && r.earliestNextDate);
+    // dose on or after it finds nothing here. Only the PCV card's hold: since
+    // §C-P2-FIVE (2026-10-31) the PPSV23 alternative beside it can be held 5
+    // years from a THROWN-OUT PPSV23, and reading that hold here wrote "shorter
+    // than the 5 years" under 9 grid PCV20s given 9 years after the first dose.
+    const held = then.recs.find((r) => r.vaccine === 'PCV' && r.minIntervalMonths === MO60 && r.earliestNextDate);
     if (!held) return d;
     const k = then.perDose.ppsv23.findIndex((x) => x.effectiveDoseNum === 1);
     // Never reached on the grid (a card holding five years always has a

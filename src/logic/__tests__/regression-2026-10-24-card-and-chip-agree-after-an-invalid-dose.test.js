@@ -92,7 +92,10 @@ describe('the contract itself, on the population that still has floors', () => {
     const out = run(CHILD);
     const chip = invalidOf(out)[0];
     expect(chip).toBeDefined();
-    expect(chip.repeatDueDate).toBe('2026-08-17');   // 8 weeks after the dose given
+    // §C-P2-FIVE (owner ruling 2026-10-31): "PPSV23 to PPSV23 is 5 years." The
+    // repeat of a thrown-out PPSV23 is another PPSV23, so it moved from 8 weeks
+    // (2026-08-17) to 5 years after the dose given.
+    expect(chip.repeatDueDate).toBe('2031-06-22');   // 5 years after the dose given
 
     // Whichever card is offering the next PPSV23 must not name an earlier day
     // than the chip does. That is the whole finding: two dates on one screen.

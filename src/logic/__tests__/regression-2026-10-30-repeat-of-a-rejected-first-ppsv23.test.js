@@ -21,6 +21,14 @@
 // dose", 9 times, read live the same day). The 5 years is the gap between
 // dose 1 and dose 2, so it applies only once a PPSV23 has COUNTED.
 //
+// ⚠ REVERSED 2026-10-31 BY THE OWNER (§C-P2-FIVE): "PPSV23 to PCV is 8 weeks,
+// but PPSV23 to PPSV23 is 5 years. For Noah and Sam - they should be given
+// PCV20 8 weeks after the second PPSV23 dose to avoid getting 3 PPSV23." The
+// repeat of a thrown-out FIRST PPSV23 now waits 5 years, like any second
+// PPSV23, so Noah's Jul 10 repeat is thrown out and his card is PCV20 only.
+// This file is kept, its assertions inverted, as the record of both rulings;
+// the current rule's guard is regression-2026-10-31-ppsv23-repeat-waits-five-years.
+//
 // ⚠ THE GRID CANNOT REACH THESE CHILDREN — hand-built, every one.
 
 import { describe, it, expect } from 'vitest';
@@ -43,34 +51,26 @@ const ppsvDoses = (p) => analyzeBoth(p).ppsv23.perDose;
 const recsOf = (p) => recommend(p).recs;
 const allText = (recs) => recs.map((r) => JSON.stringify(r.note) + ' ' + (r.doseLabel || '')).join(' ');
 
-describe('Noah — the repeat of his rejected first PPSV23 counts as his first', () => {
-  it('the first PPSV23 is still thrown out, and its chip still names Jun 24, 2023', () => {
+describe('Noah — REVERSED 2026-10-31: his repeat no longer counts', () => {
+  it('the first PPSV23 is still thrown out; its repeat now waits 5 years from it', () => {
     const [first] = ppsvDoses(NOAH);
     expect(first.status).toBe('invalid');
     expect(first.intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
-    expect(first.repeatDueDate).toBe('2023-06-24');
-    expect(first.reasons.join(' ')).toContain('can be given from Jun 24, 2023 at the earliest');
+    // Was 2023-06-24 (8 weeks). The repeat is another PPSV23: 5 years.
+    expect(first.repeatDueDate).toBe('2028-04-29');
+    expect(first.reasons.join(' ')).toContain('can be given from Apr 29, 2028 at the earliest');
   });
 
-  it('the repeat on 2023-07-10 counts, as PPSV23 dose 1', () => {
+  it('the repeat on 2023-07-10 — REVERSED: thrown out, inside 5 years of the first', () => {
     const [, repeat] = ppsvDoses(NOAH);
-    expect(repeat.status).toBe('valid');
-    expect(repeat.effectiveDoseNum).toBe(1);
-    expect(analyzeBoth(NOAH).ppsv23.effective.map((x) => x.date)).toEqual(['2023-07-10']);
-    // Pre-fix: "not until Jul 10, 2028" — the second-dose gap, measured from a
-    // dose that never counted.
-    expect(JSON.stringify(repeat)).not.toContain('2028');
+    expect(repeat.status).toBe('invalid');
+    expect(repeat.intervalRuleId).toBe('CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
+    expect(analyzeBoth(NOAH).ppsv23.effective).toEqual([]);
   });
 
-  it('his card is the card of a child who HAS had one PPSV23 — never a third', () => {
+  it('his card is PCV20 only — never a third PPSV23 (as before, for a new reason)', () => {
     const recs = recsOf(NOAH);
-    const withOne = recsOf({ ...NOAH_BASE, ppsv23Doses: d('PPSV23', ['2023-07-10']) });
-    // Exactly the card he would get had the bad dose never been given: the
-    // rejected dose changes nothing about what he is owed.
-    expect(recs.map((r) => [r.vaccine, r.status, r.doseLabel])).toEqual(
-      withOne.map((r) => [r.vaccine, r.status, r.doseLabel]),
-    );
-    // Pre-fix: "Option B: 1 dose PPSV23 (≥8 weeks)" — a third PPSV23 shot.
+    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
     expect(recs.map((r) => r.doseLabel).join(' ')).not.toContain('Option B: 1 dose PPSV23');
     expect(allText(recs)).not.toContain('neither PCV20 nor PPSV23');
   });
@@ -85,32 +85,35 @@ describe('Noah — the repeat of his rejected first PPSV23 counts as his first',
   });
 });
 
-describe('the repeat is spaced from the rejected dose — RULING D still holds', () => {
-  it('a repeat 6 weeks after the rejected dose does not count, and says 8 weeks', () => {
+describe('the repeat is spaced from the rejected dose — RULING D still holds, at 5 years', () => {
+  it('a repeat 6 weeks after the rejected dose does not count, and says 5 years', () => {
     const p = { ...NOAH_BASE, ppsv23Doses: d('PPSV23', ['2023-04-29', '2023-06-10']) };
     const [, repeat] = ppsvDoses(p);
     expect(repeat.status).toBe('invalid');
     expect(repeat.intervalRuleId).toBe('CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
     expect(repeat.reasons[0]).toBe(
-      'Given 42 days after the PPSV23 dose of Apr 29, 2023, which did not count — the repeat of a PPSV23 that did not count is given at least 8 weeks (56 days) after it.',
+      'Given 42 days after the PPSV23 dose of Apr 29, 2023, which did not count — a PPSV23 after another PPSV23 is given at least 5 years after it, whether or not that dose counted.',
     );
-    // 2023-06-10 + 56 days, no grace (owner ruling 2026-10-24).
-    expect(repeat.repeatDueDate).toBe('2023-08-05');
+    // 2023-06-10 + 5 years, no grace (owner ruling 2026-10-24).
+    expect(repeat.repeatDueDate).toBe('2028-06-10');
   });
 
-  it('CDC\'s 4-day grace applies: 52 days counts, 51 does not', () => {
+  it('REVERSED 2026-10-31: 52 days after the rejected dose no longer counts', () => {
     const at = (date) => ppsvDoses({ ...NOAH_BASE, ppsv23Doses: d('PPSV23', ['2023-04-29', date]) })[1];
-    expect(at('2023-06-20').status).toBe('valid');
-    expect(at('2023-06-19').status).toBe('invalid');
+    expect(at('2023-06-20').status).toBe('invalid');
   });
 
-  it('the repeat must also be 8 weeks after the PCV — that row still speaks', () => {
-    // PCV13 on 2023-04-01; a PPSV23 rejected on 2023-04-05 (4 days later); a
-    // repeat on 2023-05-31 is 56 days after the bad dose but only 60 after
-    // the PCV, so both rows are met — and on 2023-05-20 neither is.
-    const at = (date) => ppsvDoses({ ...NOAH_BASE, ppsv23Doses: d('PPSV23', ['2023-04-05', date]) })[1];
-    expect(at('2023-05-31').status).toBe('valid');
-    expect(at('2023-05-20').status).toBe('invalid');
+  it('the repeat must also be 8 weeks after a PCV — that row still speaks', () => {
+    // PPSV23 rejected 2023-04-05 (4 days after a PCV13). A later PCV13 on
+    // 2028-03-20; a repeat on 2028-04-10 is 5 years after the bad dose but 21
+    // days after that PCV13 — thrown out by the PCV row; on 2028-05-20 both
+    // rows are met.
+    const late = { ...NOAH_BASE, ageMonths: 69 + 24, today: '2028-10-30',
+      pcvDoses: d('PCV13', ['2023-02-01', '2023-04-01', '2028-03-20']) };
+    const at = (date) => ppsvDoses({ ...late, ppsv23Doses: d('PPSV23', ['2023-04-05', date]) })[1];
+    expect(at('2028-04-10').status).toBe('invalid');
+    expect(at('2028-04-10').intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
+    expect(at('2028-05-20').status).toBe('valid');
   });
 });
 

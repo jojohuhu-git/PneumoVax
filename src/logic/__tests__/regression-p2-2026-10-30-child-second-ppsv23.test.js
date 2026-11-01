@@ -298,12 +298,15 @@ describe('the two cases P2 does not cover keep their own answers', () => {
   const REPEAT_OF_A_REJECTED_PPSV23 = child(['asplenia'], ['2018-01-29', '2019-02-01']);
   REPEAT_OF_A_REJECTED_PPSV23.pcvDoses = d('PCV13', ['2016-03-01', '2016-05-01', '2016-07-01', '2018-01-01']);
 
-  it('a repeat of a rejected FIRST PPSV23 is not P2 — and it now counts as the first', () => {
+  // ⚠ REVERSED AGAIN (OWNER RULING 2026-10-31, §C-P2-FIVE): "PPSV23 to
+  // PPSV23 is 5 years." The repeat, a year after the rejected dose, is thrown
+  // out again — by the repeat row, now at 5 years — and it is still not P2.
+  it('a repeat of a rejected FIRST PPSV23 is not P2 — REVERSED 2026-10-31: thrown out at 5 years', () => {
     const [first, second] = analyzeBoth(REPEAT_OF_A_REJECTED_PPSV23).ppsv23.perDose;
     expect(first.status).toBe('invalid');
     expect(first.intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
-    expect(second.status).toBe('valid');
-    expect(second.effectiveDoseNum).toBe(1);
+    expect(second.status).toBe('invalid');
+    expect(second.intervalRuleId).toBe('CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
     expect(JSON.stringify(second)).not.toContain('never give a third');
   });
 });

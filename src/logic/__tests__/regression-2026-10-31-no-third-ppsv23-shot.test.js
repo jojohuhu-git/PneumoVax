@@ -33,7 +33,7 @@ const SAM = {
   pcvDoses: d('PCV13', ['2023-03-01', '2023-05-01', '2023-07-01', '2024-01-05']),
   ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-05']),
 };
-const GREY_HEAD = 'Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. This app spaces the repeat 8 weeks from the invalid dose, so the Jan 5, 2025 dose is not counted.';
+const GREY_HEAD = 'Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. This app spaces any PPSV23 at least 5 years from the PPSV23 before it, so the Jan 5, 2025 dose is not counted.';
 const withCites = (s) => s
   .replace('on or after that age,', 'on or after that age [c],')
   .replace('not live.', 'not live [c].');
@@ -136,7 +136,7 @@ describe('Noah — first PPSV23 thrown out for spacing, the repeat thrown out to
   });
 });
 
-const greyHead = (date) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. This app spaces the repeat 8 weeks from the invalid dose, so the ${date} dose is not counted.`;
+const greyHead = (date) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. This app spaces any PPSV23 at least 5 years from the PPSV23 before it, so the ${date} dose is not counted.`;
 
 describe('Kai — 8, no spleen, never a PCV: the 6-18 three-option card', () => {
   const KAI = {
