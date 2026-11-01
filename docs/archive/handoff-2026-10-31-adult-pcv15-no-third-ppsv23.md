@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-10-31, night)** by `handoff-2026-10-31-pcv20-before-6-and-early-ic-pcv20.md`. Its PR (#104) is merged and its queue moved on: "also state the minimum" is closed, and two new owner questions were added. Resume from the newer file.
+
 # PneumoVax — Handoff after the adult PCV15 + two thrown-out PPSV23 ruling (2026-10-31, late night)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
