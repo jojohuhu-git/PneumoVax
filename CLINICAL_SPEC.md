@@ -2593,6 +2593,23 @@ record-problem rows. Prose: 312 of 35,280 lines, 0 added, 0 removed.
 
 Guard: `regression-2026-10-31-never-flagged-row-keeps-earlier-notes.test.js`.
 
+### §K-MET-ONLY — "this dose met that minimum" only for a dose that met it (2026-10-31)
+
+For an adult **50+** with an immunocompromising condition, cochlear implant or CSF leak,
+mm7401a1 advises PPSV23 ≥1 year after PCV15 and says 8 weeks "can be considered".
+`ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` is the row for a dose that **took** that
+option (8 weeks to a year), and its sentence ends *"this dose met that minimum, so it counts"*.
+It also spoke for a dose given **before** 8 weeks, right under the 8-week row's *"shorter than
+the 8 weeks (56 days) ACIP recommends"* — two sentences on one chip saying opposite things.
+*Grace*, 60, HIV, PPSV23 4 weeks after PCV15. Found while testing §K-NONE-KEEPS.
+
+The row now declares `onlyIfMet: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM'` and is silent when
+that row was not met. Wording only. **Measured: 30 of 17,016 grid verdicts moved, every one only
+the note count (2 → 1)** — all 65-year-olds with an immunocompromising condition or cochlear
+implant, PPSV23 28 days after PCV15. 0 of 18,264 record-problem rows. Prose: 30 of 35,280 lines.
+
+Guard: `regression-2026-10-31-eight-week-option-only-when-met.test.js`.
+
 ### §K-PCV20CHILD2023 — ACIP's 2023 PCV20-in-children report on the cards (OWNER, 2026-10-25)
 
 **The document.** *Use of 20-Valent Pneumococcal Conjugate Vaccine Among U.S. Children:

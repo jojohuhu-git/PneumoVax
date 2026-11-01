@@ -305,6 +305,10 @@ function lastOf(list) {
 //                 shorterMinimum. It is NOT an inline age test deciding whether
 //                 a rule may bite — that was the S14-RC root cause. A row that
 //                 needs to speak only to one age band declares it here.
+//   onlyIfMet     a rule id → silent when THAT row's interval was not met
+//                 (it is an earlier recommendation, so an unmet one has
+//                 already spoken). For a row whose sentence says the dose met
+//                 another row's minimum — §K-MET-ONLY, 2026-10-31.
 //   anchorCounted true  → only when the anchor dose COUNTED
 //                 false → only when it did NOT (it was set aside)
 //                 undefined → regardless
@@ -1214,6 +1218,12 @@ export const DOSE_INTERVAL_RULES = [
     // was never recommended to them — the A-P1-1 self-contradiction, one
     // surface along, exactly as the comment in evaluateDoseInterval() warns.
     shorterIsTheAdvice: false,
+    // §K-MET-ONLY (2026-10-31): this row is the dose that TOOK the 8-week
+    // option, and its sentence ends "this dose met that minimum". A dose given
+    // before 8 weeks did not take it — the row above has already said so, and
+    // this one would contradict it on the same chip (Grace, 60, HIV, PPSV23 4
+    // weeks after PCV15). Silent whenever that row's interval was not met.
+    onlyIfMet: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
     interval: { months: ADULT_PPSV23_INTERVAL_MONTHS },
     grace: false,
     enforcement: 'recommendation',
@@ -1669,6 +1679,10 @@ export function evaluateDoseInterval(ctx) {
     // That is the A-P1-1 mistake — one flat interval quoted at every adult —
     // reappearing one rule along.
     if (rule.catchAll && namedByRule) continue;
+    // A row that describes a dose which MET another row's interval stays
+    // silent when that row was not met (§K-MET-ONLY). The other row is a
+    // recommendation earlier in the table, so an unmet one is already here.
+    if (rule.onlyIfMet && advisories.some((a) => a.ruleId === rule.onlyIfMet)) continue;
     if (intervalMet(rule, ctx, anchor)) {
       namedByRule = namedByRule || !(rule.catchAll || rule.advisoryOnly);
       continue;
