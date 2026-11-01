@@ -347,7 +347,13 @@ describe('swept over every patient the grid can build', () => {
       // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
       // counting conjugate and her card family changes with it. The invariant
       // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132 + 30);
+      // +10, 2026-11-01 (§K-THROWNOUTTIMING): ten 19-year-olds whose PCV15
+      // at 14 was followed a day later by a PPSV23 that did not count now read
+      // "PCV20 or PCV21 in place of the PPSV23" instead of "PPSV23", and that
+      // card quotes mm7401a1's footnote * ("may be used if PPSV23 is not
+      // available"). The document speaks for the new card; the old one quoted
+      // none of its sentences. Zero uncredited is unchanged.
+      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10);
   });
 
   it("the job aid is on 3,869 — 3,616 after document 2, plus Ruling F's 253", () => {

@@ -79,7 +79,7 @@ describe('P6-4 — note lead, with detail behind a disclosure', () => {
     expect(queryMarker('[2]')).toBeNull();
     fireEvent.click(screen.getByTestId('rec-note-toggle'));
     expect(marker('[2]').getAttribute('href')).toBe('https://example.test/detail#y');
-    expect(marker('[2]').getAttribute('title')).toBe('Detail source');
+    expect(marker('[2]').getAttribute('data-title')).toBe('Detail source');
   });
 
   it('a lead with no marker leaves the whole citation list to the detail', () => {

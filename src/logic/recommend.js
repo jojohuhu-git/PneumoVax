@@ -62,6 +62,11 @@ const M = {
   m7: 7, m12: 12, m24: 24, m60: 60, m72: 72,
   y18: ADULT_SCHED_MIN_M, y50: ROUTINE_ADULT_MIN_M, y65: 780,
 };
+// The rules page (src/data/rulebook.js) prints these ages. It reads THIS
+// object rather than keeping a copy, so the page and the engine cannot hold
+// two opinions about one age — the y65 note above is why it is not a second
+// home in scheduleConstants.js.
+export const ENGINE_AGE_LINES = Object.freeze({ ...M });
 
 const WK8 = DAYS.weeks(8);   // 56
 const WK4 = DAYS.weeks(4);   // 28
@@ -1346,8 +1351,9 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
 // counted and whose second was thrown out: her "2nd PPSV23" card counted 5
 // years from the first, while the dose check (CHILD-PPSV23-AFTER-INVALID-PPSV23)
 // counts from the thrown-out one — 12 grid patients advised inside the grace.
-// A conjugate is NOT held — a thrown-out PPSV23 holds off no conjugate
-// (ANCHOR-1, OWNER RULINGS 2026-10-31 on Eli and Rosa).
+// A conjugate is not held HERE: a thrown-out PPSV23 holds off no conjugate's
+// VALIDITY (ANCHOR-1, OWNER RULINGS 2026-10-31 on Eli and Rosa). Its ADVISED
+// date is held, since 2026-11-01, by `holdConjugateAfterThrownOut` below.
 function holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today) {
   const last = ppsvAnalysis?.anchor?.date;
   const counted = (ppsvAnalysis?.effective ?? []).some((e) => e.date === last);
@@ -1359,6 +1365,41 @@ function holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today) {
   return recs.map((r) => {
     if (r.vaccine !== 'PPSV23' || r.status === 'complete' || r.status === 'not-indicated') return r;
     if (!r.dueToday && r.earliestNextDate && r.earliestNextDate >= hold.earliestNextDate) return r;
+    const note = typeof r.note === 'string' ? `${r.note}${why}` : { ...r.note, lead: `${r.note.lead}${why}` };
+    return { ...r, dueToday: false, earliestNextDate: hold.earliestNextDate, note };
+  });
+}
+
+// ── §K-THROWNOUTTIMING (OWNER RULINGS 2026-11-01) ─────────────────────────
+//
+// A PPSV23 that did not count still sets the date of the next conjugate.
+// Children: "at least 8 weeks after the last PCV and at least 8 weeks after
+// the invalid PPSV23, whichever date is later". Adults: "at least 1 year after
+// whichever came later, the PCV or the PPSV23 ... ACIP recommends at least 1
+// year after any PPSV23 before a conjugate dose."
+//
+// ADVICE ONLY, and that is her ruling, not an omission: asked whether Eli's
+// PCV20 (33 days after a thrown-out PPSV23) then stops counting, she chose
+// "Still counts (advise only)". So only the card moves. A child's card carries
+// two numbers and says so, as C10-2 requires — "it can be given today if
+// needed" / "from <date>" is the date the card advised before this hold. An
+// adult's has no minimum to state: adult conjugate intervals are advice too.
+//
+// Never later than any hold the card already had (one `max`), and never on a
+// card that owes nothing.
+function holdConjugateAfterThrownOut(recs, thrownOut, today, { child }) {
+  if (!thrownOut) return recs;
+  const hold = child
+    ? dueState(thrownOut, WK8, today)
+    : dueStateMonths(thrownOut, MO12, today);
+  if (hold.dueToday) return recs;
+  return recs.map((r) => {
+    if (r.vaccine !== 'PCV' || r.status === 'complete' || r.status === 'not-indicated') return r;
+    if (!r.dueToday && r.earliestNextDate && r.earliestNextDate >= hold.earliestNextDate) return r;
+    const could = r.dueToday || !r.earliestNextDate ? 'today' : `from ${fmtDate(r.earliestNextDate)}`;
+    const why = child
+      ? ` **Advised ≥${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(thrownOut)}, which did not count; it can be given ${could} if needed, as a PPSV23 that did not count does not change when a PCV is valid.**`
+      : ` **Held to ≥${ADULT_GAP_WORDS} after this patient's PPSV23 of ${fmtDate(thrownOut)}, which did not count: a conjugate is given ≥${ADULT_GAP_WORDS} after any PPSV23.**`;
     const note = typeof r.note === 'string' ? `${r.note}${why}` : { ...r.note, lead: `${r.note.lead}${why}` };
     return { ...r, dueToday: false, earliestNextDate: hold.earliestNextDate, note };
   });
@@ -3410,6 +3451,36 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
     })];
   }
 
+  // ── PCV15, then a PPSV23 that did not count → PCV20 or PCV21 ─────────
+  // §K-THROWNOUTTIMING (OWNER RULING 2026-11-01): "After PCV15: the same
+  // 1-year interval applies. No PPSV23 is needed after that dose." So the
+  // follow-on is the conjugate that may stand in for an unavailable PPSV23,
+  // a year after the PPSV23 GIVEN — not a PPSV23 again, whatever the risk
+  // class (the 19–49 IC row's 8 weeks is the PCV15→PPSV23 gap, and no PPSV23
+  // is given). Only a PPSV23 given AFTER the PCV15: one given before it (a
+  // baby's dose, Ivy) leaves the ordinary PCV15-then-PPSV23 card standing.
+  if (pcv.hasPCV15 && !ppsvGiven && ppsv.thrownOutDate && pcv.lastDate && ppsv.thrownOutDate > pcv.lastDate) {
+    const { dueToday, earliestNextDate } = dueStateMonths(ppsv.thrownOutDate, MO12, today);
+    return [rec({
+      vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
+      doseLabel: `1 dose PCV (PCV20 or PCV21) ≥${ADULT_GAP_WORDS} after the PPSV23 — completes the series`,
+      dueToday, earliestNextDate, minIntervalMonths: MO12,
+      brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
+      note: {
+        lead: `**Give 1 dose of PCV20 or PCV21** ≥${ADULT_GAP_WORDS} after the PPSV23 of ${fmtDate(ppsv.thrownOutDate)}, which did not count, in place of the PPSV23 [c] [c]; it completes the series [c]. No PPSV23 is needed after it.`,
+        detail: `The PPSV23 did not count, so the PCV15 still needs its follow-on dose. ACIP gives a conjugate ≥${ADULT_GAP_WORDS} after a PPSV23 [c]; applying that to a PPSV23 that did not count is a PneumoVax decision, because the spacing is about the immune response, not whether the dose counted.`,
+      },
+      noteCites: [
+        cite('mmwrPpsv23Unavailable'),
+        cite('jobAidPpsv23Unavailable'),
+        cite('adultPpsv23Unavailable'),
+        cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'),
+      ],
+      // All three adult documents state a sentence on this card.
+      refs: adultRefs(),
+    })];
+  }
+
   // ── PCV15 only, no PPSV23 → INCOMPLETE: give PPSV23 ─────────────────
   if (pcv.hasPCV15 && !ppsvGiven) {
     const { dueToday, earliestNextDate } = ppsvDueState(pcv.lastDate);
@@ -4163,6 +4234,23 @@ export function recommend(input) {
     // was told her conjugate was due today, then had it thrown out.
     holdDate: ppsvAnalysis?.conjugateHold
       ?? ([...effectivePpsv].reverse().find((d) => d.date)?.date || null),
+    // §K-THROWNOUTTIMING (OWNER RULINGS 2026-11-01): the last PPSV23 GIVEN
+    // when it neither counted nor was an extra dose — validate.js's own anchor
+    // (Ruling D: never a record problem), never re-derived. It still sets the
+    // date of the next conjugate on the CARD ("the 8-week PPSV23-to-PCV
+    // spacing is about immune response, not dose validity"), and the dose
+    // check does not see it: asked about Eli, she chose "Still counts (advise
+    // only)". `holdDate` is the dose check's clock; this is the card's alone.
+    //
+    // One test, not two: `conjugateHold` IS the last PPSV23 that counted or
+    // was extra, so a last dose that is not it was thrown out. (An
+    // `effective.some(...)` clause beside it was found redundant by mutation.)
+    // Even this one cannot be seen on a card today — a counted or extra dose
+    // already holds the card to the same 8 weeks, and the hold below takes
+    // the later date — and it is kept so the field means what its name says
+    // for the adult PCV15 branch that reads it.
+    thrownOutDate: ppsvAnalysis?.anchor?.date && ppsvAnalysis.anchor.date !== ppsvAnalysis.conjugateHold
+      ? ppsvAnalysis.anchor.date : null,
     // P2 (2026-10-30): a COUNTED PPSV23 that came inside the five years. Read
     // off validate.js's own verdict — never re-test the interval here, which
     // would be a second reading of one rule (the P0 bug's shape). Only an
@@ -4223,6 +4311,7 @@ export function recommend(input) {
       noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
       if (noThird) recs = noThird.recs;
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
+      recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
@@ -4237,6 +4326,7 @@ export function recommend(input) {
     recs = pcvAdult(am, riskIds, pcv, ppsv, today, dob, adultRepeat);
     noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
     if (noThird) recs = noThird.recs;
+    recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: false });
   }
   path.push(pathStep('Doses already given', doseWords(pcvAnalysis, ppsvAnalysis), null));
 

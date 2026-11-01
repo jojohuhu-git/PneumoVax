@@ -646,116 +646,199 @@ body {
 .risk-age-note-line + .risk-age-note-line { margin-top: var(--sp-4); }
 .risk-age-note-footer { margin-top: var(--sp-4); color: var(--gy2); }
 
-/* ── "How recommendations are made" (the rulebook page) ──────────
-   C14 (2026-10-25). Design rules applied: no decorative icons, small radii
-   only, every colour a token. The +/- marks are text, not shapes. */
+/* ── "How PneumoVax decides" (the rules page) ─────────────────────
+   C14 (2026-10-25), redesigned 2026-11-01 from the owner's design canvas.
+   No decorative icons, small radii only, every colour a token. Dose boxes
+   use the app's own colours: PCV green, PPSV23 blue, complete green, no
+   longer used grey dashed. The dose-label chips reuse the result card's own
+   `.dose-val-chip` classes so the page shows exactly what the card shows. */
 .rb-link {
-  margin-left: auto; flex-shrink: 0; background: none; border: none; padding: var(--sp-4) 0;
-  font-size: var(--fs-sm); font-family: inherit; color: var(--c2);
-  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  margin-left: auto; flex-shrink: 0; padding: var(--sp-4) 0;
+  font-size: var(--fs-sm); color: var(--c2);
+  text-decoration: underline; text-underline-offset: 3px;
 }
 .rb-link:hover { color: var(--c); }
 
-.rb { max-width: 660px; margin: 0 auto; width: 100%; padding: var(--sp-24) var(--sp-16) 60px; }
-.rb-top { display: flex; align-items: flex-start; gap: var(--sp-16); margin-bottom: var(--sp-12); }
-.rb-title { font-size: var(--fs-xl); font-weight: 700; color: var(--gy); line-height: 1.25; }
-.rb-close { flex-shrink: 0; margin-left: auto; }
-.rb-intro { font-size: var(--fs-base); color: var(--gy2); line-height: 1.6; margin-bottom: var(--sp-24); }
+.rb { max-width: 1040px; margin: 0 auto; width: 100%; padding: var(--sp-24) var(--sp-16) 64px; display: flex; flex-direction: column; gap: var(--sp-24); }
+.rb-top { display: flex; flex-direction: column; gap: var(--sp-8); max-width: 780px; }
+.rb-title { font-size: 1.6rem; font-weight: 700; color: var(--gy); line-height: 1.2; }
+.rb-intro, .rb-lead { font-size: var(--fs-md); color: var(--gy2); line-height: 1.5; max-width: 780px; }
+.rb-band { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; background: var(--gy6); border-radius: var(--radp); padding: var(--sp-8) var(--sp-12); }
+.rb-band-green { background: var(--glt); color: var(--g); }
+.rb-band-blue { background: var(--blt); color: var(--b); }
 
-.rb-section { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-16) var(--sp-24); margin-bottom: var(--sp-16); }
-.rb-section-head {
-  width: 100%; display: flex; align-items: center; gap: var(--sp-12);
-  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; text-align: left;
+.rb-nav { display: flex; flex-wrap: wrap; gap: var(--sp-8); }
+.rb-nav a {
+  padding: var(--sp-8) var(--sp-12); border: 1px solid var(--gy5); border-radius: var(--radp);
+  background: var(--wh); font-size: var(--fs-base); color: var(--c); text-decoration: none;
 }
-.rb-section-title { font-size: var(--fs-md); font-weight: 700; color: var(--c); }
-.rb-section-mark { margin-left: auto; font-size: var(--fs-lg); color: var(--gy3); line-height: 1; }
-.rb-section-lead { font-size: var(--fs-sm); color: var(--gy3); line-height: 1.5; margin-top: var(--sp-4); }
-.rb-section-body { margin-top: var(--sp-16); border-top: 1px solid var(--gy6); padding-top: var(--sp-16); }
+.rb-nav a:hover { border-color: var(--cmd); background: var(--clt); }
 
-.rb-h3 { font-size: var(--fs-base); font-weight: 700; color: var(--gy); margin: var(--sp-16) 0 var(--sp-4); }
-.rb-note { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.6; margin-bottom: var(--sp-12); }
-.rb-sub { display: block; font-size: var(--fs-xs); color: var(--gy3); line-height: 1.45; margin-top: 2px; }
-.rb-tag {
-  display: inline-block; margin-left: var(--sp-8); padding: 1px var(--sp-8);
-  border-radius: var(--rads); background: var(--gy6); color: var(--gy2); font-size: var(--fs-2xs);
+.rb-section { display: flex; flex-direction: column; gap: var(--sp-16); scroll-margin-top: var(--sp-16); }
+.rb-h2 { font-size: var(--fs-xl); font-weight: 700; color: var(--c); scroll-margin-top: var(--sp-16); }
+.rb-h3 { font-size: var(--fs-lg); font-weight: 700; color: var(--gy); }
+.rb-h4 { font-size: var(--fs-md); font-weight: 700; color: var(--gy); }
+.rb-card { background: var(--wh); border: 1px solid var(--gy5); border-radius: var(--rad); padding: var(--sp-24); display: flex; flex-direction: column; gap: var(--sp-16); min-width: 0; }
+.rb-card-stop { background: var(--hsctlt); border-color: var(--hsctmd); }
+.rb-card-stop .rb-h3 { color: var(--hsct); }
+.rb-body { font-size: var(--fs-md); line-height: 1.5; }
+.rb-small { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.45; }
+.rb-label { font-size: var(--fs-sm); font-weight: 600; color: var(--gy2); margin-bottom: var(--sp-8); }
+.rb-indent { padding-left: 80px; }
+.rb-strong { font-weight: 700; white-space: nowrap; }
+.rb-scroll { overflow-x: auto; }
+.rb-w8 { width: 8%; } .rb-w12 { width: 12%; } .rb-w18 { width: 18%; } .rb-w24 { width: 24%; } .rb-w30 { width: 30%; } .rb-w40 { width: 40%; }
+
+/* Dose boxes */
+.rb-dose {
+  display: inline-block; background: var(--clt); border: 1px solid var(--cmd); border-radius: var(--radp);
+  padding: var(--sp-8) 10px; font-size: var(--fs-base); font-weight: 600; color: var(--c); text-align: center;
+}
+.rb-dose-ppsv { background: var(--blt); border-color: var(--bmd); color: var(--b); }
+.rb-dose-done { background: var(--glt); border-color: var(--gmd); color: var(--g); }
+.rb-dose-old { background: var(--bg); border: 1px dashed var(--gy4); color: var(--gy2); }
+.rb-dose-struck { text-decoration: line-through; }
+.rb-ppsv-text { color: var(--b); }
+.rb-or { font-weight: 400; }
+.rb-empty { display: block; border: 1px dashed var(--gy5); border-radius: var(--radp); padding: var(--sp-8) 10px; font-size: var(--fs-sm); color: var(--gy3); text-align: center; }
+.rb-arrow { color: var(--gy3); font-size: var(--fs-sm); text-align: center; white-space: nowrap; }
+.rb-cell-note { display: block; font-size: var(--fs-xs); color: var(--gy2); line-height: 1.45; margin-top: 2px; }
+.rb-cell-text { display: block; margin-top: 2px; }
+.rb-complete { color: var(--g); }
+.rb-invalid-text { color: var(--r); }
+
+/* The routine infant timeline */
+.rb-timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-12); }
+.rb-tick-col { display: flex; flex-direction: column; gap: 6px; }
+.rb-tick-col .rb-dose { display: block; }
+.rb-tick { display: block; height: 10px; width: 2px; background: var(--gy3); margin: 0 auto; }
+.rb-tick-age { font-size: var(--fs-sm); font-weight: 600; color: var(--gy2); text-align: center; }
+.rb-rail { height: 2px; background: var(--cmd); border-radius: 2px; margin: var(--sp-8) 0; }
+
+/* The children's lanes: one shared grid so every box lines up across rows */
+.rb-lanes-row { display: grid; grid-template-columns: 240px repeat(4, minmax(0, 1fr)); column-gap: var(--sp-12); }
+.rb-lanes-head > span { font-size: var(--fs-xs); font-weight: 600; color: var(--gy2); padding-bottom: var(--sp-8); }
+.rb-lane-name { font-weight: 700; font-size: var(--fs-base); padding: 14px 0; border-top: 1px solid var(--gy6); }
+.rb-lane-cell { padding: 14px 0; border-top: 1px solid var(--gy6); display: flex; flex-direction: column; gap: var(--sp-4); }
+.rb-lane-cell .rb-dose { display: block; }
+.rb-lane-cell .rb-cell-note { text-align: center; }
+.rb-bullets { margin: var(--sp-12) 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-sm); color: var(--gy2); line-height: 1.45; }
+
+/* Adults */
+.rb-agebar { display: flex; }
+.rb-agebar-seg { display: flex; flex-direction: column; gap: 2px; padding: 10px var(--sp-12); font-size: var(--fs-sm); color: var(--gy2); }
+.rb-agebar-seg strong { font-size: var(--fs-base); color: var(--gy); }
+.rb-agebar-0 { flex: 3; background: var(--alt); border: 1px solid var(--amd); border-radius: var(--radp) 0 0 var(--radp); }
+.rb-agebar-1 { flex: 5; background: var(--glt); border: 1px solid var(--gmd); border-left: none; border-radius: 0 var(--radp) var(--radp) 0; }
+.rb-path { display: grid; grid-template-columns: 80px 170px 90px 150px 40px 150px; align-items: center; margin-bottom: var(--sp-8); }
+.rb-path-name { font-size: var(--fs-sm); font-weight: 700; }
+
+/* Tables */
+.rb-table { width: 100%; border-collapse: collapse; font-size: var(--fs-base); }
+.rb-fixed { table-layout: fixed; }
+.rb-table th { text-align: left; font-size: var(--fs-xs); color: var(--gy2); font-weight: 600; padding: var(--sp-8) 10px; border-bottom: 1px solid var(--gy5); background: var(--gy6); vertical-align: top; }
+.rb-table td { padding: 10px; border-bottom: 1px solid var(--gy6); vertical-align: top; line-height: 1.45; }
+.rb-grp td { background: var(--bg); font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); padding: 6px 10px; }
+.rb-def { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.45; }
+.rb-decision {
+  display: inline-block; font-size: var(--fs-2xs); font-weight: 600; color: var(--gy2);
+  background: var(--gy6); border: 1px solid var(--gy5); border-radius: var(--rads); padding: 1px 6px; white-space: nowrap;
 }
 
-.rb-path-list { list-style: none; counter-reset: rbp; }
-.rb-path { position: relative; padding-left: var(--sp-24); margin-bottom: var(--sp-16); counter-increment: rbp; }
-.rb-path::before { content: counter(rbp) "."; position: absolute; left: 0; top: 0; color: var(--c3); font-weight: 700; font-size: var(--fs-sm); }
-.rb-path-name { font-size: var(--fs-base); font-weight: 700; color: var(--gy); }
-.rb-path-when { font-size: var(--fs-xs); color: var(--c2); margin-bottom: var(--sp-4); }
-.rb-path-sum { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.6; }
-
-.rb-group { margin-bottom: var(--sp-16); }
-.rb-plain-list { list-style: none; }
-.rb-plain-list li { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; padding: var(--sp-8) 0; border-bottom: 1px solid var(--gy6); }
-.rb-plain-list li:last-child { border-bottom: none; }
-
-.rb-table { width: 100%; border-collapse: collapse; margin-bottom: var(--sp-12); }
-.rb-table th {
-  text-align: left; font-size: var(--fs-xs); font-weight: 700; color: var(--gy3);
-  padding: var(--sp-4) var(--sp-8) var(--sp-8) 0; border-bottom: 1px solid var(--gy5);
-}
-.rb-table td {
-  font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5;
-  padding: var(--sp-8) var(--sp-8) var(--sp-8) 0; border-bottom: 1px solid var(--gy6); vertical-align: top;
-}
-.rb-table td:last-child, .rb-table th:last-child { padding-right: 0; }
-.rb-td-age { white-space: nowrap; }
-
-/* ── The rule LOOKUP (2026-10-25) ─────────────────────────────────────── */
-/* Six columns of mostly short phrases, so the cells are tightened and the
-   two widest ("measured from", "if it is shorter") are allowed to wrap. */
-.rb-lookup td, .rb-lookup th { padding-right: var(--sp-12); }
-.rb-lookup td { font-size: var(--fs-xs); }
-.rb-lookup td strong { font-size: var(--fs-sm); }
-/* The sub-rows carry the paediatric grid and the source sentence. They are
-   part of the row above, so they lose the divider that would cut them off. */
-.rb-subrow > td { border-bottom: 1px solid var(--gy5); padding-top: 0; }
-.rb-inner { margin: var(--sp-4) 0 var(--sp-8); }
-.rb-inner td, .rb-inner th { font-size: var(--fs-xs); padding-top: var(--sp-4); padding-bottom: var(--sp-4); }
-.rb-why {
-  display: block; margin-top: var(--sp-8); background: none; border: none; padding: 0;
-  cursor: pointer; font-family: inherit; text-align: left;
-  font-size: var(--fs-xs); font-weight: 600; color: var(--c2); text-decoration: underline;
-}
-.rb-source {
-  font-size: var(--fs-xs); color: var(--gy2); line-height: 1.6;
-  background: var(--gy7, #f6f7f9); border-left: 3px solid var(--gy5);
-  padding: var(--sp-8) var(--sp-12); margin: 0 0 var(--sp-8);
+/* The risk matrix: merged cells give one answer to several groups */
+.rb-matrix { width: 100%; border-collapse: separate; border-spacing: var(--sp-4); font-size: var(--fs-base); table-layout: fixed; min-width: 760px; }
+.rb-matrix thead th { font-size: var(--fs-sm); text-align: left; padding: 10px; vertical-align: top; background: var(--gy6); border-radius: var(--radp); }
+.rb-matrix td, .rb-matrix-row { padding: 10px; border-radius: var(--radp); vertical-align: top; line-height: 1.4; }
+.rb-matrix-row { background: var(--wh); font-weight: 600; font-size: var(--fs-sm); text-align: left; border: 1px solid var(--gy6); }
+.rb-matrix-sec td { padding: var(--sp-16) var(--sp-4) 2px; font-weight: 700; font-size: var(--fs-md); color: var(--c); }
+.rb-matrix-list { font-size: var(--fs-sm); color: var(--gy2); }
+.rb-matrix-list ul { padding-left: var(--sp-16); display: flex; flex-direction: column; gap: 3px; }
+.rb-tone-yes { background: var(--glt); color: var(--g); }
+.rb-tone-no { background: var(--bg); color: var(--gy2); }
+.rb-tone-alt { background: var(--alt); color: var(--hsct); }
+.rb-tone-na { background: var(--wh); color: var(--gy3); border: 1px dashed var(--gy5); }
+.rb-rank { list-style: none; counter-reset: rbr; }
+.rb-rank li { counter-increment: rbr; display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: var(--sp-12); padding: var(--sp-12) 0; border-top: 1px solid var(--gy6); }
+.rb-rank li::before {
+  content: counter(rbr); grid-row: span 2; width: 28px; height: 28px; border-radius: var(--radp);
+  background: var(--clt); border: 1px solid var(--cmd); color: var(--c); font-weight: 700; font-size: var(--fs-base);
+  display: flex; align-items: center; justify-content: center;
 }
 
-.rb-legend { margin: 0 0 var(--sp-16); font-size: var(--fs-xs); line-height: 1.55; }
-.rb-legend dt { font-weight: 700; color: var(--gy2); margin-top: var(--sp-8); }
-.rb-legend dd { margin: 0; color: var(--gy3); }
-.rb-flag {
-  display: inline-block; margin-left: var(--sp-4); padding: 1px var(--sp-4);
-  border-radius: 3px; background: var(--gy6); color: var(--gy3);
-  font-size: var(--fs-xs); font-weight: 600; white-space: nowrap;
+/* Series patterns */
+.rb-pattern { display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: var(--sp-16); padding: 14px 0; border-top: 1px solid var(--gy6); }
+.rb-pattern-name { font-size: var(--fs-base); padding-top: var(--sp-8); }
+.rb-pattern-doses { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-8); }
+.rb-pattern-note { grid-column: 2; font-size: var(--fs-sm); color: var(--gy2); line-height: 1.45; padding-top: 6px; }
+
+/* Dose labels */
+.rb-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-12); }
+.rb-legend-item { border: 1px solid var(--gy6); border-radius: var(--radp); padding: var(--sp-12); display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--sp-12); align-items: start; }
+.rb-invalid-box { border: 1px solid var(--rmd); border-radius: var(--radp); padding: 14px var(--sp-16); display: flex; flex-direction: column; gap: 6px; }
+.rb-fact { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; font-size: var(--fs-base); line-height: 1.45; padding: var(--sp-8) 0; border-top: 1px solid var(--bg); }
+
+/* "Source" — the app's own citations for the row's worked patient */
+.rb-src { display: inline; }
+.rb-src-btn {
+  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit;
+  font-size: var(--fs-xs); font-weight: 600; color: var(--c2); text-decoration: underline; text-underline-offset: 2px;
 }
+.rb-src-panel {
+  display: flex; flex-direction: column; gap: 6px; margin-top: 6px; text-align: left;
+  font-size: var(--fs-xs); color: var(--gy2); line-height: 1.5; font-weight: 400;
+  background: var(--bg); border-left: 3px solid var(--gy5); padding: var(--sp-8) var(--sp-12);
+}
+.rb-src-quote { font-style: italic; }
+.rb-src-doc { display: block; font-style: normal; color: var(--c2); }
+.rb-src-who { color: var(--gy3); }
 
-.rb-foot { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.6; margin-top: var(--sp-24); }
+/* Sources */
+.rb-src-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-24); }
+.rb-src-col { display: flex; flex-direction: column; gap: var(--sp-12); }
+.rb-doc { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-base); line-height: 1.4; }
+.rb-doc a { color: var(--c); }
 
-@media (max-width: 560px) {
-  .rb-top { flex-direction: column; }
-  .rb-close { margin-left: 0; }
-  .rb-table, .rb-table tbody, .rb-table tr, .rb-table td { display: block; width: 100%; }
-  .rb-table thead { display: none; }
-  .rb-table tr { border-bottom: 1px solid var(--gy5); padding: var(--sp-8) 0; }
-  .rb-table td { border-bottom: none; padding: 2px 0; }
-  /* Without this the lookup's six values stack unlabelled, because `thead`
-     is hidden above. Each cell prints its own column name instead. */
-  .rb-lookup td[data-label]::before {
-    content: attr(data-label) ': ';
-    font-weight: 700; color: var(--gy3);
-  }
-  /* The sub-rows are full-width panels, not columns, so they take no label
-     and keep their own padding. */
-  .rb-subrow > td::before { content: none; }
-  .rb-subrow > td { padding: var(--sp-4) 0 var(--sp-8); }
+.rb-foot { font-size: var(--fs-xs); color: var(--gy3); line-height: 1.6; }
+
+@media (max-width: 720px) {
+  .rb-card { padding: var(--sp-16); }
+  .rb-timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rb-lanes-head { display: none; }
+  .rb-lanes-row { grid-template-columns: 1fr; border-top: 1px solid var(--gy5); padding-top: var(--sp-8); }
+  .rb-lane-name { border-top: none; padding: var(--sp-4) 0; }
+  .rb-lane-cell { border-top: none; padding: var(--sp-4) 0; }
+  .rb-lane-cell[data-label]::before { content: attr(data-label); font-size: var(--fs-xs); font-weight: 600; color: var(--gy3); }
+  .rb-agebar { flex-direction: column; }
+  .rb-agebar-0 { border-radius: var(--radp) var(--radp) 0 0; }
+  .rb-agebar-1 { border-left: 1px solid var(--gmd); border-top: none; border-radius: 0 0 var(--radp) var(--radp); }
+  .rb-path { grid-template-columns: auto; justify-items: start; gap: var(--sp-4); }
+  .rb-indent { padding-left: 0; }
+  .rb-pattern { grid-template-columns: 1fr; row-gap: var(--sp-8); }
+  .rb-pattern-note { grid-column: 1; }
+  .rb-legend { grid-template-columns: 1fr; }
+  .rb-legend-item { grid-template-columns: 1fr; }
+  .rb-src-grid { grid-template-columns: 1fr; }
+  .rb-fact { grid-template-columns: 1fr; gap: 2px; }
 }
 .app-main-rulebook { flex: 1; width: 100%; }
+
+/* ── The citation pop-up on result cards (2026-11-01) ─────────────
+   Opens at once on hover, focus or tap; replaces the native title tooltip,
+   which lagged and never appeared on touch screens. */
+.cite-wrap { position: relative; display: inline; }
+.cite-pop {
+  position: fixed; left: 0; top: 0; z-index: 60;
+  width: max-content; max-width: min(380px, 80vw);
+  display: flex; flex-direction: column; gap: 6px; text-align: left;
+  background: var(--wh); border: 1px solid var(--cmd); border-radius: var(--radp);
+  box-shadow: var(--sh2); padding: var(--sp-12) 14px;
+  font-size: var(--fs-sm); font-weight: 400; line-height: 1.45; color: var(--gy);
+  white-space: normal;
+}
+.cite-pop-head { font-weight: 700; }
+.cite-pop-quote { font-style: italic; color: var(--gy2); }
+.cite-pop-link { color: var(--c2); text-decoration: underline; }
+
 
 /* ── "How this was worked out" — the per-patient route (C14, 2026-10-25) ── */
 .howpath { background: var(--wh); border-radius: var(--rad); box-shadow: var(--sh); padding: var(--sp-12) var(--sp-16); margin-bottom: var(--sp-16); }

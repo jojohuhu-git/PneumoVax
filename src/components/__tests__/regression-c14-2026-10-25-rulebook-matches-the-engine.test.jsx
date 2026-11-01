@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-// C14 (2026-10-25) — the "How recommendations are made" page cannot quietly
-// stop describing the app.
+// C14 (2026-10-25), rebuilt 2026-11-01 for the redesigned page — "How
+// PneumoVax decides" cannot quietly stop describing the app.
 //
 // WHY THIS GUARD EXISTS. The owner asked for a map of the rules a clinician
 // could follow, like PediVax's Rulebook screen. PediVax generates its rulebook
@@ -8,31 +8,39 @@
 // code, so part of this page is sentences somebody typed — and a typed
 // sentence about a rule is exactly the failure this repo has been bitten by
 // before: the post-transplant schedule disagreed with its own documentation
-// for 32 days and nothing in the suite could see it, because no test compared
-// a document's prose to the code.
+// for 32 days and nothing in the suite could see it.
 //
-// So the page is built under one rule, and this file enforces it:
+// The 2026-11-01 redesign (her design canvas) has far more sentences than the
+// first page, so it is held by two rules instead of one:
 //
-//   EVERY NUMBER ON THE PAGE COMES FROM A CONSTANT THE ENGINE READS, and
-//   every list on it is the engine's own list, entry for entry.
-//
-// The strongest assertion here is the one that reads rulebook.js's source and
-// fails if any WRITTEN sentence contains a number that is not one of the three
-// schedule constants. Without it, someone could "update" a sentence to say 65
-// while ROUTINE_ADULT_MIN_M still says 50 and every other test would pass.
+//   1. NO NUMBER IS TYPED in rulebook.js's page text. Every age and interval
+//      is interpolated from a constant the engine reads. The guard below reads
+//      the SOURCE and fails on a typed one — "update" a sentence to 65 while
+//      the engine says 50 and this goes red.
+//   2. EVERY CLAIM CARRIES A WORKED PATIENT, and every worked patient is run
+//      through recommend() here. A sentence that stops being true of the app
+//      fails its patient.
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import Rulebook from '../Rulebook.jsx';
-import { BOUNDARIES, PATHWAYS, PRODUCTS, RISK_GROUPS, INTERVAL_TABLE, INTERVAL_GROUPS, SOURCE_GROUPS, monthsInWords } from '../../data/rulebook.js';
+import RecCard from '../RecCard.jsx';
+import { doseChipLabel } from '../doseChipLabel.js';
+import {
+  BOUNDARIES, PRODUCTS, RISK_GROUPS, SOURCE_GROUPS, monthsInWords, WORKED_PATIENTS,
+  CHILD_LANES, CHILD_NOTES, ADULT_HISTORY, ADULT_OPTIONS, RISK_MATRIX, RISK_RANKING, RISK_COLUMNS,
+  SERIES_PATTERNS, CHIP_LEGEND, PCV_AND_PPSV23, INVALID_ACTIONS, SPACING_RULE_IDS, ROUTINE_INFANT,
+  PCV_AFTER_PCV, TRANSPLANT_STOP, VACCINE_ROWS, sourcesFor,
+} from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
 import { DOSE_INTERVAL_RULES } from '../../logic/doseIntervalRules.js';
 import { ALL_PRODUCTS } from '../../data/brands.js';
 import { RISK_FACTORS } from '../../data/riskFactors.js';
+import { REFS } from '../../data/refs.js';
 import { recommend } from '../../logic/recommend.js';
 
 const SRC = dirname(dirname(dirname(fileURLToPath(import.meta.url))));   // src/
@@ -40,145 +48,152 @@ const rulebookSrc = readFileSync(join(SRC, 'data', 'rulebook.js'), 'utf8');
 const componentSrc = readFileSync(join(SRC, 'components', 'Rulebook.jsx'), 'utf8');
 const engineSrc = readFileSync(join(SRC, 'logic', 'recommend.js'), 'utf8');
 
-describe('C14 — the rulebook page states the engine\'s own numbers', () => {
-  it('shows exactly the three schedule constants, and gets them from the constants file', () => {
-    expect(BOUNDARIES.map((b) => b.months).sort((a, b) => a - b))
-      .toEqual([PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M].sort((a, b) => a - b));
-    // and the source imports them rather than typing them
-    expect(rulebookSrc).toContain("from '../logic/scheduleConstants.js'");
+/** What the app says for a worked patient, in the shape `expect` describes. */
+function check(key, e) {
+  const out = recommend(e.input);
+  const x = e.expect;
+  const recs = out.recs ?? [];
+  const labels = recs.map((r) => r.doseLabel ?? '');
+  const notes = recs.map((r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`));
+  const fails = [];
+  for (const re of x.cards ?? []) if (!labels.some((l) => re.test(l))) fails.push(`no card ${re}`);
+  for (const re of x.noCards ?? []) if (labels.some((l) => re.test(l))) fails.push(`unexpected card ${re}`);
+  for (const re of x.note ?? []) if (!notes.some((l) => re.test(l))) fails.push(`no note ${re}`);
+  if (x.status && !recs.some((r) => r.status === x.status)) fails.push(`no ${x.status} card`);
+  if (x.due) {
+    const d = recs[0]?.dueToday ? 'today' : recs[0]?.earliestNextDate;
+    if (d !== x.due) fails.push(`due ${d}, page says ${x.due}`);
+  }
+  if (x.excluded && !out.excluded) fails.push('not stopped');
+  if (x.chip) {
+    const [stream, i, want] = x.chip;
+    const total = recs.find((r) => r.vaccine === (stream === 'pcv' ? 'PCV' : 'PPSV23'))?.seriesTotal ?? null;
+    const got = doseChipLabel(out.perDose?.[stream]?.[i], total);
+    if (got !== want) fails.push(`chip reads "${got}", page says "${want}"`);
+  }
+  return fails.map((f) => `${key} (${e.who}): ${f}`);
+}
+
+describe('C14 — every claim on the page is true of the app, patient by patient', () => {
+  it('every worked patient gets the answer the page describes', () => {
+    const fails = Object.entries(WORKED_PATIENTS).flatMap(([k, e]) => check(k, e));
+    expect(fails).toEqual([]);
+    expect(Object.keys(WORKED_PATIENTS).length).toBeGreaterThan(40);
   });
 
-  it('no written sentence in rulebook.js contains a number that is not one of those constants', () => {
-    // Pull every string literal out of the data file and look for digits in it.
-    // Allowed: the three constants, and the words built from them by
-    // monthsInWords (which this test computes rather than trusting).
-    const allowed = new Set([
-      ...[PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M].map(String),
-      ...[PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M].map((m) => String(m / 12)),
-      '24',   // the infant/child line, asserted against the engine below
-      '2', '5',   // "Children 2 up to...", "caught up to age 5" - both asserted below
-      '19',   // ADULT_SCHED_MIN_M in years, spelled out in a pathway name
-    ]);
-    const offenders = [];
-    // Only the sentence-bearing fields: skip code, comments and imports.
-    for (const m of rulebookSrc.matchAll(/(?:whenWritten|writtenSummary|means|name|engineFn):\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)) {
-      // A product's name carries digits that are not an age: PCV7, PCV13,
-      // PCV15, PCV20, PCV21, PPSV23. Take the names out before looking.
-      const text = m[2].replace(/\bP?[CP]C?S?V-?\d+\b/g, 'the vaccine');
-      for (const n of text.matchAll(/\d+/g)) {
-        if (!allowed.has(n[0])) offenders.push(`"${text.slice(0, 70)}..." contains ${n[0]}`);
+  it('every written row carries at least one worked patient', () => {
+    const rows = [
+      ...CHILD_LANES, ...CHILD_NOTES, ...ADULT_HISTORY, ADULT_OPTIONS, TRANSPLANT_STOP,
+      ...RISK_MATRIX.flatMap((s) => s.rows.flatMap((r) => r.cells)), ...RISK_RANKING.steps,
+      ...SERIES_PATTERNS, ...CHIP_LEGEND, ...PCV_AND_PPSV23, ...INVALID_ACTIONS.rows,
+    ];
+    const bare = rows.filter((r) => !r.ex?.length).map((r) => r.text ?? r.history ?? r.name ?? r.doses ?? r.dose);
+    expect(bare).toEqual([]);
+  });
+
+  it('each dose label in the key is the label its worked patient\'s dose really shows', () => {
+    for (const c of CHIP_LEGEND) {
+      expect(c.ex[0].expect.chip?.[2], `"${c.chip}" has no chip check`).toBe(c.chip);
+    }
+  });
+
+  it('the risk matrix covers all four columns in every row', () => {
+    for (const s of RISK_MATRIX) {
+      for (const r of s.rows) {
+        // A cell spanning two rows (rowSpan) fills its column in the next row.
+        const spanned = s.rows.indexOf(r) > 0
+          ? s.rows[s.rows.indexOf(r) - 1].cells.filter((c) => (c.rows ?? 1) > 1).reduce((n, c) => n + c.span, 0)
+          : 0;
+        expect(r.cells.reduce((n, c) => n + c.span, 0) + spanned, r.label).toBe(RISK_COLUMNS.length);
       }
+    }
+  });
+});
+
+describe('C14 — no age or interval on the page is typed by hand', () => {
+  it('rulebook.js\'s page text holds no typed number', () => {
+    // The page block only, without the worked patients (patient FACTS — dates,
+    // ages at a dose — checked by running them, not by this scan).
+    const page = rulebookSrc.slice(rulebookSrc.indexOf('THE PAGE'))
+      .replace(/const P = \{[\s\S]*?\nexport const WORKED_PATIENTS/, '')
+      .replace(/^\s*\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const offenders = [];
+    for (const m of page.matchAll(/(\w+):\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g)) {
+      const [, field, , raw] = m;
+      // A chip's words are asserted equal to doseChipLabel() above; an
+      // `example` is a patient's facts, run as a patient.
+      if (field === 'chip' || field === 'example') continue;
+      const text = raw
+        .replace(/\$\{[^}]*\}/g, ' ')                              // interpolated: from a constant
+        .replace(/\bP?[CP]C?S?V-?\d+\b/g, 'the vaccine')           // product names: PCV13, PPSV23
+        .replace(/\b[Dd]ose \d+( → \d+| of \d+)?/g, 'a dose')      // dose numbers, not ages
+        .replace(/\b[Ss]tep \d\b/g, 'a step')
+        .replace(/\b\d+(st|nd|rd|th)\b/g, 'nth')
+        .replace(/\b\d+( or \d+)? (catch-up )?(the vaccine )?(PCV )?doses?\b/g, 'some doses')
+        .replace(/\b1 the vaccine or the vaccine dose\b/g, 'one dose');
+      for (const n of text.matchAll(/\d+/g)) offenders.push(`${field}: "${raw.slice(0, 70)}" contains ${n[0]}`);
     }
     expect(offenders).toEqual([]);
   });
 
+  it('the ages it prints are the engine\'s own table, not a copy', () => {
+    expect(rulebookSrc).toContain("ENGINE_AGE_LINES as AGE } from '../logic/recommend.js'");
+    expect(engineSrc).toMatch(/export const ENGINE_AGE_LINES = Object\.freeze\(\{ \.\.\.M \}\)/);
+  });
+
+  it('the routine infant series is read out of CDC\'s own sentence', () => {
+    expect(ROUTINE_INFANT.quote).toBe(REFS.pedsRoutine4Dose.quote);
+    expect(ROUTINE_INFANT.ages).toHaveLength(ROUTINE_INFANT.total);
+  });
+
   it('the component itself hardcodes no ages — it only renders what the data gives it', () => {
-    // Any bare 2-3 digit number in the JSX would be an age typed by hand.
     const jsxText = componentSrc.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
     const numbers = [...jsxText.matchAll(/>[^<>{}]*?\b(\d{2,3})\b[^<>{}]*?</g)].map((m) => m[1]);
     expect(numbers).toEqual([]);
   });
+
+  it('keeps exactly the three schedule constants, imported rather than typed', () => {
+    expect(BOUNDARIES.map((b) => b.months).sort((a, b) => a - b))
+      .toEqual([PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M].sort((a, b) => a - b));
+    expect(rulebookSrc).toContain("from '../logic/scheduleConstants.js'");
+  });
 });
 
-describe('C14 — the boundaries the page claims are the ones the engine actually uses', () => {
-  it('the engine dispatches on the SAME constant the page prints for the adult line', () => {
-    // M.y18 is ADULT_SCHED_MIN_M despite its name; if someone renames or
-    // re-points it, this fails rather than the page quietly lying.
-    expect(engineSrc).toMatch(/y18:\s*ADULT_SCHED_MIN_M/);
-    expect(engineSrc).toMatch(/am\s*<\s*M\.y18/);
-    expect(engineSrc).toMatch(/am\s*<\s*M\.m24/);
-    expect(PATHWAYS.find((p) => p.id === 'adult').fromMonths).toBe(ADULT_SCHED_MIN_M);
-    expect(PATHWAYS.find((p) => p.id === 'child').toMonths).toBe(ADULT_SCHED_MIN_M);
-    expect(PATHWAYS.find((p) => p.id === 'infant').toMonths).toBe(24);
+describe('C14 — every list on the page is the engine\'s own list', () => {
+  it('every spacing rule the engine applies is on exactly one row of section 4', () => {
+    expect(SPACING_RULE_IDS.slice().sort()).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id).sort());
+    expect(new Set(SPACING_RULE_IDS).size).toBe(SPACING_RULE_IDS.length);
   });
 
-  it('a patient one month either side of the adult line really does change rulebook', () => {
-    const base = { riskIds: ['asplenia'], pcvDoses: [], ppsv23Doses: [], today: '2026-10-25' };
-    const child = recommend({ ...base, ageMonths: ADULT_SCHED_MIN_M - 1 });
-    const adult = recommend({ ...base, ageMonths: ADULT_SCHED_MIN_M });
-    const books = (r) => new Set((r.recs ?? []).flatMap((x) => (x.citations ?? []).map((c) => c.rulebook)));
-    expect(books(child).has('adult')).toBe(false);
-    expect(books(adult).has('child')).toBe(false);
+  it('the catch-up grid is probed out of the engine\'s own function', () => {
+    expect(PCV_AFTER_PCV.rows.map((r) => r.gap)).toEqual(['4 weeks', '8 weeks', '4 weeks', '8 weeks', '8 weeks', '4 weeks']);
+    expect(rulebookSrc).toContain('pcvRule.interval.daysFrom(anchor, ctx)');
   });
 
-  it('the transplant tick really does override everything, at every age the page claims', () => {
+  it('the vaccines table is ALL_PRODUCTS, and says which ones do not count', () => {
+    const keys = VACCINE_ROWS.flatMap((g) => g.rows.map((r) => r.key));
+    expect(keys.slice().sort()).toEqual(ALL_PRODUCTS.map((p) => p.key).sort());
+    for (const r of VACCINE_ROWS.flatMap((g) => g.rows)) {
+      expect(r.valid).toBe(ALL_PRODUCTS.find((p) => p.key === r.key).counts);
+    }
+    expect(PRODUCTS.map((p) => p.key)).toEqual(ALL_PRODUCTS.map((p) => p.key));
+  });
+
+  it('every risk condition is listed exactly once, and the transplant row is not', () => {
+    const listed = RISK_COLUMNS.flatMap((c) => c.conditions);
+    const expected = RISK_FACTORS.filter((r) => !r.exclude).map((r) => r.label);
+    expect(listed.slice().sort()).toEqual(expected.slice().sort());
+    expect(new Set(listed).size).toBe(listed.length);
+    expect(RISK_GROUPS.find((g) => g.group === 'exclude').conditions.map((c) => c.id)).toEqual(['hct_cart_bcell_exclude']);
+  });
+
+  it('the transplant tick really does override everything, at every age', () => {
     for (const ageMonths of [2, 24, 120, ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M, 900]) {
       const r = recommend({ ageMonths, riskIds: ['hct_cart_bcell_exclude', 'asplenia'], pcvDoses: [], ppsv23Doses: [], today: '2026-10-25' });
       expect(r.excluded).toBe(true);
       expect(r.recs).toEqual([]);
     }
-  });
-});
-
-describe('C14 — every list on the page is the engine\'s own list', () => {
-  it('the dose-spacing table is DOSE_INTERVAL_RULES, entry for entry', () => {
-    expect(INTERVAL_TABLE.map((r) => r.id)).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id));
-    for (const r of INTERVAL_TABLE) {
-      const real = DOSE_INTERVAL_RULES.find((x) => x.id === r.id);
-      expect(r.enforcement).toBe(real.enforcement);
-      expect(r.authority ?? null).toBe(real.authority ?? null);
-    }
-  });
-
-  it('regrouping the table loses no rule and duplicates none', () => {
-    // 2026-10-25: the flat list became a lookup grouped by patient. A regroup
-    // is exactly the kind of change that can silently drop a row, so the
-    // grouped view is checked back against the engine's own list as a SET.
-    const grouped = INTERVAL_GROUPS.flatMap((g) => g.rows.map((r) => r.id));
-    expect(grouped.slice().sort()).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id).sort());
-    expect(new Set(grouped).size).toBe(grouped.length);
-  });
-
-  it('every rule the engine can apply appears on the rendered page', () => {
-    render(<Rulebook onClose={() => {}} />);
-    // Section 4 is collapsed by default, so open it the way a reader would.
-    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
-    // ⚠ NOT by rule id any more. The ids used to print under every row and
-    // were removed on 2026-10-25 — the owner asked for a table to look a
-    // patient up in, and `CHILD-PCV-AFTER-PCV` is the most list-like thing
-    // that was on it. A row is now identified the way a reader identifies it:
-    // by the gap it states and what happens when it is missed.
-    for (const r of INTERVAL_TABLE) {
-      expect(screen.getAllByText(r.gap).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(`${r.ifShorter}.`).length).toBeGreaterThan(0);
-    }
-  });
-
-  it('shows no internal rule id to a clinician', () => {
-    render(<Rulebook onClose={() => {}} />);
-    fireEvent.click(screen.getByText(/Whether a dose already given/).closest('button'));
-    for (const r of DOSE_INTERVAL_RULES) {
-      expect(screen.queryAllByText(r.id).length).toBe(0);
-    }
-  });
-
-  it('carries each rule\'s own source sentence, so a reader need not open the document', () => {
-    // The owner's stated reason for the reorganisation: "It's confusing for me
-    // to go back to each reference document on my own." A row with no source
-    // sends her back to the document, so every row that HAS one in the engine
-    // must carry it here.
-    for (const real of DOSE_INTERVAL_RULES) {
-      const row = INTERVAL_TABLE.find((r) => r.id === real.id);
-      if (typeof real.source === 'string') expect(row.source).toBe(real.source);
-    }
-  });
-
-  it('the products table is ALL_PRODUCTS, and says which ones do not count', () => {
-    expect(PRODUCTS.map((p) => p.key)).toEqual(ALL_PRODUCTS.map((p) => p.key));
-    const pcv7 = PRODUCTS.find((p) => p.key === 'PCV7');
-    expect(pcv7.counts).toBe(false);
-    for (const p of PRODUCTS) {
-      expect(p.counts).toBe(ALL_PRODUCTS.find((x) => x.key === p.key).counts);
-    }
-  });
-
-  it('every risk condition is listed exactly once, and the transplant row is not filed under immunocompromising', () => {
-    const listed = RISK_GROUPS.flatMap((g) => g.conditions.map((c) => c.id));
-    expect(listed.slice().sort()).toEqual(RISK_FACTORS.map((r) => r.id).sort());
-    expect(new Set(listed).size).toBe(listed.length);
-    const ic = RISK_GROUPS.find((g) => g.group === 'IC').conditions.map((c) => c.id);
-    expect(ic).not.toContain('hct_cart_bcell_exclude');
-    expect(RISK_GROUPS.find((g) => g.group === 'exclude').conditions.map((c) => c.id)).toEqual(['hct_cart_bcell_exclude']);
   });
 
   it('every source listed has a real URL and a date it was read', () => {
@@ -191,11 +206,7 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
     }
   });
 
-  it('files every document under exactly one heading, and CDC before the rest', () => {
-    // 2026-10-25: the list was alphabetical by an internal key, which the
-    // owner read as random. Grouping can lose a document or file it twice, so
-    // both are checked, and the publisher order is asserted because the
-    // authority rule in CLAUDE.md is what it encodes.
+  it('files every document under one heading, CDC first, and "children and adults" holds only documents about both', () => {
     const names = SOURCE_GROUPS.flatMap((g) => g.docs.map((d) => d.name));
     expect(new Set(names).size).toBe(names.length);
     expect(SOURCE_GROUPS.map((g) => g.book)).toEqual(['child', 'adult', 'any']);
@@ -203,28 +214,102 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
       const rank = g.docs.map((d) => (d.publisher === 'CDC / ACIP' ? 0 : 1));
       expect(rank).toEqual(rank.slice().sort());
     }
+    // Owner, 2026-10-31: the PCV21 report is about adults.
+    const any = SOURCE_GROUPS.find((g) => g.book === 'any').docs.map((d) => d.name);
+    expect(any).not.toContain('PCV21 MMWR');
   });
 
-  it('says how heavily each document is leaned on', () => {
-    // "Sentences quoted" is the column that tells the owner which documents
-    // are load-bearing. If every count were zero the column would be a lie.
-    const all = SOURCE_GROUPS.flatMap((g) => g.docs);
-    expect(all.filter((d) => d.quotes > 0).length).toBeGreaterThan(5);
-    expect(Math.max(...all.map((d) => d.quotes))).toBeGreaterThan(10);
+  it('a row\'s Source is the sentences the app\'s own cards cite for its patient', () => {
+    const quotes = sourcesFor(ADULT_HISTORY[0].ex).map((q) => q.quote);
+    expect(quotes.length).toBeGreaterThan(0);
+    const out = recommend(ADULT_HISTORY[0].ex[0].input);
+    const cited = out.recs.flatMap((r) => r.noteCites ?? []).map((c) => c.quote).filter(Boolean);
+    expect(quotes.slice().sort()).toEqual([...new Set(cited)].sort());
   });
 });
 
-describe('C14 — the page says things a clinician can read', () => {
-  it('turns months into the words a clinician uses', () => {
-    expect(monthsInWords(228)).toBe('19 years');
-    expect(monthsInWords(600)).toBe('50 years');
-    expect(monthsInWords(216)).toBe('18 years');
-    expect(monthsInWords(18)).toBe('18 months');
+describe('C14 — the page renders, and reads as a clinician page', () => {
+  it('renders the five sections in order', () => {
+    render(<Rulebook />);
+    const heads = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    expect(heads).toEqual([
+      '1. Standard schedules', '2. Risk groups', '3. The vaccines and how they combine',
+      '4. Minimum intervals and the 4-day grace', '5. Sources',
+    ]);
+  });
+
+  it('opens a Source on request, with the document named', () => {
+    const { container } = render(<Rulebook />);
+    const btn = container.querySelector('.rb-src-btn');
+    fireEvent.click(btn);
+    const panel = container.querySelector('.rb-src-panel');
+    expect(panel.textContent).toMatch(/Checked on:/);
+  });
+
+  it('shows no internal rule id to a clinician', () => {
+    const { container } = render(<Rulebook />);
+    for (const r of DOSE_INTERVAL_RULES) expect(container.textContent).not.toContain(r.id);
+  });
+
+  it('never uses the words the owner retired', () => {
+    // Her rounds of 2026-10-31: "baby series", "ticked", "shot", "shortest
+    // gap", and the engineering-log phrasing of the first page.
+    const { container } = render(<Rulebook />);
+    const text = container.textContent;
+    for (const w of [/baby series/i, /\bticked\b/i, /\bshots?\b/i, /shortest gap/i, /PneumoRecs/, /Does not count \/ Counts with a note/i, /app's judgement/i]) {
+      expect(text).not.toMatch(w);
+    }
   });
 
   it('renders without a single decorative icon or emoji', () => {
-    const { container } = render(<Rulebook onClose={() => {}} />);
-    expect(container.textContent).not.toMatch(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
+    const { container } = render(<Rulebook />);
+    expect(container.textContent).not.toMatch(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/u);
     expect(container.querySelectorAll('svg').length).toBe(0);
+  });
+
+  it('turns months into the words a clinician uses', () => {
+    expect(monthsInWords(228)).toBe('19 years');
+    expect(monthsInWords(600)).toBe('50 years');
+    expect(monthsInWords(18)).toBe('18 months');
+  });
+});
+
+describe('the citation pop-up on a result card (2026-11-01)', () => {
+  const rec = {
+    vaccine: 'PCV', status: 'due', doseLabel: 'Dose 1', dueToday: true,
+    note: 'Give 1 dose [c].',
+    noteCites: [{ key: 'k', page: 'https://example.test/p', url: 'https://example.test/p#x', doc: 'CDC Adult Notes', quote: 'the quoted sentence' }],
+  };
+  const markerOf = (c) => c.querySelector('a.note-cite');
+
+  it('opens at once on hover, naming the document and the sentence, with the link', () => {
+    const { container } = render(<RecCard rec={rec} />);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    fireEvent.mouseEnter(markerOf(container).parentElement);
+    const tip = screen.getByRole('tooltip');
+    expect(tip.textContent).toContain('CDC Adult Notes');
+    expect(tip.textContent).toContain('the quoted sentence');
+    expect(within(tip).getByText('Open the document').getAttribute('href')).toBe('https://example.test/p#x');
+  });
+
+  it('closes on moving away, on Escape, and on a tap elsewhere', () => {
+    const { container } = render(<RecCard rec={rec} />);
+    const wrap = markerOf(container).parentElement;
+    fireEvent.mouseEnter(wrap);
+    fireEvent.mouseLeave(wrap);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    fireEvent.focus(markerOf(container));
+    expect(screen.getByRole('tooltip')).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    fireEvent.focus(markerOf(container));
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+
+  it('no longer carries the native tooltip that lagged', () => {
+    const { container } = render(<RecCard rec={rec} />);
+    expect(markerOf(container).hasAttribute('title')).toBe(false);
+    expect(markerOf(container).getAttribute('data-title')).toBe('CDC Adult Notes\n“the quoted sentence”');
   });
 });

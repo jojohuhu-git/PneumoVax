@@ -136,7 +136,7 @@ describe('P3-9 — RiskAgeNote explains the tick the engine disregards', () => {
     // [1] — the adult notes sentence that lists smoking as an adult factor.
     expect(cites[0].getAttribute('href')).toContain('adult-notes.html');
     expect(cites[0].getAttribute('href')).toContain('#:~:text=');
-    expect(cites[0].getAttribute('title')).toMatch(/cigarette smoking/i);
+    expect(cites[0].getAttribute('data-title')).toMatch(/cigarette smoking/i);
     // [2] — the child notes "Special situations" list, which omits it.
     expect(cites[1].getAttribute('href')).toContain('child-adolescent-notes.html');
     expect(cites[1].getAttribute('href')).toContain('#:~:text=');

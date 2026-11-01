@@ -314,7 +314,7 @@ describe('C3 — every cited document has a button to click', () => {
 
     // The explanation beside the dose cites immunize.org...
     const markerTitles = [...document.querySelectorAll('a.note-cite')]
-      .map((a) => a.getAttribute('title'));
+      .map((a) => a.getAttribute('data-title'));
     expect(markerTitles.some((t) => /immunize\.org PCV7 rule/.test(t ?? ''))).toBe(true);
 
     // ...and there is now a button naming that document, carrying the same

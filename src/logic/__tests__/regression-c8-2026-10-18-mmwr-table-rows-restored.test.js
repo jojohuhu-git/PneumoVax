@@ -210,7 +210,10 @@ describe('FINDING F — over the whole grid', () => {
       // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
       // counting conjugate and her card family changes with it. The invariant
       // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30);
+      // +10, 2026-11-01 (§K-THROWNOUTTIMING): ten 19-year-olds whose childhood
+      // PPSV23 after a PCV15 did not count now read "PCV20 or PCV21 in place of
+      // the PPSV23", which quotes mm7401a1's footnote * - and credits it.
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10);
     expect(stats.uncredited).toBe(0);
   });
 });

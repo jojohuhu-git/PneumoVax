@@ -94,9 +94,16 @@ describe('the toddler — the card never advises a PPSV23 the dose check refuses
     expect(optionB.earliestNextDate).toBe(addCalendarMonths('2026-09-15', 60));
   });
 
-  it('Option A PCV20 is still due today — a thrown-out PPSV23 holds off no conjugate (Eli, Rosa)', () => {
+  // ⚠ REVERSED 2026-11-01 (§K-THROWNOUTTIMING), and kept as the record of
+  // it. This asserted "due today" because a thrown-out PPSV23 held off no
+  // conjugate (Eli, Rosa). She has since ruled that it still sets the ADVISED
+  // date — 8 weeks after it, Nov 10 — while a PCV given sooner still counts
+  // (advise only, so Eli's PCV20 keeps counting). The card says both dates.
+  it('Option A PCV20 is advised 8 weeks after the thrown-out PPSV23, and may be given today', () => {
     const optionA = out.recs.find((r) => r.vaccine === 'PCV');
-    expect(optionA.dueToday).toBe(true);
+    expect(optionA.dueToday).toBe(false);
+    expect(optionA.earliestNextDate).toBe('2026-11-10');
+    expect(String(optionA.note.lead ?? optionA.note)).toContain('it can be given today if needed');
   });
 
   it('a PPSV23 given on the advised date counts; one given today does not', () => {

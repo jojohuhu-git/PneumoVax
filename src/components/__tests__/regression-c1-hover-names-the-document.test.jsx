@@ -109,7 +109,7 @@ describe('C1 — the hover text on a raised number names its document', () => {
 
     for (const a of links) {
       const n = a.textContent.trim();
-      const title = a.getAttribute('title') ?? '';
+      const title = a.getAttribute('data-title') ?? '';
       const expected = chipName.get(n);
       expect(expected, `${n} is a marker with no button of that number`).toBeTruthy();
       expect(title, `a ${n} hover text does not name its document`)
@@ -136,7 +136,7 @@ describe('C1 — the hover text on a raised number names its document', () => {
     // "immunize.org PCV7 rule", not the bare domain: three PneumoVax sources
     // live on immunize.org, so the short name is what distinguishes them — and
     // distinguishing them is the whole point of C1.
-    const title = a.getAttribute('title') ?? '';
+    const title = a.getAttribute('data-title') ?? '';
     expect(title).toMatch(/^immunize\.org PCV7 rule\n/);
     expect(title, 'the quote itself must survive unchanged')
       .toMatch(/doses of PCV7 should be ignored/);
