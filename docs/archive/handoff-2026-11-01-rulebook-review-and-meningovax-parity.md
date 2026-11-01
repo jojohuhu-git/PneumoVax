@@ -1,3 +1,5 @@
+> **SUPERSEDED** by `handoff-2026-11-01-grey-zone-fixes-pr116.md` (same day): PR #115 merged; the grey-zone audit and its 8 fixes are in PR #116. This file's two open owner decisions (CDC deep links, MeningoVax Ruling D) are carried forward there.
+
 # PneumoVax — Handoff after the CDC re-check, the owner's Rulebook review, and the MeningoVax comparison (2026-11-01)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`, a client-side pneumococcal decision-support app.
