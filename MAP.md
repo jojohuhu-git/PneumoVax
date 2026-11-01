@@ -12,8 +12,8 @@ folder — they go where the table at the bottom says.**
 | Folder / file | What it is |
 |---|---|
 | `src/` | The app's working parts. This is where the actual program lives. |
-| `src/components/` | The screens, cards, and buttons you see on screen. Two of them answer "why is it saying that?": `Rulebook.jsx` is the **How PneumoVax decides** page (the whole rulebook; the header link opens it in its own browser tab, so the patient being entered stays put), and `HowThisWasWorkedOut.jsx` is the short list on the results screen showing the route *this* patient took. |
-| `src/data/rulebook.js` | What the **How PneumoVax decides** page says. Every age and interval in it comes from the numbers the engine itself uses, and every sentence comes with an example patient that a test runs through the app, so the page cannot quietly stop matching what the app does. |
+| `src/components/` | The screens, cards, and buttons you see on screen. Two of them answer "why is it saying that?": `Rulebook.jsx` is the **Rulebook** page (the whole rulebook; the "Patient | Rulebook" switch in the header flips between it and the patient entry in the same tab, and the patient being entered stays put), and `HowThisWasWorkedOut.jsx` is the short list on the results screen showing the route *this* patient took. |
+| `src/data/rulebook.js` | What the **Rulebook** page says. Every age and interval in it comes from the numbers the engine itself uses, and every sentence comes with an example patient that a test runs through the app, so the page cannot quietly stop matching what the app does. |
 | `src/logic/` | The "brain" — `recommend.js` decides what's due; `validate.js` checks recorded doses; `doseIntervalRules.js` is the single list of "how long must there be between two doses" rules; `doseIdentity.js` decides whether a row of the history counts as a dose at all (an empty row you never typed in does not). |
 | `src/data/` | The facts the brain uses: brands, risk factors, schedules. |
 | `src/test-grid.js` | A list of about 16,000 made-up patients (every age, risk tick and vaccination history worth testing). Used only by the tests, never shipped to anyone using the app. |

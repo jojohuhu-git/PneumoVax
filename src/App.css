@@ -97,6 +97,9 @@ body {
    No visual change today (the background is painted by body), but leaving the
    column broken would be a trap for the next layout change. */
 .app-form { display: flex; flex-direction: column; flex: 1; }
+/* The `hidden` attribute loses to the display above unless restated: the
+   patient form showed under the Rulebook until 2026-11-01. */
+.app-form[hidden] { display: none; }
 
 /* ── Header ────────────────────────────────────────────────────── */
 .app-header {
@@ -551,7 +554,9 @@ body {
 
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .app-header-inner { gap: var(--sp-12); }
+  .app-header-inner { gap: var(--sp-8) var(--sp-12); flex-wrap: wrap; }
+  /* The Patient | Rulebook switch needs the room: the steps get a line of their own. */
+  .app-header-inner .stepper { order: 3; flex-basis: 100%; }
   .app-logo-sub { display: none; }
   .stepper-label { display: none; }
   .app-main { padding: var(--sp-16) var(--sp-12) 100px; }
@@ -652,12 +657,15 @@ body {
    use the app's own colours: PCV green, PPSV23 blue, complete green, no
    longer used grey dashed. The dose-label chips reuse the result card's own
    `.dose-val-chip` classes so the page shows exactly what the card shows. */
-.rb-link {
-  margin-left: auto; flex-shrink: 0; padding: var(--sp-4) 0;
-  font-size: var(--fs-sm); color: var(--c2);
-  text-decoration: underline; text-underline-offset: 3px;
+/* "Patient | Rulebook" — PediVax schedule builder's view switch. */
+.viewnav { margin-left: auto; flex-shrink: 0; display: flex; border: 1px solid var(--gy5); border-radius: var(--radp); overflow: hidden; }
+.viewnav button {
+  font: inherit; font-size: var(--fs-sm); font-weight: 500; border: none; cursor: pointer;
+  background: var(--wh); color: var(--gy2); padding: 7px 14px;
 }
-.rb-link:hover { color: var(--c); }
+.viewnav button + button { border-left: 1px solid var(--gy5); }
+.viewnav button.active { background: var(--clt); color: var(--c); font-weight: 600; }
+.viewnav button:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; }
 
 .rb { max-width: 1040px; margin: 0 auto; width: 100%; padding: var(--sp-24) var(--sp-16) 64px; display: flex; flex-direction: column; gap: var(--sp-24); }
 .rb-top { display: flex; flex-direction: column; gap: var(--sp-8); max-width: 780px; }
@@ -775,7 +783,6 @@ body {
 .rb-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-12); }
 .rb-legend-item { border: 1px solid var(--gy6); border-radius: var(--radp); padding: var(--sp-12); display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--sp-12); align-items: start; }
 .rb-invalid-box { border: 1px solid var(--rmd); border-radius: var(--radp); padding: 14px var(--sp-16); display: flex; flex-direction: column; gap: 6px; }
-.rb-fact { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; font-size: var(--fs-base); line-height: 1.45; padding: var(--sp-8) 0; border-top: 1px solid var(--bg); }
 
 /* "Source" — the app's own citations for the row's worked patient */
 .rb-src { display: inline; }
@@ -790,7 +797,6 @@ body {
 }
 .rb-src-quote { font-style: italic; }
 .rb-src-doc { display: block; font-style: normal; color: var(--c2); }
-.rb-src-who { color: var(--gy3); }
 
 /* Sources */
 .rb-src-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-24); }
@@ -818,7 +824,6 @@ body {
   .rb-legend { grid-template-columns: 1fr; }
   .rb-legend-item { grid-template-columns: 1fr; }
   .rb-src-grid { grid-template-columns: 1fr; }
-  .rb-fact { grid-template-columns: 1fr; gap: 2px; }
 }
 .app-main-rulebook { flex: 1; width: 100%; }
 
@@ -856,3 +861,16 @@ body {
 .howpath-step-name { display: block; font-size: var(--fs-xs); color: var(--gy3); }
 .howpath-step-took { display: block; font-size: var(--fs-sm); color: var(--gy); line-height: 1.45; }
 .howpath-step-why { display: block; font-size: var(--fs-xs); color: var(--gy2); line-height: 1.5; margin-top: 2px; }
+
+/* 2026-11-01 owner review: risk-table column titles, at-risk sub-rows, the
+   merged chip key, and the invalid-dose example. */
+.rb-matrix-head { vertical-align: top; }
+.rb-matrix-coltitle th { text-align: left; font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); text-transform: uppercase; letter-spacing: 0.04em; padding: var(--sp-12) 10px 0; }
+.rb-who { display: block; font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); }
+.rb-subrow td { border-top: 1px dashed var(--gy6); }
+.rb-chips { display: flex; flex-wrap: wrap; gap: var(--sp-4); min-width: 0; }
+.rb-chips .dose-val-chip { flex-shrink: 1; max-width: 100%; white-space: normal; }
+.rb-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-12); }
+.rb-step { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-4); border: 1px solid var(--gy6); border-radius: var(--radp); padding: var(--sp-12); background: var(--wh); }
+.rb-step-when { font-size: var(--fs-sm); font-weight: 600; color: var(--gy); }
+@media (max-width: 640px) { .rb-steps { grid-template-columns: minmax(0, 1fr); } }

@@ -136,7 +136,7 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
       'Children aged ≥2 years with any risk conditions should receive PPSV23 '
       + 'after completing all recommended PCV doses (either PCV13 or PCV15). '
       + 'These children should receive a single dose of PPSV23 at age ≥2 years '
-      + 'and ≥8 weeks after the most recent PCV dose.',
+      + 'and ≥8 weeks after the most recent PCV dose (Table 3).',
     );
     expect(e.url).toBe('https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm');
     expect(e.rulebook).toBe('child');

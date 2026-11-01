@@ -727,7 +727,8 @@ export const REFS = {
   //   Child's age now            | 24 through 71 months (any risk condition)
   //   Number of previous PCV13,  | Any incomplete schedule of 0, 1, or 2 PCV
   //     PCV15, or PCV20 doses    |   doses by age 24 months
-  //   Option A                   | 2 doses of PCV20 or PCV15,(double dagger)
+  //   Option A                   | 2 doses of PCV20 or PCV15,‡ (quoted with
+  //                              |   its mark since the 2026-11-01 re-read)
   //                              |   given at least 8 weeks apart
   //   Option B (if applicable)   | (blank)
   p2016AtRiskCatchup24to71Incomplete: {
@@ -738,9 +739,9 @@ export const REFS = {
     url: 'https://www.immunize.org/wp-content/uploads/catg.d/p2016.pdf',
     label: 'immunize.org p2016 Table 4 — an at-risk child 24-71 months with an incomplete schedule of 0, 1 or 2 PCV doses by age 24 months: 2 doses of PCV20 or PCV15, at least 8 weeks apart',
     short: 'immunize.org p2016',
-    quote: 'Any incomplete schedule of 0, 1, or 2 PCV doses by age 24 months — 2 doses of PCV20 or PCV15, given at least 8 weeks apart',
+    quote: 'Any incomplete schedule of 0, 1, or 2 PCV doses by age 24 months — 2 doses of PCV20 or PCV15,‡ given at least 8 weeks apart',
     pdfPage: 2,
-    lastVerified: '2026-10-23',
+    lastVerified: '2026-11-01',
   },
   // Row 2. Its prior-dose column is "3 doses of PCV, all before 12 months" —
   // before TWELVE, not before 24, which is FINDING G's whole point and why the
@@ -1985,7 +1986,8 @@ export const REFS = {
   // "Administration of PPSV23 After PCV13 or PCV15 Among Persons Aged 2-18
   // Years with Risk Conditions". VERBATIM AND CONTIGUOUS: the two sentences are
   // consecutive on the page and are quoted as printed, so the deep link can
-  // match. (A joined non-contiguous string exists nowhere on a page — that is
+  // match. "(Table 3)" is part of the printed sentence: until the 2026-11-01
+  // re-read the quote dropped it, so the deep link silently matched nothing. (A joined non-contiguous string exists nowhere on a page — that is
   // what made `pedsMinAge`'s deep link match nothing.)
   //
   // (!) `population` IS BOTH AT-RISK GROUPS, which is the sentence's own scope:
@@ -2001,8 +2003,8 @@ export const REFS = {
     url: 'https://www.cdc.gov/mmwr/volumes/71/wr/mm7137a3.htm',
     label: 'ACIP 2022 — MMWR mm7137a3, "Administration of PPSV23 After PCV13 or PCV15 Among Persons Aged 2–18 Years with Risk Conditions": a single dose of PPSV23 once the PCV series is complete',
     short: 'PCV15 Children MMWR',
-    quote: 'Children aged ≥2 years with any risk conditions should receive PPSV23 after completing all recommended PCV doses (either PCV13 or PCV15). These children should receive a single dose of PPSV23 at age ≥2 years and ≥8 weeks after the most recent PCV dose.',
-    lastVerified: '2026-10-23',
+    quote: 'Children aged ≥2 years with any risk conditions should receive PPSV23 after completing all recommended PCV doses (either PCV13 or PCV15). These children should receive a single dose of PPSV23 at age ≥2 years and ≥8 weeks after the most recent PCV dose (Table 3).',
+    lastVerified: '2026-11-01',
   },
 
   // immunize.org ----------------------------------------------------------
