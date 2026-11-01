@@ -86,8 +86,8 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     const d = pcv21Dose({ dob: '2008-10-16', doseDate: '2026-10-16', ageMonths: 216 });
     expect(doseChipLabel(d, 1)).toBe('Dose 1 of 1');
     expect(doseChipClass(d)).toBe('dose-val-chip dose-val-valid');
-    // Specifically NOT the two chips that mean "a repeat is owed".
-    expect(doseChipLabel(d, 1)).not.toMatch(/repeat|Invalid|Off-window/i);
+    // Specifically NOT a chip that means the dose does not count.
+    expect(doseChipLabel(d, 1)).not.toMatch(/repeat|Invalid|Off-window|Not counted/i);
   });
 
   it('a dose given at 18y 6m to a patient now 19y 6m still carries the note', () => {
