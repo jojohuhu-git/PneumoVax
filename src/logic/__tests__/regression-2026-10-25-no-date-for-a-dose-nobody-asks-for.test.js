@@ -225,7 +225,16 @@ describe('swept over the grid', () => {
     // 19"): the same family one year older — 19-year-olds whose PPSV23 at 9
     // was given on the day of a PCV and again five years later. 78 owed
     // nothing, 10 owed a conjugate (Leo at 19, promised Dec 2016).
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2350, kept: 1829 });
+    //
+    // RE-MEASURED 2026-10-31 (late) and KEPT FELL by 40: 1829 -> 1789,
+    // withdrawn unchanged. §C-P2-ONE ("Leah"): an at-risk child whose ONLY
+    // PPSV23 was thrown out for coming too soon after a PCV is now offered
+    // PCV20 only, and that chip's "can be given from <date>" — a PPSV23 the
+    // card no longer offers — becomes "It is not repeated." The grid family is
+    // 72 children (aged 6, 18 and 18y11m; PPSV23 on the day of, or the day
+    // after, a PCV): 40 had no other dated chip and left `kept`; 32 stay,
+    // because a thrown-out PCV dose on the same screen keeps its own date.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2350, kept: 1789 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {

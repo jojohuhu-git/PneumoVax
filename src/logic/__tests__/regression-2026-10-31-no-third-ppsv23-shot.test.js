@@ -124,11 +124,15 @@ describe('Noah — first PPSV23 thrown out for spacing, the repeat thrown out to
     expect(twin.recs[0].noteCites[0].key).toBe('pedsRiskPcv20orPpsv23');
   });
 
-  it('ONE thrown-out PPSV23 is untouched — the repeat is still offered', () => {
+  // REVERSED 2026-10-31 (late) by §C-P2-ONE, the owner's ruling on "Leah":
+  // a child's ONLY PPSV23, thrown out for coming too soon after a PCV, gets
+  // PCV20 only too. Noah's first shot was thrown out for exactly that, so
+  // without his repeat he is now Leah's case. This used to pin the pair.
+  it('ONE thrown-out PPSV23 (too soon after a PCV): PCV20 only — §C-P2-ONE', () => {
     const one = recommend({ ...NOAH, ppsv23Doses: d('PPSV23', ['2023-04-29']) });
-    expect(one.recs.map((r) => r.doseLabel)).toEqual([
-      'Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)',
-    ]);
+    expect(one.perDose.ppsv23[0].intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
+    expect(one.recs.map((r) => r.doseLabel)).toEqual([ONE_PCV20]);
+    expect(one.recs[0].note.detail).toBe('A PPSV23 is not offered: it would be a second PPSV23 shot.');
   });
 });
 
