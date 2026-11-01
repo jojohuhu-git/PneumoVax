@@ -192,7 +192,11 @@ describe('over the whole grid', () => {
       // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
       // counting conjugate and her card family changes with it. The invariant
       // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-      expect(stats.jobAid).toBe(6805 - 3189 + 253 + 213 - 5);
+      // +/-132, 2026-10-31 (§H-ANY65, owner ruling "Pat, 70"): a 70-year-old with a
+      // PPSV23 before 65 AND one at 65 now reads the shared-decision card, as CDC
+      // words his row, so its buttons (the job aid's and mm7401a1's at-65 rows)
+      // move with the card. Zero uncredited is unchanged.
+      expect(stats.jobAid).toBe(6805 - 3189 + 253 + 213 - 5 + 132);
   });
 
   it('and reaches zero uncredited — every remaining button has a number', () => {

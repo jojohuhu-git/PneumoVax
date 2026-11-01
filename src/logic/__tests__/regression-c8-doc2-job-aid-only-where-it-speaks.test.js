@@ -338,7 +338,11 @@ describe('swept over every patient the grid can build', () => {
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
       // -5, 2026-10-25 second ruling (the PPSV23-then-PCV floor): five cards
       // left the job aid altogether when their child's conjugate was set aside.
-      expect(adultCards).toBe(6805 - 3189 + 253 + 213 - 5);
+      // +/-132, 2026-10-31 (§H-ANY65, owner ruling "Pat, 70"): a 70-year-old with a
+      // PPSV23 before 65 AND one at 65 now reads the shared-decision card, as CDC
+      // words his row, so its buttons (the job aid's and mm7401a1's at-65 rows)
+      // move with the card. Zero uncredited is unchanged.
+      expect(adultCards).toBe(6805 - 3189 + 253 + 213 - 5 + 132);
     // 'Elsewhere' is every job-aid card that is NOT one of the two matched
     // statements, so Ruling F moves it twice: the total rose by 253, and
     // the MATCHED group rose by 363 — the 110 shared-decision cards that
@@ -349,6 +353,8 @@ describe('swept over every patient the grid can build', () => {
     // 2026-10-25 second ruling: the total fell by 5 and the MATCHED group in
     // this expression is a 50+ figure, which did not move at all — so the
     // whole -5 lands in 'elsewhere'. 4,077 - 3,168 = 909.
-    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 213 - 5) - (2589 + 363 + 33 + 183));
+    // +132, 2026-10-31 (§H-ANY65): Pat's 132 shared-decision cards carry the
+    // job aid's at-65 sentence, which is not one of the two matched statements.
+    expect(jobAidElsewhere).toBe((6805 - 3189 + 253 + 213 - 5 + 132) - (2589 + 363 + 33 + 183));
   });
 });

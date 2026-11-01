@@ -193,7 +193,11 @@ describe('FINDING F — over the whole grid', () => {
       // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
       expect(stats.ppsvOnly).toBe(1154 - 132 + 40);
     // -110: the shared-decision cards whose PCV20 now counts.
-    expect(stats.shared).toBe(440 - 110 + 66);  // +66, 2026-10-25 (see above)
+    // +/-132, 2026-10-31 (§H-ANY65, owner ruling "Pat, 70"): a 70-year-old with a
+    // PPSV23 before 65 AND one at 65 now reads the shared-decision card, as CDC
+    // words his row, so its buttons (the job aid's and mm7401a1's at-65 rows)
+    // move with the card. Zero uncredited is unchanged.
+    expect(stats.shared).toBe(440 - 110 + 66 + 132);  // +66, 2026-10-25 (see above)
   });
 
   it('mm7401a1 stays fully credited — every restored button has a number', () => {
