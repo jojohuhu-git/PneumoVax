@@ -1691,6 +1691,15 @@ Routine for ALL adults ≥50 regardless of risk.
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.
 
+### §I-NAMED — a PCV21 counted at 18 is called a PCV21 on the child's card (2026-11-01)
+
+P2-2 of the 2026-11-01 grey-zone audit. G27 — 18y5m, diabetes, PCV21 at 18y1m — read
+"PCV complete (includes PCV20)". The child "complete" cards now name the product on record,
+and a PCV21 card adds: *"CDC's child rows name PCV20; PCV21 is licensed from age 18, and this
+app counts one given at 18 as completing the series as a PCV20 would (owner decision
+2026-10-16)."* No new source; 0 grid patients (the grid cannot build this child); hand-built
+guard `regression-2026-11-01-p2-2-pcv21-at-18-is-named.test.js`.
+
 ### §I-REMEDY — A child's rejected PCV21 names PCV20, not a repeat (2026-10-26)
 
 From the owner's children's table: PCV21 under 18 is *"rejected correctly; wording says

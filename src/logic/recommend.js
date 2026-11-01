@@ -2033,7 +2033,15 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     // No "at least one earlier dose" clause: a series of PCV20/PCV21 alone is
     // `pcv20IsFirstConjugate`, whose branch runs first.
     const priorsAllBefore6 = pcv.priorBand.ge72 === 0 && pcv.priorBand.undated === 0;
-    const complete = 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed [c].';
+    // P2-2 (2026-11-01): name the completing product the record SHOWS. A
+    // PCV21 counts from 18 (§I, owner decision 2026-10-16) and reached this
+    // card titled "includes PCV20" (FINDING H). CDC's child rows are written
+    // for PCV20, so a PCV21 card says that rather than letting it be assumed.
+    const done = pcv.hasPCV20 ? 'PCV20' : 'PCV21';
+    const pcv21Bridge = done === 'PCV21'
+      ? " CDC's child rows name PCV20; PCV21 is licensed from age 18, and this app counts one given at 18 as completing the series as a PCV20 would (owner decision 2026-10-16)."
+      : '';
+    const complete = `At-risk child whose PCV series includes ${done} — no additional PCV or PPSV23 doses needed [c].`;
     // The conjugates on record BEFORE the completing dose -- the only ones
     // CDC's "PCV13 only, given at or after age 6 years" row is about. The
     // block-level `words`/`bridge` describe the whole series and would print the
@@ -2126,7 +2134,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // both chips on the card are credited.
       note = {
         lead: complete,
-        detail: 'This child had never received PCV13, PCV15 or PCV20 before that dose, which is the history CDC\'s row for an at-risk 6-18 year old describes [c]. CDC gives that dose whether or not a PPSV23 was given earlier.',
+        detail: `This child had never received PCV13, PCV15 or PCV20 before that dose, which is the history CDC's row for an at-risk 6-18 year old describes [c]. CDC gives that dose whether or not a PPSV23 was given earlier.${pcv21Bridge}`,
       };
       noteCites = [
         cite('pedsRiskPcv20FirstConjugate'),
@@ -2150,10 +2158,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // PCV20, the PCV20 is the five-year dose (an early one is the chip's
       // business); if not, the PCV20 alone met the row.
       note = {
-        lead: 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed.',
-        detail: `The conjugate doses before the PCV20 (${priorWords.phrase}) were all given before age 6. ${isIC
-          ? "CDC's row for an immunocompromised child with this history — PCV before age 6, no PCV20 — calls for one dose of PCV20 or PPSV23 — and, if PPSV23 is used, a PCV20 or a second PPSV23 at least 5 years later. The PCV20 on record completes that row [c]."
-          : "CDC's row for a child with this history — PCV before age 6, no PCV20 — calls for one dose of PCV20 or PPSV23, and the PCV20 has been given [c]."}`,
+        lead: `At-risk child whose PCV series includes ${done} — no additional PCV or PPSV23 doses needed.`,
+        detail: `The conjugate doses before the ${done} (${priorWords.phrase}) were all given before age 6. ${isIC
+          ? `CDC's row for an immunocompromised child with this history — PCV before age 6, no PCV20 — calls for one dose of PCV20 or PPSV23 — and, if PPSV23 is used, a PCV20 or a second PPSV23 at least 5 years later. The ${done} on record completes that row [c].`
+          : `CDC's row for a child with this history — PCV before age 6, no PCV20 — calls for one dose of PCV20 or PPSV23, and the ${done} has been given [c].`}${pcv21Bridge}`,
       };
       noteCites = [cite(before6NoPcv20RowKey(am, isIC))];
       cardRefs = collectRefs(riskIds, ['cdcChildPneumo'], 'child');
@@ -2180,15 +2188,15 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // CDC's Risk-based chip comes off: neither of its two prior-conjugate
       // branches reaches a conjugate first given at or after age 6.
       note = {
-        lead: 'At-risk child whose PCV series includes PCV20 — no additional PCV or PPSV23 doses needed.',
-        detail: `The conjugate on record before the PCV20 was ${priorWords.phrase}, given at or after age 6 years. CDC's row for that history calls for exactly one dose of PCV20, and that dose has been given [c].${priorBridge.sentence}`,
+        lead: `At-risk child whose PCV series includes ${done} — no additional PCV or PPSV23 doses needed.`,
+        detail: `The conjugate on record before the ${done} was ${priorWords.phrase}, given at or after age 6 years. CDC's row for that history calls for exactly one dose of PCV20, and ${done === 'PCV20' ? 'that dose' : 'a PCV21'} has been given [c].${priorBridge.sentence}${pcv21Bridge}`,
       };
       noteCites = [cite('pedsRiskPcv13At6'), ...priorBridge.cites];
       cardRefs = collectRefs(riskIds, ['cdcChildPneumo', ...priorBridge.refKeys], 'child');
     }
     out.push(rec({
       vaccine: 'PCV', status: 'complete',
-      doseLabel: 'PCV complete (includes PCV20)',
+      doseLabel: `PCV complete (includes ${done})`,
       note,
       noteCites,
       refs: cardRefs,
