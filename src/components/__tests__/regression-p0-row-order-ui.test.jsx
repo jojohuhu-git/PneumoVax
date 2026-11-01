@@ -93,11 +93,12 @@ describe('P0 — a dose verdict belongs to the dose it was computed for', () => 
     expect(pcv13Row).toBeTruthy();
 
     // Before the fix these were swapped: the PCV13 row carried
-    // 'Off-window - repeat', the PCV7 row carried 'Dose 1'.
-    expect(pcv7Row).toContain('Off-window - repeat');
+    // the PCV7 chip (then 'Off-window - repeat', now 'Not counted'), the
+    // PCV7 row carried 'Dose 1'.
+    expect(pcv7Row).toContain('Not counted');
     expect(pcv13Row).toContain('Dose 1');
     expect(pcv7Row).not.toContain('Dose 1');
-    expect(pcv13Row).not.toContain('Off-window - repeat');
+    expect(pcv13Row).not.toContain('Not counted');
   });
 
   it('the PCV7 explanation sits on the PCV7 row', () => {
@@ -134,7 +135,7 @@ describe('P0 — a dose verdict belongs to the dose it was computed for', () => 
     const rows = doseRowTexts();
     const pcv7Row = rows.find((t) => t.includes('PCV7'));
     const pcv13Row = rows.find((t) => t.includes('PCV13'));
-    expect(pcv7Row).toContain('Off-window - repeat');
+    expect(pcv7Row).toContain('Not counted');
     expect(pcv7Row).toContain('D1');
     expect(pcv13Row).toContain('Dose 1');
     expect(pcv13Row).toContain('D2');

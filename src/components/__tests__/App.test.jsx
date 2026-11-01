@@ -142,7 +142,7 @@ describe('App wizard', () => {
     const cards = screen.getAllByTestId('rec-card');
     expect(cards.map(c => c.querySelector('.rec-vaccine-name')?.textContent)).toEqual(['PPSV23']);
     expect(screen.getByText('PCV history:')).toBeTruthy();
-    expect(screen.getByText('Off-window - repeat')).toBeTruthy();
+    expect(screen.getByText('Not counted')).toBeTruthy();
     expect(screen.getByText(/PCV7 \(Prevnar 7\) is not counted/)).toBeTruthy();
   });
 

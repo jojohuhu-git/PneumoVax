@@ -31,12 +31,16 @@ export function doseChipLabel(result, seriesTotal) {
   if (!result) return null;
   const { status, effectiveDoseNum, extraDose, extraDoseUnverified } = result;
 
-  // S14-6 (owner decision 2026-10-11): PCV7 reads MeningoVax's own
-  // "Off-window - repeat" — high-risk patients are treated as PCV-naïve for
-  // these doses (validate.js), so a dose IS genuinely owed, same shape as
-  // MeningoVax's sense of the words. "Window" is a slightly loose fit for an
-  // obsolete product, but the owner accepted it as-is: no new vocabulary.
-  if (status === 'noncounting') return 'Off-window - repeat';
+  // PCV7 (the only 'noncounting' dose). OWNER DECISION 2026-10-31, REVERSING
+  // S14-6 of 2026-10-11, which had borrowed MeningoVax's "Off-window - repeat"
+  // to avoid new vocabulary. Reading the rules-page draft, she agreed it
+  // "should say not counted": "repeat" reads as "give this dose again", but
+  // PCV7 is simply set aside and the patient treated as PCV-naïve — the card,
+  // not the chip, says what is owed. No existing chip fits: "Invalid" is a
+  // dose given wrongly (PCV7 was not), and "Extra dose" means nothing is owed.
+  // MeningoVax keeps "Off-window - repeat" in its own sense — a dose that
+  // really is repeated.
+  if (status === 'noncounting') return 'Not counted';
   // S14-4: a dose given after the series was already complete by product
   // (validate.js, `completesSeries`). G6 (MeningoVax, 2026-09-16) — ASK,
   // don't assert, for an undated row: with no date the app cannot tell a

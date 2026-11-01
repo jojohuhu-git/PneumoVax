@@ -1859,11 +1859,13 @@ catch-up row**.
 ## §K — Cross-cutting rules
 
 - **PCV7 ignored** for everyone — not counted in the PCV13/15/20-based tables (`immPCV7`).
-  **UI wording (S14-6, owner decision 2026-10-11):** the chip reads MeningoVax's own
-  "Off-window - repeat" rather than "Recorded (does not count)" — high-risk patients are
-  treated as PCV-naïve for these doses, so a dose genuinely is owed, the same shape as
-  MeningoVax's meaning of the words. Internally `status` stays `'noncounting'`, distinct
-  from `'invalid'`: PCV7 was validly given, it just never counts.
+  **UI wording (owner decision 2026-10-31, reversing S14-6 of 2026-10-11):** the chip reads
+  **"Not counted"**. S14-6 had borrowed MeningoVax's "Off-window - repeat" to avoid new
+  vocabulary; reading the rules-page draft, the owner agreed it "should say not counted",
+  because "repeat" reads as "give this dose again" while PCV7 is only set aside (the patient
+  is treated as PCV-naïve and the card says what is owed). No existing chip fits — "Invalid"
+  is a dose given wrongly, "Extra dose" means nothing is owed. Internally `status` stays
+  `'noncounting'`, distinct from `'invalid'`: PCV7 was validly given, it just never counts.
 - **Unknown / undocumented history → treat as unvaccinated** (CDC).
 - **Multiple risk conditions:** apply all relevant pathways; most protective wins;
   **IC precedence over non-IC** — the IC catch-up rows win, the 8-week option is named, and

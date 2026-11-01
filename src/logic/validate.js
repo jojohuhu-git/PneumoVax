@@ -570,8 +570,9 @@ function noncounting(reasons = [], reasonCites) { return withCites({ status: 'no
 //
 // S14-3 (owner decision 2026-10-11): named `earlyAdvisory`, not `offWindow`.
 // "Off-window" is reserved for MeningoVax's sense of the word — a dose that
-// does NOT count and is owed a repeat (doseChipLabel.js, S14-6) — and this
-// dose is the opposite of that: it counts.
+// does NOT count and is owed a repeat — and this dose is the opposite of
+// that: it counts. (PneumoVax's PCV7 chip used the word until 2026-10-31 and
+// now reads "Not counted"; see doseChipLabel.js.)
 // `reasons` is a LIST since the owner's *"mention both gaps"* decision of
 // 2026-10-24: a dose can miss more than one advised interval, and each unmet
 // row contributes its own sentence. `intervalRuleId` still names the FIRST

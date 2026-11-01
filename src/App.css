@@ -498,7 +498,7 @@ body {
 }
 .dose-val-valid       { background: var(--glt); color: var(--g); border: 1px solid var(--gmd); }
 /* S14-4/S14-6 — a dose set aside from the count for an administrative reason,
-   not an error: PCV7 ("Off-window - repeat" — never counts, a dose IS owed)
+   not an error: PCV7 ("Not counted" — never counts, a dose IS owed)
    and an extra dose given after the series was already complete ("Extra
    dose..." — the opposite, nothing is owed, but it likewise isn't numbered
    against the series). Blue reads as information rather than a warning. */
