@@ -72,6 +72,9 @@ describe('p2016 Table 4 row 1 — the 2-dose at-risk catch-up', () => {
       'pedsRiskIncompleteCatchup',
       'p2016AtRiskCatchup24to71Incomplete',
       'p2016Pcv15NeedsFurtherDoses',
+      // P1-1 (2026-11-01): an immunocompromised child's card now also says the
+      // dose owed five years after the PPSV23, with its own source.
+      'pedsSecondPpsv5y',
     ]);
     // The row's quote carries both halves the card's sentence needs.
     const row = cites[1];
@@ -90,7 +93,8 @@ describe('p2016 Table 4 row 1 — the 2-dose at-risk catch-up', () => {
     expect(sl.lead.map((c) => c.key)).toEqual([
       'pedsRiskIncompleteCatchup', 'p2016AtRiskCatchup24to71Incomplete',
     ]);
-    expect(sl.detail.map((c) => c.key)).toEqual(['p2016Pcv15NeedsFurtherDoses']);
+    // P1-1 (2026-11-01): then the five-year sentence, which is about the PPSV23.
+    expect(sl.detail.map((c) => c.key)).toEqual(['p2016Pcv15NeedsFurtherDoses', 'pedsSecondPpsv5y']);
   });
 });
 
@@ -122,6 +126,9 @@ describe('p2016 Table 4 row 2 — the 1-dose at-risk catch-up, which no grid cas
       'pedsRiskIncompleteCatchup',
       'p2016AtRiskCatchup24to71ThreeBefore12',
       'p2016Pcv15NeedsFurtherDoses',
+      // P1-1 (2026-11-01): an immunocompromised child's card now also says the
+      // dose owed five years after the PPSV23, with its own source.
+      'pedsSecondPpsv5y',
     ]);
     expect(cites[1].quote).toContain('3 doses of PCV, all before 12 months');
     // The two rows must never be interchangeable: row 1's column would be a

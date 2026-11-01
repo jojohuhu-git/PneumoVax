@@ -1331,6 +1331,35 @@ two PPSV23 doses, so every patient here is hand-built. Guard:
 
 ---
 
+### §C-CATCHUP-AFTER-PPSV23 — what the 2–5 catch-up card says follows a PCV15 (owner, 2026-11-01)
+
+**P1-1 of the 2026-11-01 grey-zone audit; wording only, 0 verdicts moved.** The 24–71-month
+at-risk catch-up card ended every time with *"If PCV15 is used to complete, add PPSV23 ≥8
+weeks after the last PCV"* — even for a child whose PPSV23 had already COUNTED. G01 (4, no
+spleen, PPSV23 at 3, never a PCV) followed it and got a second PPSV23 15 months after the
+first, which the app then graded "shorter than the 5 years advised". And no immunocompromised
+child's card said a dose was owed five years on, which the app's next card asked for.
+
+**OWNER RULING**, quoting ACIP mm7137a3 (both sentences read live 2026-11-01, each once on
+the page): *"Children who have received PPSV23 but have not yet completed their recommended
+PCV doses should receive PCV ≥8 weeks after the PPSV23 dose. Therefore the PCV schedule is
+correct, but if PPSV23 is also used, it needs to be 5 years after the last PPSV23"*, and
+*"Children aged ≥2 years who have an immunocompromising condition should receive a second
+dose of PPSV23 ≥5 years after the first PPSV23 dose."*
+
+| Child | The card's PCV15 sentence | Cited to |
+|---|---|---|
+| a PPSV23 already counted, **IC** | no PPSV23 now; PCV20 or a second PPSV23 ≥5 years after that PPSV23 | `pedsIcPpsvWaitFiveYears` (what the next card cites) |
+| a PPSV23 already counted, **non-IC** | no PPSV23 follows — one has been given, ACIP gives a single dose | `pedsRiskSinglePpsv23AfterPcv` |
+| no counting PPSV23, **IC** | unchanged, **plus** PCV20 or a second PPSV23 ≥5 years after that PPSV23 | p2016 ‡ + `pedsSecondPpsv5y` |
+| no counting PPSV23, non-IC | unchanged | p2016 ‡ |
+
+Both catch-up rows (2 doses, and "3 doses, all before 12 months") take the same sentence.
+The PCV20-only swap for two PPSV23 shots that never counted (§C-P2-NOTHIRD) removes the
+five-year sentence and its source with the PCV15 sentence. Measured: 606 real grid patients'
+card text changed, 0 verdicts. Guard:
+`regression-2026-11-01-p1-1-catchup-card-ppsv23-already-given.test.js`.
+
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
 
 1. 24–71 mo, any risk, **incomplete (0–2 PCV by 24mo)** → **2 doses** PCV20 or PCV15 ≥8wk apart.

@@ -1207,6 +1207,11 @@ const PAIR_ROW_IS_IC = new Map([
 // immunocompromised child would still owe a dose five years on — so none.
 const CATCHUP_PCV15_SENTENCE_ROW1 = `If PCV15 is used, add PPSV23 ≥${PNEUMO_GAP_WORDS} later [c].`;
 const CATCHUP_PCV15_SENTENCE_ROW2 = `If PCV15 is used to complete, add PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV [c].`;
+// P1-1 (OWNER RULING 2026-11-01). An immunocompromised child's PPSV23 after a
+// PCV15 catch-up is not the end of her series: the app's next card asks for
+// PCV20 or a second PPSV23 five years on, so this card says so too. Appended to
+// the PCV15 sentence above, and removed with it by the Kai swap below.
+const CATCHUP_IC_FIVE_YEAR_SENTENCE = `For an immunocompromising condition, that PPSV23 is followed by one further dose — PCV20 or a second PPSV23 — ≥${LONG_GAP_WORDS} later [c].`;
 const NO_PRIOR_PCV_ROWS = new Set(['pedsIc6to18NoPcv', 'pedsRisk6to18NoPcv']);
 //
 // Ivy, no spleen: PPSV23 at 13 and 20 months, BOTH too young — her second is
@@ -1320,9 +1325,12 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
       brands: ['PCV20 (Prevnar 20)'],
       note: {
         lead: c.note.lead.replace('PCV20 or PCV15', 'PCV20'),
-        detail: c.note.detail.replace(CATCHUP_PCV15_SENTENCE_ROW1, why).replace(CATCHUP_PCV15_SENTENCE_ROW2, why),
+        detail: c.note.detail.replace(` ${CATCHUP_IC_FIVE_YEAR_SENTENCE}`, '')
+          .replace(CATCHUP_PCV15_SENTENCE_ROW1, why).replace(CATCHUP_PCV15_SENTENCE_ROW2, why),
       },
-      noteCites: [...c.noteCites, ...greyCites],
+      // P1-1: the five-year sentence went with the PCV15 it followed, so its
+      // source goes too — one source per [c].
+      noteCites: [...c.noteCites.filter((x) => x.key !== 'pedsSecondPpsv5y'), ...greyCites],
     })) };
   }
 
@@ -2389,6 +2397,34 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       && (anchorPcv == null || ppsv.holdDate > anchorPcv);
     const { dueToday, earliestNextDate } = dueState(anchorPneumoGiven, WK8, today);
     const doseNum = target - remaining + 1;
+    // P1-1 (OWNER RULING 2026-11-01): what follows a PCV15 depends on whether a
+    // PPSV23 has already COUNTED. Her words, from ACIP mm7137a3: "Children who
+    // have received PPSV23 but have not yet completed their recommended PCV
+    // doses should receive PCV ≥8 weeks after the PPSV23 dose. Therefore the
+    // PCV schedule is correct, but if PPSV23 is also used, it needs to be 5
+    // years after the last PPSV23." Each branch says what the app's own next
+    // card says for that child, and cites the source that card cites.
+    //
+    // No branch for TWO counting PPSV23 doses: under 72 months it cannot
+    // happen for a non-IC child (a second is an extra dose), and the IC child
+    // who has two is past this card (`icTwoPpsv23Done`).
+    const firstPpsvDate = ppsv.effective.find((x) => x.date)?.date;
+    const ppsvOn = firstPpsvDate ? ` (${fmtDate(firstPpsvDate)})` : '';
+    const pcv15Then = ppsv.count >= 1
+      ? (isIC
+        ? {
+          text: `If PCV15 is used, no PPSV23 follows it now: this child has already had a PPSV23${ppsvOn}. The further dose — PCV20 or a second PPSV23 — waits until ≥${LONG_GAP_WORDS} after that PPSV23 [c].`,
+          cites: [cite('pedsIcPpsvWaitFiveYears')],
+        }
+        : {
+          text: `If PCV15 is used, no PPSV23 follows it: this child has already had one${ppsvOn}, and ACIP gives a child without an immunocompromising condition a single PPSV23 [c].`,
+          cites: [cite('pedsRiskSinglePpsv23AfterPcv')],
+        })
+      : {
+        text: (target === 1 ? CATCHUP_PCV15_SENTENCE_ROW1 : CATCHUP_PCV15_SENTENCE_ROW2)
+          + (isIC ? ` ${CATCHUP_IC_FIVE_YEAR_SENTENCE}` : ''),
+        cites: [cite('p2016Pcv15NeedsFurtherDoses'), ...(isIC ? [cite('pedsSecondPpsv5y')] : [])],
+      };
     out.push(rec({
       vaccine: 'PCV', status: 'risk-based',
       doseLabel: target === 1 ? '1 dose PCV (at-risk catch-up)' : `PCV dose ${doseNum} of 2 (at-risk catch-up)`,
@@ -2414,7 +2450,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           // FINDING G: "all before 12 months", which is what p2016's row says.
           // It used to read "before 24 months" — a looser claim than the row,
           // and one that described 32 children the row is not about.
-          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. ${CATCHUP_PCV15_SENTENCE_ROW1}${ppsvHoldsRow1 ? ' The 8 weeks above is ACIP\'s, measured from the last PCV dose. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that this child and one on the neighbouring row with the same recent PPSV23 are not given different dates.' : ''}`,
+          detail: `This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. ${pcv15Then.text}${ppsvHoldsRow1 ? ' The 8 weeks above is ACIP\'s, measured from the last PCV dose. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that this child and one on the neighbouring row with the same recent PPSV23 are not given different dates.' : ''}`,
         }
         : {
           // Both halves of CDC's row, 2026-10-25. It states two intervals --
@@ -2422,14 +2458,14 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           // least 8 weeks apart" -- and this lead printed only the second,
           // while the card's date was computed from neither.
           lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal dose and ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
-          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. ${CATCHUP_PCV15_SENTENCE_ROW2}`,
+          detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. ${pcv15Then.text}`,
         },
       noteCites: [
         cite('pedsRiskIncompleteCatchup'),
         cite(target === 1
           ? 'p2016AtRiskCatchup24to71ThreeBefore12'
           : 'p2016AtRiskCatchup24to71Incomplete'),
-        cite('p2016Pcv15NeedsFurtherDoses'),
+        ...pcv15Then.cites,
       ],
       refs,
     }));
