@@ -92,11 +92,13 @@ const noteText = (rec) => (typeof rec.note === 'string'
   : [rec.note?.lead, rec.note?.detail].filter(Boolean).join(' '));
 
 const findByNote = (result, needle) =>
-  (result.recs ?? []).find((r) => noteText(r).includes(needle));
+  (result.recs ?? []).find((r) => [].concat(needle).some((n) => noteText(r).includes(n)));
 
 const SAYS = {
   complete20or21: 'A pneumococcal series that includes PCV20 or PCV21 is complete',
-  complete15plus: 'PCV15 followed by PPSV23 is a complete pneumococcal series',
+  // P1-3 (2026-11-01): the same "series complete" claim, in its two orders —
+  // a patient who had PPSV23 FIRST is now told so. One statement, two wordings.
+  complete15plus: ['PCV15 followed by PPSV23 is a complete pneumococcal series', 'When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete'],
   routineAt50: 'Routine pneumococcal vaccination begins at age 50',
 };
 
@@ -240,7 +242,7 @@ describe('swept over every patient the grid can build', () => {
       const text = noteText(rec);
       let matched = false;
       for (const [key, needle] of Object.entries(SAYS)) {
-        if (!text.includes(needle)) continue;
+        if (![].concat(needle).some((n) => text.includes(n))) continue;
         matched = true;
         const t = tally[key];
         t.total += 1;

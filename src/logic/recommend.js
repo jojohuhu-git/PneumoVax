@@ -293,6 +293,9 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     includesCompleting,
     hasUndatedCompleting,
     lastDate: lastDated?.date || null,
+    // P1-3 (2026-11-01): the earliest DATED PCV15, so the adult "complete"
+    // card can tell PPSV23-then-PCV15 from PCV15-then-PPSV23.
+    firstPcv15Date: pcvDoses.filter((d) => d.product === 'PCV15' && d.date).map((d) => d.date).sort()[0] ?? null,
     // Age in months at the dose `lastDate` names. Derived from `lastDated`
     // rather than counted in the loop above so that a key and a date can
     // never refer to different doses. null when undated.
@@ -1154,7 +1157,12 @@ function atNineteen(adultCard) {
   // test here was tried and found unreachable (a mutation deleting it moved
   // no test), so the guard's sweep holds the rule instead.
   const keys = (adultCard.noteCites ?? []).map((c) => c.key);
-  const hit = AT_NINETEEN_LINES.find(([key]) => keys.includes(key));
+  // P1-3 (2026-11-01): the PPSV23-then-PCV15 "Complete" card now cites
+  // `adultPpsvOnly1949` for "no additional PPSV23 doses are recommended". That
+  // patient is complete for life, so the row's "unrecorded product" line is
+  // not hers; only the unfinished card that row was chosen for earns it.
+  const hit = AT_NINETEEN_LINES.find(([key]) => keys.includes(key)
+    && !(key === 'adultPpsvOnly1949' && adultCard.status === 'complete'));
   if (!hit) return null;
   const why = 'states what the adult schedule gives this patient at 19, the next age at which anything changes';
   return { sentence: hit[1], cite: cite(hit[0], { aboutAnotherGroup: why }) };
@@ -3326,11 +3334,24 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   }
   // PCV15 + PPSV23 → complete.
   if (pcv.hasPCV15 && ppsvGiven) {
+    // P1-3 (2026-11-01): a patient whose every counting PPSV23 came BEFORE her
+    // PCV15, with no other conjugate, followed CDC's "Previously received only
+    // PPSV23" row — whose last sentence is "If PCV15 is used, no additional
+    // PPSV23 doses are recommended" — not the PCV15 -> PPSV23 row. 675 grid
+    // patients were told "PCV15 followed by PPSV23" under dates saying the
+    // opposite. Cite the row she followed (owner rule 2026-10-23). Undated
+    // doses cannot show an order, so they keep the old sentence.
+    const ppsvDates = ppsv.effective.map((x) => x.date);
+    const ppsvFirst = pcv.firstPcv15Date != null
+      && pcv.products.length === pcv.count && pcv.products.every((x) => x === 'PCV15')
+      && ppsvDates.every((x) => x && x < pcv.firstPcv15Date);
     return [rec({
       vaccine: 'PCV', status: 'complete',
       doseLabel: 'Complete (PCV15 + PPSV23)',
-      note: `PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c]${jobAidCompleteMarker}.`,
-      noteCites: [cite('adultPcv15ThenPpsv'), ...jobAidCompleteCites],
+      note: ppsvFirst
+        ? `PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete [c]${jobAidCompleteMarker}.`
+        : `PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c]${jobAidCompleteMarker}.`,
+      noteCites: [cite(!ppsvFirst ? 'adultPcv15ThenPpsv' : isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'), ...jobAidCompleteCites],
       refs: refsSeriesComplete,
     })];
   }

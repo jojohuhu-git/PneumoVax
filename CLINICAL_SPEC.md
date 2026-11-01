@@ -2698,6 +2698,30 @@ pin is now 400, was 188) and
 
 ---
 
+### §K-PPSVFIRST — an adult who had PPSV23 first is told so, with the row she followed (2026-11-01)
+
+**P1-3 of the 2026-11-01 grey-zone audit; wording and citation only, 0 verdicts moved.** G04
+— 30, diabetes, PPSV23 Oct 2024, PCV15 Oct 2025 — read *"PCV15 followed by PPSV23 is a
+complete pneumococcal series"* directly under dates showing the opposite order, cited to the
+PCV15 → PPSV23 interval sentence. The row she followed is CDC's *"Previously received only
+PPSV23: … If PCV15 is used, no additional PPSV23 doses are recommended"*, printed in both the
+19–49 and the 50+ lists (read live 2026-11-01). The `adultPpsvOnly` (50+) quote stopped one
+sentence short and now carries it, contiguous on the page.
+
+When every counting PPSV23 is dated before the first PCV15 and PCV15 is the only conjugate,
+the card says *"PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no
+additional PPSV23 doses are recommended — the series is complete"*, cited to `adultPpsvOnly1949`
+or `adultPpsvOnly` by age (the job aid stays at 50+). Undated doses, or a PCV13 alongside,
+keep the old sentence. The label "Complete (PCV15 + PPSV23)" is unchanged. Decided without
+asking (dose unchanged, owner rule 2026-10-18; cite the row followed, 2026-10-23).
+
+⚠ **`atNineteen()` reads the adult card's citation to pick a child's "at 19" line**, and
+`adultPpsvOnly1949` there means "a conjugate of unrecorded product". A complete card citing it
+is excluded, or 185 grid children (measured) whose adult card at 19 says "Complete" would have been told
+"the adult schedule gives 1 dose of PCV15, PCV20 or PCV21" — caught by the C13 guards.
+Measured: 642 real grid patients' sentences changed, plus 792 cards whose 50+ quote now
+shows the extra sentence. Guard: `regression-2026-11-01-p1-3-adult-ppsv23-then-pcv15-wording.test.js`.
+
 ### §K-CONJUGATE — One adult conjugate soon after another is ADVICE, not a floor (OWNER, 2026-10-24)
 
 **The decision.** The last two adult rows asserting that a conjugate given sooner than a
