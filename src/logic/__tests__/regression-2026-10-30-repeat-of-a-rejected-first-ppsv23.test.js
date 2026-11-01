@@ -75,9 +75,13 @@ describe('Noah — the repeat of his rejected first PPSV23 counts as his first',
     expect(allText(recs)).not.toContain('neither PCV20 nor PPSV23');
   });
 
-  it('without the repeat he is still owed his PPSV23 or PCV20 — unchanged', () => {
+  // CHANGED 2026-10-31 (late) by §C-P2-ONE, the owner's ruling on "Leah":
+  // with only the thrown-out shot on record he is owed PCV20 alone — a
+  // second polysaccharide shot is avoided and PCV20 completes the series.
+  // This used to pin "Option A PCV20 / Option B PPSV23".
+  it('without the repeat he is still owed a dose: PCV20 only — §C-P2-ONE', () => {
     const labels = recsOf(NOAH_NO_REPEAT).map((r) => r.doseLabel);
-    expect(labels).toEqual(['Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)']);
+    expect(labels).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
   });
 });
 

@@ -1233,13 +1233,19 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     return true;
   });
   const given = shots.length;
-  if (given < 2) return null;
+  // §C-P2-ONE (OWNER RULING 2026-10-31, on Leah): ONE shot is enough when it
+  // was thrown out for coming too soon after a PCV — "PCV20 only + note", on
+  // the Option A / Option B pair only (`if (oneTooSoon) return null` below).
+  const oneTooSoon = given === 1 && perDose[shots[0]].intervalRuleId === 'CHILD-PPSV23-AFTER-PCV';
+  if (given < 2 && !oneTooSoon) return null;
   const repeatAt = perDose.findIndex((d) => d.intervalRuleId === 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
   const i = repeatAt >= 0 ? repeatAt : shots[given - 1];
   const isGrey = Boolean(perDose[i].repeatOfUnderAgeDose);
   const repeatDate = ppsvAnalysis.doses[i].date;
-  const third = given === 2 ? 'a third PPSV23 shot' : `PPSV23 shot number ${given + 1}`;
-  const neither = `${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted`;
+  const third = given === 1 ? 'a second PPSV23 shot'
+    : given === 2 ? 'a third PPSV23 shot' : `PPSV23 shot number ${given + 1}`;
+  const neither = given === 1 ? '1 PPSV23 dose has been given and it did not count'
+    : `${given} PPSV23 doses have been given and ${given === 2 ? 'neither' : 'none'} counted`;
   const greyHead = (cites) => `Grey area: CDC says a dose given under the minimum age is repeated on or after that age${cites ? ' [c]' : ''}, and states no gap from the invalid dose for a vaccine that is not live${cites ? ' [c]' : ''}. ACIP does not address this case. This app spaces the repeat ${PNEUMO_GAP_WORDS} from the invalid dose, so the ${fmtDate(repeatDate)} dose is not counted.`;
   const greyCites = isGrey ? [cite('cdcGbpRepeatUnderMinAge'), cite('cdcGbpLiveVaccine28Days')] : [];
   const result = (tail) => ({
@@ -1253,21 +1259,34 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
 
   // Sam, Max, Noah: the Option A PCV20 / Option B PPSV23 pair.
   const optionB = recs.find((r) => r.vaccine === 'PPSV23' && r.doseLabel?.startsWith('Option B: 1 dose PPSV23'));
-  if (optionA && optionB && recs.length === 2 && PAIR_ROW_IS_IC.has(rowA)) {
+  // Leah's own card is the at/after-6 pair (`pedsRiskPcv13At6`), which the
+  // two-shot ruling never reached; it joins for her case only. The tail below
+  // is the grey chip's, which a one-shot case never shows (isGrey needs the
+  // repeat rule), so the row needs no IC entry.
+  const pairRow = PAIR_ROW_IS_IC.has(rowA) || (oneTooSoon && rowA === 'pedsRiskPcv13At6');
+  if (optionA && optionB && recs.length === 2 && pairRow) {
     const tail = PAIR_ROW_IS_IC.get(rowA)
       ? ` If it were counted, PCV20 would be due on or after ${fmtDate(addCalendarMonths(repeatDate, MO60))} and would complete the series.`
       : ' If it were counted, the series would already be complete.';
     const r = result(tail);
+    // A PCV13-worded row used for a PCV15 says so on the card (owner rulings
+    // 2026-10-18): Leah's Option A carried the bridge, so her PCV20 card does
+    // too. The before-6 rows never need one, so Sam's cards are unchanged.
+    const bridgeText = [BRIDGE_UNRECORDED, BRIDGE_RECORDED].find((t) => String(optionA.note).includes(t)) ?? '';
+    const bridgeCites = bridgeText ? optionA.noteCites.filter((c) => c.key === 'pedsPcv13Pcv15Interchangeable') : [];
     return { ...r, recs: [{
       ...optionA,
       doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`,
       note: {
         lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; that completes the series [c]. No further PPSV23: ${neither}.`,
-        detail: isGrey ? r.detailGrey.trim() : `A PPSV23 is not offered: it would be ${third}.`,
+        detail: (isGrey ? r.detailGrey.trim() : `A PPSV23 is not offered: it would be ${third}.`) + bridgeText,
       },
-      noteCites: [optionA.noteCites[0], cite('cdcPcv20Children2023CompleteWithoutPcv20'), ...greyCites],
+      noteCites: [optionA.noteCites[0], cite('cdcPcv20Children2023CompleteWithoutPcv20'), ...greyCites, ...bridgeCites],
     }] };
   }
+
+  // Leah's ruling reaches no further than the pair (§C-P2-ONE).
+  if (oneTooSoon) return null;
 
   // Kai at 6-18: the no-prior-PCV three-option card. Option A is rebuilt and
   // Option B (B-1 PCV15, B-2 PPSV23) dropped; any other card is left alone.
@@ -1680,11 +1699,11 @@ function pcvProductWords(pcv) {
  * the cite that backs it. Empty strings when the row already names what the
  * patient got, so a PCV13 child's card is untouched.
  */
+const BRIDGE_UNRECORDED = ' The product of at least one dose on record was not entered, so it is counted as a generic PCV and is not assumed to have been PCV20. PCV13 and PCV15 can be used interchangeably for all recommendations, so this row governs whichever was given [c].';
+const BRIDGE_RECORDED = ' The row for this history is worded for PCV13. PCV13 and PCV15 can be used interchangeably for all recommendations, so it governs this child too [c].';
 function pcvInterchangeableBridge(words) {
   if (!words.needsBridge) return { sentence: '', cites: [], refKeys: [] };
-  const sentence = words.unrecorded
-    ? ' The product of at least one dose on record was not entered, so it is counted as a generic PCV and is not assumed to have been PCV20. PCV13 and PCV15 can be used interchangeably for all recommendations, so this row governs whichever was given [c].'
-    : ' The row for this history is worded for PCV13. PCV13 and PCV15 can be used interchangeably for all recommendations, so it governs this child too [c].';
+  const sentence = words.unrecorded ? BRIDGE_UNRECORDED : BRIDGE_RECORDED;
   // FINDING L, the part of it this commit owns (2026-10-18). `refKeys` is new:
   // the numbered citation this bridge adds pointed at a document that was NOT
   // among the card's grey buttons, so a clinician clicking the number found no
@@ -4330,8 +4349,12 @@ export function recommend(input) {
       // and no clearing of `forwardLookingReason`: both found redundant by
       // mutation — this dose is never a record problem (it is a shot), and a
       // card offering PCV20 owes something, so the withdrawal never runs.
+      // §C-P2-ONE: the forward-looking clause is gone, so the field that marks
+      // one goes too, as `withLaterShot` does — the grid reaches this family
+      // through Leah's ruling (same-day PCV + PPSV23), and the 2026-10-25
+      // sweep reads a marked chip with no date as a date lost wrongly.
       ppsv23: withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
-        ? { ...d, reasons: d.reasons.map((x) => (x === d.closingSentence ? [`${d.closingLead} It is not repeated.`, noThird.chip].filter(Boolean).join(' ') : x)) }
+        ? { ...d, forwardLookingReason: null, reasons: d.reasons.map((x) => (x === d.closingSentence ? [`${d.closingLead} It is not repeated.`, noThird.chip].filter(Boolean).join(' ') : x)) }
         : withLaterShot(d, i)))),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was

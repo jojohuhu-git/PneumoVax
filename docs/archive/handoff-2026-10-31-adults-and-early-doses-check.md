@@ -1,5 +1,8 @@
 # PneumoVax — Handoff after the ordinary-adult and too-early-dose checks (2026-10-31, night)
 
+> **SUPERSEDED** by `handoff-2026-10-31-early-dose-check-leah.md` (same night): #108 and #109
+> are merged, the early-dose check this file left open was done, and the queue below is stale.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
 vaccine decision support across the lifespan. No backend. Live at
 https://jojohuhu-git.github.io/PneumoVax/ (GitHub Pages, deploys from `main`).

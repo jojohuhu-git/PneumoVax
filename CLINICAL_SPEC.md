@@ -1062,6 +1062,47 @@ New sources: `cdcGbpRepeatUnderMinAge`, `cdcGbpLiveVaccine28Days` (quoted) and
 `cdcGbpTimingSpacing` (the whole page). **0 / 17,016** verdicts, **0 / 18,264** record-problem
 rows. Guard: `regression-2026-10-31-sam-grey-area-repeat-of-a-too-young-ppsv23.test.js`.
 
+### §C-P2-ONE — ONE PPSV23, thrown out for coming too soon after a PCV: PCV20 only (owner, 2026-10-31)
+
+**Leah**, 7, diabetes, never vaccinated: PCV15 Aug 31, PPSV23 Oct 21 — 51 days, 5 short of the
+8 weeks CDC requires after a PCV (`CHILD-PPSV23-AFTER-PCV`), so it does not count. Her card
+offered *Option A PCV20 today / Option B PPSV23 today*; a PPSV23 recorded today was then thrown
+out by `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` (8 weeks from the invalid dose — §C-P2-GREY's
+kept rule), while the chip under the Oct 21 dose said *"can be given from Dec 16, 2026 at the
+earliest"*. Two dates for one dose. Found by the early-dose sweep of 2026-10-31: 168 of 630
+hand-built children aged 2–18 with one early dose.
+
+**Her questions first.** *"Is there a rule stating the PCV20 needs to be given 8 weeks after
+PPSV23 even if the PPSV23 was invalid?"* — No document says so either way. ACIP's 2023 report
+gives a no-prior-PCV child PCV15 or PCV20 *"≥8 weeks after the most recent dose of
+pneumococcal vaccination, regardless of whether the child has previously received PPSV23"*
+(read 2026-10-31 from her Downloads copy) without saying whether an invalid dose sets that
+clock, and it is not Leah's row; CDC's notes (read live 2026-10-31) measure Leah's row from
+*"the most recent PCV13 dose"*. The app follows her own **Eli** ruling ("Count it"): a
+thrown-out PPSV23 holds off no conjugate. And *"shouldn't [a PPSV23] be 5 years after her last
+PPSV23?"* — CDC's 5 years runs between two PPSV23 doses that COUNT; but the reason for it, a
+weaker response to a second polysaccharide shot, is the reason to offer none.
+
+**Her ruling: "PCV20 only + note".** The pair becomes *"1 dose PCV20 (≥8 weeks) — completes
+the series"*, *"No further PPSV23: 1 PPSV23 dose has been given and it did not count"*, *"A
+PPSV23 is not offered: it would be a second PPSV23 shot."* — §C-P2-NOTHIRD's card, for one
+shot. The chip's dated sentence becomes *"It is not repeated."* Leah's own card is the
+at/after-6 row (`pedsRiskPcv13At6`), which joins for this case; her PCV13/PCV15 bridge sentence
+and cite are carried over (owner rulings 2026-10-18).
+
+**Scope — the patients she worked, pinned:** an at-risk child 2–18 whose ONLY PPSV23 was thrown
+out by `CHILD-PPSV23-AFTER-PCV`, on the Option A PCV20 / Option B PPSV23 card. NOT covered, each
+pinned unchanged: a single PPSV23 thrown out for being given under age 2; the 24–71-month
+catch-up card; an adult whose childhood PPSV23 came too soon; and **two** thrown-out shots on
+the at/after-6 card (still offered a third PPSV23 as Option B — parked for her).
+
+**Measured:** **72 / 17,016** verdicts — the PPSV23 option removed, the PCV20 option unchanged:
+children aged 6, 18 and 18y11m, 8 risk groups × 9, whose PPSV23 is on the day of or the day
+after a PCV (the grid's form of "too soon"). **0 / 18,264** record-problem rows. Prose: 72 /
+35,280 lines. The 2026-10-25 sweep's `kept` falls 1829 → 1789: 40 of the 72 had no other
+dated chip; 32 keep one on a thrown-out PCV dose. Guard:
+`regression-2026-10-31-one-ppsv23-too-soon-pcv20-only.test.js`.
+
 ### §C-P2-LATER — a thrown-out PPSV23 that was repeated points to the repeat (owner, 2026-10-31)
 
 Sam's first PPSV23 (23 months, too young) read *"repeat this dose only (do not restart the
