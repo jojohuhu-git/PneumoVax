@@ -39,7 +39,7 @@ import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAY
 import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
-import { pcvNextDoseMinIntervalCell, intervalPhrase } from './intervals.js';
+import { pcvNextDoseMinIntervalCell, intervalPhrase, pcvAgeAtTwelveMonthLine } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 import { ADULT_OWED_AFTER_INVALID_DOSE, fmtSince } from './doseIntervalRules.js';
 
@@ -236,7 +236,7 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
   // on it ("1 or 2 before age 7 months" vs "1 at age 7 months or older") and
   // CDC Catch-up Table 2 keys the dose 2->3 interval on it too (P0-2). Both
   // are DATED-ONLY; see the undated policy where the ladder consumes them.
-  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0 };
+  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0, at12ByGrace: 0 };
   // The same before/after-6 split for every dose that is NOT a PCV20/PCV21 —
   // the conjugates a completing dose was given on top of. §B-PCV20-AFTER-
   // BEFORE6 (2026-10-31): `band.ge72` counts the PCV20 itself, so a child whose
@@ -250,7 +250,13 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     // subtracting two spans counted on different rulers. These bands decide HOW
     // MANY doses a child needs, so a fraction of a month moved the dose count in
     // both directions — a baby dosed on their 7-month anniversary read as 6.97.
-    const ageAtDose = ageAtDoseMonths(d, { dob, ageMonths: am }, today);
+    const rawAge = ageAtDoseMonths(d, { dob, ageMonths: am }, today);
+    // §A-GRACE12 (OWNER RULING 2026-10-31, "Lily"): a dose given 1-4 days
+    // before the first birthday is the 12-month dose — read through the one
+    // helper the validator uses too, so the bands and the dose verdicts cannot
+    // disagree about which side of the line a dose is on.
+    const ageAtDose = pcvAgeAtTwelveMonthLine(rawAge, d.date, dob);
+    if (ageAtDose !== rawAge) band.at12ByGrace += 1;
     if (ageAtDose < M.m12) {
       band.before12 += 1;
       if (ageAtDose < M.m7) band.before7 += 1;
@@ -567,13 +573,18 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // is the app's own arithmetic, which no row states. FINDING 2's rule.
   let target;
   let t1row = null;
-  if (am < M.m7) {
+  // §A-GRACE12: a child holding a dose that counts as given AT 12 months is on
+  // a 12-23-month row even on that dose's own day, when she is still 11 months
+  // old. Without this, the dose day read "3 doses in total" and a visit a
+  // week later "2 doses" for the same record.
+  const rowAm = pcv.band.at12ByGrace ? Math.max(am, M.m12) : am;
+  if (rowAm < M.m7) {
     // "2 through 6 months": 0 prior -> "4 doses"; 1 -> "3 additional doses";
     // 2 -> "2 additional doses"; 3 -> "1 additional dose at age 12-15 months".
     // Every row sums to 4, so the band needs no sub-branching. No row is
     // recorded: a total of 4 prints CDC's routine sentence, which states it.
     target = 4;
-  } else if (am < M.m12) {
+  } else if (rowAm < M.m12) {
     // "7 through 11 months", keyed on WHEN the prior doses were given.
     if (before7 >= 3) {
       target = before7 + 1;      // "3 before age 7 months" -> 1 additional
@@ -731,7 +742,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // The final dose must be at ≥12 months — if this is the last dose and the
   // child is <12mo, it is not due until 12 months.
   const isFinal = remaining === 1;
-  const needs12moFloor = isFinal && am < M.m12;
+  const needs12moFloor = isFinal && rowAm < M.m12; // rowAm: §A-GRACE12
   // ── The interval to the NEXT dose: CDC Catch-up Table 2, dose by dose ──
   //
   // Keyed off `anchor`, not off `prior`: an interval only exists when there is
