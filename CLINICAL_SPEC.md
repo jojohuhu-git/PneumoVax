@@ -291,6 +291,19 @@ words from the other side. **Not used:** `mmwrChronic1949ReviewAt50` and
 `jobAidChronic1949ReviewAt50` — both are printed about a 19–49 adult **with chronic
 conditions** and tell you to review a risk-based decision, which is a different claim.
 
+### §B-ADULTRISK19 — a teen whose only tick is an adult risk factor looks again at 19 (2026-11-01)
+
+P2-5 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G59 — 17, smokes, a baby
+PCV13 series — reads the healthy 5–18 card (CDC's child schedule does not list smoking or
+alcohol use disorder; `riskAgeNote` says so), but its "Re-evaluate at age 50" was the wrong
+next look: at 19 the adult schedule gives her a dose. The patient is run forward to 19 as
+§B-AT19 does; when that adult card asks for a dose, the age-50 sentence becomes *"Re-evaluate
+at age 19, when the adult schedule counts cigarette smoking as a risk condition and recommends
+a dose"*, cited to `cdcAdultRiskFactorList` with `aboutAnotherGroup` — a third adult source on
+a child card, declared and pinned. Otherwise the age-50 line stands. Measured: 404 grid teens
+(202 smoking, 202 alcohol use disorder); the age-50 healthy 5–18 count is now 1,584 − 404 =
+1,180. 0 verdicts. Guard: `regression-2026-11-01-p2-5-adult-risk-teen-review-at-19.test.js`.
+
 ### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
 
 **OWNER DECISION 2026-10-30.** Asked whether the age-50 line should spread to the other
@@ -1331,6 +1344,62 @@ two PPSV23 doses, so every patient here is hand-built. Guard:
 
 ---
 
+### §C-CATCHUP-AFTER-PPSV23 — what the 2–5 catch-up card says follows a PCV15 (owner, 2026-11-01)
+
+**P1-1 of the 2026-11-01 grey-zone audit; wording only, 0 verdicts moved.** The 24–71-month
+at-risk catch-up card ended every time with *"If PCV15 is used to complete, add PPSV23 ≥8
+weeks after the last PCV"* — even for a child whose PPSV23 had already COUNTED. G01 (4, no
+spleen, PPSV23 at 3, never a PCV) followed it and got a second PPSV23 15 months after the
+first, which the app then graded "shorter than the 5 years advised". And no immunocompromised
+child's card said a dose was owed five years on, which the app's next card asked for.
+
+**OWNER RULING**, quoting ACIP mm7137a3 (both sentences read live 2026-11-01, each once on
+the page): *"Children who have received PPSV23 but have not yet completed their recommended
+PCV doses should receive PCV ≥8 weeks after the PPSV23 dose. Therefore the PCV schedule is
+correct, but if PPSV23 is also used, it needs to be 5 years after the last PPSV23"*, and
+*"Children aged ≥2 years who have an immunocompromising condition should receive a second
+dose of PPSV23 ≥5 years after the first PPSV23 dose."*
+
+| Child | The card's PCV15 sentence | Cited to |
+|---|---|---|
+| a PPSV23 already counted, **IC** | no PPSV23 now; PCV20 or a second PPSV23 ≥5 years after that PPSV23 | `pedsIcPpsvWaitFiveYears` (what the next card cites) |
+| a PPSV23 already counted, **non-IC** | no PPSV23 follows — one has been given, ACIP gives a single dose | `pedsRiskSinglePpsv23AfterPcv` |
+| no counting PPSV23, **IC** | unchanged, **plus** PCV20 or a second PPSV23 ≥5 years after that PPSV23 | p2016 ‡ + `pedsSecondPpsv5y` |
+| no counting PPSV23, non-IC | unchanged | p2016 ‡ |
+
+Both catch-up rows (2 doses, and "3 doses, all before 12 months") take the same sentence.
+The PCV20-only swap for two PPSV23 shots that never counted (§C-P2-NOTHIRD) removes the
+five-year sentence and its source with the PCV15 sentence. Measured: 606 real grid patients'
+card text changed, 0 verdicts. Guard:
+`regression-2026-11-01-p1-1-catchup-card-ppsv23-already-given.test.js`.
+
+### §C-OPTIONB-IC — the 6–18 immunocompromised Option B card names the dose 5 years on (owner, 2026-11-01)
+
+**P1-2 of the 2026-11-01 grey-zone audit; wording only, 0 verdicts moved.** Isla, 8, no
+spleen, never vaccinated: Option B (PCV15, then PPSV23 8 weeks later) said nothing more, and
+the app's next card asked for PCV20 or a second PPSV23 five years after the PPSV23. CDC's
+no-prior-PCV row stops at the PPSV23 and CDC's PneumoRecs calls PCV15 + PPSV23 complete, so
+this went to the owner as a case-(b) question. **OWNER RULING, "yes"**, citing ACIP
+mm7137a3: *"Children aged ≥2 years who have an immunocompromising condition should receive
+a second dose of PPSV23 ≥5 years after the first PPSV23 dose."* Both Option B cards (B-1 and
+B-2) now say it, cited to `pedsSecondPpsv5y`; a child whose PPSV23 already counted is told
+none follows the PCV15 and the further dose waits 5 years after hers. Measured: 222 real
+grid patients' card text changed. Guard:
+`regression-2026-11-01-p1-2-ic-6to18-option-b-five-year-dose.test.js`.
+
+### §C-COMPLETE — "complete" only when nothing more is owed (OWNER RULE 2026-11-01)
+
+*"Complete should only be used if no additional doses/boosters are needed."* First applied
+(P2-3) to the before-6 Option A / Option B cards of an **immunocompromised** child, which said
+*"Either a single dose of PCV20 or a PPSV23 completes the recommended series"* beside the
+PPSV23's 5-year follow-on. They now read *"ACIP recommends either a single dose of PCV20, or
+PPSV23 on its previously recommended schedule [c]. Only PCV20 finishes the series in one
+dose."* — ACIP 2023's own qualifier ("using previously recommended dosing and schedules"),
+same source. Non-IC cards are unchanged: for them a PPSV23 does complete it. 198 cards / 99
+real grid patients; 0 verdicts. Guard:
+`regression-2026-11-01-p2-3-complete-only-when-nothing-more-is-owed.test.js`. A sweep of every
+other "complete" in the app against this rule is a separate audit.
+
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
 
 1. 24–71 mo, any risk, **incomplete (0–2 PCV by 24mo)** → **2 doses** PCV20 or PCV15 ≥8wk apart.
@@ -1502,6 +1571,18 @@ Prior-vaccine branches:
 
 ---
 
+### §G-TURNS50 — an 8-week PPSV23 date that falls after the 50th birthday (2026-11-01)
+
+P2-1 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G31 — 49y11m, HIV, PCV15
+2026-10-11 — was advised PPSV23 from 2026-12-06 (the 19–49 IC 8 weeks); she turns 50 on
+2026-11-29, and on 12-06 the 50+ card says ≥1 year. **No date moves** — 8 weeks as advice at
+50+ is what the owner declined on 2026-10-16. The 19–49 card instead adds: *"This patient
+turns 50 on <date>, before that date. From age 50, ACIP advises ≥1 year after the PCV15, with
+8 weeks an option that may be considered [c] — so the date above stays an option, and from
+that birthday the card shows the 1-year date."* (`adultPcv15ThenPpsv`). 0 grid patients (the
+grid cannot place a PCV15 in the 8 weeks before a 50th birthday); hand-built guard
+`regression-2026-11-01-p2-1-eight-week-date-after-50th-birthday.test.js`.
+
 ## §H — Adults ≥50 y (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`; routine lowered 65→50 eff. 2024-10-23)
 
 Routine for ALL adults ≥50 regardless of risk.
@@ -1634,6 +1715,15 @@ Routine for ALL adults ≥50 regardless of risk.
 - Geographic note: PCV21 **lacks serotype 4**. In regions where ≥30% of pneumococcal
   disease is serotype 4 (Alaska, Colorado, Navajo Nation, New Mexico, Oregon), PCV20 (or
   PCV15+PPSV23) may be preferred. Surfaced as an **advisory note**, not a hard block.
+
+### §I-NAMED — a PCV21 counted at 18 is called a PCV21 on the child's card (2026-11-01)
+
+P2-2 of the 2026-11-01 grey-zone audit. G27 — 18y5m, diabetes, PCV21 at 18y1m — read
+"PCV complete (includes PCV20)". The child "complete" cards now name the product on record,
+and a PCV21 card adds: *"CDC's child rows name PCV20; PCV21 is licensed from age 18, and this
+app counts one given at 18 as completing the series as a PCV20 would (owner decision
+2026-10-16)."* No new source; 0 grid patients (the grid cannot build this child); hand-built
+guard `regression-2026-11-01-p2-2-pcv21-at-18-is-named.test.js`.
 
 ### §I-REMEDY — A child's rejected PCV21 names PCV20, not a repeat (2026-10-26)
 
@@ -2654,6 +2744,30 @@ pin is now 400, was 188) and
 `regression-2026-10-25-pcv13-families-follow-the-invalid-dose.test.js`.
 
 ---
+
+### §K-PPSVFIRST — an adult who had PPSV23 first is told so, with the row she followed (2026-11-01)
+
+**P1-3 of the 2026-11-01 grey-zone audit; wording and citation only, 0 verdicts moved.** G04
+— 30, diabetes, PPSV23 Oct 2024, PCV15 Oct 2025 — read *"PCV15 followed by PPSV23 is a
+complete pneumococcal series"* directly under dates showing the opposite order, cited to the
+PCV15 → PPSV23 interval sentence. The row she followed is CDC's *"Previously received only
+PPSV23: … If PCV15 is used, no additional PPSV23 doses are recommended"*, printed in both the
+19–49 and the 50+ lists (read live 2026-11-01). The `adultPpsvOnly` (50+) quote stopped one
+sentence short and now carries it, contiguous on the page.
+
+When every counting PPSV23 is dated before the first PCV15 and PCV15 is the only conjugate,
+the card says *"PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no
+additional PPSV23 doses are recommended — the series is complete"*, cited to `adultPpsvOnly1949`
+or `adultPpsvOnly` by age (the job aid stays at 50+). Undated doses, or a PCV13 alongside,
+keep the old sentence. The label "Complete (PCV15 + PPSV23)" is unchanged. Decided without
+asking (dose unchanged, owner rule 2026-10-18; cite the row followed, 2026-10-23).
+
+⚠ **`atNineteen()` reads the adult card's citation to pick a child's "at 19" line**, and
+`adultPpsvOnly1949` there means "a conjugate of unrecorded product". A complete card citing it
+is excluded, or 185 grid children (measured) whose adult card at 19 says "Complete" would have been told
+"the adult schedule gives 1 dose of PCV15, PCV20 or PCV21" — caught by the C13 guards.
+Measured: 642 real grid patients' sentences changed, plus 792 cards whose 50+ quote now
+shows the extra sentence. Guard: `regression-2026-11-01-p1-3-adult-ppsv23-then-pcv15-wording.test.js`.
 
 ### §K-CONJUGATE — One adult conjugate soon after another is ADVICE, not a floor (OWNER, 2026-10-24)
 

@@ -453,9 +453,14 @@ describe('the guard — swept over every patient the grid can build', () => {
     //   adultChronicOnlyReviewAt50 (2) chronic only: nothing at 19, review at 50
     //   mmwrIc1949TwoPpsv          (3) cochlear / CSF with two PPSV23 received
     //   adultPpsvOnly1949          (4) a conjugate of unrecorded product
+    // P2-5 (2026-11-01, owner: "agree with fixing") adds ONE, the same kind as
+    // the age-50 line: a teen whose only tick is smoking or alcohol use
+    // disorder is told to re-evaluate at 19, and only the adult risk list can
+    // say why. Given only when the app's own adult card at 19 asks for a dose.
+    //   cdcAdultRiskFactorList    the adult risk factor this teenager has
     expect([...seen.keys()].sort()).toEqual([
       'adultBothNotAt65', 'adultChronicOnlyReviewAt50', 'adultIc1949BothPcv13Ppsv',
-      'adultPpsvOnly1949', 'adultRoutine50', 'cdcChildSpecialSituations', 'immPCV7',
+      'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList', 'cdcChildSpecialSituations', 'immPCV7',
       'mmwrIc1949TwoPpsv',
     ]);
   });

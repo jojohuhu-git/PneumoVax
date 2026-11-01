@@ -515,9 +515,10 @@ the patient is not — via `cite(key, { aboutAnotherGroup: 'why' })`. There are 
 source's `population` to make a wrong quote legal** — that is the one mutation that made the
 sweep go quiet, which is why both lists are pinned. Fix the call site instead.
 
-**Adult sources on CHILD cards are allowed in exactly two places** — C12's age-50 line
-(2026-10-29) and C13's "at 19" lines on the four Group B cards (2026-10-30, `CLINICAL_SPEC.md`
-§B-AT19). The healthy 5–18 card ends with *"Re-evaluate at age 50, when
+**Adult sources on CHILD cards are allowed in exactly three places** — C12's age-50 line
+(2026-10-29), C13's "at 19" lines on the four Group B cards (2026-10-30, `CLINICAL_SPEC.md`
+§B-AT19), and the "re-evaluate at 19" line for a teen whose only tick is an adult risk factor
+(2026-11-01, §B-ADULTRISK19, `cdcAdultRiskFactorList`). The healthy 5–18 card ends with *"Re-evaluate at age 50, when
 routine pneumococcal vaccination begins for every adult"* — the owner's request — and cites
 `adultRoutine50`, an **adult** source on a **child's** card. That is the N6 rule crossed
 deliberately: the sentence is ABOUT the adult schedule, so only the adult schedule can carry

@@ -312,8 +312,11 @@ export const REFS = {
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
     label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PPSV23',
     short: 'CDC Adult Notes',
-    quote: 'Previously received only PPSV23: 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PPSV23 dose.',
-    lastVerified: '2026-10-10',
+    // P1-3 (2026-11-01): extended by its next sentence, read live and found
+    // contiguous, so the 50+ PPSV23-then-PCV15 card has a source for "no
+    // additional PPSV23". The 19-49 twin already carried it.
+    quote: 'Previously received only PPSV23: 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PPSV23 dose. If PCV15 is used, no additional PPSV23 doses are recommended.',
+    lastVerified: '2026-11-01',
   },
   // The 19-49 row for a PCV13 + one PPSV23 history (patient-population field,
   // 2026-10-17). CDC splits that history in two at 19-49: this half for
