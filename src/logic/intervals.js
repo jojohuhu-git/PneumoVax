@@ -40,10 +40,37 @@
 // sentence off the same page.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { addDays, calendarMonthsBetween, calendarIntervalElapsed } from './dateUtils.js';
+import { addDays, addCalendarMonths, calendarMonthsBetween, calendarIntervalElapsed } from './dateUtils.js';
 
 /** Days a dose may precede a minimum age or interval and still count. */
 export const GRACE_DAYS = 4;
+
+/**
+ * The age a PCV dose COUNTS as at CDC's 12-month line (§A-GRACE12, OWNER
+ * RULING 2026-10-31, "Lily"): a dose given 1-4 days before the first birthday
+ * is the 12-month dose. ACIP General Best Practices: "vaccine doses
+ * administered ≤4 days before the minimum interval or age are considered
+ * valid"; CDSI v4.64 gives the booster, and a first dose at 12 months, an
+ * absolute minimum age of "12 months - 4 days".
+ *
+ * ONE home for the question, because three places ask it: the validator's
+ * age at this dose and at the dose it is measured from (Table 2's cells), and
+ * recommend.js's age bands. (validate.js's "any earlier dose before 12
+ * months" is left on the raw age: it only decides a THIRD dose's spacing, and
+ * a child whose one pre-birthday dose fell in the window needs two — breaking
+ * it moved no test, so it was not changed.) Answering
+ * it in only the bands counted a booster given 5 weeks after the previous dose
+ * as complete, while the same dose ON the birthday was rejected for being
+ * under 8 weeks.
+ *
+ * Only with a date of birth: an age-only entry cannot place a dose to the day.
+ * This decides what a dose given COUNTS as; what the app ADVISES is still the
+ * birthday itself (owner ruling 2026-10-24).
+ */
+export function pcvAgeAtTwelveMonthLine(ageAtDose, doseDate, dob) {
+  if (!dob || !doseDate || ageAtDose == null || ageAtDose >= 12) return ageAtDose;
+  return doseDate >= addDays(addCalendarMonths(dob, 12), -GRACE_DAYS) ? 12 : ageAtDose;
+}
 
 // ── The pneumococcal minimum intervals, in one place (queue P1-0) ────────
 //

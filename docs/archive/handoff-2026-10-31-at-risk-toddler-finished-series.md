@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-10-31 (night)** by `handoff-2026-10-31-adults-and-early-doses-check.md`.
+> Both PRs below (#106, #107) are merged, and the "adults + early-dose check" this file
+> offered has been run. Do not resume from here.
+
 # PneumoVax — Handoff after the typical-patient check: two toddler fixes (2026-10-31, late)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
