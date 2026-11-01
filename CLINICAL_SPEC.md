@@ -165,6 +165,44 @@ Catch-up grid by current age band × # previous PCV13/15/20 doses × age-at-prio
 > `prior + owed`: "1 additional dose" is counted against the row's own key, so adding it to
 > every prior dose double-counts a closing dose the child already received.
 
+### §L-T1-12TO23 — a series started at 12–23 months is two doses (2026-10-31)
+
+Found by the typical-patient walk (follow the app's own advice forward, dose by dose). Ella
+is first seen at 15 months with no doses. The app said *"2 doses in total for this child"*;
+she had PCV20 at 15 and 17 months; the app then said *"PCV dose 3 of 3 … 3 doses in total"*.
+
+- p2016 Table 1 (Item #P2016, 2/16/2024, read live 2026-10-31), *"all children (healthy and
+  those with risk conditions) age 2 through 23 months"*, 12 through 23 months: *"0 before age
+  12 months — 2 doses: 2 doses 8 weeks apart"*; *"1 dose at age 12 months or older — 1
+  additional dose, at least 8 weeks after the most recent dose"*.
+- CDC Catch-up Table 2 (read live 2026-10-31), dose 1 to dose 2: *"8 weeks (as final dose
+  for healthy children) if first dose was administered at the 1st birthday or after"*.
+
+**OWNER RULING 2026-10-31: "Complete at 2."**
+
+**Cause.** The 12–23 month rung of the ladder above wrote `target = at12plus + 1` — the
+`prior + owed` shape this section forbids — so the "1 dose at age 12 months or older" row
+added one to however many doses were given at 12+ months. It is now the row's own total, 2.
+
+**An at-risk toddler** is finished by Table 1 too (OWNER RULING B, no split under 24
+months), but her own rows at age 2 ask for **two more**, PCV20 or not: CDC *"Less than 3 PCV
+doses: 2 doses PCV"* (the catch-up table calls the second dose final only *"for healthy
+children"*), and p2016 Table 4 *"Any incomplete schedule of 0, 1, or 2 PCV doses by age 24
+months"*. The 24-month card already asked for them. The under-2 "complete" card had only ever
+been reached with 3+ doses, and promised one dose (or, with a PCV20, none). It now says *"…
+with fewer than 3 doses by age 2 years, 2 more PCV doses fall due from the 2nd birthday"*,
+citing the Table 1 row she followed (`p2016Table1_12to23_noneBefore12`) and CDC's line.
+
+At age 2 this is **not** a CDC/p2016 disagreement: CDC's "for healthy children" makes the
+two-dose series incomplete for an at-risk child, so both ask for two more.
+
+**Measured** against untouched `main`: **0 / 17,016** verdicts, **0 / 18,264** record-problem
+rows, **0 / 35,280** rendered lines (the grid has no toddler who started at 12+ months).
+Hand-built: **600 of 600** toddlers aged 12–23 months who started at 12–22 months and had
+both doses (three risk groups, PCV15/PCV20, 8- or 13-week gap) moved from "PCV dose 3 of 3" to
+"PCV series complete (2 doses)"; nothing else moved. Guard:
+`regression-2026-10-31-toddler-two-dose-series.test.js` (seven mutations, each caught).
+
 ---
 
 ## §B — Healthy children 24 months – 18 years (p2016 Table 2; `cdcCatchupJobAid`)
