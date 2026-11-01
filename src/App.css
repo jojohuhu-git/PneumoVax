@@ -333,8 +333,11 @@ body {
    now one of the two yes/no toggle buttons above, not a separate link. */
 .history-select-hint { color: var(--gy3); font-size: var(--fs-base); font-style: italic; margin-top: var(--sp-4); }
 .history-detail-sub { margin-top: var(--sp-12); margin-bottom: var(--sp-16); }
-.step-toggle-row { display: flex; gap: var(--sp-8); margin-bottom: 14px; }
-.step-toggle-btn { flex: none; min-height: 36px; padding: 0 14px; font-size: var(--fs-base); }
+.step-toggle-row { display: flex; flex-wrap: wrap; gap: var(--sp-8); margin-bottom: 14px; }
+/* Phone width (owner, 2026-11-01: "Some buttons extend beyond the background"):
+   the two age-entry buttons may wrap their words and share the row rather
+   than run past the card's edge. */
+.step-toggle-btn { flex: 1 1 auto; min-height: 36px; padding: 6px 14px; font-size: var(--fs-base); white-space: normal; text-align: center; }
 #dob-input { width: auto; }
 .age-badge-row { margin-top: var(--sp-12); }
 
@@ -754,20 +757,18 @@ body {
 .rb-dec { display: inline; }
 .rb-decision {
   display: inline-block; font-family: inherit; font-size: var(--fs-2xs); font-weight: 600; color: var(--c2);
-  background: var(--gy6); border: 1px solid var(--gy5); border-radius: var(--rads); padding: 1px 6px; white-space: nowrap;
+  background: var(--gy6); border: 1px solid var(--gy5); border-radius: var(--rads); padding: 1px 6px; white-space: normal; text-align: left;
   cursor: pointer; text-decoration: underline; text-underline-offset: 2px; vertical-align: baseline;
 }
 .rb-decision:hover, .rb-decision[aria-expanded="true"] { background: var(--clt); border-color: var(--cmd); }
 .rb-decision:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; }
-.rb-decision-static { cursor: default; text-decoration: none; color: var(--gy2); }
-.rb-decision-static:hover { background: var(--gy6); border-color: var(--gy5); }
 .rb-dec-panel { font-style: normal; }
 .rb-dec-title { display: block; font-weight: 700; color: var(--gy); }
 .rb-dec-line { display: block; }
 .rb-declist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
 .rb-declist-item { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-12) 0; border-top: 1px solid var(--gy6); font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; scroll-margin-top: var(--sp-16); }
 .rb-declist-item:first-child { border-top: none; padding-top: 0; }
-.rb-declist-item .rb-dec-title { font-size: var(--fs-base); }
+.rb-declist-item .rb-h4 { margin: 0; }
 
 /* Age lines and risk groups */
 .rb-agelines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-12); }
@@ -843,6 +844,30 @@ body {
   .rb-agelines, .rb-groups { grid-template-columns: 1fr; }
   .rb-src-grid { grid-template-columns: 1fr; }
 }
+/* Phones (owner, 2026-11-01: "the current rulebook does not fit on a phone
+   screen ... Some of the tables require scrolling to the right"). Every
+   rulebook table stacks: each row becomes a block, each cell a line headed by
+   its column name (data-label), so nothing scrolls sideways or overlaps. */
+@media (max-width: 640px) {
+  .rb { padding-left: var(--sp-12); padding-right: var(--sp-12); }
+  .rb-card { padding: var(--sp-12); }
+  .rb-scroll { overflow-x: visible; }
+  .rb-stack, .rb-stack tbody, .rb-stack tr, .rb-stack td { display: block; width: 100%; }
+  .rb-stack { table-layout: auto; }
+  .rb-stack colgroup, .rb-stack thead { display: none; }
+  .rb-stack tr { padding: var(--sp-8) 0; border-bottom: 1px solid var(--gy5); }
+  .rb-stack tr.rb-hist-more { border-top: none; padding-top: 0; }
+  .rb-stack .rb-grp td { padding: var(--sp-8) 0 var(--sp-4); border-bottom: none; }
+  .rb .rb-stack tr td { border: none; padding: var(--sp-4) 0; }
+  .rb-stack td[data-label]::before {
+    content: attr(data-label); display: block; font-size: var(--fs-xs); font-weight: 600; color: var(--gy3);
+  }
+  .rb-stack td.rb-stack-head { font-weight: 700; }
+  .rb-stack td.rb-stack-head::before { display: none; }
+  .rb-strong { white-space: normal; }
+  .rb-path { grid-template-columns: auto; }
+  .rb-dose { max-width: 100%; white-space: normal; }
+}
 .app-main-rulebook { flex: 1; width: 100%; }
 
 /* ── The citation pop-up on result cards (2026-11-01) ─────────────
@@ -883,7 +908,7 @@ body {
 /* 2026-11-01 owner review: risk-table column titles, at-risk sub-rows, the
    merged chip key, and the invalid-dose example. */
 .rb-who { display: block; font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); }
-.rb-subrow td { border-top: 1px dashed var(--gy6); }
+.rb-atrisk { display: block; margin-top: var(--sp-8); padding-top: var(--sp-8); border-top: 1px dashed var(--gy5); }
 .rb-chips { display: flex; flex-wrap: wrap; gap: var(--sp-4); min-width: 0; }
 .rb-chips .dose-val-chip { flex-shrink: 1; max-width: 100%; white-space: normal; }
 .rb-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-12); }
