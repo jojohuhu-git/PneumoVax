@@ -114,14 +114,17 @@ describe('one number for every adult, which is what she chose', () => {
 describe('children keep their own numbers — her ruling is adult-shaped', () => {
   // "8 weeks for pediatrics with risks". A 5-year-old with asplenia whose
   // PPSV23 came 21 days after her PCV20: 22 Jun + 56 days.
-  it('an at-risk child repeats 8 weeks after the early dose, not a year', () => {
+  it('an at-risk child repeats a PPSV23 5 years after the early dose, never the adult year (§C-P2-FIVE)', () => {
     const bad = invalidOf(run({
       ageMonths: 60, riskIds: ['asplenia'],
       pcvDoses: [{ product: 'PCV20', date: '2026-06-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2026-06-22' }],
     }));
     expect(bad).toHaveLength(1);
-    expect(bad[0].repeatDueDate).toBe('2026-08-17');
+    // §C-P2-FIVE (owner ruling 2026-10-31): "PPSV23 to PPSV23 is 5 years." The
+    // repeat of a thrown-out PPSV23 is another PPSV23, so it moved from 8 weeks
+    // (2026-08-17) to 5 years after the dose given.
+    expect(bad[0].repeatDueDate).toBe('2031-06-22');
   });
 
   it('the adult branch refuses to answer for a child at all', () => {
@@ -251,8 +254,11 @@ describe('the advice is never inside CDC\'s 4-day grace', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2026-06-22' }],
     }));
     expect(bad).toHaveLength(1);
-    expect(bad[0].repeatDueDate).toBe('2026-08-17');   // 8 weeks exactly
-    expect(bad[0].repeatDueDate).not.toBe('2026-08-13'); // 8 weeks less the grace
+    // §C-P2-FIVE (owner ruling 2026-10-31): "PPSV23 to PPSV23 is 5 years." The
+    // repeat of a thrown-out PPSV23 is another PPSV23, so it moved from 8 weeks
+    // (2026-08-17) to 5 years after the dose given.
+    expect(bad[0].repeatDueDate).toBe('2031-06-22');   // 5 years exactly
+    expect(bad[0].repeatDueDate).not.toBe('2031-06-18'); // 5 years less the grace
   });
 });
 

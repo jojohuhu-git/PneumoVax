@@ -550,19 +550,29 @@ export const DOSE_INTERVAL_RULES = [
     from: 'prevSameStream',
     anchorCounted: false,
     needsNoPriorPpsv23: true,
-    interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
+    // OWNER RULING 2026-10-31, REVERSING the 8 weeks of 2026-10-30 (Noah) and
+    // of §C-P2-GREY (Sam): "PPSV23 to PCV is 8 weeks, but PPSV23 to PPSV23 is
+    // 5 years." A PPSV23 after a thrown-out PPSV23 is measured like any second
+    // PPSV23. The row stays separate from CHILD-PPSV23-AFTER-INVALID-PPSV23
+    // only for its sentence and for `repeatOfUnderAgeDose` (validate.js) and
+    // `noThirdPpsv23` (recommend.js), which key on its id.
+    interval: { months: PPSV23_REVACC_MIN_MONTHS },
     grace: true,
     enforcement: 'floor',
+    // CDC's, as the 8-week version was: both numbers are CDC's own intervals
+    // and her ruling chose between them; she did not add a consequence no
+    // document states (contrast CHILD-PCV-AFTER-PPSV23, the one OWNER floor).
     authority: 'CDC',
-    source: 'CDC General Best Practices, Timing and Spacing of Immunobiologics (read live 2026-10-30): '
-      + '"The repeat dose should be spaced after the invalid dose by the recommended minimum interval" and, '
-      + 'in its worked example, "The repeat dose is counted as the valid second dose." The interval for a '
-      + 'first PPSV23, CDC Child & Adolescent Schedule Notes, pneumococcal: "1 dose PPSV23 at least 8 weeks '
-      + 'after the most recent PCV dose" (read live 2026-10-30). OWNER RULING 2026-10-30: the repeat of a '
-      + 'rejected first PPSV23 counts as the first PPSV23. See CLINICAL_SPEC.md §C-P2.',
+    source: 'OWNER RULING 2026-10-31, reversing her 2026-10-30 ruling on Noah: a PPSV23 given after a '
+      + 'PPSV23 that did not count waits 5 years from it, as any second PPSV23 does. CDC General Best '
+      + 'Practices, Timing and Spacing of Immunobiologics (read live 2026-10-31): "The repeat dose should '
+      + 'be spaced after the invalid dose by the recommended minimum interval." CDC Child & Adolescent '
+      + 'Schedule Notes, pneumococcal (read live 2026-10-31): "dose 2 PPSV23 at least 5 years after dose 1 '
+      + 'PPSV23". Neither says which interval governs a repeat of a thrown-out FIRST PPSV23 — the 8 weeks '
+      + 'after a PCV or the 5 years after a PPSV23 — so the choice is hers. See CLINICAL_SPEC.md §C-P2-FIVE.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)}, which did not count — the repeat of a PPSV23 that did not count is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after it.`],
-      detail: `Previous PPSV23 (did not count): ${fmtDate(anchor.date)}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} later (doses up to 4 days early still count, per CDC).`,
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)}, which did not count — a PPSV23 after another PPSV23 is given at least ${min.words} after it, whether or not that dose counted.`],
+      detail: `Previous PPSV23 (did not count): ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
     }),
   },
   {
@@ -1574,6 +1584,13 @@ function repeatDueDate(rule, anchor, ctx) {
   // An ADULT dose follows the owner's ruling above: the clock length comes
   // from the pair (vaccine before -> PCV20/PCV21 owed), not from this rule.
   if (rulebookOf(ctx.ageAtDose) === 'adult' && rule.id !== 'ADULT-PPSV23-AFTER-PPSV23') return adultRepeatDueDate(ctx);
+  // §C-P2-FIVE (OWNER RULING 2026-10-31): "PPSV23 to PPSV23 is 5 years." The
+  // repeat of a child's thrown-out PPSV23 is another PPSV23, so it is spaced 5
+  // years from the dose given, whichever row threw it out — the same 5 years
+  // CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST will hold that repeat to. Spending
+  // the rejecting row's own interval here (8 weeks after a PCV) printed a date
+  // that row would refuse.
+  if (ctx.vaccine === 'PPSV23') return applyIntervalFrom(ctx.doseDate, { months: PPSV23_REVACC_MIN_MONTHS });
   return intervalFrom(rule, anchor, ctx, ctx.doseDate);
 }
 
