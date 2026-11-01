@@ -203,6 +203,47 @@ both doses (three risk groups, PCV15/PCV20, 8- or 13-week gap) moved from "PCV d
 "PCV series complete (2 doses)"; nothing else moved. Guard:
 `regression-2026-10-31-toddler-two-dose-series.test.js` (seven mutations, each caught).
 
+### §A-GRACE12 — a PCV dose 1–4 days before the first birthday is the 12-month dose (OWNER RULING 2026-10-31, "Lily")
+
+Found by the too-early-dose walk. Lily, healthy, PCV20 at 2, 4 and 6 months and her booster
+**2 days before** her first birthday (the 12-month visit booked a little early), was told the
+booster was an extra infant dose and asked for a 5th PCV.
+
+ACIP General Best Practices, timing and spacing (read live 2026-10-31): *"vaccine doses
+administered ≤4 days before the minimum interval or age are considered valid"*. CDSI v4.64
+(local copy) gives the booster — and the first dose of its "start at 12 months" series — an
+absolute minimum age of **"12 months - 4 days"**. Owner: *"Grace applies"*, including a
+first-ever dose.
+
+**The rule:** with a date of birth on file, a PCV dose given 1–4 days before the first birthday
+is read as given **at 12 months**, for every purpose — the age bands that pick the Table 1 row,
+and the ages Table 2's spacing cells key on (this dose's and the dose it is measured from). One
+helper, `pcvAgeAtTwelveMonthLine()` in `intervals.js`, answers it for all of them.
+
+- Lily → **complete (4 doses)**. A baby started at 7 months (doses at 7 and 9) whose 3rd dose
+  falls in the window → **complete (3 doses)**. A first-ever PCV in the window → a series
+  started at 12 months: **2 doses** (§L-T1-12TO23), on the dose's own day as well (`rowAm`: she
+  is still 11 months old that day, and the card used to read "3 doses" then and "2" a week
+  later).
+- **Spacing comes with it.** A dose in the window owes what a dose ON the birthday owes. The
+  first version moved only the age bands, and a booster given 5 weeks after a 10-month dose read
+  "complete" while the same dose on the birthday was rejected for being under the booster's 8
+  weeks. Both are now rejected.
+- **Unchanged:** a dose **5+ days** early is still an extra infant dose and the booster is still
+  owed (owner ruling 2026-10-23). An age-only entry (no date of birth) cannot place a dose to the
+  day, so the grace is not applied there. What the app **advises** is still the birthday itself
+  — the grace decides what a dose given counts as, never the date advised (owner ruling
+  2026-10-24).
+- Left on the raw age, deliberately: validate.js's "any earlier dose before 12 months". It only
+  sets a 3rd dose's spacing, and a child whose one pre-birthday dose fell in the window needs two;
+  breaking it moved no test.
+
+Measured: **0 of 17,016** grid verdicts, **0 of 18,264** record-problem rows, **0 / 35,280**
+rendered lines (the grid never places a dose in those four days). Hand-built: **288 of 360**
+babies moved — every one with a dose 1–4 days before the birthday; the 72 with a dose 7 days
+early did not. Guard: `regression-2026-10-31-four-day-grace-at-first-birthday.test.js` (eight
+mutations; seven caught, the eighth is the raw-age check above, reverted).
+
 ---
 
 ## §B — Healthy children 24 months – 18 years (p2016 Table 2; `cdcCatchupJobAid`)
