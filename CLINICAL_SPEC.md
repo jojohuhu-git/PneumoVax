@@ -1374,6 +1374,19 @@ none follows the PCV15 and the further dose waits 5 years after hers. Measured: 
 grid patients' card text changed. Guard:
 `regression-2026-11-01-p1-2-ic-6to18-option-b-five-year-dose.test.js`.
 
+### §C-COMPLETE — "complete" only when nothing more is owed (OWNER RULE 2026-11-01)
+
+*"Complete should only be used if no additional doses/boosters are needed."* First applied
+(P2-3) to the before-6 Option A / Option B cards of an **immunocompromised** child, which said
+*"Either a single dose of PCV20 or a PPSV23 completes the recommended series"* beside the
+PPSV23's 5-year follow-on. They now read *"ACIP recommends either a single dose of PCV20, or
+PPSV23 on its previously recommended schedule [c]. Only PCV20 finishes the series in one
+dose."* — ACIP 2023's own qualifier ("using previously recommended dosing and schedules"),
+same source. Non-IC cards are unchanged: for them a PPSV23 does complete it. 198 cards / 99
+real grid patients; 0 verdicts. Guard:
+`regression-2026-11-01-p2-3-complete-only-when-nothing-more-is-owed.test.js`. A sweep of every
+other "complete" in the app against this rule is a separate audit.
+
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
 
 1. 24–71 mo, any risk, **incomplete (0–2 PCV by 24mo)** → **2 doses** PCV20 or PCV15 ≥8wk apart.

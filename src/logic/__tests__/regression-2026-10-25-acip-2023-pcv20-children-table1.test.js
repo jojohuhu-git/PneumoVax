@@ -131,7 +131,10 @@ describe('half B — the 2023 report is added beside CDC\'s notes', () => {
       const text = noteOf(cardNamed(who, label));
       // Split into sentences and find the one the 2023 report is credited for.
       const sentences = text.split(/(?<=\.)\s+/).filter(Boolean);
-      const choice = sentences.find((x) => x.includes('completes the recommended series'));
+      // P2-3 (2026-11-01): an immunocompromised card states the choice in ACIP's
+      // own qualifier — "on its previously recommended schedule" — not "completes".
+      const choice = sentences.find((x) => x.includes('completes the recommended series')
+        || x.includes('on its previously recommended schedule'));
       expect(choice, `no choice sentence on ${label}`).toBeDefined();
       // Exactly one marker on it — its own.
       expect((choice.match(/\[c\]/g) || [])).toHaveLength(1);
