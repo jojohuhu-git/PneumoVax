@@ -391,6 +391,60 @@ some doses before 6 and some after. CDC's "PCV13 only at or after age 6" row doe
 *only*), and neither does the before-6 row in full. The card keeps the old wording until the
 owner rules on that history.
 
+### §B-TODDLER-PCV20 — an at-risk 2–5 year old who finished her baby series with a PCV20 (2026-10-31)
+
+Maya is 4 and has diabetes: PCV13 at 2, 4 and 6 months, PCV20 at 12 months, no PPSV23. Her
+card offered *"Option A: 1 dose PCV20 / Option B: 1 dose PPSV23"*. Both documents say she is
+finished:
+
+- CDC Child/Adolescent Schedule Notes, at-risk list (and the IC list, in the same words),
+  **Age 2–5 years**, read live 2026-10-31: *"Completed recommended PCV series but have not
+  received PPSV23 → Previously received at least 1 dose of PCV20: no further PCV or PPSV23
+  doses needed"*. Its footnote: *"Incomplete series = Not having received all doses in either
+  the recommended series or an age-appropriate catch-up series"*.
+- p2016 Table 4: *"Completed PCV series before age 6 years, including one or more doses of
+  PCV20 | No additional doses"*.
+
+**OWNER RULING 2026-10-31: "Mark complete."** (It moves a verdict, so it went to her.)
+
+**Cause.** `pcvRiskChild`'s gate for the PCV20-complete card, `enoughAt24mo`, read "3 or more
+doses before 24 months" as p2016 Table 4's row 2, *"3 doses of PCV, all before 12 months"*,
+and so asked a child who finished on time for a dose at 24 months or later.
+
+**Fix.** A child is past Table 4's rows 1/2 — `finishedBabySeries` — when she has **3+ doses
+before 24 months** (not row 1, "0, 1, or 2 PCV doses by age 24 months") **and a dated dose at
+12–23 months** (not row 2). That dose is also what finishes the series in CDC's words: its
+catch-up table asks for a 4th dose only of a child *"who received 3 doses before age 12
+months"*. The card it reaches (Group A) picked CDC's **Age 6–18** key at every age; it now
+asks `pcv20CompleteRowKey()`, the one age choice Groups A and B share, so a 4-year-old's card
+quotes the Age 2–5 sentence (FINDING N).
+
+**Left alone, on purpose:**
+- A series **started at 12–23 months with only two doses** (13 and 15 months) still owes two
+  more at age 2, and that is right. *Corrected the same day:* this line first called it a
+  CDC/p2016 disagreement. It is not — CDC's catch-up table calls the second dose final only
+  *"for healthy children"*, so CDC (*"Less than 3 PCV doses: 2 doses PCV"*) and p2016 row 1
+  both ask for two more. With **three** such doses the child is complete.
+- A child whose only possible booster is **undated** (three baby doses, then a PCV20 with no
+  date): it might have been a 4th dose before the first birthday, so she keeps the PCV20 /
+  PPSV23 offer, as before.
+
+**Measured** against untouched `main`: **0 / 17,016** verdicts, **0 / 18,264** record-problem
+rows, **0 / 35,280** rendered lines — the grid's only four-dose series is dated in the last five
+months, so it builds no toddler with baby doses. Over a hand-built set of **8,400** at-risk
+children aged 24–71 months (seven baby histories × five product mixes × five conditions),
+**3,840** moved, every one from "Option A PCV20 / Option B PPSV23" to "PCV complete (includes
+PCV20)", and every one a finished series containing a PCV20. A second hand-built check of
+**9,900 typical children** aged 2–18 (on-time and late baby series, each product mix, with
+and without a PPSV23 at age 2, eight risk profiles) moved **1,260**: 924 from a dose to
+complete — including **252 immunocompromised children with a PPSV23 at 2**, who had been told
+"1 dose PCV20 (immunocompromising)" and now read complete under the 2026-10-23 Group B ruling
+— and 336 already-complete cards whose wording changed to "PCV complete (includes PCV20)".
+Against an independent reading of CDC's rows, that set has **0** disagreements after the fix
+and **924** before. Guard:
+`regression-2026-10-31-at-risk-toddler-finished-series-with-pcv20.test.js` (pinned at 5,760
+complete / 1,440 control; seven mutations, each caught).
+
 ### What "completed by 24 months" means — FINDING M, 2026-10-22
 
 p2016 Table 2 splits on the word **completed** and never defines it. CDC's catch-up Table 2

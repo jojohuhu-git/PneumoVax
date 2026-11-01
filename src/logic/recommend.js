@@ -121,6 +121,17 @@ function before6NoPcv20RowKey(am, isIC) {
     : (isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23');
 }
 
+// The same choice for its sibling sub-bullet, "Previously received at least 1
+// dose of PCV20". Under Age 2-5 both lists print it in identical words (one
+// key); under Age 6-18 in two. Groups A and B of the PCV20-complete card ask
+// it — Group A picked the 6-18 key at every age until §B-TODDLER-PCV20 made
+// 2-5 year olds reach it.
+function pcv20CompleteRowKey(am, isIC) {
+  return am >= M.m72
+    ? (isIC ? 'pedsIcPcv20Complete' : 'pedsRiskPcv20Complete')
+    : 'pedsRiskPcv20CompleteAt2';
+}
+
 // ── rec() helper ──────────────────────────────────────────────────────────
 function rec(o) {
   return {
@@ -1845,8 +1856,34 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // Gate: child <6y AND insufficient doses at ≥24mo → fall through to rows 1/2.
   // For child ≥6y the catch-up is a single dose regardless, so the shortcut is
   // safe once a PCV20 is present (they've had their 1 at-risk dose).
-  const enoughAt24mo = am >= M.m72 || pcv.band.ge24 >= (pcv.band.before24 >= 3 ? 1 : 2);
-  if (pcv.includesCompleting && (am >= M.m72 || enoughAt24mo)) {
+  //
+  // §B-TODDLER-PCV20 (2026-10-31, OWNER RULING "Mark complete"). The line
+  // above read "3 or more doses before 24 months" as p2016's "3 doses of PCV,
+  // all before 12 months" row, so Maya — 4, diabetes, PCV13 at 2/4/6 months,
+  // PCV20 at 12 — was offered another PCV20. A FINISHED baby series is not one
+  // of rows 1/2: CDC's Age 2-5 at-risk list, "Completed recommended PCV series
+  // but have not received PPSV23 → Previously received at least 1 dose of
+  // PCV20: no further PCV or PPSV23 doses needed" (read live 2026-10-31), and
+  // p2016 Table 4's "Completed PCV series before age 6 years, including one or
+  // more doses of PCV20 | No additional doses".
+  //
+  // So the child is past rows 1/2 when she has 3+ doses before 24 months
+  // (not row 1, "0, 1, or 2 PCV doses by age 24 months") AND a DATED dose at
+  // 12-23 months (not row 2, "3 doses of PCV, all before 12 months"). That
+  // dose is also what makes it a finished series in CDC's words: its
+  // catch-up table asks for a 4th dose only of a child "who received 3 doses
+  // before age 12 months". An undated dose cannot be that 12-23 month dose —
+  // it might have been a 4th dose before the first birthday — so a child
+  // whose only possible booster is undated keeps the dose.
+  //
+  // A series STARTED at 12-23 months with only two doses stays in row 1, and
+  // rightly: CDC's catch-up table calls that second dose final only "for
+  // healthy children", so CDC ("Less than 3 PCV doses: 2 doses PCV") and
+  // p2016 ("0, 1, or 2 PCV doses by age 24 months") both ask for two more.
+  const finishedBabySeries = pcv.band.before24 >= 3 && pcv.band.m12to23 >= 1;
+  const enoughAt24mo = am >= M.m72 || finishedBabySeries
+    || pcv.band.ge24 >= (pcv.band.before24 >= 3 ? 1 : 2);
+  if (pcv.includesCompleting && enoughAt24mo) {
     // FINDING K (2026-10-18). ONE card, FOUR different patients, and until now
     // one citation for all of them.
     //
@@ -1916,7 +1953,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         detail: "ACIP's 2023 PCV20-in-children report states the same for this history: for a child 2-18 with any risk condition whose completed series includes a PCV20, no additional doses of any pneumococcal vaccine are indicated [c].",
       };
       noteCites = [
-        cite(isIC ? 'pedsIcPcv20Complete' : 'pedsRiskPcv20Complete'),
+        cite(pcv20CompleteRowKey(am, isIC)),
         cite('cdcPcv20Children2023CompleteWithPcv20'),
       ];
       cardRefs = childRefsSwap('p2016', 'cdcPcv20Children2023');
@@ -1955,9 +1992,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         detail: "CDC's row for a child who received PCV before age 6 is written for one who has not yet had PPSV23; this child has had one, which does not change the answer — a prior PCV20 means no further doses either way, and immunize.org p2016 prints the same row with no PPSV23 condition at all [c].",
       };
       noteCites = [
-        am >= M.m72
-          ? cite(isIC ? 'pedsIcPcv20Complete' : 'pedsRiskPcv20Complete')
-          : cite('pedsRiskPcv20CompleteAt2'),
+        cite(pcv20CompleteRowKey(am, isIC)),
         cite('p2016CompletedBefore6WithPcv20'),
       ];
       cardRefs = collectRefs(riskIds, ['cdcChildPneumo', 'p2016'], 'child');
