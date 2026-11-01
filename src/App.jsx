@@ -32,20 +32,26 @@ const INITIAL_STATE = {
   historyAnswered: null,
 };
 
-/** True in the tab opened by "How PneumoVax decides" (App.jsx header link). */
+/** `?rules` still opens straight on the Rulebook, for a saved link. */
 const RULES_VIEW = typeof window !== 'undefined'
   && new URLSearchParams(window.location.search).has('rules');
 
 export default function App() {
   const [state, setState] = useState(INITIAL_STATE);
   const [ageError, setAgeError] = useState('');
-  // The rules page ("How PneumoVax decides"). 2026-11-01: it opens in its OWN
-  // TAB (`?rules`) — the owner asked that it "open in its own section, not on
-  // top of the patient's information". Until then it was a flag that replaced
-  // the wizard in place; a new tab keeps the half-filled patient on screen in
-  // the first tab, so a clinician three steps into a history never loses it
-  // to answer "why is it saying that?". No router: one query flag, read once.
-  const rulebookOpen = RULES_VIEW;
+  // The Rulebook. OWNER REVIEW 2026-11-01 (second round): a "Patient |
+  // Rulebook" switch in the header, as in PediVax's schedule builder, in the
+  // SAME tab — replacing the separate tab of that morning. Her words: "I do
+  // not want the patient info section to live below the rulebook. There
+  // should be a back button to go back to entering in patient info." The form
+  // stays mounted (only hidden), so a clinician three steps into a history
+  // switches over and back and finds every entry where she left it.
+  const [view, setView] = useState(RULES_VIEW ? 'rulebook' : 'patient');
+  const rulebookOpen = view === 'rulebook';
+  function showView(next) {
+    setView(next);
+    window.scrollTo?.(0, 0);
+  }
 
   // P3-1: one clock read, one age. Derived here so a tab left open across
   // midnight ages the patient along with the calendar, instead of holding the
@@ -155,13 +161,14 @@ export default function App() {
             </div>
           </div>
           {!rulebookOpen && <Stepper steps={STEPS} current={state.step} />}
-          {/* Only when the rulebook is shut: the page carries its own way back,
-              and two controls doing the same thing in the same view is noise. */}
-          {!rulebookOpen && (
-            <a className="rb-link" href={`${import.meta.env.BASE_URL}?rules`} target="_blank" rel="noopener noreferrer">
-              How PneumoVax decides
-            </a>
-          )}
+          <nav className="viewnav" aria-label="View">
+            <button type="button" className={rulebookOpen ? '' : 'active'} aria-pressed={!rulebookOpen} onClick={() => showView('patient')}>
+              Patient
+            </button>
+            <button type="button" className={rulebookOpen ? 'active' : ''} aria-pressed={rulebookOpen} onClick={() => showView('rulebook')}>
+              Rulebook
+            </button>
+          </nav>
         </div>
       </header>
 

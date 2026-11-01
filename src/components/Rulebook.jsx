@@ -1,11 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Rulebook.jsx — "How PneumoVax decides".
+// Rulebook.jsx — the "Rulebook" view.
 //
 // 2026-11-01 redesign, built from the owner's five-board design canvas: the
 // standard schedules first, then what each risk group changes, how the
 // vaccines combine, the minimum intervals with the app's own dose-chip words,
-// and the sources. It opens in its own browser tab (App.jsx, `?rules`), so a
-// half-entered patient in the first tab is never covered or lost.
+// and the sources. Since the owner's 2026-11-01 review it is a view of the
+// same tab, switched from the header ("Patient | Rulebook", as in PediVax's
+// schedule builder); App.jsx keeps the patient form mounted but hidden, so a
+// half-entered patient is still there on the way back.
 //
 // This file renders and decides nothing. Every sentence, age and interval
 // comes from src/data/rulebook.js, which draws its numbers from the engine's
@@ -14,7 +16,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react';
 import {
-  EXCEPTION_NOTE, ROUTINE_INFANT, CHILD_LANES, CHILD_NOTES, ADULT_BANDS, ADULT_OPTIONS,
+  ROUTINE_INFANT, CHILD_LANES, ADULT_BANDS, ADULT_OPTIONS, CHILD_EXCEPTIONS, INVALID_EXAMPLE,
   ADULT_HISTORY, TRANSPLANT_STOP, RISK_COLUMNS, RISK_MATRIX, RISK_RANKING, VACCINE_ROWS,
   SERIES_PATTERNS, CHIP_LEGEND, GRACE, PCV_AFTER_PCV, PCV_AND_PPSV23, PPSV_THEN_PCV_DECISION,
   INVALID_ACTIONS, ADULT_INTERVALS, SOURCE_GROUPS, HEADINGS, sourcesFor,
@@ -33,7 +35,9 @@ const Decision = () => <span className="rb-decision">PneumoVax decision</span>;
 
 /**
  * "Source": the sentences the app's own cards cite for this row's worked
- * patients, and who those patients are. Run on open, never stored.
+ * patients, each with its document linked. Run on open, never stored. The
+ * worked patients themselves are not shown (owner, 2026-11-01: "I only want
+ * to include references hyperlinked"); the C14 guard still runs every one.
  */
 function Source({ ex }) {
   const [open, setOpen] = useState(false);
@@ -53,7 +57,6 @@ function Source({ ex }) {
             </span>
           ))}
           {!quotes.length && <span className="rb-src-quote">PneumoVax decision; no CDC or ACIP sentence states this.</span>}
-          <span className="rb-src-who">Checked on: {ex.map((e) => e.who).join('; ')}.</span>
         </span>
       )}
     </span>
@@ -134,9 +137,6 @@ function Schedules() {
               </div>
             ))}
           </div>
-          <ul className="rb-bullets">
-            {CHILD_NOTES.map((n) => <li key={n.text}>{n.text} <Source ex={n.ex} /></li>)}
-          </ul>
         </div>
       </Card>
 
@@ -203,7 +203,7 @@ function Schedules() {
 function Risks() {
   return (
     <>
-      <p className="rb-lead">Risk conditions fall into four groups. The group decides the recommendation. A box spanning several columns means the same answer applies.</p>
+      <p className="rb-lead">Risk conditions fall into four groups. The group decides the recommendation.</p>
       <div className="rb-card rb-scroll">
         <table className="rb-matrix">
           <colgroup><col className="rb-w24" /><col /><col /><col /><col /></colgroup>
@@ -211,16 +211,17 @@ function Risks() {
             <tr><td />{RISK_COLUMNS.map((c) => <th key={c.key} scope="col">{c.name}</th>)}</tr>
           </thead>
           <tbody>
-            <tr className="rb-matrix-sec"><td colSpan={5}>Conditions</td></tr>
             <tr>
-              <th scope="row" className="rb-matrix-row">Included</th>
+              <th scope="row" className="rb-matrix-row rb-matrix-head">Conditions</th>
               {RISK_COLUMNS.map((c) => (
                 <td key={c.key} className="rb-matrix-list">
                   <ul>{c.conditions.map((x) => <li key={x}>{x}</li>)}</ul>
-                  {c.note && <span className="rb-cell-note">{c.note}</span>}
                 </td>
               ))}
             </tr>
+            {/* The first column's own title (owner, 2026-11-01: "Find clinical
+                word for this and place it below 'Conditions'"). */}
+            <tr className="rb-matrix-coltitle"><th scope="col">Recommendation</th><td colSpan={4} /></tr>
             {RISK_MATRIX.map((sec) => (
               <React.Fragment key={sec.section}>
                 <tr className="rb-matrix-sec"><td colSpan={5}>{sec.section}</td></tr>
@@ -244,7 +245,7 @@ function Risks() {
         <p className="rb-small">{RISK_RANKING.lead}</p>
         <ol className="rb-rank">
           {RISK_RANKING.steps.map((s) => (
-            <li key={s.name}><strong>{s.name}</strong><span className="rb-small">{s.text} <Source ex={s.ex} /></span></li>
+            <li key={s.name}><strong>{s.name}</strong> <Source ex={s.ex} /></li>
           ))}
         </ol>
       </Card>
@@ -260,19 +261,28 @@ function Vaccines() {
       <div className="rb-card rb-scroll">
         <table className="rb-table rb-fixed">
           <colgroup><col className="rb-w18" /><col className="rb-w12" /><col className="rb-w8" /><col /><col /></colgroup>
-          <thead><tr><th>Vaccine</th><th>Minimum age</th><th>Valid?</th><th>Use in children</th><th>Use in adults</th></tr></thead>
+          <thead><tr><th>Vaccine</th><th>Minimum age</th><th>Counts?</th><th>Use in children</th><th>Use in adults</th></tr></thead>
           <tbody>
             {VACCINE_ROWS.map((g) => (
               <React.Fragment key={g.kind}>
                 <tr className="rb-grp"><td colSpan={5}>{g.name}</td></tr>
-                {g.rows.map((p) => (
-                  <tr key={p.key}>
-                    <td><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
-                    <td>{p.minAge}</td>
-                    <td>{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
-                    {p.both ? <td colSpan={2}>{p.both}</td> : <><td>{p.child}</td><td>{p.adult}</td></>}
-                  </tr>
-                ))}
+                {g.rows.map((p) => {
+                  // An at-risk child gets a line of its own under the vaccine.
+                  const span = p.atRisk ? 2 : 1;
+                  return (
+                    <React.Fragment key={p.key}>
+                      <tr>
+                        <td rowSpan={span}><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
+                        <td rowSpan={span}>{p.minAge}</td>
+                        <td rowSpan={span}>{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
+                        {p.both
+                          ? <td colSpan={2}>{p.both}</td>
+                          : <><td>{p.atRisk && <span className="rb-who">Healthy</span>}{p.child}</td><td rowSpan={span}>{p.adult}</td></>}
+                      </tr>
+                      {p.atRisk && <tr className="rb-subrow"><td><span className="rb-who">At risk</span>{p.atRisk}</td></tr>}
+                    </React.Fragment>
+                  );
+                })}
               </React.Fragment>
             ))}
           </tbody>
@@ -320,16 +330,24 @@ function Spacing() {
       <Card id="rb-labels" title="What the label on a dose means">
         <div className="rb-legend">
           {CHIP_LEGEND.map((c) => (
-            <div key={c.chip + c.text} className="rb-legend-item">
-              <span><Chip tone={c.tone}>{c.chip}</Chip></span>
+            <div key={(c.chips ?? [c.chip]).join() + c.text} className="rb-legend-item">
+              <span className="rb-chips">{(c.chips ?? [c.chip]).map((x) => <Chip key={x} tone={c.tone}>{x}</Chip>)}</span>
               <span className="rb-small">{c.text} <Source ex={c.ex} /></span>
             </div>
           ))}
         </div>
       </Card>
 
-      <Card id="rb-kid-gaps" title="Children: a dose given before the minimum interval is invalid">
+      <Card id="rb-kid-gaps" title="Children: a dose given before the minimum interval does not count, with three exceptions">
         <p className="rb-band rb-band-green"><strong>{GRACE.title}</strong> {GRACE.text} <Chip tone="invalid">Invalid</Chip></p>
+        <div>
+          <h4 className="rb-h4">The dose still counts when</h4>
+          <ul className="rb-bullets">
+            {CHILD_EXCEPTIONS.map((x) => (
+              <li key={x.text}>{x.decision && <><Decision /> </>}{x.text} <Source ex={x.ex} /></li>
+            ))}
+          </ul>
+        </div>
 
         <h4 className="rb-h4">PCV after PCV (CDC catch-up schedule)</h4>
         <div className="rb-scroll">
@@ -389,17 +407,22 @@ function Spacing() {
               </tbody>
             </table>
           </div>
+          <p className="rb-small">{INVALID_ACTIONS.timing}</p>
           <p className="rb-def"><Decision /> {INVALID_ACTIONS.decision}</p>
-          {INVALID_ACTIONS.facts.map((f) => (
-            <div key={f.name} className="rb-fact">
-              <strong>{f.name}</strong>
-              <span>{f.text ?? f.example} {f.ex && <Source ex={f.ex} />}</span>
-            </div>
-          ))}
+          <p className="rb-label">Example: an infant&rsquo;s PCV given too soon <Source ex={INVALID_EXAMPLE.ex} /></p>
+          <ol className="rb-steps">
+            {INVALID_EXAMPLE.steps.map((st) => (
+              <li key={st.chip + st.example} className="rb-step">
+                <span className="rb-step-when">{st.example}</span>
+                <Chip tone={st.tone}>{st.chip}</Chip>
+                <span className="rb-small">{st.text}</span>
+              </li>
+            ))}
+          </ol>
         </div>
       </Card>
 
-      <Card id="rb-adult-gaps" title="Adults: a dose given before the recommended interval is still valid">
+      <Card id="rb-adult-gaps" title="Adults: a dose given before the recommended interval still counts">
         <p className="rb-band rb-band-blue">{ADULT_INTERVALS.lead}</p>
         <div className="rb-scroll">
           <table className="rb-table">
@@ -460,10 +483,8 @@ export default function Rulebook() {
   return (
     <div className="rb">
       <div className="rb-top">
-        <h1 className="rb-title">How PneumoVax decides</h1>
-        <p className="rb-intro">Recommendations are based on age, risk conditions and dated vaccine history. When CDC lists more than one option, each is shown (Option A, Option B).</p>
-        <p className="rb-band"><strong>Exception</strong> <Decision /> {EXCEPTION_NOTE}</p>
-        <p className="rb-small">This page opened in its own tab; the patient you were entering is still in the other tab.</p>
+        <h1 className="rb-title">Rulebook</h1>
+        <p className="rb-intro">Recommendations are based on age, risk conditions and dated vaccine history.</p>
       </div>
 
       <nav aria-label="On this page" className="rb-nav">

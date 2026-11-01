@@ -32,7 +32,7 @@ import RecCard from '../RecCard.jsx';
 import { doseChipLabel } from '../doseChipLabel.js';
 import {
   BOUNDARIES, PRODUCTS, RISK_GROUPS, SOURCE_GROUPS, monthsInWords, WORKED_PATIENTS,
-  CHILD_LANES, CHILD_NOTES, ADULT_HISTORY, ADULT_OPTIONS, RISK_MATRIX, RISK_RANKING, RISK_COLUMNS,
+  CHILD_LANES, CHILD_EXCEPTIONS, INVALID_EXAMPLE, ADULT_HISTORY, ADULT_OPTIONS, RISK_MATRIX, RISK_RANKING, RISK_COLUMNS,
   SERIES_PATTERNS, CHIP_LEGEND, PCV_AND_PPSV23, INVALID_ACTIONS, SPACING_RULE_IDS, ROUTINE_INFANT,
   PCV_AFTER_PCV, TRANSPLANT_STOP, VACCINE_ROWS, sourcesFor,
 } from '../../data/rulebook.js';
@@ -83,7 +83,7 @@ describe('C14 — every claim on the page is true of the app, patient by patient
 
   it('every written row carries at least one worked patient', () => {
     const rows = [
-      ...CHILD_LANES, ...CHILD_NOTES, ...ADULT_HISTORY, ADULT_OPTIONS, TRANSPLANT_STOP,
+      ...CHILD_LANES, ...CHILD_EXCEPTIONS, ...ADULT_HISTORY, ADULT_OPTIONS, TRANSPLANT_STOP,
       ...RISK_MATRIX.flatMap((s) => s.rows.flatMap((r) => r.cells)), ...RISK_RANKING.steps,
       ...SERIES_PATTERNS, ...CHIP_LEGEND, ...PCV_AND_PPSV23, ...INVALID_ACTIONS.rows,
     ];
@@ -93,17 +93,33 @@ describe('C14 — every claim on the page is true of the app, patient by patient
 
   it('each dose label in the key is the label its worked patient\'s dose really shows', () => {
     for (const c of CHIP_LEGEND) {
-      expect(c.ex[0].expect.chip?.[2], `"${c.chip}" has no chip check`).toBe(c.chip);
+      // An entry may show two labels (owner, 2026-11-01): each pairs, in
+      // order, with a worked patient whose dose really reads that way.
+      (c.chips ?? [c.chip]).forEach((chip, i) => {
+        expect(c.ex[i].expect.chip?.[2], `"${chip}" has no chip check`).toBe(chip);
+      });
     }
+  });
+
+  it('the invalid-dose example shows the labels its infant really gets', () => {
+    const e = INVALID_EXAMPLE.ex[0];
+    const out = recommend(e.input);
+    const total = out.recs.find((r) => r.vaccine === 'PCV').seriesTotal;
+    const [given, invalid, next] = INVALID_EXAMPLE.steps;
+    expect(doseChipLabel(out.perDose.pcv[0], total)).toBe(given.chip);
+    expect(doseChipLabel(out.perDose.pcv[1], total)).toBe(invalid.chip);
+    // The third box is the dose the card advises: it takes dose 2's number.
+    expect(out.recs.find((r) => r.vaccine === 'PCV').doseLabel).toMatch(new RegExp(next.chip, 'i'));
   });
 
   it('the risk matrix covers all four columns in every row', () => {
     for (const s of RISK_MATRIX) {
       for (const r of s.rows) {
         // A cell spanning two rows (rowSpan) fills its column in the next row.
-        const spanned = s.rows.indexOf(r) > 0
-          ? s.rows[s.rows.indexOf(r) - 1].cells.filter((c) => (c.rows ?? 1) > 1).reduce((n, c) => n + c.span, 0)
-          : 0;
+        const at = s.rows.indexOf(r);
+        const spanned = s.rows.slice(0, at)
+          .flatMap((prev, j) => prev.cells.filter((c) => (c.rows ?? 1) > at - j))
+          .reduce((n, c) => n + c.span, 0);
         expect(r.cells.reduce((n, c) => n + c.span, 0) + spanned, r.label).toBe(RISK_COLUMNS.length);
       }
     }
@@ -119,11 +135,15 @@ describe('C14 — no age or interval on the page is typed by hand', () => {
       .replace(/^\s*\/\/.*$/gm, '')
       .replace(/\/\*[\s\S]*?\*\//g, '');
     const offenders = [];
-    for (const m of page.matchAll(/(\w+):\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g)) {
+    // `field: '...'` inside a row, AND `const NAME = '...'` — a sentence shared
+    // by several rows is a constant, and was invisible to the first form
+    // until 2026-11-01.
+    for (const m of page.matchAll(/(\w+)(?::|\s*=)\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g)) {
       const [, field, , raw] = m;
       // A chip's words are asserted equal to doseChipLabel() above; an
       // `example` is a patient's facts, run as a patient.
-      if (field === 'chip' || field === 'example') continue;
+      // EX_TODAY is the worked patients' "today" — a patient fact, like `example`.
+      if (field === 'chip' || field === 'example' || field === 'EX_TODAY') continue;
       const text = raw
         .replace(/\$\{[^}]*\}/g, ' ')                              // interpolated: from a constant
         .replace(/\bP?[CP]C?S?V-?\d+\b/g, 'the vaccine')           // product names: PCV13, PPSV23
@@ -238,12 +258,20 @@ describe('C14 — the page renders, and reads as a clinician page', () => {
     ]);
   });
 
-  it('opens a Source on request, with the document named', () => {
+  it('opens a Source on request: quotes with their documents linked, and no test patients', () => {
     const { container } = render(<Rulebook />);
     const btn = container.querySelector('.rb-src-btn');
     fireEvent.click(btn);
     const panel = container.querySelector('.rb-src-panel');
-    expect(panel.textContent).toMatch(/Checked on:/);
+    expect(panel.querySelector('a.rb-src-doc').getAttribute('href')).toMatch(/^https:\/\//);
+    // Owner, 2026-11-01: "I only want to include references hyperlinked."
+    expect(panel.textContent).not.toMatch(/Checked on/);
+  });
+
+  it('is titled Rulebook, with no exception box above section 1 (owner, 2026-11-01)', () => {
+    const { container } = render(<Rulebook />);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Rulebook');
+    expect(container.querySelector('.rb-top').textContent).not.toMatch(/Exception|more than one option/);
   });
 
   it('shows no internal rule id to a clinician', () => {
