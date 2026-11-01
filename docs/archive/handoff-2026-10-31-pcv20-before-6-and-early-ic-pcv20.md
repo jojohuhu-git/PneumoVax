@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-10-31, late)** by `handoff-2026-10-31-at-risk-toddler-finished-series.md`. Its PR (#105) is merged; the undated-PCV20 item is mostly answered there, and the queue is re-ordered around a typical-patient sweep. Resume from the newer file.
+
 # PneumoVax — Handoff after the before-6 wording fix, the early IC PCV20 note, and closing "state the minimum" (2026-10-31, night)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
