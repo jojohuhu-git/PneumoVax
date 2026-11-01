@@ -599,7 +599,11 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
       target = before12 + 2;     // "1 before age 12 months" -> 2 additional
       t1row = 'p2016Table1_12to23_oneBefore12';
     } else if (at12plus >= 1) {
-      target = at12plus + 1;     // "1 dose at age 12 months or older" -> 1 additional
+      // "1 dose at age 12 months or older" -> 1 additional: a total of 2. The
+      // row keys on ONE dose, so the total is 1 + 1, not `at12plus + 1` —
+      // which asked a toddler who had both doses for a third (§L-T1-12TO23,
+      // 2026-10-31). Two or more doses at 12+ months is a finished series.
+      target = 2;
       t1row = 'p2016Table1_12to23_oneAt12Plus';
     } else {
       target = 2;                // "0 before age 12 months" -> "2 doses"
@@ -669,8 +673,25 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     const atRisk = rowClass !== null;
     const pcv20Done = pcv.hasPCV20;
     const nextDoseCite = rowClass === 'IC' ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23';
+    // §L-T1-12TO23 (2026-10-31). A series STARTED at 12-23 months is finished
+    // after two doses — p2016 Table 1, "all children (healthy and those with
+    // risk conditions)" — so an at-risk toddler can now reach this card with
+    // two. Her own rows at age 2 then ask for TWO more, PCV20 or not: CDC "Less
+    // than 3 PCV doses: 2 doses PCV" (CDC's catch-up table calls the second
+    // dose final only "for healthy children"), and p2016 Table 4 "0, 1, or 2
+    // PCV doses by age 24 months". The 24-month card already says so; this
+    // card must not promise her one dose, or none. Two counted doses on a
+    // finished series means both were dated at 12+ months (one before 12
+    // keys Table 1's 3-dose row), so the row she followed is "0 before age 12".
+    // Read only on the at-risk side of each ternary below.
+    const fewerThanThree = prior < 3;
     const note = !atRisk
       ? 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).'
+      : fewerThanThree
+        ? {
+          lead: 'The age-appropriate PCV series appears complete [c].',
+          detail: `This child has a risk condition. The series is complete for their age now, but with fewer than 3 doses by age 2 years, 2 more PCV doses fall due from the 2nd birthday, at least ${PNEUMO_GAP_WORDS} after the most recent dose and ${PNEUMO_GAP_WORDS} apart [c]. Re-check at the 2-year visit.`,
+        }
       : pcv20Done
         ? {
           lead: 'The age-appropriate PCV series appears complete [c].',
@@ -698,7 +719,9 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
       // where the other belongs.
       noteCites: !atRisk
         ? [cite('pedsNoPcv20IfComplete')]
-        : [cite('pedsRoutine4Dose'), cite(pcv20Done ? 'pedsRiskPcv20CompleteAt2' : nextDoseCite)],
+        : fewerThanThree
+          ? [cite('p2016Table1_12to23_noneBefore12'), cite('pedsRiskIncompleteCatchup')]
+          : [cite('pedsRoutine4Dose'), cite(pcv20Done ? 'pedsRiskPcv20CompleteAt2' : nextDoseCite)],
       refs: INFANT_DEFAULT_REFS,
     })];
   }
