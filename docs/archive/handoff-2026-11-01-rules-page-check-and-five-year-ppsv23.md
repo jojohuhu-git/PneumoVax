@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-11-01, later the same day)** by `handoff-2026-11-01-rules-page-live-and-thrown-out-ppsv23-timing.md`. Its open owner question (advise or require the conjugate wait after a thrown-out PPSV23) was answered — advise only — and built as §K-THROWNOUTTIMING; the rules-page canvas it mentions is now built (PR #114). Do not resume from this file.
+
 # PneumoVax — Handoff after the rules-page engine check, the PCV7 chip and §C-P2-FIVE (2026-11-01)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax` — client-side pneumococcal decision support.
