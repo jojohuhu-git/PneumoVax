@@ -3611,6 +3611,17 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   // ── PCV15 only, no PPSV23 → INCOMPLETE: give PPSV23 ─────────────────
   if (pcv.hasPCV15 && !ppsvGiven) {
     const { dueToday, earliestNextDate } = ppsvDueState(pcv.lastDate);
+    // P2-1 (2026-11-01, owner: "agree with fixing"). A 19-49 patient on the
+    // 8-week row whose date falls on or after her 50th birthday: G31, HIV,
+    // PCV15 on 10-11, told 12-06, turns 50 on 11-29 — and on 12-06 the 50+ card
+    // gives the year. One sentence, no new date: advising 8 weeks at 50+ is
+    // what the owner declined on 2026-10-16. The birthday is read from the date
+    // of birth when there is one, else counted from today's age.
+    const fifty = dob ? addCalendarMonths(dob, M.y50) : addCalendarMonths(today, M.y50 - am);
+    const turnsFiftyFirst = ppsvIntervalDays != null && !dueToday && earliestNextDate && earliestNextDate >= fifty;
+    const turnsFiftyLine = turnsFiftyFirst
+      ? ` This patient turns 50 on ${fmtDate(fifty)}, before that date. From age 50, ACIP advises ≥${ADULT_GAP_WORDS} after the PCV15, with ${PNEUMO_GAP_WORDS} an option that may be considered [c] — so the date above stays an option, and from that birthday the card shows the 1-year date.`
+      : '';
     const pcv15Card = rec({
       vaccine: 'PPSV23', status: anyRisk ? 'risk-based' : 'due',
       doseLabel: `PPSV23 (≥${ppsvIntervalLabel} after PCV15) — completes the series`,
@@ -3619,7 +3630,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       brands: ['PPSV23 (Pneumovax 23)'],
       note: {
         lead: `Give PPSV23 ≥${ppsvIntervalLabel} after the PCV15 dose [c] — the series is INCOMPLETE until then.${shorterMinimumNote}`,
-        detail: `PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given${notesCompletionMarker}. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete [c].`,
+        detail: `PCV15 was given but PPSV23 is still pending; the pneumococcal series is complete once it is given${notesCompletionMarker}. If PPSV23 is unavailable, a dose of PCV20 or PCV21 may be substituted to complete [c].${turnsFiftyLine}`,
       },
       // C8, document 2's CITE: the substitution sentence is the job aid's
       // footnote and NOTHING ELSE in the app's source set states it, so this
@@ -3633,6 +3644,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         ...shorterMinimumCites,
         ...notesCompletionCites,
         cite('jobAidPpsv23Unavailable'),
+        ...(turnsFiftyFirst ? [cite('adultPcv15ThenPpsv')] : []),
       ],
       refs: refsWithoutMmwr,
     });

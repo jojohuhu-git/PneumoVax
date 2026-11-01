@@ -1571,6 +1571,18 @@ Prior-vaccine branches:
 
 ---
 
+### §G-TURNS50 — an 8-week PPSV23 date that falls after the 50th birthday (2026-11-01)
+
+P2-1 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G31 — 49y11m, HIV, PCV15
+2026-10-11 — was advised PPSV23 from 2026-12-06 (the 19–49 IC 8 weeks); she turns 50 on
+2026-11-29, and on 12-06 the 50+ card says ≥1 year. **No date moves** — 8 weeks as advice at
+50+ is what the owner declined on 2026-10-16. The 19–49 card instead adds: *"This patient
+turns 50 on <date>, before that date. From age 50, ACIP advises ≥1 year after the PCV15, with
+8 weeks an option that may be considered [c] — so the date above stays an option, and from
+that birthday the card shows the 1-year date."* (`adultPcv15ThenPpsv`). 0 grid patients (the
+grid cannot place a PCV15 in the 8 weeks before a 50th birthday); hand-built guard
+`regression-2026-11-01-p2-1-eight-week-date-after-50th-birthday.test.js`.
+
 ## §H — Adults ≥50 y (`cdcAdultPneumo`, `cdcAdultTimingJobAid`, `mmwr7401a1`; routine lowered 65→50 eff. 2024-10-23)
 
 Routine for ALL adults ≥50 regardless of risk.
