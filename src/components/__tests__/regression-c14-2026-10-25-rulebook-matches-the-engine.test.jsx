@@ -32,7 +32,7 @@ import RecCard from '../RecCard.jsx';
 import { doseChipLabel } from '../doseChipLabel.js';
 import {
   BOUNDARIES, PRODUCTS, RISK_GROUPS, SOURCE_GROUPS, monthsInWords, WORKED_PATIENTS,
-  CHILD_LANES, CHILD_EXCEPTIONS, INVALID_EXAMPLE, ADULT_HISTORY, ADULT_OPTIONS, RISK_MATRIX, RISK_RANKING, RISK_COLUMNS,
+  CHILD_LANES, CHILD_EXCEPTIONS, INVALID_EXAMPLE, ADULT_HISTORY, ADULT_OPTIONS, RISK_RANKING, RISK_COLUMNS, DECISIONS,
   SERIES_PATTERNS, CHIP_LEGEND, PCV_AND_PPSV23, INVALID_ACTIONS, SPACING_RULE_IDS, ROUTINE_INFANT,
   PCV_AFTER_PCV, TRANSPLANT_STOP, VACCINE_ROWS, sourcesFor,
 } from '../../data/rulebook.js';
@@ -59,6 +59,7 @@ function check(key, e) {
   for (const re of x.cards ?? []) if (!labels.some((l) => re.test(l))) fails.push(`no card ${re}`);
   for (const re of x.noCards ?? []) if (labels.some((l) => re.test(l))) fails.push(`unexpected card ${re}`);
   for (const re of x.note ?? []) if (!notes.some((l) => re.test(l))) fails.push(`no note ${re}`);
+  for (const re of x.noNote ?? []) if (notes.some((l) => re.test(l))) fails.push(`unexpected note ${re}`);
   if (x.status && !recs.some((r) => r.status === x.status)) fails.push(`no ${x.status} card`);
   if (x.due) {
     const d = recs[0]?.dueToday ? 'today' : recs[0]?.earliestNextDate;
@@ -83,11 +84,10 @@ describe('C14 — every claim on the page is true of the app, patient by patient
 
   it('every written row carries at least one worked patient', () => {
     const rows = [
-      ...CHILD_LANES, ...CHILD_EXCEPTIONS, ...ADULT_HISTORY, ADULT_OPTIONS, TRANSPLANT_STOP,
-      ...RISK_MATRIX.flatMap((s) => s.rows.flatMap((r) => r.cells)), ...RISK_RANKING.steps,
-      ...SERIES_PATTERNS, ...CHIP_LEGEND, ...PCV_AND_PPSV23, ...INVALID_ACTIONS.rows,
+      ...CHILD_LANES, ...CHILD_EXCEPTIONS, ...ADULT_HISTORY.flatMap((h) => h.splits), ADULT_OPTIONS, TRANSPLANT_STOP,
+      ...RISK_RANKING.steps, ...SERIES_PATTERNS, ...CHIP_LEGEND, ...PCV_AND_PPSV23, ...INVALID_ACTIONS.rows, ...DECISIONS,
     ];
-    const bare = rows.filter((r) => !r.ex?.length).map((r) => r.text ?? r.history ?? r.name ?? r.doses ?? r.dose);
+    const bare = rows.filter((r) => !r.ex?.length).map((r) => r.text ?? r.next ?? r.history ?? r.name ?? r.doses ?? r.dose ?? r.title);
     expect(bare).toEqual([]);
   });
 
@@ -110,19 +110,6 @@ describe('C14 — every claim on the page is true of the app, patient by patient
     expect(doseChipLabel(out.perDose.pcv[1], total)).toBe(invalid.chip);
     // The third box is the dose the card advises: it takes dose 2's number.
     expect(out.recs.find((r) => r.vaccine === 'PCV').doseLabel).toMatch(new RegExp(next.chip, 'i'));
-  });
-
-  it('the risk matrix covers all four columns in every row', () => {
-    for (const s of RISK_MATRIX) {
-      for (const r of s.rows) {
-        // A cell spanning two rows (rowSpan) fills its column in the next row.
-        const at = s.rows.indexOf(r);
-        const spanned = s.rows.slice(0, at)
-          .flatMap((prev, j) => prev.cells.filter((c) => (c.rows ?? 1) > at - j))
-          .reduce((n, c) => n + c.span, 0);
-        expect(r.cells.reduce((n, c) => n + c.span, 0) + spanned, r.label).toBe(RISK_COLUMNS.length);
-      }
-    }
   });
 });
 
@@ -181,7 +168,7 @@ describe('C14 — no age or interval on the page is typed by hand', () => {
 });
 
 describe('C14 — every list on the page is the engine\'s own list', () => {
-  it('every spacing rule the engine applies is on exactly one row of section 4', () => {
+  it('every spacing rule the engine applies is on exactly one row of section 5', () => {
     expect(SPACING_RULE_IDS.slice().sort()).toEqual(DOSE_INTERVAL_RULES.map((r) => r.id).sort());
     expect(new Set(SPACING_RULE_IDS).size).toBe(SPACING_RULE_IDS.length);
   });
@@ -240,21 +227,21 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
   });
 
   it('a row\'s Source is the sentences the app\'s own cards cite for its patient', () => {
-    const quotes = sourcesFor(ADULT_HISTORY[0].ex).map((q) => q.quote);
+    const quotes = sourcesFor(ADULT_HISTORY[0].splits[0].ex).map((q) => q.quote);
     expect(quotes.length).toBeGreaterThan(0);
-    const out = recommend(ADULT_HISTORY[0].ex[0].input);
+    const out = recommend(ADULT_HISTORY[0].splits[0].ex[0].input);
     const cited = out.recs.flatMap((r) => r.noteCites ?? []).map((c) => c.quote).filter(Boolean);
     expect(quotes.slice().sort()).toEqual([...new Set(cited)].sort());
   });
 });
 
 describe('C14 — the page renders, and reads as a clinician page', () => {
-  it('renders the five sections in order', () => {
+  it('renders the seven parts in the order the app decides (owner, 2026-11-01)', () => {
     render(<Rulebook />);
     const heads = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
     expect(heads).toEqual([
-      '1. Standard schedules', '2. Risk groups', '3. The vaccines and how they combine',
-      '4. Minimum intervals and the 4-day grace', '5. Sources',
+      '1. The vaccines', '2. Age and risk group', '3. Children, birth to 18 years',
+      '4. Adults, 19 years and over', '5. Doses on the record', '6. PneumoVax decisions', '7. Sources',
     ]);
   });
 

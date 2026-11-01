@@ -433,6 +433,7 @@ const INFANT_PCV13_2022 = doses('PCV13', ['2023-01-01', '2023-03-01', '2023-05-0
  *   cards   — each pattern must match some card's dose label
  *   noCards — no card's dose label may match
  *   note    — each pattern must match some card's note
+ *   noNote  — no card's note may match
  *   status  — some card has this status
  *   due     — the first card is due on this date ('today' = due today)
  *   chip    — [stream, index, label]: that dose's chip reads exactly this
@@ -485,7 +486,19 @@ const P = {
     { cards: [/PCV dose 1 of 2 \(at-risk catch-up\)/] }),
   asplenia10none: ex('10-year-old with asplenia, unvaccinated',
     { dob: '2016-11-01', riskIds: ['asplenia'], pcvDoses: [], ppsv23Doses: [] },
-    { cards: [/Option A: 1 dose PCV20/, /Option B-1: 1 dose PCV15/, /Option B-2: PPSV23/] }),
+    { cards: [/Option A: 1 dose PCV20/, /Option B-1: 1 dose PCV15/, /Option B-2: PPSV23/], note: [new RegExp(`PCV20 or a second PPSV23 — ≥${Y5} later`)] }),
+  // 2026-11-01 (logic-order rebuild): the never-vaccinated 6-18 lane's step 3
+  // read "None" for every at-risk child while the app gave an immunocompromised
+  // one the 5-year dose (P1-2). These two hold both halves of that lane.
+  diabetic10none: ex('10-year-old with diabetes, unvaccinated',
+    { dob: '2016-11-01', riskIds: ['diabetes'], pcvDoses: [], ppsv23Doses: [] },
+    { cards: [/Option A: 1 dose PCV20/, /Option B-1: 1 dose PCV15/], noNote: [new RegExp(`≥${Y5}`)] }),
+  diabetic8pcv13: ex('8-year-old with diabetes, first PCV13 at 7',
+    { dob: '2018-11-01', riskIds: ['diabetes'], pcvDoses: doses('PCV13', ['2025-12-01']), ppsv23Doses: [] },
+    { cards: [/Option A: 1 dose PCV20/, /Option B: 1 dose PPSV23/], noCards: [/PCV15/] }),
+  asplenia4pcv20: ex('4-year-old with asplenia, PCV20 at 2, 4, 6 and 12 months',
+    { dob: '2022-11-01', riskIds: ['asplenia'], pcvDoses: doses('PCV20', ['2023-01-01', '2023-03-01', '2023-05-01', '2023-11-15']), ppsv23Doses: [] },
+    { status: 'complete', cards: [/includes PCV20/] }),
   smoker10: ex('10-year-old who smokes, unvaccinated (smoking counts only in adults)',
     { dob: '2016-11-01', riskIds: ['smoking'], pcvDoses: [], ppsv23Doses: [] },
     { status: 'not-indicated' }),
@@ -534,6 +547,12 @@ const P = {
   bothCsf40: ex('40-year-old with a CSF leak, PCV13 in 2020 and PPSV23 in 2022',
     { ageMonths: 480, riskIds: ['csf_leak'], pcvDoses: doses('PCV13', ['2020-01-01']), ppsv23Doses: doses('PPSV23', ['2022-01-01']) },
     { cards: [new RegExp(`PCV20 or PCV21 ≥${Y5} after last pneumococcal dose`)] }),
+  hiv30two: ex('30-year-old with HIV, PCV13 in 2012 and PPSV23 in 2013 and 2018',
+    { ageMonths: 360, riskIds: ['hiv'], pcvDoses: doses('PCV13', ['2012-01-01']), ppsv23Doses: doses('PPSV23', ['2013-01-01', '2018-06-01']) },
+    { cards: [new RegExp(`^Review at age ${ROUTINE_ADULT_MIN_M / 12} — or PCV20 or PCV21`)] }),
+  csf40two: ex('40-year-old with a CSF leak, PCV13 in 2012 and PPSV23 in 2013 and 2018',
+    { ageMonths: 480, riskIds: ['csf_leak'], pcvDoses: doses('PCV13', ['2012-01-01']), ppsv23Doses: doses('PPSV23', ['2013-01-01', '2018-06-01']) },
+    { cards: [new RegExp(`^Review at age ${ROUTINE_ADULT_MIN_M / 12} — or PCV20 or PCV21`)] }),
   bothDiabetic40: ex('40-year-old with diabetes, PCV13 in 2020 and PPSV23 in 2022',
     { ageMonths: 480, riskIds: ['diabetes'], pcvDoses: doses('PCV13', ['2020-01-01']), ppsv23Doses: doses('PPSV23', ['2022-01-01']) },
     { cards: [new RegExp(`^No dose now — review at age ${ROUTINE_ADULT_MIN_M / 12}$`)] }),
@@ -601,213 +620,114 @@ const P = {
 };
 export const WORKED_PATIENTS = P;
 
-/** Headings that carry an age, built from the constants like every sentence. */
+// ═════════════════════════════════════════════════════════════════════════
+//  THE PAGE IN THE APP'S OWN ORDER (owner, 2026-11-01, second review)
+// ═════════════════════════════════════════════════════════════════════════
+//
+// Her brief: *"I want this rulebook to follow the logic of the app but also be
+// instructive for a user to find the relevant rule to back up a piece of
+// vaccine logic without being overwhelmed by text or figures."* So the parts
+// run in the order the engine decides — the transplant stop, the vaccines,
+// who the patient is (age, risk group), what children and adults are given,
+// then how a recorded dose is checked — and three things changed with it:
+//
+//   • ONE SOURCE SENTENCE PER CLAIM. A row names the sentences it rests on
+//     (`cite`, refs.js keys). The Source button shows only those, and only
+//     when the app's own card for the row's worked patient cites them — so a
+//     row can never show a sentence the app does not use. When documents say
+//     the same thing, CDC's schedule notes come first and p2016 only when no
+//     CDC sentence on that card says it (her rule of 2026-10-23). When they
+//     disagree, the row cites the document the app FOLLOWS (mm7401a1's "≥8
+//     weeks" at 19-49 over CDC's notes' "may use").
+//   • PNEUMOVAX DECISIONS ARE NUMBERED AND WRITTEN ONCE (`DECISIONS`). A row
+//     names its decision by key; the chip opens that decision's own reason in
+//     place, and part 6 lists them all. The four grey paragraphs under tables
+//     are gone — each explained a different chip from the one beside it.
+//   • THE RISK GRID IS FOLDED INTO THE SCHEDULES. Its child rows repeated the
+//     children's table and its adult rows the adult history table, and its
+//     colours meant three things. Each answer now has one home.
+
+/** The parts of the page, in the order the app decides. */
 export const HEADINGS = {
+  vaccines: 'The vaccines',
+  who: 'Age and risk group',
   kids: `Children, birth to ${ADULT_SCHED_MIN_M / 12 - 1} years`,
   lanes: `Age ${AGE.m24 / 12} to ${ADULT_SCHED_MIN_M / 12 - 1} years, by risk group`,
   adults: `Adults, ${yrs(ADULT_SCHED_MIN_M)} and over`,
-  spacing: `Minimum intervals and the ${GRACE_DAYS}-day grace`,
+  spacing: 'Doses on the record',
+  decisions: 'PneumoVax decisions',
+  sources: 'Sources',
 };
 
-/** The routine infant series, read out of CDC's own sentence. */
-const routineQuote = REFS.pedsRoutine4Dose.quote;
-const routineAges = routineQuote.replace(/^.* at /, '').replace(/ months$/, '').split(', ');
-export const ROUTINE_INFANT = {
-  products: ALL_PRODUCTS.filter((p) => p.type === 'PCV' && p.active && p.counts && p.minAgeM < AGE.m24)
-    .map((p) => p.key).join(' or '),
-  total: Number(routineQuote.match(/(\d+)-dose/)[1]),
-  ages: routineAges.map((a) => `${a.replace('–', ' to ')} months`),
-  quote: routineQuote,
-  // The on-time infant first, so the Source shows CDC's routine 2/4/6/12-15
-  // sentence; the late starter backs "Children who start late need fewer doses".
-  ex: [P.infantOnTime, P.healthy3],
-};
+// ── PneumoVax decisions: written once, numbered, opened in place ─────────
+//
+// Every place CDC and ACIP give no answer and the app chose one. A row says
+// `decision: 'key'` (or a list); the chip reads "PneumoVax decision N" and
+// opens the entry below. `ex` is the patient whose card shows the decision.
+const W4 = wk(ADULT_CONJUGATE_SUPPORTED_MIN_DAYS);
+const Y1_PCV_AFTER_PPSV = gapOf('ADULT-PCV-AFTER-PPSV23');
+export const DECISIONS = [
+  {
+    key: 'transplant',
+    title: 'Transplant, CAR-T or B-cell-depleting therapy: no schedule is given',
+    does: 'Stops and shows no recommendation, even when another condition is also selected.',
+    why: 'Revaccination after these therapies is individualized. Refer to institutional guidelines (ASCO, NCCN, IDSA, CDC).',
+    ex: [P.transplant],
+  },
+  {
+    key: 'ppsvNotRepeated',
+    title: 'PPSV23 is not repeated',
+    when: `The first PPSV23 was invalid because it was given <${W8} after a PCV, or another PPSV23 would be a third dose.`,
+    does: 'Give PCV20 (adults: PCV20 or PCV21). PPSV23, and PCV15 (which requires PPSV23), are not offered.',
+    cdc: 'Also allow PPSV23 here.',
+    why: 'Each additional PPSV23 dose produces a weaker immune response.',
+    ex: [P.leah, P.sam, P.pcv15ThenBad19],
+  },
+  {
+    key: 'invalidPpsvTiming',
+    title: 'An invalid PPSV23 still sets the timing of the next dose',
+    does: `Children: the next PCV is advised ≥${W8} after it, and a PCV given sooner still counts; another PPSV23 waits ≥${Y5} after it. Adults: the next PCV is ≥${Y1_PCV_AFTER_PPSV} after it.`,
+    cdc: 'Do not address an invalid PPSV23.',
+    why: 'The spacing is about the immune response, not whether the dose counted.',
+    ex: [P.toddler, P.toddlerPcvSoon, P.pcv15ThenBad19],
+  },
+  {
+    key: 'pcvAfterPpsvInvalid',
+    title: `A child's PCV given <${W8} after a valid PPSV23 is Invalid`,
+    cdc: `Give ${W8} as the timing of the next dose, but do not say whether a PCV given sooner is valid.`,
+    why: 'A PCV given soon after PPSV23 produces a weaker immune response.',
+    ex: [P.ppsvThenPcvSoon],
+  },
+  {
+    key: 'icSecondPpsvCounts',
+    title: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first still counts`,
+    does: 'The note under the dose says how early it was.',
+    cdc: `Give ${Y5} as the interval, but do not say a dose given sooner is invalid.`,
+    why: 'Repeating it would mean a third PPSV23, which PneumoVax does not give (see "PPSV23 is not repeated").',
+    ex: [P.ic2ndEarly],
+  },
+  {
+    key: 'adultPcvAfterPcv',
+    title: 'An adult PCV given after another PCV always counts',
+    does: `If it was given <${W4} after the earlier PCV, a repeat dose (PCV20 or PCV21) ≥${W8} later may be considered.`,
+    cdc: 'Give no minimum interval between two adult PCV doses.',
+    why: `Other ACIP schedules space PCV doses ${W4} apart (infants, transplant recipients).`,
+    ex: [P.adultPcvClose],
+  },
+].map((d, i) => ({ ...d, n: i + 1 }));
+export const DECISION = Object.fromEntries(DECISIONS.map((d) => [d.key, d]));
+/** A row's decision keys, as a list. */
+export const decisionsOf = (row) => (row?.decision == null ? [] : [].concat(row.decision));
 
-/**
- * The children's table, one row per patient group. Step cells are
- * 'dose' | 'none'; a cell's `note` carries the catch-up and skip rules that
- * used to sit in a bullet list under the table (owner, 2026-11-01: "Is there
- * any way to incorporate in the visual").
- */
-const CATCHUP_AT_RISK = `If incomplete at ${yrs(AGE.m24)} to under ${yrs(AGE.m72)}: 1 or 2 catch-up PCV doses, ≥${W8} apart`;
-const SKIP_IF_PCV20 = `≥${W8} after last PCV. Not needed if the series included PCV20.`;
-export const CHILD_LANES = [
-  {
-    group: 'Healthy',
-    steps: [
-      { kind: 'dose', text: 'Routine series', note: `If incomplete at ${yrs(AGE.m24)} to under ${yrs(AGE.m60)}: 1 catch-up PCV dose, ≥${W8} after the last dose` },
-      { kind: 'none' },
-      { kind: 'none' },
-    ],
-    result: { text: 'Complete', note: `From ${yrs(AGE.m60)}: no catch-up; not indicated. Re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)}.` },
-    ex: [P.healthy3, P.healthy6],
-  },
-  {
-    group: 'Chronic condition, cochlear implant or CSF leak',
-    steps: [
-      { kind: 'dose', text: 'Routine series', note: CATCHUP_AT_RISK },
-      { kind: 'dose', text: 'PCV20 or PPSV23', ppsv: true, note: SKIP_IF_PCV20 },
-      { kind: 'none' },
-    ],
-    result: { text: 'Complete' },
-    ex: [P.diabetic4, P.cochlear4, P.diabetic5done, P.diabetic3partial, P.diabeticPcv20],
-  },
-  {
-    group: 'Immunocompromising',
-    steps: [
-      { kind: 'dose', text: 'Routine series', note: CATCHUP_AT_RISK },
-      { kind: 'dose', text: 'PCV20 or PPSV23', ppsv: true, note: SKIP_IF_PCV20 },
-      { kind: 'dose', text: 'PCV20 or 2nd PPSV23', ppsv: true, note: `≥${Y5} after PPSV23 (only if step 2 was PPSV23)` },
-    ],
-    result: { text: 'Complete' },
-    ex: [P.asplenia5ppsv, P.asplenia3partial],
-  },
-  {
-    group: `At risk, no PCV before ${yrs(AGE.m72)}`,
-    steps: [
-      { kind: 'dose', text: 'PCV20 or PCV15' },
-      { kind: 'dose', text: 'PPSV23', ppsv: true, note: `≥${W8} after PCV15 (only if step 1 was PCV15)` },
-      { kind: 'none' },
-    ],
-    result: { text: 'Complete' },
-    ex: [P.asplenia10none],
-  },
-];
-
-export const ADULT_BANDS = [
-  { label: band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M), sub: 'Risk condition required', ex: [P.healthy30, P.smoker30] },
-  { label: `${ROUTINE_ADULT_MIN_M / 12} and over`, sub: 'All adults', ex: [P.healthy55] },
-];
-
-export const ADULT_OPTIONS = {
-  lead: 'No prior pneumococcal vaccine: either option completes the series',
-  a: { doses: ['PCV20 or PCV21'] },
-  b: { doses: ['PCV15', 'PPSV23'], gap: Y1 },
-  note: `Option B interval is ≥${W8_ADULT} (not ${Y1}) at ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)} with an immunocompromising condition, cochlear implant or CSF leak. From ${yrs(ROUTINE_ADULT_MIN_M)}, ${W8_ADULT} may be considered for these conditions.`,
-  ex: [P.csf30, P.smoker30, P.pcv15at55, P.cochlear45pcv15, P.asplenia60pcv15],
-};
-
-export const ADULT_HISTORY = [
-  { history: 'PCV13 only', next: `PCV20 or PCV21, ≥${gapOf('ADULT-PCV20-21-AFTER-PCV13')} after PCV13`, ex: [P.pcv13at60] },
-  { history: 'PPSV23 only', next: `PCV15, PCV20 or PCV21, ≥${gapOf('ADULT-PCV-AFTER-PPSV23')} after the last PPSV23`, ex: [P.ppsv70] },
-  {
-    history: 'PCV15 only',
-    next: `PPSV23 ≥${Y1} after PCV15 (≥${W8_ADULT} at ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)} with an immunocompromising condition, cochlear implant or CSF leak). If PPSV23 is unavailable: PCV20 or PCV21.`,
-    ex: [P.pcv15at55, P.cochlear45pcv15],
-  },
-  {
-    history: 'PCV15, then a PPSV23 that was invalid',
-    next: `PCV20 or PCV21, ≥${Y1} after the PPSV23. No PPSV23.`,
-    decision: true,
-    ex: [P.pcv15ThenBad19],
-  },
-  {
-    history: `PCV13 and PPSV23, from ${yrs(ROUTINE_ADULT_MIN_M)}`,
-    next: `PCV20 or PCV21, ≥${gapOf('ADULT-PCV20-21-5Y-AFTER-PPSV23')} after the last dose. Shared clinical decision-making if PPSV23 was given at ${yrs(AGE.y65)} or older.`,
-    ex: [P.both60, P.both72],
-  },
-  {
-    history: `PCV13 and PPSV23, ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)}`,
-    next: `Immunocompromising condition, cochlear implant or CSF leak: PCV20 or PCV21, ≥${Y5} after the last dose. Chronic conditions only: none now; review at ${yrs(ROUTINE_ADULT_MIN_M)}.`,
-    ex: [P.bothHiv30, P.bothDiabetic40],
-  },
-  { history: 'PCV20, PCV21, or PCV15 and PPSV23', next: 'Complete', complete: true, ex: [P.pcv20adult, P.complete55] },
-];
-
+// ── 0. The stop ──────────────────────────────────────────────────────────
 export const TRANSPLANT_STOP = {
   title: 'Stem cell transplant, CAR-T or B-cell-depleting therapy',
   text: 'Individualized revaccination schedule required. Refer to institutional guidelines.',
+  decision: 'transplant',
   ex: [P.transplant],
 };
 
-// ── 2. Risk groups ───────────────────────────────────────────────────────
-const conds = (pred) => RISK_FACTORS.filter((r) => !r.exclude && pred(r)).map((r) => r.label);
-const grp = (r) => r.group ?? r.class;
-export const RISK_COLUMNS = [
-  { key: 'IC', name: 'Immunocompromising', conditions: conds((r) => grp(r) === 'IC') },
-  { key: 'special', name: 'Cochlear implant or CSF leak', conditions: conds((r) => grp(r) === 'special') },
-  { key: 'nonIC', name: 'Chronic conditions', conditions: conds((r) => grp(r) === 'nonIC' && !r.adultOnly) },
-  { key: 'adultOnly', name: 'Smoking or alcohol use disorder (adults only)', conditions: conds((r) => grp(r) === 'nonIC' && r.adultOnly) },
-];
-
-/** A row of the matrix: `cells` span columns left to right; tone yes|no|alt|na. */
-export const RISK_MATRIX = [
-  {
-    section: `Children, ${yrs(AGE.m24)} to ${ADULT_SCHED_MIN_M / 12 - 1} years`,
-    rows: [
-      {
-        label: 'Additional dose after the routine PCV series (PCV20 or PPSV23)',
-        cells: [
-          { span: 3, tone: 'yes', text: `Yes, ≥${W8} after last PCV`, ex: [P.diabetic4, P.cochlear4, P.asplenia5ppsv] },
-          { span: 1, tone: 'na', text: 'Not a child risk condition', rows: 3, ex: [P.smoker10] },
-        ],
-      },
-      {
-        label: `Dose ≥${Y5} after PPSV23 (PCV20 or 2nd PPSV23)`,
-        cells: [
-          { span: 1, tone: 'yes', text: 'Yes', ex: [P.asplenia5ppsv] },
-          { span: 2, tone: 'no', text: 'No', ex: [P.diabetic5done, P.cochlear15] },
-        ],
-      },
-      // Owner, 2026-11-01: "Do any of the children sections need None now;
-      // review at 19-50 years?" Yes — this row, which is also where the
-      // "at 19" bullet from section 1 now lives. The three answers are the
-      // adult cards' own (withAtNineteen), each with its patient.
-      {
-        label: `At ${yrs(ADULT_SCHED_MIN_M)}, if the series did not include PCV20`,
-        cells: [
-          { span: 1, tone: 'alt', text: `Review at ${yrs(ROUTINE_ADULT_MIN_M)}, or PCV20 or PCV21 ≥${Y5} after the last dose`, ex: [P.asplenia16two] },
-          { span: 1, tone: 'yes', text: `PCV20 or PCV21, ≥${Y5} after the last dose`, ex: [P.cochlear15] },
-          { span: 1, tone: 'no', text: `None now; review at ${yrs(ROUTINE_ADULT_MIN_M)}`, ex: [P.diabetic15] },
-        ],
-      },
-    ],
-  },
-  {
-    section: `Adults, ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)}`,
-    rows: [
-      { label: 'Indication for vaccination', cells: [{ span: 4, tone: 'yes', text: 'Yes, all groups', ex: [P.csf30, P.smoker30] }] },
-      {
-        label: 'PCV15 to PPSV23 interval',
-        cells: [
-          { span: 2, tone: 'alt', text: `≥${W8_ADULT}`, ex: [P.cochlear45pcv15] },
-          { span: 2, tone: 'no', text: `≥${Y1}`, ex: [P.diabetic30pcv15] },
-        ],
-      },
-      {
-        label: 'Prior PCV13 and PPSV23',
-        cells: [
-          { span: 2, tone: 'yes', text: `PCV20 or PCV21, ≥${Y5} after the last dose`, ex: [P.bothHiv30, P.bothCsf40] },
-          { span: 2, tone: 'no', text: `None now; review at ${yrs(ROUTINE_ADULT_MIN_M)}`, ex: [P.bothDiabetic40, P.bothSmoker40] },
-        ],
-      },
-    ],
-  },
-  {
-    section: `Adults, ${yrs(ROUTINE_ADULT_MIN_M)} and over`,
-    rows: [
-      {
-        label: 'Effect of risk group',
-        cells: [
-          { span: 2, tone: 'alt', text: `PCV15 to PPSV23: ≥${W8_ADULT} may be considered (≥${Y1} recommended)`, ex: [P.asplenia60pcv15] },
-          { span: 2, tone: 'no', text: `None. Same schedule as all adults from ${yrs(ROUTINE_ADULT_MIN_M)}.`, ex: [P.diabetic60pcv15] },
-        ],
-      },
-    ],
-  },
-];
-
-export const RISK_RANKING = {
-  lead: 'The highest-ranked condition decides the recommendation. Every selected condition is listed on the result.',
-  steps: [
-    { name: 'Stem cell transplant, CAR-T or B-cell-depleting therapy', ex: [P.transplant] },
-    { name: 'Any immunocompromising condition', ex: [P.childMulti] },
-    { name: 'Cochlear implant or CSF leak', ex: [P.adultMulti, P.cochlear15] },
-    { name: 'Chronic conditions, smoking or alcohol use disorder', ex: [P.diabetic30pcv15] },
-  ],
-};
-
-// ── 3. The vaccines ──────────────────────────────────────────────────────
+// ── 1. The vaccines ──────────────────────────────────────────────────────
 // `atRisk` is a second line for an at-risk child (owner, 2026-11-01: "PCV15 -
 // at risk comment under use in children should have a separate row for it"),
 // worded to say what completes the series, as the other cells do.
@@ -839,22 +759,206 @@ export const VACCINE_ROWS = ['current', 'history'].map((kind) => ({
     })),
 }));
 
+// The owner kept these as a quick reference (2026-11-01: "it is helpful to
+// reference"). Every one is also stated in its home in parts 3 to 5, so the
+// patterns carry NO interval — a sixth copy of an interval is a sixth place
+// for it to drift — and no Source: the source is on the rule's home row.
 export const SERIES_PATTERNS = [
   { name: 'Single dose', doses: [{ text: 'PCV20 or PCV21' }], note: 'Adults. Also at-risk children after a completed routine series (PCV20 only).', ex: [P.healthy55, P.diabetic4] },
   { name: 'Two doses', doses: [{ text: 'PCV15' }, { text: 'PPSV23', ppsv: true }], note: 'At-risk children and adults. Adults: PCV20 or PCV21 may replace PPSV23 if it is unavailable.', ex: [P.asplenia10none, P.pcv15at55] },
-  { name: 'Prior PCV13', doses: [{ text: 'PCV13', old: true }, { text: 'PCV20 or PCV21' }], note: `Adults: ≥${gapOf('ADULT-PCV20-21-AFTER-PCV13')} after PCV13. At-risk children after a PCV13 series: PCV20 or PPSV23, ≥${W8} after the last PCV.`, ex: [P.pcv13at60, P.diabetic4] },
-  { name: 'Prior PPSV23 only', doses: [{ text: 'PPSV23', ppsv: true }, { text: 'PCV15, PCV20 or PCV21' }], note: `A PCV is still needed. Adults: ≥${gapOf('ADULT-PCV-AFTER-PPSV23')} after PPSV23. Children: ≥${W8} after PPSV23.`, ex: [P.ppsv70, P.asplenia8ppsv] },
+  { name: 'Prior PCV13', doses: [{ text: 'PCV13', old: true }, { text: 'PCV20 or PCV21' }], note: 'Adults. At-risk children after a PCV13 series: PCV20 or PPSV23.', ex: [P.pcv13at60, P.diabetic4] },
+  { name: 'Prior PPSV23 only', doses: [{ text: 'PPSV23', ppsv: true }, { text: 'PCV15, PCV20 or PCV21' }], note: 'A PCV is still needed.', ex: [P.ppsv70, P.asplenia8ppsv] },
   {
     name: 'PPSV23 not repeated',
     doses: [{ text: 'PPSV23', ppsv: true, struck: true }, { text: 'PCV20 (adults: or PCV21)' }],
-    note: `Applies when the first PPSV23 was invalid because it was given <${W8} after a PCV, or when another PPSV23 would be a third dose. PPSV23 and PCV15 (which requires PPSV23) are not offered.`,
-    decision: 'CDC also allows PPSV23 here. PneumoVax omits it because each additional PPSV23 dose produces a weaker immune response.',
+    note: `When the first PPSV23 was invalid because it was given <${W8} after a PCV, or another PPSV23 would be a third dose.`,
+    decision: 'ppsvNotRepeated',
     ex: [P.leah, P.sam],
   },
   { name: 'Not valid', doses: [{ text: 'PCV7', old: true }], end: 'Treat as unvaccinated', ex: [P.pcv7] },
 ];
 
-// ── 4. Minimum intervals and the 4-day grace ─────────────────────────────
+// ── 2. Age and risk group ────────────────────────────────────────────────
+/** The three age lines, youngest first (owner, 2026-10-31: chronological). */
+export const AGE_LINES = [
+  { age: `${yrs(PCV21_MIN_AGE_M)}`, text: 'PCV21 may be given. A product limit only; it does not change the schedule.' },
+  { age: `${yrs(ADULT_SCHED_MIN_M)}`, text: 'The adult rules apply instead of the child ones.' },
+  { age: `${yrs(ROUTINE_ADULT_MIN_M)}`, text: 'Every adult is recommended a pneumococcal vaccine. Below this age, an adult needs a risk condition.' },
+];
+
+const conds = (pred) => RISK_FACTORS.filter((r) => !r.exclude && pred(r)).map((r) => r.label);
+const grp = (r) => r.group ?? r.class;
+export const RISK_COLUMNS = [
+  { key: 'IC', name: 'Immunocompromising', conditions: conds((r) => grp(r) === 'IC') },
+  { key: 'special', name: 'Cochlear implant or CSF leak', conditions: conds((r) => grp(r) === 'special') },
+  { key: 'nonIC', name: 'Chronic conditions', conditions: conds((r) => grp(r) === 'nonIC' && !r.adultOnly) },
+  {
+    key: 'adultOnly',
+    name: 'Smoking or alcohol use disorder',
+    conditions: conds((r) => grp(r) === 'nonIC' && r.adultOnly),
+    note: `Adults only. Not a risk condition under ${yrs(ADULT_SCHED_MIN_M)}.`,
+    cite: ['cdcChildSpecialSituations'],
+    ex: [P.smoker10],
+  },
+];
+
+export const RISK_RANKING = {
+  lead: 'The highest-ranked condition decides the recommendation. Every selected condition is listed on the result.',
+  steps: [
+    { name: 'Stem cell transplant, CAR-T or B-cell-depleting therapy', ex: [P.transplant] },
+    { name: 'Any immunocompromising condition', ex: [P.childMulti] },
+    { name: 'Cochlear implant or CSF leak', ex: [P.adultMulti, P.cochlear15] },
+    { name: 'Chronic conditions, smoking or alcohol use disorder', ex: [P.diabetic30pcv15] },
+  ],
+};
+
+// ── 3. Children ──────────────────────────────────────────────────────────
+/** The routine infant series, read out of CDC's own sentence. */
+const routineQuote = REFS.pedsRoutine4Dose.quote;
+const routineAges = routineQuote.replace(/^.* at /, '').replace(/ months$/, '').split(', ');
+export const ROUTINE_INFANT = {
+  products: ALL_PRODUCTS.filter((p) => p.type === 'PCV' && p.active && p.counts && p.minAgeM < AGE.m24)
+    .map((p) => p.key).join(' or '),
+  total: Number(routineQuote.match(/(\d+)-dose/)[1]),
+  ages: routineAges.map((a) => `${a.replace('–', ' to ')} months`),
+  quote: routineQuote,
+  cite: ['pedsRoutine4Dose'],
+  ex: [P.infantOnTime, P.healthy3],
+};
+
+/**
+ * The children's table, one row per patient group. Step cells are
+ * 'dose' | 'none'; a cell's `note` carries the catch-up and skip rules that
+ * used to sit in a bullet list under the table (owner, 2026-11-01: "Is there
+ * any way to incorporate in the visual").
+ */
+const CATCHUP_AT_RISK = `If incomplete at ${yrs(AGE.m24)} to under ${yrs(AGE.m72)}: 1 or 2 catch-up PCV doses, ≥${W8} apart`;
+const SKIP_IF_PCV20 = `≥${W8} after last PCV. Not needed if the series included PCV20.`;
+export const CHILD_LANES = [
+  {
+    group: 'Healthy',
+    steps: [
+      { kind: 'dose', text: 'Routine series', note: `If incomplete at ${yrs(AGE.m24)} to under ${yrs(AGE.m60)}: 1 catch-up PCV dose, ≥${W8} after the last dose` },
+      { kind: 'none' },
+      { kind: 'none' },
+    ],
+    result: { text: 'Complete', note: `From ${yrs(AGE.m60)}: no catch-up; not indicated. Re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)}.` },
+    cite: ['pedsHealthyCatchup', 'adultRoutine50'],
+    ex: [P.healthy3, P.healthy6],
+  },
+  {
+    group: 'Chronic condition, cochlear implant or CSF leak',
+    steps: [
+      { kind: 'dose', text: 'Routine series', note: CATCHUP_AT_RISK },
+      { kind: 'dose', text: 'PCV20 or PPSV23', ppsv: true, note: SKIP_IF_PCV20 },
+      { kind: 'none' },
+    ],
+    result: { text: 'Complete' },
+    cite: ['pedsRiskIncompleteCatchup', 'pedsRiskPcv20orPpsv23', 'pedsRiskPcv20CompleteAt2', 'pedsRiskSinglePpsv23AfterPcv'],
+    ex: [P.diabetic4, P.cochlear4, P.diabetic5done, P.diabetic3partial, P.diabeticPcv20],
+  },
+  {
+    group: 'Immunocompromising',
+    steps: [
+      { kind: 'dose', text: 'Routine series', note: CATCHUP_AT_RISK },
+      { kind: 'dose', text: 'PCV20 or PPSV23', ppsv: true, note: SKIP_IF_PCV20 },
+      { kind: 'dose', text: 'PCV20 or 2nd PPSV23', ppsv: true, note: `≥${Y5} after PPSV23 (only if step 2 was PPSV23)` },
+    ],
+    result: { text: 'Complete' },
+    cite: ['pedsRiskIncompleteCatchup', 'pedsIcPcv20orPpsv23', 'pedsIcPpsvWaitFiveYears', 'pedsRiskPcv20CompleteAt2'],
+    ex: [P.asplenia5ppsv, P.asplenia3partial, P.asplenia4pcv20],
+  },
+  // Owner, 2026-11-01: "What is the purpose of At risk, no PCV before 6
+  // years?" It is CDC's own split at 6-18 — "Not previously received any dose
+  // of PCV13, PCV15, or PCV20" is a separate row from "Received PCV before age
+  // 6 years". The old label said neither the age nor "never", and a PCV13
+  // first given at 6 or older is NOT this row (CDC: PCV20 or PPSV23), so it
+  // now says both. Step 3 used to read None for every child; since P1-2 the
+  // app gives an immunocompromised child the 5-year dose.
+  {
+    group: `At risk, ${AGE.m72 / 12} to ${ADULT_SCHED_MIN_M / 12 - 1} years, never had a PCV`,
+    steps: [
+      { kind: 'dose', text: 'PCV20 or PCV15', note: `First PCV already given at ${yrs(AGE.m72)} or older: start at step 2 (PCV20 or PPSV23)` },
+      { kind: 'dose', text: 'PPSV23', ppsv: true, note: `≥${W8} after PCV15 (only if step 1 was PCV15)` },
+      { kind: 'dose', text: 'PCV20 or 2nd PPSV23', ppsv: true, note: `Immunocompromising only: ≥${Y5} after PPSV23` },
+    ],
+    result: { text: 'Complete' },
+    cite: ['pedsRisk6to18NoPcv', 'pedsIc6to18NoPcv', 'pedsRiskPcv13At6', 'pedsSecondPpsv5y'],
+    ex: [P.asplenia10none, P.diabetic10none, P.diabetic8pcv13],
+  },
+];
+
+/** The children's table hands over to the adult one at the child/adult line. */
+export const AT_NINETEEN = `From ${yrs(ADULT_SCHED_MIN_M)}, the adult rules apply, including to doses given in childhood: see Adults, prior pneumococcal vaccines.`;
+
+// ── 4. Adults ────────────────────────────────────────────────────────────
+export const ADULT_BANDS = [
+  { label: band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M), sub: 'Risk condition required', cite: ['cdcAdultRiskFactorList'], ex: [P.healthy30, P.smoker30] },
+  { label: `${ROUTINE_ADULT_MIN_M / 12} and over`, sub: 'All adults', cite: ['adultRoutine50'], ex: [P.healthy55] },
+];
+
+// The ONE home of the adult PCV15 -> PPSV23 interval (it was written in five
+// places). The usual interval first, the exception in parentheses (owner,
+// 2026-11-01). ACIP's two verbs are kept: "administer ≥8 weeks" at 19-49,
+// "can be considered" from 50 — and the 19-49 row cites mm7401a1, the
+// document the app follows there, not CDC's notes ("may use").
+const IC_SPECIAL = 'an immunocompromising condition, cochlear implant or CSF leak';
+export const ADULT_PCV15_PPSV23 = `≥${Y1} (≥${W8_ADULT} at ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)} with ${IC_SPECIAL}; from ${yrs(ROUTINE_ADULT_MIN_M)}, ≥${W8_ADULT} may be considered for these conditions)`;
+export const ADULT_OPTIONS = {
+  lead: 'No prior pneumococcal vaccine: either option completes the series',
+  a: { doses: ['PCV20 or PCV21'] },
+  b: { doses: ['PCV15', 'PPSV23'], gap: Y1 },
+  note: `Option B interval: ${ADULT_PCV15_PPSV23}.`,
+  cite: ['adultPcv20or21Complete', 'adultPcv15ThenPpsv', 'adultPcv15ThenPpsvShort'],
+  ex: [P.csf30, P.smoker30, P.pcv15at55, P.cochlear45pcv15, P.asplenia60pcv15],
+};
+
+/**
+ * Prior vaccines, with the risk group as a column where the answer splits
+ * (owner, 2026-11-01: fold the risk grid into the schedules). Each `split`
+ * is one row of the table; `risk: null` means every risk group.
+ */
+const ANY = null;
+export const ADULT_HISTORY = [
+  { history: 'PCV13 only', splits: [{ risk: ANY, next: `PCV20 or PCV21, ≥${gapOf('ADULT-PCV20-21-AFTER-PCV13')} after PCV13`, cite: ['adultPcv13Only'], ex: [P.pcv13at60] }] },
+  { history: 'PPSV23 only', splits: [{ risk: ANY, next: `PCV15, PCV20 or PCV21, ≥${gapOf('ADULT-PCV-AFTER-PPSV23')} after the last PPSV23`, cite: ['adultPpsvOnly'], ex: [P.ppsv70] }] },
+  {
+    history: 'PCV15 only',
+    splits: [{ risk: ANY, next: 'PPSV23, at the Option B interval above. If PPSV23 is unavailable: PCV20 or PCV21.', cite: ['adultPcv15ThenPpsv', 'jobAidPpsv23Unavailable'], ex: [P.pcv15at55, P.cochlear45pcv15] }],
+  },
+  // Owner, 2026-11-01: "should either give a brief explanation why PPSV23
+  // isn't listed as an option here. Also consider removing 'No PPSV23'". The
+  // explanation is decision 'ppsvNotRepeated', opened from the chip. And the
+  // context it lacked: every adult interval is advice only (no adult row is a
+  // floor since 2026-10-25), so an adult's PPSV23 can only be invalid if it
+  // was given under the CHILD rules.
+  {
+    history: `PCV15, then an invalid PPSV23 (given before ${yrs(ADULT_SCHED_MIN_M)})`,
+    splits: [{ risk: ANY, next: `PCV20 or PCV21, ≥${Y1_PCV_AFTER_PPSV} after the PPSV23`, decision: ['ppsvNotRepeated', 'invalidPpsvTiming'], cite: ['adultPpsv23Unavailable'], ex: [P.pcv15ThenBad19] }],
+  },
+  {
+    history: `PCV13 and PPSV23, ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)}`,
+    splits: [
+      { risk: 'Immunocompromising condition, cochlear implant or CSF leak; one PPSV23 dose', next: `PCV20 or PCV21, ≥${Y5} after the last dose`, cite: ['adultIc1949BothPcv13Ppsv'], ex: [P.bothHiv30, P.bothCsf40] },
+      // Moved here from the children's "At 19" row (owner, 2026-11-01: remove
+      // it, the patient is under Adults) — the adult table had not shown
+      // ACIP's two-dose row at all.
+      { risk: 'Immunocompromising condition, cochlear implant or CSF leak; two PPSV23 doses', next: `Review at ${yrs(ROUTINE_ADULT_MIN_M)}, or PCV20 or PCV21 ≥${Y5} after the last dose`, cite: ['mmwrIc1949TwoPpsv'], ex: [P.hiv30two, P.csf40two, P.asplenia16two] },
+      { risk: 'Chronic conditions, smoking or alcohol use disorder', next: `None now; review at ${yrs(ROUTINE_ADULT_MIN_M)}`, cite: ['adultChronicOnlyReviewAt50'], ex: [P.bothDiabetic40, P.bothSmoker40, P.diabetic15] },
+    ],
+  },
+  // Owner, 2026-11-01: "the 'from 50 years' is confusing" — it meant the
+  // patient's age now.
+  {
+    history: `PCV13 and PPSV23, ${yrs(ROUTINE_ADULT_MIN_M)} and over`,
+    splits: [{ risk: ANY, next: `PCV20 or PCV21, ≥${gapOf('ADULT-PCV20-21-5Y-AFTER-PPSV23')} after the last dose. Shared clinical decision-making if PPSV23 was given at ${yrs(AGE.y65)} or older.`, cite: ['adultBothNotAt65', 'adultBothAt65'], ex: [P.both60, P.both72] }],
+  },
+  { history: 'PCV20, PCV21, or PCV15 and PPSV23', splits: [{ risk: ANY, next: 'Complete', complete: true, cite: ['adultPcv20or21Complete', 'jobAidSeriesCompleteAt50'], ex: [P.pcv20adult, P.complete55] }] },
+];
+
+// ── 5. Doses on the record ───────────────────────────────────────────────
+// The dose labels are the app's own words, so they carry no Source; the
+// worked patients still prove each label.
 export const CHIP_LEGEND = [
   // One entry for the two counted labels (owner, 2026-11-01: "Can dose 1 and
   // 2 child be combined"). `chips` pair with `ex` in order; the third patient
@@ -884,8 +988,8 @@ export const GRACE = {
  */
 export const CHILD_EXCEPTIONS = [
   { text: `Given up to ${GRACE_DAYS} days early: CDC's grace, above.`, ex: [P.infantOnTime] },
-  { text: `A PCV given <${W8} after a PPSV23 that itself did not count. The ${W8} is advice only.`, decision: true, ex: [P.toddlerPcvSoon] },
-  { text: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first. The note says how early. Other children do not need a 2nd PPSV23; it is labelled Extra dose.`, decision: true, ex: [P.ic2ndEarly, P.nonIc2nd] },
+  { text: `A PCV given <${W8} after a PPSV23 that itself did not count. The ${W8} is advice only.`, decision: 'invalidPpsvTiming', ex: [P.toddlerPcvSoon] },
+  { text: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first. The note says how early. Other children do not need a 2nd PPSV23; it is labelled Extra dose.`, decision: 'icSecondPpsvCounts', ex: [P.ic2ndEarly, P.nonIc2nd] },
 ];
 
 /** CDC Catch-up Table 2, probed out of the engine's own function. */
@@ -904,12 +1008,15 @@ export const PCV_AFTER_PCV = {
 };
 
 export const PCV_AND_PPSV23 = [
-  { doses: 'PCV, then PPSV23', gap: gapOf('CHILD-PPSV23-AFTER-PCV'), ruleIds: ['CHILD-PPSV23-AFTER-PCV'], ex: [P.leah] },
-  { doses: 'PPSV23, then PCV', gap: gapOf('CHILD-PCV-AFTER-PPSV23'), decision: true, text: 'A PCV given sooner is Invalid.', ruleIds: ['CHILD-PCV-AFTER-PPSV23'], ex: [P.ppsvThenPcvSoon] },
+  { doses: 'PCV, then PPSV23', gap: gapOf('CHILD-PPSV23-AFTER-PCV'), ruleIds: ['CHILD-PPSV23-AFTER-PCV'], cite: ['pedsRiskPcv20orPpsv23'], ex: [P.diabetic4, P.leah] },
+  // p2016 is the one sentence ON THIS CARD giving the gap from a PPSV23 to
+  // the PCV (CDC's 6-18 notes row says only "1 dose of PCV15 or 1 dose of
+  // PCV20") — her fallback rule, not a preference.
+  { doses: 'PPSV23, then PCV', gap: gapOf('CHILD-PCV-AFTER-PPSV23'), decision: 'pcvAfterPpsvInvalid', text: 'A PCV given sooner is Invalid.', ruleIds: ['CHILD-PCV-AFTER-PPSV23'], cite: ['p2016NoPriorPcv6to18OptionA'], ex: [P.asplenia8ppsv, P.ppsvThenPcvSoon] },
   {
     doses: 'An invalid PPSV23, then PCV',
     gap: W8,
-    decision: true,
+    decision: 'invalidPpsvTiming',
     text: `Advised ≥${W8} after the invalid PPSV23 (or the last PCV, if later). A PCV given sooner is still valid.`,
     ruleIds: [],
     ex: [P.toddler],
@@ -917,36 +1024,25 @@ export const PCV_AND_PPSV23 = [
   {
     doses: 'PPSV23, then a 2nd PPSV23',
     gap: gapOf('CHILD-PPSV23-AFTER-PPSV23'),
+    decision: ['invalidPpsvTiming', 'icSecondPpsvCounts'],
     text: 'Counted from the previous PPSV23, whether or not it was valid. Only immunocompromised children receive a 2nd PPSV23; if it is given early it is still valid, and the note says so.',
     sub: 'Other children do not need a 2nd PPSV23; it is labelled',
     subChip: 'Extra dose',
     ruleIds: ['CHILD-PPSV23-AFTER-PPSV23', 'CHILD-PPSV23-AFTER-INVALID-PPSV23', 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST'],
-    ex: [P.ic2ndEarly, P.nonIc2nd],
+    cite: ['pedsIcPpsvWaitFiveYears'],
+    ex: [P.asplenia5ppsv, P.ic2ndEarly, P.nonIc2nd],
   },
 ];
-export const PPSV_THEN_PCV_DECISION = `CDC gives ${W8} as the timing of the next dose but does not say whether a PCV given sooner is valid. PneumoVax marks it Invalid after a PPSV23 that counted, because a PCV given soon after PPSV23 produces a weaker immune response. After an invalid PPSV23 the ${W8} is advice only.`;
-
-export const INVALID_ACTIONS = {
-  rows: [
-    { dose: 'PCV', action: 'Give the next dose in the series at the minimum interval above, counted from the date of the invalid dose.', ex: [P.infantShort] },
-    { dose: `PPSV23 given before ${yrs(AGE.m24)}`, action: `Give PCV20 (advised ≥${W8} after the invalid dose). A repeat PPSV23 waits ≥${Y5} after it (Option B).`, decision: true, ex: [P.toddler] },
-    { dose: `First PPSV23, given <${W8} after a PCV`, action: 'Do not repeat PPSV23. Give PCV20.', strong: 'Give PCV20.', decision: true, ex: [P.leah] },
-    { dose: 'Two PPSV23 doses on record, both invalid', action: 'Do not give a third PPSV23. Give PCV20 (adults: PCV20 or PCV21).', strong: 'Give PCV20', decision: true, ex: [P.sam] },
-  ],
-  // The exception that used to sit at the top of the page (owner, 2026-11-01:
-  // "Remove exception at the top. This can be mentioned in the 4").
-  decision: `PPSV23 is not given again when the first PPSV23 was invalid because it was given <${W8} after a PCV, or when it would be a third PPSV23 dose. PCV20 is given instead (adults: PCV20 or PCV21). CDC would allow PPSV23 here; PneumoVax omits it because each additional PPSV23 dose produces a weaker immune response.`,
-  timing: 'The interval is counted from whichever is later: the invalid dose, or the last dose that counted.',
-};
 
 /**
- * The visual example under "Repeating an invalid dose" (owner, 2026-11-01:
- * "Could you use a visual example here instead with an explanation of the
- * different comments?"). `example` is the patient's facts (exempt from the
- * typed-number scan, like `who`); the chips are what the app shows, checked
- * against P.infantShort by the C14 guard.
+ * The visual example, FIRST in the invalid-dose box (owner, 2026-11-01:
+ * "should have context ... Should it be at the top or bottom"): it shows how
+ * an invalid dose is handled before the table says what to do for each kind.
+ * `example` is the patient's facts (exempt from the typed-number scan, like
+ * `who`); the chips are what the app shows, checked against P.infantShort.
  */
 export const INVALID_EXAMPLE = {
+  lead: "How an invalid dose is handled. Example: an infant's 2nd PCV given too soon",
   steps: [
     { example: '2 months', chip: 'Dose 1 of 4', tone: 'valid', text: 'Counts.' },
     { example: '2 weeks later', chip: 'Invalid', tone: 'invalid', text: `Before the minimum interval (${wk(PCV_MIN_INTERVAL_DAYS_UNDER_12M)}). Stays on the record and does not count.` },
@@ -955,11 +1051,21 @@ export const INVALID_EXAMPLE = {
   ex: [P.infantShort],
 };
 
+export const INVALID_ACTIONS = {
+  rows: [
+    { dose: 'PCV', action: 'Give the next dose in the series at the minimum interval above, counted from the date of the invalid dose.', ex: [P.infantShort] },
+    { dose: `PPSV23 given before ${yrs(AGE.m24)}`, action: `Give PCV20 (advised ≥${W8} after the invalid dose). A repeat PPSV23 waits ≥${Y5} after it (Option B).`, decision: 'invalidPpsvTiming', cite: ['pedsRiskPcv20orPpsv23'], ex: [P.toddler] },
+    { dose: `First PPSV23, given <${W8} after a PCV`, action: 'Do not repeat PPSV23. Give PCV20.', strong: 'Give PCV20.', decision: 'ppsvNotRepeated', ex: [P.leah] },
+    { dose: 'Two PPSV23 doses on record, both invalid', action: 'Do not give a third PPSV23. Give PCV20 (adults: PCV20 or PCV21).', strong: 'Give PCV20', decision: 'ppsvNotRepeated', ex: [P.sam] },
+  ],
+  timing: 'The interval is counted from whichever is later: the invalid dose, or the last dose that counted.',
+};
+
 export const ADULT_INTERVALS = {
   lead: `For adults, CDC gives recommended intervals, not minimums. A dose given early counts however early it was, and the note says by how much. An adult dose can still be Invalid for another reason, such as PPSV23 given before ${yrs(AGE.m24)}.`,
   rows: [
-    { doses: 'PCV15, then PPSV23', gap: gapOf('ADULT-PPSV23-AFTER-PCV15'), text: `(${gapOf('ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM')} at ${band(ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M)} with an immunocompromising condition, cochlear implant or CSF leak).`, ruleIds: ['ADULT-PPSV23-AFTER-PCV15', 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM', 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED', 'ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE', 'ADULT-PPSV23-AFTER-PCV13', 'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM', 'ADULT-PPSV23-AFTER-PCV-CATCH-ALL'], ex: [P.adultEarlyPpsv] },
-    { doses: 'PCV13, then PCV20 or PCV21', gap: gapOf('ADULT-PCV20-21-AFTER-PCV13'), ruleIds: ['ADULT-PCV20-21-AFTER-PCV13', 'ADULT-PCV20-21-1Y-AFTER-PCV', 'ADULT-PCV-AFTER-PCV-CATCH-ALL'], ex: [P.pcv13at60] },
+    { doses: 'PCV15, then PPSV23', gap: null, text: ADULT_PCV15_PPSV23, ruleIds: ['ADULT-PPSV23-AFTER-PCV15', 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM', 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED', 'ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE', 'ADULT-PPSV23-AFTER-PCV13', 'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM', 'ADULT-PPSV23-AFTER-PCV-CATCH-ALL'], cite: ['adultPcv15ThenPpsv', 'adultPcv15ThenPpsvShort'], ex: [P.adultEarlyPpsv, P.cochlear45pcv15] },
+    { doses: 'PCV13, then PCV20 or PCV21', gap: gapOf('ADULT-PCV20-21-AFTER-PCV13'), ruleIds: ['ADULT-PCV20-21-AFTER-PCV13', 'ADULT-PCV20-21-1Y-AFTER-PCV', 'ADULT-PCV-AFTER-PCV-CATCH-ALL'], cite: ['adultPcv13Only'], ex: [P.pcv13at60] },
     // Owner, 2026-11-01: "Shouldn't this have a pneumovax decision chip? What
     // have we decided on in terms of minimum acceptable interval?" CDC states
     // none; the dose counts at any gap; under 4 weeks the card also offers the
@@ -967,47 +1073,69 @@ export const ADULT_INTERVALS = {
     {
       doses: 'PCV15, then PCV20 or PCV21',
       gap: null,
-      text: `CDC states no interval. Counts at any interval. If given <${wk(ADULT_CONJUGATE_SUPPORTED_MIN_DAYS)} after the PCV15, a repeat dose (PCV20 or PCV21) ≥${W8} later may be considered.`,
-      decision: true,
+      text: 'CDC states no interval. Counts at any interval.',
+      decision: 'adultPcvAfterPcv',
       ruleIds: ['ADULT-PCV20-21-AFTER-PCV15-NO-INTERVAL'],
       ex: [P.adultPcvClose],
     },
-    { doses: 'PPSV23, then any PCV', gap: gapOf('ADULT-PCV-AFTER-PPSV23'), text: 'after the last PPSV23, including an invalid one.', decision: true, ruleIds: ['ADULT-PCV-AFTER-PPSV23'], ex: [P.ppsv70, P.pcv15ThenBad19] },
-    { doses: 'PCV13 and PPSV23, then PCV20 or PCV21', gap: gapOf('ADULT-PCV20-21-5Y-AFTER-PPSV23'), text: 'after the last dose.', ruleIds: ['ADULT-PCV20-21-5Y-AFTER-PPSV23'], ex: [P.both60] },
+    { doses: 'PPSV23, then any PCV', gap: gapOf('ADULT-PCV-AFTER-PPSV23'), text: 'after the last PPSV23, including an invalid one.', decision: 'invalidPpsvTiming', ruleIds: ['ADULT-PCV-AFTER-PPSV23'], cite: ['adultPpsvOnly'], ex: [P.ppsv70, P.pcv15ThenBad19] },
+    { doses: 'PCV13 and PPSV23, then PCV20 or PCV21', gap: gapOf('ADULT-PCV20-21-5Y-AFTER-PPSV23'), text: 'after the last dose.', ruleIds: ['ADULT-PCV20-21-5Y-AFTER-PPSV23'], cite: ['adultBothNotAt65'], ex: [P.both60] },
     { doses: 'PPSV23, then a 2nd PPSV23', gap: gapOf('ADULT-PPSV23-AFTER-PPSV23'), ruleIds: ['ADULT-PPSV23-AFTER-PPSV23'] },
     {
-      doses: `PCV, then another PCV, <${wk(ADULT_CONJUGATE_SUPPORTED_MIN_DAYS)} apart`,
+      doses: `PCV, then another PCV, <${W4} apart`,
       gap: null,
       text: `Counts. A repeat dose (PCV20 or PCV21) ≥${W8} later may be considered.`,
-      decision: true,
+      decision: 'adultPcvAfterPcv',
       ruleIds: ['ADULT-PCV-AFTER-PCV-UNDER-4-WEEKS'],
       ex: [P.adultPcvClose],
     },
   ],
-  decision: `CDC gives no minimum interval between two adult PCV doses. PneumoVax counts the dose, because other ACIP schedules space PCV doses ${wk(ADULT_CONJUGATE_SUPPORTED_MIN_DAYS)} apart (infants, transplant recipients). CDC does not address an invalid PPSV23; PneumoVax still waits ${gapOf('ADULT-PCV-AFTER-PPSV23')} after it, because the spacing is about the immune response, not whether the dose counted.`,
 };
 
-/** Every rule the engine applies must be on exactly one row of section 4. */
+/** Every rule the engine applies must be on exactly one row of section 5. */
 export const SPACING_RULE_IDS = [
   ...PCV_AFTER_PCV.ruleIds,
   ...PCV_AND_PPSV23.flatMap((r) => r.ruleIds),
   ...ADULT_INTERVALS.rows.flatMap((r) => r.ruleIds),
 ];
 
+// ── Where each decision is used, generated from the rows above ───────────
+// Part 6 lists these under each decision, so the list cannot name a place
+// the chip is not, or miss one it is.
+const USES = [
+  [HEADINGS.vaccines, SERIES_PATTERNS, (r) => r.name],
+  [HEADINGS.adults, ADULT_HISTORY.flatMap((h) => h.splits.map((s) => ({ ...s, label: h.history }))), (r) => r.label],
+  [`${HEADINGS.spacing}, children`, [...CHILD_EXCEPTIONS.map((r) => ({ ...r, label: 'The dose still counts when' })), ...PCV_AND_PPSV23.map((r) => ({ ...r, label: r.doses })), ...INVALID_ACTIONS.rows.map((r) => ({ ...r, label: `Repeating an invalid dose, ${r.dose}` }))], (r) => r.label],
+  [`${HEADINGS.spacing}, adults`, ADULT_INTERVALS.rows, (r) => r.doses],
+];
+export const DECISION_USES = Object.fromEntries(DECISIONS.map((d) => [d.key, [
+  ...(decisionsOf(TRANSPLANT_STOP).includes(d.key) ? ['The stop, at the top of the page'] : []),
+  ...USES.flatMap(([part, rows, label]) => rows.filter((r) => decisionsOf(r).includes(d.key)).map((r) => `${part}: ${label(r)}`)),
+]]));
+
 // ── The worked patient behind a row, run through the app ─────────────────
 /**
- * Runs a row's worked patients and returns the CDC/ACIP sentences the app's
- * own cards cite for them — the "Source" button's content. Generated, never
- * transcribed: change the card's citation and this changes with it.
+ * The "Source" button's content: the CDC/ACIP sentences the app's own cards
+ * cite for a row's worked patients. Generated, never transcribed: change the
+ * card's citation and this changes with it.
+ *
+ * With `keys` (a row's `cite`), only those sentences, in that order — and
+ * only if the app's card for one of the patients really cites them, so a row
+ * can never show a sentence the app does not use. Without `keys`, every
+ * sentence the cards cite (the old behaviour, kept for the guard that
+ * measures it).
  */
-export function sourcesFor(examples = []) {
+export function sourcesFor(examples = [], keys = null) {
   const seen = new Map();
   for (const e of examples) {
     const out = recommend(e.input);
     for (const c of (out.recs ?? []).flatMap((r) => r.noteCites ?? [])) {
+      if (!c?.quote || (keys && !keys.includes(c.key))) continue;
       const ref = REFS[c?.key];
-      if (c?.quote && !seen.has(c.quote)) seen.set(c.quote, { quote: c.quote, doc: ref?.short ?? ref?.doc ?? c.key, url: c.url });
+      const id = keys ? c.key : c.quote;
+      if (!seen.has(id)) seen.set(id, { key: c.key, quote: c.quote, doc: ref?.short ?? ref?.doc ?? c.key, url: c.url });
     }
   }
-  return [...seen.values()];
+  const found = [...seen.values()];
+  return keys ? keys.map((k) => found.find((q) => q.key === k)).filter(Boolean) : found;
 }

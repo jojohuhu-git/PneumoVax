@@ -747,24 +747,41 @@ body {
 .rb-table th { text-align: left; font-size: var(--fs-xs); color: var(--gy2); font-weight: 600; padding: var(--sp-8) 10px; border-bottom: 1px solid var(--gy5); background: var(--gy6); vertical-align: top; }
 .rb-table td { padding: 10px; border-bottom: 1px solid var(--gy6); vertical-align: top; line-height: 1.45; }
 .rb-grp td { background: var(--bg); font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); padding: 6px 10px; }
-.rb-def { font-size: var(--fs-sm); color: var(--gy2); line-height: 1.45; }
+/* "PneumoVax decision N" — a button that opens its reason in place. Owner,
+   2026-11-01: it must read as clickable without an instruction sentence, and
+   the design rules allow no icon, so it borrows Source's cue (link colour,
+   underline) on the grey chip, tints on hover, and stays tinted while open. */
+.rb-dec { display: inline; }
 .rb-decision {
-  display: inline-block; font-size: var(--fs-2xs); font-weight: 600; color: var(--gy2);
+  display: inline-block; font-family: inherit; font-size: var(--fs-2xs); font-weight: 600; color: var(--c2);
   background: var(--gy6); border: 1px solid var(--gy5); border-radius: var(--rads); padding: 1px 6px; white-space: nowrap;
+  cursor: pointer; text-decoration: underline; text-underline-offset: 2px; vertical-align: baseline;
 }
+.rb-decision:hover, .rb-decision[aria-expanded="true"] { background: var(--clt); border-color: var(--cmd); }
+.rb-decision:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; }
+.rb-decision-static { cursor: default; text-decoration: none; color: var(--gy2); }
+.rb-decision-static:hover { background: var(--gy6); border-color: var(--gy5); }
+.rb-dec-panel { font-style: normal; }
+.rb-dec-title { display: block; font-weight: 700; color: var(--gy); }
+.rb-dec-line { display: block; }
+.rb-declist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+.rb-declist-item { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-12) 0; border-top: 1px solid var(--gy6); font-size: var(--fs-sm); color: var(--gy2); line-height: 1.5; scroll-margin-top: var(--sp-16); }
+.rb-declist-item:first-child { border-top: none; padding-top: 0; }
+.rb-declist-item .rb-dec-title { font-size: var(--fs-base); }
 
-/* The risk matrix: merged cells give one answer to several groups */
-.rb-matrix { width: 100%; border-collapse: separate; border-spacing: var(--sp-4); font-size: var(--fs-base); table-layout: fixed; min-width: 760px; }
-.rb-matrix thead th { font-size: var(--fs-sm); text-align: left; padding: 10px; vertical-align: top; background: var(--gy6); border-radius: var(--radp); }
-.rb-matrix td, .rb-matrix-row { padding: 10px; border-radius: var(--radp); vertical-align: top; line-height: 1.4; }
-.rb-matrix-row { background: var(--wh); font-weight: 600; font-size: var(--fs-sm); text-align: left; border: 1px solid var(--gy6); }
-.rb-matrix-sec td { padding: var(--sp-16) var(--sp-4) 2px; font-weight: 700; font-size: var(--fs-md); color: var(--c); }
-.rb-matrix-list { font-size: var(--fs-sm); color: var(--gy2); }
-.rb-matrix-list ul { padding-left: var(--sp-16); display: flex; flex-direction: column; gap: 3px; }
-.rb-tone-yes { background: var(--glt); color: var(--g); }
-.rb-tone-no { background: var(--bg); color: var(--gy2); }
-.rb-tone-alt { background: var(--alt); color: var(--hsct); }
-.rb-tone-na { background: var(--wh); color: var(--gy3); border: 1px dashed var(--gy5); }
+/* Age lines and risk groups */
+.rb-agelines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-12); }
+.rb-ageline { display: flex; flex-direction: column; gap: var(--sp-4); border: 1px solid var(--gy6); border-left: 3px solid var(--cmd); border-radius: var(--radp); padding: var(--sp-12); }
+.rb-ageline strong { font-size: var(--fs-md); color: var(--gy); }
+.rb-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-12); }
+.rb-group { display: flex; flex-direction: column; gap: var(--sp-8); background: var(--bg); border-radius: var(--radp); padding: var(--sp-12); font-size: var(--fs-sm); color: var(--gy2); }
+.rb-group-name { font-size: var(--fs-base); color: var(--gy); }
+.rb-group ul { padding-left: var(--sp-16); display: flex; flex-direction: column; gap: 3px; margin: 0; }
+.rb-handover { margin-top: var(--sp-12); border-left: 3px solid var(--gy5); padding-left: var(--sp-12); }
+.rb-history .rb-hist-first td { border-top: 1px solid var(--gy5); }
+.rb-history td[rowspan] { font-weight: 600; }
+.rb-any { color: var(--gy3); }
+
 .rb-rank { list-style: none; counter-reset: rbr; }
 .rb-rank li { counter-increment: rbr; display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: var(--sp-12); padding: var(--sp-12) 0; border-top: 1px solid var(--gy6); }
 .rb-rank li::before {
@@ -823,6 +840,7 @@ body {
   .rb-pattern-note { grid-column: 1; }
   .rb-legend { grid-template-columns: 1fr; }
   .rb-legend-item { grid-template-columns: 1fr; }
+  .rb-agelines, .rb-groups { grid-template-columns: 1fr; }
   .rb-src-grid { grid-template-columns: 1fr; }
 }
 .app-main-rulebook { flex: 1; width: 100%; }
@@ -864,8 +882,6 @@ body {
 
 /* 2026-11-01 owner review: risk-table column titles, at-risk sub-rows, the
    merged chip key, and the invalid-dose example. */
-.rb-matrix-head { vertical-align: top; }
-.rb-matrix-coltitle th { text-align: left; font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); text-transform: uppercase; letter-spacing: 0.04em; padding: var(--sp-12) 10px 0; }
 .rb-who { display: block; font-size: var(--fs-xs); font-weight: 700; color: var(--gy2); }
 .rb-subrow td { border-top: 1px dashed var(--gy6); }
 .rb-chips { display: flex; flex-wrap: wrap; gap: var(--sp-4); min-width: 0; }
