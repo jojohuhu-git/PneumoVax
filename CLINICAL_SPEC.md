@@ -1311,7 +1311,7 @@ Prior-vaccine branches:
   8-week minimum named as an option for IC/cochlear/CSF). PCV20/PCV21 → complete.
 - **PCV15 only (PPSV23 pending) → INCOMPLETE:** PPSV23 ≥1y (8-week option named for
   IC/cochlear/CSF); may substitute PCV20/PCV21 if PPSV23 unavailable.
-- **PPSV23 only:** PCV15/20/21 ≥1y after PPSV23 (PCV15 → no further PPSV23).
+- **PPSV23 only:** PCV15/20/21 ≥1y after the **last** PPSV23 (PCV15 → no further PPSV23; §H-PPSVLAST).
 - **PCV13 only:** PCV20 or PCV21 ≥1y after PCV13 → complete.
 - **PCV13 + 1 PPSV23:** PCV20 or PCV21 ≥5y after last pneumo → complete (IC/cochlear/CSF);
   for chronic conditions, none now → review at 50.
@@ -1323,14 +1323,38 @@ Prior-vaccine branches:
 
 Routine for ALL adults ≥50 regardless of risk.
 - **None / unknown / PCV7-only:** PCV20 or PCV21; **or** PCV15 then PPSV23 **≥1 year** (8-week minimum may be *considered* for IC / cochlear implant / CSF leak — named, never substituted). `mm7401a1`, ≥50 row: "a single dose of PPSV23 should be administered ≥1 year after the PCV15 dose. A minimum interval of 8 weeks **can be considered** if PCV15 is used in adults with an immunocompromising condition, cochlear implant, or CSF leak." **S15 (2026-10-16): this card now carries that option sentence.** It did not before — the option appeared only once the PCV15 had been recorded, i.e. after the booking decision was made. Unlike §G, the ≥50 band is **not** keyed on risk class.
-- **PPSV23 only:** PCV15/20/21 ≥1y after PPSV23 (PCV15 → no further PPSV23).
+- **PPSV23 only:** PCV15/20/21 ≥1y after the **last** PPSV23 (PCV15 → no further PPSV23; §H-PPSVLAST).
 - **PCV13 only:** PCV20 or PCV21 ≥1y → complete.
 - **PCV13 + PPSV23, and NO PPSV23 was received at ≥65:** PCV20 or PCV21 **≥5y** after the
   last pneumococcal dose → complete. This is a **plain recommendation**, not shared
   decision-making. (Corrected 2026-10-10, S10: this line previously said "shared clinical
   decision-making" for both rows, which is the documentation half of A-P0-1.)
 - **PCV13 + PPSV23, AND PPSV23 was received at ≥65:** **shared clinical decision-making** —
-  PCV20/PCV21 ≥5y, or nothing.
+  PCV20/PCV21 ≥5y, or nothing. **Any one** counted PPSV23 at ≥65 puts the patient here (§H-ANY65).
+
+> **§H-ANY65 — any PPSV23 at 65 or older (OWNER RULING 2026-10-31, "Pat, 70").** Pat, 70,
+> diabetes: PCV13 at 60, PPSV23 at 60 and again at 65 (the old schedule's second dose). The
+> engine read only the FIRST PPSV23's age, so he was a plain recommendation, while the same
+> man with only his age-65 dose was a shared decision. CDC Adult Schedule Notes (read live
+> 2026-10-31): *"Previously received both PCV13 and PPSV23, AND PPSV23 was received at age 65
+> years or older: Based on shared clinical decision–making, 1 dose of PCV20 or 1 dose of PCV21
+> at least 5 years after the last pneumococcal vaccine dose."* mm7401a1's row: *"completed the
+> recommended vaccination series with both PCV13 and PPSV23 (i.e., PPSV23 administered at age
+> ≥65 years)"*. Every counted, dated PPSV23 is now checked, on both the date-of-birth and the
+> age-only paths; the card says "one of the PPSV23 doses was received at age 65 or older" when
+> there are two. Same vaccine and date — only the status moves. Grid: **132 of 17,016**
+> verdicts, all 70-year-olds. Undated doses keep the current-age proxy, unchanged. Guard:
+> `regression-2026-10-31-any-ppsv23-at-65-is-shared-decision.test.js`.
+>
+> **§H-PPSVLAST — "PPSV23 only": the year runs from the LAST PPSV23 (OWNER RULING
+> 2026-10-31, "Ruth, 71").** Ruth, 71, COPD, PPSV23 at 60 and again six months ago, never a
+> PCV, was told her PCV was due today: the card measured from her FIRST PPSV23. CDC: *"at least
+> 1 year after the last PPSV23 dose"*. The note under a too-early PCV already measured from the
+> last dose, so card and note disagreed. Applies at 19–49 and 50+ (one branch). The adult twin
+> of Hana's children's fix (2026-10-26). Grid: 0 verdicts (the grid builds no adult with two
+> PPSV23 and nothing else); a hand-built sweep of 4,008 typical adults moved **141**, every one
+> to a later date, none earlier. Guard:
+> `regression-2026-10-31-adult-ppsv23-only-year-from-last-dose.test.js`.
 - **PCV15 only, no PPSV23 → INCOMPLETE:** PPSV23 **≥1 year** (or substitute PCV20/21), with the 8-week option named for IC / cochlear implant / CSF leak. Series complete once given. At **19–49** that same row is **≥8 weeks** for those conditions — see §G.
 - **PCV15 & PPSV23, or PCV20, or PCV21 (any age):** complete.
 

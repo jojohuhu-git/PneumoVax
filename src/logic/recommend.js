@@ -3389,7 +3389,13 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   // (pcv.count>0 but neither PCV13 nor PCV15 identified). Both resolve the same
   // way per ACIP: a PCV15/20/21 ≥1y after PPSV23 completes the series.
   if (ppsvGiven && !pcv.hasPCV13 && !pcv.hasPCV15) {
-    const ppsvDate = ppsv.effective.find((d) => d.date)?.date || null;
+    // §H-PPSVLAST (OWNER RULING 2026-10-31, "Ruth, 71"): the year runs from
+    // the LAST counted PPSV23 — CDC: "at least 1 year after the last PPSV23
+    // dose". `find` returned the FIRST, so Ruth (PPSV23 at 60 and again six
+    // months ago) was told her PCV was due today. The adult twin of Hana's
+    // fix for children (2026-10-26, the anchorPneumo comment above).
+    const ppsvDates = ppsv.effective.filter((d) => d.date).map((d) => d.date); // effective is in date order
+    const ppsvDate = ppsvDates.at(-1) ?? null;
     const { dueToday, earliestNextDate } = dueStateMonths(ppsvDate, MO12, today);
     return [rec({
       vaccine: 'PCV', status: anyRisk ? 'risk-based' : 'due',
@@ -3397,7 +3403,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: adultBrands,
       note: {
-        lead: `Give 1 dose of PCV15, PCV20, or PCV21 ≥${ADULT_GAP_WORDS} after the PPSV23 dose [c] [c].`,
+        lead: `Give 1 dose of PCV15, PCV20, or PCV21 ≥${ADULT_GAP_WORDS} after the ${ppsvDates.length > 1 ? 'last ' : ''}PPSV23 dose [c] [c].`,
         detail: 'PPSV23 was given previously, with no prior PCV or a PCV of unknown product. If PCV15 is chosen, no further PPSV23 is needed — the PPSV23 requirement is already met.',
       },
       // Population field (2026-10-17): CDC prints this row in both adult
@@ -3459,9 +3465,15 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
     // captures both the patient's age and the PPSV23 date, so compute age-at-PPSV23
     // directly when the dose is dated; fall back to the current-age proxy only when
     // the PPSV23 dose is undated. (Verified against CDC PneumoRecs VaxAdvisor 2026-06-07.)
-    const ppsvDateForAge = ppsv.effective.find((d) => d.date)?.date || null;
+    // §H-ANY65 (OWNER RULING 2026-10-31, "Pat, 70"): EVERY counted, dated
+    // PPSV23 is looked at, not just the first. Pat had PPSV23 at 60 and again
+    // at 65 (the old schedule); reading only the age-60 dose made him a plain
+    // recommendation, while the same man with only his age-65 dose was a
+    // shared decision. CDC's row is "AND PPSV23 was received at age 65 years or
+    // older" — any one dose at 65+ puts him on it.
+    const ppsvDatesForAge = ppsv.effective.filter((d) => d.date).map((d) => d.date);
     let ppsvAtOrAfter65;
-    if (ppsvDateForAge && dob) {
+    if (ppsvDatesForAge.length && dob) {
       // A-P0-1 (S10): compare the dose date against the patient's REAL 65th
       // birthday. This used to be `am - Math.round(daysBetween(...) / 30.4375)
       // >= M.y65` — a float current-age minus an elapsed span rounded to whole
@@ -3473,12 +3485,14 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       // The 4-day grace does NOT apply: it governs whether a dose that was
       // given counts as valid, and this is not a validity floor — it selects
       // which of two CDC recommendation rows the patient is on.
-      ppsvAtOrAfter65 = ppsvDateForAge >= addCalendarMonths(dob, M.y65);
-    } else if (ppsvDateForAge) {
+      ppsvAtOrAfter65 = ppsvDatesForAge.some((date) => date >= addCalendarMonths(dob, M.y65));
+    } else if (ppsvDatesForAge.length) {
       // No date of birth: the best the app can honestly do is measure back
       // from today in calendar months. Unrounded, unlike the old expression.
-      const ageAtPpsv = ageAtDoseMonths({ date: ppsvDateForAge }, { ageMonths: am }, today);
-      ppsvAtOrAfter65 = ageAtPpsv != null && ageAtPpsv >= M.y65;
+      ppsvAtOrAfter65 = ppsvDatesForAge.some((date) => {
+        const ageAtPpsv = ageAtDoseMonths({ date }, { ageMonths: am }, today);
+        return ageAtPpsv != null && ageAtPpsv >= M.y65;
+      });
     } else {
       ppsvAtOrAfter65 = am >= M.y65; // proxy when PPSV23 is undated
     }
@@ -3494,7 +3508,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
         note: {
           lead: `An additional PCV20 or PCV21, ≥${LONG_GAP_WORDS} after the last pneumococcal dose, is a shared clinical decision — it may be given or omitted [c] [c] [c].`,
-          detail: 'PCV13 and PPSV23 have both been given, and the PPSV23 dose was received at age 65 or older. CDC places this group under shared clinical decision-making rather than a routine recommendation.',
+          detail: `PCV13 and PPSV23 have both been given, and ${ppsvDatesForAge.length > 1 ? 'one of the PPSV23 doses was' : 'the PPSV23 dose was'} received at age 65 or older. CDC places this group under shared clinical decision-making rather than a routine recommendation.`,
         },
         // C8, document 2's CITE: both documents state this one in words, so
         // the sentence carries both numbers. That is "cite it, or take it off
