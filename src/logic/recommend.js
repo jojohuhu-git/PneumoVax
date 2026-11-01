@@ -1853,9 +1853,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // it might have been a 4th dose before the first birthday — so a child
   // whose only possible booster is undated keeps the dose.
   //
-  // A series STARTED at 12-23 months with only two doses stays in row 1: CDC
-  // calls it a finished catch-up series, p2016 asks for two more. Two
-  // documents, two doses — not asked, so left as it was.
+  // A series STARTED at 12-23 months with only two doses stays in row 1, and
+  // rightly: CDC's catch-up table calls that second dose final only "for
+  // healthy children", so CDC ("Less than 3 PCV doses: 2 doses PCV") and
+  // p2016 ("0, 1, or 2 PCV doses by age 24 months") both ask for two more.
   const finishedBabySeries = pcv.band.before24 >= 3 && pcv.band.m12to23 >= 1;
   const enoughAt24mo = am >= M.m72 || finishedBabySeries
     || pcv.band.ge24 >= (pcv.band.before24 >= 3 ? 1 : 2);

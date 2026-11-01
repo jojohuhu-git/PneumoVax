@@ -19,12 +19,12 @@
 // The test is p2016 Table 4's rows 1/2 read as printed: 3+ doses before 24
 // months, one of them DATED at 12-23 months, is neither row.
 //
-// Left alone, deliberately: a series STARTED at 12-23 months with only two
-// doses (13 and 15 months). CDC calls that a completed catch-up series; p2016
-// Table 4's "0, 1, or 2 PCV doses by age 24 months" row asks for two more. Two
-// documents, two doses — an owner question not asked, so those children are
-// pinned unchanged below. So is a child whose only possible booster is
-// UNDATED: it might have been a 4th dose before her first birthday.
+// Unchanged, and right: a series STARTED at 12-23 months with only two doses
+// (13 and 15 months). CDC's catch-up table calls the second dose final only
+// "for healthy children", so CDC ("Less than 3 PCV doses: 2 doses PCV") and
+// p2016 Table 4 ("0, 1, or 2 PCV doses by age 24 months") both ask for two
+// more. Pinned below. So is a child whose only possible booster is UNDATED: it
+// might have been a 4th dose before her first birthday.
 
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
@@ -109,7 +109,7 @@ describe('children who are NOT finished keep their dose', () => {
     expect(out.recs.map((r) => r.doseLabel)).toEqual(['Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)']);
   });
 
-  it('a series started at 12-23 months is unchanged — CDC and p2016 disagree there, not asked', () => {
+  it('a series started at 12-23 months with two doses still owes two at age 2 (CDC and p2016 agree)', () => {
     const r = only(run({ months: [13, 15], products: ['PCV13', 'PCV20'] }));
     expect(r.doseLabel).toBe('PCV dose 1 of 2 (at-risk catch-up)');
   });

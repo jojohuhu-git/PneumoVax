@@ -382,10 +382,11 @@ asks `pcv20CompleteRowKey()`, the one age choice Groups A and B share, so a 4-ye
 quotes the Age 2–5 sentence (FINDING N).
 
 **Left alone, on purpose:**
-- A series **started at 12–23 months with only two doses** (13 and 15 months). CDC calls it a
-  finished catch-up series; p2016's row 1 asks for two more. Two documents, two doses — not put
-  to the owner (an uncommon history), so unchanged. With **three** such doses the two agree and
-  the child is complete.
+- A series **started at 12–23 months with only two doses** (13 and 15 months) still owes two
+  more at age 2, and that is right. *Corrected the same day:* this line first called it a
+  CDC/p2016 disagreement. It is not — CDC's catch-up table calls the second dose final only
+  *"for healthy children"*, so CDC (*"Less than 3 PCV doses: 2 doses PCV"*) and p2016 row 1
+  both ask for two more. With **three** such doses the child is complete.
 - A child whose only possible booster is **undated** (three baby doses, then a PCV20 with no
   date): it might have been a 4th dose before the first birthday, so she keeps the PCV20 /
   PPSV23 offer, as before.
@@ -395,7 +396,14 @@ rows, **0 / 35,280** rendered lines — the grid's only four-dose series is date
 months, so it builds no toddler with baby doses. Over a hand-built set of **8,400** at-risk
 children aged 24–71 months (seven baby histories × five product mixes × five conditions),
 **3,840** moved, every one from "Option A PCV20 / Option B PPSV23" to "PCV complete (includes
-PCV20)", and every one a finished series containing a PCV20. Guard:
+PCV20)", and every one a finished series containing a PCV20. A second hand-built check of
+**9,900 typical children** aged 2–18 (on-time and late baby series, each product mix, with
+and without a PPSV23 at age 2, eight risk profiles) moved **1,260**: 924 from a dose to
+complete — including **252 immunocompromised children with a PPSV23 at 2**, who had been told
+"1 dose PCV20 (immunocompromising)" and now read complete under the 2026-10-23 Group B ruling
+— and 336 already-complete cards whose wording changed to "PCV complete (includes PCV20)".
+Against an independent reading of CDC's rows, that set has **0** disagreements after the fix
+and **924** before. Guard:
 `regression-2026-10-31-at-risk-toddler-finished-series-with-pcv20.test.js` (pinned at 5,760
 complete / 1,440 control; seven mutations, each caught).
 
