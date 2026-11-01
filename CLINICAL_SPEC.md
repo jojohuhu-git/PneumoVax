@@ -1360,6 +1360,20 @@ five-year sentence and its source with the PCV15 sentence. Measured: 606 real gr
 card text changed, 0 verdicts. Guard:
 `regression-2026-11-01-p1-1-catchup-card-ppsv23-already-given.test.js`.
 
+### §C-OPTIONB-IC — the 6–18 immunocompromised Option B card names the dose 5 years on (owner, 2026-11-01)
+
+**P1-2 of the 2026-11-01 grey-zone audit; wording only, 0 verdicts moved.** Isla, 8, no
+spleen, never vaccinated: Option B (PCV15, then PPSV23 8 weeks later) said nothing more, and
+the app's next card asked for PCV20 or a second PPSV23 five years after the PPSV23. CDC's
+no-prior-PCV row stops at the PPSV23 and CDC's PneumoRecs calls PCV15 + PPSV23 complete, so
+this went to the owner as a case-(b) question. **OWNER RULING, "yes"**, citing ACIP
+mm7137a3: *"Children aged ≥2 years who have an immunocompromising condition should receive
+a second dose of PPSV23 ≥5 years after the first PPSV23 dose."* Both Option B cards (B-1 and
+B-2) now say it, cited to `pedsSecondPpsv5y`; a child whose PPSV23 already counted is told
+none follows the PCV15 and the further dose waits 5 years after hers. Measured: 222 real
+grid patients' card text changed. Guard:
+`regression-2026-11-01-p1-2-ic-6to18-option-b-five-year-dose.test.js`.
+
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
 
 1. 24–71 mo, any risk, **incomplete (0–2 PCV by 24mo)** → **2 doses** PCV20 or PCV15 ≥8wk apart.
