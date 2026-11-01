@@ -2118,7 +2118,8 @@ catch-up row**.
     both. An unmet **floor** still ends the walk and discards any sentence collected before
     it: every recommendation sentence ends by saying the dose counts, which would read as a
     contradiction printed beside a rejection. `none`: deliberately never flagged, with the reason in the row's
-    `source` field. A `none` row states no interval at all, because an interval it never
+    `source` field. A matching `none` row **ends the walk but keeps** the sentences already collected
+    above it (§K-NONE-KEEPS, 2026-10-31) — it says nothing itself, and it does not erase the rows that did. A `none` row states no interval at all, because an interval it never
     reads would read as a live rule to the next person (asserted by P2-7).
   - **Authority** — ⚠️ `OWNER` means an **owner clinical determination dated 2026-10-11**,
     not ACIP's and not CDC's. Every adult floor is one; see the determination below. `CDC`
@@ -2648,6 +2649,48 @@ and discards anything collected before it — every recommendation sentence ends
 the dose counts, which would contradict a rejection printed beside it.
 
 Guard: `regression-2026-10-24-conjugate-gaps-are-advice-not-floors.test.js`.
+
+### §K-NONE-KEEPS — a "never flagged" row stops the walk without erasing it (2026-10-31)
+
+**The fault.** "Mention both gaps" made an unmet recommendation collect its sentence and walk
+on. Two `none` rows sit below recommendations: `ADULT-PPSV23-AFTER-PCV15-MEETS-SHORTER-ADVICE`
+(an adult 19–49 with an immunocompromising condition, cochlear implant or CSF leak — 8 weeks
+is the advice) and `ADULT-PCV20-21-AFTER-PCV15-NO-INTERVAL`. Both were written when the row
+above still returned, and both comments said that row "still wins". After 2026-10-24 the walk
+reached them, and `return null` threw the collected sentence away.
+
+**Who it hit.** *Dana*, 30, HIV: PCV15, then PPSV23 4 weeks later — 4 weeks short of the
+8 weeks ACIP gives her. The dose counted (as it should) and read as routine; the same dose at
+50, or after a PCV13, carried "shorter than the 8 weeks (56 days) ACIP recommends … Counted".
+*Omar*, 55, diabetes: PCV20 2 weeks after PCV15 — no note, where 2 weeks after a PCV13 or a
+PCV20 carries the under-4-weeks note. Found by a hand-built sweep of 906 adults with one early
+dose: 60 lost their note, every one through these two rows.
+
+**The change.** `if (rule.enforcement === 'none') break;` — the walk stops and returns what
+it collected. No dose changes status, number or card. **Measured: 312 of 17,016 grid
+verdicts moved, every one only the note fields** (rule id, early-advice flag, note count) —
+297 PCV15 + PCV20 recorded on the same day, which now read exactly as PCV13 + PCV20 on the
+same day already did, and 15 PPSV23 inside 8 weeks of a PCV15 at 19–49. 0 of 18,264
+record-problem rows. Prose: 312 of 35,280 lines, 0 added, 0 removed.
+
+Guard: `regression-2026-10-31-never-flagged-row-keeps-earlier-notes.test.js`.
+
+### §K-MET-ONLY — "this dose met that minimum" only for a dose that met it (2026-10-31)
+
+For an adult **50+** with an immunocompromising condition, cochlear implant or CSF leak,
+mm7401a1 advises PPSV23 ≥1 year after PCV15 and says 8 weeks "can be considered".
+`ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED` is the row for a dose that **took** that
+option (8 weeks to a year), and its sentence ends *"this dose met that minimum, so it counts"*.
+It also spoke for a dose given **before** 8 weeks, right under the 8-week row's *"shorter than
+the 8 weeks (56 days) ACIP recommends"* — two sentences on one chip saying opposite things.
+*Grace*, 60, HIV, PPSV23 4 weeks after PCV15. Found while testing §K-NONE-KEEPS.
+
+The row now declares `onlyIfMet: 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM'` and is silent when
+that row was not met. Wording only. **Measured: 30 of 17,016 grid verdicts moved, every one only
+the note count (2 → 1)** — all 65-year-olds with an immunocompromising condition or cochlear
+implant, PPSV23 28 days after PCV15. 0 of 18,264 record-problem rows. Prose: 30 of 35,280 lines.
+
+Guard: `regression-2026-10-31-eight-week-option-only-when-met.test.js`.
 
 ### §K-PCV20CHILD2023 — ACIP's 2023 PCV20-in-children report on the cards (OWNER, 2026-10-25)
 
