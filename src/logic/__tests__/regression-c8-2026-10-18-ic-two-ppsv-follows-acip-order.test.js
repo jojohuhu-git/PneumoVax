@@ -167,6 +167,10 @@ describe('over the whole grid', () => {
       // buttons move with the card. +159 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(counts.flat).toBe(185 + 952 + 330 - 253 + 159);
+      // +/-132, 2026-10-31 (§H-ANY65, owner ruling "Pat, 70"): a 70-year-old with a
+      // PPSV23 before 65 AND one at 65 now reads the shared-decision card, as CDC
+      // words his row, so its buttons (the job aid's and mm7401a1's at-65 rows)
+      // move with the card. Zero uncredited is unchanged.
+      expect(counts.flat).toBe(185 + 952 + 330 - 253 + 159 - 132);
   });
 });
