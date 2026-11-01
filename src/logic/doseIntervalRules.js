@@ -1189,8 +1189,10 @@ export const DOSE_INTERVAL_RULES = [
     source: 'CDC Adult Immunization Schedule Notes offer PCV20 or PCV21 as a substitute when PPSV23 is '
       + 'not available after a PCV15, and state NO interval for that substitution. Flagging a gap here '
       + 'would invent one. Deliberately NOT conditioned on PPSV23 history: the substitution has no '
-      + 'stated interval whatever else is on the record, and the more specific floors above are '
-      + 'ordered ahead of this row so they still win where they apply.',
+      + 'stated interval whatever else is on the record, and the more specific rows above are '
+      + 'ordered ahead of this row so they still win where they apply: a floor returns before it, '
+      + 'and an unmet recommendation (the under-4-weeks note) keeps its sentence, because this '
+      + 'row stops the walk without erasing what was collected (\u00a7K-NONE-KEEPS, 2026-10-31).',
     message: null,
   },
 
@@ -1244,7 +1246,7 @@ export const DOSE_INTERVAL_RULES = [
     shorterIsTheAdvice: true,
     // Never-flagged rows state NO interval and NO grace — both fields would
     // only mislead a reader into thinking this row judges something. The
-    // floor that does judge these doses is
+    // row that does judge these doses is
     // ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM, and it is unchanged.
     interval: null,
     grace: false,
@@ -1253,8 +1255,9 @@ export const DOSE_INTERVAL_RULES = [
     source: 'mm7401a1 (ACIP, January 2025), row "Adults aged 19-49 years with an immunocompromising '
       + 'condition, a CSF leak, or a cochlear implant": "If PCV15 is used, administer a single dose '
       + 'of PPSV23 >=8 weeks after the PCV15 dose." Never flagged because the dose met the '
-      + 'recommendation; a shorter gap is still caught by the floor row '
-      + 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM, which this row does not weaken.',
+      + 'recommendation; a shorter gap is still caught by the row above, '
+      + 'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM (a recommendation since 2026-10-25), whose note '
+      + 'this row stops the walk without erasing (\u00a7K-NONE-KEEPS, 2026-10-31).',
   },
   {
     id: 'ADULT-PCV-AFTER-PCV-CATCH-ALL',
@@ -1650,7 +1653,13 @@ export function evaluateDoseInterval(ctx) {
     if (!anchorAllowed(rule, anchor, ctx)) continue;
 
     // A matching never-flagged row stops the walk — that is its whole job.
-    if (rule.enforcement === 'none') return null;
+    // It does NOT erase what the walk already collected (§K-NONE-KEEPS,
+    // 2026-10-31): since "mention both gaps" an unmet recommendation above it
+    // no longer returns, so `return null` here threw that sentence away. An
+    // adult 19-48 with HIV whose PPSV23 came 4 weeks after PCV15 read as
+    // routine, while the same dose at 49 carried the note. The rows below
+    // that stop the walk say nothing themselves; the sentences above stand.
+    if (rule.enforcement === 'none') break;
 
     // A catch-all only speaks for a pair NO enumerated row named. Without
     // this, the generic note talks over the specific rule and gets the number
