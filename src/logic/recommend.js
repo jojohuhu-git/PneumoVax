@@ -296,6 +296,9 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     // P1-3 (2026-11-01): the earliest DATED PCV15, so the adult "complete"
     // card can tell PPSV23-then-PCV15 from PCV15-then-PPSV23.
     firstPcv15Date: pcvDoses.filter((d) => d.product === 'PCV15' && d.date).map((d) => d.date).sort()[0] ?? null,
+    // P2-4 (2026-11-01): the earliest DATED PCV20/PCV21, so a child's
+    // "complete" card can tell a PPSV23 given before it from one given after.
+    firstCompletingDate: pcvDoses.filter((d) => (d.product === 'PCV20' || d.product === 'PCV21') && d.date).map((d) => d.date).sort()[0] ?? null,
     // Age in months at the dose `lastDate` names. Derived from `lastDated`
     // rather than counted in the loop above so that a key and a date can
     // never refer to different doses. null when undated.
@@ -2132,9 +2135,16 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // previously received PPSV23 or PCV7"). CDC's notes row for the same
       // branch is cited too, because it is what called for the dose; that way
       // both chips on the card are credited.
+      //
+      // P2-4 (2026-11-01): CDC's "regardless of whether the child has previously
+      // received PPSV23" is about a PPSV23 BEFORE the dose. G21's came a year
+      // after it, so her card says what happened to her instead.
+      const ppsvDates = ppsv.effective.map((x) => x.date);
+      const ppsvOnlyAfter = ppsvDates.length > 0 && pcv.firstCompletingDate != null
+        && ppsvDates.every((x) => x && x > pcv.firstCompletingDate);
       note = {
         lead: complete,
-        detail: `This child had never received PCV13, PCV15 or PCV20 before that dose, which is the history CDC's row for an at-risk 6-18 year old describes [c]. CDC gives that dose whether or not a PPSV23 was given earlier.${pcv21Bridge}`,
+        detail: `This child had never received PCV13, PCV15 or PCV20 before that dose, which is the history CDC's row for an at-risk 6-18 year old describes [c]. ${ppsvOnlyAfter ? 'The PPSV23 given after it does not change this.' : 'CDC gives that dose whether or not a PPSV23 was given earlier.'}${pcv21Bridge}`,
       };
       noteCites = [
         cite('pedsRiskPcv20FirstConjugate'),
