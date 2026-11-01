@@ -74,7 +74,7 @@ describe('P6-3c UI — a verdict citation renders as a working superscript', () 
     expect(a.getAttribute('href')).toMatch(/#:~:text=/); // deep-linked to the sentence
     expect(a.getAttribute('target')).toBe('_blank');
     // The hover text is CDC's/immunize.org's own sentence, not our paraphrase.
-    expect(a.getAttribute('title')).toMatch(/doses of PCV7 should be ignored/);
+    expect(a.getAttribute('data-title')).toMatch(/doses of PCV7 should be ignored/);
   });
 
   it('a minimum-age verdict renders its own citation, to the CDC schedule notes', () => {
@@ -91,6 +91,6 @@ describe('P6-3c UI — a verdict citation renders as a working superscript', () 
     const a = [...container.querySelectorAll('a.note-cite')]
       .find((x) => /child-adolescent-notes/.test(x.getAttribute('href') ?? ''));
     expect(a, 'the minimum-age verdict renders no citation link').toBeTruthy();
-    expect(a.getAttribute('title')).toMatch(/minimum age: 6 weeks/);
+    expect(a.getAttribute('data-title')).toMatch(/minimum age: 6 weeks/);
   });
 });

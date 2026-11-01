@@ -1835,7 +1835,11 @@ export const REFS = {
     lastVerified: '2026-10-12',
   },
   mmwr7336a3: {
-    rulebook: 'any',
+    // 'adult', not 'any' (owner, rules-page review 2026-10-31: the page's
+    // "children and adults" list "must hold only documents about both", and
+    // this report is about adults - its own title says so). Its one reader is
+    // the adults-only PCV21 geographic note.
+    rulebook: 'adult',
     url: 'https://www.cdc.gov/mmwr/volumes/73/wr/mm7336a3.htm',
     label: 'ACIP 2024 — Use of 21-valent pneumococcal conjugate vaccine (PCV21/Capvaxive) in adults (MMWR mm7336a3)',
     short: 'PCV21 MMWR',

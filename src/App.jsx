@@ -32,14 +32,20 @@ const INITIAL_STATE = {
   historyAnswered: null,
 };
 
+/** True in the tab opened by "How PneumoVax decides" (App.jsx header link). */
+const RULES_VIEW = typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).has('rules');
+
 export default function App() {
   const [state, setState] = useState(INITIAL_STATE);
   const [ageError, setAgeError] = useState('');
-  // C14 (2026-10-25): the rulebook page. Held as a flag rather than a route so
-  // that opening it and coming back leaves the half-filled patient exactly as
-  // it was — this app has no router, and a clinician three steps into a
-  // history should not lose it to answer "why is it saying that?".
-  const [rulebookOpen, setRulebookOpen] = useState(false);
+  // The rules page ("How PneumoVax decides"). 2026-11-01: it opens in its OWN
+  // TAB (`?rules`) — the owner asked that it "open in its own section, not on
+  // top of the patient's information". Until then it was a flag that replaced
+  // the wizard in place; a new tab keeps the half-filled patient on screen in
+  // the first tab, so a clinician three steps into a history never loses it
+  // to answer "why is it saying that?". No router: one query flag, read once.
+  const rulebookOpen = RULES_VIEW;
 
   // P3-1: one clock read, one age. Derived here so a tab left open across
   // midnight ages the patient along with the calendar, instead of holding the
@@ -152,16 +158,16 @@ export default function App() {
           {/* Only when the rulebook is shut: the page carries its own way back,
               and two controls doing the same thing in the same view is noise. */}
           {!rulebookOpen && (
-            <button type="button" className="rb-link" onClick={() => setRulebookOpen(true)}>
-              How recommendations are made
-            </button>
+            <a className="rb-link" href={`${import.meta.env.BASE_URL}?rules`} target="_blank" rel="noopener noreferrer">
+              How PneumoVax decides
+            </a>
           )}
         </div>
       </header>
 
       {rulebookOpen && (
         <main className="app-main-rulebook">
-          <Rulebook onClose={() => setRulebookOpen(false)} />
+          <Rulebook />
         </main>
       )}
 

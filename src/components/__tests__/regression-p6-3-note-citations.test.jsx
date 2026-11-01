@@ -67,7 +67,7 @@ describe('P6-3 — numbered inline note citations', () => {
       .toBe('https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#:~:text=example');
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.getAttribute('rel')).toContain('noopener');
-    expect(link.getAttribute('title')).toBe('CDC Adult Notes — the quoted sentence');
+    expect(link.getAttribute('data-title')).toBe('CDC Adult Notes — the quoted sentence');
     expect(link.className).toContain('note-cite');
   });
 
@@ -114,8 +114,8 @@ describe('P6-3 — numbered inline note citations', () => {
     expect(queryMarker('[2]')).toBeNull();
     expect(links[0].getAttribute('href')).toMatch(/#:~:text=routine$/);
     expect(links[1].getAttribute('href')).toMatch(/#:~:text=interval$/);
-    expect(links[0].getAttribute('title')).toBe('Routine at age 50');
-    expect(links[1].getAttribute('title')).toBe('PPSV23 one year later');
+    expect(links[0].getAttribute('data-title')).toBe('Routine at age 50');
+    expect(links[1].getAttribute('data-title')).toBe('PPSV23 one year later');
   });
 
   it('a note with no noteCites renders as plain text, with no stray links', () => {

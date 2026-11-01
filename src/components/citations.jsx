@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 // C1 (2026-10-17): the hover text's wording. It lives beside `cite()` in
 // refs.js, not here, because it is a pure function of a citation's fields and
 // MeningoVax — which has no citations.jsx — keeps its copy in the same file.
@@ -86,19 +86,94 @@ export function renderNoteWithCites(text, cites, numberFor = makeCiteNumberer())
     if (i === parts.length - 1) return em.nodes;
     const c = cites[i];
     if (!c) return em.nodes;
-    return [...em.nodes, (
+    return [...em.nodes, <CiteMark key={i} c={c} n={numberFor(c.page ?? c.key)} />];
+  });
+}
+
+// ── The citation pop-up (2026-11-01, rules-page redesign) ───────────────
+//
+// The owner: the superscript's hover "lags". It was the browser's native
+// `title` tooltip — a built-in delay of about a second, and nothing at all on
+// a touch screen. Now the same text (`citeTitle`, unchanged, so MeningoVax's
+// wording rule still holds) opens at once on hover or keyboard focus, and on a
+// phone or tablet the first tap opens it instead of leaving the page; the
+// pop-up carries the link. Three ways out, as every popover here has: moving
+// or tapping away, Escape, and the marker itself.
+//
+// The text moved from `title` to `data-title` so the native tooltip does not
+// appear on top of this one a second later. Tests read `data-title`.
+function CiteMark({ c, n }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef(null);
+  const pop = useRef(null);
+  const lastPointer = useRef('mouse');
+  const text = citeTitle(c) ?? '';
+  const [head, ...rest] = text.split('\n');
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    const onDown = (e) => { if (wrap.current && !wrap.current.contains(e.target)) setOpen(false); };
+    const onScroll = () => setOpen(false);
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onDown);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [open]);
+  // Placed against the WINDOW, not the card: a result card clips what
+  // overflows it, and a marker near the card's right edge lost half its
+  // pop-up. Fixed position, kept inside the window, closed on scroll (above).
+  // Set through the element, not a `style` prop (no inline styles - p7-2).
+  useLayoutEffect(() => {
+    const el = pop.current;
+    const anchor = wrap.current;
+    if (!open || !el || !anchor || typeof window === 'undefined') return;
+    const a = anchor.getBoundingClientRect();
+    const gap = 8;
+    const w = el.offsetWidth;
+    el.style.left = `${Math.max(gap, Math.min(a.left, window.innerWidth - w - gap))}px`;
+    // Flush against the marker: a gap would fire mouseleave on the way to
+    // the "Open the document" link and shut the pop-up under the pointer.
+    const below = a.bottom;
+    el.style.top = `${below + el.offsetHeight > window.innerHeight - gap ? Math.max(gap, a.top - el.offsetHeight) : below}px`;
+  }, [open]);
+  return (
+    <span
+      className="cite-wrap"
+      ref={wrap}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       <a
-        key={i}
         href={c.url}
         target="_blank"
         rel="noopener noreferrer"
         className="note-cite"
-        title={citeTitle(c)}
+        data-title={text}
+        aria-expanded={open}
+        onPointerDown={(e) => { lastPointer.current = e.pointerType; }}
+        onFocus={() => setOpen(true)}
+        onBlur={(e) => { if (!wrap.current?.contains(e.relatedTarget)) setOpen(false); }}
+        onClick={(e) => {
+          // A touch has no hover: its first tap opens the pop-up; the link
+          // inside it opens the document.
+          if (lastPointer.current === 'touch' && !open) { e.preventDefault(); setOpen(true); }
+        }}
       >
-        {`[${numberFor(c.page ?? c.key)}]`}
+        {`[${n}]`}
       </a>
-    )];
-  });
+      {open && (
+        <span className="cite-pop" role="tooltip" ref={pop}>
+          <span className="cite-pop-head">[{n}] {head}</span>
+          {rest.length > 0 && <span className="cite-pop-quote">{rest.join(' ')}</span>}
+          <a href={c.url} target="_blank" rel="noopener noreferrer" className="cite-pop-link">Open the document</a>
+        </span>
+      )}
+    </span>
+  );
 }
 
 // ── How many "[c]" markers a piece of text renders ──────────────────────

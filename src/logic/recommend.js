@@ -62,6 +62,11 @@ const M = {
   m7: 7, m12: 12, m24: 24, m60: 60, m72: 72,
   y18: ADULT_SCHED_MIN_M, y50: ROUTINE_ADULT_MIN_M, y65: 780,
 };
+// The rules page (src/data/rulebook.js) prints these ages. It reads THIS
+// object rather than keeping a copy, so the page and the engine cannot hold
+// two opinions about one age — the y65 note above is why it is not a second
+// home in scheduleConstants.js.
+export const ENGINE_AGE_LINES = Object.freeze({ ...M });
 
 const WK8 = DAYS.weeks(8);   // 56
 const WK4 = DAYS.weeks(4);   // 28
