@@ -1,5 +1,7 @@
 # PneumoVax — Handoff after the rules page went live and §K-THROWNOUTTIMING (2026-11-01)
 
+> **SUPERSEDED 2026-11-01** by `handoff-2026-11-01-rulebook-review-and-meningovax-parity.md`. PR #114 merged; its open items are carried there. Do not resume from this file.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`, a client-side pneumococcal decision-support app.
 Branch: `design/2026-11-01-rules-page-redesign`, off `main` (`2738347`). **Pushed.**
 [PR #114](https://github.com/jojohuhu-git/PneumoVax/pull/114) is open and mergeable, with CI pending
