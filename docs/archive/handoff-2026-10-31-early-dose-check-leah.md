@@ -1,5 +1,7 @@
 # PneumoVax — Handoff after the too-early-dose check and Leah's ruling (2026-10-31, late night)
 
+> **SUPERSEDED 2026-11-01** by `handoff-2026-11-01-rules-page-check-and-five-year-ppsv23.md`. Its PRs merged; its open items are carried there. Do not resume from this file.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React app for pneumococcal
 vaccine decision support across the lifespan. No backend. Live at
 https://jojohuhu-git.github.io/PneumoVax/ (GitHub Pages, deploys from `main`).
