@@ -466,6 +466,17 @@ const P = {
   cochlear15: ex('15-year-old with a cochlear implant, PCV13 series, PPSV23 at 10',
     { dob: '2011-11-01', riskIds: ['cochlear_implant'], pcvDoses: doses('PCV13', ['2012-01-01', '2012-03-01', '2012-05-01', '2012-11-15']), ppsv23Doses: doses('PPSV23', ['2021-11-15']) },
     { status: 'complete', note: [/At 19, the adult schedule gives 1 dose of PCV20 or PCV21/] }),
+  // The other two answers at 19 (2026-11-01 CDC re-check: the row claimed the
+  // cochlear answer for every at-risk child).
+  diabetic15: ex('15-year-old with diabetes, PCV13 series, PPSV23 at 10',
+    { dob: '2011-11-01', riskIds: ['diabetes'], pcvDoses: doses('PCV13', ['2012-01-01', '2012-03-01', '2012-05-01', '2012-11-15']), ppsv23Doses: doses('PPSV23', ['2021-11-15']) },
+    { status: 'complete', note: [/At 19, the adult schedule gives no dose now; re-evaluate at age 50/] }),
+  asplenia16two: ex('16-year-old with asplenia, PCV13 series, PPSV23 at 2 and 7',
+    { dob: '2010-11-01', riskIds: ['asplenia'], pcvDoses: doses('PCV13', ['2011-01-01', '2011-03-01', '2011-05-01', '2011-11-15']), ppsv23Doses: doses('PPSV23', ['2013-01-01', '2018-02-01']) },
+    { status: 'complete', note: [/At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21/] }),
+  asplenia8ppsv: ex('8-year-old with asplenia, PPSV23 4 weeks ago, no PCV',
+    { dob: '2018-11-01', riskIds: ['asplenia'], pcvDoses: [], ppsv23Doses: doses('PPSV23', ['2026-10-04']) },
+    { cards: [/Option A: 1 dose PCV20 \(≥8 weeks\)/, /Option B-1: 1 dose PCV15 \(≥8 weeks\)/] }),
   asplenia3partial: ex('3-year-old with asplenia, PCV at 2 and 4 months only',
     { dob: '2023-11-01', riskIds: ['asplenia'], pcvDoses: doses('PCV15', ['2024-01-01', '2024-03-01']), ppsv23Doses: [] },
     { cards: [/PCV dose 1 of 2 \(at-risk catch-up\)/] }),
@@ -601,7 +612,9 @@ export const ROUTINE_INFANT = {
   total: Number(routineQuote.match(/(\d+)-dose/)[1]),
   ages: routineAges.map((a) => `${a.replace('–', ' to ')} months`),
   quote: routineQuote,
-  ex: P.healthy3,
+  // The on-time infant first, so the Source shows CDC's routine 2/4/6/12-15
+  // sentence; the late starter backs "Children who start late need fewer doses".
+  ex: [P.infantOnTime, P.healthy3],
 };
 
 /** Step cells for the children's lanes: 'dose' | 'none' | 'done'. */
@@ -649,8 +662,8 @@ export const CHILD_NOTES = [
     ex: [P.asplenia10none],
   },
   {
-    text: `At risk and complete: at ${yrs(ADULT_SCHED_MIN_M)}, the adult schedule gives 1 PCV20 or PCV21 dose, ≥${Y5} after the last pneumococcal dose.`,
-    ex: [P.cochlear15],
+    text: `At risk and complete without PCV20: at ${yrs(ADULT_SCHED_MIN_M)}, cochlear implant or CSF leak: 1 PCV20 or PCV21 dose, ≥${Y5} after the last pneumococcal dose. Immunocompromising: review at ${yrs(ROUTINE_ADULT_MIN_M)}, or that same dose. Chronic conditions only: none; re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)}.`,
+    ex: [P.cochlear15, P.asplenia16two, P.diabetic15],
   },
 ];
 
@@ -807,7 +820,7 @@ export const SERIES_PATTERNS = [
   { name: 'Single dose', doses: [{ text: 'PCV20 or PCV21' }], note: 'Adults. Also at-risk children after a completed routine series (PCV20 only).', ex: [P.healthy55, P.diabetic4] },
   { name: 'Two doses', doses: [{ text: 'PCV15' }, { text: 'PPSV23', ppsv: true }], note: 'At-risk children and adults. Adults: PCV20 or PCV21 may replace PPSV23 if it is unavailable.', ex: [P.asplenia10none, P.pcv15at55] },
   { name: 'Prior PCV13', doses: [{ text: 'PCV13', old: true }, { text: 'PCV20 or PCV21' }], note: `Adults: ≥${gapOf('ADULT-PCV20-21-AFTER-PCV13')} after PCV13. At-risk children after a PCV13 series: PCV20 or PPSV23, ≥${W8} after the last PCV.`, ex: [P.pcv13at60, P.diabetic4] },
-  { name: 'Prior PPSV23 only', doses: [{ text: 'PPSV23', ppsv: true }, { text: 'PCV15, PCV20 or PCV21' }], note: `A PCV is still needed. Adults: ≥${gapOf('ADULT-PCV-AFTER-PPSV23')} after PPSV23. Children: ≥${W8} after PPSV23.`, ex: [P.ppsv70] },
+  { name: 'Prior PPSV23 only', doses: [{ text: 'PPSV23', ppsv: true }, { text: 'PCV15, PCV20 or PCV21' }], note: `A PCV is still needed. Adults: ≥${gapOf('ADULT-PCV-AFTER-PPSV23')} after PPSV23. Children: ≥${W8} after PPSV23.`, ex: [P.ppsv70, P.asplenia8ppsv] },
   {
     name: 'PPSV23 not repeated',
     doses: [{ text: 'PPSV23', ppsv: true, struck: true }, { text: 'PCV20 (adults: or PCV21)' }],

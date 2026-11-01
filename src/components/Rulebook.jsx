@@ -92,7 +92,7 @@ function Schedules() {
     <>
       <Card id="rb-kids" title={HEADINGS.kids}>
         <div>
-          <p className="rb-label">Routine PCV series, all children ({ROUTINE_INFANT.products}) <Source ex={[ROUTINE_INFANT.ex]} /></p>
+          <p className="rb-label">Routine PCV series, all children ({ROUTINE_INFANT.products}) <Source ex={ROUTINE_INFANT.ex} /></p>
           <div className="rb-timeline">
             {ROUTINE_INFANT.ages.map((age, i) => (
               <div key={age} className="rb-tick-col">
