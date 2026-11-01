@@ -61,6 +61,14 @@ P2016 of 2/16/2024 — `CLINICAL_SPEC.md` §D-note). Before applying it, **check
 document against itself**: P2016 turned out to contradict its own Table 4 row, which
 settled the question far better than the date did.
 
+**Reconfirmed 2026-11-01, wider: ACIP and CDC over immunize.org.** Shown FINDING A's patient
+again (a 5-year-old with asplenia, PCV13 series, one PPSV23), the owner pointed to the two ACIP
+reports as the documents that speak to her. Both were read live that day: mm7137a3 ("a second
+dose of PPSV23 ≥5 years after the first PPSV23 dose") and the 2023 PCV20 Supplementary Report
+("When PPSV23 is used instead of PCV20 … either PCV20 or a second PPSV23 dose is recommended ≥5
+years after the first PPSV23 dose"). Asked whether immunize.org alone should beat ACIP and CDC,
+she answered **"Yes, ACIP and CDC."** The app was already doing this; nothing moved.
+
 ### Three Schedule Constants — Never Collapse
 `src/logic/scheduleConstants.js` exports three distinct constants:
 - **`ADULT_SCHED_MIN_M = 228` (19y)** — schedule routing boundary (peds vs adult rulebook)
