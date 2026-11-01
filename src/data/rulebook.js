@@ -662,30 +662,36 @@ export const HEADINGS = {
 // ── PneumoVax decisions: written once, numbered, opened in place ─────────
 //
 // Every place CDC and ACIP give no answer and the app chose one. A row says
-// `decision: 'key'` (or a list); the chip reads "PneumoVax decision N" and
-// opens the entry below. `ex` is the patient whose card shows the decision.
+// `decision: 'key'` (or a list); the chip reads "PneumoVax decision: <short>"
+// and opens the entry below. Every entry has the same four parts — when,
+// what PneumoVax does, what CDC and ACIP say, why — and no number (owner,
+// 2026-11-01: make them consistent; "Does it need to be numbered?"). `ex` is
+// the patient whose card shows the decision.
 const W4 = wk(ADULT_CONJUGATE_SUPPORTED_MIN_DAYS);
 const Y1_PCV_AFTER_PPSV = gapOf('ADULT-PCV-AFTER-PPSV23');
 export const DECISIONS = [
   {
     key: 'transplant',
-    title: 'Transplant, CAR-T or B-cell-depleting therapy: no schedule is given',
+    short: 'Transplant stop',
+    when: 'Stem cell transplant, CAR-T or B-cell-depleting therapy is selected.',
     does: 'Stops and shows no recommendation, even when another condition is also selected.',
+    cdc: 'Give separate schedules after a stem cell transplant.',
     why: 'Revaccination after these therapies is individualized. Refer to institutional guidelines (ASCO, NCCN, IDSA, CDC).',
     ex: [P.transplant],
   },
   {
     key: 'ppsvNotRepeated',
-    title: 'PPSV23 is not repeated',
+    short: 'PPSV23 not repeated',
     when: `The first PPSV23 was invalid because it was given <${W8} after a PCV, or another PPSV23 would be a third dose.`,
-    does: 'Give PCV20 (adults: PCV20 or PCV21). PPSV23, and PCV15 (which requires PPSV23), are not offered.',
+    does: 'Gives PCV20 (adults: PCV20 or PCV21). PPSV23, and PCV15 (which requires PPSV23), are not offered.',
     cdc: 'Also allow PPSV23 here.',
     why: 'Each additional PPSV23 dose produces a weaker immune response.',
     ex: [P.leah, P.sam, P.pcv15ThenBad19],
   },
   {
     key: 'invalidPpsvTiming',
-    title: 'An invalid PPSV23 still sets the timing of the next dose',
+    short: 'Invalid PPSV23 still sets the timing',
+    when: 'A PPSV23 on the record did not count (given too young, or too soon after a PCV).',
     does: `Children: the next PCV is advised ≥${W8} after it, and a PCV given sooner still counts; another PPSV23 waits ≥${Y5} after it. Adults: the next PCV is ≥${Y1_PCV_AFTER_PPSV} after it.`,
     cdc: 'Do not address an invalid PPSV23.',
     why: 'The spacing is about the immune response, not whether the dose counted.',
@@ -693,28 +699,32 @@ export const DECISIONS = [
   },
   {
     key: 'pcvAfterPpsvInvalid',
-    title: `A child's PCV given <${W8} after a valid PPSV23 is Invalid`,
+    short: 'PCV too soon after PPSV23',
+    when: `A child's PCV is given <${W8} after a PPSV23 that counted.`,
+    does: 'Marks the PCV Invalid. It does not count.',
     cdc: `Give ${W8} as the timing of the next dose, but do not say whether a PCV given sooner is valid.`,
     why: 'A PCV given soon after PPSV23 produces a weaker immune response.',
     ex: [P.ppsvThenPcvSoon],
   },
   {
     key: 'icSecondPpsvCounts',
-    title: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first still counts`,
-    does: 'The note under the dose says how early it was.',
+    short: 'Early 2nd PPSV23 still counts',
+    when: `An immunocompromised child's 2nd PPSV23 is given <${Y5} after the first.`,
+    does: 'Counts the dose. The note under it says how early it was.',
     cdc: `Give ${Y5} as the interval, but do not say a dose given sooner is invalid.`,
-    why: 'Repeating it would mean a third PPSV23, which PneumoVax does not give (see "PPSV23 is not repeated").',
+    why: 'Repeating it would mean a third PPSV23, which PneumoVax does not give (see "PPSV23 not repeated").',
     ex: [P.ic2ndEarly],
   },
   {
     key: 'adultPcvAfterPcv',
-    title: 'An adult PCV given after another PCV always counts',
-    does: `If it was given <${W4} after the earlier PCV, a repeat dose (PCV20 or PCV21) ≥${W8} later may be considered.`,
+    short: 'Adult PCV after PCV',
+    when: 'An adult receives a PCV after another PCV, for example PCV20 after PCV15.',
+    does: `Counts the dose at any interval. If it was given <${W4} after the earlier PCV, a repeat dose (PCV20 or PCV21) ≥${W8} later may be considered.`,
     cdc: 'Give no minimum interval between two adult PCV doses.',
     why: `Other ACIP schedules space PCV doses ${W4} apart (infants, transplant recipients).`,
     ex: [P.adultPcvClose],
   },
-].map((d, i) => ({ ...d, n: i + 1 }));
+];
 export const DECISION = Object.fromEntries(DECISIONS.map((d) => [d.key, d]));
 /** A row's decision keys, as a list. */
 export const decisionsOf = (row) => (row?.decision == null ? [] : [].concat(row.decision));

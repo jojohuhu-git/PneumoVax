@@ -14,8 +14,14 @@
 //      a decision someone makes, not drift. (Before: 239 over 63 buttons.)
 //   3. p2016 appears only where no CDC sentence on that card says the thing
 //      (her rule of 2026-10-23), and each such row is named here with why.
-//   4. Every PneumoVax decision is written once, numbered, used somewhere, and
-//      opens in place; the grey paragraphs that explained the wrong chip are gone.
+//   4. Every PneumoVax decision is written once, named (not numbered), has the
+//      same four parts as every other, is used somewhere, and opens in place;
+//      the grey paragraphs that explained the wrong chip are gone.
+//   6. On a phone nothing scrolls sideways: every rulebook table stacks, and
+//      the patient screen's age buttons wrap inside their card. (Layout cannot
+//      be measured here — happy-dom draws nothing — so these assert the markup
+//      and CSS the stacking depends on; the widths were measured in the
+//      running app at 320 and 375 px.)
 //   5. A children's row whose last step reads "None" really gives no later
 //      dose — the gap that let the 6-18 row say None for an immunocompromised
 //      child for a day after P1-2 gave that child the 5-year dose.
@@ -98,14 +104,30 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
   });
 });
 
-describe('PneumoVax decisions: written once, numbered, opened in place', () => {
-  it('each decision has a unique key, its number in order, and is used somewhere on the page', () => {
+describe('PneumoVax decisions: written once, named, consistent, opened in place', () => {
+  it('each decision has a unique key and name, and is used somewhere on the page', () => {
     expect(new Set(DECISIONS.map((d) => d.key)).size).toBe(DECISIONS.length);
-    expect(DECISIONS.map((d) => d.n)).toEqual(DECISIONS.map((_, i) => i + 1));
+    expect(new Set(DECISIONS.map((d) => d.short)).size).toBe(DECISIONS.length);
+    for (const d of DECISIONS) expect(DECISION_USES[d.key].length, `${d.key} is never used`).toBeGreaterThan(0);
+  });
+
+  it('every decision has the same four parts, and no number (owner, 2026-11-01)', () => {
+    // "Some have when some don't, Some clearly say what pneumovax will decide
+    // and others don't. Each section ... should be consistent."
     for (const d of DECISIONS) {
-      expect(d.why, d.key).toBeTruthy();
-      expect(DECISION_USES[d.key].length, `${d.key} is never used`).toBeGreaterThan(0);
+      for (const part of ['short', 'when', 'does', 'cdc', 'why']) {
+        expect(typeof d[part] === 'string' && d[part].trim().length > 0, `${d.key} has no ${part}`).toBe(true);
+      }
+      expect(d.n, `${d.key} is numbered`).toBeUndefined();
     }
+    const { container } = render(<Rulebook />);
+    const items = container.querySelectorAll('.rb-declist-item');
+    expect(items).toHaveLength(DECISIONS.length);
+    for (const li of items) {
+      expect([...li.querySelectorAll('.rb-dec-line strong')].map((x) => x.textContent))
+        .toEqual(['When:', 'PneumoVax:', 'CDC and ACIP:', 'Why:']);
+    }
+    expect(container.textContent).not.toMatch(/PneumoVax decision \d/);
   });
 
   it('every decision a row names exists', () => {
@@ -116,11 +138,11 @@ describe('PneumoVax decisions: written once, numbered, opened in place', () => {
   it('the chip is a button that opens its own reason in place, with no instruction sentence', () => {
     const { container } = render(<Rulebook />);
     const chip = container.querySelector('#rb-stop').closest('section').querySelector('button.rb-decision');
-    expect(chip.textContent).toBe('PneumoVax decision 1');
+    expect(chip.textContent).toBe(`PneumoVax decision: ${DECISIONS[0].short}`);
     expect(chip.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(chip);
     expect(chip.getAttribute('aria-expanded')).toBe('true');
-    expect(chip.parentElement.querySelector('.rb-dec-panel').textContent).toContain(DECISIONS[0].title);
+    expect(chip.parentElement.querySelector('.rb-dec-panel').textContent).toContain(DECISIONS[0].why);
     // Owner, 2026-11-01: "I don't want an unelegant sentence below the chip like click to expand".
     expect(container.textContent).not.toMatch(/click to|tap to|to expand/i);
   });
@@ -156,5 +178,39 @@ describe('the adult PCV15 to PPSV23 interval has one home', () => {
   it('is written once in rulebook.js and reused, not retyped', () => {
     expect(rulebookSrc.match(/may be considered for these conditions/g)).toHaveLength(1);
     expect(ADULT_OPTIONS.note).toContain(ADULT_INTERVALS.rows[0].text);
+  });
+});
+
+describe('on a phone, nothing scrolls sideways (owner, 2026-11-01)', () => {
+  const css = readFileSync(join(SRC, 'App.css'), 'utf8');
+
+  it('every rulebook table stacks, and every cell names its column', () => {
+    const { container } = render(<Rulebook />);
+    const tables = [...container.querySelectorAll('table')];
+    expect(tables.length).toBeGreaterThan(4);
+    for (const t of tables) {
+      expect(t.classList.contains('rb-stack'), t.textContent.slice(0, 40)).toBe(true);
+      for (const td of t.querySelectorAll('tbody tr:not(.rb-grp) td')) {
+        expect(td.getAttribute('data-label'), td.textContent.slice(0, 40)).toBeTruthy();
+      }
+    }
+  });
+
+  it('the stacking rule exists at phone width, and no row spans two table rows', () => {
+    const rule = css.indexOf('.rb-stack, .rb-stack tbody, .rb-stack tr, .rb-stack td { display: block;');
+    const media = css.lastIndexOf('@media (max-width: 640px) {', rule);
+    expect(rule).toBeGreaterThan(-1);
+    expect(media).toBeGreaterThan(-1);
+    // Still inside that media block: no top-level closing brace between them.
+    expect(css.slice(media, rule)).not.toMatch(/\n\}/);
+    // The vaccines table's at-risk line used to be a second table row; a
+    // stacked table would have shown it after the adult cell.
+    const { container } = render(<Rulebook />);
+    expect(container.querySelector('.rb-subrow')).toBeNull();
+  });
+
+  it('the patient screen\'s age-entry buttons wrap inside their card', () => {
+    expect(css).toMatch(/\.step-toggle-row \{[^}]*flex-wrap: wrap;/);
+    expect(css).toMatch(/\.step-toggle-btn \{[^}]*white-space: normal;/);
   });
 });

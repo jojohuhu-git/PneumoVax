@@ -34,24 +34,31 @@ const SECTIONS = [
   ['rb-sources', HEADINGS.sources],
 ];
 
-/** What a decision says, as short labelled lines. Shared by the chip and part 6. */
+/**
+ * What a decision says: the same four labelled lines for every decision, in
+ * the same order (owner, 2026-11-01: "Each section of the pneumovax decision
+ * should be consistent with each other"). Shared by the chip and part 6.
+ */
 function DecisionText({ d }) {
   return (
     <>
-      {d.when && <span className="rb-dec-line"><strong>When:</strong> {d.when}</span>}
-      {d.does && <span className="rb-dec-line"><strong>PneumoVax:</strong> {d.does}</span>}
-      {d.cdc && <span className="rb-dec-line"><strong>CDC and ACIP:</strong> {d.cdc}</span>}
+      <span className="rb-dec-line"><strong>When:</strong> {d.when}</span>
+      <span className="rb-dec-line"><strong>PneumoVax:</strong> {d.does}</span>
+      <span className="rb-dec-line"><strong>CDC and ACIP:</strong> {d.cdc}</span>
       <span className="rb-dec-line"><strong>Why:</strong> {d.why}</span>
     </>
   );
 }
 
 /**
- * "PneumoVax decision N" — a button that opens that decision's reason in
- * place (owner, 2026-11-01: "it should be clear to the user they can click to
- * expand. I don't want an unelegant sentence below the chip"). It is styled as
- * a link-coloured, underlined button like "Source", which is how it reads as
- * clickable without an instruction or an icon.
+ * "PneumoVax decision: <its name>" — a button that opens that decision's
+ * reason in place (owner, 2026-11-01: "it should be clear to the user they can
+ * click to expand. I don't want an unelegant sentence below the chip"). It is
+ * styled as a link-coloured, underlined button like "Source", which is how it
+ * reads as clickable without an instruction or an icon. It carries the
+ * decision's NAME, not a number (owner, same day: "The numbering ... is a bit
+ * confusing") — chips appeared out of order (2, 3, 5) and a number told the
+ * reader nothing until they found part 6.
  */
 function DecisionChip({ k }) {
   const [open, setOpen] = useState(false);
@@ -59,11 +66,10 @@ function DecisionChip({ k }) {
   return (
     <span className="rb-dec">
       <button type="button" className="rb-decision" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        PneumoVax decision {d.n}
+        PneumoVax decision: {d.short}
       </button>
       {open && (
         <span className="rb-src-panel rb-dec-panel">
-          <span className="rb-dec-title">{d.title}</span>
           <DecisionText d={d} />
         </span>
       )}
@@ -146,30 +152,34 @@ function Vaccines() {
     <>
       <p className="rb-lead">Two vaccine types. Conjugate vaccines (PCV, green) form every series. The polysaccharide vaccine (PPSV23, blue) is added only for at-risk patients, after a PCV.</p>
       <div className="rb-card rb-scroll">
-        <table className="rb-table rb-fixed">
+        <table className="rb-table rb-fixed rb-stack">
           <colgroup><col className="rb-w18" /><col className="rb-w12" /><col className="rb-w8" /><col /><col /></colgroup>
           <thead><tr><th>Vaccine</th><th>Minimum age</th><th>Counts?</th><th>Use in children</th><th>Use in adults</th></tr></thead>
           <tbody>
             {VACCINE_ROWS.map((g) => (
               <React.Fragment key={g.kind}>
                 <tr className="rb-grp"><td colSpan={5}>{g.name}</td></tr>
-                {g.rows.map((p) => {
-                  // An at-risk child gets a line of its own under the vaccine.
-                  const span = p.atRisk ? 2 : 1;
-                  return (
-                    <React.Fragment key={p.key}>
-                      <tr>
-                        <td rowSpan={span}><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
-                        <td rowSpan={span}>{p.minAge}</td>
-                        <td rowSpan={span}>{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
-                        {p.both
-                          ? <td colSpan={2}>{p.both}</td>
-                          : <><td>{p.atRisk && <span className="rb-who">Healthy</span>}{p.child}</td><td rowSpan={span}>{p.adult}</td></>}
-                      </tr>
-                      {p.atRisk && <tr className="rb-subrow"><td><span className="rb-who">At risk</span>{p.atRisk}</td></tr>}
-                    </React.Fragment>
-                  );
-                })}
+                {g.rows.map((p) => (
+                  <tr key={p.key}>
+                    <td data-label="Vaccine"><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
+                    <td data-label="Minimum age">{p.minAge}</td>
+                    <td data-label="Counts?">{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
+                    {p.both
+                      ? <td colSpan={2} data-label="Use">{p.both}</td>
+                      : (
+                        <>
+                          {/* An at-risk child gets a line of its own under the
+                              healthy one (owner, 2026-11-01), inside the cell so
+                              the table can stack on a phone. */}
+                          <td data-label="Use in children">
+                            {p.atRisk && <span className="rb-who">Healthy</span>}{p.child}
+                            {p.atRisk && <span className="rb-atrisk"><span className="rb-who">At risk</span>{p.atRisk}</span>}
+                          </td>
+                          <td data-label="Use in adults">{p.adult}</td>
+                        </>
+                      )}
+                  </tr>
+                ))}
               </React.Fragment>
             ))}
           </tbody>
@@ -325,14 +335,14 @@ function Adults() {
       <div>
         <p className="rb-label">Prior pneumococcal vaccines</p>
         <div className="rb-scroll">
-          <table className="rb-table rb-history">
+          <table className="rb-table rb-history rb-stack">
             <thead><tr><th className="rb-w24">Vaccine history</th><th className="rb-w30">Risk group</th><th>Next step</th></tr></thead>
             <tbody>
               {ADULT_HISTORY.map((h) => h.splits.map((s, i) => (
-                <tr key={h.history + i} className={i === 0 ? 'rb-hist-first' : undefined}>
-                  {i === 0 && <td rowSpan={h.splits.length} className="rb-strong-wrap">{h.history}</td>}
-                  <td className={s.risk ? undefined : 'rb-any'}>{s.risk ?? 'Any'}</td>
-                  <td>
+                <tr key={h.history + i} className={i === 0 ? 'rb-hist-first' : 'rb-hist-more'}>
+                  {i === 0 && <td rowSpan={h.splits.length} className="rb-strong-wrap rb-stack-head" data-label="Vaccine history">{h.history}</td>}
+                  <td className={s.risk ? undefined : 'rb-any'} data-label="Risk group">{s.risk ?? 'Any'}</td>
+                  <td data-label="Next step">
                     {s.complete ? <strong className="rb-complete">{s.next}</strong> : s.next}
                     <Decisions row={s} />
                     <Source row={s} />
@@ -378,16 +388,16 @@ function Spacing() {
 
         <h4 className="rb-h4">PCV after PCV (CDC catch-up schedule)</h4>
         <div className="rb-scroll">
-          <table className="rb-table">
+          <table className="rb-table rb-stack">
             <thead><tr><th className="rb-w18">Doses</th><th>When</th><th className="rb-w18">Minimum interval</th></tr></thead>
             <tbody>
               {PCV_AFTER_PCV.rows.map((r, i) => (
                 <tr key={r.when}>
                   {(i === 0 || PCV_AFTER_PCV.rows[i - 1].doses !== r.doses) && (
-                    <td className="rb-strong" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length}>{r.doses}</td>
+                    <td className="rb-strong rb-stack-head" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length} data-label="Doses">{r.doses}</td>
                   )}
-                  <td>{r.when}</td>
-                  <td className="rb-strong">{r.gap}</td>
+                  <td data-label="When">{r.when}</td>
+                  <td className="rb-strong" data-label="Minimum interval">{r.gap}</td>
                 </tr>
               ))}
             </tbody>
@@ -396,13 +406,13 @@ function Spacing() {
 
         <h4 className="rb-h4">PCV and PPSV23</h4>
         <div className="rb-scroll">
-          <table className="rb-table">
+          <table className="rb-table rb-stack">
             <thead><tr><th className="rb-w30">Doses</th><th>Minimum interval</th></tr></thead>
             <tbody>
               {PCV_AND_PPSV23.map((r) => (
                 <tr key={r.doses}>
-                  <td>{r.doses}</td>
-                  <td>
+                  <td className="rb-stack-head" data-label="Doses">{r.doses}</td>
+                  <td data-label="Minimum interval">
                     <strong>{r.gap}</strong><Decisions row={r} />
                     {r.text && <span className="rb-cell-text">{r.text}</span>}
                     {r.sub && <span className="rb-cell-note">{r.sub} <Chip tone="extra">{r.subChip}</Chip></span>}
@@ -427,13 +437,13 @@ function Spacing() {
             ))}
           </ol>
           <div className="rb-scroll">
-            <table className="rb-table">
+            <table className="rb-table rb-stack">
               <thead><tr><th className="rb-w40">Invalid dose</th><th>What to do</th></tr></thead>
               <tbody>
                 {INVALID_ACTIONS.rows.map((r) => (
                   <tr key={r.dose}>
-                    <td>{r.dose}</td>
-                    <td>
+                    <td className="rb-stack-head" data-label="Invalid dose">{r.dose}</td>
+                    <td data-label="What to do">
                       {r.strong ? <>{r.action.split(r.strong)[0]}<strong>{r.strong}</strong>{r.action.split(r.strong)[1]}</> : r.action}
                       <Decisions row={r} />
                       <Source row={r} />
@@ -450,13 +460,13 @@ function Spacing() {
       <Card id="rb-adult-gaps" title="Adults: a dose given before the recommended interval still counts">
         <p className="rb-band rb-band-blue">{ADULT_INTERVALS.lead}</p>
         <div className="rb-scroll">
-          <table className="rb-table">
+          <table className="rb-table rb-stack">
             <thead><tr><th className="rb-w40">Doses</th><th>Recommended interval</th></tr></thead>
             <tbody>
               {ADULT_INTERVALS.rows.map((r) => (
                 <tr key={r.doses}>
-                  <td>{r.doses}</td>
-                  <td>
+                  <td className="rb-stack-head" data-label="Doses">{r.doses}</td>
+                  <td data-label="Recommended interval">
                     {r.gap && <strong>{r.gap}</strong>}
                     {r.gap && r.text ? ' ' : ''}
                     {r.text}
@@ -477,13 +487,12 @@ function Spacing() {
 function DecisionList() {
   return (
     <>
-      <p className="rb-lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is numbered; the same number marks it wherever it applies on this page.</p>
+      <p className="rb-lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is listed here once, and its name marks it wherever it applies on this page.</p>
       <div className="rb-card">
         <ol className="rb-declist">
           {DECISIONS.map((d) => (
             <li key={d.key} id={`rb-decision-${d.key}`} className="rb-declist-item">
-              <span className="rb-decision rb-decision-static">PneumoVax decision {d.n}</span>
-              <strong className="rb-dec-title">{d.title}</strong>
+              <h4 className="rb-h4">{d.short}</h4>
               <span className="rb-dec-body"><DecisionText d={d} /></span>
               <span className="rb-cell-note">Applies in: {DECISION_USES[d.key].join('; ')}</span>
             </li>
