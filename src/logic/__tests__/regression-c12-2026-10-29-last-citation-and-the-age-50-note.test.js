@@ -267,7 +267,10 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
       }
     }
     expect(Object.fromEntries([...byCard.entries()].sort())).toEqual({
-      'Not indicated (healthy 5–18y)': 1584,
+      // P2-5 (2026-11-01, owner: "agree with fixing"): -404, the teens whose only
+      // tick is smoking (202) or alcohol use disorder (202). The adult schedule
+      // gives them a dose at 19, so their card now says 19. 1,584 - 404.
+      'Not indicated (healthy 5–18y)': 1584 - 404,
       'PCV series complete': 12,
     });
   });

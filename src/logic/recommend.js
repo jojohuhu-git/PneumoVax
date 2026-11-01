@@ -1424,6 +1424,33 @@ function holdConjugateAfterThrownOut(recs, thrownOut, today, { child }) {
   });
 }
 
+// ── P2-5 (2026-11-01, owner: "agree with fixing") ─────────────────────────
+//
+// G59 — 17, smokes, a baby PCV13 series — reads the healthy 5-18 card, rightly:
+// CDC's child schedule does not list smoking or alcohol use disorder, and
+// `riskAgeNote` says the tick is not acted on at her age. But that card ends
+// "Re-evaluate at age 50", and at 19 the adult schedule gives her a dose. The
+// patient is run forward to 19 exactly as §B-AT19 does, and the age-50 line is
+// swapped only when the adult card there asks for a dose; otherwise 50 stands.
+// The adult risk list is the one source that can say why 19 — an adult source
+// on a child card, declared with `aboutAnotherGroup` like the age-50 line.
+function reviewAdultRiskAtNineteen(recs, riskIds, adultCardAt19) {
+  const ticked = riskIds.filter((id) => RISK_BY_ID[id]?.adultOnly).map((id) => RISK_BY_ID[id].label.toLowerCase());
+  const card = recs.find((r) => r.doseLabel === 'Not indicated (healthy 5–18y)');
+  if (!ticked.length || !card) return recs;
+  const at19 = adultCardAt19();
+  if (!at19 || at19.status === 'complete' || at19.status === 'not-indicated') return recs;
+  const names = ticked.length > 1 ? `${ticked.slice(0, -1).join(', ')} and ${ticked.at(-1)}` : ticked[0];
+  const line = `Re-evaluate at age 19, when the adult schedule counts ${names} as a risk condition and recommends a dose [c].`;
+  return recs.map((r) => (r !== card ? r : {
+    ...r,
+    note: { ...r.note, detail: r.note.detail.replace(REVIEW_AT_50_SENTENCE, line) },
+    noteCites: [...r.noteCites.filter((c) => c.key !== 'adultRoutine50'), cite('cdcAdultRiskFactorList', {
+      aboutAnotherGroup: 'names the adult risk factor this teenager has, which the adult schedule acts on from 19',
+    })],
+  }));
+}
+
 /** Add the "at 19" line to a child's "complete" card: the end of its lead. */
 function withAtNineteen(card, at19) {
   if (!at19 || card.status !== 'complete') return card;
@@ -4417,6 +4444,10 @@ export function recommend(input) {
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
         + (riskIds.length && !pedsIds.length ? ' — the condition ticked is one that only applies to adults' : '')));
       recs = pcvHealthyChild(am, pcv, ppsv, today);
+      recs = reviewAdultRiskAtNineteen(recs, riskIds, () => recommend({
+        ...input, ageMonths: ADULT_SCHED_MIN_M,
+        today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
+      }).recs[0]);
     }
   } else {
     path.push(pathStep('Which rules apply', 'Adults',

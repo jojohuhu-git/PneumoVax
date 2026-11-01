@@ -291,6 +291,19 @@ words from the other side. **Not used:** `mmwrChronic1949ReviewAt50` and
 `jobAidChronic1949ReviewAt50` — both are printed about a 19–49 adult **with chronic
 conditions** and tell you to review a risk-based decision, which is a different claim.
 
+### §B-ADULTRISK19 — a teen whose only tick is an adult risk factor looks again at 19 (2026-11-01)
+
+P2-5 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G59 — 17, smokes, a baby
+PCV13 series — reads the healthy 5–18 card (CDC's child schedule does not list smoking or
+alcohol use disorder; `riskAgeNote` says so), but its "Re-evaluate at age 50" was the wrong
+next look: at 19 the adult schedule gives her a dose. The patient is run forward to 19 as
+§B-AT19 does; when that adult card asks for a dose, the age-50 sentence becomes *"Re-evaluate
+at age 19, when the adult schedule counts cigarette smoking as a risk condition and recommends
+a dose"*, cited to `cdcAdultRiskFactorList` with `aboutAnotherGroup` — a third adult source on
+a child card, declared and pinned. Otherwise the age-50 line stands. Measured: 404 grid teens
+(202 smoking, 202 alcohol use disorder); the age-50 healthy 5–18 count is now 1,584 − 404 =
+1,180. 0 verdicts. Guard: `regression-2026-11-01-p2-5-adult-risk-teen-review-at-19.test.js`.
+
 ### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
 
 **OWNER DECISION 2026-10-30.** Asked whether the age-50 line should spread to the other
