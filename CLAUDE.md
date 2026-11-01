@@ -61,6 +61,14 @@ P2016 of 2/16/2024 — `CLINICAL_SPEC.md` §D-note). Before applying it, **check
 document against itself**: P2016 turned out to contradict its own Table 4 row, which
 settled the question far better than the date did.
 
+**Reconfirmed 2026-11-01, wider: ACIP and CDC over immunize.org.** Shown FINDING A's patient
+again (a 5-year-old with asplenia, PCV13 series, one PPSV23), the owner pointed to the two ACIP
+reports as the documents that speak to her. Both were read live that day: mm7137a3 ("a second
+dose of PPSV23 ≥5 years after the first PPSV23 dose") and the 2023 PCV20 Supplementary Report
+("When PPSV23 is used instead of PCV20 … either PCV20 or a second PPSV23 dose is recommended ≥5
+years after the first PPSV23 dose"). Asked whether immunize.org alone should beat ACIP and CDC,
+she answered **"Yes, ACIP and CDC."** The app was already doing this; nothing moved.
+
 ### Three Schedule Constants — Never Collapse
 `src/logic/scheduleConstants.js` exports three distinct constants:
 - **`ADULT_SCHED_MIN_M = 228` (19y)** — schedule routing boundary (peds vs adult rulebook)
@@ -447,6 +455,11 @@ already right on both; **do not "fix" either**:
 - *"cochlear implant / CSF leak are NOT IC-equivalent for the second PPSV23"* — no. Current
   guidance groups all three and gives **PCV20/PCV21 at ≥5 years**, not a second PPSV23.
 
+**⚠ SUPERSEDED 2026-10-25 (PR #90, `84ffe45`): no adult dose is voided for timing.** Every
+adult row in `DOSE_INTERVAL_RULES` is `'recommendation'` or `'none'` (measured 2026-11-01: 0
+adult floors); an early adult dose counts with a note. The paragraph below is the history.
+An adult's PPSV23 can still be invalid if it was given under the CHILD rules (before 19).
+
 **S14-7's separation of recommendation from validity still stands, unchanged.** The
 **floors** for a dose *already given* key on risk class with **no age term** — 8 weeks for
 IC / cochlear implant / CSF leak, the year for every other adult — and remain an **OWNER
@@ -635,7 +648,7 @@ the record of the reversal — do not delete it.
 
 Each row declares **`rulebook`** (child / adult / any — which schedule states it, so which number and which citation apply) and **`enforcement`** separately: `'floor'` voids the dose and gets CDC's 4-day grace; `'recommendation'` keeps the dose and adds a note, no grace; `'none'` is never flagged, with the reason written down. **One pinned exception:** `CHILD-PPSV23-AFTER-PPSV23` is a recommendation that keeps the grace (owner decision 2026-10-30, `CLINICAL_SPEC.md` §C-P2) — for a non-IC child its firing makes the dose an extra dose, so the grace still decides what counts. **Never add an age test that decides whether a rule may bite** — that was the S14-RC root cause, and three adult gaps fell in the hole it left. Add a row instead.
 
-⚠️ **EVERY adult floor is an OWNER CLINICAL DETERMINATION dated 2026-10-11 — never cite ACIP or CDC for one.** The *intervals* are ACIP's (rr7203a1 keys both PCV13→PPSV23 and PCV15→PPSV23 at 8 weeks for an immunocompromising condition / cochlear implant / CSF leak and 1 year otherwise); treating them as floors is not. Watch ACIP's vocabulary: "**minimum recommended** interval" is the shortest *recommended* spacing, **not** the General Best Practices "minimum interval" that voids a dose. rr7203a1's 8 weeks is explicitly something that "can be considered… to minimize the time of risk" — permission to vaccinate sooner. CDSI v4.64 sets `absMinInt = 0 days` for every adult pneumococcal interval and the current adult MMWRs never say a short gap means repeat the dose; the owner was shown that and reaffirmed. Rows carry `authority: 'OWNER'` and the app's own per-dose text says so. Full evidence and the enumerated rows: `CLINICAL_SPEC.md` §K.
+⚠️ **There are no adult floors since 2026-10-25 (PR #90) — see the SUPERSEDED note above; what follows is why they were owner determinations while they existed.** **EVERY adult floor was an OWNER CLINICAL DETERMINATION dated 2026-10-11 — never cite ACIP or CDC for one.** The *intervals* are ACIP's (rr7203a1 keys both PCV13→PPSV23 and PCV15→PPSV23 at 8 weeks for an immunocompromising condition / cochlear implant / CSF leak and 1 year otherwise); treating them as floors is not. Watch ACIP's vocabulary: "**minimum recommended** interval" is the shortest *recommended* spacing, **not** the General Best Practices "minimum interval" that voids a dose. rr7203a1's 8 weeks is explicitly something that "can be considered… to minimize the time of risk" — permission to vaccinate sooner. CDSI v4.64 sets `absMinInt = 0 days` for every adult pneumococcal interval and the current adult MMWRs never say a short gap means repeat the dose; the owner was shown that and reaffirmed. Rows carry `authority: 'OWNER'` and the app's own per-dose text says so. Full evidence and the enumerated rows: `CLINICAL_SPEC.md` §K.
 
 ### dateUtils.js Is Mirror-Synced
 `dateUtils.js` is identical across PneumoVax and MeningoVax **apart from the `L2 MIRROR NOTE` comment, which exists only in PneumoVax's copy** (measured 2026-10-13: that comment is the only difference; zero lines of code differ). If you change it here, apply the same change to MeningoVax.
