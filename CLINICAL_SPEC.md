@@ -1253,10 +1253,9 @@ family. **369 / 35,280** rendered lines changed (193 real, 176 impossible), ever
 "Held to 5 years" sentence or the 8-week date → 5-year date in the chip. No PCV card and no PCV
 dose verdict moved.
 
-**Still open, asked:** whether *"PCV20 8 weeks after the second PPSV23"* means the card should
-ADVISE a conjugate 8 weeks after a thrown-out PPSV23 (with an earlier one still counting, as Eli's
-did), or whether a conjugate inside those 8 weeks should no longer count — which would reverse Eli
-and Rosa. For Noah and Sam the 8 weeks passed long ago, so neither answer changes their cards.
+**Answered 2026-11-01 — ADVISE ONLY** (§K-THROWNOUTTIMING): the card holds a conjugate 8 weeks
+after a thrown-out PPSV23 and an earlier one still counts, as Eli's did. For Noah and Sam the 8
+weeks passed long ago, so neither card changes.
 
 Guard: `regression-2026-10-31-ppsv23-repeat-waits-five-years.test.js` (Noah, Sam, the toddler,
 the IC teenager, the grace, a 5-year repeat that counts, a child with no thrown-out dose).
@@ -2960,6 +2959,10 @@ push a date later — and the behaviour must **not** be pinned by a test, which 
 
 #### §K-PPSV23THENPCV, 2026-10-31 — a THROWN-OUT PPSV23 holds off nothing; an EXTRA one now holds the card too
 
+**⚠ The CARD half is reversed 2026-11-01 (§K-THROWNOUTTIMING):** a thrown-out PPSV23 now sets the
+ADVISED date of the next conjugate. The dose-check half below stands — it still holds off no
+conjugate's validity.
+
 **Three owner answers in one day, the later two withdrawing the first.**
 
 1. **Eli** (asplenia; catch-up PCV13 Feb 1 and Apr 1, 2023; PPSV23 Apr 29, thrown out — 28 days
@@ -2998,6 +3001,73 @@ Guard: `regression-2026-10-31-card-holds-a-conjugate-after-an-extra-ppsv23.test.
 Rosa as she ruled them, the extra-dose child, and the advice-equals-grading sweep). Mutations:
 the card reading counted doses only fails 3; dropping extras on both sides fails 19; on the
 card side only, 4.
+
+### §K-THROWNOUTTIMING — a PPSV23 that did not count still sets the date of the next conjugate (OWNER, 2026-11-01)
+
+**This reverses the CARD half of §K-PPSV23THENPCV, not the dose-check half.** Asked the
+question §C-P2-FIVE left open, the owner wrote the rule out in full (2026-11-01). Her words:
+
+> **Children (PCV13 or PCV15, then an invalid PPSV23).** *"give PCV20 at least 8 weeks after the
+> last PCV and at least 8 weeks after the invalid PPSV23, whichever date is later ... the invalid
+> PPSV23 doesn't count, so the child still needs the '1 dose PCV20 or 1 dose PPSV23 at least 8
+> weeks after the most recent PCV' step ... the 8-week PPSV23-to-PCV spacing is about immune
+> response, not dose validity."*
+>
+> **Adults (PCV13 or PCV15, then an invalid PPSV23).** *"give PCV20 or PCV21 at least 1 year
+> after whichever came later, the PCV or the PPSV23 ... an invalid PPSV23 leaves the patient in
+> the 'PCV13 only' category ... ACIP recommends at least 1 year after any PPSV23 before a
+> conjugate dose ... After PCV15: the same 1-year interval applies. No PPSV23 is needed after
+> that dose."*
+
+Then asked, with **Eli** (asplenia; PCV13 Feb 1 and Apr 1, 2023; PPSV23 Apr 29, thrown out;
+PCV20 Jun 1), whether a PCV20 given inside those 8 weeks stops counting, she chose **"Still
+counts (advise only)"**. So:
+
+| | Before | Now |
+|---|---|---|
+| Child's PCV card, last PPSV23 thrown out | measured from the last PCV only | the **later** of 8 weeks after the last PCV and 8 weeks after the thrown-out PPSV23, and the card says the earlier date it *could* be given (*"it can be given today if needed, as a PPSV23 that did not count does not change when a PCV is valid"*) — the C10-2 rule for a card carrying two numbers |
+| Child's dose check | a thrown-out PPSV23 holds off no conjugate | **unchanged** — Eli's PCV20 counts, Rosa's booster counts |
+| Adult's PCV card, last PPSV23 thrown out | measured from the PCV only | the later of that and **1 year** after the thrown-out PPSV23 |
+| Adult, PCV15 then a thrown-out PPSV23 | *"PPSV23 (≥… after PCV15)"* | **PCV20 or PCV21, ≥1 year after the PPSV23**, in place of the PPSV23 — citing mm7401a1's footnote *, the job aid's ¶ and CDC's adult notes for the substitution, and CDC's "PPSV23 only" row for the year. No PPSV23 at any risk class (the 19–49 IC row's 8 weeks is the PCV15→PPSV23 gap, and no PPSV23 is given) |
+
+**Applying the year to a PPSV23 that did not count is the owner's determination**, and the
+adult card says so in words ("a PneumoVax decision, because the spacing is about the immune
+response, not whether the dose counted"). No ACIP or CDC sentence addresses a thrown-out PPSV23.
+
+**Scope — only what she described.**
+- **Children: the at-risk path, 24 months to 18 years** (`pcvRiskChild`). The infant pathway
+  (under 2) and the healthy-child pathway are not held: neither was in her rule, and a
+  healthy child given a PPSV23 is a rare history (her 2026-10-31 request to skip those).
+- **Adults: "PCV15, THEN an invalid PPSV23"** — a PPSV23 dated after the last PCV15. A baby's
+  PPSV23 given *before* a later PCV15 (adult Ivy's shape, §C-P2-NOTHIRD) keeps the ordinary
+  PCV15-then-PPSV23 card, or Ivy's own two-shot swap; that order was not in her rule.
+- **Untouched:** the 5-year rule (§H — PCV13 plus a VALID PPSV23 only, split by age and risk
+  exactly as she restated it on 2026-11-01; checked and already correct), PCV15 plus a valid
+  PPSV23 is complete (checked, already correct), every `DOSE_INTERVAL_RULES` row.
+
+**One home.** `ppsv.thrownOutDate` in `recommend()` is validate.js's own `anchor` (the last
+PPSV23 given — Ruling D, never a record problem) when it is not `conjugateHold` (the last that
+counted or was extra) — read, never re-derived. `holdConjugateAfterThrownOut()` holds the
+PCV cards to it — one `max`, never on a card that owes nothing — and the adult PCV15 branch
+of `pcvAdult` reads it.
+
+**Measured against `main`.** **10 / 17,016** verdicts, **0 / 18,264** record-problem rows,
+**10 / 35,280** rendered lines — one family: 19-year-olds with a PCV15 at 14 and a PPSV23 a
+day later, which the child rules threw out; their card goes from PPSV23 to PCV20 or PCV21,
+due today either way. mm7401a1 gains a button on those 10 cards (it states the substitution);
+uncredited (source, statement) pairs stay **0**. The grid builds no child with a thrown-out
+PPSV23 inside the last 8 weeks, so a hand-built sweep (1,680 at-risk children, 2–18, four
+risk sets, four PCV histories, PPSV23 10/30/50 days ago, thrown out for spacing or for age):
+**0** dose verdicts moved, **1,680** advised dates moved, every one **later** by the gap
+between the PCV and the PPSV23, **0** earlier, **0** card labels or vaccines changed.
+
+Guard: `regression-2026-11-01-conjugate-waits-after-thrown-out-ppsv23.test.js` (the toddler,
+Eli before and after, the counted / extra / finished / already-later controls, four adults).
+Nine mutations: seven caught (1–3 tests each); the two that passed tested whether the last
+PPSV23 counted or was extra, which no card can see, and one of them was redundant — removed.
+Two older tests asserted the reversed rule and are kept, renamed, as the record:
+`regression-2026-10-31-ppsv23-repeat-waits-five-years` (the toddler's PCV20 "due today" → Nov 10)
+and `regression-2026-10-31-one-ppsv23-too-soon-pcv20-only` (Leah's PCV20 → Dec 16).
 
 ### §K-IC-PCV20-5Y — An immunocompromised child's early PCV20 counts, and says so (OWNER, 2026-10-31)
 

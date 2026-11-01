@@ -44,12 +44,19 @@ describe('§C-P2-ONE — Leah', () => {
     expect(out.perDose.ppsv23[0].intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
   });
 
-  it('one card: PCV20, due today, and nothing else', () => {
+  // ⚠ "DUE TODAY" WAS REVERSED 2026-11-01 (§K-THROWNOUTTIMING). Her PPSV23
+  // did not count, but it still sets the date: "at least 8 weeks after the
+  // last PCV and at least 8 weeks after the invalid PPSV23, whichever date is
+  // later". The card is still PCV20 only; it is ADVISED from Dec 16 and states
+  // that it can be given today (advise only — her ruling on Eli).
+  it('one card: PCV20, advised 8 weeks after her PPSV23, and nothing else', () => {
     const cards = live(out);
     expect(cards).toHaveLength(1);
     expect(cards[0].vaccine).toBe('PCV');
     expect(cards[0].doseLabel).toBe('1 dose PCV20 (≥8 weeks) — completes the series');
-    expect(cards[0].dueToday).toBe(true);
+    expect(cards[0].dueToday).toBe(false);
+    expect(cards[0].earliestNextDate).toBe('2026-12-16');
+    expect(String(cards[0].note.lead ?? cards[0].note)).toContain('it can be given today if needed');
     expect(out.recs.some((r) => r.vaccine === 'PPSV23')).toBe(false);
   });
 
