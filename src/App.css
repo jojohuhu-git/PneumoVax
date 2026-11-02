@@ -711,7 +711,6 @@ body {
 .rb-dose-struck { text-decoration: line-through; }
 .rb-ppsv-text { color: var(--b); }
 .rb-or { font-weight: 400; }
-.rb-empty { display: block; border: 1px dashed var(--gy5); border-radius: var(--radp); padding: var(--sp-8) 10px; font-size: var(--fs-sm); color: var(--gy3); text-align: center; }
 .rb-arrow { color: var(--gy3); font-size: var(--fs-sm); text-align: center; white-space: nowrap; }
 .rb-cell-note { display: block; font-size: var(--fs-xs); color: var(--gy2); line-height: 1.45; margin-top: 2px; }
 .rb-cell-text { display: block; margin-top: 2px; }
@@ -835,7 +834,9 @@ body {
   .rb-agebar { flex-direction: column; }
   .rb-agebar-0 { border-radius: var(--radp) var(--radp) 0 0; }
   .rb-agebar-1 { border-left: 1px solid var(--gmd); border-top: none; border-radius: 0 0 var(--radp) var(--radp); }
-  .rb-path { grid-template-columns: auto; justify-items: start; gap: var(--sp-4); }
+  /* One wrapping line per option, not one line per box and arrow. */
+  .rb-path { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-4) var(--sp-8); }
+  .rb-path-name { flex-basis: 100%; }
   .rb-indent { padding-left: 0; }
   .rb-pattern { grid-template-columns: 1fr; row-gap: var(--sp-8); }
   .rb-pattern-note { grid-column: 1; }
@@ -844,29 +845,51 @@ body {
   .rb-agelines, .rb-groups { grid-template-columns: 1fr; }
   .rb-src-grid { grid-template-columns: 1fr; }
 }
-/* Phones (owner, 2026-11-01: "the current rulebook does not fit on a phone
-   screen ... Some of the tables require scrolling to the right"). Every
-   rulebook table stacks: each row becomes a block, each cell a line headed by
-   its column name (data-label), so nothing scrolls sideways or overlaps. */
+/* Phones (owner, 2026-11-01, second review: "For any tables on phone that
+   require scrolling to the right, can the first column be frozen and the rest
+   of the columns can scroll?"). A table too wide for a phone keeps its column
+   widths and scrolls sideways inside its card, with its first column pinned
+   (`.rb-freeze-col`). The two- and three-column tables fit as they are. This
+   replaces the stacked layout of the first review, which made the page about
+   three times as tall. */
 @media (max-width: 640px) {
   .rb { padding-left: var(--sp-12); padding-right: var(--sp-12); }
   .rb-card { padding: var(--sp-12); }
-  .rb-scroll { overflow-x: visible; }
-  .rb-stack, .rb-stack tbody, .rb-stack tr, .rb-stack td { display: block; width: 100%; }
-  .rb-stack { table-layout: auto; }
-  .rb-stack colgroup, .rb-stack thead { display: none; }
-  .rb-stack tr { padding: var(--sp-8) 0; border-bottom: 1px solid var(--gy5); }
-  .rb-stack tr.rb-hist-more { border-top: none; padding-top: 0; }
-  .rb-stack .rb-grp td { padding: var(--sp-8) 0 var(--sp-4); border-bottom: none; }
-  .rb .rb-stack tr td { border: none; padding: var(--sp-4) 0; }
-  .rb-stack td[data-label]::before {
-    content: attr(data-label); display: block; font-size: var(--fs-xs); font-weight: 600; color: var(--gy3);
-  }
-  .rb-stack td.rb-stack-head { font-weight: 700; }
-  .rb-stack td.rb-stack-head::before { display: none; }
+  .rb-freeze { min-width: 500px; }
+  /* Narrow the pinned and middle columns so the answer column starts on screen. */
+  .rb-history .rb-w24 { width: 104px; }
+  .rb-history .rb-w30 { width: 118px; }
+  .rb-freeze-wide { min-width: 660px; }
+  .rb-freeze-col { position: sticky; left: 0; z-index: 1; background: var(--wh); box-shadow: inset -1px 0 0 var(--gy5); }
+  th.rb-freeze-col { background: var(--gy6); }
+  .rb-grp-label { position: sticky; left: 10px; }
+  .rb-table td { padding: var(--sp-8); }
+  .rb-table th { padding: var(--sp-8); }
   .rb-strong { white-space: normal; }
-  .rb-path { grid-template-columns: auto; }
   .rb-dose { max-width: 100%; white-space: normal; }
+}
+
+/* Parts that start closed on a phone (owner, 2026-11-01: fewer screens of
+   scrolling). On a computer the bar is hidden and everything is open; on a
+   phone the bar names the part, and the rest shows only once it is opened.
+   "Show" / "Hide" is the cue, in words, since the design rules allow no icon. */
+.rb-fold-btn { display: none; }
+@media (max-width: 720px) {
+  .rb-fold-btn {
+    display: flex; width: 100%; align-items: flex-start; gap: var(--sp-12); text-align: left;
+    background: none; border: none; padding: var(--sp-8) 0; cursor: pointer; font-family: inherit; color: var(--gy);
+  }
+  .rb-fold-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .rb-fold-name { font-size: var(--fs-base); font-weight: 700; }
+  .rb-fold-sum { font-size: var(--fs-xs); color: var(--gy2); line-height: 1.45; }
+  .rb-fold-mark { font-size: var(--fs-xs); font-weight: 600; color: var(--c2); text-decoration: underline; text-underline-offset: 2px; padding-top: 2px; }
+  .rb-fold-btn:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  .rb-fold > .rb-fold-title { display: none; }
+  .rb-fold:not(.rb-open) > :not(.rb-fold-btn) { display: none; }
+  .rb-lane-blank { display: none; }
+  .rb-group.rb-fold { padding: var(--sp-4) var(--sp-12); }
+  .rb-declist-item.rb-fold { padding: var(--sp-4) 0; }
+  .rb-lanes-row.rb-fold { padding-top: 0; }
 }
 .app-main-rulebook { flex: 1; width: 100%; }
 
