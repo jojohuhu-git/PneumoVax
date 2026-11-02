@@ -34,24 +34,55 @@ const SECTIONS = [
   ['rb-sources', HEADINGS.sources],
 ];
 
-/** What a decision says, as short labelled lines. Shared by the chip and part 6. */
+/**
+ * What a decision says: the same three labelled lines for every decision, in
+ * the same order — the problem, what CDC and ACIP say or leave out, what
+ * PneumoVax does (owner, 2026-11-01, second review: no "Why" at the end).
+ * Shared by the chip and part 6, so the two can never differ.
+ */
 function DecisionText({ d }) {
   return (
     <>
-      {d.when && <span className="rb-dec-line"><strong>When:</strong> {d.when}</span>}
-      {d.does && <span className="rb-dec-line"><strong>PneumoVax:</strong> {d.does}</span>}
-      {d.cdc && <span className="rb-dec-line"><strong>CDC and ACIP:</strong> {d.cdc}</span>}
-      <span className="rb-dec-line"><strong>Why:</strong> {d.why}</span>
+      <span className="rb-dec-line"><strong>Problem:</strong> {d.problem}</span>
+      <span className="rb-dec-line"><strong>CDC and ACIP:</strong> {d.cdc}</span>
+      <span className="rb-dec-line"><strong>PneumoVax decision:</strong> {d.does}</span>
     </>
   );
 }
 
 /**
- * "PneumoVax decision N" — a button that opens that decision's reason in
- * place (owner, 2026-11-01: "it should be clear to the user they can click to
- * expand. I don't want an unelegant sentence below the chip"). It is styled as
- * a link-coloured, underlined button like "Source", which is how it reads as
- * clickable without an instruction or an icon.
+ * A part that starts closed on a phone (owner, 2026-11-01: "Trying to
+ * decrease amount of scrolling needed ... Can these risk groups be
+ * expandable rather than everything open?"). The bar names the part and
+ * gives a one-line summary; on a computer the bar is hidden and everything
+ * is open, as before. The CSS does the hiding (`.rb-fold`), so the content
+ * is always in the page, only not shown.
+ */
+function useFold() {
+  const [open, setOpen] = useState(false);
+  return [open ? ' rb-fold rb-open' : ' rb-fold', open, () => setOpen((v) => !v)];
+}
+function FoldBar({ name, summary, open, toggle }) {
+  return (
+    <button type="button" className="rb-fold-btn" aria-expanded={open} onClick={toggle}>
+      <span className="rb-fold-text">
+        <strong className="rb-fold-name">{name}</strong>
+        {summary && <span className="rb-fold-sum">{summary}</span>}
+      </span>
+      <span className="rb-fold-mark">{open ? 'Hide' : 'Show'}</span>
+    </button>
+  );
+}
+
+/**
+ * "PneumoVax decision: <its name>" — a button that opens that decision's
+ * reason in place (owner, 2026-11-01: "it should be clear to the user they can
+ * click to expand. I don't want an unelegant sentence below the chip"). It is
+ * styled as a link-coloured, underlined button like "Source", which is how it
+ * reads as clickable without an instruction or an icon. It carries the
+ * decision's NAME, not a number (owner, same day: "The numbering ... is a bit
+ * confusing") — chips appeared out of order (2, 3, 5) and a number told the
+ * reader nothing until they found part 6.
  */
 function DecisionChip({ k }) {
   const [open, setOpen] = useState(false);
@@ -59,11 +90,10 @@ function DecisionChip({ k }) {
   return (
     <span className="rb-dec">
       <button type="button" className="rb-decision" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        PneumoVax decision {d.n}
+        PneumoVax decision: {d.short}
       </button>
       {open && (
         <span className="rb-src-panel rb-dec-panel">
-          <span className="rb-dec-title">{d.title}</span>
           <DecisionText d={d} />
         </span>
       )}
@@ -145,36 +175,42 @@ function Vaccines() {
   return (
     <>
       <p className="rb-lead">Two vaccine types. Conjugate vaccines (PCV, green) form every series. The polysaccharide vaccine (PPSV23, blue) is added only for at-risk patients, after a PCV.</p>
-      <div className="rb-card rb-scroll">
-        <table className="rb-table rb-fixed">
+      {/* The table scrolls in its own unpadded box: a pinned column in a
+          padded one lets the scrolled cells show through the padding. */}
+      <div className="rb-card"><div className="rb-scroll">
+        <table className="rb-table rb-fixed rb-freeze rb-freeze-wide">
           <colgroup><col className="rb-w18" /><col className="rb-w12" /><col className="rb-w8" /><col /><col /></colgroup>
-          <thead><tr><th>Vaccine</th><th>Minimum age</th><th>Counts?</th><th>Use in children</th><th>Use in adults</th></tr></thead>
+          <thead><tr><th className="rb-freeze-col">Vaccine</th><th>Minimum age</th><th>Counts?</th><th>Use in children</th><th>Use in adults</th></tr></thead>
           <tbody>
             {VACCINE_ROWS.map((g) => (
               <React.Fragment key={g.kind}>
-                <tr className="rb-grp"><td colSpan={5}>{g.name}</td></tr>
-                {g.rows.map((p) => {
-                  // An at-risk child gets a line of its own under the vaccine.
-                  const span = p.atRisk ? 2 : 1;
-                  return (
-                    <React.Fragment key={p.key}>
-                      <tr>
-                        <td rowSpan={span}><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
-                        <td rowSpan={span}>{p.minAge}</td>
-                        <td rowSpan={span}>{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
-                        {p.both
-                          ? <td colSpan={2}>{p.both}</td>
-                          : <><td>{p.atRisk && <span className="rb-who">Healthy</span>}{p.child}</td><td rowSpan={span}>{p.adult}</td></>}
-                      </tr>
-                      {p.atRisk && <tr className="rb-subrow"><td><span className="rb-who">At risk</span>{p.atRisk}</td></tr>}
-                    </React.Fragment>
-                  );
-                })}
+                <tr className="rb-grp"><td colSpan={5}><span className="rb-grp-label">{g.name}</span></td></tr>
+                {g.rows.map((p) => (
+                  <tr key={p.key}>
+                    <td className="rb-freeze-col"><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
+                    <td>{p.minAge}</td>
+                    <td>{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
+                    {p.both
+                      ? <td colSpan={2}>{p.both}</td>
+                      : (
+                        <>
+                          {/* An at-risk child gets a line of its own under the
+                              healthy one (owner, 2026-11-01), inside the cell so
+                              the table can stack on a phone. */}
+                          <td>
+                            {p.atRisk && <span className="rb-who">Healthy</span>}{p.child}
+                            {p.atRisk && <span className="rb-atrisk"><span className="rb-who">At risk</span>{p.atRisk}</span>}
+                          </td>
+                          <td>{p.adult}</td>
+                        </>
+                      )}
+                  </tr>
+                ))}
               </React.Fragment>
             ))}
           </tbody>
         </table>
-      </div>
+      </div></div>
 
       <Card id="rb-patterns" title="Common series patterns">
         <p className="rb-small">A quick reference. Intervals are with each rule in the children&rsquo;s, adults&rsquo; and doses-on-the-record parts.</p>
@@ -200,6 +236,19 @@ function Vaccines() {
 }
 
 // ── 2. Age and risk group ────────────────────────────────────────────────
+function RiskGroup({ c }) {
+  const [cls, open, toggle] = useFold();
+  const n = c.conditions.length;
+  return (
+    <div className={`rb-group${cls}`}>
+      <FoldBar name={c.name} summary={`${n} condition${n === 1 ? '' : 's'}`} open={open} toggle={toggle} />
+      <strong className="rb-group-name rb-fold-title">{c.name}</strong>
+      <ul>{c.conditions.map((x) => <li key={x}>{x}</li>)}</ul>
+      {c.note && <span className="rb-cell-note">{c.note}<Source row={c} /></span>}
+    </div>
+  );
+}
+
 function Who() {
   return (
     <>
@@ -217,13 +266,7 @@ function Who() {
       <Card id="rb-groups" title="Risk groups">
         <p className="rb-small">What each group is given is in the children&rsquo;s and adults&rsquo; parts that follow.</p>
         <div className="rb-groups">
-          {RISK_COLUMNS.map((c) => (
-            <div key={c.key} className="rb-group">
-              <strong className="rb-group-name">{c.name}</strong>
-              <ul>{c.conditions.map((x) => <li key={x}>{x}</li>)}</ul>
-              {c.note && <span className="rb-cell-note">{c.note}<Source row={c} /></span>}
-            </div>
-          ))}
+          {RISK_COLUMNS.map((c) => <RiskGroup key={c.key} c={c} />)}
         </div>
       </Card>
 
@@ -238,6 +281,36 @@ function Who() {
 }
 
 // ── 3. Children ──────────────────────────────────────────────────────────
+/**
+ * One risk group's row. A step the group does not get is left blank (owner,
+ * 2026-11-01: "if there are blank steps should they even be there?"): an
+ * empty cell on a computer, so Result stays under its column, and nothing at
+ * all on a phone. The phone bar's summary is the row's doses, in order.
+ */
+function Lane({ lane }) {
+  const [cls, open, toggle] = useFold();
+  const doses = lane.steps.filter((s) => s.kind !== 'none').map((s) => s.text.replace(/ \(above\)$/, ''));
+  return (
+    <div className={`rb-lanes-row${cls}`} role="row">
+      <FoldBar name={lane.group} summary={[...doses, lane.result.text].join(' → ')} open={open} toggle={toggle} />
+      <span className="rb-lane-name rb-fold-title" role="rowheader">{lane.group}</span>
+      {lane.steps.map((s, i) => (s.kind === 'none'
+        ? <span key={i} className="rb-lane-cell rb-lane-blank" role="cell" />
+        : (
+          <span key={i} className="rb-lane-cell" role="cell" data-label={`Step ${i + 1}`}>
+            <DoseBox><OrDose text={s.text} /></DoseBox>
+            {s.note && <span className="rb-cell-note">{s.note}</span>}
+          </span>
+        )))}
+      <span className="rb-lane-cell" role="cell" data-label="Result">
+        <DoseBox done>{lane.result.text}</DoseBox>
+        {lane.result.note && <span className="rb-cell-note">{lane.result.note}</span>}
+        <span className="rb-cell-note"><Source row={lane} /></span>
+      </span>
+    </div>
+  );
+}
+
 function Children() {
   return (
     <div className="rb-card">
@@ -265,24 +338,7 @@ function Children() {
           <div className="rb-lanes-row rb-lanes-head" role="row">
             {['Risk group', 'Step 1', 'Step 2', 'Step 3', 'Result'].map((h) => <span key={h} role="columnheader">{h}</span>)}
           </div>
-          {CHILD_LANES.map((lane) => (
-            <div key={lane.group} className="rb-lanes-row" role="row">
-              <span className="rb-lane-name" role="rowheader">{lane.group}</span>
-              {lane.steps.map((s, i) => (
-                <span key={i} className="rb-lane-cell" role="cell" data-label={`Step ${i + 1}`}>
-                  {s.kind === 'none'
-                    ? <span className="rb-empty">None</span>
-                    : <DoseBox><OrDose text={s.text} /></DoseBox>}
-                  {s.note && <span className="rb-cell-note">{s.note}</span>}
-                </span>
-              ))}
-              <span className="rb-lane-cell" role="cell" data-label="Result">
-                <DoseBox done>{lane.result.text}</DoseBox>
-                {lane.result.note && <span className="rb-cell-note">{lane.result.note}</span>}
-                <span className="rb-cell-note"><Source row={lane} /></span>
-              </span>
-            </div>
-          ))}
+          {CHILD_LANES.map((lane) => <Lane key={lane.group} lane={lane} />)}
         </div>
         <p className="rb-small rb-handover">{AT_NINETEEN}</p>
       </div>
@@ -325,12 +381,12 @@ function Adults() {
       <div>
         <p className="rb-label">Prior pneumococcal vaccines</p>
         <div className="rb-scroll">
-          <table className="rb-table rb-history">
-            <thead><tr><th className="rb-w24">Vaccine history</th><th className="rb-w30">Risk group</th><th>Next step</th></tr></thead>
+          <table className="rb-table rb-history rb-freeze">
+            <thead><tr><th className="rb-w24 rb-freeze-col">Vaccine history</th><th className="rb-w30">Risk group</th><th>Next step</th></tr></thead>
             <tbody>
               {ADULT_HISTORY.map((h) => h.splits.map((s, i) => (
-                <tr key={h.history + i} className={i === 0 ? 'rb-hist-first' : undefined}>
-                  {i === 0 && <td rowSpan={h.splits.length} className="rb-strong-wrap">{h.history}</td>}
+                <tr key={h.history + i} className={i === 0 ? 'rb-hist-first' : 'rb-hist-more'}>
+                  {i === 0 && <td rowSpan={h.splits.length} className="rb-strong-wrap rb-freeze-col">{h.history}</td>}
                   <td className={s.risk ? undefined : 'rb-any'}>{s.risk ?? 'Any'}</td>
                   <td>
                     {s.complete ? <strong className="rb-complete">{s.next}</strong> : s.next}
@@ -354,7 +410,7 @@ const Chip = ({ tone, children }) => <span className={`dose-val-chip ${CHIP_CLAS
 function Spacing() {
   return (
     <>
-      <p className="rb-lead">Each dose on the record is checked against the dose before it, and the label on the dose shows the result. The intervals below are minimums; the result card still recommends the routine date.</p>
+      <p className="rb-lead">Each dose on the record is checked against the dose before it, and the label on the dose shows the result. Children's intervals below are minimums: a dose given sooner is Invalid. Adults' are recommendations: a dose given sooner still counts. Either way, the result card advises the routine date, which can be later than the minimum.</p>
 
       <Card id="rb-labels" title="What the label on a dose means">
         <div className="rb-legend">
@@ -384,7 +440,7 @@ function Spacing() {
               {PCV_AFTER_PCV.rows.map((r, i) => (
                 <tr key={r.when}>
                   {(i === 0 || PCV_AFTER_PCV.rows[i - 1].doses !== r.doses) && (
-                    <td className="rb-strong" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length}>{r.doses}</td>
+                    <td className="rb-strong" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length} data-label="Doses">{r.doses}</td>
                   )}
                   <td>{r.when}</td>
                   <td className="rb-strong">{r.gap}</td>
@@ -474,20 +530,25 @@ function Spacing() {
 }
 
 // ── 6. PneumoVax decisions ───────────────────────────────────────────────
+function DecisionItem({ d }) {
+  const [cls, open, toggle] = useFold();
+  return (
+    <li id={`rb-decision-${d.key}`} className={`rb-declist-item${cls}`}>
+      <FoldBar name={d.short} open={open} toggle={toggle} />
+      <h4 className="rb-h4 rb-fold-title">{d.short}</h4>
+      <span className="rb-dec-body"><DecisionText d={d} /></span>
+      <span className="rb-cell-note">Applies in: {DECISION_USES[d.key].join('; ')}</span>
+    </li>
+  );
+}
+
 function DecisionList() {
   return (
     <>
-      <p className="rb-lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is numbered; the same number marks it wherever it applies on this page.</p>
+      <p className="rb-lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is listed here once, and its name marks it wherever it applies on this page.</p>
       <div className="rb-card">
         <ol className="rb-declist">
-          {DECISIONS.map((d) => (
-            <li key={d.key} id={`rb-decision-${d.key}`} className="rb-declist-item">
-              <span className="rb-decision rb-decision-static">PneumoVax decision {d.n}</span>
-              <strong className="rb-dec-title">{d.title}</strong>
-              <span className="rb-dec-body"><DecisionText d={d} /></span>
-              <span className="rb-cell-note">Applies in: {DECISION_USES[d.key].join('; ')}</span>
-            </li>
-          ))}
+          {DECISIONS.map((d) => <DecisionItem key={d.key} d={d} />)}
         </ol>
       </div>
     </>
@@ -535,7 +596,7 @@ export default function Rulebook() {
         <p className="rb-intro">
           Recommendations are based on age, risk conditions and dated vaccine history. The parts
           below follow the order the app decides in. Source shows the CDC or ACIP sentence a rule
-          rests on; a PneumoVax decision marks a rule they do not state, and opens to say why.
+          rests on; a PneumoVax decision marks a rule they do not state, and opens to show the problem, what CDC and ACIP say, and what PneumoVax does.
         </p>
       </div>
 

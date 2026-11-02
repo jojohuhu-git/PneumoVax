@@ -14,8 +14,17 @@
 //      a decision someone makes, not drift. (Before: 239 over 63 buttons.)
 //   3. p2016 appears only where no CDC sentence on that card says the thing
 //      (her rule of 2026-10-23), and each such row is named here with why.
-//   4. Every PneumoVax decision is written once, numbered, used somewhere, and
-//      opens in place; the grey paragraphs that explained the wrong chip are gone.
+//   4. Every PneumoVax decision is written once, named (not numbered), has the
+//      same three parts as every other (Problem, CDC and ACIP, PneumoVax
+//      decision — her third review, no "Why"), is used somewhere, and opens in
+//      place; the grey paragraphs that explained the wrong chip are gone.
+//   6. On a phone (her third review, 2026-11-01): a table too wide for the
+//      screen scrolls sideways with its first column pinned; the risk groups,
+//      the 2-18 rows and the decision list start closed; a step a group does
+//      not get is not shown. The patient screen's age buttons wrap inside
+//      their card. (Layout cannot be measured here — happy-dom draws nothing —
+//      so these assert the markup and CSS the layout depends on; it was
+//      checked in the running app at 375 px.)
 //   5. A children's row whose last step reads "None" really gives no later
 //      dose — the gap that let the 6-18 row say None for an immunocompromised
 //      child for a day after P1-2 gave that child the 5-year dose.
@@ -98,14 +107,33 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
   });
 });
 
-describe('PneumoVax decisions: written once, numbered, opened in place', () => {
-  it('each decision has a unique key, its number in order, and is used somewhere on the page', () => {
+describe('PneumoVax decisions: written once, named, consistent, opened in place', () => {
+  it('each decision has a unique key and name, and is used somewhere on the page', () => {
     expect(new Set(DECISIONS.map((d) => d.key)).size).toBe(DECISIONS.length);
-    expect(DECISIONS.map((d) => d.n)).toEqual(DECISIONS.map((_, i) => i + 1));
+    expect(new Set(DECISIONS.map((d) => d.short)).size).toBe(DECISIONS.length);
+    for (const d of DECISIONS) expect(DECISION_USES[d.key].length, `${d.key} is never used`).toBeGreaterThan(0);
+  });
+
+  it('every decision has the same three parts, in order, and no number (owner, 2026-11-01)', () => {
+    // "Some have when some don't, Some clearly say what pneumovax will decide
+    // and others don't. Each section ... should be consistent." Then, third
+    // review: "The problem/what the issue is and why it's a problem, PneumoVax
+    // decision. What CDC and ACIP provide or have lack of guidance for. Remove
+    // the why at the end." She chose the gap before the answer.
     for (const d of DECISIONS) {
-      expect(d.why, d.key).toBeTruthy();
-      expect(DECISION_USES[d.key].length, `${d.key} is never used`).toBeGreaterThan(0);
+      for (const part of ['short', 'problem', 'cdc', 'does']) {
+        expect(typeof d[part] === 'string' && d[part].trim().length > 0, `${d.key} has no ${part}`).toBe(true);
+      }
+      for (const gone of ['when', 'why', 'n']) expect(d[gone], `${d.key} still has ${gone}`).toBeUndefined();
     }
+    const { container } = render(<Rulebook />);
+    const items = container.querySelectorAll('.rb-declist-item');
+    expect(items).toHaveLength(DECISIONS.length);
+    for (const li of items) {
+      expect([...li.querySelectorAll('.rb-dec-line strong')].map((x) => x.textContent))
+        .toEqual(['Problem:', 'CDC and ACIP:', 'PneumoVax decision:']);
+    }
+    expect(container.textContent).not.toMatch(/PneumoVax decision \d/);
   });
 
   it('every decision a row names exists', () => {
@@ -116,11 +144,11 @@ describe('PneumoVax decisions: written once, numbered, opened in place', () => {
   it('the chip is a button that opens its own reason in place, with no instruction sentence', () => {
     const { container } = render(<Rulebook />);
     const chip = container.querySelector('#rb-stop').closest('section').querySelector('button.rb-decision');
-    expect(chip.textContent).toBe('PneumoVax decision 1');
+    expect(chip.textContent).toBe(`PneumoVax decision: ${DECISIONS[0].short}`);
     expect(chip.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(chip);
     expect(chip.getAttribute('aria-expanded')).toBe('true');
-    expect(chip.parentElement.querySelector('.rb-dec-panel').textContent).toContain(DECISIONS[0].title);
+    expect(chip.parentElement.querySelector('.rb-dec-panel').textContent).toContain(DECISIONS[0].problem);
     // Owner, 2026-11-01: "I don't want an unelegant sentence below the chip like click to expand".
     expect(container.textContent).not.toMatch(/click to|tap to|to expand/i);
   });
@@ -156,5 +184,99 @@ describe('the adult PCV15 to PPSV23 interval has one home', () => {
   it('is written once in rulebook.js and reused, not retyped', () => {
     expect(rulebookSrc.match(/may be considered for these conditions/g)).toHaveLength(1);
     expect(ADULT_OPTIONS.note).toContain(ADULT_INTERVALS.rows[0].text);
+  });
+});
+
+describe('on a phone: pinned first column, closed parts, no blank steps (owner, 2026-11-01)', () => {
+  const css = readFileSync(join(SRC, 'App.css'), 'utf8');
+  const phoneBlock = (selector) => {
+    const at = css.indexOf(selector);
+    const media = css.lastIndexOf('@media (max-width:', at);
+    // Inside that media block: no top-level closing brace between them.
+    return at > -1 && media > -1 && !/\n\}/.test(css.slice(media, at));
+  };
+
+  it('a table with more than three columns, or the adult history table, pins its first column', () => {
+    // "For any tables on phone that require scrolling to the right, can the
+    // first column be frozen and the rest of the columns can scroll?"
+    const { container } = render(<Rulebook />);
+    const tables = [...container.querySelectorAll('table')];
+    expect(tables.length).toBeGreaterThan(4);
+    for (const t of tables) {
+      const cols = t.querySelectorAll('thead th').length;
+      const label = t.textContent.slice(0, 40);
+      if (cols > 3 || t.classList.contains('rb-history')) {
+        expect(t.classList.contains('rb-freeze'), label).toBe(true);
+        expect(t.querySelector('thead th').classList.contains('rb-freeze-col'), label).toBe(true);
+        // Every row's first-column cell is pinned (a spanned cell counts once).
+        const pinned = t.querySelectorAll('tbody td.rb-freeze-col').length;
+        const groups = t.querySelectorAll('tbody tr:not(.rb-grp):not(.rb-hist-more)').length;
+        expect(pinned, label).toBe(groups);
+        // It scrolls inside a box of its own, never the padded card.
+        expect(t.parentElement.classList.contains('rb-scroll'), label).toBe(true);
+        expect(t.parentElement.classList.contains('rb-card'), label).toBe(false);
+      } else {
+        expect(t.classList.contains('rb-freeze'), label).toBe(false);
+      }
+    }
+    expect(container.querySelector('.rb-stack')).toBeNull();
+  });
+
+  it('the pin is a phone rule: sticky, at the left edge, inside the phone media block', () => {
+    expect(css).toMatch(/\.rb-freeze-col \{ position: sticky; left: 0;/);
+    expect(phoneBlock('.rb-freeze-col { position: sticky;')).toBe(true);
+    expect(phoneBlock('.rb-freeze { min-width:')).toBe(true);
+    expect(css).not.toMatch(/\.rb-stack/);
+  });
+
+  it('the risk groups, the 2-18 rows and the decision list start closed on a phone, behind a named bar', () => {
+    // "Trying to decrease amount of scrolling needed ... Can these risk groups
+    // be expandable rather than everything open?"
+    const { container } = render(<Rulebook />);
+    const folds = {
+      '.rb-group': RISK_COLUMNS.length,
+      '.rb-lanes-row:not(.rb-lanes-head)': CHILD_LANES.length,
+      '.rb-declist-item': DECISIONS.length,
+    };
+    for (const [sel, n] of Object.entries(folds)) {
+      const items = container.querySelectorAll(sel);
+      expect(items, sel).toHaveLength(n);
+      for (const it of items) {
+        expect(it.classList.contains('rb-fold'), sel).toBe(true);
+        expect(it.classList.contains('rb-open'), sel).toBe(false);
+        const bar = [...it.children].find((c) => c.matches('button.rb-fold-btn'));
+        expect(bar.getAttribute('aria-expanded'), sel).toBe('false');
+        fireEvent.click(bar);
+        expect(it.classList.contains('rb-open'), sel).toBe(true);
+        expect(bar.getAttribute('aria-expanded'), sel).toBe('true');
+      }
+    }
+    // Closed hides everything but the bar, on a phone only; on a computer the
+    // bar is hidden and everything is open.
+    expect(css).toMatch(/\.rb-fold-btn \{ display: none; \}/);
+    expect(phoneBlock('.rb-fold:not(.rb-open) > :not(.rb-fold-btn) { display: none; }')).toBe(true);
+    // A 2-18 row's bar says what the row gives, in order.
+    const healthy = container.querySelector('.rb-lanes-row:not(.rb-lanes-head) .rb-fold-sum');
+    expect(healthy.textContent).toBe('Routine PCV series → Complete');
+  });
+
+  it('a step a group does not get is not shown, and the routine series points up the page', () => {
+    // "if there are blank steps should they even be there?" — "Everywhere".
+    // "Routine series should specify routine PCV series so the user knows to look above."
+    const { container } = render(<Rulebook />);
+    const lanes = container.querySelector('.rb-lanes');
+    expect(lanes.textContent).not.toMatch(/\bNone\b/);
+    const blanks = CHILD_LANES.flatMap((l) => l.steps).filter((s) => s.kind === 'none').length;
+    expect(blanks).toBeGreaterThan(0);
+    expect(lanes.querySelectorAll('.rb-lane-blank')).toHaveLength(blanks);
+    for (const b of lanes.querySelectorAll('.rb-lane-blank')) expect(b.textContent).toBe('');
+    expect(phoneBlock('.rb-lane-blank { display: none; }')).toBe(true);
+    expect(lanes.textContent).not.toMatch(/Routine series/);
+    expect(lanes.textContent).toMatch(/Routine PCV series \(above\)/);
+  });
+
+  it('the patient screen\'s age-entry buttons wrap inside their card', () => {
+    expect(css).toMatch(/\.step-toggle-row \{[^}]*flex-wrap: wrap;/);
+    expect(css).toMatch(/\.step-toggle-btn \{[^}]*white-space: normal;/);
   });
 });
