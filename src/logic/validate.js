@@ -49,6 +49,9 @@ import { cite } from '../data/refs.js';
 // drift guard that fails if one appears here.
 import { ageMeetsMinimum, ageMeetsMinimumDays, pcvAgeAtTwelveMonthLine } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
+
+// Where CDC's "Age 6-18 years" rows begin. `recommend.js` calls the same line M.m72.
+const CHILD_LATE_ROW_MIN_M = 72;
 import { hasIC, populationOf } from '../data/riskFactors.js';
 import { evaluateDoseInterval, lastPpsv23HoldingAConjugate } from './doseIntervalRules.js';
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
@@ -396,6 +399,32 @@ function extraDoseSentence(completingDose, dose, vaccine) {
   }
   const needed = vaccine === 'PPSV23' ? 'no PPSV23 was needed, and this dose' : 'this dose';
   return `Given at the same visit as the ${label} dose, which completes the adult series on its own: ${needed} does not add to the series.`;
+}
+
+// ── P1-3 (OWNER RULING 2026-11-06, on Noor): a PCV15 no card asked for ──────
+//
+// An immunocompromised child aged 6-18 who had her PCV doses before 6 and one
+// PPSV23 is offered PCV20 or a 2nd PPSV23. CDC's row names no PCV15 (child
+// notes, read live 2026-11-06: "Not previously received PCV20: administer 1
+// dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV dose.
+// If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years
+// after dose 1 PPSV23."). So a PCV15 here is an extra dose: not needed, not
+// harmful, not counted, nothing repeated. It still holds the next dose 8 weeks,
+// because it IS "the most recent PCV dose".
+//
+// EVERY CLAUSE IS HER PATIENT, and each one keeps out a family she did not
+// rule on: no PPSV23 yet, a healthy child, two PPSV23 doses, a series with a
+// PCV20 in it, an unrecorded product, a conjugate given at or after 6.
+// `ageNow` is the same limit P2 set for PPSV23 (§C-P2-ONTIME): an adult's
+// history is read by ACIP's adult rows, which count every dose received.
+const NOT_ASKED_FOR_CONJUGATE = 'Not needed: after a PCV series before age 6 and one PPSV23, CDC offers PCV20 or a 2nd PPSV23 here, not PCV15. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated. The next dose still waits 8 weeks after it.';
+
+function conjugateNobodyAskedFor(dose, { kept, countedPpsv23, ageAt, ageNow, riskIds }) {
+  if (dose.product !== 'PCV15' || !dose.date || ageNow >= ADULT_SCHED_MIN_M || !hasIC(riskIds)) return false;
+  if (ageAt(dose) < CHILD_LATE_ROW_MIN_M) return false;
+  const earlierPpsv23 = countedPpsv23.filter((d) => d.date < dose.date);
+  return earlierPpsv23.length === 1 && kept.length > 0 && kept.every((d) => d.date && d.product
+    && !productByKey(d.product)?.completesSeries && ageAt(d) < CHILD_LATE_ROW_MIN_M);
 }
 
 // ── P6-3c (2026-10-12): which sentence a minimum-age verdict cites ───────
@@ -796,6 +825,7 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
     prev,
     priorPcv: (ctxParts.priorPcv ?? []).filter((d) => d.date && d.date <= dose.date),
     priorPpsv23: (ctxParts.priorPpsv23 ?? []).filter((d) => d.date && d.date <= dose.date),
+    pcvExtraGiven: (ctxParts.pcvExtraGiven ?? []).filter((d) => d.date <= dose.date),
     riskIds: ctxParts.riskIds ?? [],
   });
 }
@@ -826,6 +856,7 @@ function freshStreamState() {
     // response to a conjugate given soon after a PPSV23 — is about the dose
     // the child received, needed or not.
     extraChildPpsv23: [],
+    extraChildPcv: [],
   };
 }
 
@@ -881,7 +912,10 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         priorPcv: kept, priorPpsv23: crossStream, riskIds,
         ppsv23ExtraGiven: (otherExtra ?? []).filter((d) => d && d.date),
       }
-      : { priorPcv: crossStream, priorPpsv23: kept, riskIds };
+      : {
+        priorPcv: crossStream, priorPpsv23: kept, riskIds,
+        pcvExtraGiven: (otherExtra ?? []).filter((d) => d && d.date),
+      };
     // Two different products on one day. A SENTENCE added to whatever verdict
     // this dose gets, never a verdict of its own (owner decision, 2026-10-12)
     // — computed here, once, and appended at every push below, because the
@@ -1260,6 +1294,25 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       return;
     }
 
+    if (vaccine === 'PCV' && conjugateNobodyAskedFor(dose, {
+      kept,
+      countedPpsv23: crossStream,
+      ageAt: (d) => ageAtDoseFromDate(d, ageMonths, today, dob),
+      ageNow: ageMonths,
+      riskIds,
+    })) {
+      perDose.push(addNote({
+        ...result,
+        effectiveDoseNum: null,
+        extraDose: true,
+        notAskedFor: true,
+        reasons: [...result.reasons, NOT_ASKED_FOR_CONJUGATE],
+      }));
+      st.extraChildPcv.push(dose);
+      anchorOn(dose);
+      return;
+    }
+
     st.effectiveCount++;
     perDose.push(addNote({ ...result, effectiveDoseNum: st.effectiveCount }));
     kept.push(dose);
@@ -1330,7 +1383,7 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
   for (const { dose, vaccine } of queue) {
     const self = vaccine === 'PCV' ? pcv : ppsv23;
     const other = vaccine === 'PCV' ? ppsv23 : pcv;
-    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds, other.extraChildPpsv23);
+    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds, vaccine === 'PCV' ? ppsv23.extraChildPpsv23 : pcv.extraChildPcv);
   }
 
   // `anchor` is the stream's last DATED dose — the one a same-stream interval
@@ -1346,6 +1399,8 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
   return {
     pcv: {
       perDose: pcv.perDose, effective: pcv.kept, doses: pcv.doses, anchor: pcv.prev,
+      // P1-3: the extra PCV15 the next dose still waits 8 weeks after.
+      extraConjugate: pcv.extraChildPcv.at(-1) ?? null,
     },
     ppsv23: {
       perDose: ppsv23.perDose, effective: ppsv23.kept, doses: ppsv23.doses, anchor: ppsv23.prev,
