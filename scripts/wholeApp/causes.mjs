@@ -18,10 +18,6 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 export const CAUSES = {
-  'R3-date-crosses-7-months': {
-    class: 'real',
-    title: "An infant's date is worked out by today's age band, not the age at the dose",
-  },
   'R4-thrown-out-ppsv23-chip': {
     class: 'real',
     title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other",
@@ -102,7 +98,6 @@ export function causeOf(check, kind, group) {
     if (kind === 'recorded-dose-verdict-changed' && /^ppsv23 (extraDose: true → -|effectiveDoseNum: - → \d) \(crossing 19\)/.test(group)) return 'D2-extra-dose-counts-at-19';
     if (kind === 'recorded-dose-verdict-changed' && /^pcv (extraDose: true → -|effectiveDoseNum: - → \d) \(crossing 19\)/.test(group)) return 'D5-extra-pcv15-counts-at-19';
     if (kind === 'advised-date-moved' && /^Option B-2/.test(group)) return 'R4-thrown-out-ppsv23-chip';
-    if (/crossed 7m/.test(group)) return 'R3-date-crosses-7-months';
   }
   return 'unsorted';
 }
