@@ -68,8 +68,18 @@ describe('Rafi: the dose stays, on the adult card', () => {
     expect(note).toContain('A 2nd PPSV23 is not offered at 19');
   });
 
-  it('carries the adult advisory on PCV21 with the card that offers it', () => {
-    expect(r.pcv21Geo).not.toBeNull();
+  it('keeps the PCV21 regional advisory off a 14-year-old\'s screen', () => {
+    // OWNER 2026-11-06: the note waits for the adult schedule, at 19, however
+    // early a card names PCV21 for the dose he will get then.
+    expect(r.recs[0].brands.some((x) => x.includes('PCV21'))).toBe(true);
+    expect(r.pcv21Geo).toBeNull();
+  });
+
+  it('keeps it off at 18 too, and shows it on the 19th birthday', () => {
+    // Same line as every other patient: the adult schedule's own start.
+    expect(recommend({ ...rafi, today: '2030-10-11' }).pcv21Geo).toBeNull();
+    expect(recommend({ ...rafi, today: '2031-10-10' }).pcv21Geo).toBeNull();
+    expect(recommend({ ...rafi, today: '2031-10-11' }).pcv21Geo).not.toBeNull();
   });
 });
 

@@ -432,18 +432,23 @@ on the screen with one opening sentence added. It is the adult card's own answer
 become a second reading. Its citations are declared `aboutAnotherGroup`. It acts only when every
 dated card falls on or after the birthday: **a dose due before 19 stays a child's dose**, on the
 child's rules, and turns to the adult answer on the birthday (42 grid patients, sorted as ruling
-D4 in `scripts/wholeApp/causes.mjs`). The PCV21 advisory comes with a card offering PCV21. The
+D4 in `scripts/wholeApp/causes.mjs`). The PCV21 advisory waits for the 19th birthday, as it does for every patient, even when a card
+already names PCV21 for the dose at 19 (owner, 2026-11-06, on Rafi at 14). The
 5-year note on a PCV20 given early still reads the child's card (`childCardsReplaced`): a dose
 given at 18 was given under the child's rules.
 
-**Two families she did not see, both inside the rule she stated, dose moved by the adult row:**
-an unrecorded conjugate plus PPSV23 (36 grid patients: PCV15, PCV20 or PCV21 ≥1 year after the
-PPSV23, EARLIER than the child's 5 years) and a thrown-out PCV21 at 17 plus PPSV23 (24: the same
-card, LATER than the child's 8 weeks). Listed so she can overrule either.
+**Three families she did not see, all inside the rule she stated, dose moved by the adult row:**
+an unrecorded conjugate plus PPSV23 (12 grid patients: PCV15, PCV20 or PCV21 ≥1 year after the
+PPSV23, EARLIER than the child's 5 years); no conjugate that counts plus a recent PPSV23 (24: 8
+with none, 8 with PCV7 only, 8 with a PCV21 thrown out at 17; the same card, LATER than the child's
+8 weeks); a PCV13 in the past year plus an older PPSV23 (24: 5 years after the last counting
+conjugate, LATER than 5 years after the PPSV23). Listed so she can overrule any of them. The first
+draft of this paragraph said 36 and 24, and named only the thrown-out PCV21. Those were recounted
+from the corpus on 2026-11-06.
 
 Measured: **222 of 17,016** verdicts, all aged 18 on the grid (90 same date, PCV20 or PCV21; 72
-Complete at 19; 36 + 24 as above), **0 of 18,264** record-problem rows. No recorded-dose verdict
-moved; the only other column to change is the PCV21 advisory, on 150. Prose: those same 222 lines.
+Complete at 19; 12 earlier and 48 later, as above), **0 of 18,264** record-problem rows. No
+recorded-dose verdict moved, and the PCV21 advisory column did not move. Prose: those same 222 lines.
 All seven checks: this cause 1,358 patients to **0**.
 Guard: `regression-2026-11-05-r2-adult-rules-win-past-19.test.js`.
 

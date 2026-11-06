@@ -132,3 +132,11 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
 
 - A healthy baby's "series complete" card does not mention what happens at 50. The toddler's card
   does. The ask is decades away. Listed so it is not found again.
+
+### P1-3: a child's conjugate dose that nobody asked for is never called extra (found 2026-11-06, OWNER)
+
+- **Patient:** Noor, 10, HIV. PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, PCV15 two weeks ago. No card offered a PCV15: the options were PCV20 or a 2nd PPSV23. The dose reads plain "valid".
+- **Cause:** in `validate.js`, `priorCompletingDose` is `!isAdultDose ? null : ...`. The check for a dose given after the series was finished runs for adults only. Children have the PPSV23 version (§C-P2) but no conjugate version. None of the seven whole-app checks asks "was this dose on offer?"
+- **Size, measured 2026-11-06:** 31,584 of 43,324 patients whose last PCV was given between age 7 and 18 got a dose no card offered, and it reads plain "valid". The count needs splitting into clinical families before any ruling.
+- **Not a fault:** the same child with no PCV at all before the PCV15. CDC's row offers PCV15 and the app's Option B-1 names it.
+- **Waits on:** her decision. It would move dose verdicts.

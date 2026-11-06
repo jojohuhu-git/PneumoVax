@@ -4571,7 +4571,7 @@ export function recommend(input) {
   path.push(pathStep('Doses already given', doseWords(pcvAnalysis, ppsvAnalysis), null));
 
   // ── PCV21 geographic advisory ─────────────────────────────────────────
-  const pcv21Geo = pcv21GeoNote(childCardsReplaced ? M.y18 : am, recs);
+  const pcv21Geo = pcv21GeoNote(am, recs);
 
   // ── OWNER DECISION 2026-10-25: a rejected dose does not promise a dose
   //    nobody is asking for ───────────────────────────────────────────────
