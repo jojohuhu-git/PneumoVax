@@ -3650,6 +3650,22 @@ on the record, a card has nothing to measure from. "≥8 weeks after the most re
 previously given" come off those cards and their headings. The 8 weeks between PCV15 and PPSV23, and
 between two doses, stays. A dose that was thrown out or has no date is still a dose on the record, so
 those cards keep the interval. Kai's PPSV23s are the guard.
+### §L-2, 2026-11-06 — the row is the one for the age at the dose (P2-2, R3, OWNER)
+
+Remy, born May 6, 2026, HIV, PCV20 on Nov 6 and Dec 4. The app read the child's age on the visit day.
+On Dec 4, under 7 months, no p2016 row applied and the card said Jan 1, the 4-week minimum. On Jan 1,
+over 7 months, the same card said Jan 29. Asked which date the Dec 4 card should give, she chose
+**advise Jan 29, and say Jan 1 counts**.
+
+CDC's catch-up table sets the minimum: *"4 weeks if current age is younger than 12 months and
+previous dose was administered at <7 months old"*. p2016 Table 1, 7–11 months, sets the advice: *"1 or
+2 before age 7 months — 2 additional doses: 1 dose 8 weeks after most recent dose"*. So when the earliest
+date the dose could fall is at 7 months or later, the row applies from today. **The minimum does not
+move** (Ruling C): a dose given Jan 1 counts. Three or more doses before 7 months has no 8-week row,
+because that row's one remaining dose is held to 12 months.
+
+**Known and left alone.** The dose TOTAL on the card is still read from the age today. A baby with one
+dose before 7 months reads "of 4" under 7 months and "of 3" over it. That is p2016's own table.
 
 ### §L-3 — RULING D (2026-10-23): the repeat is measured from the dose the patient GOT
 
