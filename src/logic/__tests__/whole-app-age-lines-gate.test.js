@@ -13,6 +13,7 @@
 //
 // The one known part of check 6 left out is `ask-turns-to-complete-at-19`
 // (report, R2). It is filtered by name, so anything new still fails here.
+// Check 4 has its own file, `whole-app-options-agree-gate.test.js`.
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 import { buildCases, buildTypicalCases, GRID_TYPICAL_CHILD_AGES_MONTHS } from '../../test-grid.js';

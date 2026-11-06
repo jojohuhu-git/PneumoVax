@@ -293,6 +293,8 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     includesCompleting,
     hasUndatedCompleting,
     lastDate: lastDated?.date || null,
+    // The product of the dose `lastDate` names, as the record shows it.
+    lastProduct: lastDated?.product || null,
     // P1-3 (2026-11-01): the earliest DATED PCV15, so the adult "complete"
     // card can tell PPSV23-then-PCV15 from PCV15-then-PPSV23.
     firstPcv15Date: pcvDoses.filter((d) => d.product === 'PCV15' && d.date).map((d) => d.date).sort()[0] ?? null,
@@ -388,11 +390,15 @@ function dueStateMonths(anchorDate, months, today) {
 // rule, extended in the same commit to rank CDC above an older immunize.org
 // handout where AAP is silent.
 //
-// The 8-week floor is KEPT as the later of the two dates: a conjugate dose can
-// fall after the PPSV23, and nothing here should let the app recommend a dose
-// two weeks after the last one. Measured on the grid, that floor changes no
-// committed verdict (0 of the 234 patients already past five years are also
-// inside 8 weeks); it is exercised directly by its own test.
+// The 8-week wait is KEPT as the later of the two dates: a conjugate dose can
+// fall after the PPSV23, and CDC's own row for that child states both ("at least
+// 8 weeks after the most recent PCV13 dose and at least 5 years after dose 1
+// PPSV23"). BOTH CARDS ASK HERE: the PCV20 and the 2nd PPSV23 beside it share
+// this one answer, so they cannot name different days. They did until P0-1
+// (2026-11-05): the PPSV23 card worked out five years alone and 2,110 of 77,496
+// patients read "due today" on one card and a later date on the other. This
+// comment used to say the wait "changes no committed verdict", which was true
+// only of the grid, which has no vaccinated child aged 6-18.
 function icPostPpsv23DueState(ppsv, anchorPneumo, today) {
   const firstPpsv = ppsv.effective.find((d) => d.date)?.date || anchorPneumo;
   const fiveYear = dueStateMonths(firstPpsv, MO60, today);
@@ -402,7 +408,46 @@ function icPostPpsv23DueState(ppsv, anchorPneumo, today) {
   }
   const pending = [fiveYear.earliestNextDate, eightWeek.earliestNextDate].filter(Boolean);
   // ISO date strings sort chronologically, so the last one is the later date.
-  return { dueToday: false, earliestNextDate: pending.sort().at(-1) ?? null };
+  const earliestNextDate = pending.sort().at(-1) ?? null;
+  const eightWeeksDecides = !eightWeek.dueToday
+    && (fiveYear.dueToday || eightWeek.earliestNextDate > fiveYear.earliestNextDate);
+  return { dueToday: false, earliestNextDate, eightWeeksDecides };
+}
+
+// OWNER DECISION 2026-11-05. Noor's cards read "eligible Nov 22" over text naming
+// only the five years, which she had already passed, so nothing said why. When
+// the 8 weeks is what the child is waiting for, one line says so. It is carried
+// on the card as `eightWeekWait` and printed by `sayEightWeekWait()`, after the
+// thrown-out-dose holds, because a hold moves the card to a later date and the
+// line must not name a date the card no longer shows.
+//
+// Only the at/after-6 block can reach this, so only its two cards carry it: every
+// other caller serves a child whose conjugates all came before 6, and five years
+// after a PPSV23 given at 2 or older is past 8 weeks after any such dose
+// (measured: 0 of 47,254 screens differ).
+//
+// The dose waited on is usually a PCV, but not always: after two PPSV23 doses it
+// can be the second PPSV23. So the line names `anchor`, the dose the 8 weeks was
+// counted from, and "PCV" when the record shows no product. It never prints a
+// product the record does not show (FINDING H).
+function withEightWeekWait(card, state, pcv, anchor) {
+  if (!state.eightWeeksDecides) return card;
+  const named = anchor !== pcv.lastDate ? 'PPSV23'
+    : /^PCV\d+$/.test(pcv.lastProduct ?? '') ? pcv.lastProduct : 'PCV';
+  return {
+    ...card,
+    eightWeekWait: {
+      until: state.earliestNextDate,
+      line: ` **Wait until ${fmtDate(state.earliestNextDate)}: ${PNEUMO_GAP_WORDS} after the ${named} of ${fmtDate(anchor)}.**`,
+    },
+  };
+}
+
+function sayEightWeekWait(recs) {
+  return recs.map(({ eightWeekWait, ...card }) => {
+    if (!eightWeekWait || card.earliestNextDate !== eightWeekWait.until) return card;
+    return { ...card, note: { ...card.note, lead: `${card.note.lead}${eightWeekWait.line}` } };
+  });
 }
 
 // The sentence both the PCV20 card and its 2nd-PPSV23 alternative now carry.
@@ -2409,15 +2454,12 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv20orPpsv23')],
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
       }));
-      const ppsv2done = dueStateMonths(
-        ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today,
-      );
       // P2: never a third PPSV23.
       if (!icNoThirdPpsv23) out.push(rec({
         vaccine: 'PPSV23', status: 'risk-based',
         doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
-        dueToday: ppsv2done.dueToday,
-        earliestNextDate: ppsv2done.earliestNextDate,
+        dueToday: icPost.dueToday,
+        earliestNextDate: icPost.earliestNextDate,
         minIntervalMonths: MO60,
         brands: ['PPSV23 (Pneumovax 23)'],
         ...icFiveYearAlternative(cite('pedsIcPcv20orPpsv23')),
@@ -2681,14 +2723,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsBefore6NoPcv20'), cite('pedsIcBefore6NoPcv20At6to18')],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }));
-    const ppsv2Before6 = dueStateMonths(
-      ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today,
-    );
     out.push(rec({
       vaccine: 'PPSV23', status: 'risk-based',
       doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
-      dueToday: ppsv2Before6.dueToday,
-      earliestNextDate: ppsv2Before6.earliestNextDate,
+      dueToday: icBefore6.dueToday,
+      earliestNextDate: icBefore6.earliestNextDate,
       minIntervalMonths: MO60,
       brands: ['PPSV23 (Pneumovax 23)'],
       ...icFiveYearAlternative(cite('pedsIcBefore6NoPcv20At6to18')),
@@ -2804,11 +2843,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         noteCites: [cite('pedsIcPpsvWaitFiveYears'), before6Cite()],
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
       }));
-      const ppsv2 = dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today);
       // P2: never a third PPSV23.
       if (!icNoThirdPpsv23) out.push(rec({
         vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
-        dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalMonths: MO60,
+        dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PPSV23 (Pneumovax 23)'],
         ...icFiveYearAlternative(before6Cite()),
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
@@ -2978,7 +3016,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     // CDC row for a prior PPSV23 gives five years -- so the branch is not
     // split on it.
     const icState = icPostPpsv23DueState(ppsv, anchorPneumo, today);
-    out.push(rec({
+    out.push(withEightWeekWait(rec({
       vaccine: 'PCV', status: 'risk-based', doseLabel: '1 dose PCV20 (immunocompromising)',
       dueToday: icState.dueToday,
       earliestNextDate: icState.earliestNextDate,
@@ -2993,16 +3031,15 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       },
       noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv13AndPpsvAt6'), ...bridge.cites],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', ...bridge.refKeys], 'child'),
-    }));
-    const ppsv2 = dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today);
+    }), icState, pcv, anchorPneumo));
     // P2: never a third PPSV23.
-    if (!icNoThirdPpsv23) out.push(rec({
+    if (!icNoThirdPpsv23) out.push(withEightWeekWait(rec({
       vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
-      dueToday: ppsv2.dueToday, earliestNextDate: ppsv2.earliestNextDate, minIntervalMonths: MO60,
+      dueToday: icState.dueToday, earliestNextDate: icState.earliestNextDate, minIntervalMonths: MO60,
       brands: ['PPSV23 (Pneumovax 23)'],
       ...icFiveYearAlternative(cite('pedsIcPcv13AndPpsvAt6')),
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
-    }));
+    }), icState, pcv, anchorPneumo));
     return out;
   }
 
@@ -4451,6 +4488,7 @@ export function recommend(input) {
       if (noThird) recs = noThird.recs;
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
+      recs = sayEightWeekWait(recs);
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`

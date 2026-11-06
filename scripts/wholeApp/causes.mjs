@@ -18,10 +18,6 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 export const CAUSES = {
-  'R1-same-day-ppsv23': {
-    class: 'real',
-    title: "An immunocompromised child's 2nd-PPSV23 card ignores the 8 weeks after a recent PCV",
-  },
   'R2-date-past-19': {
     class: 'real',
     title: "A child's card gives a date after the 19th birthday, and the adult rules answer differently on the day",
@@ -68,7 +64,6 @@ export function causeOf(check, kind, group) {
   if (check === 'harness') return 'unsorted';
   if (kind === 'line-changes-what-the-rule-says' || kind === 'dose-line-changes-what-the-rule-says') return 'line-doing-its-job';
   if (check === 1) {
-    if (kind === 'rejected' && /^2nd PPSV23/.test(group)) return 'R1-same-day-ppsv23';
     if (kind === 'warned-short' && /rule=ADULT-PPSV23-AFTER-PPSV23/.test(group)) return 'R4-thrown-out-ppsv23-chip';
     if (kind === 'warned-short' && /rule=ADULT-/.test(group) && CHILD_CARD.test(group)) return 'R2-date-past-19';
   }
@@ -88,7 +83,6 @@ export function causeOf(check, kind, group) {
     // Option B-2 only ever carries a date through the hold after a thrown-out
     // PPSV23 (`holdPpsv23AfterThrownOut`), which reads no other clock.
     if (kind === 'second-step-dated-before-the-first-allows') return 'R4-thrown-out-ppsv23-chip';
-    if (/2nd PPSV23/.test(group)) return 'R1-same-day-ppsv23';
   }
   if (check === 5) {
     if (/rule=CHILD-PPSV23-AFTER-PCV/.test(group)) return 'R4-thrown-out-ppsv23-chip';

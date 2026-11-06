@@ -1472,14 +1472,60 @@ received PPSV23 or PCV7.**"* That is an explicit instruction to ignore a prior P
 vaccinate at 8 weeks (rows 6 and 7 above). A test holds that card at 8 weeks so the
 five-year rule cannot creep onto it.
 
-**The 8-week floor is kept, not dropped.** The gate is the **later** of (5 years after the
+**The 8-week wait is kept, not dropped.** The date is the **later** of (5 years after the
 first PPSV23) and (8 weeks after the most recent pneumococcal dose) — a conjugate dose can
-fall after the PPSV23. Measured: 0 of the 228 patients already past five years are also
-inside 8 weeks, so the floor moves no committed verdict; it has its own test.
+fall after the PPSV23.
 
 Single source: `icPostPpsv23DueState()` in `recommend.js`. Citation:
 `pedsIcPpsvWaitFiveYears` in `refs.js`. Test:
 `regression-2026-10-17-finding-a-ic-ppsv23-five-year-wait.test.js`.
+
+### §D-note-8W — both options wait for the 8 weeks, and the card says so (P0-1, 2026-11-05)
+
+**Noor, 10, HIV.** PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, PCV15 two weeks ago. Her five
+years are up. Before this fix the PCV20 option said "Nov 22" and the 2nd PPSV23 beside it said
+"due today", and a PPSV23 given that day was thrown out for coming 14 days after the PCV15.
+
+**The source states both waits for both vaccines.** CDC Child Notes, read live 2026-11-05,
+immunocompromised list, once on the page:
+> "Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: administer 1 dose PCV20 or
+> 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose and at least 5 years after
+> dose 1 PPSV23."
+
+**One answer, both cards.** The PCV20 card asked `icPostPpsv23DueState()`; the 2nd-PPSV23 card
+worked out five years alone, in four places. All four now use the same result. This was no
+new rule. The dose check (`CHILD-PPSV23-AFTER-PCV`) did not move: it already required 8 weeks.
+
+**Only one of the four could ever disagree**, the block for a child with a conjugate at or
+after age 6. The other three serve a child whose conjugates all came before 6, and a first
+PPSV23 cannot count before age 2, so its five years ends at age 7 or later, at least a year
+after any such conjugate. Measured over every screen of all 77,496 patients: 0 of 47,254
+screens in those three blocks differ; 13,350 of 243,220 differ in the fourth. Those three
+moved anyway, so one rule has one reading, and only a source check can hold them.
+
+**OWNER DECISION 2026-11-05: the card says why.** With both cards waiting, Noor read "eligible
+Nov 22" over text naming only the five years, already passed. Shown that, the owner chose one
+short bold line at the end of the short text:
+> **Wait until Nov 22, 2026: 8 weeks after the PCV15 of Sep 27, 2026.**
+
+- It shows only when the 8 weeks is the later wait, and only on the at/after-6 block's cards.
+- It names the dose the 8 weeks was counted from. After two PPSV23 doses that can be the second
+  PPSV23, not a PCV (a first draft got this wrong; the sweep caught it). An unrecorded product
+  reads "PCV". It never prints a product the record does not show.
+- It is printed after the thrown-out-dose holds, and only if the card still shows its date. A
+  hold moves a card to a later date, and the line must not contradict the header.
+- It carries no number of its own, so the card's numbered sources do not shift. CDC's row is
+  already cited on both cards.
+
+**What moved.** Neither verdict corpus moved (0 of 17,016 and 0 of 18,264): the grid holds no
+patient like Noor on a first screen, only on a later screen reached by following the advice.
+Over all 77,496 patients: R1 went from 2,110 patients to 0; check 1 from 1,441 to 139; check 4
+from 2,126 to 16, all R4; check 7 from 1,833 to 1,320. R2 went from 1,871 to 1,358: those 513
+were children sent down the "due today" PPSV23, thrown out, and then held past their 19th
+birthday. That path no longer exists.
+
+Guard: `regression-2026-11-05-r1-second-ppsv23-waits-eight-weeks.test.js`. Check 4 is now in
+`npm test`: `whole-app-options-agree-gate.test.js`.
 
 ---
 
