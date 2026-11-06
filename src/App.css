@@ -399,6 +399,7 @@ body {
 .status-badge.risk-based       { color: var(--r); }
 .status-badge.shared-decision  { color: var(--b); }
 .status-badge.complete         { color: var(--gy3); }
+.status-badge.no-dose-now      { color: var(--gy3); }
 .status-badge.not-indicated    { color: var(--gy4); }
 .status-badge.deferred         { color: var(--a); }
 /* PD2/D5: neutral cards (complete/not-indicated/deferred) collapse to this

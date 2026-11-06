@@ -137,3 +137,26 @@ describe('the sweep: no card anywhere advises an age already passed', () => {
     expect(pastTense).toBeGreaterThan(0);
   });
 });
+
+// P2-8 (2026-11-06). Found by the wordiness review. Mia, healthy, PCV20 on time
+// at 2 months, seen on the day she turns 4 months. The dose is due today, on
+// time, and "Why this" said it "is overdue". A routine age is passed only once
+// the day has gone by.
+describe('the day the routine age arrives is not overdue', () => {
+  const MIA = { dob: '2026-07-06', riskIds: [], pcvDoses: [{ product: 'PCV20', date: '2026-09-06' }], ppsv23Doses: [] };
+  const on = (today) => pcvCard({ ...MIA, today });
+
+  it('on the day itself: due today, in the present tense', () => {
+    const card = on('2026-11-06');
+    expect(card.dueToday).toBe(true);
+    expect(card.note.detail).toContain('The next dose is due at age 4 months');
+    expect(card.note.detail).not.toContain('overdue');
+  });
+
+  it('the day after: overdue, in the past tense', () => {
+    const card = on('2026-11-07');
+    expect(card.dueToday).toBe(true);
+    expect(card.note.detail).toContain('This dose was due at age 4 months');
+    expect(card.note.detail).toContain('is overdue');
+  });
+});

@@ -70,7 +70,7 @@ describe('FINDING C — the review-at-50 card quotes the 19-49 rule, not the 50+
   it('the card still gives the same advice (this fix changes citations, not verdicts)', () => {
     const card = reviewCard(chronicOnly1949());
     expect(card).toBeTruthy();
-    expect(card.status).toBe('complete');
+    expect(card.status).toBe('no-dose-now'); // P1-2, owner ruling 2026-11-06
     expect(card.dueToday).toBe(false);
     expect(card.brands ?? []).toEqual([]);
   });
@@ -112,10 +112,17 @@ describe('FINDING C — the review-at-50 card quotes the 19-49 rule, not the 50+
   // the test cannot pass while the rendered card disagrees.
   it('the 50+ sentence is kept, on the half of the note it actually supports', () => {
     const card = reviewCard(chronicOnly1949());
-    const { lead, detail } = noteCiteSlices(card.note, card.noteCites);
+    const { lead: wholeLead, detail } = noteCiteSlices(card.note, card.noteCites);
 
-    // The lead says no dose is due. Every citation beside it must be a
-    // sentence that says the same, about this patient's own age band.
+    // P1-2 (owner ruling 2026-11-06): the sentence about age 50 moved up from
+    // the detail, so it shows without a click, and its citation moved with it.
+    // It is still its own sentence with its own marker, last in the lead.
+    expect(wholeLead.at(-1).key).toBe('adultBothNotAt65');
+    expect(card.note.lead).toMatch(/\. At age 50, a dose of PCV20 or PCV21 is recommended, [^.]*\[c\]\.$/);
+    const lead = wholeLead.slice(0, -1);
+
+    // The lead's first sentence says no dose is due. Every citation beside it
+    // must be a sentence that says the same, about this patient's own age band.
     expect(lead.map((c) => c.key)).toEqual([
       'adultChronicOnlyReviewAt50',
       'jobAidChronic1949ReviewAt50',
@@ -138,17 +145,18 @@ describe('FINDING C — the review-at-50 card quotes the 19-49 rule, not the 50+
       expect(REFS[c.key].population, c.key).toEqual(['adult-19to49']);
     }
 
-    // The detail half is the only place the 50+ instruction belongs.
-    expect(detail.map((c) => c.key)).toEqual(['adultBothNotAt65']);
-    expect(detail[0].quote).toMatch(/1 dose PCV20 or 1 dose PCV21 at least 5 years/);
+    // The sentence about age 50 is the only place the 50+ instruction belongs.
+    expect(detail).toEqual([]);
+    expect(wholeLead.at(-1).quote).toMatch(/1 dose PCV20 or 1 dose PCV21 at least 5 years/);
 
     // Marker counts still match the slices, so nothing is silently dropped.
     // The lead went 2 -> 3 on 2026-10-17 when C8 document 1 credited
-    // mm7401a1's own chronic-block row; the detail is unchanged.
+    // mm7401a1's own chronic-block row; 3 -> 4 and the detail 1 -> 0 on
+    // 2026-11-06, when the sentence about age 50 moved up (P1-2).
     const leadMarkers = (card.note.lead.match(/\[c\]/g) ?? []).length;
     const detailMarkers = (card.note.detail.match(/\[c\]/g) ?? []).length;
-    expect(leadMarkers).toBe(3);
-    expect(detailMarkers).toBe(1);
+    expect(leadMarkers).toBe(4);
+    expect(detailMarkers).toBe(0);
     // And every marker has a citation behind it. Without this, adding a "[c]"
     // and forgetting its cite would silently truncate the slice instead of
     // failing — the card would print a number that points at nothing.

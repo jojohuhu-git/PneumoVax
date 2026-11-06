@@ -63,7 +63,8 @@ describe('Rosa — a PPSV23 given by mistake at 12 months holds off nothing', ()
       const a = analyzeBoth(p);
       expect(a.ppsv23.perDose[0].status).toBe('invalid');
       expect(a.pcv.perDose.map((x) => x.effectiveDoseNum)).toEqual([1, 2, 3, 4]);
-      expect(recommend(p).recs[0].doseLabel).toBe('PCV series complete (4 doses)');
+      // P1-2 (2026-11-06): the at-risk child still owes a dose at 2.
+      expect(recommend(p).recs[0].doseLabel).toBe(riskIds.length ? 'PCV series up to date for age (4 doses)' : 'PCV series complete (4 doses)');
     });
   }
 });
