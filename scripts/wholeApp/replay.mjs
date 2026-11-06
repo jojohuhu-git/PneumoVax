@@ -32,7 +32,7 @@ export function allPatients({ only } = {}) {
 export const code = (b) => String(typeof b === 'string' ? b : b?.key ?? b?.label ?? '').split(' ')[0];
 export const noteText = (r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`);
 export const cardText = (r) => `${r.doseLabel ?? ''} ${noteText(r)}`;
-export const NOTHING_OWED = new Set(['complete', 'not-indicated']);
+export const NOTHING_OWED = new Set(['complete', 'no-dose-now', 'not-indicated']);
 
 /** The screen for one patient on one day, exactly as the app computes it from a date of birth. */
 export function view(patient, s) {

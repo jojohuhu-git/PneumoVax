@@ -48,7 +48,7 @@ describe('first seen at 15 months, two doses 8 weeks apart', () => {
 
   it('diabetes, after the second: complete under 24 months too (Table 1 is for all children)', () => {
     const out = run('2026-06-10', 16, ['2026-04-15', '2026-06-10'], ['diabetes']);
-    expect(out.recs.map((r) => r.status)).toEqual(['complete']);
+    expect(out.recs.map((r) => r.status)).toEqual(['no-dose-now']);
   });
 
   // Both doses here are PCV20, and she is STILL owed two at age 2: her rows
@@ -57,8 +57,8 @@ describe('first seen at 15 months, two doses 8 weeks apart', () => {
   for (const riskIds of [['diabetes'], ['asplenia']]) {
     it(`${riskIds[0]}: the card says two more PCV doses fall due at age 2, citing the row she followed and CDC's`, () => {
       const r = run('2026-06-10', 16, ['2026-04-15', '2026-06-10'], riskIds).recs[0];
-      expect(r.note.detail).toMatch(/2 more PCV doses fall due from the 2nd birthday/);
-      expect(r.note.detail).not.toMatch(/one further dose|no further pneumococcal dose/);
+      expect(r.note.lead).toMatch(/2 more PCV doses fall due from the 2nd birthday/);
+      expect(`${r.note.lead} ${r.note.detail}`).not.toMatch(/one further dose|no further pneumococcal dose/i);
       expect(r.noteCites.map((c) => c.key)).toEqual(['p2016Table1_12to23_noneBefore12', 'pedsRiskIncompleteCatchup']);
     });
   }

@@ -303,7 +303,7 @@ describe('§G Adults 19–49 with risk', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'],
       pcvDoses: [{ product: 'PCV13', date: '2015-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2016-01-01' }] });
-    expect(pcv(r).status).toBe('complete');
+    expect(pcv(r).status).toBe('no-dose-now'); // P1-2, owner ruling 2026-11-06
     expect(pcv(r).doseLabel).toMatch(/review at age 50/);
   });
 
