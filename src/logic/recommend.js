@@ -3492,8 +3492,14 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       doseLabel: 'Complete (PCV15 + PPSV23)',
       note: ppsvFirst
         ? `PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete [c]${jobAidCompleteMarker}.`
-        : `PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c]${jobAidCompleteMarker}.`,
-      noteCites: [cite(!ppsvFirst ? 'adultPcv15ThenPpsv' : isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'), ...jobAidCompleteCites],
+        // P2-7 (2026-11-06): one number per claim. CDC's Adult Notes give the
+        // sequence and never say "complete", so they sit on the sequence. The
+        // word "complete" takes the document that says it: the job aid at 50+,
+        // and at 19-49 the risk page, which has no 50+ section.
+        : 'PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].',
+      noteCites: ppsvFirst
+        ? [cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'), ...jobAidCompleteCites]
+        : [cite('adultPcv15ThenPpsv'), ...(isOlderAdult ? jobAidCompleteCites : [cite('adultPcv15PpsvComplete1949')])],
       refs: refsSeriesComplete,
     })];
   }

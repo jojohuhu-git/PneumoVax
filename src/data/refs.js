@@ -215,6 +215,29 @@ export const REFS = {
     quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
     lastVerified: '2026-10-16',
   },
+  // P2-7 (2026-11-06). The sentence that says the word "complete" for a 19-49
+  // adult who had PCV15 then PPSV23. `adultPcv15ThenPpsv` above gives the
+  // sequence and the interval and never says complete, so the card's "complete"
+  // pointed at a sentence that does not state it.
+  //
+  // Read live 2026-11-06 with the sections forced open, page dated May 8, 2026,
+  // "PPSV23" x46 as the positive control. The risk page has NO 50+ section: this
+  // sits under "Adults 19 through 49 years old" > "Never received any
+  // pneumococcal vaccine" > "When PCV15 is used", so 50+ keeps the job aid's
+  // "schedule is complete" (`jobAidSeriesCompleteAt50`). "are then complete"
+  // occurs 8 times on the page, 7 of them in the children's lists, and a text
+  // link ignores case. The words before it are what make this quote land on the
+  // adult row.
+  adultPcv15PpsvComplete1949: {
+    rulebook: 'adult',
+    // Patients this sentence is about: under that page's "Adults 19 through 49 years old" heading
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html',
+    label: 'CDC Risk-based Pneumococcal Recommendations — adults 19 through 49 years old who never received a pneumococcal vaccine, when PCV15 is used: PPSV23 follows it, and the vaccinations are then complete',
+    short: 'CDC Risk-based Pneumococcal',
+    quote: 'cerebrospinal fluid leak. Their pneumococcal vaccinations are then complete.',
+    lastVerified: '2026-11-06',
+  },
   // C8, CDC Adult Notes' last uncredited statement (2026-10-22). On the
   // 19-49 immunocompromising / cochlear implant / CSF leak card the INTERVAL
   // sentence cites ACIP (the 8 weeks), so CDC's notes sat on the card as a

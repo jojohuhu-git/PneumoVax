@@ -1658,6 +1658,13 @@ The 8 weeks is the **advice** here, not an option, so the "may be considered" se
 dose." The job aid prints the same ≥8 weeks on p.2 (immunocompromising) and p.3 (cochlear
 implant / CSF leak), and ≥1 year on p.4 (chronic). See §K's S15 bullet.
 
+**"Complete" after PCV15 then PPSV23 (P2-7, 2026-11-06).** The word cites the sentence that
+says it. At 19–49 that is CDC's risk page, read live 2026-11-06 (updated May 8, 2026): *"Their
+pneumococcal vaccinations are then complete."* That page has no 50+ section, so at 50+ the
+Adult Timing Job Aid keeps the claim (*"No vaccines recommended; schedule is complete."*). CDC's
+Adult Notes stay on the card for the sequence only: their quote gives the interval and never
+says complete. `adultPcv15PpsvComplete1949`. No dose moves.
+
 Other 19–49 rows, which are **NOT** keyed on risk class and did not move:
 - **PPSV23 only:** PCV15/20/21 **≥1 year** after PPSV23, every class.
 - **PCV13 only:** PCV20 or PCV21 **≥1 year**. There is **no PPSV23 route** — the job aid
