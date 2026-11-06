@@ -1443,6 +1443,30 @@ real grid patients; 0 verdicts. Guard:
 `regression-2026-11-01-p2-3-complete-only-when-nothing-more-is-owed.test.js`. A sweep of every
 other "complete" in the app against this rule is a separate audit.
 
+**The other "complete" cards, OWNER RULING 2026-11-06 (P1-2, R5).** Shown three patients, each
+reading "Complete" with a later dose named, she chose **"Sadie and Ola"**. The test is whether
+the patient still owes a dose **on the schedule they are on now**:
+
+| Patient | Later dose | Label now |
+|---|---|---|
+| Sadie, 15 months, no spleen, PCV13 at 2, 4, 6, 12 months. Same for any at-risk child under 2 with no PCV20, or owed 2 doses from the 2nd birthday | At 2, on the childhood schedule | **No dose now**, heading "PCV series up to date for age (4 doses)" |
+| Ola, 45, diabetes, PCV13 and PPSV23 | At 50, on the adult schedule she is on | **No dose now**, heading "No dose now — review at age 50" |
+| Iris, 7, cochlear implant, PCV13 series and PPSV23 | At 19, on the adult schedule she has not reached | **Complete**, unchanged (her 2026-10-30 ruling, §B-AT19) |
+
+A healthy baby and an at-risk baby whose series includes PCV20 keep "Complete": nothing further
+is named. So does the healthy child's "re-evaluate at age 50".
+
+**The label alone would not have been enough.** A "Complete" result folds shut, and on both
+patients the sentence naming the dose sat behind "Why this". So `no-dose-now` stays open, and
+that sentence moved into the visible part of the note. Her preview showed both.
+
+**No dose, date or product moves.** Status changes on the saved patients: the 225 of 17,016 on
+Ola's card, and 0 of 18,264 impossible records. Sadie's family is on no first screen of the saved
+list: the whole-app check reaches it by following patients forward (832 patients), and the guard
+builds it by hand. `no-dose-now` counts as "asks for nothing today" (`ASKS_FOR_NOTHING`), so an
+at-19 line reading a future adult card behaves as before. Guard:
+`regression-2026-11-06-p1-2-no-dose-now.test.jsx`, which pins the reach at exactly 369 cards.
+
 ## §D — At-risk children 24 mo–18 y (p2016 Table 4; `cdcChildPneumo`) — each row implemented
 
 1. 24–71 mo, any risk, **incomplete (0–2 PCV by 24mo)** → **2 doses** PCV20 or PCV15 ≥8wk apart.
@@ -3429,7 +3453,7 @@ whose PPSV23 was rejected IS owed something — a conjugate, per §K-INVALID —
 stays and goes on matching her card's date. Keying on the vaccine stream would have stripped
 it from every one of those adults one commit after the owner ruled that the two surfaces
 must agree. It is **not an age test** either: what separates these children is that nothing
-is owed, which `recs` states directly. `complete` and `not-indicated` are the only two card
+is owed, which `recs` states directly. `complete`, `no-dose-now` (added 2026-11-06, §C-COMPLETE) and `not-indicated` are the only card
 statuses that ask for nothing.
 
 **The lead always survives.** Only the forward-looking half goes; the dose still does not

@@ -73,6 +73,10 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
 
 ### P1-2 — R5, OWNER: "Complete" beside a dose falling due at 2
 
+**DONE 2026-11-06 on `fix/p1-2-r5-no-dose-now`.** She chose "Sadie and Ola": both now read "No dose
+now", stay open, and show the later dose without a click. Iris keeps "Complete". No dose or date
+moves. R5 went from 832 patients to 0. `CLINICAL_SPEC.md` §C-COMPLETE. What follows is the history.
+
 - **Patient:** Sadie in the report, Decision 2.
 - **Now:** an at-risk baby's card has the pill "Complete" and says "one further dose falls due at
   age 2 years". Her rule of 2026-11-01: *"Complete should only be used if no additional

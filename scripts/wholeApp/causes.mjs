@@ -26,10 +26,6 @@ export const CAUSES = {
     class: 'real',
     title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other",
   },
-  'R5-complete-with-a-dose-at-2': {
-    class: 'real',
-    title: 'An at-risk baby\'s card reads "Complete" while saying a dose falls due at age 2',
-  },
   'R6-option-b-later-dose-unsaid': {
     class: 'real',
     title: "A child's Option B says it completes the series; at 19 the adult schedule can still ask for a dose",
@@ -76,7 +72,6 @@ export function causeOf(check, kind, group) {
     if (kind === 'not-mentioned' && /^PCV dose 2 of 2 \(at-risk catch-up\) ⇒ PCV20: 1 dose PCV20/.test(group)) return 'R4-thrown-out-ppsv23-chip';
   }
   if (check === 3) {
-    if (/says complete, and that a dose falls due at 2/.test(kind)) return 'R5-complete-with-a-dose-at-2';
     if (/card warned of it/.test(kind)) return 'D1-at-19-and-50-lines';
     if (/card silent/.test(kind)) return 'R7-baby-complete-silent-on-adult-schedule';
   }
@@ -116,7 +111,7 @@ const CARD_MOVES = [
   [7, /^cards: PCV dose \d of 4 → PCV dose \d of 3$/, 'p2016 Table 1: from 7 months a series is 3 doses, not 4'],
   [12, /^cards: PCV dose \d of 3 → PCV dose \d of 2$/, 'p2016 Table 1: from 12 months a series is 2 doses'],
   [12, /^card PCV dose (\d) of \1: dueToday false → true$/, 'the final dose stops being held to the first birthday'],
-  [24, /^cards: (PCV dose \d of 2|PCV series complete \(3 doses\)) → /, 'under-2 rules end; healthy or at-risk 2-5 rules begin'],
+  [24, /^cards: (PCV dose \d of 2|PCV series (complete|up to date for age) \(3 doses\)) → /, 'under-2 rules end; healthy or at-risk 2-5 rules begin'],
   [60, /→ Not indicated \(healthy 5–18y\)$/, 'CDC: no PCV for a healthy child from 5'],
   [72, /^cards: (PCV dose \d of 2 \(at-risk catch-up\)|PCV complete \(at-risk catch-up done\)) → /, 'the 2-5 at-risk rows end; the 6-18 rows begin'],
   [228, /^cards: /, 'the child rulebook ends and the adult rulebook begins at 19'],

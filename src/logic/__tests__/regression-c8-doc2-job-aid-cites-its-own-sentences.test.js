@@ -243,6 +243,9 @@ describe('statement #7 — no dose now, review at 50', () => {
       // job aid's page-4 cite is unmoved and still second — this list grew,
       // it did not change.
       'mmwrChronic1949ReviewAt50',
+      // P1-2 (2026-11-06): the sentence about age 50 moved up from the detail,
+      // so it shows without a click, and brought its own citation.
+      'adultBothNotAt65',
     ]);
   });
 

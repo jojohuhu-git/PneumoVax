@@ -169,7 +169,7 @@ HANDOFF.md               Author-review checklist, source-vs-p2016 reconciliation
 - `orderedDoses` — `{ pcv:[...], ppsv23:[...] }` the doses themselves, **index-for-index with `perDose`** (P0, 2026-10-12). The walk sorts into date order before grading, so `perDose` is NOT in input order; anything rendering a verdict beside its dose must take the dose from here, never from its own input array. Both are built in the same `stepStream` call, so they cannot disagree. Also always arrays, including on the hard stop. Guarded over all 16,250 grid patients by `regression-p0-ordered-doses-pair-with-verdicts.test.js`.
 - `meta` — `{ ageMonths, today, riskIds, pcvCount, ppsv23Count }`
 
-**Status values:** `due | catchup | risk-based | shared-decision | complete | not-indicated | deferred`
+**Status values:** `due | catchup | risk-based | shared-decision | complete | no-dose-now | not-indicated | deferred`
 
 **Design rule:** All clinical logic in the engine. Product validity, PCV15→PPSV23 vs PCV20-complete distinction, prior-vaccine matrix, PCV7-not-counted — computed in `recommend.js`. UI consumes pre-built recs.
 

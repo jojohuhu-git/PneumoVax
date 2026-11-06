@@ -49,7 +49,7 @@ function acip(dob, risk, pcv, ppsv) {
   return { cat: 'ANY_PCV', lo: e, hi: e };
 }
 function appCat(out) {
-  const live = out.recs.filter((r) => !['complete', 'not-indicated'].includes(r.status));
+  const live = out.recs.filter((r) => !['complete', 'no-dose-now', 'not-indicated'].includes(r.status));
   if (!live.length) return { cat: 'NONE', text: out.recs.map((r) => r.status + ': ' + r.doseLabel).join(' || ') };
   const text = live.map((r) => r.doseLabel).join(' || ');
   const date = live.map((r) => (r.dueToday ? T : r.earliestNextDate)).filter(Boolean).sort()[0];
