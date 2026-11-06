@@ -235,6 +235,13 @@ function fmtSinceDays(fromISO, toISO) {
 const ANCHORS = {
   prevSameStream: (ctx) => ctx.prev,
   lastPcv: (ctx) => lastOf(ctx.priorPcv),
+  // P1-3 (OWNER RULING 2026-11-06, on Noor): the most recent PCV that counted
+  // OR was an extra dose. CDC's row reads "the most recent PCV dose", and an
+  // extra PCV15 is one. Read by ONE row, `CHILD-PPSV23-AFTER-PCV`. The mirror of
+  // `lastPpsv23Received`; a thrown-out dose still anchors nothing across streams.
+  lastPcvReceived: (ctx) => lastOf(
+    [...ctx.priorPcv, ...(ctx.pcvExtraGiven ?? [])].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)),
+  ),
   lastPcv13: (ctx) => lastOf(ctx.priorPcv.filter((d) => d.product === 'PCV13')),
   lastPcv15: (ctx) => lastOf(ctx.priorPcv.filter((d) => d.product === 'PCV15')),
   lastPpsv23: (ctx) => lastOf(ctx.priorPpsv23),
@@ -404,7 +411,7 @@ export const DOSE_INTERVAL_RULES = [
     rulebook: 'child',
     vaccine: 'PPSV23',
     products: null,
-    from: 'lastPcv',
+    from: 'lastPcvReceived',
     interval: { days: PCV_PPSV23_MIN_INTERVAL_DAYS },
     grace: true,
     enforcement: 'floor',

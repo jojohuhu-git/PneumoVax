@@ -421,10 +421,11 @@ function icPostPpsv23DueState(ppsv, anchorPneumo, today) {
 // thrown-out-dose holds, because a hold moves the card to a later date and the
 // line must not name a date the card no longer shows.
 //
-// Only the at/after-6 block can reach this, so only its two cards carry it: every
-// other caller serves a child whose conjugates all came before 6, and five years
-// after a PPSV23 given at 2 or older is past 8 weeks after any such dose
-// (measured: 0 of 47,254 screens differ).
+// Two ways to reach it. The at/after-6 block, from a conjugate that counted. And
+// the two blocks for a child aged 6-18 whose conjugates all came before 6, only
+// from an extra PCV15 (P1-3, 2026-11-06): their counting doses are always too old
+// for the 8 weeks to decide (a PPSV23 at 2 or older reaches five years long after
+// 8 weeks past any of them), so without an extra dose those cards never carry it.
 //
 // The dose waited on is usually a PCV, but not always: after two PPSV23 doses it
 // can be the second PPSV23. So the line names `anchor`, the dose the 8 weeks was
@@ -432,8 +433,9 @@ function icPostPpsv23DueState(ppsv, anchorPneumo, today) {
 // product the record does not show (FINDING H).
 function withEightWeekWait(card, state, pcv, anchor) {
   if (!state.eightWeeksDecides) return card;
-  const named = anchor !== pcv.lastDate ? 'PPSV23'
-    : /^PCV\d+$/.test(pcv.lastProduct ?? '') ? pcv.lastProduct : 'PCV';
+  const named = anchor === pcv.extraConjugate?.date ? pcv.extraConjugate.product
+    : anchor !== pcv.lastDate ? 'PPSV23'
+      : /^PCV\d+$/.test(pcv.lastProduct ?? '') ? pcv.lastProduct : 'PCV';
   return {
     ...card,
     eightWeekWait: {
@@ -2002,7 +2004,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // (`dueStateMonths(..., MO60, ...)` and `firstPpsv` in
   // `icPostPpsv23DueState`). First and last are different questions; this line
   // is the one that asks for the last.
-  const anchorPneumo = mostRecent(pcv.lastDate, ppsv.holdDate);
+  const anchorPneumo = mostRecent(mostRecent(pcv.lastDate, pcv.extraConjugate?.date), ppsv.holdDate);
   // ── 2026-10-25: the 24-71-month catch-up card's 8 weeks ─────────────────
   //
   // CDC's at-risk catch-up row states TWO intervals and the card implemented
@@ -2751,7 +2753,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     && pcv.count < 3 && !pcv.includesCompleting) {
     // Finding A (2026-10-17): the five-year date, not 8 weeks.
     const icBefore6 = icPostPpsv23DueState(ppsv, anchorPneumo, today);
-    out.push(rec({
+    out.push(withEightWeekWait(rec({
       vaccine: 'PCV', status: 'risk-based',
       doseLabel: '1 dose PCV20 (immunocompromising)',
       dueToday: icBefore6.dueToday,
@@ -2770,8 +2772,8 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       },
       noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsBefore6NoPcv20'), cite('pedsIcBefore6NoPcv20At6to18')],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
-    }));
-    out.push(rec({
+    }), icBefore6, pcv, anchorPneumo));
+    out.push(withEightWeekWait(rec({
       vaccine: 'PPSV23', status: 'risk-based',
       doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
       dueToday: icBefore6.dueToday,
@@ -2780,7 +2782,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       brands: ['PPSV23 (Pneumovax 23)'],
       ...icFiveYearAlternative(cite('pedsIcBefore6NoPcv20At6to18')),
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
-    }));
+    }), icBefore6, pcv, anchorPneumo));
     return out;
   }
 
@@ -2879,8 +2881,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // IC + PPSV23 already given. Finding A (2026-10-17): BOTH options are
       // five years after the first PPSV23, not one at 8 weeks and one at five
       // years. 24 of the 219 patients this fix moves come from here.
-      const { dueToday, earliestNextDate } = icPostPpsv23DueState(ppsv, anchorPneumo, today);
-      out.push(rec({
+      const icCompleted = icPostPpsv23DueState(ppsv, anchorPneumo, today);
+      const { dueToday, earliestNextDate } = icCompleted;
+      out.push(withEightWeekWait(rec({
         vaccine: 'PCV', status: 'risk-based', doseLabel: '1 dose PCV20 (immunocompromising)',
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)'],
@@ -2890,15 +2893,15 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         },
         noteCites: [cite('pedsIcPpsvWaitFiveYears'), before6Cite()],
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
-      }));
+      }), icCompleted, pcv, anchorPneumo));
       // P2: never a third PPSV23.
-      if (!icNoThirdPpsv23) out.push(rec({
+      if (!icNoThirdPpsv23) out.push(withEightWeekWait(rec({
         vaccine: 'PPSV23', status: 'risk-based', doseLabel: '2nd PPSV23 (alternative, ≥5y after first)',
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PPSV23 (Pneumovax 23)'],
         ...icFiveYearAlternative(before6Cite()),
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
-      }));
+      }), icCompleted, pcv, anchorPneumo));
       return out;
     }
     // No PPSV23 yet. A) PCV20 ≥8wk; or B) PPSV23 ≥8wk (IC: then ≥5y → PCV20 or 2nd PPSV23).
@@ -4414,6 +4417,7 @@ export function recommend(input) {
   // counting history speaks for itself.
   const adultRepeat = adultRepeatOwed(analysis, rawPcv, rawPpsv, am);
   const pcv = summarizePcv(effectivePcv, am, today, dob, pcvAnalysis.anchor);
+  pcv.extraConjugate = pcvAnalysis.extraConjugate;
   const ppsv = {
     count: effectivePpsv.length,
     // C13 (2026-10-30): PPSV23 doses RECEIVED, an extra dose included — the
@@ -4499,6 +4503,7 @@ export function recommend(input) {
   // 5-year note on an early PCV20 reads them: a dose given at 18 was given under
   // the child's rules, whatever the adult card says from 19.
   let childCardsReplaced = null;
+  let adultChips = null;
   if (am < M.m24) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
@@ -4545,6 +4550,7 @@ export function recommend(input) {
       if (pastNineteen) {
         childCardsReplaced = recs;
         recs = pastNineteen;
+        adultChips = adultAt19.perDose.pcv;
         path.push(pathStep('Adult rules answer', 'The next dose falls after the child schedule ends',
           `the 19th birthday is ${fmtDate(nineteenth)}`));
       }
@@ -4568,7 +4574,10 @@ export function recommend(input) {
     if (noThird) recs = noThird.recs;
     recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: false });
   }
-  path.push(pathStep('Doses already given', doseWords(pcvAnalysis, ppsvAnalysis), null));
+  // P1-3: an adult card counts every dose received, so when it answers from today
+  // a PCV15 cannot read "extra" beside a card that says "Complete (PCV15 + PPSV23)".
+  const pcvChips = pcvAnalysis.perDose.map((d, i) => (d.notAskedFor && adultChips ? adultChips[i] : d));
+  path.push(pathStep('Doses already given', doseWords({ perDose: pcvChips }, ppsvAnalysis), null));
 
   // ── PCV21 geographic advisory ─────────────────────────────────────────
   const pcv21Geo = pcv21GeoNote(am, recs);
@@ -4706,7 +4715,7 @@ export function recommend(input) {
     recs,
     pcv21Geo,
     perDose: {
-      pcv: withdrawForwardLook(pcvAnalysis.perDose.map(earlyFiveYearPcv20)),
+      pcv: withdrawForwardLook(pcvChips.map(earlyFiveYearPcv20)),
       // §C-P2-GREY / §C-P2-NOTHIRD: the chip under the thrown-out repeat drops
       // "the next dose in this series can be given from …" — a PPSV23 the
       // card no longer offers — and names the grey area where there is one.

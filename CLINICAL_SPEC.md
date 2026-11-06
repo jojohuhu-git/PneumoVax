@@ -1523,6 +1523,34 @@ Single source: `icPostPpsv23DueState()` in `recommend.js`. Citation:
 `pedsIcPpsvWaitFiveYears` in `refs.js`. Test:
 `regression-2026-10-17-finding-a-ic-ppsv23-five-year-wait.test.js`.
 
+### §C-P1-3 — a PCV15 no card asked for (OWNER RULING 2026-11-06, on Noor)
+
+**Noor, 10, HIV.** PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, then a PCV15. Asked whether the
+PCV15 is an extra dose with the 8-week wait kept, the owner answered **"Yes, flag it extra."**
+
+CDC Child Notes, read live 2026-11-06, immunocompromised list, Age 6-18, under "Received PCV before
+age 6 years":
+> "Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after
+> the most recent PCV dose. If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least
+> 5 years after dose 1 PPSV23."
+
+No PCV15 in it, and no row says what a PCV15 given anyway does. That is why the ruling is hers. The
+8 weeks stays because an extra PCV15 IS "the most recent PCV dose": `CHILD-PPSV23-AFTER-PCV` reads
+it through `lastPcvReceived`, and the card through `extraConjugate`. The same child with no PCV
+before the PCV15 is NOT this case: CDC's row offers PCV15 ("Not previously received any dose of
+PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or 1 dose of PCV20").
+
+**Scoped to her patient** (`conjugateNobodyAskedFor` in `validate.js`, count pinned in the guard):
+PCV15 only, given at 6-18, a child today, immunocompromising condition, exactly one earlier counted
+PPSV23, and every counted conjugate before 6 with a recorded product and no PCV20 or PCV21. Other
+unasked-for conjugates were not ruled on and read as before. **When the adult card answers from
+today (§B-AT19) the chip stays valid**, because that card counts the dose: "Complete at 19 (PCV15 +
+PPSV23)" cannot sit beside "extra". At 19 the chip reads valid for the same reason, as a PPSV23
+does (§C-P2-ONTIME).
+
+The card moves from the at/after-6 row to the row she followed, and the bold wait line now reaches
+the two before-6 blocks. Guard: `regression-2026-11-06-p1-3-noor-pcv15-extra.test.js`.
+
 ### §D-note-8W — both options wait for the 8 weeks, and the card says so (P0-1, 2026-11-05)
 
 **Noor, 10, HIV.** PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, PCV15 two weeks ago. Her five
@@ -2333,7 +2361,7 @@ catch-up row**.
   |---|---|---|---|---|---|---|---|---|
   | Child (under 19 years) | Any | Anything | Any PCV | the previous dose of the same vaccine — including one that did not count | Dose 2, when dose 1 was given before the first birthday: at least 4 weeks; Dose 2, when dose 1 was given at the first birthday or later: at least 8 weeks; Dose 3, given under 12 months, previous dose before 7 months: at least 4 weeks; Dose 3, previous dose at 7–11 months: at least 8 weeks; Dose 4 or later, given under 12 months (an extra infant dose): at least 4 weeks; Dose 4 or later, given at 12 months or over (the booster): at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PCV-AFTER-PCV` |
   | Child (under 19 years) | Any | Anything | Any PCV | the most recent PPSV23 that counted or was an extra dose | at least 8 weeks | Does not count | This app | `CHILD-PCV-AFTER-PPSV23` |
-  | Child (under 19 years) | Any | Anything | PPSV23 | the most recent PCV that counted | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PCV` |
+  | Child (under 19 years) | Any | Anything | PPSV23 | the most recent PCV that counted or was an extra dose | at least 8 weeks | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-PCV` |
   | Child (under 19 years) | Any | Anything | PPSV23 | the previous dose of the same vaccine, when that dose counted | at least 5 years | Immunocompromised: counts, with a note. Otherwise: an extra dose, not counted | CDC / ACIP | `CHILD-PPSV23-AFTER-PPSV23` |
   | Child (under 19 years) | Any | a PPSV23 that counted | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-AFTER-INVALID-PPSV23` |
   | Child (under 19 years) | Any | no PPSV23 that counted | PPSV23 | the previous dose of the same vaccine, when that dose did not count | at least 5 years | Does not count | CDC / ACIP | `CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST` |
