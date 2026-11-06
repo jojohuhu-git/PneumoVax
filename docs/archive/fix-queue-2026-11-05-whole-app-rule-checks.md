@@ -1,0 +1,114 @@
+# Fix queue — 2026-11-05 whole-app rule checks
+
+A fresh session can run this queue on its own. The plain-English report, with every patient
+and count, is `docs/archive/report-2026-11-05-whole-app-rule-checks.md`. **Read it first.**
+
+## Baseline
+
+- Measured on `audit/2026-11-05-whole-app-rule-checks`, branched from `main` at `83e095d`.
+  **Check whether its PR has merged, and start from `main`.**
+- Reproduce any item: `node scripts/wholeApp/run.mjs`, about 3 minutes on a quiet machine.
+  `--only grid` is about 1 minute. `--checks 1,4` narrows it.
+- Read one patient: `node scripts/wholeApp/show.mjs '<patient key>' '<road>'`.
+
+## Ground rules (from CLAUDE.md; do not re-litigate)
+
+- **Use the `fix-queue` skill, one item at a time.** Reproduce, failing test, smallest fix,
+  full suite, break the fix on purpose, prose diff, check in the running app, commit by ID.
+- **Items marked OWNER need her answer first.** Her answer goes in the commit and in
+  `CLINICAL_SPEC.md`. The patients for each question are in the report's "Decisions" section,
+  with the whole scenario, ready for the question box.
+- **A verdict that moves must be explained.** Do not run `npm run sweep:update` until you can
+  say why those patients should get a different answer. Put both moved counts in the PR.
+- **The corpora hold no prose.** Run `scripts/proseDiff.mjs` before and after any wording item.
+- **When an item lands, re-run the checks and update `scripts/wholeApp/causes.mjs`:** delete the
+  sorting rule for the fixed cause, so that if it returns it lands in "unsorted" and fails.
+  Then move the check into the required suite as the report's gate table says.
+
+---
+
+## P0
+
+### P0-1 — R1: the 2nd-PPSV23 card ignores the 8 weeks after a recent PCV
+
+- **Patient:** Noor, 10, HIV. PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, PCV15 two weeks ago.
+  `node scripts/wholeApp/show.mjs 'tc120|r:hiv|P:PCV13@2m,PCV13@4m,PCV13@6m,PCV13@12m,PCV15@-0m-14d|S:-60m' 'PPSV23 2026-10-11'`
+- **Now:** "1 dose PCV20" waits to Nov 22. "2nd PPSV23 (alternative)" beside it is due today. Given
+  today, the app throws that PPSV23 out.
+- **Cause:** `src/logic/recommend.js` works the alternative's date out separately, in four places:
+  lines 2412, 2684, 2807 and 2997. Each reads 5 years only. The PCV20 card beside each calls
+  `icPostPpsv23DueState()` (line 396), which takes the later of 5 years and 8 weeks.
+- **Fix:** give the PPSV23 card the same call. No new rule is needed.
+- **Source:** CDC Child Notes, read live 2026-11-05, immunocompromised, age 6-18: *"administer 1
+  dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose and at least 5
+  years after dose 1 PPSV23."* PneumoRecs says the same in its own words.
+- **Expect:** checks 1 and 4 lose all of R1. Tried in a throwaway copy: 2,110 patients to 0.
+- **Verdicts move.** The corpus will change on these patients. That is the fix.
+
+---
+
+## P1
+
+### P1-1 — R2, OWNER: a child's card gives a date after the 19th birthday
+
+- **Patients:** Tess (A), Rafi (B), Cal (C) in the report, Decision 1.
+- **Now:** the child's card names a date past 19. On that date the adult rules give another answer:
+  "Complete", or a different product, or a date a year later.
+- **Cause:** `withAtNineteen()` (`recommend.js:1455`) runs the patient forward only for `complete`
+  cards. A card asking for a dose never consults the adult answer.
+- **Do not start until she has answered.** The likely shape is to run the patient forward to the
+  card's own date, as `earlyFiveYearPcv20` already does, and let that answer the card.
+
+### P1-2 — R5, OWNER: "Complete" beside a dose falling due at 2
+
+- **Patient:** Sadie in the report, Decision 2.
+- **Now:** an at-risk baby's card has the pill "Complete" and says "one further dose falls due at
+  age 2 years". Her rule of 2026-11-01: *"Complete should only be used if no additional
+  doses/boosters are needed."*
+- **Likely shape:** a status and label change only. No date moves. Check `RecCard.jsx`'s collapsed
+  neutral card: a card that is not neutral stays open.
+
+---
+
+## P2
+
+### P2-1 — R9: "may be given now" over a date still in the future
+
+- **Patient:** Pax in the report. 40, HIV, PCV13 and two PPSV23, the last 4 years ago.
+- **Now:** the header says "Not yet due — eligible Nov 5, 2027"; the note says "may be given now".
+- **Fix:** drop "now" from the sentence, or use it only when the five years have passed. Wording
+  only, no verdict moves. ACIP's row (mm7401a1) says ≥5 years after the last dose.
+- 88 cards. `node scripts/wholeApp/wordingChecks.mjs` counts them.
+
+### P2-2 — R3: an infant's date moves when the child turns 7 months
+
+- **Patient:** Remy in the report.
+- **Now:** the card says dose 3 is due Dec 6. On Dec 6 the same card says Jan 3.
+- **Cause:** the band is read from the child's age today (`recommend.js:778`,
+  `ageAtThisDose: needs12moFloor ? M.m12 : am`, and `t1row`), not the age on the advised date.
+- **Note:** nothing is rejected if the dose is given on Dec 6. Only the advice moves.
+
+### P2-3 — R8: a card says "at or after age 6" about doses given before 6
+
+- **Patient:** Ada in the report.
+- **Dose unchanged**, so her 2026-10-18 rule lets this be decided without asking. Group the
+  judgement calls in the PR body. Read each row first, tables included (FINDING F).
+- **Note:** every one of these patients has a conjugate at 6 or over on top of a baby series, so
+  most are off-schedule histories. Fix the wording; do not chase every shape.
+
+### P2-4 — R6, OWNER: Option B says it completes the series, and at 19 a dose can still come
+
+- **Patient:** Cora in the report, Decision 3. Wording only.
+
+### P2-5 — R4: recommend parking
+
+- A childhood PPSV23 thrown out for being too close to a PCV, and the patient since turned 19 or
+  has a PCV card. The chip's five-year date and the card disagree. Rare history, and the owner
+  asked on 2026-10-31 not to bring very unlikely histories to her.
+- **Recommend parking** with a one-line note in the report. If taken up, the adult path in
+  `recommend()` does not call `holdPpsv23AfterThrownOut()`; the child path does.
+
+### P2-6 — R7: recommend no change
+
+- A healthy baby's "series complete" card does not mention what happens at 50. The toddler's card
+  does. The ask is decades away. Listed so it is not found again.

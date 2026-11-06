@@ -20,6 +20,7 @@ folder — they go where the table at the bottom says.**
 | `public/` | Images and files shipped with the app exactly as-is. |
 | `index.html` | The single web page the app loads into. |
 | `scripts/` | Verification tools: compare this app's answers against CDC's PneumoRecs tool, and rebuild the saved answers file below. Not part of the app. |
+| `scripts/wholeApp/` | The whole-app rule checks (2026-11-05): seven questions asked of every patient, such as "if you follow the card, does the app accept the dose?". `run.mjs` runs them, `causes.mjs` sorts what they find, `proveChecks.mjs` breaks the app on purpose to prove each check can fail. Not part of the app. |
 | `scripts/pneumorecs/` | CDC's PneumoRecs VaxAdvisor, read out of its own code on 2026-10-25: all 175 recommendations it can print, which of them nobody can reach, the seven answers checked by hand against the live site, and how its answers compared with ours. `pneumorecs-rulebook.txt` is the readable version. |
 | `src/logic/__tests__/__corpus__/` | The app's saved answers for all ~16,000 made-up patients. The tests re-run the app over them and complain if any answer changed, so a change that quietly moves thousands of patients' advice can't slip through. If a change was meant to move them, run `npm run sweep:update` and say in the pull request how many moved. |
 
