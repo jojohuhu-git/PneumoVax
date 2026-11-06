@@ -101,7 +101,9 @@ describe('C8 — the five-year step cites its row on both cards', () => {
     // with TWO counted PPSV23 doses is never offered a third, so the 96
     // 18-year-olds who had both before their conjugate keep the PCV20 card and
     // lose the "2nd PPSV23" alternative. CLINICAL_SPEC.md §C-P2.
-    expect(cards).toBe(1074);
+    // was 1074; -396, R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19):
+    // those children now read the adult card instead of this pair.
+    expect(cards).toBe(678);
     expect([...strays.entries()]).toEqual([]);
   });
 
@@ -118,7 +120,7 @@ describe('C8 — the five-year step cites its row on both cards', () => {
     // P2 (2026-10-30): 585 -> 489 pairs — the 96 Sofias have no alternative
     // card left to compare. Pinned exactly, not floored, so that a family
     // quietly losing its alternative shows up here as a number.
-    expect(compared).toBe(489);
+    expect(compared).toBe(291); // was 489; -198 pairs: R2, as above
     expect(mismatched.slice(0, 5)).toEqual([]);
   });
 
@@ -144,7 +146,7 @@ describe('C8 — the five-year step cites its row on both cards', () => {
       // they keep the PCV20 card and lose the alternative, which would have
       // been a third PPSV23. Every one quotes this same row.
       expect(tally.get(`${label}|pedsIcPcv13AndPpsvAt6`), label)
-        .toBe(label === PCV20_CARD ? 486 : 390);
+        .toBe(label === PCV20_CARD ? 288 : 192); // were 486 and 390: R2, as above
       expect(tally.get(`${label}|pedsIcBefore6NoPcv20At6to18`), label).toBe(87);
       expect(tally.get(`${label}|pedsIcPcv20orPpsv23`), label).toBe(12);
     }

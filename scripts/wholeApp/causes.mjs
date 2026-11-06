@@ -18,10 +18,6 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 export const CAUSES = {
-  'R2-date-past-19': {
-    class: 'real',
-    title: "A child's card gives a date after the 19th birthday, and the adult rules answer differently on the day",
-  },
   'R3-date-crosses-7-months': {
     class: 'real',
     title: "An infant's date is worked out by today's age band, not the age at the dose",
@@ -54,18 +50,20 @@ export const CAUSES = {
     class: 'ruling',
     title: 'Option A due now, Option B PPSV23 held 5 years after a thrown-out PPSV23 (§C-P2-FIVE)',
   },
+  'D4-dose-due-before-19-stays-a-childs': {
+    class: 'ruling',
+    title: 'A dose already due before 19 stays on the child rules; the adult answer starts on the birthday (§B-AT19, 2026-11-05)',
+  },
   'line-doing-its-job': { class: 'info', title: 'An age line changing exactly what its rule says' },
   unsorted: { class: 'unsorted', title: 'Not yet sorted' },
 };
 
-const CHILD_CARD = /^(1 dose PCV20 \(immunocompromising\)|2nd PPSV23|Option [AB]|PCV dose)/;
 
 export function causeOf(check, kind, group) {
   if (check === 'harness') return 'unsorted';
   if (kind === 'line-changes-what-the-rule-says' || kind === 'dose-line-changes-what-the-rule-says') return 'line-doing-its-job';
   if (check === 1) {
     if (kind === 'warned-short' && /rule=ADULT-PPSV23-AFTER-PPSV23/.test(group)) return 'R4-thrown-out-ppsv23-chip';
-    if (kind === 'warned-short' && /rule=ADULT-/.test(group) && CHILD_CARD.test(group)) return 'R2-date-past-19';
   }
   if (check === 2) {
     if (kind === 'not-mentioned' && /^Option B/.test(group) && /quiet spell/.test(group)) return 'R6-option-b-later-dose-unsaid';
@@ -88,7 +86,7 @@ export function causeOf(check, kind, group) {
     if (/rule=CHILD-PPSV23-AFTER-PCV/.test(group)) return 'R4-thrown-out-ppsv23-chip';
   }
   if (check === 6) {
-    if (kind === 'ask-turns-to-complete-at-19') return 'R2-date-past-19';
+    if (kind === 'due-today-turns-to-complete-at-19') return 'D4-dose-due-before-19-stays-a-childs';
     if (kind === 'recorded-dose-changed-at-line' && /^228m: ppsv23 dose \d: (extraDose true → null|effectiveDoseNum null → \d)/.test(group)) return 'D2-extra-dose-counts-at-19';
   }
   if (check === 7) {
@@ -96,7 +94,6 @@ export function causeOf(check, kind, group) {
     // "counted". A dose going the other way would be a new fault.
     if (kind === 'recorded-dose-verdict-changed' && /^ppsv23 (extraDose: true → -|effectiveDoseNum: - → \d) \(crossing 19\)/.test(group)) return 'D2-extra-dose-counts-at-19';
     if (kind === 'advised-date-moved' && /^Option B-2/.test(group)) return 'R4-thrown-out-ppsv23-chip';
-    if (/crossed 228m/.test(group)) return 'R2-date-past-19';
     if (/crossed 7m/.test(group)) return 'R3-date-crosses-7-months';
   }
   return 'unsorted';
@@ -115,6 +112,8 @@ const CARD_MOVES = [
   [60, /→ Not indicated \(healthy 5–18y\)$/, 'CDC: no PCV for a healthy child from 5'],
   [72, /^cards: (PCV dose \d of 2 \(at-risk catch-up\)|PCV complete \(at-risk catch-up done\)) → /, 'the 2-5 at-risk rows end; the 6-18 rows begin'],
   [228, /^cards: /, 'the child rulebook ends and the adult rulebook begins at 19'],
+  // R2: the day before 19 shows the adult card dated that birthday; on it, due.
+  [228, /^card PCV \(PCV15, PCV20, or PCV21\) ≥1 year after PPSV23: (dueToday false → true|dated true → false)$/, 'a date set to the 19th birthday falls due on it'],
   [600, /^cards: (No dose now|Not indicated \(no risk|Review at age 50|PPSV23 \(≥8 weeks after PCV15\))/, 'routine adult vaccination begins at 50 (mm7401a1)'],
   [600, /^card 1 dose PCV \(PCV20, PCV15, or PCV21\): status risk-based → due$/, 'the same dose becomes routine rather than risk-based at 50'],
   [780, /→ PCV20 or PCV21 ≥5 years \(shared clinical decision-making\)$/, 'a PPSV23 at 65 or over makes a further PCV a shared decision (mm7401a1)'],

@@ -283,7 +283,7 @@ describe('swept over every patient the grid can build', () => {
     // ENTIRELY UNDER 50 — the `ge50` tallies in the next test are untouched,
     // which is what says these are children's doses being re-graded and not
     // an adult card moving. See CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(tally.complete15plus.total).toBe(914 + 188 - 20);  // +183 at 50+, +5 under 50, then -20
+    expect(tally.complete15plus.total).toBe(914 + 188 - 20 + 72);  // +183 at 50+, +5 under 50, then -20
     expect(tally.routineAt50.total).toBe(180);
   });
 
@@ -316,7 +316,7 @@ describe('swept over every patient the grid can build', () => {
       // buttons move with the card. +5 is the measured net movement on this
       // count. The invariant beside it — zero uncredited — is unchanged, and
       // `scripts/uncreditedSources.mjs` reports no new (source, statement) pair.
-      expect(tally.complete15plus.under50).toBe(305 + 5 - 20);
+      expect(tally.complete15plus.under50).toBe(305 + 5 - 20 + 72); // +72: R2, Complete at 19, §B-AT19
     expect(tally.routineAt50.under50).toBe(180);
     expect(tally.complete20or21.jobAidUnder50).toBe(0);
     expect(tally.complete15plus.jobAidUnder50).toBe(0);

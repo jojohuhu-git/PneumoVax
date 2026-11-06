@@ -234,7 +234,9 @@ describe('swept over the grid', () => {
     // 72 children (aged 6, 18 and 18y11m; PPSV23 on the day of, or the day
     // after, a PCV): 40 had no other dated chip and left `kept`; 32 stay,
     // because a thrown-out PCV dose on the same screen keeps its own date.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2350, kept: 1789 });
+    // 54 moved across, R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19):
+    // a child now read as Complete at 19 is promised no date.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1735 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {

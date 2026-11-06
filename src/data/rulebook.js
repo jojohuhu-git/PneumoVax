@@ -475,6 +475,16 @@ const P = {
   asplenia16two: ex('16-year-old with asplenia, PCV13 series, PPSV23 at 2 and 7',
     { dob: '2010-11-01', riskIds: ['asplenia'], pcvDoses: doses('PCV13', ['2011-01-01', '2011-03-01', '2011-05-01', '2011-11-15']), ppsv23Doses: doses('PPSV23', ['2013-01-01', '2018-02-01']) },
     { status: 'complete', note: [/At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21/] }),
+  // R2 (OWNER RULINGS 2026-11-05): the next dose falls at 19 or later.
+  tess14: ex('14-year-old with asplenia, PCV15 series, PPSV23 at 14: the wait ends after the adult schedule starts',
+    { dob: '2012-10-11', riskIds: ['asplenia'], pcvDoses: doses('PCV15', ['2012-12-11', '2013-02-11', '2013-04-11', '2013-10-11']), ppsv23Doses: doses('PPSV23', ['2026-10-12']) },
+    { status: 'complete', cards: [/^Complete at 19 \(PCV15 \+ PPSV23\)$/] }),
+  rafi14: ex('14-year-old with asplenia, PCV13 series, PPSV23 at 14: the same wait, and the adult schedule still gives a dose',
+    { dob: '2012-10-11', riskIds: ['asplenia'], pcvDoses: doses('PCV13', ['2012-12-11', '2013-02-11', '2013-04-11', '2013-10-11']), ppsv23Doses: doses('PPSV23', ['2026-10-12']) },
+    { cards: [/^PCV20 or PCV21 ≥/], noCards: [/^2nd PPSV23/], due: '2031-10-12' }),
+  cal18: ex('Weeks from the adult schedule, heart disease, a first PCV15 this week: the adult wait replaces the child\'s',
+    { dob: '2007-12-05', riskIds: ['chronic_heart'], pcvDoses: doses('PCV15', ['2026-10-31']), ppsv23Doses: [] },
+    { cards: [/^PPSV23 \(≥/], due: '2027-10-31' }),
   asplenia8ppsv: ex('8-year-old with asplenia, PPSV23 4 weeks ago, no PCV',
     { dob: '2018-11-01', riskIds: ['asplenia'], pcvDoses: [], ppsv23Doses: doses('PPSV23', ['2026-10-04']) },
     { cards: [/Option A: 1 dose PCV20 \(≥8 weeks\)/, /Option B-1: 1 dose PCV15 \(≥8 weeks\)/] }),
@@ -681,6 +691,14 @@ export const DECISIONS = [
     cdc: 'Give a separate schedule for stem cell transplant recipients, outside the routine and risk-based schedules.',
     does: 'Stops and shows no recommendation, even when another condition is also selected. Follow institutional guidelines (ASCO, NCCN, IDSA, CDC).',
     ex: [P.transplant],
+  },
+  {
+    key: 'nextDoseIsAnAdults',
+    short: `Next dose falls after ${yrs(ADULT_SCHED_MIN_M)}`,
+    problem: `A child's next dose would fall at ${yrs(ADULT_SCHED_MIN_M)} or later. On that date the adult schedule may give a different answer: no further dose, a different product, or a longer wait.`,
+    cdc: `Give the child schedule, and the adult schedule from ${yrs(ADULT_SCHED_MIN_M)}. They do not say which applies to a dose the child schedule places after ${yrs(ADULT_SCHED_MIN_M)}.`,
+    does: `Shows the adult schedule's answer from today, and says why. A dose that can be given before ${yrs(ADULT_SCHED_MIN_M)} stays on the child schedule.`,
+    ex: [P.tess14, P.rafi14, P.cal18],
   },
   {
     key: 'ppsvNotRepeated',
@@ -998,6 +1016,7 @@ export const GRACE = {
  * there are when there is no CDC or ACIP guidance"). Each has its patient.
  */
 export const CHILD_EXCEPTIONS = [
+  { text: `A next dose falling at ${yrs(ADULT_SCHED_MIN_M)} or later: the adult schedule answers, shown from today.`, decision: 'nextDoseIsAnAdults', ex: [P.tess14, P.rafi14, P.cal18] },
   { text: `Given up to ${GRACE_DAYS} days early: CDC's grace, above.`, ex: [P.infantOnTime] },
   { text: `A PCV given <${W8} after a PPSV23 that itself did not count. The ${W8} is advice only.`, decision: 'invalidPpsvTiming', ex: [P.toddlerPcvSoon] },
   { text: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first. The note states the actual gap. Other children do not need a 2nd PPSV23; it is labelled Extra dose.`, decision: 'icSecondPpsvCounts', ex: [P.ic2ndEarly, P.nonIc2nd] },

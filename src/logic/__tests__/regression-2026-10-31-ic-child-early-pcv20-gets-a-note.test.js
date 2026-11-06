@@ -103,7 +103,9 @@ describe('the grid: the note appears exactly when the card held a PCV20 to five 
         const am = calendarMonthsBetween(c.input.dob, day);
         if (am >= 228) continue;
         const before = recommend({ ...c.input, today: day, ageMonths: am });
-        const held = before.recs.some((r) => r.vaccine === 'PCV' && r.minIntervalMonths === 60
+        // R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19): the note
+        // follows the child's card even where the adult card replaced it.
+        const held = (before.childCardsReplaced ?? before.recs).some((r) => r.vaccine === 'PCV' && r.minIntervalMonths === 60
           && r.brands.some((b) => b.startsWith('PCV20')) && r.earliestNextDate > day);
         const after = recommend({ ...c.input, today: day, ageMonths: am, pcvDoses: [...c.input.pcvDoses, { product: 'PCV20', date: day }] });
         const dose = after.perDose.pcv.at(-1);

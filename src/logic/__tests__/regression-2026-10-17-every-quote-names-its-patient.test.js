@@ -458,10 +458,15 @@ describe('the guard — swept over every patient the grid can build', () => {
     // disorder is told to re-evaluate at 19, and only the adult risk list can
     // say why. Given only when the app's own adult card at 19 asks for a dose.
     //   cdcAdultRiskFactorList    the adult risk factor this teenager has
+    // R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19): a child
+    // whose next dose falls at 19 or later is shown the ADULT card, so that
+    // card's own citations come with it, each declared. Three are new here.
+    //   adultPcv15ThenPpsv, mmwrIc1949OnePpsv, mmwrPpsvOnlyThenPcv
     expect([...seen.keys()].sort()).toEqual([
       'adultBothNotAt65', 'adultChronicOnlyReviewAt50', 'adultIc1949BothPcv13Ppsv',
-      'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList', 'cdcChildSpecialSituations', 'immPCV7',
-      'mmwrIc1949TwoPpsv',
+      'adultPcv15ThenPpsv', 'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList',
+      'cdcChildSpecialSituations', 'immPCV7', 'mmwrIc1949OnePpsv', 'mmwrIc1949TwoPpsv',
+      'mmwrPpsvOnlyThenPcv',
     ]);
   });
 

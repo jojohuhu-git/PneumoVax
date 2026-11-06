@@ -1512,6 +1512,54 @@ function withAtNineteen(card, at19) {
   };
 }
 
+// `complete` and `not-indicated` are the only two statuses that ask for nothing;
+// `due`, `catchup`, `risk-based` and `shared-decision` all ask.
+const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
+
+// ── §B-AT19, R2 (OWNER RULINGS 2026-11-05, on Tess, Rafi and Cal) ─────────
+//
+// Tess, 14, no spleen, a PCV15 series and PPSV23: her card gave PCV20 or a 2nd
+// PPSV23 on the day after she turns 19, and from that birthday the adult card
+// says "Complete". Rafi, the same with PCV13: the dose stays but the 2nd PPSV23
+// goes. Cal, 18 years 11 months with heart disease, a PCV15 today: 8 weeks on
+// the child's card, a year on the adult's. CDC's child pages stop at 18 and no
+// document carries a child's dose past 19. Asked, she chose "Adult rules win"
+// for Tess and "Yes, both" for Rafi and Cal, shown from today.
+//
+// THE ANSWER IS THE ADULT CARD'S OWN, for the same patient, nothing more given,
+// on the 19th birthday (as `withAtNineteen` does for a "complete" card). Only
+// the opening sentence is new, so this cannot become a second reading of the
+// adult rules. It runs only when nothing can be done before 19: a dose due
+// sooner stays a child's dose, on the child's rules.
+function adultAnswerPastNineteen(recs, adultRecs, nineteenth) {
+  const asks = recs.filter((r) => !ASKS_FOR_NOTHING.has(r.status));
+  const dated = asks.filter((r) => r.earliestNextDate);
+  // No test for a due-today card beside a dated one: 0 of 77,496 patients, and
+  // none could be built by hand, so a branch for it could not be tested.
+  if (!dated.length || dated.some((r) => r.earliestNextDate < nineteenth)) return null;
+  const gap = dated[0].minIntervalMonths === MO60 ? LONG_GAP_WORDS : PNEUMO_GAP_WORDS;
+  const on = fmtDate(nineteenth);
+  const why = 'the adult schedule answers for this dose, which falls on or after the 19th birthday';
+  // The adult card never offers PPSV23 to anyone holding this card: 0 of 534.
+  const ppsvGone = recs.some((r) => /^2nd PPSV23/.test(r.doseLabel));
+  return adultRecs.map((card) => {
+    const nothing = ASKS_FOR_NOTHING.has(card.status);
+    const opening = nothing
+      ? `No dose now. The wait of ${gap} ends after the 19th birthday, ${on}. From then the adult schedule applies.`
+      : `This patient turns 19 on ${on}, before the wait of ${gap} ends, so the adult schedule applies.${ppsvGone ? ' A 2nd PPSV23 is not offered at 19.' : ''}`;
+    return {
+      ...card,
+      doseLabel: card.doseLabel.replace(/^Complete \(/, 'Complete at 19 ('),
+      dueToday: false,
+      earliestNextDate: card.earliestNextDate ?? (card.dueToday ? nineteenth : null),
+      note: typeof card.note === 'string'
+        ? `${opening} ${card.note}`
+        : { ...card.note, lead: `${opening} ${card.note.lead}` },
+      noteCites: (card.noteCites ?? []).map((c) => ({ ...c, aboutAnotherGroup: why })),
+    };
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4447,6 +4495,10 @@ export function recommend(input) {
   // §C-P2-GREY / §C-P2-NOTHIRD: set on the at-risk child path and (Ivy grown
   // up) the adult path, read again for the chip.
   let noThird = null;
+  // R2: the child's own cards, when `adultAnswerPastNineteen` replaced them. The
+  // 5-year note on an early PCV20 reads them: a dose given at 18 was given under
+  // the child's rules, whatever the adult card says from 19.
+  let childCardsReplaced = null;
   if (am < M.m24) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
@@ -4479,16 +4531,23 @@ export function recommend(input) {
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}, with a risk condition that applies at this age`));
       // §B-AT19: the same patient, nothing more given, on the day she turns
       // 19 — the adult card whose answer each "complete" card's line repeats.
-      const at19 = atNineteen(recommend({
-        ...input, ageMonths: ADULT_SCHED_MIN_M,
-        today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
-      }).recs[0]);
+      const nineteenth = addCalendarMonths(dob ?? today, dob ? ADULT_SCHED_MIN_M : ADULT_SCHED_MIN_M - am);
+      const adultAt19 = recommend({ ...input, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
+      const at19 = atNineteen(adultAt19.recs[0]);
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today).map((r) => withAtNineteen(r, at19));
       noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
       if (noThird) recs = noThird.recs;
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
       recs = sayEightWeekWait(recs);
+      // R2: nothing can be done before 19, so the adult card answers from today.
+      const pastNineteen = adultAnswerPastNineteen(recs, adultAt19.recs, nineteenth);
+      if (pastNineteen) {
+        childCardsReplaced = recs;
+        recs = pastNineteen;
+        path.push(pathStep('Adult rules answer', 'The next dose falls after the child schedule ends',
+          `the 19th birthday is ${fmtDate(nineteenth)}`));
+      }
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
@@ -4620,7 +4679,7 @@ export function recommend(input) {
     // §C-P2-FIVE (2026-10-31) the PPSV23 alternative beside it can be held 5
     // years from a THROWN-OUT PPSV23, and reading that hold here wrote "shorter
     // than the 5 years" under 9 grid PCV20s given 9 years after the first dose.
-    const held = then.recs.find((r) => r.vaccine === 'PCV' && r.minIntervalMonths === MO60 && r.earliestNextDate);
+    const held = (then.childCardsReplaced ?? then.recs).find((r) => r.vaccine === 'PCV' && r.minIntervalMonths === MO60 && r.earliestNextDate);
     if (!held) return d;
     const k = then.perDose.ppsv23.findIndex((x) => x.effectiveDoseNum === 1);
     // Never reached on the grid (a card holding five years always has a
@@ -4636,7 +4695,6 @@ export function recommend(input) {
     };
   };
 
-  const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
   const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
   const withdrawForwardLook = (list) => (nothingIsOwed
     ? list.map((d) => (d.forwardLookingReason
@@ -4671,6 +4729,7 @@ export function recommend(input) {
     // every verdict on the wrong row for a history typed newest-first.
     orderedDoses: { pcv: pcvAnalysis.doses, ppsv23: ppsvAnalysis.doses },
     path,
+    childCardsReplaced,
     meta: { ageMonths: am, dob, today, riskIds, pcvCount: pcv.count, ppsv23Count: ppsv.count },
   };
 }

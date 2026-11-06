@@ -409,6 +409,49 @@ sweep: a line appears exactly when the adult card at 19 is not complete for life
 that card's row) and `regression-c13-2026-10-30-what-happens-at-19.test.js` (the grid, every
 line run forward, counts pinned: 186 / 327 / 32 / 80, plus the 60 without).
 
+### §B-AT19, 2026-11-05 — a dose falling at 19 or later: the adult rules answer (R2)
+
+**OWNER RULINGS 2026-11-05.** Shown Tess (14, no spleen, four PCV15 as a baby, PPSV23 Oct 12, 2026,
+19 on Oct 11, 2031), whose card gave PCV20 or a 2nd PPSV23 the day after her birthday and who read
+"Complete" from that birthday, she chose **"Adult rules win"**, stated from today. Shown Rafi (the
+same with PCV13: the dose stays, the 2nd PPSV23 goes) and Cal (18 years 11 months, heart disease,
+a first PCV15: 8 weeks as a child, a year as an adult), she chose **"Yes, both"**: *if the advised
+date falls at 19 or later, the screen shows the adult answer now.*
+
+Read live 2026-11-05. CDC's child notes head the row *"Age 6–18 years"*; its risk page,
+*"Children 6 through 18 years old"*. For adults 19–49 the risk page (updated May 8, 2026), after
+PCV15 then PPSV23: *"Their pneumococcal vaccinations are then complete."* The two PneumoRecs
+branches for Tess at 14 and at 19 give the 5-year dose and then *"no vaccine recommended at this
+time"*. **No document carries a child's dose past 19.** AAP's schedule gives the same 5 years to
+children; a search of aap.org found nothing on the move to the adult schedule, and that was a
+search, not a full reading of the Red Book chapter.
+
+**How it is built.** `recommend()` runs the same patient, nothing more given, to the 19th birthday
+(one call, shared with `withAtNineteen()`), and `adultAnswerPastNineteen()` puts that adult card
+on the screen with one opening sentence added. It is the adult card's own answer, so it cannot
+become a second reading. Its citations are declared `aboutAnotherGroup`. It acts only when every
+dated card falls on or after the birthday: **a dose due before 19 stays a child's dose**, on the
+child's rules, and turns to the adult answer on the birthday (42 grid patients, sorted as ruling
+D4 in `scripts/wholeApp/causes.mjs`). The PCV21 advisory waits for the 19th birthday, as it does for every patient, even when a card
+already names PCV21 for the dose at 19 (owner, 2026-11-06, on Rafi at 14). The
+5-year note on a PCV20 given early still reads the child's card (`childCardsReplaced`): a dose
+given at 18 was given under the child's rules.
+
+**Three families she did not see, all inside the rule she stated, dose moved by the adult row:**
+an unrecorded conjugate plus PPSV23 (12 grid patients: PCV15, PCV20 or PCV21 ≥1 year after the
+PPSV23, EARLIER than the child's 5 years); no conjugate that counts plus a recent PPSV23 (24: 8
+with none, 8 with PCV7 only, 8 with a PCV21 thrown out at 17; the same card, LATER than the child's
+8 weeks); a PCV13 in the past year plus an older PPSV23 (24: 5 years after the last counting
+conjugate, LATER than 5 years after the PPSV23). Listed so she can overrule any of them. The first
+draft of this paragraph said 36 and 24, and named only the thrown-out PCV21. Those were recounted
+from the corpus on 2026-11-06.
+
+Measured: **222 of 17,016** verdicts, all aged 18 on the grid (90 same date, PCV20 or PCV21; 72
+Complete at 19; 12 earlier and 48 later, as above), **0 of 18,264** record-problem rows. No
+recorded-dose verdict moved, and the PCV21 advisory column did not move. Prose: those same 222 lines.
+All seven checks: this cause 1,358 patients to **0**.
+Guard: `regression-2026-11-05-r2-adult-rules-win-past-19.test.js`.
+
 ### §B-PCV20-AFTER-BEFORE6 — baby doses, then a PCV20 at 6 or later (2026-10-31)
 
 An 8-year-old with diabetes: four PCV13 doses as a baby, then a PCV20 at 7. Her card said

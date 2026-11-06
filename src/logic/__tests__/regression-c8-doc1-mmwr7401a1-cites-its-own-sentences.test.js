@@ -372,7 +372,7 @@ describe('over the whole grid', () => {
       // +10, 2026-11-01 (§K-THROWNOUTTIMING): ten 19-year-olds whose childhood
       // PPSV23 after a PCV15 did not count now read "PCV20 or PCV21 in place of
       // the PPSV23", which quotes mm7401a1's footnote * - and credits it.
-      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10);
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10 + 150); // +150: R2, a child shown the adult card, §B-AT19
     expect(stats.uncredited).toBe(0);
     expect([...stats.uncreditedNotes.keys()]).toEqual([]);
   });
@@ -445,6 +445,8 @@ describe('over the whole grid', () => {
       for (const rec of r.recs ?? []) {
         for (const ct of rec.noteCites ?? []) {
           if (!QUOTES[ct.key]) continue;
+          // R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19): a child shown the adult card.
+          if (/19th birthday/.test(ct.aboutAnotherGroup ?? '') && c.input.ageMonths < 228) continue;
           if (ct.key === 'mmwrIc1949TwoPpsv' && ct.aboutAnotherGroup && c.input.ageMonths < 228) {
             crossRefs++;
             continue;
