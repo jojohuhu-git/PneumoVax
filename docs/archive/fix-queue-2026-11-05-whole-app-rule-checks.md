@@ -86,13 +86,20 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
 
 ### P2-1 — R9: "may be given now" over a date still in the future
 
+**DONE 2026-11-06 on `fix/p2-wording-items`.** The word "now" came off. 88 cards to 0.
+
 - **Patient:** Pax in the report. 40, HIV, PCV13 and two PPSV23, the last 4 years ago.
 - **Now:** the header says "Not yet due — eligible Nov 5, 2027"; the note says "may be given now".
 - **Fix:** drop "now" from the sentence, or use it only when the five years have passed. Wording
   only, no verdict moves. ACIP's row (mm7401a1) says ≥5 years after the last dose.
 - 88 cards. `node scripts/wholeApp/wordingChecks.mjs` counts them.
 
-### P2-2 — R3: an infant's date moves when the child turns 7 months
+### P2-2 — R3, OWNER: an infant's date moves when the child turns 7 months
+
+**NOT DONE. Waits on her answer.** The handoff listed this as needing no decision. It does: the fix
+moves an advised date 4 weeks later for a child already behind, which is case (c) of her 2026-10-18
+rule. Tried in a throwaway copy. Remy, born May 6, 2026, PCV20 Nov 6 and Dec 4: on Dec 4 the card says
+Jan 1, on Jan 1 it says Jan 29. The fix says Jan 29 from Dec 4. 0 of 17,016 first screens move.
 
 - **Patient:** Remy in the report.
 - **Now:** the card says dose 3 is due Dec 6. On Dec 6 the same card says Jan 3.
@@ -101,6 +108,10 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
 - **Note:** nothing is rejected if the dose is given on Dec 6. Only the advice moves.
 
 ### P2-3 — R8: a card says "at or after age 6" about doses given before 6
+
+**DONE 2026-11-06 on `fix/p2-wording-items`, wording only.** 19,910 cards to 0. `CLINICAL_SPEC.md`
+§C-AGE6-WORDS. **Deferred:** the cards still cite the row they cited. Most of these children had a
+conjugate nobody asked for, so that waits on the open half of P1-3.
 
 - **Patient:** Ada in the report.
 - **Dose unchanged**, so her 2026-10-18 rule lets this be decided without asking. Group the
@@ -122,6 +133,9 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
 
 ### P2-7 — NEW, found live on Tess: the word "complete" cites the wrong sentence
 
+**DONE 2026-11-06 on `fix/p2-wording-items`.** The risk page speaks for 19-49 only, as it has no 50+
+section, so the job aid keeps the claim at 50+. `CLINICAL_SPEC.md` §G.
+
 - **Now:** "PCV15 followed by PPSV23 is a complete pneumococcal series" cites `adultPcv15ThenPpsv`,
   CDC Adult Notes, whose quote is the interval and never says "complete". This predates R2.
 - **Fix:** CDC's risk page says it, read live 2026-11-05: *"Their pneumococcal vaccinations are then
@@ -141,3 +155,21 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
 - **Not a fault:** the same child with no PCV at all before the PCV15. CDC's row offers PCV15 and the app's Option B-1 names it.
 - **Noor's own family: DONE 2026-11-06, ruling "Yes, flag it extra".** 3,442 patients, PCV15 now Extra dose, 8-week wait kept (`CLINICAL_SPEC.md` §C-P1-3). 0 of 3,442 had a card offering PCV15.
 - **Still open, not ruled on:** every other unasked-for conjugate, grouped by clinical family before asking: no PPSV23 yet (PCV20 or PPSV23 on offer), a child called complete, a healthy child. Keep the count pinned in the guard so a wider rule fails until she rules.
+
+### P2-8 — NEW, found by the wordiness review: "overdue" on the day a dose is due
+
+**DONE 2026-11-06 on `fix/p2-wording-items`.** Mia, healthy, PCV20 on time at 2 months, seen the day
+she turns 4 months. "Why this" said the dose "is overdue". 99 of 17,016 and 594 of 18,264 change
+wording. No dose or date moves.
+
+### P2-9 — NEW, OWNER: an on-time baby's card says "Catch-up"
+
+- **Patient:** Mia again. Her card's label reads "Catch-up", and so does every baby's once one dose is
+  recorded, on time or not. `status: prior === 0 ? 'due' : 'catchup'` in `pcvInfant()`.
+- **Not started.** It changes a label a clinician reads first, and the colour of the card's top bar.
+
+### WORD-1 — NEW, OWNER: fold the result page
+
+**Investigated, not started.** Report: `docs/archive/report-2026-11-06-wordy-result-pages.md`, which
+lists eight decisions for her. Do not build until she has answered the keep list, where the Sources row
+goes, and what stays under a recorded dose.

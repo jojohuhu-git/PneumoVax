@@ -905,7 +905,9 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // routine age they had already passed. Wording only — this flag is used
   // nowhere but the note. Guard:
   // regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js
-  const routineAgePassed = routineAgeDate != null && routineAgeDate <= today;
+  // P2-8 (2026-11-06): strictly earlier. The day the routine age arrives is on
+  // time, not overdue: Mia, due the day she turned 4 months.
+  const routineAgePassed = routineAgeDate != null && routineAgeDate < today;
   const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
