@@ -464,6 +464,9 @@ const P = {
   diabetic5done: ex('5-year-old with diabetes, PCV13 series, PPSV23 at 4',
     { dob: '2021-11-01', riskIds: ['diabetes'], pcvDoses: doses('PCV13', ['2022-01-01', '2022-03-01', '2022-05-01', '2022-11-15']), ppsv23Doses: doses('PPSV23', ['2025-11-15']) },
     { status: 'complete' }),
+  sadie15m: ex('15-month-old with no spleen, PCV13 at 2, 4, 6 and 12 months: up to date, and a dose falls due at 2',
+    { dob: '2025-08-01', riskIds: ['asplenia'], pcvDoses: doses('PCV13', ['2025-10-01', '2025-12-01', '2026-02-01', '2026-08-01']), ppsv23Doses: [] },
+    { status: 'no-dose-now', cards: [/^PCV series up to date for age \(4 doses\)$/], note: [/One further dose falls due at age 2 years/] }),
   cochlear15: ex('15-year-old with a cochlear implant, PCV13 series, PPSV23 at 10',
     { dob: '2011-11-01', riskIds: ['cochlear_implant'], pcvDoses: doses('PCV13', ['2012-01-01', '2012-03-01', '2012-05-01', '2012-11-15']), ppsv23Doses: doses('PPSV23', ['2021-11-15']) },
     { status: 'complete', note: [/At 19, the adult schedule gives 1 dose of PCV20 or PCV21/] }),
@@ -565,7 +568,7 @@ const P = {
     { cards: [new RegExp(`^Review at age ${ROUTINE_ADULT_MIN_M / 12} — or PCV20 or PCV21`)] }),
   bothDiabetic40: ex('40-year-old with diabetes, PCV13 in 2020 and PPSV23 in 2022',
     { ageMonths: 480, riskIds: ['diabetes'], pcvDoses: doses('PCV13', ['2020-01-01']), ppsv23Doses: doses('PPSV23', ['2022-01-01']) },
-    { cards: [new RegExp(`^No dose now — review at age ${ROUTINE_ADULT_MIN_M / 12}$`)] }),
+    { status: 'no-dose-now', cards: [new RegExp(`^No dose now — review at age ${ROUTINE_ADULT_MIN_M / 12}$`)] }),
   bothSmoker40: ex('40-year-old who smokes, PCV13 in 2020 and PPSV23 in 2022',
     { ageMonths: 480, riskIds: ['smoking'], pcvDoses: doses('PCV13', ['2020-01-01']), ppsv23Doses: doses('PPSV23', ['2022-01-01']) },
     { cards: [new RegExp(`^No dose now — review at age ${ROUTINE_ADULT_MIN_M / 12}$`)] }),
@@ -739,6 +742,14 @@ export const DECISIONS = [
     cdc: 'Give no interval between two adult PCV doses, and do not say whether one given soon after another counts.',
     does: `Counts the dose at any interval. If it was given <${W4} after the earlier PCV, the note offers an optional repeat (PCV20 or PCV21) ≥${W8} after it, most worth considering for an immunocompromised patient.`,
     ex: [P.adultPcvClose],
+  },
+  {
+    key: 'noDoseNowLabel',
+    short: 'No dose now, not Complete',
+    problem: 'A patient has every dose due today, and a further dose is named for later on the schedule they are on now. "Complete" would tell the clinician nothing more is needed.',
+    cdc: 'Give the later dose. They do not say what to call the visits before it.',
+    does: `Labels the patient No dose now and shows the later dose without a click. Complete means nothing further on the current schedule. A child who finishes the child schedule keeps Complete, even if the adult schedule gives a dose at ${yrs(ADULT_SCHED_MIN_M)}.`,
+    ex: [P.sadie15m, P.bothDiabetic40],
   },
 ];
 export const DECISION = Object.fromEntries(DECISIONS.map((d) => [d.key, d]));
@@ -973,7 +984,7 @@ export const ADULT_HISTORY = [
       // it, the patient is under Adults) — the adult table had not shown
       // ACIP's two-dose row at all.
       { risk: 'Immunocompromising condition, cochlear implant or CSF leak; two PPSV23 doses', next: `Review at ${yrs(ROUTINE_ADULT_MIN_M)}, or PCV20 or PCV21 ≥${Y5} after the last dose`, cite: ['mmwrIc1949TwoPpsv'], ex: [P.hiv30two, P.csf40two, P.asplenia16two] },
-      { risk: 'Chronic conditions, smoking or alcohol use disorder', next: `None now; review at ${yrs(ROUTINE_ADULT_MIN_M)}`, cite: ['adultChronicOnlyReviewAt50'], ex: [P.bothDiabetic40, P.bothSmoker40, P.diabetic15] },
+      { risk: 'Chronic conditions, smoking or alcohol use disorder', next: `None now; review at ${yrs(ROUTINE_ADULT_MIN_M)}`, cite: ['adultChronicOnlyReviewAt50'], decision: 'noDoseNowLabel', ex: [P.bothDiabetic40, P.bothSmoker40, P.diabetic15] },
     ],
   },
   // Owner, 2026-11-01: "the 'from 50 years' is confusing" — it meant the

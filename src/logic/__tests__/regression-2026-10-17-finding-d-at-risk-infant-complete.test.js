@@ -69,7 +69,9 @@ const infant = (riskIds, product = 'PCV13') => recommend({
   ppsv23Doses: [],
 });
 
-const completeCard = (out) => (out.recs ?? []).find((r) => r.status === 'complete');
+// P1-2 (owner ruling 2026-11-06): the at-risk card with a dose left at 2 reads
+// "No dose now" now. Both are the card this file is about.
+const completeCard = (out) => (out.recs ?? []).find((r) => r.status === 'complete' || r.status === 'no-dose-now');
 const citeKeys = (card) => (card.noteCites ?? []).map((c) => c.key);
 const allText = (card) => [
   card.doseLabel,
@@ -174,9 +176,9 @@ describe('FINDING E — the card says what falls due at age 2', () => {
     expect(completeCard(at24)).toBeUndefined();
   });
 
-  it('the status is still "complete" — this changes what the card says, not the verdict', () => {
+  it('the label reads "No dose now" (P1-2, 2026-11-06), and no dose is asked for today', () => {
     const card = completeCard(infant(['asplenia']));
-    expect(card.status).toBe('complete');
+    expect(card.status).toBe('no-dose-now');
     expect(card.dueToday).toBeFalsy();
     expect(card.brands ?? []).toEqual([]);
   });
