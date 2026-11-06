@@ -100,14 +100,13 @@
 // ── THE 8-WEEK FLOOR IS KEPT, NOT DROPPED ──────────────────────────────────
 //
 // The new gate is the LATER of (5 years after the first PPSV23) and (8 weeks
-// after the most recent pneumococcal dose). CDC states only the five-year
-// condition, but a child can have a conjugate dose AFTER the PPSV23, and
-// nothing in this change should let the app recommend a dose 2 weeks after the
-// last one. Measured on the grid: of the 234 patients already past five years,
-// ZERO are also within 8 weeks of a pneumococcal dose — so on the committed
-// corpora the floor changes nothing, and the only behaviour this commit moves
-// is the five-year gate. It is exercised directly by its own test below rather
-// than left as logic no case reaches.
+// after the most recent pneumococcal dose). A child can have a conjugate dose
+// AFTER the PPSV23, and nothing in this change should let the app recommend a
+// dose 2 weeks after the last one. Measured on the grid: of the 234 patients
+// already past five years, ZERO are also within 8 weeks of a pneumococcal dose,
+// so on the committed corpora the floor changes nothing. That was true of the
+// grid only: it has no vaccinated child aged 6-18, and 2,110 such patients turned
+// up on 2026-11-05 (`regression-2026-11-05-r1-...`, CLINICAL_SPEC.md §D-note-8W).
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 

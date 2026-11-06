@@ -52,7 +52,9 @@ See `CLINICAL_SPEC.md` §III for the full 9-row grid. Key invariants:
   then PCV20 *or* a 2nd PPSV23, both at the same five-year mark.** Not 8 weeks. CDC's
   risk-indications page (May 8, 2026) over immunize.org P2016's footnote ‖ (2/16/2024);
   FINDING A, owner decision 2026-10-17. Full argument and both quotes:
-  `CLINICAL_SPEC.md` §D-note. One source: `icPostPpsv23DueState()`.
+  `CLINICAL_SPEC.md` §D-note. One source: `icPostPpsv23DueState()`. Both options also wait
+  8 weeks after the most recent dose, which is what sets the date when a PCV is recent, and
+  the card then says so (§D-note-8W, 2026-11-05).
   The child who has **never** had a conjugate vaccine is the exception CDC states outright
   — 8 weeks, "regardless of whether the child has previously received PPSV23 or PCV7".
 

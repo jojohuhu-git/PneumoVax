@@ -40,8 +40,12 @@ export const MUTATIONS = [
     file: REC, from: '    note: o.note,', to: "    note: String(o.doseLabel).startsWith('1 dose PCV (PCV20, PCV15') ? 'Give 1 dose.' : o.note," },
   { id: 'M3a', check: 3, what: 'At-risk "complete" cards lose the line saying what happens at 19',
     file: REC, from: "if (!at19 || card.status !== 'complete') return card;", to: 'if (at19 || !at19) return card;' },
-  { id: 'M4a', check: 4, what: 'The PCV20 card takes the earlier of its two waits, not the later',
-    file: REC, from: 'return { dueToday: false, earliestNextDate: pending.sort().at(-1) ?? null };', to: 'return { dueToday: false, earliestNextDate: pending.sort()[0] ?? null };' },
+  // Moved from check 4 on 2026-11-05: both cards now share one date, so breaking
+  // it moves them together and they still agree. Advice-accepted is what sees it.
+  { id: 'M4a', check: 1, what: 'Both cards take the earlier of their two waits, not the later',
+    file: REC, from: 'const earliestNextDate = pending.sort().at(-1) ?? null;', to: 'const earliestNextDate = pending.sort()[0] ?? null;' },
+  { id: 'M4b', check: 4, what: 'R1 returns: the 2nd-PPSV23 card works out five years alone',
+    file: REC, from: 'dueToday: icState.dueToday, earliestNextDate: icState.earliestNextDate, minIntervalMonths: MO60,\n      brands: [\'PPSV23', to: 'dueToday: dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today).dueToday, earliestNextDate: dueStateMonths(ppsv.effective.find((d) => d.date)?.date || anchorPneumo, MO60, today).earliestNextDate, minIntervalMonths: MO60,\n      brands: [\'PPSV23' },
   { id: 'M5a', check: 5, what: 'The chip under a thrown-out dose prints a date a year later',
     file: RULES, from: 'repeatDueDate: repeatDueDate(rule, anchor, ctx),', to: 'repeatDueDate: repeatDueDate(rule, anchor, ctx)?.replace(/^\\d{4}/, (y) => String(Number(y) + 1)),' },
   { id: 'M6a', check: 6, what: 'The 6-year line moves to 6 years 1 month',

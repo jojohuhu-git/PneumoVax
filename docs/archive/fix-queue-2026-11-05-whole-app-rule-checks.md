@@ -31,6 +31,12 @@ and count, is `docs/archive/report-2026-11-05-whole-app-rule-checks.md`. **Read 
 
 ### P0-1 — R1: the 2nd-PPSV23 card ignores the 8 weeks after a recent PCV
 
+**DONE 2026-11-05.** Both options now give one date, and the card says why (owner decision,
+`CLINICAL_SPEC.md` §D-note-8W). R1 went from 2,110 patients to 0. Check 4 is in `npm test`.
+**Two things in this entry turned out wrong, and are left as written so the record stands:** "Verdicts
+move" did not happen (0 of 17,016 and 0 of 18,264 moved, because the grid has no such patient on
+a first screen), and only one of the four places could ever disagree.
+
 - **Patient:** Noor, 10, HIV. PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, PCV15 two weeks ago.
   `node scripts/wholeApp/show.mjs 'tc120|r:hiv|P:PCV13@2m,PCV13@4m,PCV13@6m,PCV13@12m,PCV15@-0m-14d|S:-60m' 'PPSV23 2026-10-11'`
 - **Now:** "1 dose PCV20" waits to Nov 22. "2nd PPSV23 (alternative)" beside it is due today. Given
@@ -50,6 +56,9 @@ and count, is `docs/archive/report-2026-11-05-whole-app-rule-checks.md`. **Read 
 ## P1
 
 ### P1-1 — R2, OWNER: a child's card gives a date after the 19th birthday
+
+**Count changed 2026-11-05:** 1,358 patients now, not 1,871. P0-1 removed 513: children sent down
+the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are unaffected.
 
 - **Patients:** Tess (A), Rafi (B), Cal (C) in the report, Decision 1.
 - **Now:** the child's card names a date past 19. On that date the adult rules give another answer:
