@@ -542,3 +542,180 @@ export function recordProblemCorpusLines({ today = CORPUS_TODAY } = {}) {
 
 export const RECORD_PROBLEM_CORPUS_RELATIVE_PATH =
   'src/logic/__tests__/__corpus__/record-problem-corpus.tsv';
+
+// ─────────────────────────────────────────────────────────────────────────
+// THE TYPICAL-PATIENT GRID (2026-11-05, whole-app rule checks)
+// ─────────────────────────────────────────────────────────────────────────
+//
+// `buildCases()` has no age between 72 and 216 months, and not one of its
+// 5-to-18-year-olds has an infant dose: its histories are written as "days
+// before today", so a dose given at 2 months can only be expressed for a child
+// young enough to have one. A vaccinated 10-year-old therefore does not exist
+// on it, and the fault that started this work (a "2nd PPSV23" card reading due
+// today, inside the 8 weeks after a PCV15) was found on hand-built 10- and
+// 14-year-olds the grid could not reach.
+//
+// This is a SECOND LIST, not a change to the first. `buildCases()` is untouched
+// and these patients go in NEITHER verdict corpus, so `npm run sweep:update`
+// has nothing to do with them. They are read only by the rule checks in
+// `scripts/wholeApp/`, which ask whether the app agrees with itself rather than
+// whether its answer moved.
+//
+// A dose here is written the way a clinician thinks of it, in one of two forms:
+//   { at: 6 }             given at 6 months of age, by the calendar
+//   { ago: 12, days: -1 } given 12 calendar months before today, minus 1 day
+// Calendar arithmetic matters: "1 year ago" is 365 or 366 days, and an interval
+// of >=4 months is counted in calendar months (CDC, quoted at MO12 in
+// recommend.js), so a fixed day count would miss the edge it set out to test.
+
+/** Vaccinated school-age children: every birthday from 7 through 17. */
+export const GRID_TYPICAL_CHILD_AGES_MONTHS = [84, 96, 108, 120, 132, 144, 156, 168, 180, 192, 204];
+
+/**
+ * Adults either side of the lines the adult rows turn on: 19-49 risk-based,
+ * 50 routine, 65 PPSV23 shared decision, and one well past each.
+ */
+export const GRID_TYPICAL_ADULT_AGES_MONTHS = [240, 420, 588, 600, 660, 768, 780, 840, 960];
+
+/** One per pathway. The transplant hard stop is left out: it has no doses to follow. */
+export const GRID_TYPICAL_RISK_PROFILES = [
+  [],
+  ['asplenia'],
+  ['hiv'],
+  ['cochlear_implant'],
+  ['csf_leak'],
+  ['chronic_heart'],
+  ['diabetes'],
+  ['smoking'],
+];
+
+const series = (product, ages) => ages.map((at) => [product, { at }]);
+
+/** The conjugate history a school-age child really arrives with. */
+export const GRID_TYPICAL_CHILD_SERIES = [
+  [],                                               // never vaccinated
+  series('PCV13', [2, 4, 6, 12]),                   // on time, the commonest record
+  series('PCV15', [2, 4, 6, 12]),
+  series('PCV20', [2, 4, 6, 12]),
+  [...series('PCV13', [2, 4, 6]), ['PCV20', { at: 12 }]],  // product changed at the booster
+  series('PCV13', [2, 4, 6]),                       // booster missed
+  series('PCV13', [2, 4]),                          // stopped early
+  series('PCV13', [12, 14]),                        // two-dose toddler start
+  series('PCV13', [24]),                            // one catch-up dose at 2
+  series('', [2, 4, 6, 12]),                        // product not recorded
+  series('PCV7', [2, 4, 6, 12]),                    // an older teenager's record
+  [...series('PCV7', [2, 4, 6, 12]), ['PCV13', { at: 30 }]],  // PCV7 then the PCV13 supplement
+];
+
+/** A conjugate given lately, on top of that series, either side of the 8 weeks. */
+export const GRID_TYPICAL_CHILD_RECENT_PCV = [
+  [],
+  [['PCV15', { ago: 0, days: -14 }]],
+  [['PCV15', { ago: 0, days: -55 }]],
+  [['PCV15', { ago: 0, days: -56 }]],
+  [['PCV20', { ago: 0, days: -56 }]],
+  [['PCV15', { ago: 12, days: 0 }]],
+];
+
+/** PPSV23 histories: on the usual ages, and either side of the five years. */
+export const GRID_TYPICAL_CHILD_PPSV23 = [
+  [],
+  [{ at: 24 }],
+  [{ at: 60 }],
+  [{ ago: 60, days: 1 }],    // 1 day short of 5 years
+  [{ ago: 60, days: 0 }],
+  [{ ago: 60, days: -1 }],
+  [{ ago: 12, days: 0 }],
+  [{ ago: 0, days: -14 }],
+  [{ at: 24 }, { at: 84 }],  // a second dose, five years after the first
+];
+
+/**
+ * Adult histories around each interval. The `{ edge: … }` dose is the one that
+ * sits ON the interval being tested, and it is moved by each of
+ * GRID_TYPICAL_ADULT_EDGE_DAYS, so every interval gets a just-short and a
+ * just-over neighbour. The other doses are fixed, well clear of it.
+ */
+export const GRID_TYPICAL_ADULT_EDGE_DAYS = [5, 1, 0, -1];
+
+export const GRID_TYPICAL_ADULT_HISTORIES = [
+  { name: 'PCV15, 8 weeks', pcv: [['PCV15', { edge: { ago: 0, days: -56 } }]], ppsv: [] },
+  { name: 'PCV15, 1 year', pcv: [['PCV15', { edge: { ago: 12 } }]], ppsv: [] },
+  { name: 'PCV13, 1 year', pcv: [['PCV13', { edge: { ago: 12 } }]], ppsv: [] },
+  { name: 'PPSV23, 1 year', pcv: [], ppsv: [{ edge: { ago: 12 } }] },
+  { name: 'PPSV23, 5 years', pcv: [], ppsv: [{ edge: { ago: 60 } }] },
+  { name: 'PPSV23 twice, 5 years apart', pcv: [], ppsv: [{ ago: 120, days: 0 }, { edge: { ago: 60 } }] },
+  { name: 'PCV13 then PPSV23, 5 years', pcv: [['PCV13', { ago: 84, days: 0 }]], ppsv: [{ edge: { ago: 60 } }] },
+  { name: 'PCV13 then PPSV23, 1 year', pcv: [['PCV13', { ago: 84, days: 0 }]], ppsv: [{ edge: { ago: 12 } }] },
+  { name: 'PCV15 then PPSV23, 5 years', pcv: [['PCV15', { ago: 72, days: 0 }]], ppsv: [{ edge: { ago: 60 } }] },
+  { name: 'PPSV23 then PCV13, 1 year', pcv: [['PCV13', { edge: { ago: 12 } }]], ppsv: [{ ago: 72, days: 0 }] },
+  { name: 'PPSV23 twice then PCV13, 1 year', pcv: [['PCV13', { edge: { ago: 12 } }]], ppsv: [{ ago: 132, days: 0 }, { ago: 72, days: 0 }] },
+  { name: 'PPSV23 then PCV15, 1 year', pcv: [['PCV15', { edge: { ago: 12 } }]], ppsv: [{ ago: 72, days: 0 }] },
+];
+
+const whenGiven = (w, dob, today) => (w.at != null
+  ? addCalendarMonths(dob, w.at)
+  : addDays(addCalendarMonths(today, -w.ago), w.days ?? 0));
+
+const whenWord = (w) => (w.at != null ? `${w.at}m` : `-${w.ago}m${w.days ? `${w.days > 0 ? '+' : ''}${w.days}d` : ''}`);
+
+function typicalCase(prefix, ageMonths, dob, today, riskIds, pcvWhen, ppsvWhen) {
+  const pcvDoses = pcvWhen.map(([product, w]) => ({ product, date: whenGiven(w, dob, today) }));
+  const ppsv23Doses = ppsvWhen.map((w) => ({ product: 'PPSV23', date: whenGiven(w, dob, today) }));
+  const all = [...pcvDoses, ...ppsv23Doses].map((d) => d.date);
+  if (all.some((x) => x < dob || x > today)) return null;
+  return {
+    key: key([
+      `${prefix}${ageMonths}`,
+      `r:${riskIds.join('+')}`,
+      `P:${pcvWhen.map(([p, w]) => `${p || '?'}@${whenWord(w)}`).join(',')}`,
+      `S:${ppsvWhen.map(whenWord).join(',')}`,
+    ]),
+    input: {
+      ageMonths,
+      dob,
+      today,
+      riskIds,
+      // Date order, as a clinician's record reads. The engine sorts for itself;
+      // the keys stay in the order the history was written.
+      pcvDoses: [...pcvDoses].sort((a, b) => (a.date < b.date ? -1 : 1)),
+      ppsv23Doses: [...ppsv23Doses].sort((a, b) => (a.date < b.date ? -1 : 1)),
+    },
+  };
+}
+
+/**
+ * Vaccinated children aged 7 to 17, and adults either side of each interval.
+ * Never read by either corpus. A case whose dose would fall before birth or
+ * after today is skipped, for the reason `buildCases()` gives.
+ */
+export function buildTypicalCases({ today = CORPUS_TODAY } = {}) {
+  const cases = [];
+  for (const ageMonths of GRID_TYPICAL_CHILD_AGES_MONTHS) {
+    const dob = addCalendarMonths(today, -ageMonths);
+    for (const riskIds of GRID_TYPICAL_RISK_PROFILES) {
+      for (const earlier of GRID_TYPICAL_CHILD_SERIES) {
+        for (const recent of GRID_TYPICAL_CHILD_RECENT_PCV) {
+          for (const ppsv of GRID_TYPICAL_CHILD_PPSV23) {
+            const c = typicalCase('tc', ageMonths, dob, today, riskIds, [...earlier, ...recent], ppsv);
+            if (c) cases.push(c);
+          }
+        }
+      }
+    }
+  }
+  for (const ageMonths of GRID_TYPICAL_ADULT_AGES_MONTHS) {
+    const dob = addCalendarMonths(today, -ageMonths);
+    for (const riskIds of GRID_TYPICAL_RISK_PROFILES) {
+      for (const h of GRID_TYPICAL_ADULT_HISTORIES) {
+        for (const shift of GRID_TYPICAL_ADULT_EDGE_DAYS) {
+          const place = (w) => (w.edge ? { ago: w.edge.ago, days: (w.edge.days ?? 0) + shift } : w);
+          const c = typicalCase('ta', ageMonths, dob, today, riskIds,
+            h.pcv.map(([p, w]) => [p, place(w)]), h.ppsv.map(place));
+          if (c) cases.push(c);
+        }
+      }
+    }
+  }
+  return cases;
+}
