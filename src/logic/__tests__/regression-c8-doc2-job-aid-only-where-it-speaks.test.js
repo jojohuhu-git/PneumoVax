@@ -98,7 +98,7 @@ const SAYS = {
   complete20or21: 'A pneumococcal series that includes PCV20 or PCV21 is complete',
   // P1-3 (2026-11-01): the same "series complete" claim, in its two orders —
   // a patient who had PPSV23 FIRST is now told so. One statement, two wordings.
-  complete15plus: ['PCV15 followed by PPSV23 is a complete pneumococcal series', 'When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete'],
+  complete15plus: ['PCV15 followed by PPSV23 [c] is a complete pneumococcal series', 'When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete'],
   routineAt50: 'Routine pneumococcal vaccination begins at age 50',
 };
 

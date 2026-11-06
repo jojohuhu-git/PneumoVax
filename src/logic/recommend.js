@@ -910,7 +910,9 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // routine age they had already passed. Wording only — this flag is used
   // nowhere but the note. Guard:
   // regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js
-  const routineAgePassed = routineAgeDate != null && routineAgeDate <= today;
+  // P2-8 (2026-11-06): strictly earlier. The day the routine age arrives is on
+  // time, not overdue: Mia, due the day she turned 4 months.
+  const routineAgePassed = routineAgeDate != null && routineAgeDate < today;
   const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
@@ -1948,7 +1950,7 @@ function pcvInterchangeableBridge(words) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  AT-RISK CHILDREN 24 months – 18 years — p2016 Table 4
 // ═══════════════════════════════════════════════════════════════════════════
-function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
+function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   // C13's "at 19" line is added by `recommend()` to every card here that says
   // "complete" (`withAtNineteen`), from the adult card for this same patient
   // at 19 — never written into a card below (§B-AT19, 2026-10-31).
@@ -1983,6 +1985,18 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // enforce for numbers, applied to words.
   const words = pcvProductWords(pcv);
   const bridge = pcvInterchangeableBridge(words);
+  // P2-3 / R8 (2026-11-06). CDC's rows here are worded "at or after age 6", and
+  // the cards repeated that about a child whose baby series was before 6 with
+  // one conjugate on top: Ada, 8, four PCV13 as a baby, PCV15 at 7. A card says
+  // it only when the record bears it out. One reading of the record, here, and
+  // every sentence below asks it. Dated doses only, as `band` is: an undated dose
+  // says nothing either way, and rows 8/9 keep their standing treatment of it.
+  const someConjugateBefore6 = pcv.count - pcv.band.ge72 - pcv.band.undated > 0;
+  const somePpsv23Before6 = ppsv.effective.some(
+    (d) => d.date && ageAtDoseMonths(d, { dob, ageMonths: am }, today) < M.m72,
+  );
+  const conjugateAt6Words = someConjugateBefore6 ? '' : ' at/after age 6';
+  const historyAt6Words = someConjugateBefore6 || somePpsv23Before6 ? '' : ' at/after age 6';
   // RULING D (2026-10-23) — same-stream PCV→PCV gap (the 8-week rows below).
   // `anchorPneumo` on the next line deliberately does NOT move: it is a
   // CROSS-stream anchor, and ANCHOR-1 keys those on COUNTING doses in both
@@ -2326,12 +2340,20 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       //
       // CDC's Risk-based chip comes off: neither of its two prior-conjugate
       // branches reaches a conjugate first given at or after age 6.
+      // P2-3 / R8 (2026-11-06): the 576's sentence is about a child with no
+      // conjugate before 6. A child reaching here with one (a baby series, then
+      // a conjugate at 6 or later) has no row of her own, and "the conjugate
+      // before the PCV20" can be false about order too: four PCV20 as a baby, a
+      // PCV15 at 7. So the card says what the record shows. Same status, and
+      // nothing is owed either way.
       note = {
         lead: `At-risk child whose PCV series includes ${done} — no additional PCV or PPSV23 doses needed.`,
-        detail: `The conjugate on record before the ${done} was ${priorWords.phrase}, given at or after age 6 years. CDC's row for that history calls for exactly one dose of PCV20, and ${done === 'PCV20' ? 'that dose' : 'a PCV21'} has been given [c].${priorBridge.sentence}${pcv21Bridge}`,
+        detail: someConjugateBefore6
+          ? `This child's conjugate doses were given both before and after age 6, so no single CDC row describes the whole history. The series includes a ${done}, the dose CDC's row for a conjugate given from age 6 calls for [c].${pcv21Bridge}`
+          : `The conjugate on record before the ${done} was ${priorWords.phrase}, given at or after age 6 years. CDC's row for that history calls for exactly one dose of PCV20, and ${done === 'PCV20' ? 'that dose' : 'a PCV21'} has been given [c].${priorBridge.sentence}${pcv21Bridge}`,
       };
-      noteCites = [cite('pedsRiskPcv13At6'), ...priorBridge.cites];
-      cardRefs = collectRefs(riskIds, ['cdcChildPneumo', ...priorBridge.refKeys], 'child');
+      noteCites = [cite('pedsRiskPcv13At6'), ...(someConjugateBefore6 ? [] : priorBridge.cites)];
+      cardRefs = collectRefs(riskIds, ['cdcChildPneumo', ...(someConjugateBefore6 ? [] : priorBridge.refKeys)], 'child');
     }
     out.push(rec({
       vaccine: 'PCV', status: 'complete',
@@ -2990,7 +3012,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     if (!isIC) {
       out.push(rec({
         vaccine: 'PCV', status: 'complete',
-        doseLabel: `Complete (${words.label} + PPSV23 at/after age 6)`,
+        doseLabel: `Complete (${words.label} + PPSV23${historyAt6Words})`,
         // FINDING H, the 380. This said "PCV13" to 230 children whose dose was
         // a PCV15, 80 with a PCV15 plus a rejected same-day PCV20, and 70 whose
         // product was never recorded.
@@ -2998,7 +3020,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         // builds "Complete (PCV15 + PPSV23 at/after age 6)", which is complete
         // for life (Group C: the adult rows finish a PCV15 + PPSV23 history),
         // so it must not gain a "come back at 19" line.
-        note: `Non-immunocompromising at-risk child with ${words.label} at/after age 6 who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated [c].${bridge.sentence}`,
+        note: `Non-immunocompromising at-risk child with ${words.label}${conjugateAt6Words} who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated [c].${bridge.sentence}`,
         noteCites: [cite('pedsRiskDone'), ...bridge.cites],
         // C9 (2026-10-23) — OWNER DECISION, 840 cards: p2016 COMES OFF.
         //
@@ -3042,8 +3064,8 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     if (icTwoPpsv23Done) {
       out.push(rec({
         vaccine: 'PCV', status: 'complete',
-        doseLabel: `Complete (${words.label} + 2 PPSV23 at/after age 6)`,
-        note: `Immunocompromising at-risk child with ${words.label} at/after age 6 who has received both PPSV23 doses — complete. CDC's row for this history gives a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${bridge.sentence}${earlySecondPpsv23(ppsv)}`,
+        doseLabel: `Complete (${words.label} + 2 PPSV23${historyAt6Words})`,
+        note: `Immunocompromising at-risk child with ${words.label}${conjugateAt6Words} who has received both PPSV23 doses — complete. CDC's row for this history gives a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${bridge.sentence}${earlySecondPpsv23(ppsv)}`,
         noteCites: [cite('pedsIcPcv13AndPpsvAt6'), ...bridge.cites],
         refs: collectRefs(riskIds, ['cdcChildPneumo', ...bridge.refKeys], 'child'),
       }));
@@ -3085,7 +3107,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         // The IC twin of FINDING H, 228 of its 456 cards product-wrong. Found
         // by sweeping the whole class rather than the one card reported — the
         // spot-check was a sample.
-        detail: `This applies to an immunocompromising at-risk child whose conjugate ${pcv.count === 1 ? 'dose was' : 'doses were'} ${words.label}, given at or after age 6, and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23${whicheverProduct(icNoThirdPpsv23)}.${bridge.sentence}`,
+        detail: `This applies to an immunocompromising at-risk child whose conjugate ${pcv.count === 1 ? 'dose was' : 'doses were'} ${words.label}${someConjugateBefore6 ? '' : ', given at or after age 6,'} and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23${whicheverProduct(icNoThirdPpsv23)}.${bridge.sentence}`,
       },
       noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv13AndPpsvAt6'), ...bridge.cites],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', ...bridge.refKeys], 'child'),
@@ -3145,7 +3167,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       // product-agnostic phrase p2016's own Option A cell uses ("at least 8
       // weeks after most recent PCV dose"), so the anchor cannot name a product
       // the patient has not had either.
-      : `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with ${words.phrase} (at/after age 6): Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].${bridge.sentence}`,
+      : `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with ${words.phrase}${someConjugateBefore6 ? '' : ' (at/after age 6)'}: Option A — 1 dose of PCV20 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c].${bridge.sentence}`,
     // Population field (2026-10-17): the IC and non-IC lists print this row
     // with different wording, so each class quotes its own. `pedsRiskPcv13At6`
     // stays shared on purpose — that sentence IS identical in both lists, and
@@ -3499,8 +3521,14 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       doseLabel: 'Complete (PCV15 + PPSV23)',
       note: ppsvFirst
         ? `PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete [c]${jobAidCompleteMarker}.`
-        : `PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c]${jobAidCompleteMarker}.`,
-      noteCites: [cite(!ppsvFirst ? 'adultPcv15ThenPpsv' : isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'), ...jobAidCompleteCites],
+        // P2-7 (2026-11-06): one number per claim. CDC's Adult Notes give the
+        // sequence and never say "complete", so they sit on the sequence. The
+        // word "complete" takes the document that says it: the job aid at 50+,
+        // and at 19-49 the risk page, which has no 50+ section.
+        : 'PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].',
+      noteCites: ppsvFirst
+        ? [cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'), ...jobAidCompleteCites]
+        : [cite('adultPcv15ThenPpsv'), ...(isOlderAdult ? jobAidCompleteCites : [cite('adultPcv15PpsvComplete1949')])],
       refs: refsSeriesComplete,
     })];
   }
@@ -3993,7 +4021,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)'],
         note: {
-          lead: `Review the pneumococcal recommendations again at age 50 [c]. Alternatively, 1 dose of PCV20 or PCV21 may be given now, ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c] — that completes the series.`,
+          lead: `Review the pneumococcal recommendations again at age 50 [c]. Alternatively, 1 dose of PCV20 or PCV21 may be given ≥${LONG_GAP_WORDS} after the last pneumococcal dose [c] — that completes the series.`,
           detail: `This is an adult aged 19–49 with an immunocompromising condition, a cochlear implant or a CSF leak who has already received PCV13 and ${ppsv.count === 2 ? 'two' : ppsv.count} doses of PPSV23. ACIP states the review at 50 first and the further dose as the alternative; both are recommended options.`,
         },
         // One citation per claim. The review at 50 is stated only by ACIP's
@@ -4548,7 +4576,7 @@ export function recommend(input) {
       const nineteenth = addCalendarMonths(dob ?? today, dob ? ADULT_SCHED_MIN_M : ADULT_SCHED_MIN_M - am);
       const adultAt19 = recommend({ ...input, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
       const at19 = atNineteen(adultAt19.recs[0]);
-      recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today).map((r) => withAtNineteen(r, at19));
+      recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today, dob).map((r) => withAtNineteen(r, at19));
       noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
       if (noThird) recs = noThird.recs;
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
