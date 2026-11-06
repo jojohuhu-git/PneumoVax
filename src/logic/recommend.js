@@ -39,6 +39,7 @@ import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAY
 import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
+import { dropBlankDoseRows } from './doseIdentity.js';
 import { pcvNextDoseMinIntervalCell, intervalPhrase, pcvAgeAtTwelveMonthLine } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 import { ADULT_OWED_AFTER_INVALID_DOSE, fmtSince } from './doseIntervalRules.js';
@@ -59,7 +60,7 @@ import { ADULT_OWED_AFTER_INVALID_DOSE, fmtSince } from './doseIntervalRules.js'
 // regression-s6-3-no-dead-age-bands.test.js now fails on any unused entry or
 // any two entries holding the same number.
 const M = {
-  m7: 7, m12: 12, m24: 24, m60: 60, m72: 72,
+  m7: 7, m12: 12, m16: 16, m24: 24, m60: 60, m72: 72,
   y18: ADULT_SCHED_MIN_M, y50: ROUTINE_ADULT_MIN_M, y65: 780,
 };
 // The rules page (src/data/rulebook.js) prints these ages. It reads THIS
@@ -905,7 +906,9 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // routine age they had already passed. Wording only — this flag is used
   // nowhere but the note. Guard:
   // regression-2026-10-24-a-card-never-advises-an-age-already-passed.test.js
-  const routineAgePassed = routineAgeDate != null && routineAgeDate <= today;
+  // P2-8 (2026-11-06): strictly earlier. The day the routine age arrives is on
+  // time, not overdue: Mia, due the day she turned 4 months.
+  const routineAgePassed = routineAgeDate != null && routineAgeDate < today;
   const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
@@ -1004,8 +1007,14 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     : advisedCiteRaw;
   const advisedMark = advisedCite ? ' [c]' : '';
 
+  // P2-9 (OWNER 2026-11-06): "Catch-up" is for a baby who is behind. On time means
+  // the routine 4-dose series, with this dose's routine age not yet past, or the
+  // closing dose before 16 months (CDC's "12-15 months"). Same reading as the
+  // "overdue" wording, `routineAgePassed`, so the label and the note cannot differ.
+  const onSchedule = target === 4 && (routineAgeM != null ? !routineAgePassed : am < M.m16);
+
   return [rec({
-    vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
+    vaccine: 'PCV', status: prior === 0 ? 'due' : onSchedule ? 'routine' : 'catchup',
     ...pcvSeriesShape(pcv, am, target),
     doseLabel: `PCV dose ${doseNum} of ${target}`,
     dueToday: due,
@@ -1761,7 +1770,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
         // the job aid has a cell for this history. `noteCiteSlices` pairs
         // markers to cites by POSITION, so the count here and the array below
         // must move together.
-        lead: `Give 1 dose of PCV15 or PCV20, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c] [c]${jobAidKey ? ' [c]' : ''}.${ppsvHolds ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.holdDate)}.**` : ''}`,
+        lead: `Give 1 dose of PCV15 or PCV20${ppsv.noDoseOnRecord ? '' : `, ≥${PNEUMO_GAP_WORDS} after the most recent PCV`} [c] [c]${jobAidKey ? ' [c]' : ''}.${ppsvHolds ? ` **Held to ${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(ppsv.holdDate)}.**` : ''}`,
         detail: `This is the catch-up for a healthy child 24–59 months whose PCV schedule was not complete by 24 months. If PCV15 is used, a PPSV23 follow-up is NOT routine for a healthy child — PPSV23 here is risk-based only.${ppsvHolds ? ' The 8 weeks above is CDC\'s, measured in every source on this card from the most recent PCV. Measuring it from a PPSV23 as well is this app\'s own determination on the owner\'s instruction of 2026-10-29, so that a healthy child and an at-risk child with the same recent PPSV23 are not given different dates.' : ''}`,
       },
       // p2016 Table 2's row states this card's whole sentence — the single dose
@@ -2005,6 +2014,12 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   // `icPostPpsv23DueState`). First and last are different questions; this line
   // is the one that asks for the last.
   const anchorPneumo = mostRecent(mostRecent(pcv.lastDate, pcv.extraConjugate?.date), ppsv.holdDate);
+  // P2-10 (OWNER 2026-11-06): "this patient has no prior pneumococcal doses so why
+  // is the 8 week interval being mentioned". With nothing on record, a card has
+  // nothing to measure from. Undated and thrown-out doses are still doses, so
+  // this reads the record and not the counted doses: Kai's PPSV23s were thrown
+  // out, and his card keeps the interval.
+  const noPneumococcalDose = ppsv.noDoseOnRecord;
   // ── 2026-10-25: the 24-71-month catch-up card's 8 weeks ─────────────────
   //
   // CDC's at-risk catch-up row states TWO intervals and the card implemented
@@ -2602,7 +2617,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
           // "at least 8 weeks after the most recent dose AND administered at
           // least 8 weeks apart" -- and this lead printed only the second,
           // while the card's date was computed from neither.
-          lead: `Give 2 doses of PCV20 or PCV15, ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal dose and ≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
+          lead: `Give 2 doses of PCV20 or PCV15, ${noPneumococcalDose ? '' : `≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal dose and `}≥${PNEUMO_GAP_WORDS} apart [c] [c].`,
           detail: `This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. ${pcv15Then.text}`,
         },
       noteCites: [
@@ -3124,7 +3139,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
   const aState = dueState(anchorForA, WK8, today);
 
   out.push(rec({
-    vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
+    vaccine: 'PCV', status: 'risk-based', doseLabel: `Option A: 1 dose PCV20${noPneumococcalDose ? '' : ' (≥8 weeks)'}`,
     dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
     brands: ['PCV20 (Prevnar 20)'],
     // C9 (2026-10-23): p2016's Option A cell for rows 6/7 is this sentence, and
@@ -3133,7 +3148,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
     // unlike CDC's notes above, which word the two differently and get a key
     // each.
     note: noPriorPcv
-      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20 ≥8 weeks after the most recent pneumococcal vaccine [c] [c].`
+      ? `At-risk ${isIC ? 'immunocompromising' : 'non-immunocompromising'} child 6–18 years with no prior PCV: Option A — 1 dose of PCV20${noPneumococcalDose ? '' : ' ≥8 weeks after the most recent pneumococcal vaccine'} [c] [c].`
       // The 112 residue. "the most recent PCV13" is replaced by the
       // product-agnostic phrase p2016's own Option A cell uses ("at least 8
       // weeks after most recent PCV dose"), so the anchor cannot name a product
@@ -3169,7 +3184,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
       : { text: ` ${CATCHUP_IC_FIVE_YEAR_SENTENCE}`, cite: cite('pedsSecondPpsv5y') };
     // Option B: PCV15 then PPSV23 ≥8wk later (rows 6/7).
     out.push(rec({
-      vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option B-1: 1 dose PCV15 (≥8 weeks)',
+      vaccine: 'PCV', status: 'risk-based', doseLabel: `Option B-1: 1 dose PCV15${noPneumococcalDose ? '' : ' (≥8 weeks)'}`,
       dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
       brands: ['PCV15 (Vaxneuvance)'],
       note: {
@@ -3179,7 +3194,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         // one cell shown twice — the same shape as the five-year step's two
         // cards (2026-10-23) — so they must quote the SAME entry, which the
         // guard asserts for one patient rather than trusting the two call sites.
-        lead: `Option B — 1 dose of PCV15 ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine, then ≥${PNEUMO_GAP_WORDS} later 1 dose of PPSV23 if not previously given [c] [c].${icOptionB?.text ?? ''}`,
+        lead: `Option B — 1 dose of PCV15${noPneumococcalDose ? ',' : ` ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine,`} then ≥${PNEUMO_GAP_WORDS} later 1 dose of PPSV23${noPneumococcalDose ? '' : ' if not previously given'} [c] [c].${icOptionB?.text ?? ''}`,
         detail: 'Choose Option A or B, not both.',
       },
       noteCites: [
@@ -3194,7 +3209,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today) {
         vaccine: 'PPSV23', status: 'risk-based', doseLabel: 'Option B-2: PPSV23 (≥8 weeks after PCV15)',
         dueToday: false, earliestNextDate: null, minIntervalDays: WK8,
         brands: ['PPSV23 (Pneumovax 23)'],
-        note: `Second step of Option B: PPSV23 ≥${PNEUMO_GAP_WORDS} after the PCV15 dose [c] [c]. Only if PPSV23 was not previously given.${icOptionB?.text ?? ''}`,
+        note: `Second step of Option B: PPSV23 ≥${PNEUMO_GAP_WORDS} after the PCV15 dose [c] [c].${noPneumococcalDose ? '' : ' Only if PPSV23 was not previously given.'}${icOptionB?.text ?? ''}`,
         noteCites: [
           cite(isIC ? 'pedsIc6to18NoPcv' : 'pedsRisk6to18NoPcv'),
           cite('p2016NoPriorPcv6to18OptionB'),
@@ -4420,6 +4435,9 @@ export function recommend(input) {
   pcv.extraConjugate = pcvAnalysis.extraConjugate;
   const ppsv = {
     count: effectivePpsv.length,
+    // P2-10: nothing on the record at all, counted or not. An untouched row in
+    // the form is not a dose (`dropBlankDoseRows`).
+    noDoseOnRecord: dropBlankDoseRows(rawPcv).length === 0 && dropBlankDoseRows(rawPpsv).length === 0,
     // C13 (2026-10-30): PPSV23 doses RECEIVED, an extra dose included — the
     // count the ADULT rows read ("PCV13 and 2 doses of PPSV23"). Never use it
     // for a child's own series; that is `count`.
