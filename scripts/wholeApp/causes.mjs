@@ -42,6 +42,10 @@ export const CAUSES = {
     class: 'ruling',
     title: "A child's extra PPSV23 is counted once the patient is an adult (§C-P2-ONTIME: adult rows count every PPSV23 received)",
   },
+  'D5-extra-pcv15-counts-at-19': {
+    class: 'ruling',
+    title: "A child's extra PCV15 is counted once the patient is an adult (§C-P1-3: adult rows count every dose received)",
+  },
   'D3-ppsv23-held-5-years-after-thrown-out': {
     class: 'ruling',
     title: 'Option A due now, Option B PPSV23 held 5 years after a thrown-out PPSV23 (§C-P2-FIVE)',
@@ -84,10 +88,14 @@ export function causeOf(check, kind, group) {
     if (kind === 'due-today-turns-to-complete-at-19') return 'D4-dose-due-before-19-stays-a-childs';
     if (kind === 'recorded-dose-changed-at-line' && /^228m: ppsv23 dose \d: (extraDose true → null|effectiveDoseNum null → \d)/.test(group)) return 'D2-extra-dose-counts-at-19';
   }
+  if (check === 6 && kind === 'recorded-dose-changed-at-line' && /^228m: pcv dose \d: (extraDose true → null|effectiveDoseNum null → \d)/.test(group)) {
+    return 'D5-extra-pcv15-counts-at-19';
+  }
   if (check === 7) {
     // Narrow on purpose: only the one-way move the ruling describes, "extra" to
     // "counted". A dose going the other way would be a new fault.
     if (kind === 'recorded-dose-verdict-changed' && /^ppsv23 (extraDose: true → -|effectiveDoseNum: - → \d) \(crossing 19\)/.test(group)) return 'D2-extra-dose-counts-at-19';
+    if (kind === 'recorded-dose-verdict-changed' && /^pcv (extraDose: true → -|effectiveDoseNum: - → \d) \(crossing 19\)/.test(group)) return 'D5-extra-pcv15-counts-at-19';
     if (kind === 'advised-date-moved' && /^Option B-2/.test(group)) return 'R4-thrown-out-ppsv23-chip';
     if (/crossed 7m/.test(group)) return 'R3-date-crosses-7-months';
   }

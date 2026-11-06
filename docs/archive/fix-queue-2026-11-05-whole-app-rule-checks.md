@@ -143,4 +143,5 @@ moves. R5 went from 832 patients to 0. `CLINICAL_SPEC.md` §C-COMPLETE. What fol
 - **Cause:** in `validate.js`, `priorCompletingDose` is `!isAdultDose ? null : ...`. The check for a dose given after the series was finished runs for adults only. Children have the PPSV23 version (§C-P2) but no conjugate version. None of the seven whole-app checks asks "was this dose on offer?"
 - **Size, measured 2026-11-06:** 31,584 of 43,324 patients whose last PCV was given between age 7 and 18 got a dose no card offered, and it reads plain "valid". The count needs splitting into clinical families before any ruling.
 - **Not a fault:** the same child with no PCV at all before the PCV15. CDC's row offers PCV15 and the app's Option B-1 names it.
-- **Waits on:** her decision. It would move dose verdicts.
+- **Noor's own family: DONE 2026-11-06, ruling "Yes, flag it extra".** 3,442 patients, PCV15 now Extra dose, 8-week wait kept (`CLINICAL_SPEC.md` §C-P1-3). 0 of 3,442 had a card offering PCV15.
+- **Still open, not ruled on:** every other unasked-for conjugate, grouped by clinical family before asking: no PPSV23 yet (PCV20 or PPSV23 on offer), a child called complete, a healthy child. Keep the count pinned in the guard so a wider rule fails until she rules.
