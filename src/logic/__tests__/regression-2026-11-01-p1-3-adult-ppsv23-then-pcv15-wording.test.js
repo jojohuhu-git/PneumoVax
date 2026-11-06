@@ -60,8 +60,9 @@ describe('P1-3: an adult who had PPSV23 first is told so, with the row she follo
 
   it('CONTROL: PCV15 first, PPSV23 after — wording and source unchanged', () => {
     const r = card(PCV15_FIRST);
-    expect(r.note).toBe('PCV15 followed by PPSV23 is a complete pneumococcal series — no further doses needed [c].');
-    expect(keys(r)).toEqual(['adultPcv15ThenPpsv']);
+    // P2-7 (2026-11-06): the word "complete" now cites the sentence that says it.
+    expect(r.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].');
+    expect(keys(r)).toEqual(['adultPcv15ThenPpsv', 'adultPcv15PpsvComplete1949']);
   });
 
   it('a PCV13 in the history too: not "only PPSV23", so the old row stays', () => {

@@ -1493,6 +1493,23 @@ at-19 line reading a future adult card behaves as before. Guard:
 
 Peds intervals are **≥8 weeks** throughout Table 4 for ≥24mo — with ONE exception, below.
 
+### §C-AGE6-WORDS — a card says "at or after age 6" only when the dates do (P2-3, 2026-11-06)
+
+CDC's rows are worded "at or after age 6", and the cards repeated that about children whose baby
+series came before 6, with one conjugate on top. Ada, 8, cochlear implant, four PCV13 as a baby,
+PPSV23 at 2, PCV15 at 7, read *"Complete (PCV13 and PCV15 + PPSV23 at/after age 6)"*. The words now
+appear only when no dated dose they describe was given before 6: `someConjugateBefore6` and
+`somePpsv23Before6` in `pcvRiskChild()`. No dose, status or date moves. 19,910 hand-built cards to
+0, 0 of 17,016 and 0 of 18,264 grid patients, because the grid has no such child.
+
+**Decided without asking (dose unchanged, her 2026-10-18 rule).** A child with a PCV20 in the series
+and conjugates either side of 6 now reads *"This child's conjugate doses were given both before and
+after age 6, so no single CDC row describes the whole history."*
+
+**Left as it is, and why.** These cards still cite the row they cited before. Most of these children
+had a conjugate nobody asked for, which is the open half of P1-3, and her ruling there may send them
+to the before-6 row. An undated dose is unchanged too: it says nothing either way.
+
 ### §D-note — FINDING A: an IC child who has ALREADY had a PPSV23 waits five years
 
 **OWNER DECISION 2026-10-17. Implemented; four branches of `recommend.js`.**
@@ -1681,6 +1698,13 @@ The 8 weeks is the **advice** here, not an option, so the "may be considered" se
 "If PCV15 is used, **administer** a single dose of PPSV23 **≥8 weeks** after the PCV15
 dose." The job aid prints the same ≥8 weeks on p.2 (immunocompromising) and p.3 (cochlear
 implant / CSF leak), and ≥1 year on p.4 (chronic). See §K's S15 bullet.
+
+**"Complete" after PCV15 then PPSV23 (P2-7, 2026-11-06).** The word cites the sentence that
+says it. At 19–49 that is CDC's risk page, read live 2026-11-06 (updated May 8, 2026): *"Their
+pneumococcal vaccinations are then complete."* That page has no 50+ section, so at 50+ the
+Adult Timing Job Aid keeps the claim (*"No vaccines recommended; schedule is complete."*). CDC's
+Adult Notes stay on the card for the sequence only: their quote gives the interval and never
+says complete. `adultPcv15PpsvComplete1949`. No dose moves.
 
 Other 19–49 rows, which are **NOT** keyed on risk class and did not move:
 - **PPSV23 only:** PCV15/20/21 **≥1 year** after PPSV23, every class.

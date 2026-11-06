@@ -30,7 +30,9 @@ for (const p of allPatients()) {
     const text = cardText(c);
     if (SAYS_AFTER_SIX.test(text)) {
       const pcvEarly = counted('pcv').some((d) => d.date < six);
-      const ppsvEarly = counted('ppsv23').some((d) => d.date < six);
+      // Only the label's "+ PPSV23 at/after age 6" is a claim about the PPSV23.
+      // "conjugate ... given at or after age 6" stays true beside an early PPSV23.
+      const ppsvEarly = /PPSV23 at\/after age 6/.test(text) && counted('ppsv23').some((d) => d.date < six);
       if (pcvEarly || ppsvEarly) add(`W1 ${pcvEarly ? 'a conjugate' : 'the PPSV23'} before 6 | ${c.doseLabel}`, p);
     }
     if (/may be given now/.test(text) && !c.dueToday && c.earliestNextDate) add(`W2 ${c.doseLabel}`, p);

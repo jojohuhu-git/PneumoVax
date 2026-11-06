@@ -167,7 +167,7 @@ describe('statements #1 and #4 — "the series is complete", cited at 50+ only',
       pcvDoses: [{ date: '2022-01-10', product: 'PCV15' }],
       ppsv23Doses: [{ date: '2023-06-10' }],
     }),
-    'PCV15 followed by PPSV23 is a complete',
+    'PCV15 followed by PPSV23 [c] is a complete',
   );
 
   it('at 50+ the card quotes page 1, which says exactly that', () => {

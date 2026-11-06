@@ -462,9 +462,12 @@ describe('the guard — swept over every patient the grid can build', () => {
     // whose next dose falls at 19 or later is shown the ADULT card, so that
     // card's own citations come with it, each declared. Three are new here.
     //   adultPcv15ThenPpsv, mmwrIc1949OnePpsv, mmwrPpsvOnlyThenPcv
+    // P2-7 (2026-11-06): the same adult card now cites the sentence that says
+    // "complete", so Tess's adult card brings it too.
+    //   adultPcv15PpsvComplete1949
     expect([...seen.keys()].sort()).toEqual([
       'adultBothNotAt65', 'adultChronicOnlyReviewAt50', 'adultIc1949BothPcv13Ppsv',
-      'adultPcv15ThenPpsv', 'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList',
+      'adultPcv15PpsvComplete1949', 'adultPcv15ThenPpsv', 'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList',
       'cdcChildSpecialSituations', 'immPCV7', 'mmwrIc1949OnePpsv', 'mmwrIc1949TwoPpsv',
       'mmwrPpsvOnlyThenPcv',
     ]);
