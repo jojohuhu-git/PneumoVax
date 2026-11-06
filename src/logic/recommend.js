@@ -918,7 +918,19 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
   // ladder picked `t1row` from this child's actual history, so its history
   // columns fit her by construction — which is what the column-fit rule asks.
-  const spacingDate = anchor && t1row ? addDays(anchor, RECOMMENDED_SPACING_DAYS) : null;
+  //
+  // P2-2 / R3 (OWNER RULING 2026-11-06, CLINICAL_SPEC.md §L-2): the row is the
+  // one for the age at the DOSE, not the age at the visit. Remy, PCV20 at 6 and
+  // 6.9 months: on the visit day she is under 7 months and no row applied, so
+  // the card said the 4-week minimum, and on that date the same card said 8 weeks.
+  // She chose "advise Jan 29, say Jan 1 counts". `minDate` is untouched (Ruling C).
+  // Three or more before 7 months owes only the 12-15-month dose, so no row here.
+  const sevenMonthDate = dob ? addCalendarMonths(dob, M.m7) : addCalendarMonths(today, Math.max(0, M.m7 - am));
+  const dateBeforeSpacing = [minDate, routineAgeDate].filter(Boolean).sort().at(-1) ?? null;
+  const doseFallsInto7to11 = rowAm < M.m7 && before7 >= 1 && before7 <= 2
+    && dateBeforeSpacing != null && dateBeforeSpacing >= sevenMonthDate;
+  const spacingRow = t1row ?? (doseFallsInto7to11 ? 'p2016Table1_7to11_oneOrTwoBefore7' : null);
+  const spacingDate = anchor && spacingRow ? addDays(anchor, RECOMMENDED_SPACING_DAYS) : null;
   // The advised date is the LATEST of the three — and that single `max` IS the
   // answer to the open design question the owner agreed was real: a child
   // genuinely behind (first dose at 9 months) has no routine date left, so the
@@ -970,7 +982,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
   // a document could speak for.
   const advisedCiteRaw = !anchor ? null
     : advisedReason === 'routineAge' ? 'pedsRoutine4Dose'
-      : advisedReason === 'spacing' ? t1row
+      : advisedReason === 'spacing' ? spacingRow
         : minCell;
   // The lead's one marker, named here so the detail can avoid repeating it.
   const leadCite = target > 4
