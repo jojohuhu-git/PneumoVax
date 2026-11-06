@@ -191,7 +191,7 @@ describe('FINDING F — over the whole grid', () => {
       // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
       // counting conjugate and her card family changes with it. The invariant
       // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-      expect(stats.ppsvOnly).toBe(1154 - 132 + 40);
+      expect(stats.ppsvOnly).toBe(1154 - 132 + 40 + 36); // +36: R2, a child shown the adult card, §B-AT19
     // -110: the shared-decision cards whose PCV20 now counts.
     // +/-132, 2026-10-31 (§H-ANY65, owner ruling "Pat, 70"): a 70-year-old with a
     // PPSV23 before 65 AND one at 65 now reads the shared-decision card, as CDC
@@ -213,7 +213,7 @@ describe('FINDING F — over the whole grid', () => {
       // +10, 2026-11-01 (§K-THROWNOUTTIMING): ten 19-year-olds whose childhood
       // PPSV23 after a PCV15 did not count now read "PCV20 or PCV21 in place of
       // the PPSV23", which quotes mm7401a1's footnote * - and credits it.
-      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10);
+      expect(stats.listing).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10 + 150); // +150: R2, §B-AT19
     expect(stats.uncredited).toBe(0);
   });
 });

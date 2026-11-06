@@ -353,7 +353,7 @@ describe('swept over every patient the grid can build', () => {
       // card quotes mm7401a1's footnote * ("may be used if PPSV23 is not
       // available"). The document speaks for the new card; the old one quoted
       // none of its sentences. Zero uncredited is unchanged.
-      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10);
+      expect(mmwrCards).toBe(2564 + 1154 + 440 - 363 - 132 + 30 + 10 + 150); // +150: R2, §B-AT19
   });
 
   it("the job aid is on 3,869 — 3,616 after document 2, plus Ruling F's 253", () => {

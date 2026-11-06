@@ -381,7 +381,11 @@ export function ageLineCheck(tally, patient, expected) {
     const allowed = expected(ageMonths, d, patient);
     // A dose dated this very day moves across the line WITH the date of birth,
     // so its age at the dose really did change: that is the rule working.
-    const kind = askTurnsToComplete(ageMonths, d) ? 'ask-turns-to-complete-at-19'
+    // R2's ruling covers a date ON or AFTER the 19th birthday. A dose already due
+    // the day before stays a child's dose, so it is named apart: a card that is
+    // merely DATED and still turns to Complete is the fault itself, and stays red.
+    const dueNow = (seen[0].recs ?? []).some((r) => r.dueToday);
+    const kind = askTurnsToComplete(ageMonths, d) ? `${dueNow ? 'due-today' : 'ask'}-turns-to-complete-at-19`
       : allowed || (aboutADose && newestDose === today) ? 'line-changes-what-the-rule-says'
         : aboutADose ? 'recorded-dose-changed-at-line' : 'line-changes-something-else';
     tally.add(6, kind, `${ageMonths}m: ${plain(d)}`, { today });

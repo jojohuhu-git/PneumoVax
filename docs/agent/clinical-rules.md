@@ -105,6 +105,12 @@ NEVER counts. Records as `noncounting`, dropped from effective series. High-risk
 ### PCV15
 Requires a PPSV23 follow-up to complete the series (encoded as `requiresPPSV23: true` in `brands.js`).
 
+## A Child's Next Dose Falling At 19 Or Later
+
+The adult rules answer, shown from today (owner rulings 2026-11-05, `CLINICAL_SPEC.md` §B-AT19).
+`adultAnswerPastNineteen()` shows the adult card for the same patient on the 19th birthday. A dose
+that can be given before 19 stays on the child's rules.
+
 ## Adult PCV15 → PPSV23 Interval — ≥8 Weeks at 19–49 for IC / Cochlear / CSF
 
 **Rewritten 2026-10-16 (S15), owner decision.** This section has now been wrong twice, in

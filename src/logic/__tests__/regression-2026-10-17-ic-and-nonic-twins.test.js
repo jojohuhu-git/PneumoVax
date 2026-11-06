@@ -159,6 +159,9 @@ describe('PART B — the asymmetry itself, as the sources state it', () => {
       const countingPcv20 = (t.ic.recs ?? []).length
         && t.base.pcvDoses.some((d) => d.product === 'PCV20' || d.product === 'PCV21');
       if (countingPcv20) continue;       // Table 4: a PCV20 completes either class
+      // R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19): the 5 years
+      // end after 19, and the adult schedule calls PCV15 + PPSV23 complete.
+      if ((t.ic.recs ?? []).some((r) => r.doseLabel.startsWith('Complete at 19'))) continue;
       examined++;
       if (finished(t.ic)) breaches.push(t.label);
     }

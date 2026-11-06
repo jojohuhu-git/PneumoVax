@@ -57,6 +57,9 @@ a first screen), and only one of the four places could ever disagree.
 
 ### P1-1 — R2, OWNER: a child's card gives a date after the 19th birthday
 
+**DONE 2026-11-05 on `fix/p1-1-r2-adult-rules-win-past-19`.** She chose the adult rules, for Tess,
+Rafi and Cal. 1,358 patients to 0. `CLINICAL_SPEC.md` §B-AT19. What follows is the history.
+
 **Count changed 2026-11-05:** 1,358 patients now, not 1,871. P0-1 removed 513: children sent down
 the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are unaffected.
 
@@ -116,6 +119,14 @@ the "due today" PPSV23, thrown out, and held past 19. Tess, Rafi and Cal are una
   asked on 2026-10-31 not to bring very unlikely histories to her.
 - **Recommend parking** with a one-line note in the report. If taken up, the adult path in
   `recommend()` does not call `holdPpsv23AfterThrownOut()`; the child path does.
+
+### P2-7 — NEW, found live on Tess: the word "complete" cites the wrong sentence
+
+- **Now:** "PCV15 followed by PPSV23 is a complete pneumococcal series" cites `adultPcv15ThenPpsv`,
+  CDC Adult Notes, whose quote is the interval and never says "complete". This predates R2.
+- **Fix:** CDC's risk page says it, read live 2026-11-05: *"Their pneumococcal vaccinations are then
+  complete."* Add that entry and cite it. Dose unchanged, so her 2026-10-18 rule lets this be decided
+  without asking. Read the document first (FINDING F), and watch the citation count pins.
 
 ### P2-6 — R7: recommend no change
 

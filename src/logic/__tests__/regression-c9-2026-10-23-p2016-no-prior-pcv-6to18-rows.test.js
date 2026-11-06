@@ -145,8 +145,10 @@ describe('every no-prior-PCV 6-18 card in the grid is balanced and credited', ()
     // block is the NO-PRIOR-PCV one, so it grows for exactly the right reason —
     // a child whose only conjugate was set aside has no prior PCV any more.
     // CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(counts.optionA).toBe(592);
-    expect(counts.optionB).toBe(592);
+    // -24 on each, R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19):
+    // an 18-year-old whose 8 weeks end after 19 reads the adult card.
+    expect(counts.optionA).toBe(568);
+    expect(counts.optionB).toBe(568);
     expect(counts.ppsvStep).toBe(96);
     expect(unbalanced.slice(0, 5)).toEqual([]);
     expect(uncredited.slice(0, 5)).toEqual([]);

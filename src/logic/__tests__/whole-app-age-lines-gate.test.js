@@ -11,8 +11,9 @@
 //   • check 6: at every age line, ON the line matches just inside it, nothing
 //     changes that the line's rule does not cover, and every line still acts.
 //
-// The one known part of check 6 left out is `ask-turns-to-complete-at-19`
-// (report, R2). It is filtered by name, so anything new still fails here.
+// Since R2 (2026-11-05) a DATED card turning to "Complete" at 19 fails here. The
+// one part left out by name is a dose already due before 19, which the ruling
+// leaves on the child's rules (`due-today-turns-to-complete-at-19`).
 // Check 4 has its own file, `whole-app-options-agree-gate.test.js`.
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
@@ -93,7 +94,7 @@ describe('check 6: age lines', () => {
   const allowedKinds = new Set([
     'line-changes-what-the-rule-says',
     'dose-line-changes-what-the-rule-says',
-    'ask-turns-to-complete-at-19',         // report R2: out until its fix lands
+    'due-today-turns-to-complete-at-19',   // §B-AT19 2026-11-05: due before 19 stays a child's dose
   ]);
   const sortedAsRuling = (r) => r.cause === 'D2-extra-dose-counts-at-19';
 

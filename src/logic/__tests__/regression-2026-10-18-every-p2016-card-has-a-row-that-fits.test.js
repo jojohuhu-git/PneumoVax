@@ -229,7 +229,9 @@ describe("every card citing p2016 has a p2016 row whose columns all fit", () => 
     // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
     // counting conjugate and her card family changes with it. The invariant
     // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(carrying).toBe(3403 + 128);
+    // -48, R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19):
+    // those children now read the adult card, which does not carry p2016.
+    expect(carrying).toBe(3403 + 128 - 48);
     expect([...noRowFits.entries()].slice(0, 8)).toEqual([]);
     expect([...noRowFits.values()].reduce((a, b) => a + b, 0)).toBe(0);
   });
