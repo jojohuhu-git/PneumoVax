@@ -15,6 +15,7 @@ const STATUS_LABELS = {
   'risk-based':       'Risk-Based',
   'shared-decision':  'Optional (shared decision)',
   'complete':         'Complete',
+  'no-dose-now':      'No dose now',
   'not-indicated':    'Not indicated',
   'deferred':         'Deferred',
 };
@@ -277,6 +278,8 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
     noteCites,
     citations,
   });
+  // `no-dose-now` is left out on purpose: it names a later dose, which must show
+  // without a click (OWNER RULING 2026-11-06, CLINICAL_SPEC.md §C-COMPLETE).
   const isNeutral = status === 'complete' || status === 'not-indicated' || status === 'deferred';
   const isShared = status === 'shared-decision';
   // PD2/D5: neutral cards (nothing to do) collapse to a compact row so due

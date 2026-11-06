@@ -99,7 +99,7 @@ const SCEN = {
 };
 
 function appView(out) {
-  const live = out.recs.filter((r) => !['complete', 'not-indicated'].includes(r.status));
+  const live = out.recs.filter((r) => !['complete', 'no-dose-now', 'not-indicated'].includes(r.status));
   if (!live.length) return { cat: 'NONE', labels: out.recs.map((r) => r.status + ': ' + r.doseLabel).join(' || ') };
   const r = live[0];
   const text = live.map((x) => x.doseLabel + ' ' + (x.brands || []).join(',')).join(' || ');

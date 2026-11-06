@@ -62,7 +62,7 @@ const run = (p) => recommend({ today: TODAY, ...p });
 const chipsOf = (o) => [...o.perDose.pcv, ...o.perDose.ppsv23];
 const textOf = (d) => (d.reasons ?? []).join(' ');
 const FORWARD = 'can be given from';
-const ASKS_FOR_NOTHING = new Set(['complete', 'not-indicated']);
+const ASKS_FOR_NOTHING = new Set(['complete', 'no-dose-now', 'not-indicated']);
 
 describe('her worked child, and the sentence she should see', () => {
   it('a 5-year-old with asplenia whose PCV20 series covers her is promised nothing', () => {
