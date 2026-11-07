@@ -222,6 +222,11 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null,
 // the sentences it supports. After the fold most open cards show no number in view,
 // and a row of buttons with no number to match is the question she asked on
 // 2026-10-17. So a card with sources always has the toggle, even with no detail.
+//
+// OWNER DECISION 2026-11-07 ("Call it Sources"): with no detail the toggle holds
+// only the Sources row, and "Why this" opened to nothing she could read as a
+// reason (Ava; 5,676 of 17,017 grid cards). So it is labelled "Sources" then,
+// and the row drops its own "Sources" heading rather than repeat the word.
 function RecNote({ note, noteCites, numberFor, sources = [] }) {
   const [open, setOpen] = useState(false);
   const lead = typeof note === 'string' ? note : note?.lead;
@@ -248,7 +253,7 @@ function RecNote({ note, noteCites, numberFor, sources = [] }) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
           >
-            Why this<Chevron open={open} />
+            {detail ? 'Why this' : 'Sources'}<Chevron open={open} />
           </button>
           {open && detail && (
             <div className="rec-note-detail">
@@ -259,7 +264,7 @@ function RecNote({ note, noteCites, numberFor, sources = [] }) {
               so a `[2]` in a sentence names the button marked [2]. */}
           {open && sources.length > 0 && (
             <div className="rec-citations">
-              <span className="rec-citations-heading">Sources</span>
+              {detail && <span className="rec-citations-heading">Sources</span>}
               {sources.map((src) => (
                 <a key={src.url} href={src.url} target="_blank" rel="noopener noreferrer"
                   className="citation-chip" title={src.title}>

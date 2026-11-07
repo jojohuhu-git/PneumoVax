@@ -3858,6 +3858,15 @@ card" had been behind the click since it was written.
 child with no immunocompromising condition, a third PPSV23, and Noor's PCV15. Showing PCV7's line once
 under a run of PCV7 doses is the report's rewrite 3; each dose keeps its "Not counted" chip.
 
+**"Sources" when there is no reason to show (owner, 2026-11-07, *"Call it Sources"*).** Because the
+Sources row moved inside "Why this", a card with no explanation sentence still had the toggle, and it
+opened to source buttons alone. On Ava's card (3, healthy, four PCV20) she said *"there is nothing under
+why this"*. Measured over the grid: 5,676 of 17,017 cards were like it. Asked, she chose: the toggle reads
+**"Sources"** when the card has no explanation sentence, and **"Why this"** when it has one; the row drops
+its own "Sources" heading when the button already says it. Layout only, in `RecCard.jsx`'s `RecNote`; no
+sentence, citation or verdict moves. The dose chip's own "Why this" appears only with an explanation, so it
+is unchanged. Guard: `regression-2026-11-07-sources-only-toggle-says-sources.test.jsx`.
+
 ### §L-2, 2026-11-06 — "Routine", and no interval before a first dose (P2-9, P2-10, OWNER)
 
 **"Routine" when on time.** Mia, 4 months, PCV20 on time at 2 months, read "Catch-up", as every baby
