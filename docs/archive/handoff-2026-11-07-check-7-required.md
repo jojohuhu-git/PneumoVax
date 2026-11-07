@@ -1,5 +1,8 @@
 # PneumoVax — Handoff after making check 7 a required test (2026-11-07)
 
+> **SUPERSEDED 2026-11-07** by `handoff-2026-11-07-check-5-required.md`. Check 7 merged as #131;
+> check 5, the next item below, is done in #133. Resume from the newer file.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
 Its promise: never guess, and every clinical line rests on a document that says it. Read `CLAUDE.md` first.
 
