@@ -14,7 +14,7 @@
 // Since R2 (2026-11-05) a DATED card turning to "Complete" at 19 fails here. The
 // one part left out by name is a dose already due before 19, which the ruling
 // leaves on the child's rules (`due-today-turns-to-complete-at-19`).
-// Check 4 has its own file, `whole-app-options-agree-gate.test.js`.
+// Checks 1 and 4 have their own file, `whole-app-forward-checks-gate.test.js`.
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 import { buildCases, buildTypicalCases, GRID_TYPICAL_CHILD_AGES_MONTHS } from '../../test-grid.js';

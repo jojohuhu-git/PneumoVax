@@ -132,6 +132,8 @@ not put to her. `CLINICAL_SPEC.md` §B-OPTIONB19.
 
 ### P2-5 — R4: recommend parking
 
+**Check 1 became a required test the same day** (`whole-app-forward-checks-gate.test.js`).
+
 **RULED 2026-11-07, not parked.** Shown Sam (19, PCV and PPSV23 the same day at 18), she asked twice why
 the wait was 1 year and not 5, then chose "PCV20 or PCV21 only", as for Leah and Ivy. 10 of 17,016
 verdicts moved. Check 1 ("advice is accepted") went to 0 patients. What still sorts as R4 (57 grid, 60
