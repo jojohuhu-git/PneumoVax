@@ -1226,6 +1226,43 @@ after a PCV (the grid's form of "too soon"). **0 / 18,264** record-problem rows.
 dated chip; 32 keep one on a thrown-out PCV dose. Guard:
 `regression-2026-10-31-one-ppsv23-too-soon-pcv20-only.test.js`.
 
+### §C-P2-ONE-ADULT — one childhood PPSV23 thrown out, the patient now an adult: PCV20 or PCV21 only (owner, 2026-11-07, "Sam")
+
+P2-5 / R4 of the 2026-11-05 whole-app checks. **Sam, 19, alcohol use disorder.** At 18 he got
+a PCV (product not recorded) and a PPSV23 on the same day, Oct 11, 2025; the PPSV23 does not
+count (`CHILD-PPSV23-AFTER-PCV`). The adult card offered PCV15, PCV20 or PCV21, and after a
+PCV15 advised a PPSV23 a year later — his second PPSV23 shot — while the line under the 2025
+dose read *"Next dose from Oct 11, 2030 at the earliest"* and the later PPSV23 then read *"5
+years advised"*: the app faulting a dose it had advised (whole-app check 1).
+
+**Her questions first**, both about the gap: *"why was PPSV23 given 2 years later"*, then *"why
+was PPSV23 given 1 year after the last PPSV23 instead of 5 years"*. The answer given: CDC's 5
+years runs between two PPSV23 doses that both count; the 2025 dose did not, so the adult rules
+treat him as never having had one, and give PCV15 → PPSV23 at ≥1 year. No CDC document says
+whether a thrown-out PPSV23 starts the 5-year clock. She was then shown her own rulings on the
+same question — **Leah** (§C-P2-ONE, a child, one shot thrown out for coming too soon after a
+PCV: *"PCV20 only"*, because a second polysaccharide shot gives a weaker response) and **Ivy at
+20** (§C-P2-NOTHIRD for adults, two thrown-out childhood shots: *"PCV20/21 only"*) — and that
+Sam had been left out of both on purpose. She chose **"PCV20 or PCV21 only"**.
+
+**Built:** `noThirdPpsv23()` lets Leah's one-shot case (`oneTooSoon`) reach the two adult cards
+Ivy's ruling already rebuilds — the no-history card (*"Give 1 dose of PCV20 or PCV21; either
+completes the series alone. No further PPSV23: 1 PPSV23 dose has been given and it did not
+count."*, and under Why this *"PCV15 is not offered: after it a PPSV23 would be owed ≥1 year
+later — a second PPSV23 shot"*), and, for an adult who already had the PCV15, PCV20 or PCV21 in
+the PPSV23's place at its timing (Ivy's "Use PPSV23's timing"). The line under the 2025 dose
+becomes *"Same day as PCV; minimum interval 8 weeks. Not repeated."*
+
+**Scope — the patient she worked:** ONE childhood PPSV23 thrown out by `CHILD-PPSV23-AFTER-PCV`,
+the patient now 19 or older. Not covered, pinned unchanged: an adult whose single childhood
+PPSV23 was thrown out for another reason (given under age 2) — still offered PCV15.
+
+**Measured:** **10 / 17,016** verdicts moved, all 19-year-olds with an unrecorded PCV and a
+PPSV23 on the same day at 18, one per qualifying risk tick; in each the only change is PCV15
+leaving the card. **0 / 18,264** record-problem rows. The 2026-10-25 sweep's `kept` fell 1735 →
+1725 (those 10 chips lost "Next dose from …"). Guard:
+`regression-2026-11-07-sam-one-thrown-out-ppsv23-adult.test.js`.
+
 ### §C-P2-LATER — a thrown-out PPSV23 that was repeated points to the repeat (owner, 2026-10-31)
 
 Sam's first PPSV23 (23 months, too young) read *"repeat this dose only (do not restart the

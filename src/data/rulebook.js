@@ -595,6 +595,10 @@ const P = {
   pcv15ThenBad19: ex('19-year-old with diabetes, PCV15 on Sep 1, 2026 and PPSV23 19 days later (invalid)',
     { dob: '2007-10-01', riskIds: ['diabetes'], pcvDoses: doses('PCV15', ['2026-09-01']), ppsv23Doses: doses('PPSV23', ['2026-09-20']) },
     { cards: [new RegExp(`PCV20 or PCV21\\) ≥${Y1} after the PPSV23`)], noCards: [/^PPSV23/], due: '2027-09-20' }),
+  // Owner, 2026-11-07 (Sam, §C-P2-ONE-ADULT): Leah's one-shot ruling, at 19.
+  samAt19: ex('19-year-old with alcohol use disorder, a PCV and a PPSV23 on the same day at 18 (PPSV23 invalid)',
+    { dob: '2007-06-01', riskIds: ['alcoholism'], pcvDoses: [{ product: '', date: '2025-08-01' }], ppsv23Doses: doses('PPSV23', ['2025-08-01']) },
+    { cards: [/^1 dose PCV \(PCV20 or PCV21\)$/], noCards: [/PCV15/, /^PPSV23/] }),
   complete55: ex('Healthy 55-year-old, PCV15 at 52 and PPSV23 at 53',
     { ageMonths: 660, riskIds: [], pcvDoses: doses('PCV15', ['2023-11-01']), ppsv23Doses: doses('PPSV23', ['2024-12-01']) },
     { status: 'complete' }),
@@ -737,7 +741,7 @@ export const DECISIONS = [
     problem: `A PPSV23 did not count: the first was given <${W8} after a PCV, or two PPSV23 doses on the record both did not count. Giving PPSV23 again adds another PPSV23 dose, and each additional PPSV23 dose produces a weaker immune response to some serotypes.`,
     cdc: 'Offer PPSV23 at this step, as for a patient who has not had one. They do not say what to give when a PPSV23 already on the record did not count.',
     does: 'Gives PCV20 instead (adults: PCV20 or PCV21). Does not offer PPSV23, or PCV15, because PCV15 would need a PPSV23 after it.',
-    ex: [P.leah, P.sam, P.pcv15ThenBad19],
+    ex: [P.leah, P.samAt19, P.sam, P.pcv15ThenBad19],
   },
   {
     key: 'invalidPpsvTiming',
@@ -1127,7 +1131,7 @@ export const INVALID_ACTIONS = {
   rows: [
     { dose: 'PCV', action: 'Give the next dose in the series at the minimum interval above, counted from the date of the invalid dose.', ex: [P.infantShort] },
     { dose: `PPSV23 given before ${yrs(AGE.m24)}`, action: `Give PCV20 (advised ≥${W8} after the invalid dose). A repeat PPSV23 waits ≥${Y5} after it (Option B).`, decision: 'invalidPpsvTiming', cite: ['pedsRiskPcv20orPpsv23'], ex: [P.toddler] },
-    { dose: `First PPSV23, given <${W8} after a PCV`, action: 'Do not repeat PPSV23. Give PCV20.', strong: 'Give PCV20.', decision: 'ppsvNotRepeated', ex: [P.leah] },
+    { dose: `First PPSV23, given <${W8} after a PCV`, action: 'Do not repeat PPSV23. Give PCV20 (adults: PCV20 or PCV21).', strong: 'Give PCV20', decision: 'ppsvNotRepeated', ex: [P.leah, P.samAt19] },
     { dose: 'Two PPSV23 doses on record, both invalid', action: 'Do not give a third PPSV23. Give PCV20 (adults: PCV20 or PCV21).', strong: 'Give PCV20', decision: 'ppsvNotRepeated', ex: [P.sam] },
   ],
   timing: 'The interval is counted from whichever is later: the invalid dose, or the last dose that counted.',

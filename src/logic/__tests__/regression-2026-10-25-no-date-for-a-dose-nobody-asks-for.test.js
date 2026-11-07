@@ -236,7 +236,12 @@ describe('swept over the grid', () => {
     // because a thrown-out PCV dose on the same screen keeps its own date.
     // 54 moved across, R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19):
     // a child now read as Complete at 19 is promised no date.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1735 });
+    // KEPT FELL by 10, 2026-11-07: 1735 -> 1725. §C-P2-ONE-ADULT ("Sam", owner
+    // ruling): a 19-year-old whose ONLY PPSV23 was given on the day of a PCV in
+    // childhood is now offered PCV20 or PCV21 only, so that chip's "Next dose
+    // from <date>" — a PPSV23 no card offers — becomes "Not repeated." The grid
+    // family is the 10 a228 patients, one per qualifying risk tick.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1725 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {

@@ -1408,8 +1408,24 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     }] };
   }
 
-  // Leah's ruling reaches no further than the pair (§C-P2-ONE).
-  if (oneTooSoon) return null;
+  // Ivy grown up: the adult no-history card, or the PCV15-then-PPSV23 card,
+  // at any adult age. Only one adult card is ever built.
+  function adultNoSecondShot() {
+    const adultCard = recs.find((x) => NO_THIRD_ALTERNATIVE.has(x));
+    if (!adultCard) return null;
+    const r = result('');
+    const swapped = NO_THIRD_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
+    return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
+  }
+
+  // Leah's ruling reaches no further than the pair among CHILDREN (§C-P2-ONE).
+  // SAM (OWNER RULING 2026-11-07, §C-P2-ONE-ADULT) carries it to the adult card:
+  // 19, alcohol use disorder, a PCV and a PPSV23 on the same day at 18, the
+  // PPSV23 thrown out. Offered PCV15, PCV20 or PCV21, a PCV15 would have led to
+  // his second PPSV23 shot. Shown Leah's and Ivy's rulings, she chose "PCV20 or
+  // PCV21 only". So one shot thrown out for coming too soon after a PCV now
+  // reaches the adult cards Ivy's two shots reach, and nothing else.
+  if (oneTooSoon) return adultNoSecondShot();
 
   // Kai at 6-18: the no-prior-PCV three-option card. Option A is rebuilt and
   // Option B (B-1 PCV15, B-2 PPSV23) dropped; any other card is left alone.
@@ -1446,15 +1462,7 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     })) };
   }
 
-  // Ivy grown up: the adult no-history card, or the PCV15-then-PPSV23 card,
-  // at any adult age. Only one adult card is ever built.
-  const adultCard = recs.find((x) => NO_THIRD_ALTERNATIVE.has(x));
-  if (adultCard) {
-    const r = result('');
-    const swapped = NO_THIRD_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
-    return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
-  }
-  return null;
+  return adultNoSecondShot();
 }
 
 // ── §C-P2-FIVE (OWNER RULING 2026-10-31) ─────────────────────────────────
