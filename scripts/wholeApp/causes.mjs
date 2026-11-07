@@ -22,13 +22,20 @@ export const CAUSES = {
     class: 'real',
     title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other",
   },
+  // R6 was fixed for the family she was shown (§B-OPTIONB19, 2026-11-07): Option
+  // B now says what it leads to at 19 for a non-immunocompromised child whose
+  // adult card then gives a dose. What remains is the family left out on purpose:
+  // chronic conditions only, where the next dose is at 50. Not put to her.
   'R6-option-b-later-dose-unsaid': {
     class: 'real',
-    title: "A child's Option B says it completes the series; at 19 the adult schedule can still ask for a dose",
+    title: "Chronic conditions only: a child's Option B says it completes the series, and after PPSV23 a dose comes at 50 (left out of §B-OPTIONB19; not put to the owner)",
   },
+  // R7 was fixed 2026-11-07 (§B-50BABY). What remains is babies with an ADULT-only
+  // tick (smoking, alcohol use disorder): left silent on purpose, since "50" would
+  // name the wrong age and the adult schedule acts at 19.
   'R7-baby-complete-silent-on-adult-schedule': {
     class: 'real',
-    title: "A baby's \"series complete\" card says nothing of the adult schedule that its own PCV15 will meet",
+    title: "A baby with smoking or alcohol use disorder ticked: \"series complete\" names no later age (left out of §B-50BABY on purpose)",
   },
   'D1-at-19-and-50-lines': {
     class: 'ruling',
@@ -64,14 +71,18 @@ export function causeOf(check, kind, group) {
     if (kind === 'warned-short' && /rule=ADULT-PPSV23-AFTER-PPSV23/.test(group)) return 'R4-thrown-out-ppsv23-chip';
   }
   if (check === 2) {
-    if (kind === 'not-mentioned' && /^Option B/.test(group) && /quiet spell/.test(group)) return 'R6-option-b-later-dose-unsaid';
+    // Only the chronic family's dose at 50 is still expected; a 19-49 one would be
+    // Cora's family coming back, and lands in unsorted.
+    if (kind === 'not-mentioned' && /^Option B/.test(group) && /quiet spell, age 50/.test(group)) return 'R6-option-b-later-dose-unsaid';
     // "If PCV15 is used, add PPSV23", but a thrown-out PPSV23 is already on the
     // record, so the next screen offers PCV20 alone (5 grid children).
     if (kind === 'not-mentioned' && /^PCV dose 2 of 2 \(at-risk catch-up\) ⇒ PCV20: 1 dose PCV20/.test(group)) return 'R4-thrown-out-ppsv23-chip';
   }
   if (check === 3) {
     if (/card warned of it/.test(kind)) return 'D1-at-19-and-50-lines';
-    if (/card silent/.test(kind)) return 'R7-baby-complete-silent-on-adult-schedule';
+    // Only the adult-only-tick babies (the adult card acts at 19) are expected; a
+    // silent healthy baby meeting a dose at 50 would be R7 coming back: unsorted.
+    if (/card silent/.test(kind) && /at age line 228m/.test(group)) return 'R7-baby-complete-silent-on-adult-schedule';
   }
   if (check === 4) {
     if (kind === 'held-by-ruling') return 'D3-ppsv23-held-5-years-after-thrown-out';
