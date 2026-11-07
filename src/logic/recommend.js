@@ -526,7 +526,7 @@ function pcvSeriesShape(pcv, am, total) {
 // it changes which sentence is true of this child, and what happens next.
 // The caller passes `pedsRiskIds(riskIds)`, so an adult-only tick cannot reach
 // here, exactly as it cannot reach `pcvRiskChild`.
-function pcvInfant(am, riskIds, pcv, today, dob) {
+function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   const rowClass = pedsRiskRowClass(riskIds);   // 'IC' | 'nonIC' | null
   const prior = pcv.count;
   // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. Until C10-1
@@ -757,8 +757,25 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     // Read only on the at-risk side of each ternary below.
     const fewerThanThree = prior < 3;
     const owesDoseAtTwo = atRisk && (fewerThanThree || !pcv20Done);
+    // P2-6 / R7 (OWNER RULING 2026-11-07, CLINICAL_SPEC.md §B-5TO18): a
+    // healthy baby whose series is complete gets the same "re-evaluate at 50"
+    // sentence as the healthy 24-59-month card, under "Why this". Run forward,
+    // she reads "not indicated" at 19 and is owed a dose at 50 — unless the
+    // series includes PCV20, when the adult card at 50 reads Complete, so 50 is
+    // not the next event and the line stays off (the C12 rule beside
+    // REVIEW_AT_50_SENTENCE). It goes in `detail`, which is what shows under
+    // "Why this": she chose that over showing it on the opened card, and the
+    // fold leaves a complete card's note as written (`noteFold.js` NOT_FOLDED).
+    // Also off when an ADULT-only risk factor is ticked (smoking, alcohol use
+    // disorder): run forward, the adult card asks for a dose at 19, so "50"
+    // would name the wrong age — P2-5's finding on the 5-18 card. Passed in,
+    // because `pedsRiskIds()` has already removed those ticks from `riskIds`.
+    const healthyReviewAt50 = !atRisk && !pcv20Done && !adultOnlyTicked;
     const note = !atRisk
-      ? 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).'
+      ? (() => {
+        const lead = 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).';
+        return healthyReviewAt50 ? { lead, detail: REVIEW_AT_50_SENTENCE } : lead;
+      })()
       : fewerThanThree
         ? {
           lead: `The PCV series is up to date for this age [c]. 2 more PCV doses fall due from the 2nd birthday, at least ${PNEUMO_GAP_WORDS} after the most recent dose and ${PNEUMO_GAP_WORDS} apart [c].`,
@@ -794,7 +811,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
       // parent from the 6-18 one, and a separate key so neither can be shown
       // where the other belongs.
       noteCites: !atRisk
-        ? [cite('pedsNoPcv20IfComplete')]
+        ? [cite('pedsNoPcv20IfComplete'), ...(healthyReviewAt50 ? [reviewAt50Cite()] : [])]
         : fewerThanThree
           ? [cite('p2016Table1_12to23_noneBefore12'), cite('pedsRiskIncompleteCatchup')]
           : [cite('pedsRoutine4Dose'), cite(pcv20Done ? 'pedsRiskPcv20CompleteAt2' : nextDoseCite)],
@@ -1391,8 +1408,24 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     }] };
   }
 
-  // Leah's ruling reaches no further than the pair (§C-P2-ONE).
-  if (oneTooSoon) return null;
+  // Ivy grown up: the adult no-history card, or the PCV15-then-PPSV23 card,
+  // at any adult age. Only one adult card is ever built.
+  function adultNoSecondShot() {
+    const adultCard = recs.find((x) => NO_THIRD_ALTERNATIVE.has(x));
+    if (!adultCard) return null;
+    const r = result('');
+    const swapped = NO_THIRD_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
+    return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
+  }
+
+  // Leah's ruling reaches no further than the pair among CHILDREN (§C-P2-ONE).
+  // SAM (OWNER RULING 2026-11-07, §C-P2-ONE-ADULT) carries it to the adult card:
+  // 19, alcohol use disorder, a PCV and a PPSV23 on the same day at 18, the
+  // PPSV23 thrown out. Offered PCV15, PCV20 or PCV21, a PCV15 would have led to
+  // his second PPSV23 shot. Shown Leah's and Ivy's rulings, she chose "PCV20 or
+  // PCV21 only". So one shot thrown out for coming too soon after a PCV now
+  // reaches the adult cards Ivy's two shots reach, and nothing else.
+  if (oneTooSoon) return adultNoSecondShot();
 
   // Kai at 6-18: the no-prior-PCV three-option card. Option A is rebuilt and
   // Option B (B-1 PCV15, B-2 PPSV23) dropped; any other card is left alone.
@@ -1429,15 +1462,7 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     })) };
   }
 
-  // Ivy grown up: the adult no-history card, or the PCV15-then-PPSV23 card,
-  // at any adult age. Only one adult card is ever built.
-  const adultCard = recs.find((x) => NO_THIRD_ALTERNATIVE.has(x));
-  if (adultCard) {
-    const r = result('');
-    const swapped = NO_THIRD_ALTERNATIVE.get(adultCard)({ neither, third, detailGrey: r.detailGrey, greyCites });
-    return { ...r, recs: recs.map((x) => (x === adultCard ? swapped : x)) };
-  }
-  return null;
+  return adultNoSecondShot();
 }
 
 // ── §C-P2-FIVE (OWNER RULING 2026-10-31) ─────────────────────────────────
@@ -1598,6 +1623,72 @@ function adultAnswerPastNineteen(recs, adultRecs, nineteenth) {
         : { ...card.note, lead: `${opening} ${card.note.lead}` },
       noteCites: (card.noteCites ?? []).map((c) => ({ ...c, aboutAnotherGroup: why })),
     };
+  });
+}
+
+// ── P2-4 / R6 (OWNER RULING 2026-11-07, on "Cora") — what Option B leads to at 19 ──
+//
+// Cora, 14, cochlear implant, a PCV13 baby series, is offered Option A PCV20 or
+// Option B PPSV23, both "completes the recommended series". After PCV20 she is
+// finished for life; after PPSV23 her "complete" card says that at 19 the adult
+// schedule gives PCV20 or PCV21. The clinician choosing today was not told.
+// Asked, she chose "Add one line to Option B", in view.
+//
+// THE LINE IS THE ADULT CARD'S OWN (§B-AT19 — never hand-written): the PPSV23 is
+// given on Option B's own date, the patient is run to the 19th birthday, and
+// `atNineteen()` words what that card says.
+//
+// `optionBLookedAhead` stops the look-ahead from looking ahead again. The run
+// to 19 validates the dose it adds, which asks what card the child had on that
+// day (`cardsOnTheDayOf`), which is this same child pathway — so without the
+// flag each run starts another, forever. The day-of answer needs the card's
+// status and products, never this sentence, so nothing is lost.
+//
+// NOT for an immunocompromised child: CDC's row there makes Option B owe a
+// follow-on dose 5 years later ("then ≥5 years later give 1 dose of PCV20 or a
+// 2nd PPSV23"), usually before 19, and the card already says so. Run forward with
+// the PPSV23 alone, the answer at 19 would describe a child who skipped it.
+function optionBAtNineteen(recs, input, nineteenth, today, rowClass) {
+  if (input.optionBLookedAhead || rowClass !== 'nonIC') return recs;
+  // "Option B:" only — never "Option B-2", the PPSV23 that follows Option B-1's
+  // PCV15: run forward without that PCV15, its answer at 19 would be wrong.
+  const isPpsvOptionB = (r) => /^Option B: /.test(r.doseLabel ?? '') && !ASKS_FOR_NOTHING.has(r.status)
+    && (r.brands ?? []).some((b) => /PPSV23/.test(b.key ?? b));
+  const b = recs.find(isPpsvOptionB);
+  const a = recs.find((r) => /^Option A: /.test(r.doseLabel ?? '') && !ASKS_FOR_NOTHING.has(r.status));
+  if (!b || !a) return recs;
+  const on = (card) => (card.dueToday || !card.earliestNextDate ? today : card.earliestNextDate);
+  // A dose due on or after the 19th birthday is answered by the adult card itself.
+  if (on(b) >= nineteenth || on(a) >= nineteenth) return recs;
+  const afterB = atNineteen(recommendBeforeFold({
+    ...input,
+    optionBLookedAhead: true,
+    ageMonths: ADULT_SCHED_MIN_M,
+    today: nineteenth,
+    ppsv23Doses: [...(input.ppsv23Doses ?? []), { product: 'PPSV23', date: on(b) }],
+  }).recs[0]);
+  // Scoped to the family she was shown: Option B leads to a DOSE at 19. After a
+  // PPSV23, a child with chronic conditions only reads "no dose now; re-evaluate
+  // at age 50" at 19 — the two options then differ only by a review decades
+  // away, which was not put to her, so it is not changed (§B-OPTIONB19).
+  if (!afterB || afterB.cite.key === 'adultChronicOnlyReviewAt50') return recs;
+  // Option A's road is not run: after its PCV20 every such child is complete for
+  // life at 19, so it has no line to differ from. Measured 2026-11-07, 0 of 77,496
+  // patients; a comparison that never fires could not be tested, so it is not
+  // here. Cora's test asserts her Option A road reads complete with no line.
+  // Her words where the line is plain; the comma kept where a "because" clause
+  // follows, or the sentence would run on.
+  const sentence = afterB.sentence
+    .replace(/^At 19, (?!because)/, 'If PPSV23 is chosen, at 19 ')
+    .replace(/^At 19, /, 'If PPSV23 is chosen, at 19, ');
+  return recs.map((r) => {
+    if (r !== b) return r;
+    const note = typeof r.note === 'string'
+      ? `${r.note} ${sentence}`
+      : r.note.detail
+        ? { ...r.note, detail: `${r.note.detail} ${sentence}` }
+        : { ...r.note, lead: `${r.note.lead} ${sentence}` };
+    return { ...r, note, noteCites: [...(r.noteCites ?? []), afterB.cite] };
   });
 }
 
@@ -4632,7 +4723,8 @@ export function recommendBeforeFold(input) {
     // does below — a tick that does not apply to a child must not reach a
     // child's card, by any route.
     path.push(pathStep('Which rules apply', 'Babies and toddlers under 2', `under ${ageWords(M.m24)}`));
-    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today, dob);
+    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today, dob,
+      riskIds.some((id) => RISK_BY_ID[id]?.adultOnly));
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
     // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an
@@ -4667,6 +4759,7 @@ export function recommendBeforeFold(input) {
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
       recs = sayEightWeekWait(recs);
+      recs = optionBAtNineteen(recs, input, nineteenth, today, pedsRiskRowClass(pedsIds));
       // R2: nothing can be done before 19, so the adult card answers from today.
       const pastNineteen = adultAnswerPastNineteen(recs, adultAt19.recs, nineteenth);
       if (pastNineteen) {

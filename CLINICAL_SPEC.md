@@ -251,9 +251,17 @@ mutations; seven caught, the eighth is the raw-age check above, reverted).
 - 24–59 mo, **completed any PCV schedule (incl. all-PCV13) by 24mo** → no additional doses.
 - 24–59 mo, **no/incomplete schedule by 24mo** → **1 dose** PCV15/PCV20 ≥8wk after most recent PCV.
 - 5–18 y healthy → **no additional doses** (healthy older children are not caught up).
-- Both **healthy** "nothing needed" cards — the 5–18 one and the complete 24–59 month one —
-  add **"Re-evaluate at age 50, when routine pneumococcal vaccination begins for every
-  adult"** (`adultRoutine50`). **No at-risk card does** — see §B-50NOTE.
+  **G34, confirmed by the owner 2026-11-07** (*"Confirm Not indicated"*): a healthy child of
+  exactly 5 years with one PCV at 2 months is not caught up; the same child at 4y 11m is given
+  one dose. CDC's notes: *"Healthy children ages 2–4 years with any incomplete PCV series: 1
+  dose PCV."* AAP's pneumococcal page (last updated 10/09/2025, read live 2026-11-07) agrees:
+  catch-up for *"Healthy children ages 24 – 59 months with incomplete PCV vaccination
+  status"*, and nothing for a healthy child of 5 or older. No code changed; guard
+  `regression-2026-11-07-healthy-baby-age-50-and-g34.test.js`.
+- The **healthy** "nothing needed" cards — the 5–18 one, the complete 24–59 month one, and
+  since 2026-11-07 the healthy baby's complete card (§B-50BABY) — add **"Re-evaluate at age
+  50, when routine pneumococcal vaccination begins for every adult"** (`adultRoutine50`).
+  **No at-risk card does** — see §B-50NOTE.
 
 ### §B-5TO18 — the healthy 5–18 card: what it cites, and the age-50 note
 
@@ -303,6 +311,58 @@ a dose"*, cited to `cdcAdultRiskFactorList` with `aboutAnotherGroup` — a third
 a child card, declared and pinned. Otherwise the age-50 line stands. Measured: 404 grid teens
 (202 smoking, 202 alcohol use disorder); the age-50 healthy 5–18 count is now 1,584 − 404 =
 1,180. 0 verdicts. Guard: `regression-2026-11-01-p2-5-adult-risk-teen-review-at-19.test.js`.
+
+### §B-50BABY — the healthy baby's complete card says it too (owner, 2026-11-07)
+
+P2-6 / R7 of the 2026-11-05 whole-app checks. A healthy 14-month-old with four PCV15 read *"The
+age-appropriate PCV series appears complete"* and nothing about later, while the healthy
+3-year-old with the same four doses reads *"Re-evaluate at age 50"*. Shown both, the owner
+chose **"Add it under Why this"**: the same sentence and citation, in the card's `detail`. Run
+forward, the baby reads *Not indicated (no risk, <50y)* at 19 and is owed a PPSV23 at 50, so
+50 is the next event (Group A). **Two limits, each from running the baby forward:** a series
+that includes **PCV20** reads *Complete* at 50 (Group C), so no line; and an **adult-only**
+tick (smoking, alcohol use disorder) is given a dose at 19, so "50" would name the wrong age
+(§B-ADULTRISK19) — no line. **The grid has no healthy baby with a complete series on its first
+screen** (prose diff: 0 of 35,280 lines moved), so C12's pinned count cannot see this card;
+the whole-app checks reach it by following babies forward, and their "card silent" count for
+R7 went 312 → 0. Guard: `regression-2026-11-07-healthy-baby-age-50-and-g34.test.js`.
+
+**Not changed, and noted:** the 24–59-month card carries the line even when the series
+includes PCV20 or an adult-only tick is set. That predates this ruling and was not put to her.
+
+### §B-OPTIONB19 — Option B says what PPSV23 leads to at 19 (owner, 2026-11-07, "Cora")
+
+P2-4 / R6 of the 2026-11-05 whole-app checks. **Cora, 14, cochlear implant, PCV13 at 2, 4, 6
+and 12 months** is offered *Option A: 1 dose PCV20* or *Option B: 1 dose PPSV23*, both saying
+*"Either a single dose of PCV20 or a PPSV23 completes the recommended series."* After PCV20
+she is complete for life. After PPSV23 her complete card says *"At 19, the adult schedule gives
+1 dose of PCV20 or PCV21, at least 5 years after the last pneumococcal dose."* (§B-AT19). The
+clinician choosing today was not told. Shown this, the owner chose **"Add one line to Option
+B"**, in view.
+
+**The line is the adult card's own** (§B-AT19: never hand-written). `optionBAtNineteen()` gives
+the PPSV23 on Option B's own date, runs the patient to the 19th birthday, and words that card
+through `atNineteen()`: *"If PPSV23 is chosen, at 19 the adult schedule gives 1 dose of PCV20 or
+PCV21, at least 5 years after the last pneumococcal dose."* It cites the adult row
+(`adultIc1949BothPcv13Ppsv`, or `adultPpsvOnly1949` when an earlier conjugate's product is not
+recorded) with `aboutAnotherGroup` — an adult source on a child card, the fifth declared place.
+`noteFold.js` keeps it in view. The Rulebook's chronic / cochlear / CSF-leak row says the same
+in its step note.
+
+**Limits, each measured or reasoned, none put to her:**
+- **Immunocompromised children: no line.** CDC's row makes their Option B owe *"then ≥5 years
+  later give 1 dose of PCV20 or a 2nd PPSV23"*, usually before 19, and the card already says
+  so; run forward with the PPSV23 alone, the 19 answer would describe a child who skipped it.
+- **Chronic conditions only: no line.** At 19 they read *"no dose now; re-evaluate at age 50"*
+  after PPSV23 — a review decades away, not a dose.
+- **"Option B-2"**, the PPSV23 after Option B-1's PCV15: not this choice; no line.
+- Option A's road is not run: after its PCV20 every such child is complete for life at 19
+  (0 of 77,496 patients had a line there).
+
+**Measured:** 267 cards carry the line — 91 on the grid (66 the PCV20/PCV21 line, 25 the
+unrecorded-product line), 176 typical. No dose, product, status or date moves. Visible words at
+the wordiest 1 in 10 rose 64 → 65, pinned with the reason. Guard:
+`regression-2026-11-07-option-b-says-what-happens-at-19.test.js`.
 
 ### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
 
@@ -1165,6 +1225,43 @@ after a PCV (the grid's form of "too soon"). **0 / 18,264** record-problem rows.
 35,280 lines. The 2026-10-25 sweep's `kept` falls 1829 → 1789: 40 of the 72 had no other
 dated chip; 32 keep one on a thrown-out PCV dose. Guard:
 `regression-2026-10-31-one-ppsv23-too-soon-pcv20-only.test.js`.
+
+### §C-P2-ONE-ADULT — one childhood PPSV23 thrown out, the patient now an adult: PCV20 or PCV21 only (owner, 2026-11-07, "Sam")
+
+P2-5 / R4 of the 2026-11-05 whole-app checks. **Sam, 19, alcohol use disorder.** At 18 he got
+a PCV (product not recorded) and a PPSV23 on the same day, Oct 11, 2025; the PPSV23 does not
+count (`CHILD-PPSV23-AFTER-PCV`). The adult card offered PCV15, PCV20 or PCV21, and after a
+PCV15 advised a PPSV23 a year later — his second PPSV23 shot — while the line under the 2025
+dose read *"Next dose from Oct 11, 2030 at the earliest"* and the later PPSV23 then read *"5
+years advised"*: the app faulting a dose it had advised (whole-app check 1).
+
+**Her questions first**, both about the gap: *"why was PPSV23 given 2 years later"*, then *"why
+was PPSV23 given 1 year after the last PPSV23 instead of 5 years"*. The answer given: CDC's 5
+years runs between two PPSV23 doses that both count; the 2025 dose did not, so the adult rules
+treat him as never having had one, and give PCV15 → PPSV23 at ≥1 year. No CDC document says
+whether a thrown-out PPSV23 starts the 5-year clock. She was then shown her own rulings on the
+same question — **Leah** (§C-P2-ONE, a child, one shot thrown out for coming too soon after a
+PCV: *"PCV20 only"*, because a second polysaccharide shot gives a weaker response) and **Ivy at
+20** (§C-P2-NOTHIRD for adults, two thrown-out childhood shots: *"PCV20/21 only"*) — and that
+Sam had been left out of both on purpose. She chose **"PCV20 or PCV21 only"**.
+
+**Built:** `noThirdPpsv23()` lets Leah's one-shot case (`oneTooSoon`) reach the two adult cards
+Ivy's ruling already rebuilds — the no-history card (*"Give 1 dose of PCV20 or PCV21; either
+completes the series alone. No further PPSV23: 1 PPSV23 dose has been given and it did not
+count."*, and under Why this *"PCV15 is not offered: after it a PPSV23 would be owed ≥1 year
+later — a second PPSV23 shot"*), and, for an adult who already had the PCV15, PCV20 or PCV21 in
+the PPSV23's place at its timing (Ivy's "Use PPSV23's timing"). The line under the 2025 dose
+becomes *"Same day as PCV; minimum interval 8 weeks. Not repeated."*
+
+**Scope — the patient she worked:** ONE childhood PPSV23 thrown out by `CHILD-PPSV23-AFTER-PCV`,
+the patient now 19 or older. Not covered, pinned unchanged: an adult whose single childhood
+PPSV23 was thrown out for another reason (given under age 2) — still offered PCV15.
+
+**Measured:** **10 / 17,016** verdicts moved, all 19-year-olds with an unrecorded PCV and a
+PPSV23 on the same day at 18, one per qualifying risk tick; in each the only change is PCV15
+leaving the card. **0 / 18,264** record-problem rows. The 2026-10-25 sweep's `kept` fell 1735 →
+1725 (those 10 chips lost "Next dose from …"). Guard:
+`regression-2026-11-07-sam-one-thrown-out-ppsv23-adult.test.js`.
 
 ### §C-P2-LATER — a thrown-out PPSV23 that was repeated points to the repeat (owner, 2026-10-31)
 

@@ -122,6 +122,12 @@ describe('WORD-1 — what must stay in view', () => {
     expect(lead(out.recs[0])).toMatch(/can be given from .* if needed, which is the minimum interval of 4 weeks/);
   });
 
+  it('Option B says what PPSV23 leads to at 19, in view (owner, 2026-11-07, Cora)', () => {
+    const cards = everyone.flatMap(({ out }) => out.recs).filter((r) => /If PPSV23 is chosen, at 19/.test(`${lead(r)} ${detail(r)}`));
+    expect(cards.length).toBeGreaterThan(50);
+    expect(cards.every((r) => /If PPSV23 is chosen, at 19/.test(lead(r)))).toBe(true);
+  });
+
   it('a "No dose now" card is not folded: the later dose stays in view', () => {
     const cards = everyone.flatMap(({ out }) => out.recs).filter((r) => r.status === 'no-dose-now');
     expect(cards.length).toBe(225);
@@ -218,6 +224,8 @@ describe('WORD-1 — visible words cannot creep back up', () => {
     }).sort((a, b) => a - b);
     const p90 = totals[Math.floor(totals.length * 0.9)];
     const worst = totals[totals.length - 1];
-    expect({ p90, worst }).toEqual({ p90: 64, worst: 164 });
+    // 64 → 65 at p90, 2026-11-07: Cora's line on Option B (P2-4 / R6), kept in
+    // view by her ruling — it is the difference between the two options.
+    expect({ p90, worst }).toEqual({ p90: 65, worst: 164 });
   });
 });

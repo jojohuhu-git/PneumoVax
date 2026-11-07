@@ -123,9 +123,20 @@ conjugate nobody asked for, so that waits on the open half of P1-3.
 
 ### P2-4 — R6, OWNER: Option B says it completes the series, and at 19 a dose can still come
 
+**DONE 2026-11-07 on `fix/2026-11-07-three-rulings-cora-baby-g34`.** She chose "Add one line to Option
+B", in view. Non-immunocompromised children whose adult card at 19 gives a dose: 267 cards. Left out on
+purpose and still flagged as R6: chronic conditions only (dose at 50), 75 grid + 132 typical patients,
+not put to her. `CLINICAL_SPEC.md` §B-OPTIONB19.
+
 - **Patient:** Cora in the report, Decision 3. Wording only.
 
 ### P2-5 — R4: recommend parking
+
+**RULED 2026-11-07, not parked.** Shown Sam (19, PCV and PPSV23 the same day at 18), she asked twice why
+the wait was 1 year and not 5, then chose "PCV20 or PCV21 only", as for Leah and Ivy. 10 of 17,016
+verdicts moved. Check 1 ("advice is accepted") went to 0 patients. What still sorts as R4 (57 grid, 60
+typical, checks 4/5/7) is the child's card and chip naming different vaccines — not ruled.
+`CLINICAL_SPEC.md` §C-P2-ONE-ADULT.
 
 - A childhood PPSV23 thrown out for being too close to a PCV, and the patient since turned 19 or
   has a PCV card. The chip's five-year date and the card disagree. Rare history, and the owner
@@ -145,6 +156,11 @@ section, so the job aid keeps the claim at 50+. `CLINICAL_SPEC.md` §G.
   without asking. Read the document first (FINDING F), and watch the citation count pins.
 
 ### P2-6 — R7: recommend no change
+
+**RULED 2026-11-07, changed.** She chose "Add it under Why this". The healthy baby's complete card
+now says "Re-evaluate at age 50", except with PCV20 in the series or an adult-only tick. R7 went 312 to
+208; the 208 are babies with smoking or alcohol use ticked, left silent on purpose. `CLINICAL_SPEC.md`
+§B-50BABY. G34 (healthy 5-year-old) confirmed "Not indicated" the same day.
 
 - A healthy baby's "series complete" card does not mention what happens at 50. The toddler's card
   does. The ask is decades away. Listed so it is not found again.
