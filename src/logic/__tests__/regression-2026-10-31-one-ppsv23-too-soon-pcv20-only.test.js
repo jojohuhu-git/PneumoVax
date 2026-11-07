@@ -21,7 +21,7 @@
 // the 24-71-month catch-up card, are NOT covered — both are pinned unchanged
 // below so a widening fails here.
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { addDays, addCalendarMonths } from '../dateUtils.js';
 
 const TODAY = '2026-10-31';
@@ -83,7 +83,7 @@ describe('§C-P2-ONE — Leah', () => {
     const chip = out.perDose.ppsv23[0].reasons.join(' ');
     expect(chip).not.toContain('Dec 16, 2026');
     expect(chip).not.toContain('can be given from');
-    expect(chip).toContain('It is not repeated.');
+    expect(chip).toContain('Not repeated.');
   });
 
   it('a PCV20 given today counts and finishes her', () => {

@@ -83,7 +83,7 @@ describe('S14-4C UI — a same-visit PPSV23 reads the same as one given a day la
   it('it never says "after" about two doses carrying one date', () => {
     render(<Harness initial={ONE_VISIT} />);
     openTheCard();
-    expect(screen.queryByText(/after the series was already complete/)).toBeNull();
+    expect(screen.queryByText(/Series already complete with/)).toBeNull();
   });
 
   it('it no longer advises a 1-year gap for a dose no interval would have fixed', () => {

@@ -16,7 +16,7 @@ import { analyzeBoth } from '../validate.js';
 
 const TODAY = '2026-01-01';
 const DOB = '2020-01-01';
-const REPEAT = /repeat this dose only/i;
+const REPEAT = /Repeat this dose only/i;
 
 function run({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = DOB, today = TODAY, riskIds = [] }) {
   return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds });

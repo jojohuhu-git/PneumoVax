@@ -45,7 +45,7 @@
 // "4 days before it" was 8 days early and was rejected.
 // ─────────────────────────────────────────────────────────────────────────
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { analyzeBoth } from '../validate.js';
 import { addDays, calendarMonthsBetween } from '../dateUtils.js';
 import { DOSE_INTERVAL_RULES } from '../doseIntervalRules.js';
@@ -135,7 +135,7 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
     // and the rec card alone states when the dose is DUE. "is due on or
     // after" put a second due-date on the screen.
     expect(dose.reasons.at(-1))
-      .toContain('can be given from Nov 9, 2026 at the earliest');
+      .toContain('Next dose from Nov 9, 2026 at the earliest');
     expect(dose.reasons.at(-1)).not.toContain('is due on or after');
     expect(dose.reasons.at(-1)).not.toContain('2026-11-05');
   });
@@ -155,7 +155,7 @@ describe('the advised repeat date is the real minimum, not the graced one', () =
     // 2024-02-05 + 5 calendar years. Pre-fix: 2029-02-01.
     expect(dose.repeatDueDate).toBe('2029-02-05');
     expect(dose.reasons.at(-1))
-      .toContain('can be given from Feb 5, 2029 at the earliest');
+      .toContain('Next dose from Feb 5, 2029 at the earliest');
   });
 
   it('`earliestValidDate` KEEPS the grace — it judges a dose already given', () => {

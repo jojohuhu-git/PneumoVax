@@ -56,7 +56,7 @@ describe('P6-3c UI — a verdict citation renders as a working superscript', () 
     // citation link SPLITS the sentence into three nodes, which is the
     // mechanism working rather than a problem.
     expect(container.textContent)
-      .toMatch(/PCV7 doses are ignored when determining current pneumococcal needs/);
+      .toMatch(/Treat as PCV-naïve/);
   });
 
   it('the marker became a link to immunize.org, not literal "[c]"', () => {

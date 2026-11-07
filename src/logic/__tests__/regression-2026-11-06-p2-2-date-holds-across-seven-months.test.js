@@ -15,7 +15,7 @@
  * RULING C still holds: what COUNTS does not move. Only the advice does.
  */
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const DOB = '2026-05-06';
 const PCV20 = (dates) => dates.map((date) => ({ product: 'PCV20', date }));

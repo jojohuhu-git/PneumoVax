@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Chevron } from './icons.jsx';
 
 export default function Disclaimer() {
+  // WORD-1 (OWNER DECISION 2026-11-06): the paragraph about risk history goes
+  // behind a click; the first half stays in view on every page.
+  const [open, setOpen] = useState(false);
   return (
     <div className="disclaimer" role="note" aria-label="Clinical disclaimer">
       <strong>Clinical decision support only.</strong> PneumoVax is not a substitute for clinical judgment.
@@ -11,7 +15,6 @@ export default function Disclaimer() {
       before administering vaccines. Each recommendation includes a citation link to its source
       (CDC schedule notes, ACIP MMWR, or immunize.org). Age eligibility and dose intervals
       reflect ACIP guidance, which may differ from FDA package insert labeling.
-      {' '}
       {/* P6-7 (S13, 2026-10-10): the app asks for risk factors as they are TODAY
           and then grades doses recorded years ago against them. That assumption
           is reasonable and is not changing — but it was unstated. The PPSV23
@@ -19,12 +22,25 @@ export default function Disclaimer() {
           asked about. Deliberately NOT a per-dose prompt, and deliberately no
           promise that the app will ask: unlike MeningoVax, PneumoVax has no
           "Needs input" machinery to ask with. */}
+      <button
+        type="button"
+        className="rec-note-toggle disclaimer-toggle"
+        data-testid="disclaimer-toggle"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        About risk history<Chevron open={open} />
+      </button>
+      {open && (
+      <span className="disclaimer-more" data-testid="disclaimer-more">
       This app tracks the patient's <em>current</em> risk status only — it does not record
       when a risk factor started or ended. One case worth knowing: PPSV23 between ages 2 and
       5 is only <em>indicated</em> for a child with a risk condition, but a PPSV23 already
       given to a then-healthy three-year-old is still counted as a valid dose if that child
       later becomes at-risk. That is correct — it was a real vaccine given at a valid age —
       but the app will not query it, so check the record if it matters.
+      </span>
+      )}
     </div>
   );
 }

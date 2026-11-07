@@ -31,7 +31,7 @@
 //      number: the 4-vs-8-week choice is age-governed exactly as footnote †
 //      states it, and Table 2 says which age applies at which dose.
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const TODAY = '2026-06-07';
 

@@ -81,6 +81,8 @@ src/
                          BOTH StepRisks and the Results header.
     Disclaimer.jsx       Clinical disclaimer footer.
   logic/
+    noteFold.js          WORD-1: which note sentences stay in view (STAY_IN_VIEW); the rest
+                         move behind "Why this", each with its citation. Runs once, last.
     recommend.js         THE engine. recommend(input) → { recs[], pcv21Geo, perDose,
                          orderedDoses, meta }.
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,

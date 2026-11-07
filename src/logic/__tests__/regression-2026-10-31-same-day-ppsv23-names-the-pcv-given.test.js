@@ -28,15 +28,16 @@ describe('the sentence names the product given', () => {
   it('PCV13: names PCV13, not PCV15', () => {
     const r = sameDay('PCV13');
     expect(r.status).toBe('invalid');
-    expect(r.reasons[0]).toBe('Given on the same day as a PCV13 dose — PPSV23 is given at least 8 weeks (56 days) after a PCV dose.');
+    expect(r.reasons[0]).toBe('Same day as PCV; minimum interval 8 weeks.');
+    expect(r.detail).toContain('Given on the same day as a PCV13 dose.');
   });
 
   it('PCV15: keeps CDC\'s own sentence, which names PCV15', () => {
-    expect(sameDay('PCV15').reasons[0]).toBe('Given on the same day as a PCV15 dose — PCV15 and PPSV23 should not be given at the same visit, and PPSV23 is given at least 8 weeks (56 days) after a PCV dose.');
+    expect(sameDay('PCV15').detail).toContain('PCV15 and PPSV23 should not be given at the same visit. Given on the same day as a PCV15 dose.');
   });
 
   it('an unrecorded product names no product', () => {
-    expect(sameDay('').reasons[0]).toBe('Given on the same day as a PCV dose — PPSV23 is given at least 8 weeks (56 days) after a PCV dose.');
+    expect(sameDay('').detail).toContain('Given on the same day as a PCV dose.');
   });
 
   it('only a PCV15 is ever named as PCV15', () => {

@@ -300,7 +300,7 @@ function sameDayDifferentBrandNote(dose, kept) {
   const twin = (kept ?? []).find((k) => k?.date === dose.date
     && k.product && k.product !== dose.product);
   if (!twin) return null;
-  return `Two different pneumococcal vaccines are recorded on the same day (${productLabel(twin.product)} and ${productLabel(dose.product)}). They are not given together at one visit, so check the record — a mistyped date or a mistyped brand on one of the rows is the usual cause.`;
+  return `Two vaccines recorded on one day (${productLabel(twin.product)} and ${productLabel(dose.product)}). Not given together at one visit: check the record for a mistyped date or brand.`;
 }
 
 // ── The same two refusals, said in one line, for the history step ────────
@@ -395,7 +395,7 @@ function recordProblemFor(dose, { ageMonths, today, dob, kept }) {
 function extraDoseSentence(completingDose, dose, vaccine) {
   const label = productLabel(completingDose.product);
   if (completingDose.date !== dose.date) {
-    return `Given after the series was already complete (a ${label} dose already completes it): this dose does not extend the series.`;
+    return `Series already complete with ${label}; this dose does not extend it.`;
   }
   const needed = vaccine === 'PPSV23' ? 'no PPSV23 was needed, and this dose' : 'this dose';
   return `Given at the same visit as the ${label} dose, which completes the adult series on its own: ${needed} does not add to the series.`;
@@ -417,7 +417,7 @@ function extraDoseSentence(completingDose, dose, vaccine) {
 // PCV20 in it, an unrecorded product, a conjugate given at or after 6.
 // `ageNow` is the same limit P2 set for PPSV23 (§C-P2-ONTIME): an adult's
 // history is read by ACIP's adult rows, which count every dose received.
-const NOT_ASKED_FOR_CONJUGATE = 'Not needed: after a PCV series before age 6 and one PPSV23, CDC offers PCV20 or a 2nd PPSV23 here, not PCV15. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated. The next dose still waits 8 weeks after it.';
+const NOT_ASKED_FOR_CONJUGATE = 'Not needed: after a PCV series before age 6 and one PPSV23, CDC offers PCV20 or a 2nd PPSV23 here, not PCV15. Not counted. Do not repeat. The next dose still waits 8 weeks after it.';
 
 function conjugateNobodyAskedFor(dose, { kept, countedPpsv23, ageAt, ageNow, riskIds }) {
   if (dose.product !== 'PCV15' || !dose.date || ageNow >= ADULT_SCHED_MIN_M || !hasIC(riskIds)) return false;
@@ -655,7 +655,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   // the reader its source. The marker sits on the clause it supports.
   if (prod && prod.key === 'PCV7') {
     return noncounting([
-      'PCV7 (Prevnar 7) is not counted toward the pneumococcal series. Per ACIP/immunize.org[c], PCV7 doses are ignored when determining current pneumococcal needs — treat the patient as if PCV-naïve for these doses.',
+      'Not counted. Treat as PCV-naïve[c].',
       // A declared cross-reference (2026-10-17). The quote is written about
       // "an older teen or adult patient at increased risk", and this verdict
       // is applied to EVERY patient, including a healthy child — 108 of them
@@ -924,8 +924,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // exactly the drift this file keeps warning about.
     const sameDayNote = sameDayDifferentBrandNote(dose, kept);
     // The two halves of the timing-rejection sentence. See the split below.
-    const DOES_NOT_COUNT_LEAD = 'This dose does not count toward the series — given too soon after the dose it is measured from.';
-    const nextDoseClause = (r) => `the next dose in this series can be given from ${fmtDate(r.repeatDueDate ?? r.earliestValidDate)} at the earliest.`;
+        const nextDoseClause = (r) => `Next dose from ${fmtDate(r.repeatDueDate ?? r.earliestValidDate)} at the earliest.`;
     const addNote = (entry) => (sameDayNote
       ? { ...entry, reasons: [...(entry.reasons ?? []), sameDayNote] }
       : entry);
@@ -954,7 +953,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // own wording: it is not a dose the patient had.
     const healthyChildPpsv23 = vaccine === 'PPSV23' && !result.recordProblem
       && populationOf(ageMonths, riskIds) === 'child-routine';
-    const NOT_NEEDED_HEALTHY_CHILD = 'Not needed: PPSV23 is given only to children with certain medical conditions or risk factors, per CDC, and none is recorded for this child. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.';
+    // WORD-1, her answer of 2026-11-06 on her own wording: "Shorten it".
+    const NOT_NEEDED_HEALTHY_CHILD = 'No risk condition recorded: PPSV23 not indicated. Not counted. Do not repeat.';
+    const NOT_NEEDED_HEALTHY_CHILD_WHY = 'PPSV23 is given only to children with certain medical conditions or risk factors, per CDC.';
 
     if (result.status === 'invalid') {
       // W1 (owner-approved wording, 2026-10-11): a dose rejected only for
@@ -1002,7 +1003,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // its own field rather than matched by text — string surgery on a
           // sentence built somewhere else is the kind of coupling that breaks
           // silently when the wording changes.
-          ? `${DOES_NOT_COUNT_LEAD} It is not repeated; ${nextDoseClause(result)}`
+          ? `Not repeated. ${nextDoseClause(result)}`
           // 2026-10-26 — the product, not the timing, is what is wrong, so
           // repeating THIS dose would be rejected again for the same reason.
           // See `remedyIsAnotherProduct` above.
@@ -1010,7 +1011,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // "given too soon after the dose it is measured from". Nothing is
           // wrong with this dose's timing.
           : result.remedyProduct
-            ? `This dose does not count toward the series — give a dose of ${result.remedyProduct} instead (do not restart the series).`
+            ? `Give ${result.remedyProduct} instead. Do not restart the series.`
             // OWNER DECISION 2026-10-29 — see `repeatWithAnyApprovedProduct`.
             // The dose failed on AGE, so the product is not what was wrong and
             // CDC's own choice between the conjugates is left standing. A
@@ -1018,9 +1019,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
             // who has passed it is not shown a bar she has already cleared.
             : result.ageRemedy
               ? (result.ageRemedy.stillTooYoung
-                ? `This dose does not count toward the series — a further dose can be given from the ${result.ageRemedy.minAgeText} minimum age at the earliest, and any PCV approved for that age may be used (do not restart the series).`
-                : 'This dose does not count toward the series — give a further dose when due; any PCV approved for the patient\'s age may be used (do not restart the series).')
-              : 'This dose does not count toward the series — repeat this dose only (do not restart the series).';
+                ? `A further dose can be given from the ${result.ageRemedy.minAgeText} minimum age at the earliest, any PCV approved for that age. Do not restart the series.`
+                : 'Give a further dose when due, any PCV approved for the patient\'s age. Do not restart the series.')
+              : 'Repeat this dose only. Do not restart the series.';
       // OWNER RULING 2026-10-24 — the second sentence she asked for on a
       // mistimed SECOND PPSV23, emphasised, giving the conjugate option its
       // own date and its own reason. Her words: "bold the alternative option
@@ -1058,6 +1059,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           effectiveDoseNum: null,
           doesNotCount: true,
           reasons: [...result.reasons, NOT_NEEDED_HEALTHY_CHILD],
+          whys: [NOT_NEEDED_HEALTHY_CHILD_WHY],
         }));
         anchorOn(dose);
         return;
@@ -1073,14 +1075,13 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         // null unless the split above produced them, so nothing else can be
         // swapped by accident.
         forwardLookingReason: result.recordProblem || !result.intervalRuleId ? null : closingSentence,
-        withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : `${DOES_NOT_COUNT_LEAD} It is not repeated.`,
+        withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : 'Not repeated.',
         // §C-P2-NOTHIRD (Ivy, 2026-10-31): the same handover for EVERY closing
         // sentence, not only the timing one, so `recommend.js` can say "It is
         // not repeated" under a too-young shot whose card offers no further
         // PPSV23. `closingLead` is the half that is always true.
         closingSentence,
-        closingLead: result.intervalRuleId ? DOES_NOT_COUNT_LEAD : 'This dose does not count toward the series.',
-        ...(repeatOfUnderAgeDose ? { repeatOfUnderAgeDose } : {}),
+                ...(repeatOfUnderAgeDose ? { repeatOfUnderAgeDose } : {}),
         reasons: [...result.reasons, closingSentence, alternativeSentence].filter(Boolean),
       }));
       // RULING D (2026-10-23) — a mistimed dose anchors the next one, because
@@ -1261,6 +1262,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         effectiveDoseNum: null,
         extraDose: true,
         reasons: [...result.reasons, NOT_NEEDED_HEALTHY_CHILD],
+          whys: [NOT_NEEDED_HEALTHY_CHILD_WHY],
       }));
       st.extraChildPpsv23.push(dose);
       anchorOn(dose);
@@ -1285,8 +1287,8 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         reasons: [
           ...(ppsvRowFired ? rowReasons.slice(0, -1) : rowReasons),
           icChild
-            ? `Not needed: two PPSV23 doses have already been given (${fmtDate(kept[0].date)} and ${fmtDate(kept[1].date)}), and CDC never gives a third. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.`
-            : `Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition; the first was given on ${fmtDate(kept[0].date)}. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.`,
+            ? `Not needed: two PPSV23 doses already given (${fmtDate(kept[0].date)} and ${fmtDate(kept[1].date)}), and CDC never gives a third. Not counted. Do not repeat.`
+            : `Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition; first given ${fmtDate(kept[0].date)}. Not counted. Do not repeat.`,
         ],
       }));
       st.extraChildPpsv23.push(dose);

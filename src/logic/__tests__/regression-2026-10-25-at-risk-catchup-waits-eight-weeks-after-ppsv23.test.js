@@ -46,7 +46,7 @@
 // PPSV23 side keeps ANCHOR-1's (counting doses only). A rule that re-read the
 // interval per stream would be the P0 bug's own shape.
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { buildCases, CORPUS_TODAY } from '../../test-grid.js';
 import { addDays } from '../dateUtils.js';
 

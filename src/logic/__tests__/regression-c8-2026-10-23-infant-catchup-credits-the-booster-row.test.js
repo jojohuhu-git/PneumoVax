@@ -38,7 +38,7 @@
  * No dose, date or verdict moves: the only change is one [c] and one citation.
  */
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 import { noteCiteSlices } from '../../components/citations.jsx';
 
@@ -151,7 +151,9 @@ describe('C8 — the five-dose catch-up card credits the booster row', () => {
         cards += 1;
         const n = notesNumbers(rec).length;
         if (n === 0) missing.push(c.key);
-        if (n > 1) doubled.push(c.key);
+        // WORD-1: an at-risk baby's card now carries a second, different CDC sentence
+        // (the PPSV23 line). Two claims, two numbers; one sentence twice is the fault.
+        if (new Set(notesNumbers(rec).map((x) => x.key)).size !== n) doubled.push(c.key);
       }
     }
     expect(cards).toBe(132);

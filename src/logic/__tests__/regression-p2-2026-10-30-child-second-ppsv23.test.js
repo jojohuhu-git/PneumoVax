@@ -21,7 +21,7 @@
 // 5.1-month PCV dose.
 //
 // WHAT THE APP SAID BEFORE: both children's second PPSV23 was thrown out as
-// "too soon", and the note under it read "the next dose in this series can be
+// "too soon", and the note under it read "the Next dose from can be
 // given from Nov 15, 2027 at the earliest". For Leo the card then offered PCV20
 // or a "2nd PPSV23" — his THIRD. For Ava the card said "complete" while the
 // note under the dose pointed at another one.
@@ -30,7 +30,7 @@
 // PPSV23 doses inside five years. Every case here is hand-built.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { analyzeBoth } from '../validate.js';
 
 const PCV13_AS_A_BABY = ['2016-03-01', '2016-05-01', '2016-07-01', '2017-01-05']
@@ -113,7 +113,7 @@ describe('Leo — immunocompromised: the early second PPSV23 counts', () => {
     expect(d.repeatDueDate).toBeUndefined();
     expect(d.earliestValidDate).toBeUndefined();
     expect(d.reasons).toEqual([
-      'Given 4 years 10 months after the previous PPSV23 dose of Jan 15, 2018 — shorter than the 5 years advised between PPSV23 doses. **Counted; never give a third.**',
+      'Given 4 years 10 months after the PPSV23 of Jan 15, 2018; 5 years advised. **Counted; never give a third.**',
     ]);
     expect(d.whys).toEqual([
       "CDC's child schedule gives an immunocompromised child a second PPSV23 at least 5 years after the first, and never a third. The dose counts because setting it aside would only invite a third PPSV23.",
@@ -162,13 +162,13 @@ describe('Ava — not immunocompromised: the second PPSV23 is an extra dose', ()
       // always true (a 2-5-year-old's conjugate series can still be open) and
       // "one PPSV23" is false for a HEALTHY child, who gets none. Same four
       // points she chose: not needed, not harmful, not counted, nothing to repeat.
-      'Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition; the first was given on Jan 15, 2018. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.',
+      'Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition; first given Jan 15, 2018. Not counted. Do not repeat.',
     ]);
   });
 
   it('nothing anywhere on her screen points to another dose', () => {
     const all = everyWord(AVA);
-    expect(all).not.toContain('next dose in this series');
+    expect(all).not.toContain('Next dose from');
     expect(all).not.toContain('Nov 15, 2027');
     expect(all).not.toContain('2027-11-15');
   });
@@ -227,7 +227,7 @@ describe('Sofia — PPSV23 twice, THEN the conjugate: PCV20 only, never a third 
   it('one card, PCV20, due today, and it says why there is no PPSV23 option', () => {
     const recs = recsOf(SOFIA);
     expect(recs.map((r) => [r.vaccine, r.status, r.doseLabel])).toEqual([
-      ['PCV', 'risk-based', '1 dose PCV20 (immunocompromising)'],
+      ['PCV', 'risk-based', '1 dose PCV20 (≥5 years after first PPSV23)'],
     ]);
     expect(recs[0].dueToday).toBe(true);
     expect(recs[0].note.lead).toBe(
@@ -277,7 +277,7 @@ describe('the two cases P2 does not cover keep their own answers', () => {
     expect(third.extraDose).toBe(true);
     expect(third.effectiveDoseNum).toBeNull();
     expect(third.reasons).toEqual([
-      'Not needed: two PPSV23 doses have already been given (Nov 2, 2009 and May 18, 2017), and CDC never gives a third. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.',
+      'Not needed: two PPSV23 doses already given (Nov 2, 2009 and May 18, 2017), and CDC never gives a third. Not counted. Do not repeat.',
     ]);
   });
 

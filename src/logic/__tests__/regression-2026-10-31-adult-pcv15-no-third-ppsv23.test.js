@@ -16,7 +16,7 @@
 // ⚠ Hand-built: the grid holds no adult with two childhood PPSV23 shots.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 const IVY_20 = {
@@ -64,8 +64,8 @@ describe('Ivy at 20 with a PCV15 — the patient she was shown', () => {
 
   it('her second chip says it is not repeated', () => {
     const [first, second] = run(IVY_20).perDose.ppsv23.map((x) => x.reasons);
-    expect(first[1]).toBe('This dose does not count toward the series. It was repeated on Sep 1, 2007 — see that dose.');
-    expect(second[1]).toBe('This dose does not count toward the series. It is not repeated.');
+    expect(first[1]).toBe('Repeated on Sep 1, 2007; see that dose.');
+    expect(second[1]).toBe('Not repeated.');
   });
 });
 

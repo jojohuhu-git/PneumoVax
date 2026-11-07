@@ -400,8 +400,8 @@ export const DOSE_INTERVAL_RULES = [
             ? 'between 7 and 11 months of age'
             : 'at 12 months of age or older';
       return {
-        reasons: [`Given ${fmtDayCount(gap)} after the previous dose — for dose ${ctx.doseNumber} of the series, when the earlier dose was given ${band}, CDC's minimum interval is ${min.words}.`],
-        detail: `Gap: ${fmtDayCount(gap)} since the dose of ${fmtDate(anchor.date)}. Minimum: ${min.words} (doses up to 4 days early still count, per CDC).`,
+        reasons: [`Given ${fmtDayCount(gap)} after the last dose; minimum interval ${min.words}.`],
+        detail: `Gap: ${fmtDayCount(gap)} since the dose of ${fmtDate(anchor.date)}. Minimum: ${min.words} for dose ${ctx.doseNumber} of the series, when the earlier dose was given ${band} (doses up to 4 days early still count, per CDC).`,
       };
     },
   },
@@ -429,14 +429,14 @@ export const DOSE_INTERVAL_RULES = [
       // same-visit sentence names PCV15 alone, so it stays for a PCV15 only.
       if (gap === 0) {
         const given = anchor.product ? `a ${anchor.product} dose` : 'a PCV dose';
-        const pcv15 = anchor.product === 'PCV15' ? 'PCV15 and PPSV23 should not be given at the same visit, and ' : '';
+        const pcv15 = anchor.product === 'PCV15' ? 'PCV15 and PPSV23 should not be given at the same visit. ' : '';
         return {
-          reasons: [`Given on the same day as ${given} — ${pcv15}PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after a PCV dose.`],
-          detail: `Gap: same day. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after the PCV dose.`,
+          reasons: [`Same day as PCV; minimum interval ${SHORTER_MINIMUM_WORDS}.`],
+          detail: `${pcv15}Given on the same day as ${given}. Gap: same day. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after the PCV dose.`,
         };
       }
       return {
-        reasons: [`Given ${fmtDayCount(gap)} after the most recent PCV dose — PPSV23 is given at least ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after a PCV dose.`],
+        reasons: [`Given ${fmtDayCount(gap)} after the last PCV; minimum interval ${SHORTER_MINIMUM_WORDS}.`],
         detail: `Gap: ${fmtDayCount(gap)}. Minimum: ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} (doses up to 4 days early still count, per CDC).`,
       };
     },
@@ -492,7 +492,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'OWNER RULINGS 2026-10-29 (immunocompromised: count, never a third) and 2026-10-30 '
       + '(not immunocompromised: an extra dose). See CLINICAL_SPEC.md §K and §C-P2.',
     message: (ctx, anchor, min) => ({
-      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} advised between PPSV23 doses. **Counted; never give a third.**`,
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 of ${fmtDate(anchor.date)}; ${min.words} advised. **Counted; never give a third.**`,
       why: `CDC's child schedule gives an immunocompromised child a second PPSV23 at least ${min.words} after the first, and never a third. The dose counts because setting it aside would only invite a third PPSV23.`,
     }),
   },
@@ -676,7 +676,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'a66219a on her earlier "grey zone" answer of the same morning, she reversed it the same '
       + 'day - "Repeat - her table wins". See CLINICAL_SPEC.md §K-PPSV23THENPCV.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} between a PPSV23 and a following conjugate dose.`],
+      reasons: [`Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 of ${fmtDate(anchor.date)}; minimum interval ${min.words} before a conjugate.`],
       // The disclosure. ACIP states the 8 weeks as the timing for the next
       // dose and nowhere says an earlier dose must be repeated, so the app
       // must not let a clinician read this rejection as CDC's.
@@ -795,7 +795,7 @@ export const DOSE_INTERVAL_RULES = [
       // previous conjugate dose", which reads as "no gap was required" — the
       // exact wording fault `fmtSince`'s own comment was written about, and
       // `regression-s14-7-one-rule-table` caught it.
-      reason: `Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the previous conjugate dose — under ${min.words}, which is shorter than any pneumococcal schedule spaces them. **Counted; an optional repeat is reasonable.**`,
+      reason: `Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the last conjugate dose; under ${min.words}, shorter than any schedule. **Counted; an optional repeat is reasonable.**`,
       why: `No ACIP schedule spaces conjugate doses closer than ${min.words}, so there are no data on a gap this short — but nothing says the dose must be repeated either, and it counts. A clinician who prefers the conservative course may give an optional PCV20 or PCV21 from ${fmtDate(repeatFrom)}, ${fmtDays(PCV_PPSV23_MIN_INTERVAL_DAYS)} after the dose given. That is most worth considering for an immunocompromised patient.`,
     }),
   },
@@ -1184,7 +1184,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'PAIR, not on the risk row: whether a second PPSV23 was indicated at all is the recommendation '
       + 'engine\'s question. See CLINICAL_SPEC.md \u00a7K.',
     message: (ctx, anchor, min) => ({
-      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous PPSV23 dose of ${fmtDate(anchor.date)} — shorter than the ${min.words} advised between PPSV23 doses. **Counted; never give a third.**`,
+      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 of ${fmtDate(anchor.date)}; ${min.words} advised. **Counted; never give a third.**`,
       why: `This is the one adult interval with direct evidence behind it: immune responses to a repeat PPSV23 were lower than to the first dose for certain serotypes when the gap was under ${min.words}, and no hyporesponsiveness was seen at ${min.words} or more (ACIP, rr7203a1). The dose counts because setting it aside would only invite a third, which would deepen that effect; two PPSV23 doses is the lifetime maximum. Where more protection is wanted the next dose is a conjugate — PCV20 or PCV21.`,
     }),
   },
@@ -1303,7 +1303,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'gaps, so a catch-all keyed on it under-flags rather than over-flags. It exists so that a pair '
       + 'the enumerated rows above do not name — PCV13→PCV15, say — does not pass unremarked; without '
       + 'it, "enumerate, never generalise" would turn into silence.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous dose. For adults CDC advises at least ${min.words} between pneumococcal conjugate doses. This dose still counts.`,
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the last dose; CDC advises ≥${min.words} between adult conjugate doses. **Counted.**`,
   },
   {
     id: 'ADULT-PPSV23-AFTER-PCV-CATCH-ALL',
@@ -1331,7 +1331,7 @@ export const DOSE_INTERVAL_RULES = [
       + '≥1-year sentence is exactly the right thing to say about them. An earlier version of this '
       + 'comment claimed the row was "reachable only by a SAME-DAY pair"; that was never true, and '
       + 'it is recorded here because a row whose purpose is mis-stated is a row someone deletes.',
-    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the previous pneumococcal conjugate dose. For adults CDC advises at least ${min.words} between a conjugate dose and PPSV23. This dose still counts.`,
+    message: (ctx, anchor, min) => `Given ${fmtSince(anchor.date, ctx.doseDate)} the last conjugate dose; CDC advises ≥${min.words} before PPSV23 in adults. **Counted.**`,
   },
 ];
 

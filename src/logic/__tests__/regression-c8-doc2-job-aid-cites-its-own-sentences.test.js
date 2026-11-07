@@ -64,7 +64,7 @@
 // citations, so all 33,660 swept patients stay green while a card credits the
 // wrong document, or no document, for what it says out loud.
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { REFS, cite } from '../../data/refs.js';
 import { buildCases } from '../../test-grid.js';
 import { markerCount, noteCiteSlices } from '../../components/citations.jsx';

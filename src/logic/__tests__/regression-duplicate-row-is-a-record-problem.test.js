@@ -12,7 +12,7 @@
 //   "Given 0 days after the previous dose — the minimum interval is 8 weeks
 //    (56 days) when the earlier dose was given at 12 months of age or older."
 //   "This dose does not count toward the series — given too soon after the dose
-//    it is measured from. It is not repeated; the next dose in this series is
+//    it is measured from. Not repeated; the Next dose from is
 //    due on or after 2024-04-22."
 //
 // That sends a clinician to look at spacing, and hands them a due date, for a
@@ -38,7 +38,7 @@ const allText = (v) => [...(v.reasons ?? []), v.detail ?? ''].join(' ');
 
 const INTERVAL = /minimum interval/i;
 const DUE_DATE = /due on or after/i;
-const REPEAT = /repeat this dose only/i;
+const REPEAT = /Repeat this dose only/i;
 
 describe('one shot recorded on two rows is a record problem, not a spacing problem', () => {
   const twice = () => run({
@@ -153,7 +153,7 @@ describe('two DIFFERENT products on one day keep their verdict and gain a senten
     const v = adultPair();
     expect(v.extraDose).toBe(true);
     expect(allText(v)).toMatch(SAME_VISIT);
-    expect(allText(v)).not.toMatch(/after the series was already complete/);
+    expect(allText(v)).not.toMatch(/Series already complete with/);
   });
 
   it('and gains the sentence telling the clinician to check the record', () => {

@@ -12,6 +12,32 @@ import { Chevron } from './icons.jsx';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { dropBlankDoseRows } from '../logic/doseIdentity.js';
 
+function Pcv21GeoNote({ note, citations }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="advisory-banner advisory-banner-info" data-testid="pcv21-geo-note">
+      <button
+        type="button"
+        className="advisory-banner-title advisory-banner-toggle"
+        data-testid="pcv21-geo-toggle"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        PCV21 geographic note<Chevron open={open} />
+      </button>
+      {open && <div className="advisory-note">{note}</div>}
+      {open && citations && citations.length > 0 && (
+        <div className="rec-citations">
+          {citations.map((c, i) => (
+            <a key={i} href={c.url} target="_blank" rel="noopener noreferrer"
+              className="citation-chip" title={c.label}>{c.short || c.label}</a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Results({ state, onReset, onChange, onBack, today }) {
   const { ageMonths, dob, riskIds, pcvDoses, ppsv23Doses } = state;
   // queue P1-1 / P3-7 (S10): one clock read, threaded from App — see StepHistory.
@@ -338,23 +364,9 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             decode it. */}
       </div>
 
-      {/* PCV21 geographic advisory — blue info banner */}
-      {pcv21Geo && (
-        <div className="advisory-banner advisory-banner-info" data-testid="pcv21-geo-note">
-          <div className="advisory-banner-title">
-            PCV21 geographic note:
-          </div>
-          <div className="advisory-note">{pcv21Geo.note}</div>
-          {pcv21Geo.citations && pcv21Geo.citations.length > 0 && (
-            <div className="rec-citations">
-              {pcv21Geo.citations.map((c, i) => (
-                <a key={i} href={c.url} target="_blank" rel="noopener noreferrer"
-                  className="citation-chip" title={c.label}>{c.short || c.label}</a>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* PCV21 geographic advisory — blue info banner. WORD-1 (OWNER DECISION
+          2026-11-06): folds to its title. */}
+      {pcv21Geo && <Pcv21GeoNote note={pcv21Geo.note} citations={pcv21Geo.citations} />}
 
       {/* Standard recommendations. One arm only since 2026-10-16: the
           transplant tick used to fold these into a collapsed "reference"

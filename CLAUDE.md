@@ -623,6 +623,17 @@ under the rejected dose said *"the next dose … is due on or after"* and spent
 card already contradicted. `repeatDueDate` is its sibling, same rule and same arithmetic
 (`intervalFrom`), anchored on the dose given. **Keep both: they answer different questions.**
 
+### The Result Page Folds, And `note.lead` Means What Shows
+**WORD-1, OWNER DECISIONS 2026-11-06, `CLINICAL_SPEC.md` §WORD-1.** `noteFold.js` runs once, as the last
+step of `recommend()`, and decides which sentences stay in view. `note.lead` is what shows; the rest,
+Sources included, is behind "Why this". **Never select a clinical sentence in a component.** A sentence a
+clinician must see without a click goes in `STAY_IN_VIEW` with its reason, and in the guard's own written-out
+list, because a rule the guard imported could be deleted silently.
+`regression-word-1-2026-11-06-result-page-fold.test.js` pins visible words at 64 / 164 (wordiest 1 in 10 /
+worst): **a rise means a sentence came back into view, so move it or say why it must show.** The engine's
+own look-aheads, and a test pinning how a sentence is written or cited, read `recommendBeforeFold`. MeningoVax
+was not folded, by her choice: *"PneumoVax only."*
+
 ### The Grace Decides What The App ACCEPTS, Never What It ADVISES
 **OWNER RULING 2026-10-24**, answering the first question Ruling D left open: *"I don't need
 the app to recommend dates within the 4 day grace period. Just the routine date next dose is

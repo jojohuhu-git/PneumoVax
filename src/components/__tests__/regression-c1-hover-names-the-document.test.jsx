@@ -99,6 +99,7 @@ describe('C1 — the hover text on a raised number names its document', () => {
     // point of C1 ("this is what lets a reader match a [1] to a chip"), it
     // cannot pass while the two disagree, and it no longer has to be edited
     // every time a card gains a source.
+    fireEvent.click(container.querySelector('[data-testid="rec-note-toggle"]'));
     const chipName = new Map(
       [...container.querySelectorAll('a.citation-chip')].map((a) => [
         a.querySelector('.citation-chip-num')?.textContent.trim(),

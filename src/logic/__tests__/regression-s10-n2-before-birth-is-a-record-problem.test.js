@@ -17,7 +17,7 @@
 import { describe, it, expect } from 'vitest';
 import { analyzeBoth } from '../validate.js';
 
-const REPEAT = /repeat this dose only/i;
+const REPEAT = /Repeat this dose only/i;
 
 function verdicts({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = '2020-01-01', today = '2026-01-01', riskIds = [] }) {
   return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds });
@@ -115,7 +115,7 @@ describe('S10-N2 controls — W1 still stands for a dose that was really given',
     ] });
     const v = r.pcv.perDose[1];
     expect(v.status).toBe('invalid');
-    expect(allText(v)).toMatch(/It is not repeated/i);
+    expect(allText(v)).toMatch(/Not repeated/i);
     expect(v.recordProblem).toBeUndefined();
   });
 });

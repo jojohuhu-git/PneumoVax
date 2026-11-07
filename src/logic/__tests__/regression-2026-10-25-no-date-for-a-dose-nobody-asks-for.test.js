@@ -5,7 +5,7 @@
 //
 // The grey note under a dose rejected for TIMING ended:
 //
-//   "...It is not repeated; the next dose in this series can be given from
+//   "...Not repeated; the Next dose from can be given from
 //    2026-08-17 at the earliest."
 //
 // Swept over the grid, **647 of the 814 children** whose PPSV23 was rejected
@@ -61,7 +61,7 @@ const TODAY = '2026-10-24';
 const run = (p) => recommend({ today: TODAY, ...p });
 const chipsOf = (o) => [...o.perDose.pcv, ...o.perDose.ppsv23];
 const textOf = (d) => (d.reasons ?? []).join(' ');
-const FORWARD = 'can be given from';
+const FORWARD = 'Next dose from';
 const ASKS_FOR_NOTHING = new Set(['complete', 'no-dose-now', 'not-indicated']);
 
 describe('her worked child, and the sentence she should see', () => {
@@ -81,8 +81,8 @@ describe('her worked child, and the sentence she should see', () => {
     expect(chip.status).toBe('invalid');
     // the half that is about the dose already given SURVIVES — it still does
     // not count, and it is still not repeated
-    expect(textOf(chip)).toContain('This dose does not count toward the series');
-    expect(textOf(chip)).toContain('It is not repeated.');
+    expect(textOf(chip)).toContain('Not repeated');
+    expect(textOf(chip)).toContain('Not repeated.');
     // and the forward-looking half, with its date, is gone
     expect(textOf(chip)).not.toContain(FORWARD);
     expect(textOf(chip)).not.toMatch(/\d{4}-\d{2}-\d{2} at the earliest/);
@@ -230,7 +230,7 @@ describe('swept over the grid', () => {
     // withdrawn unchanged. §C-P2-ONE ("Leah"): an at-risk child whose ONLY
     // PPSV23 was thrown out for coming too soon after a PCV is now offered
     // PCV20 only, and that chip's "can be given from <date>" — a PPSV23 the
-    // card no longer offers — becomes "It is not repeated." The grid family is
+    // card no longer offers — becomes "Not repeated." The grid family is
     // 72 children (aged 6, 18 and 18y11m; PPSV23 on the day of, or the day
     // after, a PCV): 40 had no other dated chip and left `kept`; 32 stay,
     // because a thrown-out PCV dose on the same screen keeps its own date.
@@ -245,8 +245,8 @@ describe('swept over the grid', () => {
       let out; try { out = recommend(c.input); } catch { continue; }
       for (const d of chipsOf(out).filter((x) => x.forwardLookingReason)) {
         seen++;
-        expect(textOf(d)).toContain('This dose does not count toward the series');
-        expect(textOf(d)).toContain('It is not repeated');
+        expect(textOf(d)).toContain('Not repeated');
+        expect(textOf(d)).toContain('Not repeated');
       }
     }
     // anti-vacuity: the sweep above is worthless if nothing matches

@@ -143,7 +143,7 @@ describe('App wizard', () => {
     expect(cards.map(c => c.querySelector('.rec-vaccine-name')?.textContent)).toEqual(['PPSV23']);
     expect(screen.getByText('PCV history:')).toBeTruthy();
     expect(screen.getByText('Not counted')).toBeTruthy();
-    expect(screen.getByText(/PCV7 \(Prevnar 7\) is not counted/)).toBeTruthy();
+    expect(screen.getByText(/Treat as PCV-naïve/)).toBeTruthy();
   });
 
   it('CAR-T/B-cell checkbox skips History and shows the hard-stop with no rec cards', () => {

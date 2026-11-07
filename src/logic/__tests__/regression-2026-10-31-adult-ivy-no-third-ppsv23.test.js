@@ -6,13 +6,13 @@
 // said "repeat this dose only". For a child the owner had ruled "PCV20 only";
 // asked about Ivy grown up, she chose the same: PCV20 or PCV21 only, PCV15
 // dropped with the reason given, no third PPSV23 at any age, and the second
-// chip reads "It is not repeated."
+// chip reads "Not repeated."
 //
 // ⚠ Hand-built: the grid holds no adult with two childhood PPSV23 shots
 // that were both thrown out.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 const IVY_20 = {
@@ -34,8 +34,8 @@ describe('Ivy at 20 — the patient she was shown', () => {
 
   it('her second chip says it is not repeated; her first still points to the second', () => {
     const [first, second] = chips(IVY_20);
-    expect(first[1]).toBe('This dose does not count toward the series. It was repeated on Sep 1, 2007 — see that dose.');
-    expect(second[1]).toBe('This dose does not count toward the series. It is not repeated.');
+    expect(first[1]).toBe('Repeated on Sep 1, 2007; see that dose.');
+    expect(second[1]).toBe('Not repeated.');
   });
 
   it('nothing else moves: same status, due today, no PPSV23 card', () => {
@@ -74,7 +74,7 @@ describe('her ruling, at every adult age', () => {
     // The grey-area sentence carries two CDC citations of its own.
     expect(r.noteCites.map((c) => c.key)).toEqual(expect.arrayContaining(['cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days']));
     expect(r.noteCites).toHaveLength(`${r.note.lead} ${r.note.detail}`.split('[c]').length - 1);
-    expect(chips(p)[1][1]).toContain('It is not repeated. Grey area:');
+    expect(chips(p)[1][1]).toContain('Not repeated. Grey area:');
   });
 });
 

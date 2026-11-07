@@ -23,7 +23,7 @@
 // PneumoVax also has no "Needs input" machinery, so unlike MeningoVax's
 // version of this sentence, this one must not promise that the app will ask.
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import Disclaimer from '../Disclaimer.jsx';
 import { recommend } from '../../logic/recommend.js';
@@ -31,6 +31,7 @@ import { recommend } from '../../logic/recommend.js';
 describe('P6-7 — the disclaimer says the app knows only TODAY\'s risk status', () => {
   it('states that only current risk status is tracked', () => {
     render(<Disclaimer />);
+    fireEvent.click(screen.getByTestId('disclaimer-toggle'));
     const text = screen.getByRole('note').textContent;
     expect(text).toMatch(/current/i);
     expect(text).toMatch(/risk/i);
@@ -39,6 +40,7 @@ describe('P6-7 — the disclaimer says the app knows only TODAY\'s risk status',
 
   it('names the PPSV23 2–5 year case specifically', () => {
     render(<Disclaimer />);
+    fireEvent.click(screen.getByTestId('disclaimer-toggle'));
     const text = screen.getByRole('note').textContent;
     expect(text).toMatch(/PPSV23/);
     expect(text).toMatch(/counted|counts/i);
@@ -49,6 +51,7 @@ describe('P6-7 — the disclaimer says the app knows only TODAY\'s risk status',
     // for the risk status on a specific date. PneumoVax has no such prompt,
     // so copying that half would be a promise the app cannot keep.
     render(<Disclaimer />);
+    fireEvent.click(screen.getByTestId('disclaimer-toggle'));
     const text = screen.getByRole('note').textContent;
     expect(text).not.toMatch(/Needs input/i);
     expect(text).not.toMatch(/will ask|asks for it directly/i);

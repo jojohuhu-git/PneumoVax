@@ -38,8 +38,8 @@ import { recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 
 const TODAY = '2026-10-25';
-const REPEAT = /repeat this dose only/i;
-const GIVE_PCV20 = /give a dose of PCV20 instead/i;
+const REPEAT = /Repeat this dose only/i;
+const GIVE_PCV20 = /Give PCV20 instead/i;
 // The sentence an age-rejected CONJUGATE carries since OWNER DECISION
 // 2026-10-29 — product-free, because the product is not what was wrong.
 const ANY_APPROVED = /any PCV approved/i;

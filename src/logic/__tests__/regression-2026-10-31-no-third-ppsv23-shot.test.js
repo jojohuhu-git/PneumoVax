@@ -24,7 +24,7 @@
 // ⚠ Hand-built: the grid holds no child with two PPSV23 doses this close.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { addCalendarMonths } from '../dateUtils.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
@@ -69,7 +69,7 @@ describe('Max — Sam\'s twin, cochlear implant, not immunocompromised', () => {
   it('the chip under his Jan 5 dose names the grey area and promises no PPSV23', () => {
     const chip = out.perDose.ppsv23[1].reasons.join(' ');
     expect(chip).toContain(GREY_HEAD + MAX_TAIL);
-    expect(chip).toContain('It is not repeated.');
+    expect(chip).toContain('Not repeated.');
     expect(chip).not.toContain('Mar 2, 2025');
   });
 
@@ -114,7 +114,7 @@ describe('Noah — first PPSV23 thrown out for spacing, the repeat thrown out to
 
   it('the chip under his repeat no longer promises a PPSV23 from Aug 5, 2023', () => {
     const chip = out.perDose.ppsv23[1].reasons.join(' ');
-    expect(chip).toContain('It is not repeated.');
+    expect(chip).toContain('Not repeated.');
     expect(chip).not.toContain('Aug 5, 2023');
   });
 

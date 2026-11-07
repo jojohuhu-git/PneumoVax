@@ -21,7 +21,7 @@
 // ⚠ Hand-built: the grid holds no child with a thrown-out PPSV23 and a repeat.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { addCalendarMonths, addDays } from '../dateUtils.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));

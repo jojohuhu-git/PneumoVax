@@ -310,7 +310,7 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
     // the call sites that print the sentence:
     //
     //      310  Complete (PCV15 + PPSV23 at/after age 6)
-    //      228  1 dose PCV20 (immunocompromising)
+    //      228  1 dose PCV20 (≥5 years after first PPSV23)
     //      144  PCV complete (includes PCV20)          <- added by FINDING K
     //      112  Option A: 1 dose PCV20 (>=8 weeks)
     //       70  Complete (a PCV of unrecorded product + PPSV23 ...)

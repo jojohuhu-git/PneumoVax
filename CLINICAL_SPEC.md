@@ -535,7 +535,7 @@ PCV20)", and every one a finished series containing a PCV20. A second hand-built
 **9,900 typical children** aged 2–18 (on-time and late baby series, each product mix, with
 and without a PPSV23 at age 2, eight risk profiles) moved **1,260**: 924 from a dose to
 complete — including **252 immunocompromised children with a PPSV23 at 2**, who had been told
-"1 dose PCV20 (immunocompromising)" and now read complete under the 2026-10-23 Group B ruling
+"1 dose PCV20 (≥5 years after first PPSV23)" and now read complete under the 2026-10-23 Group B ruling
 — and 336 already-complete cards whose wording changed to "PCV complete (includes PCV20)".
 Against an independent reading of CDC's rows, that set has **0** disagreements after the fix
 and **924** before. Guard:
@@ -1099,7 +1099,7 @@ too-young first dose's repeat (`repeatOfUnderAgeDose`), so Ivy gets none. Her ca
 chip under her second shot — found reading *"repeat this dose only"* when the app was driven,
 beside a card offering no PPSV23 — now reads *"This dose does not count toward the series. It is
 not repeated."*, as Noah's repeat does (his ruling: the chip under the repeat drops its promise of
-a further PPSV23). `validate.js` hands over every dose's `closingSentence` and `closingLead`, so
+a further PPSV23). `validate.js` hands over every dose's `closingSentence`, so
 the swap works for a shot thrown out on age as well as on timing.
 
 A row that is not a shot is not counted as one: a dose dated in the future or before birth (a
@@ -1925,7 +1925,7 @@ sentence built somewhere else is the kind of coupling that breaks silently when 
 changes"*, as its own comment puts it. The new branch keys on `remedyProduct`, set by
 `remedyIsAnotherProduct()` in `validate.js`, the same shape.
 
-**A near miss, recorded.** The first draft reused `DOES_NOT_COUNT_LEAD`, which carries the
+**A near miss, recorded.** The first draft reused the timing sentence (since shortened by WORD-1), which carries the
 clause *"given too soon after the dose it is measured from"* — so the chip claimed a timing
 fault on a dose whose timing is irrelevant. Caught by driving the engine, not by the suite,
 and pinned by the guard.
@@ -3635,6 +3635,36 @@ which is the infant block above. Printing "could be given tomorrow" beside "wait
 would argue against the card's own advice, and the chip under a dose already explains an
 early one. The same session added that note for the one place it was missing
 (§K-IC-PCV20-5Y). **Closed; do not re-open without a new owner decision.**
+
+### §WORD-1, 2026-11-06 — the result page folds (OWNER DECISIONS)
+
+Her answers on `docs/archive/report-2026-11-06-wordy-result-pages.md`, one by one: hide explanations
+under "Why this" and shorten the 20 most common lines under recorded doses; the Sources row goes inside
+"Why this"; an invalid dose shows the gap and the action without a click; PPSV23 shows wherever PCV15
+is offered to an at-risk patient; the disclaimer's risk-history paragraph and the PCV21 geographic note
+go behind a click. On her own wording, "This dose isn't harmful, it isn't counted, and nothing needs to
+be repeated": *"Shorten it"*, to "Not counted. Do not repeat." MeningoVax: *"PneumoVax only."*
+
+**No dose, date, interval, status or citation moves.** Both saved-answer files are unchanged. Across both
+grids no card sentence was lost; `noteFold.js` only moves sentences, each with its own citation. One
+sentence is new: "If PCV15 is used, PPSV23 may follow from age 2 years, ≥8 weeks after the most recent
+PCV", on an at-risk baby's card, for a series with no PCV20. It says "may" because what follows at 2 depends
+on doses not yet given, and it cites the row her age-2 card cites. CDC's Child Notes, read live 2026-11-06,
+Age 2–5 years: *"Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks
+after the most recent PCV dose."*
+
+**What stays in view is `STAY_IN_VIEW` in `noteFold.js`.** The report's table, plus three the build found:
+"Only if PPSV23 was not previously given", the "turns 19" lines on a child answered by the adult schedule,
+and "This child has already had a PPSV23". "Choose…" and the PCV15 sentences on the 2–5 catch-up came
+forward from behind "Why this". So did the minimum beside an advised date: C10-2's "both numbers go on the
+card" had been behind the click since it was written.
+
+**Two headings now carry what the fold hid:** "1 dose PCV20 (≥5 years after first PPSV23)", which read
+"(immunocompromising)", and "2nd PPSV23 (alternative, ≥5 years after first)", which read "≥5y".
+
+**The same shortening reaches the three sibling lines** that closed with her wording: a second PPSV23 for a
+child with no immunocompromising condition, a third PPSV23, and Noor's PCV15. Showing PCV7's line once
+under a run of PCV7 doses is the report's rewrite 3; each dose keeps its "Not counted" chip.
 
 ### §L-2, 2026-11-06 — "Routine", and no interval before a first dose (P2-9, P2-10, OWNER)
 

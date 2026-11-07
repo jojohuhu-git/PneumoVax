@@ -13,7 +13,7 @@
 // the PCV or the PPSV23 ... After PCV15: the same 1-year interval applies. No
 // PPSV23 is needed after that dose."*
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 // A card's note is a string on some cards and { lead, detail } on others.

@@ -145,14 +145,14 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
   it('says so in plain English, and names the earliest valid date instead of "repeat"', () => {
     const a = pcv(['2026-03-01', '2026-03-15'], { am: 4, today: '2026-05-01' });
     const reasons = a.perDose[1].reasons.join(' ');
-    expect(reasons).toMatch(/14 days after the previous dose/);
+    expect(reasons).toMatch(/14 days after the last dose/);
     expect(reasons).toMatch(/4 weeks/);
     // OWNER RULING 2026-10-24: the full 28 days from the dose of 2026-03-15,
     // with no 4-day grace — the grace decides what the app ACCEPTS, never what
     // it ADVISES. Was 2026-04-08.
-    expect(reasons).toMatch(/can be given from Apr 12, 2026 at the earliest/);
+    expect(reasons).toMatch(/Next dose from Apr 12, 2026 at the earliest/);
     expect(reasons).not.toMatch(/2026-04-08/);
-    expect(reasons).not.toMatch(/repeat this dose only/);
+    expect(reasons).not.toMatch(/Repeat this dose only/);
   });
 
   it('cannot check an interval it has no dates for', () => {
@@ -253,7 +253,7 @@ describe('peds audit P1-4 — PPSV23 must follow PCV by 8 weeks, and never the s
   it('PCV15 and PPSV23 on the same day: the PPSV23 does not count', () => {
     const out = withBoth('2026-03-02', '2026-03-02');
     expect(out.perDose.ppsv23[0].status).toBe('invalid');
-    expect(out.perDose.ppsv23[0].reasons.join(' ')).toMatch(/same visit/i);
+    expect(out.perDose.ppsv23[0].detail).toMatch(/same visit/i);
     expect(out.recs.every((r) => r.status !== 'complete')).toBe(true);
   });
 

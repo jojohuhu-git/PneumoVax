@@ -55,7 +55,7 @@ describe('S14-7 symptom 1 — PCV15 and PPSV23 on the same day', () => {
   it('a child\'s dose does not count, and the reason names the same-visit rule', () => {
     const a = ppsvAfter(pcv, ['2026-01-10'], CHILD, ['hiv']);
     expect(a.perDose[0].status).toBe('invalid');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/same visit/i);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/Same day as PCV/);
   });
 
   // ⚠️ REVERSED BY OWNER RULING 2026-10-25, and kept as the record of the
@@ -133,12 +133,12 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
     expect(nonIC.status).toBe('valid');
     expect(nonIC.extraDose).toBe(true);
     expect(nonIC.effectiveDoseNum).toBeNull();
-    expect(nonIC.reasons.join(' ')).toMatch(/^Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition/);
+    expect(nonIC.reasons.join(' ')).toMatch(/^Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition/);
     // Asplenia — her ruling of 2026-10-29: count it, never a third.
     const ic = ppsvAfter([], twoYears, CHILD13, ['asplenia']).perDose[1];
     expect(ic.status).toBe('valid');
     expect(ic.effectiveDoseNum).toBe(2);
-    expect(ic.reasons.join(' ')).toMatch(/shorter than the 5 years.*never give a third/i);
+    expect(ic.reasons.join(' ')).toMatch(/5 years advised.*never give a third/i);
   });
 
   // ⚠️ THE HEADLINE CASE, AND IT STILL HOLDS WHERE IT MATTERS. Before S14-7
@@ -153,7 +153,7 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
     expect(a.perDose[1].effectiveDoseNum).toBe(2);
     expect(a.effective).toHaveLength(2);
     expect(a.perDose[1].reasons.length).toBeGreaterThan(0);
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 5 years/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/5 years advised/);
     expect(a.perDose[1].reasons.join(' ')).toMatch(/never give a third/i);
   });
 
@@ -241,7 +241,7 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     const who = { ageMonths: 68 * 12, dob: '1958-05-01' };
     const a = ppsvAfter([], ['2021-06-01', '2024-06-01'], who);
     expect(a.perDose[1].status).toBe('valid');
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 5 years/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/5 years advised/);
   });
 
   // ⚠️ REVERSED BY OWNER RULING 2026-10-25. Nothing is dropped any more, so

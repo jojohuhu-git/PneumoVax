@@ -31,7 +31,7 @@ describe('P2-3: no "at or after age 6" over a dose given before 6', () => {
 
   it('an immunocompromised child with the same history keeps her dose, without the claim', () => {
     const r = run(['asplenia'], [...doses('PCV13', BABY), ...doses('PCV15', ['2026-01-01'])], doses('PPSV23', ['2020-07-01']));
-    expect(r.recs.some((c) => c.doseLabel === '1 dose PCV20 (immunocompromising)')).toBe(true);
+    expect(r.recs.some((c) => c.doseLabel === '1 dose PCV20 (≥5 years after first PPSV23)')).toBe(true);
     expect(allText(r)).not.toMatch(AT_6_OR_LATER);
   });
 

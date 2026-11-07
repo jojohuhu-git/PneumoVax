@@ -53,7 +53,7 @@ describe('a sentence prints a date the way a person writes one', () => {
   it('the chip under a rejected dose reads "Nov 9, 2026", not "2026-11-09"', () => {
     const dose = analyzeBoth({ ...CHILD }).pcv.perDose.at(-1);
     const text = dose.reasons.join(' ');
-    expect(text).toContain('can be given from Nov 9, 2026 at the earliest');
+    expect(text).toContain('Next dose from Nov 9, 2026 at the earliest');
     expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}/);
   });
 

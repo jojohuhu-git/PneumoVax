@@ -4,8 +4,8 @@
  * ── WHAT A CLINICIAN SAW ──────────────────────────────────────────────────
  *
  * An immunocompromised child who has already had a PPSV23 is shown two cards:
- * "1 dose PCV20 (immunocompromising)" and, beside it, "2nd PPSV23 (alternative,
- * ≥5y after first)" — one dose, two products to choose between. CDC's schedule
+ * "1 dose PCV20 (≥5 years after first PPSV23)" and, beside it, "2nd PPSV23 (alternative,
+ * ≥${LONG_GAP_WORDS} after first)" — one dose, two products to choose between. CDC's schedule
  * notes were listed under both and numbered on neither except the PCV20 one,
  * and then only on the branch where a conjugate was given at or after age 6.
  *
@@ -41,12 +41,12 @@
  * No dose, date, product or verdict moves on any of the 702.
  */
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 import { noteCiteSlices } from '../../components/citations.jsx';
 
-const PCV20_CARD = '1 dose PCV20 (immunocompromising)';
-const ALTERNATIVE_CARD = '2nd PPSV23 (alternative, ≥5y after first)';
+const PCV20_CARD = '1 dose PCV20 (≥5 years after first PPSV23)';
+const ALTERNATIVE_CARD = '2nd PPSV23 (alternative, ≥5 years after first)';
 const NOTES_URL = 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo';
 
 /** The four rows of CDC's immunocompromising list that state this step. */

@@ -27,7 +27,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { recommend } from '../recommend.js';
 
-const pcv20Card = (r) => r.recs.find((x) => x.doseLabel === '1 dose PCV20 (immunocompromising)');
+const pcv20Card = (r) => r.recs.find((x) => x.doseLabel === '1 dose PCV20 (≥5 years after first PPSV23)');
 const ppsv2Card = (r) => r.recs.find((x) => x.doseLabel.startsWith('2nd PPSV23'));
 
 const NOOR_DOB = '2016-10-11';
@@ -150,7 +150,7 @@ describe('one rule, one reading', () => {
   });
 
   it('every 2nd-PPSV23 card sits beside the PCV20 card that shares its date', () => {
-    const cards = source.match(/doseLabel: '2nd PPSV23 \(alternative, ≥5y after first\)'/g) ?? [];
+    const cards = source.match(/doseLabel: `2nd PPSV23 \(alternative, ≥\$\{LONG_GAP_WORDS\} after first\)`/g) ?? [];
     expect(cards).toHaveLength(4);
   });
 });

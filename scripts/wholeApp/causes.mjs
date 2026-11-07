@@ -51,6 +51,7 @@ export const CAUSES = {
     title: 'A dose already due before 19 stays on the child rules; the adult answer starts on the birthday (§B-AT19, 2026-11-05)',
   },
   'line-doing-its-job': { class: 'info', title: 'An age line changing exactly what its rule says' },
+  'p2-9-routine-then-behind': { class: 'info', title: 'A baby reads Routine until the routine date passes, then Catch-up (P2-9, §L-2)' },
   unsorted: { class: 'unsorted', title: 'Not yet sorted' },
 };
 
@@ -58,6 +59,7 @@ export const CAUSES = {
 export function causeOf(check, kind, group) {
   if (check === 'harness') return 'unsorted';
   if (kind === 'line-changes-what-the-rule-says' || kind === 'dose-line-changes-what-the-rule-says') return 'line-doing-its-job';
+  if (kind === 'status-changed-with-no-age-line' && / routine → catchup$/.test(group)) return 'p2-9-routine-then-behind';
   if (check === 1) {
     if (kind === 'warned-short' && /rule=ADULT-PPSV23-AFTER-PPSV23/.test(group)) return 'R4-thrown-out-ppsv23-chip';
   }
@@ -121,7 +123,7 @@ export const expectedAtAgeLine = (line, diff) => CARD_MOVES.some(([l, re]) => l 
 
 /** A card asking for a dose the day before 19 that reads Complete on the birthday. */
 export const askTurnsToComplete = (line, diff) => line === 228
-  && /^cards: .*(1 dose PCV20 \(immunocompromising\)|Option [AB]).* → Complete \(/.test(diff);
+  && /^cards: .*(1 dose PCV20 \(≥5 years after first PPSV23\)|Option [AB]).* → Complete \(/.test(diff);
 
 /**
  * Doses given around a line. CDC's 4-day grace is for a MINIMUM age, so it
