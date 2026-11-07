@@ -914,7 +914,9 @@ export const CHILD_LANES = [
       { kind: 'none' },
       { kind: 'none' },
     ],
-    result: { text: 'Complete', note: `From ${yrs(AGE.m60)}: no catch-up; not indicated. Re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)}.` },
+    // Owner 2026-11-07 (Ava, Leo, Nina, §B-50BABY / §B-5TO18): no "re-evaluate"
+    // once a PCV20 has been given — at 50 the app reads Complete.
+    result: { text: 'Complete', note: `From ${yrs(AGE.m60)}: no catch-up; not indicated. Re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)}, unless a PCV20 has been given.` },
     cite: ['pedsHealthyCatchup', 'adultRoutine50'],
     ex: [P.healthy3, P.healthy6],
   },
