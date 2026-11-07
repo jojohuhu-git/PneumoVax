@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-06 by `handoff-2026-11-06-fold-built.md`.** WORD-1 is built. Do not resume from this file.
+
 # PneumoVax — Handoff: wording queue finished, result-page fold decided, not built (2026-11-06)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. The app is a client-side React page. Its promise: never

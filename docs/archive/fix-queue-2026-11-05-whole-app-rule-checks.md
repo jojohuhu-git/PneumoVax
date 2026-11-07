@@ -176,5 +176,5 @@ wording. No dose or date moves.
 
 ### WORD-1 — OWNER: fold the result page
 
-**Built 2026-11-06 on `feat/word-1-fold-result-page`, awaiting her look at the first cards.** `CLINICAL_SPEC.md`
+**DONE 2026-11-06 on `feat/word-1-fold-result-page`.** She saw the first cards and said to open the PR. `CLINICAL_SPEC.md`
 §WORD-1. Report: `docs/archive/report-2026-11-06-wordy-result-pages.md`.
