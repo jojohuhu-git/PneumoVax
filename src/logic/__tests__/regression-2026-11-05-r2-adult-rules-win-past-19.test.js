@@ -115,14 +115,14 @@ describe('a child who reaches the dose before 19 does not change', () => {
       ...tess, dob: '2014-10-11', pcvDoses: [{ product: 'PCV15', date: '2026-08-10' }], today: TODAY,
     });
     expect(r.recs.map((c) => c.doseLabel)).toEqual([
-      '1 dose PCV20 (immunocompromising)', '2nd PPSV23 (alternative, ≥5y after first)',
+      '1 dose PCV20 (≥5 years after first PPSV23)', '2nd PPSV23 (alternative, ≥5 years after first)',
     ]);
     expect(r.recs[0].earliestNextDate).toBe('2031-10-12');
   });
 
   it('a date the day before the 19th birthday stays a child card', () => {
     const r = recommend({ ...tess, dob: '2012-10-13', today: TODAY });
-    expect(r.recs.map((c) => c.doseLabel)).toContain('1 dose PCV20 (immunocompromising)');
+    expect(r.recs.map((c) => c.doseLabel)).toContain('1 dose PCV20 (≥5 years after first PPSV23)');
   });
 
   it('a date ON the 19th birthday is already an adult answer', () => {

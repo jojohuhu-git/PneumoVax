@@ -97,7 +97,7 @@ describe('S14-4B — a PPSV23 recorded after the series already completed', () =
       ageMonths: AM, today: TODAY, dob: DOB, riskIds: [],
     });
     const t = r.ppsv23.perDose[0].reasons.join(' ');
-    expect(t, 'neither dose came "after" the other').not.toMatch(/after the series was already complete/);
+    expect(t, 'neither dose came "after" the other').not.toMatch(/Series already complete with/);
     expect(r.ppsv23.perDose[0].extraDose).toBe(true);
     expect(t).toMatch(/given at the same visit as the/i);
   });

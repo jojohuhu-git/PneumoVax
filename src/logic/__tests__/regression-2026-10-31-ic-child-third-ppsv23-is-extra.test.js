@@ -45,7 +45,7 @@ describe('Lily — her on-time third PPSV23 is an extra dose', () => {
     expect(c.extraDose).toBe(true);
     expect(c.effectiveDoseNum).toBeNull();
     expect(c.reasons.join(' ')).toContain(
-      'Not needed: two PPSV23 doses have already been given (May 10, 2010 and Jun 1, 2015), and CDC never gives a third.',
+      'Not needed: two PPSV23 doses already given (May 10, 2010 and Jun 1, 2015), and CDC never gives a third.',
     );
     expect(analyzeBoth(LILY).ppsv23.effective.map((x) => x.date)).toEqual(['2010-05-10', '2015-06-01']);
   });

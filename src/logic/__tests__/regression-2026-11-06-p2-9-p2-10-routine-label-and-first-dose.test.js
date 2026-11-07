@@ -13,7 +13,7 @@
  * No dose, date or interval changes in either.
  */
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const TODAY = '2026-11-06';
 const run = (dob, riskIds, pcv = [], ppsv = []) => recommend({

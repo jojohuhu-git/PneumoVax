@@ -207,7 +207,7 @@ describe('RULING D — the advised repeat is measured from the invalid dose', ()
   it('THE THIRD SURFACE: the recorded-dose chip agrees with the card', () => {
     // Found by driving the running app, not by the suite. The rec card said
     // "Not yet due — eligible Dec 7, 2026" while the chip immediately below it
-    // said "the next dose in this series is due on or after 2026-10-15" — the
+    // said "the Next dose from is due on or after 2026-10-15" — the
     // last VALID dose plus the gap. Two dates for one dose on one screen, the
     // shape of the P0 bug fixed the same morning.
     //
@@ -228,7 +228,7 @@ describe('RULING D — the advised repeat is measured from the invalid dose', ()
     // 2026-11-05, which left a fourth date on the screen; see
     // regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js.
     expect(rejected.repeatDueDate).toBe('2026-11-09');
-    const sentence = rejected.reasons.find((r) => /next dose in this series/.test(r));
+    const sentence = rejected.reasons.find((r) => /Next dose from/.test(r));
     expect(sentence).toContain('Nov 9, 2026');
     expect(sentence).not.toContain('2026-10-15');
     expect(sentence).not.toContain('2026-11-05');

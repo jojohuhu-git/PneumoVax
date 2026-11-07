@@ -11,7 +11,7 @@
  * Wording only: same products, same status, same date.
  */
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const TODAY = '2026-11-06';
 const IC_TWO_PPSV = (lastPpsv) => ({

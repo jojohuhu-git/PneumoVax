@@ -26,7 +26,7 @@
 // due date would be the worst kind.
 // ─────────────────────────────────────────────────────────────────────────
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const TODAY = '2026-10-24';
 const pcvCard = (p) => recommend({ today: TODAY, ...p }).recs.find((r) => r.vaccine === 'PCV');

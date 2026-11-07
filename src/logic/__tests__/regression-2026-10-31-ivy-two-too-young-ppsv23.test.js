@@ -15,7 +15,7 @@
 // ⚠ Hand-built: the grid holds no child with two PPSV23 doses under age 2.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 const IVY = {
@@ -49,7 +49,7 @@ describe('Ivy', () => {
   it('the chip under her second shot says it is not repeated — no "repeat this dose only"', () => {
     expect(out.perDose.ppsv23[1].reasons).toEqual([
       'Given at ~20 months — below the 2-year minimum age for PPSV23[c].',
-      'This dose does not count toward the series. It is not repeated.',
+      'Not repeated.',
     ]);
   });
 
@@ -83,10 +83,10 @@ describe('limits — a row that is not a shot is not counted as one', () => {
     expect(out.recs[0].note.detail).toContain('so the Jan 5, 2025 dose is not counted');
   });
 
-  it('Sam\'s repeat, thrown out for timing, keeps its timing reason in front of "It is not repeated"', () => {
+  it('Sam\'s repeat, thrown out for timing, keeps its timing reason in front of "Not repeated"', () => {
     const sam = { ...IVY, ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-05']) };
     expect(recommend(sam).perDose.ppsv23[1].reasons[1]).toMatch(
-      /^This dose does not count toward the series — given too soon after the dose it is measured from\. It is not repeated\. Grey area:/,
+      /^Not repeated\. Grey area:/,
     );
   });
 });

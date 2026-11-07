@@ -51,7 +51,7 @@ describe('Ava, on time — the second PPSV23 is an extra dose', () => {
     expect(dz.effectiveDoseNum).toBeNull();
     expect(dz.earlyAdvisory).toBeUndefined();
     expect(dz.reasons).toEqual([
-      'Not needed: CDC gives a second PPSV23 only to a child with an immunocompromising condition; the first was given on Jan 15, 2018. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.',
+      'Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition; first given Jan 15, 2018. Not counted. Do not repeat.',
     ]);
     expect(analyzeBoth(AVA_ON_TIME).ppsv23.effective.map((x) => x.date)).toEqual(['2018-01-15']);
   });
@@ -109,7 +109,7 @@ describe('Ben — an extra PPSV23 still holds off a conjugate for 8 weeks', () =
     const pcv = analyzeBoth(BEN).pcv.perDose[0];
     expect(pcv.status).toBe('invalid');
     expect(pcv.intervalRuleId).toBe('CHILD-PCV-AFTER-PPSV23');
-    expect(pcv.reasons[0]).toContain('Given 1 day after the PPSV23 dose of Sep 1, 2021');
+    expect(pcv.reasons[0]).toContain('Given 1 day after the PPSV23 of Sep 1, 2021');
   });
 
   it('so his card still asks for the conjugate, as it did', () => {

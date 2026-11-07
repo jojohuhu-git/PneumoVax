@@ -9,7 +9,7 @@
 // did not follow RULING D there, and said so on screen:
 //
 //   Maya, 8, asplenia — PPSV23 1 Oct 2026, PCV20 15 Oct 2026
-//     chip:  "the next dose ... can be given from Dec 10, 2026 at the earliest"
+//     chip:  "the next dose ... Next dose from Dec 10, 2026 at the earliest"
 //     card:  "Not yet due — eligible Nov 26, 2026"
 //
 // Two dates, 14 days apart, for the same next dose. The card measured 8 weeks

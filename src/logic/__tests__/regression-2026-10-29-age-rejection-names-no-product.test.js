@@ -10,7 +10,7 @@
 // later — described as a patient the app tells to "repeat this dose".
 //
 // MIA IS NOT SUCH A PATIENT. Her dose is rejected for TIMING, and since W1
-// (2026-10-11) a timing rejection reads "It is not repeated; the next dose in
+// (2026-10-11) a timing rejection reads "Not repeated; the next dose in
 // this series can be given from <date>" and names no product at all. So the
 // answer was given about one family and applied to another: babies whose
 // conjugate was thrown out for being given before 6 weeks of age.
@@ -32,7 +32,7 @@
 //
 // ⚠ WHAT THIS DOES **NOT** TOUCH, and each exclusion is a separate reason:
 //
-//   a child's PCV21        STILL says "give a dose of PCV20 instead". PCV21 is
+//   a child's PCV21        STILL says "Give PCV20 instead". PCV21 is
 //                          licensed from 18 years and appears nowhere in CDC's
 //                          paediatric recommendations, so repeating it would be
 //                          thrown out again. This is the one case her rule
@@ -69,24 +69,24 @@ const ayla = {
 
 describe('Ayla — a conjugate thrown out on age names no product', () => {
   it('does not tell the clinician to give PCV20', () => {
-    expect(chip(recommend(ayla))).not.toMatch(/give a dose of PCV20 instead/);
+    expect(chip(recommend(ayla))).not.toMatch(/Give PCV20 instead/);
   });
 
   it('does not tell the clinician to repeat the same vaccine either', () => {
-    expect(chip(recommend(ayla))).not.toMatch(/repeat this dose only/);
+    expect(chip(recommend(ayla))).not.toMatch(/Repeat this dose only/);
   });
 
   it('says any PCV approved for her age may be used, and names the minimum age', () => {
     const text = chip(recommend(ayla));
-    expect(text).toMatch(/does not count toward the series/);
+    expect(text).toMatch(/Do not restart the series/);
     // ⚠ THE WHOLE CLAUSE, not just "6 weeks minimum age". The first chip line
     // already reads "below the 6 weeks minimum age for PCV15", so the loose
     // regex matched text that was there before this change and passed for the
     // wrong reason — mutating `stillTooYoung` to a constant `false` broke
     // nothing in the whole 1,684-test suite. Found by mutating, not by review.
-    expect(text).toMatch(/a further dose can be given from the 6 weeks minimum age at the earliest/);
-    expect(text).toMatch(/any PCV approved for that age may be used/i);
-    expect(text).toMatch(/do not restart the series/);
+    expect(text).toMatch(/A further dose can be given from the 6 weeks minimum age at the earliest/);
+    expect(text).toMatch(/any PCV approved for that age/i);
+    expect(text).toMatch(/Do not restart the series/);
   });
 
   it('states no date on the chip — the card owns the due date', () => {
@@ -111,7 +111,7 @@ describe('the three families this does not reach', () => {
       pcvDoses: [{ product: 'PCV21', date: '2026-06-01' }],
       ppsv23Doses: [], riskIds: ['asplenia'],
     };
-    expect(chip(recommend(child))).toMatch(/give a dose of PCV20 instead/);
+    expect(chip(recommend(child))).toMatch(/Give PCV20 instead/);
   });
 
   it('still says "repeat this dose only" for a too-young PPSV23', () => {
@@ -120,7 +120,7 @@ describe('the three families this does not reach', () => {
       pcvDoses: [], ppsv23Doses: [{ date: '2026-10-01' }], riskIds: ['asplenia'],
     };
     const text = chip(recommend(toddler), 'ppsv23');
-    expect(text).toMatch(/repeat this dose only/);
+    expect(text).toMatch(/Repeat this dose only/);
     expect(text).not.toMatch(/any PCV approved/i);
   });
 
@@ -143,8 +143,8 @@ describe('an 18-year-old whose PCV21 was given a month too early', () => {
 
   it('does not name a product, because two are approved for her now', () => {
     const text = chip(recommend(justEighteen));
-    expect(text).toMatch(/does not count toward the series/);
-    expect(text).not.toMatch(/repeat this dose only/);
+    expect(text).toMatch(/Do not restart the series/);
+    expect(text).not.toMatch(/Repeat this dose only/);
     expect(text).toMatch(/any PCV approved/i);
   });
 
@@ -164,15 +164,15 @@ describe('the whole grid', () => {
     const doses = out.orderedDoses?.pcv ?? [];
     (out.perDose?.pcv ?? []).forEach((d, i) => {
       const text = (d.reasons ?? []).join(' ');
-      if (text.includes('repeat this dose only')) tally.conjugateRepeatOnly++;
-      if (text.includes('give a dose of PCV20 instead')) tally.pcv20Remedy++;
+      if (text.includes('Repeat this dose only')) tally.conjugateRepeatOnly++;
+      if (text.includes('Give PCV20 instead')) tally.pcv20Remedy++;
       if (/any PCV approved/i.test(text)) tally.anyApproved++;
       if (d.remedyProduct === 'PCV20' && doses[i]?.product !== 'PCV21') {
         throw new Error(`a ${doses[i]?.product} was told to give PCV20: ${c.key}`);
       }
     });
     (out.perDose?.ppsv23 ?? []).forEach((d) => {
-      if ((d.reasons ?? []).join(' ').includes('repeat this dose only')) tally.ppsv23RepeatOnly++;
+      if ((d.reasons ?? []).join(' ').includes('Repeat this dose only')) tally.ppsv23RepeatOnly++;
     });
   }
 

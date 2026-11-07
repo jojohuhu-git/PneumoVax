@@ -157,7 +157,7 @@ describe('the second PPSV23 — the family she kept OUT of the new clock', () =>
     const d = second();
     expect(d.status).toBe('valid');
     expect(d.effectiveDoseNum).toBe(2);
-    expect(d.reasons.join(' ')).toMatch(/shorter than the 5 years/);
+    expect(d.reasons.join(' ')).toMatch(/5 years advised/);
     expect(d.reasons.join(' ')).toMatch(/\*\*Counted; never give a third\.\*\*/);
   });
 

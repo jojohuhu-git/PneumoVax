@@ -90,7 +90,7 @@ describe('a 3rd PCV dose after a dose given at 7-11 months needs 8 weeks', () =>
     expect(v[2].reasons.join(' ')).toMatch(/8 weeks/);
     // Named as a timing rejection, so the dose is not "repeated" — the next
     // dose in the series is simply due once the interval has run.
-    expect(v[2].reasons.join(' ')).toMatch(/does not count toward the series/);
+    expect(v[2].reasons.join(' ')).toMatch(/Not repeated/);
     expect(v[2].reasons.join(' ')).not.toMatch(/repeat this dose/i);
     // 8 weeks after the dose it is measured from (2026-06-20), less CDC's
     // 4-day grace — which is what `earliestValidDate` has always meant: the
@@ -126,7 +126,7 @@ describe('a 3rd PCV dose after a dose given at 7-11 months needs 8 weeks', () =>
     expect(complete.length).toBeGreaterThan(0);
     // The rejected dose is still on the record with its explanation — "noted",
     // as she asked — rather than quietly dropped once the series is finished.
-    expect(v[2].reasons.join(' ')).toMatch(/does not count toward the series/);
+    expect(v[2].reasons.join(' ')).toMatch(/Not repeated/);
   });
 
   it('leaves the dose-1-to-dose-2 cell alone, where 4 weeks is what CDC states', () => {

@@ -46,13 +46,13 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // (dose 2 + 28 - 4); now 2026-04-12.
     const repeatDue = addDays('2026-03-15', 28);
     expect(repeatDue).toBe('2026-04-12');
-    expect(reasons).toMatch(new RegExp(`can be given from ${fmtDate(repeatDue)} at the earliest`));
+    expect(reasons).toMatch(new RegExp(`Next dose from ${fmtDate(repeatDue)} at the earliest`));
     // Both superseded dates, asserted as DATES rather than inside the old
     // sentence — a negative assertion that quotes wording the app no longer
     // prints anywhere passes for the wrong reason.
     expect(reasons).not.toMatch(/Mar 25, 2026/);
     expect(reasons).not.toMatch(/Apr 8, 2026/);
-    expect(reasons).not.toMatch(/repeat this dose only/);
+    expect(reasons).not.toMatch(/Repeat this dose only/);
   });
 
   it('names the earliest valid date for an adult\'s second PPSV23 given too soon (handoff Case A)', () => {
@@ -80,14 +80,14 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // not yet given. Was 2019-12-28 (the 2015 dose + 5y - 4d), then
     // 2022-12-28 (the 2018 dose + 5y - 4d); now 2023-01-01.
     // The forward-looking sentence is gone with the rejection — there is no
-    // "next dose in this series" to date, because this one counted. What W1
+    // "Next dose from" to date, because this one counted. What W1
     // exists to prevent is still asserted, and is now stronger: the text must
     // not tell the reader to repeat anything, and must not print the graced
     // date W1 was filed about.
     expect(reasons).not.toMatch(/does not count toward the series/);
     expect(reasons).not.toMatch(/Dec 28, 2022/);
-    expect(reasons).not.toMatch(/repeat this dose only/);
-    expect(reasons).toMatch(/shorter than the 5 years/);
+    expect(reasons).not.toMatch(/Repeat this dose only/);
+    expect(reasons).toMatch(/5 years advised/);
     expect(reasons).toMatch(/never give a third/i);
   });
 
@@ -112,7 +112,7 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     ], 12, '2026-01-20', '2025-01-01', { riskIds: ['cochlear_implant'] });
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
-    expect(first.reasons.join(' ')).toMatch(/repeat this dose only/);
+    expect(first.reasons.join(' ')).toMatch(/Repeat this dose only/);
   });
 
   it('gives a too-young CONJUGATE the product-free sentence instead', () => {
@@ -126,6 +126,6 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
     expect(first.reasons.join(' ')).toMatch(/any PCV approved/i);
-    expect(first.reasons.join(' ')).not.toMatch(/repeat this dose only/);
+    expect(first.reasons.join(' ')).not.toMatch(/Repeat this dose only/);
   });
 });

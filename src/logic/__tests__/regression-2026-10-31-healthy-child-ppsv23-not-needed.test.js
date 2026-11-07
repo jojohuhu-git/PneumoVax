@@ -23,7 +23,7 @@ import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
-const NOT_NEEDED = 'Not needed: PPSV23 is given only to children with certain medical conditions or risk factors, per CDC, and none is recorded for this child. This dose isn’t harmful, it isn’t counted, and nothing needs to be repeated.';
+const NOT_NEEDED = 'No risk condition recorded: PPSV23 not indicated. Not counted. Do not repeat.';
 const ZOE = {
   dob: '2022-11-01', ageMonths: 36, today: '2025-11-01', riskIds: [],
   pcvDoses: d('PCV20', ['2023-01-01', '2023-03-01', '2023-05-01', '2023-11-05']),

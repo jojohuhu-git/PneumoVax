@@ -160,7 +160,7 @@ describe('§K-CONJUGATE — an adult PCV20 inside the year after PCV13 COUNTS, w
     ], 4, '2026-05-01', '2026-01-01');
     expect(child.perDose[1].status).toBe('invalid');
     // The paediatric minimum, stated by CDC — not the adult owner rule.
-    expect(child.perDose[1].reasons.join(' ')).toMatch(/minimum interval is 4 weeks/);
+    expect(child.perDose[1].reasons.join(' ')).toMatch(/minimum interval 4 weeks/);
     expect(child.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
@@ -289,10 +289,10 @@ describe('S14-7 — the catch-all keeps an unenumerated adult pair from going si
     expect(second.earlyAdvisory).toBe(true);
     expect(second.effectiveDoseNum).toBe(2);
     expect(a.effective).toHaveLength(2);
-    expect(second.reasons.join(' ')).toMatch(/at least 1 year between pneumococcal conjugate doses/);
-    expect(second.reasons.join(' ')).toMatch(/still counts/);
+    expect(second.reasons.join(' ')).toMatch(/≥1 year between adult conjugate doses/);
+    expect(second.reasons.join(' ')).toMatch(/\*\*Counted\.\*\*/);
     expect(second.reasons.join(' ')).not.toMatch(/does not count toward the series/);
-    expect(second.reasons.join(' ')).not.toMatch(/repeat this dose only/);
+    expect(second.reasons.join(' ')).not.toMatch(/Repeat this dose only/);
   });
 
   it('and the engine still counts it: two doses, not one', () => {

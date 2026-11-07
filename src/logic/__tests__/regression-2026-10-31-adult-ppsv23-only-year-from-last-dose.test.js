@@ -11,7 +11,7 @@
 // from last".
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 

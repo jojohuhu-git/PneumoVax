@@ -52,7 +52,7 @@
 // invalidly-early dose must be re-anchored to the last VALID dose — both were
 // measured as already correct before this change.
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import {
   ADULT_PPSV23_INTERVAL_MONTHS,
   ADULT_PPSV23_SHORTER_MINIMUM_WEEKS,

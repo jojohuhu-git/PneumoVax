@@ -127,7 +127,7 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
       { product: 'PCV15', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/CDC advises at least 1 year/i)).toBeInTheDocument();
+    expect(screen.getByText(/CDC advises ≥1 year/i)).toBeInTheDocument();
     // Still counted, not dropped, not relabeled as an error.
     expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
     expect(screen.queryByText('Invalid')).not.toBeInTheDocument();

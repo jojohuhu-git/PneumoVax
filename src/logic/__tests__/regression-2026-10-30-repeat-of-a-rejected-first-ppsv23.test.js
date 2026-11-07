@@ -58,7 +58,7 @@ describe('Noah — REVERSED 2026-10-31: his repeat no longer counts', () => {
     expect(first.intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
     // Was 2023-06-24 (8 weeks). The repeat is another PPSV23: 5 years.
     expect(first.repeatDueDate).toBe('2028-04-29');
-    expect(first.reasons.join(' ')).toContain('can be given from Apr 29, 2028 at the earliest');
+    expect(first.reasons.join(' ')).toContain('Next dose from Apr 29, 2028 at the earliest');
   });
 
   it('the repeat on 2023-07-10 — REVERSED: thrown out, inside 5 years of the first', () => {

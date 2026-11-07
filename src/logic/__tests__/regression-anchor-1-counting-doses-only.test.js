@@ -74,7 +74,7 @@ describe('ANCHOR-1 Case A — a PCV20 behind someone else\'s early PPSV23', () =
     expect(v.ppsv23[0].status).toBe('valid');
     expect(v.ppsv23[1].status).toBe('valid');
     expect(v.ppsv23[1].intervalRuleId).toBe('ADULT-PPSV23-AFTER-PPSV23');
-    expect(v.ppsv23[1].reasons.join(' ')).toMatch(/shorter than the 5 years/);
+    expect(v.ppsv23[1].reasons.join(' ')).toMatch(/5 years advised/);
   });
 
   it('reads as a complete series, not as a PCV still due', () => {
@@ -249,7 +249,7 @@ describe('ANCHOR-1 Case G — the conjugate floor it rested on is gone (2026-10-
     const v = verdictsFor(CASE_G);
     expect(v.ppsv23[0].status).toBe('valid');
     // The reason changed with the cause: no interval rule judges it any more.
-    expect(v.ppsv23[0].reasons.join(' ')).toMatch(/series was already complete/i);
+    expect(v.ppsv23[0].reasons.join(' ')).toMatch(/series already complete/i);
     expect(v.ppsv23[0].intervalRuleId).toBeUndefined();
   });
 });

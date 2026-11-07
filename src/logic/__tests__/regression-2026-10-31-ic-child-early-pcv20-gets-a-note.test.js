@@ -47,7 +47,7 @@ describe('her: PCV20 one year after the PPSV23', () => {
 
   it('the same sentence shape as her early second PPSV23 (the control she was shown)', () => {
     const twin = recommend({ ...HER, pcvDoses: BABY, ppsv23Doses: d('PPSV23', ['2025-10-11', '2026-10-12']) });
-    expect(twin.perDose.ppsv23[1].reasons[0]).toMatch(/^Given 12 months after the previous PPSV23 dose of Oct 11, 2025 — shorter than the 5 years advised between PPSV23 doses\. \*\*Counted;/);
+    expect(twin.perDose.ppsv23[1].reasons[0]).toMatch(/^Given 12 months after the PPSV23 of Oct 11, 2025; 5 years advised\. \*\*Counted;/);
   });
 });
 

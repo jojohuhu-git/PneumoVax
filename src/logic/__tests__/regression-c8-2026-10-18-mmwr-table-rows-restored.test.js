@@ -50,7 +50,7 @@
  * document is PRESENT where it speaks.
  */
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { REFS } from '../../data/refs.js';
 import { buildCases } from '../../test-grid.js';
 import { noteCiteSlices } from '../../components/citations.jsx';

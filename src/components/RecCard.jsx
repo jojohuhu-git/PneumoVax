@@ -217,12 +217,16 @@ function DoseHistoryList({ label, doses, doseValidations, ageMonths, dob = null,
 //
 // A note with no `detail` renders no toggle: most short notes stay one line.
 // A plain string note is treated as all lead, so an unsplit note still works.
-function RecNote({ note, noteCites, numberFor }) {
+//
+// WORD-1 (OWNER DECISION 2026-11-06): the Sources row lives inside "Why this", with
+// the sentences it supports. After the fold most open cards show no number in view,
+// and a row of buttons with no number to match is the question she asked on
+// 2026-10-17. So a card with sources always has the toggle, even with no detail.
+function RecNote({ note, noteCites, numberFor, sources = [] }) {
   const [open, setOpen] = useState(false);
-  if (!note) return null;
-  const lead = typeof note === 'string' ? note : note.lead;
-  const detail = typeof note === 'string' ? null : note.detail;
-  if (!lead && !detail) return null;
+  const lead = typeof note === 'string' ? note : note?.lead;
+  const detail = typeof note === 'string' ? null : note?.detail;
+  if (!lead && !detail && sources.length === 0) return null;
 
   // C2: shared with the card's numbering, so the lead/detail split cannot be
   // computed one way to render and another way to number.
@@ -230,10 +234,12 @@ function RecNote({ note, noteCites, numberFor }) {
 
   return (
     <div className="rec-note">
-      <div className="rec-note-lead">
-        {renderNoteWithCites(lead, slices.lead, numberFor)}
-      </div>
-      {detail && (
+      {lead && (
+        <div className="rec-note-lead">
+          {renderNoteWithCites(lead, slices.lead, numberFor)}
+        </div>
+      )}
+      {(detail || sources.length > 0) && (
         <>
           <button
             type="button"
@@ -244,9 +250,23 @@ function RecNote({ note, noteCites, numberFor }) {
           >
             Why this<Chevron open={open} />
           </button>
-          {open && (
+          {open && detail && (
             <div className="rec-note-detail">
               {renderNoteWithCites(detail, slices.detail, numberFor)}
+            </div>
+          )}
+          {/* C2: each button carries the number the text uses for that document,
+              so a `[2]` in a sentence names the button marked [2]. */}
+          {open && sources.length > 0 && (
+            <div className="rec-citations">
+              <span className="rec-citations-heading">Sources</span>
+              {sources.map((src) => (
+                <a key={src.url} href={src.url} target="_blank" rel="noopener noreferrer"
+                  className="citation-chip" title={src.title}>
+                  <span className="citation-chip-num">[{src.n}]</span>
+                  {src.short}
+                </a>
+              ))}
             </div>
           )}
         </>
@@ -376,25 +396,7 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
           />
         )}
 
-        <RecNote note={note} noteCites={noteCites} numberFor={numberFor} />
-
-        {/* C2: the numbered source list. Each button carries the number the
-            text uses for that document, so a `[2]` in a sentence names the
-            button marked [2]. The heading says what the row is — the plan's
-            second owner-reported question was "why there are multiple source
-            chips listed if its only citing one of them". */}
-        {sources.length > 0 && (
-          <div className="rec-citations">
-            <span className="rec-citations-heading">Sources</span>
-            {sources.map((src) => (
-              <a key={src.url} href={src.url} target="_blank" rel="noopener noreferrer"
-                className="citation-chip" title={src.title}>
-                <span className="citation-chip-num">[{src.n}]</span>
-                {src.short}
-              </a>
-            ))}
-          </div>
-        )}
+        <RecNote note={note} noteCites={noteCites} numberFor={numberFor} sources={sources} />
       </div>
       )}
     </div>

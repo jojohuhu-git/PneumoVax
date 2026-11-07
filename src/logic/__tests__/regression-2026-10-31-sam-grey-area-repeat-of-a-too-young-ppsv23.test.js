@@ -17,7 +17,7 @@
 // ⚠ Hand-built: the grid holds no child with two PPSV23 doses this close.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { addCalendarMonths, addDays } from '../dateUtils.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
@@ -59,7 +59,7 @@ describe('Sam', () => {
   it('the chip under the Jan 5 dose names the grey area, and no longer promises a PPSV23 from Mar 2', () => {
     const chip = out.perDose.ppsv23[1].reasons.join(' ');
     expect(chip).toContain(`Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${GREY}`);
-    expect(chip).toContain('It is not repeated.');
+    expect(chip).toContain('Not repeated.');
     expect(chip).not.toContain('Mar 2, 2025');
   });
 });

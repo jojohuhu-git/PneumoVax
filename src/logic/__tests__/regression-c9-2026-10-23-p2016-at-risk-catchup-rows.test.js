@@ -30,7 +30,7 @@
 // `p2016AtRiskCatchup24to71ThreeBefore12` as unused and proved nothing either
 // way, which is exactly how a row with no cases passes as guarded.
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 import { noteCiteSlices, markerCount } from '../../components/citations.jsx';
 

@@ -21,7 +21,7 @@
 // MEASURED over `test-grid.js` (16,008 patients, corpus date 2026-10-11),
 // re-derived on 2026-10-17 rather than carried over from a note:
 //
-//     543  patients reach a "1 dose PCV20 (immunocompromising)" card
+//     543  patients reach a "1 dose PCV20 (≥5 years after first PPSV23)" card
 //     453  of those are told it is due TODAY
 //     219  of those 453 had their first PPSV23 LESS than 5 years ago  <-- wrong
 //     234  had it MORE than 5 years ago                              <-- correct
@@ -108,7 +108,7 @@
 // grid only: it has no vaccinated child aged 6-18, and 2,110 such patients turned
 // up on 2026-11-05 (`regression-2026-11-05-r1-...`, CLINICAL_SPEC.md §D-note-8W).
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 
 const TODAY = '2026-10-17';
 
@@ -126,7 +126,7 @@ const run = ({ dob, ageMonths, riskIds = ['asplenia'], pcv = [], ppsv = [] }) =>
   ppsv23Doses: ppsv.map((date) => ({ product: 'PPSV23', date })),
 });
 
-const pcv20Card = (r) => r.recs.find((x) => x.doseLabel === '1 dose PCV20 (immunocompromising)');
+const pcv20Card = (r) => r.recs.find((x) => x.doseLabel === '1 dose PCV20 (≥5 years after first PPSV23)');
 const ppsv2Card = (r) => r.recs.find((x) => x.doseLabel.startsWith('2nd PPSV23'));
 const leadOf = (card) => (typeof card.note === 'string' ? card.note : card.note.lead);
 

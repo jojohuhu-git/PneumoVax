@@ -79,7 +79,7 @@ describe('P6-3c — the PCV7 verdict shows the source it rests on', () => {
     const v = r().pcv.perDose[0];
     // "Per ACIP/immunize.org[c], PCV7 doses are ignored..." — the citation
     // backs the attribution, which is the claim a clinician would click.
-    expect(v.reasons[0]).toMatch(/Per ACIP\/immunize\.org\[c\],/);
+    expect(v.reasons[0]).toMatch(/PCV-naïve\[c\]/);
   });
 
   it('the link deep-links to the quoted sentence, not just the page', () => {

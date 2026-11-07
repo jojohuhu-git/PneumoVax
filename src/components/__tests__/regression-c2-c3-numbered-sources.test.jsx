@@ -167,9 +167,9 @@ describe('C2 — the buttons carry the number the text uses', () => {
   it("the owner's card prints a numbered, headed Sources row", () => {
     render(<Harness initial={SEVENTY_NO_RISKS} />);
     openEveryCard();
-
-    expect(screen.getByText('Sources')).toBeTruthy();
     openEveryWhyThis();
+
+    expect(screen.getAllByText('Sources').length).toBeGreaterThan(0);
 
     const row = buttonRow();
     expect(row.map((b) => `${b.n} ${b.name}`)).toEqual([
@@ -211,6 +211,7 @@ describe('C2 — the buttons carry the number the text uses', () => {
     // the row tidy would be the one genuinely harmful outcome of this item.
     render(<Harness initial={SEVENTY_NO_RISKS} />);
     openEveryCard();
+    openEveryWhyThis();
     const names = buttonRow().map((b) => b.name);
     expect(names).toContain('CDC Adult Timing Job Aid');
     expect(names).toContain('ACIP 2025 Adult MMWR');
@@ -220,6 +221,7 @@ describe('C2 — the buttons carry the number the text uses', () => {
     render(<Harness initial={ASPLENIA_SIX} />);
     openEveryCard();
 
+    openEveryWhyThis();
     const rows = buttonRowsByCard();
     // This patient emits more than one card, and each card numbers its own
     // row from [1] — so assert it of every row, not of the page.
@@ -249,6 +251,7 @@ describe('C2 — the buttons carry the number the text uses', () => {
     render(<Harness initial={SEVENTY_NO_RISKS} />);
     const geo = document.querySelector('[data-testid="pcv21-geo-note"]');
     expect(geo, 'the 70-year-old card should show the PCV21 geographic note').toBeTruthy();
+    fireEvent.click(document.querySelector('[data-testid="pcv21-geo-toggle"]'));
     const geoChips = [...geo.querySelectorAll('a.citation-chip')];
     expect(geoChips.length).toBeGreaterThan(0);
     for (const chip of geoChips) {
@@ -302,6 +305,7 @@ describe('C2 — the buttons carry the number the text uses', () => {
   it("a button keeps the title the card's own source list gave it", () => {
     render(<Harness initial={SEVENTY_NO_RISKS} />);
     openEveryCard();
+    openEveryWhyThis();
     const adultNotes = buttonRow().find((b) => b.name === 'CDC Adult Notes');
     expect(adultNotes.title).toBe(REFS.cdcAdultPneumo.label);
   });
@@ -311,6 +315,7 @@ describe('C3 — every cited document has a button to click', () => {
   it('a recorded PCV7 dose now has a button for the rule it cites', () => {
     render(<Harness initial={PCV7_PATIENT} />);
     openEveryCard();
+    openEveryWhyThis();
 
     // The explanation beside the dose cites immunize.org...
     const markerTitles = [...document.querySelectorAll('a.note-cite')]

@@ -12,7 +12,7 @@
 // immunocompromised cards on the grid. Non-IC cards are right as they were.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 
 const TODAY = '2026-11-01';

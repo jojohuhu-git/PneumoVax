@@ -71,7 +71,7 @@
 // directly rather than sampled from it.
 
 import { describe, it, expect } from 'vitest';
-import { recommend } from '../recommend.js';
+import { recommendBeforeFold as recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 import { analyzeBoth, ageAtDoseFromDate } from '../validate.js';
 import { populationOf } from '../../data/riskFactors.js';

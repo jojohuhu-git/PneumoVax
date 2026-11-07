@@ -106,8 +106,8 @@ describe('P0 — a dose verdict belongs to the dose it was computed for', () => 
     const rows = doseRowTexts();
     const pcv7Row = rows.find((t) => t.includes('PCV7'));
     const pcv13Row = rows.find((t) => t.includes('PCV13'));
-    expect(pcv7Row).toMatch(/is not counted toward the pneumococcal series/);
-    expect(pcv13Row).not.toMatch(/is not counted toward the pneumococcal series/);
+    expect(pcv7Row).toMatch(/Treat as PCV-naïve/);
+    expect(pcv13Row).not.toMatch(/Treat as PCV-naïve/);
   });
 
   it('the rows are listed oldest first, and D1/D2 follow that order', () => {
