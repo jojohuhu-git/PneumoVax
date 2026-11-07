@@ -1,5 +1,8 @@
 # PneumoVax — Handoff after R6's leftover, Owen (2026-11-07)
 
+> **SUPERSEDED 2026-11-07** by `handoff-2026-11-07-ava-toddler-age-50-and-sources.md`. #134 is merged, and
+> the 24–59-month age-50 item below was ruled and built. Resume from the newer file.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
 Its promise: never guess, and every clinical line rests on a document that says it. Read `CLAUDE.md` first.
 

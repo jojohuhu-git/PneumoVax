@@ -271,7 +271,11 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
       // tick is smoking (202) or alcohol use disorder (202). The adult schedule
       // gives them a dose at 19, so their card now says 19. 1,584 - 404.
       'Not indicated (healthy 5–18y)': 1584 - 404,
-      'PCV series complete': 12,
+      // Owner 2026-11-07, "Match the baby card" (§B-50BABY): -8, the toddlers
+      // whose only tick is smoking or alcohol use disorder — the adult schedule
+      // gives them a dose at 19. A PCV20 series also loses the line, but the
+      // grid builds no healthy toddler with one (0 of 12). 12 - 8.
+      'PCV series complete': 12 - 8,
     });
   });
 

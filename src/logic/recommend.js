@@ -1723,7 +1723,7 @@ function appendToOptionB(recs, b, sentence, cites) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
-function pcvHealthyChild(am, pcv, ppsv, today) {
+function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false) {
   // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. This block asks per
   // card -- `healthyRefsExcept` is the twin of `adultRefs` / `childRefsExcept`
   // -- rather than spreading one list over every card it builds.
@@ -1837,11 +1837,21 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
       const datedAtOrAfter12mo = b.m12to23 + b.ge24;
       const jobAidEndsItHere = b.undated === 0 && datedAtOrAfter12mo >= 1
         && prior >= 1 && prior <= 3;
+      // OWNER RULING 2026-11-07, "Match the baby card" (§B-50BABY, Ava). The
+      // age-50 line carries the baby card's two limits, each found by running
+      // the child forward: a series that includes PCV20 reads Complete at 50,
+      // so 50 is not the next event; an ADULT-only tick (smoking, alcohol use
+      // disorder) is given a dose at 19, so "50" would name the wrong age.
+      // Passed in, because `pedsRiskIds()` has already removed those ticks.
+      const reviewAt50 = !pcv.hasPCV20 && !adultOnlyTicked;
+      // Same ruling, second half ("Yes, under Why this"): where the line stays,
+      // it sits in `detail`, as on the baby card — not on the opened card.
+      const lead = `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.)`;
       return [rec({
         vaccine: 'PCV', status: 'complete',
         // Markers are paired to cites by POSITION (`noteCiteSlices`), so the
         // count here and the array below must move together.
-        note: `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.) ${REVIEW_AT_50_SENTENCE}`,
+        note: reviewAt50 ? { lead, detail: REVIEW_AT_50_SENTENCE } : lead,
         doseLabel: 'PCV series complete',
         noteCites: [
           cite('pedsNoPcv20IfComplete'),
@@ -1850,7 +1860,7 @@ function pcvHealthyChild(am, pcv, ppsv, today) {
           // OWNER DECISION 2026-10-30. This child and Nora are the two healthy
           // families where the app itself does nothing until 50: at 19 she
           // reads "not indicated (no risk, <50y)", at 50 a dose falls due.
-          reviewAt50Cite(),
+          ...(reviewAt50 ? [reviewAt50Cite()] : []),
         ],
         refs,
       })];
@@ -4802,7 +4812,8 @@ export function recommendBeforeFold(input) {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
         `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
         + (riskIds.length && !pedsIds.length ? ' — the condition ticked is one that only applies to adults' : '')));
-      recs = pcvHealthyChild(am, pcv, ppsv, today);
+      recs = pcvHealthyChild(am, pcv, ppsv, today,
+        riskIds.some((id) => RISK_BY_ID[id]?.adultOnly));
       recs = reviewAdultRiskAtNineteen(recs, riskIds, () => recommendBeforeFold({
         ...input, ageMonths: ADULT_SCHED_MIN_M,
         today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
