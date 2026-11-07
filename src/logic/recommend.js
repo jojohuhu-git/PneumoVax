@@ -526,7 +526,7 @@ function pcvSeriesShape(pcv, am, total) {
 // it changes which sentence is true of this child, and what happens next.
 // The caller passes `pedsRiskIds(riskIds)`, so an adult-only tick cannot reach
 // here, exactly as it cannot reach `pcvRiskChild`.
-function pcvInfant(am, riskIds, pcv, today, dob) {
+function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   const rowClass = pedsRiskRowClass(riskIds);   // 'IC' | 'nonIC' | null
   const prior = pcv.count;
   // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. Until C10-1
@@ -757,8 +757,25 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
     // Read only on the at-risk side of each ternary below.
     const fewerThanThree = prior < 3;
     const owesDoseAtTwo = atRisk && (fewerThanThree || !pcv20Done);
+    // P2-6 / R7 (OWNER RULING 2026-11-07, CLINICAL_SPEC.md §B-5TO18): a
+    // healthy baby whose series is complete gets the same "re-evaluate at 50"
+    // sentence as the healthy 24-59-month card, under "Why this". Run forward,
+    // she reads "not indicated" at 19 and is owed a dose at 50 — unless the
+    // series includes PCV20, when the adult card at 50 reads Complete, so 50 is
+    // not the next event and the line stays off (the C12 rule beside
+    // REVIEW_AT_50_SENTENCE). It goes in `detail`, which is what shows under
+    // "Why this": she chose that over showing it on the opened card, and the
+    // fold leaves a complete card's note as written (`noteFold.js` NOT_FOLDED).
+    // Also off when an ADULT-only risk factor is ticked (smoking, alcohol use
+    // disorder): run forward, the adult card asks for a dose at 19, so "50"
+    // would name the wrong age — P2-5's finding on the 5-18 card. Passed in,
+    // because `pedsRiskIds()` has already removed those ticks from `riskIds`.
+    const healthyReviewAt50 = !atRisk && !pcv20Done && !adultOnlyTicked;
     const note = !atRisk
-      ? 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).'
+      ? (() => {
+        const lead = 'The age-appropriate PCV series appears complete [c]. If any dose was PCV15, ensure a PPSV23 follow-up is given only when a risk condition is present (PPSV23 is not routine for healthy children).';
+        return healthyReviewAt50 ? { lead, detail: REVIEW_AT_50_SENTENCE } : lead;
+      })()
       : fewerThanThree
         ? {
           lead: `The PCV series is up to date for this age [c]. 2 more PCV doses fall due from the 2nd birthday, at least ${PNEUMO_GAP_WORDS} after the most recent dose and ${PNEUMO_GAP_WORDS} apart [c].`,
@@ -794,7 +811,7 @@ function pcvInfant(am, riskIds, pcv, today, dob) {
       // parent from the 6-18 one, and a separate key so neither can be shown
       // where the other belongs.
       noteCites: !atRisk
-        ? [cite('pedsNoPcv20IfComplete')]
+        ? [cite('pedsNoPcv20IfComplete'), ...(healthyReviewAt50 ? [reviewAt50Cite()] : [])]
         : fewerThanThree
           ? [cite('p2016Table1_12to23_noneBefore12'), cite('pedsRiskIncompleteCatchup')]
           : [cite('pedsRoutine4Dose'), cite(pcv20Done ? 'pedsRiskPcv20CompleteAt2' : nextDoseCite)],
@@ -4632,7 +4649,8 @@ export function recommendBeforeFold(input) {
     // does below — a tick that does not apply to a child must not reach a
     // child's card, by any route.
     path.push(pathStep('Which rules apply', 'Babies and toddlers under 2', `under ${ageWords(M.m24)}`));
-    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today, dob);
+    recs = pcvInfant(am, pedsRiskIds(riskIds), pcv, today, dob,
+      riskIds.some((id) => RISK_BY_ID[id]?.adultOnly));
   } else if (am < M.y18) {
     // Children 2–18y: at-risk pathway wins over healthy when a risk is present.
     // P3-9b: the paediatric pathway sees only the paediatric risk ids, so an

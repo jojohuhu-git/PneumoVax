@@ -251,9 +251,17 @@ mutations; seven caught, the eighth is the raw-age check above, reverted).
 - 24–59 mo, **completed any PCV schedule (incl. all-PCV13) by 24mo** → no additional doses.
 - 24–59 mo, **no/incomplete schedule by 24mo** → **1 dose** PCV15/PCV20 ≥8wk after most recent PCV.
 - 5–18 y healthy → **no additional doses** (healthy older children are not caught up).
-- Both **healthy** "nothing needed" cards — the 5–18 one and the complete 24–59 month one —
-  add **"Re-evaluate at age 50, when routine pneumococcal vaccination begins for every
-  adult"** (`adultRoutine50`). **No at-risk card does** — see §B-50NOTE.
+  **G34, confirmed by the owner 2026-11-07** (*"Confirm Not indicated"*): a healthy child of
+  exactly 5 years with one PCV at 2 months is not caught up; the same child at 4y 11m is given
+  one dose. CDC's notes: *"Healthy children ages 2–4 years with any incomplete PCV series: 1
+  dose PCV."* AAP's pneumococcal page (last updated 10/09/2025, read live 2026-11-07) agrees:
+  catch-up for *"Healthy children ages 24 – 59 months with incomplete PCV vaccination
+  status"*, and nothing for a healthy child of 5 or older. No code changed; guard
+  `regression-2026-11-07-healthy-baby-age-50-and-g34.test.js`.
+- The **healthy** "nothing needed" cards — the 5–18 one, the complete 24–59 month one, and
+  since 2026-11-07 the healthy baby's complete card (§B-50BABY) — add **"Re-evaluate at age
+  50, when routine pneumococcal vaccination begins for every adult"** (`adultRoutine50`).
+  **No at-risk card does** — see §B-50NOTE.
 
 ### §B-5TO18 — the healthy 5–18 card: what it cites, and the age-50 note
 
@@ -303,6 +311,24 @@ a dose"*, cited to `cdcAdultRiskFactorList` with `aboutAnotherGroup` — a third
 a child card, declared and pinned. Otherwise the age-50 line stands. Measured: 404 grid teens
 (202 smoking, 202 alcohol use disorder); the age-50 healthy 5–18 count is now 1,584 − 404 =
 1,180. 0 verdicts. Guard: `regression-2026-11-01-p2-5-adult-risk-teen-review-at-19.test.js`.
+
+### §B-50BABY — the healthy baby's complete card says it too (owner, 2026-11-07)
+
+P2-6 / R7 of the 2026-11-05 whole-app checks. A healthy 14-month-old with four PCV15 read *"The
+age-appropriate PCV series appears complete"* and nothing about later, while the healthy
+3-year-old with the same four doses reads *"Re-evaluate at age 50"*. Shown both, the owner
+chose **"Add it under Why this"**: the same sentence and citation, in the card's `detail`. Run
+forward, the baby reads *Not indicated (no risk, <50y)* at 19 and is owed a PPSV23 at 50, so
+50 is the next event (Group A). **Two limits, each from running the baby forward:** a series
+that includes **PCV20** reads *Complete* at 50 (Group C), so no line; and an **adult-only**
+tick (smoking, alcohol use disorder) is given a dose at 19, so "50" would name the wrong age
+(§B-ADULTRISK19) — no line. **The grid has no healthy baby with a complete series on its first
+screen** (prose diff: 0 of 35,280 lines moved), so C12's pinned count cannot see this card;
+the whole-app checks reach it by following babies forward, and their "card silent" count for
+R7 went 312 → 0. Guard: `regression-2026-11-07-healthy-baby-age-50-and-g34.test.js`.
+
+**Not changed, and noted:** the 24–59-month card carries the line even when the series
+includes PCV20 or an adult-only tick is set. That predates this ruling and was not put to her.
 
 ### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
 
