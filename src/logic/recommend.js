@@ -1648,7 +1648,23 @@ function adultAnswerPastNineteen(recs, adultRecs, nineteenth) {
 // follow-on dose 5 years later ("then ≥5 years later give 1 dose of PCV20 or a
 // 2nd PPSV23"), usually before 19, and the card already says so. Run forward with
 // the PPSV23 alone, the answer at 19 would describe a child who skipped it.
-function optionBAtNineteen(recs, input, nineteenth, today, rowClass) {
+// R6's leftover (OWNER RULING 2026-11-07, on "Owen", §B-OPTIONB50). Owen, 14,
+// diabetes, PCV13 baby series: after Option B's PPSV23 the adult card at 19 reads
+// "No dose now — review at age 50", and at 50 it gives PCV20 or PCV21. After
+// Option A's PCV20 he is complete for life. So Option B costs one more dose at
+// 50. Shown this, she chose "Yes, under Why this" — folded, unlike Cora's line,
+// whose dose comes at 19. The sentence is chosen by the rows the adult cards at
+// 19 and at 50 cite, the way `AT_NINETEEN_LINES` is, so it cannot become a second
+// reading of the adult rules; a pair not in this table gets no line. It must NOT
+// start "If PPSV23 is chosen, at 19" — that is Cora's in-view rule in noteFold.js.
+const OPTION_B_AT_FIFTY = [
+  ['adultChronicOnlyReviewAt50', 'adultBothNotAt65',
+    'If PPSV23 is chosen, no dose is needed at 19 [c]; at 50 the adult schedule gives 1 dose of PCV20 or PCV21 [c].',
+    ['states what the adult schedule gives this patient at 19 after the PPSV23 chosen today: no dose, and a review at 50',
+      'states what the adult schedule gives this patient at 50 after the PPSV23 chosen today']],
+];
+
+function optionBAtNineteen(recs, input, nineteenth, fiftieth, today, rowClass) {
   if (input.optionBLookedAhead || rowClass !== 'nonIC') return recs;
   // "Option B:" only — never "Option B-2", the PPSV23 that follows Option B-1's
   // PCV15: run forward without that PCV15, its answer at 19 would be wrong.
@@ -1660,18 +1676,25 @@ function optionBAtNineteen(recs, input, nineteenth, today, rowClass) {
   const on = (card) => (card.dueToday || !card.earliestNextDate ? today : card.earliestNextDate);
   // A dose due on or after the 19th birthday is answered by the adult card itself.
   if (on(b) >= nineteenth || on(a) >= nineteenth) return recs;
-  const afterB = atNineteen(recommendBeforeFold({
-    ...input,
-    optionBLookedAhead: true,
-    ageMonths: ADULT_SCHED_MIN_M,
-    today: nineteenth,
-    ppsv23Doses: [...(input.ppsv23Doses ?? []), { product: 'PPSV23', date: on(b) }],
-  }).recs[0]);
-  // Scoped to the family she was shown: Option B leads to a DOSE at 19. After a
-  // PPSV23, a child with chronic conditions only reads "no dose now; re-evaluate
-  // at age 50" at 19 — the two options then differ only by a review decades
-  // away, which was not put to her, so it is not changed (§B-OPTIONB19).
-  if (!afterB || afterB.cite.key === 'adultChronicOnlyReviewAt50') return recs;
+  const givenB = { ...input, optionBLookedAhead: true, ppsv23Doses: [...(input.ppsv23Doses ?? []), { product: 'PPSV23', date: on(b) }] };
+  const afterB = atNineteen(recommendBeforeFold({ ...givenB, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth }).recs[0]);
+  if (!afterB) return recs;
+  // Owen's family: no dose at 19, so the line says what comes at 50 — under
+  // "Why this" (see OPTION_B_AT_FIFTY above).
+  if (afterB.cite.key === 'adultChronicOnlyReviewAt50') {
+    const at50 = recommendBeforeFold({ ...givenB, ageMonths: ROUTINE_ADULT_MIN_M, today: fiftieth }).recs[0];
+    const keys50 = (at50?.noteCites ?? []).map((c) => c.key);
+    // Measured 2026-11-07 over all 77,496 patients: every such card at 50 cites
+    // `adultBothNotAt65`, so this lookup never refuses — it is what keeps the
+    // line the card's own words if the card at 50 ever changes, and Owen's test
+    // runs him to 50 to see that. A status check here as well ("the card at 50
+    // asks for a dose") was tried and decided nothing: that row only ever
+    // gives the dose. Removed, as `atNineteen`'s was.
+    const row = OPTION_B_AT_FIFTY.find(([k19, k50]) => k19 === afterB.cite.key && keys50.includes(k50));
+    if (!row) return recs;
+    const [k19, k50, sentence, [why19, why50]] = row;
+    return appendToOptionB(recs, b, sentence, [cite(k19, { aboutAnotherGroup: why19 }), cite(k50, { aboutAnotherGroup: why50 })]);
+  }
   // Option A's road is not run: after its PCV20 every such child is complete for
   // life at 19, so it has no line to differ from. Measured 2026-11-07, 0 of 77,496
   // patients; a comparison that never fires could not be tested, so it is not
@@ -1681,6 +1704,11 @@ function optionBAtNineteen(recs, input, nineteenth, today, rowClass) {
   const sentence = afterB.sentence
     .replace(/^At 19, (?!because)/, 'If PPSV23 is chosen, at 19 ')
     .replace(/^At 19, /, 'If PPSV23 is chosen, at 19, ');
+  return appendToOptionB(recs, b, sentence, [afterB.cite]);
+}
+
+/** Option B's note, with one sentence and its citations added at the end. */
+function appendToOptionB(recs, b, sentence, cites) {
   return recs.map((r) => {
     if (r !== b) return r;
     const note = typeof r.note === 'string'
@@ -1688,7 +1716,7 @@ function optionBAtNineteen(recs, input, nineteenth, today, rowClass) {
       : r.note.detail
         ? { ...r.note, detail: `${r.note.detail} ${sentence}` }
         : { ...r.note, lead: `${r.note.lead} ${sentence}` };
-    return { ...r, note, noteCites: [...(r.noteCites ?? []), afterB.cite] };
+    return { ...r, note, noteCites: [...(r.noteCites ?? []), ...cites] };
   });
 }
 
@@ -4751,6 +4779,7 @@ export function recommendBeforeFold(input) {
       // §B-AT19: the same patient, nothing more given, on the day she turns
       // 19 — the adult card whose answer each "complete" card's line repeats.
       const nineteenth = addCalendarMonths(dob ?? today, dob ? ADULT_SCHED_MIN_M : ADULT_SCHED_MIN_M - am);
+      const fiftieth = addCalendarMonths(dob ?? today, dob ? ROUTINE_ADULT_MIN_M : ROUTINE_ADULT_MIN_M - am);
       const adultAt19 = recommendBeforeFold({ ...input, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
       const at19 = atNineteen(adultAt19.recs[0]);
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today, dob).map((r) => withAtNineteen(r, at19));
@@ -4759,7 +4788,7 @@ export function recommendBeforeFold(input) {
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
       recs = sayEightWeekWait(recs);
-      recs = optionBAtNineteen(recs, input, nineteenth, today, pedsRiskRowClass(pedsIds));
+      recs = optionBAtNineteen(recs, input, nineteenth, fiftieth, today, pedsRiskRowClass(pedsIds));
       // R2: nothing can be done before 19, so the adult card answers from today.
       const pastNineteen = adultAnswerPastNineteen(recs, adultAt19.recs, nineteenth);
       if (pastNineteen) {

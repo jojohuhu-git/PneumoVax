@@ -142,7 +142,9 @@ function planMentions(first, dose, doneOnThisRoad, alternatives) {
   const text = stripNegatives(cardText(first));
   // §B-OPTIONB19 (owner, 2026-11-07, Cora): Option B now names the adult dose
   // at 19 itself, so a conjugate after it was mentioned.
-  if (/If PPSV23 is chosen, at 19\b/.test(text) && /PCV/.test(dose.product ?? '')) return true;
+  // §B-OPTIONB50 (owner, 2026-11-07, Owen): for chronic conditions only it names
+  // the dose at 50 instead, worded differently so the fold keeps it folded.
+  if (/If PPSV23 is chosen, (at 19\b|no dose is needed at 19\b[^.]*\bat 50\b)/.test(text) && /PCV/.test(dose.product ?? '')) return true;
   if (dose.product === 'PPSV23') return /PPSV23/.test(text);
   // "If PCV15 is used, add PPSV23", then a screen offering PCV20 OR that PPSV23:
   // the further dose WAS mentioned, and PCV20 is the other way of giving it.

@@ -356,6 +356,8 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
         if ((r.noteCites ?? []).some((c) => /19th birthday/.test(c.aboutAnotherGroup ?? ''))) continue;
         // P2-4 / R6 (OWNER RULING 2026-11-07, on Cora, CLINICAL_SPEC.md §B-OPTIONB19): the fourth
         // exception, by name: a PPSV23 Option B card, saying what the adult card at 19 gives after it.
+        // Owen (2026-11-07, §B-OPTIONB50): the same card, chronic conditions only, saying what
+        // comes at 19 AND at 50 — its 19 citation carries the same declaration.
         if (/^Option B: 1 dose PPSV23\b/.test(r.doseLabel)
           && (r.noteCites ?? []).some((c) => /gives this patient at 19/.test(c.aboutAnotherGroup ?? ''))) continue;
         for (const name of chipNames(r)) {

@@ -924,7 +924,8 @@ export const CHILD_LANES = [
       { kind: 'dose', text: ROUTINE_ABOVE, note: CATCHUP_AT_RISK },
       // Owner, 2026-11-07 (Cora): the result card says what PPSV23 leads to at
       // 19, so this row does too. The dose is the Adults table's, not this row's.
-      { kind: 'dose', text: 'PCV20 or PPSV23', ppsv: true, note: `${SKIP_IF_PCV20} If PPSV23 is chosen, a cochlear implant or CSF leak gets PCV20 or PCV21 at ${yrs(ADULT_SCHED_MIN_M)} (see Adults).` },
+      // Owner, 2026-11-07 (Owen, §B-OPTIONB50): and a chronic condition alone, at 50.
+      { kind: 'dose', text: 'PCV20 or PPSV23', ppsv: true, note: `${SKIP_IF_PCV20} If PPSV23 is chosen, a cochlear implant or CSF leak gets PCV20 or PCV21 at ${yrs(ADULT_SCHED_MIN_M)}, a chronic condition alone at ${yrs(ROUTINE_ADULT_MIN_M)} (see Adults).` },
       { kind: 'none' },
     ],
     result: { text: 'Complete' },

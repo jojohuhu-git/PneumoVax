@@ -22,10 +22,10 @@ export const CAUSES = {
     class: 'real',
     title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other",
   },
-  // R6 was fixed for the family she was shown (§B-OPTIONB19, 2026-11-07): Option
-  // B now says what it leads to at 19 for a non-immunocompromised child whose
-  // adult card then gives a dose. What remains is the family left out on purpose:
-  // chronic conditions only, where the next dose is at 50. Not put to her.
+  // R6 is fixed for both families: the one she was shown first (§B-OPTIONB19,
+  // Cora: the dose at 19, in view) and its leftover (§B-OPTIONB50, Owen,
+  // 2026-11-07: chronic conditions only, the dose at 50, under "Why this").
+  // Kept so a return of the fault is sorted, not unsorted.
   'R6-option-b-later-dose-unsaid': {
     class: 'real',
     title: "Chronic conditions only: a child's Option B says it completes the series, and after PPSV23 a dose comes at 50 (left out of §B-OPTIONB19; not put to the owner)",

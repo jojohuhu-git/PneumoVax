@@ -353,8 +353,9 @@ in its step note.
 - **Immunocompromised children: no line.** CDC's row makes their Option B owe *"then ≥5 years
   later give 1 dose of PCV20 or a 2nd PPSV23"*, usually before 19, and the card already says
   so; run forward with the PPSV23 alone, the 19 answer would describe a child who skipped it.
-- **Chronic conditions only: no line.** At 19 they read *"no dose now; re-evaluate at age 50"*
-  after PPSV23 — a review decades away, not a dose.
+- **Chronic conditions only: not this line.** At 19 they read *"no dose now; re-evaluate at age
+  50"* after PPSV23 — a review decades away, not a dose. Since 2026-11-07 they get the age-50
+  line instead, folded (§B-OPTIONB50, Owen).
 - **"Option B-2"**, the PPSV23 after Option B-1's PCV15: not this choice; no line.
 - Option A's road is not run: after its PCV20 every such child is complete for life at 19
   (0 of 77,496 patients had a line there).
@@ -363,6 +364,45 @@ in its step note.
 unrecorded-product line), 176 typical. No dose, product, status or date moves. Visible words at
 the wordiest 1 in 10 rose 64 → 65, pinned with the reason. Guard:
 `regression-2026-11-07-option-b-says-what-happens-at-19.test.js`.
+
+### §B-OPTIONB50 — Option B says what PPSV23 leads to at 50, under "Why this" (owner, 2026-11-07, "Owen")
+
+R6's leftover, the family §B-OPTIONB19 left out. **Owen, 14, diabetes, PCV13 at 2, 4, 6 and 12
+months** is offered *Option A: 1 dose PCV20* or *Option B: 1 dose PPSV23*. After PCV20 he is
+complete for life: the card reads "Complete" at 19, at 49 and at 50. After PPSV23 he is complete
+as a child; at 19 the adult card reads *"No dose now — review at age 50"*; at 50 it gives *"PCV20
+or PCV21 ≥5 years after last pneumococcal dose — completes the series"*. So Option B costs one
+more dose at 50. Shown this, the owner chose **"Yes, under Why this"** — behind the fold, unlike
+Cora's line, whose dose comes at 19.
+
+**The line is the adult cards' own** (§B-AT19). `optionBAtNineteen()` gives the PPSV23 on Option
+B's date and runs the patient to 19; when that card cites `adultChronicOnlyReviewAt50`, it runs
+him on to the 50th birthday too, and `OPTION_B_AT_FIFTY` picks the sentence by the rows the two
+cards cite: *"If PPSV23 is chosen, no dose is needed at 19 [c]; at 50 the adult schedule gives 1
+dose of PCV20 or PCV21 [c]."* — the owner's wording, exactly as shown to her. It cites
+`adultChronicOnlyReviewAt50` and `adultBothNotAt65` (CDC's adult notes — CDC, not mm7401a1, per
+the cite-CDC rule), both `aboutAnotherGroup`, both already on the pinned list. A pair of rows
+not in the table gives no line (never reached today: every such card at 50 cites that row).
+
+The source rows, read live 2026-11-07 in mm7401a1's clinical guidance table: chronic 19–49,
+"PCV13 and 1 dose of PPSV23" — *"The pneumococcal vaccination recommendations should be reviewed
+again when the person reaches age 50 years."*; ≥50, "PCV13 at any age and PPSV23 at age <65
+years" — *"A single dose of PCV21 or PCV20 ≥5 years after the last pneumococcal vaccine dose."* And
+the two sentences the card actually quotes, read live the same day on CDC's Adult Schedule Notes
+(sections opened): under "Previously received PCV13 and 1 dose of PPSV23" — *"Alcoholism, chronic
+heart/liver/lung disease, cigarette smoking, or diabetes mellitus: no additional PCV or PPSV23
+doses recommended at this time. Review pneumococcal recommendations when age 50 years or
+older."*; and *"Previously received both PCV13 and PPSV23 but NO PPSV23 was received at age 65
+years or older: 1 dose PCV20 or 1 dose PCV21 at least 5 years after the last pneumococcal vaccine
+dose."*
+
+**Words:** no "at least 5 years" clause. The first draft carried the card at 50's own condition
+and three guards caught it — a non-immunocompromised child is never offered a 5-year follow-on,
+and the words "5 years" on his card read as one. For this family the clause is always met (the
+PPSV23 is given before 19, 31+ years before 50), so it said nothing. **It must not start "If
+PPSV23 is chosen, at 19"** — that is Cora's in-view rule in `noteFold.js`, and would pull it into
+view. No dose, product, status, date or visible word moves.
+Guard: `regression-2026-11-07-owen-option-b-says-what-happens-at-50.test.js`.
 
 ### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
 
