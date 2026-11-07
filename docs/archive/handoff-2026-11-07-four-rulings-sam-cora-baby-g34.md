@@ -38,8 +38,11 @@ year instead of 5". What settled it was quoting her own Leah and Ivy rulings on 
 - **"eligible" beside an earlier "can be given from" date**, on Remy's card.
 
 **Not started, no ruling needed:**
-- **Make check 1 a required check.** It is clean now for the first time. Promote it as the report's gate
-  table says: a CI step on PRs touching `src/logic/`, using the grid only (about 1 minute).
+- ~~**Make check 1 a required check.**~~ **DONE 2026-11-07, same day, branch
+  `test/2026-11-07-check-1-advice-accepted-gate`.** It joined check 4's file, renamed
+  `whole-app-forward-checks-gate.test.js`. It runs in `npm test`, not a separate CI step: one forward walk
+  of the grid serves both checks, plus every 11th typical patient followed forward. It caught Sam's ruling
+  undone (2 groups) and R2 undone (5). Suite: 2,295 passing.
 - Check 7 "Stable over time": 16 grid patients, all R4. Pin R4's count before promoting it.
 - The three audits proposed 2026-11-01 (age-line doses for children, the same for adults, wording against
   the Rulebook). Not confirmed whether the whole-app checks already cover them.

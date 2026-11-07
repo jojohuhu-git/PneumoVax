@@ -1770,7 +1770,9 @@ were children sent down the "due today" PPSV23, thrown out, and then held past t
 birthday. That path no longer exists.
 
 Guard: `regression-2026-11-05-r1-second-ppsv23-waits-eight-weeks.test.js`. Check 4 is now in
-`npm test`: `whole-app-options-agree-gate.test.js`.
+`npm test`: `whole-app-forward-checks-gate.test.js` (renamed 2026-11-07, when check 1 joined it:
+"a dose given on the date the app advised is accepted", over all 17,016 grid patients and every
+11th typical patient, followed forward; it reached 0 patients with PR #129).
 
 ---
 
