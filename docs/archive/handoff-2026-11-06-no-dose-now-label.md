@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-06 by `handoff-2026-11-06-result-page-fold.md`.** Do not resume from this file.
+
 # Handoff — 2026-11-06, whole-app report queue after P1-2
 
 **The queue is still `docs/archive/fix-queue-2026-11-05-whole-app-rule-checks.md`.** This file only

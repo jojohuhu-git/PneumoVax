@@ -100,10 +100,8 @@ moves. R5 went from 832 patients to 0. `CLINICAL_SPEC.md` §C-COMPLETE. What fol
 
 ### P2-2 — R3, OWNER: an infant's date moves when the child turns 7 months
 
-**NOT DONE. Waits on her answer.** The handoff listed this as needing no decision. It does: the fix
-moves an advised date 4 weeks later for a child already behind, which is case (c) of her 2026-10-18
-rule. Tried in a throwaway copy. Remy, born May 6, 2026, PCV20 Nov 6 and Dec 4: on Dec 4 the card says
-Jan 1, on Jan 1 it says Jan 29. The fix says Jan 29 from Dec 4. 0 of 17,016 first screens move.
+**DONE 2026-11-06, PR #125.** She chose: advise Jan 29, and say Jan 1 counts. R3 went from 33 patients
+to 0. `CLINICAL_SPEC.md` §L-2. What follows is the history.
 
 - **Patient:** Remy in the report.
 - **Now:** the card says dose 3 is due Dec 6. On Dec 6 the same card says Jan 3.
@@ -168,12 +166,15 @@ wording. No dose or date moves.
 
 ### P2-9 — NEW, OWNER: an on-time baby's card says "Catch-up"
 
-- **Patient:** Mia again. Her card's label reads "Catch-up", and so does every baby's once one dose is
-  recorded, on time or not. `status: prior === 0 ? 'due' : 'catchup'` in `pcvInfant()`.
-- **Not started.** It changes a label a clinician reads first, and the colour of the card's top bar.
+**DONE 2026-11-06 on `fix/p2-9-10-routine-label-and-first-dose-wording`.** "Routine" when on time.
+231 of 17,016 and 561 of 18,264 saved answers moved, each the label alone. `CLINICAL_SPEC.md` §L-2.
 
-### WORD-1 — NEW, OWNER: fold the result page
+### P2-10 — NEW, OWNER: an interval before a first dose
 
-**Investigated, not started.** Report: `docs/archive/report-2026-11-06-wordy-result-pages.md`, which
-lists eight decisions for her. Do not build until she has answered the keep list, where the Sources row
-goes, and what stays under a recorded dose.
+**DONE 2026-11-06 on the same branch.** Her question on a 3-year-old with no spleen and no doses:
+"why is the 8 week interval being mentioned". Seven sentences and two headings lost it.
+
+### WORD-1 — OWNER: fold the result page
+
+**Her answers are in. Not built.** Report: `docs/archive/report-2026-11-06-wordy-result-pages.md`.
+Decisions and build order: `docs/archive/handoff-2026-11-06-result-page-fold.md`.
