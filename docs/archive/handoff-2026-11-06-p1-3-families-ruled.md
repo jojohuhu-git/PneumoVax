@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by `docs/archive/handoff-2026-11-07-four-rulings-sam-cora-baby-g34.md`. G34, P2-4 (R6), P2-5 (R4) and P2-6 (R7) were ruled and built in PR #129. Do not resume from this file.
+
 # PneumoVax — Handoff after P1-3's four family rulings (2026-11-06)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
