@@ -1,4 +1,4 @@
-// ── Whole-app rule checks 1, 4 and 7's forward half (required since 2026-11-07) ──
+// ── Whole-app rule checks 1, 4, 5 and 7's forward half (required since 2026-11-07) ──
 //
 // CHECK 1 — the app accepts its own advice (joined 2026-11-07). A dose given on
 // the date a card advised is never thrown out, called extra, called unneeded, or
@@ -12,6 +12,15 @@
 // CHECK 4 — the options agree (joined 2026-11-05, P0-1). When the app offers two
 // vaccines for one dose, both follow the same wait.
 //
+// CHECK 5 — the card and the chip agree (joined 2026-11-07). When the chip
+// under a recorded dose names a date for the next dose, the card does not ask
+// for that dose on a different date. Its one known fault is R4, parked by the
+// report (a thrown-out childhood PPSV23: the chip promises the PPSV23 series'
+// 5-year date while the card asks for a PCV sooner — Max, 5, no spleen). The
+// report's gate table: "when R4 is fixed, or parked with its count pinned".
+// Measured 2026-11-07 over all 77,496 patients (`node scripts/wholeApp/run.mjs
+// --checks 5`): 41 grid + 60 typical, every one R4, 0 unsorted.
+//
 // CHECK 7, FORWARD HALF — the advice still stands on its day (joined
 // 2026-11-07). A card that names a date must, on that date, still offer that
 // vaccine on that date. This is the half that found R3 (Remy: Jan 1, then Jan 29
@@ -19,11 +28,11 @@
 // — is whole-app-stable-over-time-gate.test.js; it shares no work with this walk,
 // so it is a separate file and runs beside this one.
 //
-// What it covers, in about 2½ minutes of one core:
+// What it covers, in about 3 minutes of one core:
 //   • the 17,016 grid patients, each followed forward through the advice — one
 //     walk, all three checks;
-//   • check 4 on the first screen of all 60,480 typical patients;
-//   • checks 1 and 7 on EVERY 11TH typical patient (5,499), followed forward. All
+//   • checks 4 and 5 on the first screen of all 60,480 typical patients;
+//   • checks 1, 5 and 7 on EVERY 11TH typical patient (5,499), followed forward. All
 //     60,480 would add over 4 minutes. Measured 2026-11-07: the sample reaches
 //     all 160 risk-and-age groups of the typical list; 11 is prime so it does
 //     not fall into step with the list's own patterns.
@@ -32,6 +41,8 @@
 // Allowed, by name, and nothing else:
 //   • check 4: D3, the owner's ruling (a PPSV23 held 5 years after a thrown-out
 //     one); R4, a thrown-out childhood PPSV23, pinned at exactly 16 patients;
+//   • check 5: R4 only, pinned at exactly the counts below — a fix makes the pin
+//     fail too, and that is the moment to lower it;
 //   • check 1: nothing;
 //   • check 7's forward half: nothing (0 patients over all 77,496, 2026-11-07).
 import { describe, it, expect, beforeAll } from 'vitest';
@@ -45,9 +56,9 @@ let tally;
 let sampled = 0;
 beforeAll(() => {
   tally = newTally();
-  const both = replayChecks(tally, new Set([1, 4, 7]));
-  const checkOne = replayChecks(tally, new Set([1, 7]));
-  const checkFour = replayChecks(tally, new Set([4]));
+  const both = replayChecks(tally, new Set([1, 4, 5, 7]));
+  const checkOne = replayChecks(tally, new Set([1, 5, 7]));
+  const checkFour = replayChecks(tally, new Set([4, 5]));
   allPatients({ only: 'grid' }).forEach((p) => { tally.setPatient(p); walk(p, both); });
   allPatients({ only: 'typical' }).forEach((p, i) => {
     tally.setPatient(p);
@@ -77,5 +88,16 @@ describe('check 4: alternative cards for one dose follow one wait', () => {
     expect(show(tally.rows().filter((r) => r.check === 4 && !allowed.has(r.cause)))).toEqual([]);
     const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 4);
     expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 16, typical: 0 });
+  });
+});
+
+describe('check 5: the card and the chip agree on the date of one dose', () => {
+  it('no disagreement but R4, and R4 at exactly its pinned count', () => {
+    expect(show(tally.rows().filter((r) => r.check === 5 && r.cause !== 'R4-thrown-out-ppsv23-chip'))).toEqual([]);
+    const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 5);
+    // 41 is every grid patient (the full run says 41). 5 is the typical SAMPLE:
+    // the 60 typical R4 patients are all a few screens into the walk, not on the
+    // first screen, so only the every-11th walk reaches them — 5 of 60.
+    expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 41, typical: 5 });
   });
 });

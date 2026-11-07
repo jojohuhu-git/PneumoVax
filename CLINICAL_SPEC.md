@@ -1776,6 +1776,9 @@ Guard: `regression-2026-11-05-r1-second-ppsv23-waits-eight-weeks.test.js`. Check
 joined the same day, in two halves: its forward half (a card's advised date still stands when the day
 comes) rides on that walk, and its later-look half (the same record opened on later days) is
 `whole-app-stable-over-time-gate.test.js`, with R4 pinned at exactly 16 grid patients.
+Check 5 ("card and chip agree": a recorded dose's chip and the card name one date for the next dose)
+joined it later that day on the same walk. Its only fault over all 77,496 patients is R4, parked, pinned
+at exactly 41 grid patients and 5 of the sampled typical ones.
 
 ---
 
