@@ -1,4 +1,4 @@
-// ── Whole-app rule checks 1 and 4, followed forward (required since 2026-11-07) ──
+// ── Whole-app rule checks 1, 4 and 7's forward half (required since 2026-11-07) ──
 //
 // CHECK 1 — the app accepts its own advice (joined 2026-11-07). A dose given on
 // the date a card advised is never thrown out, called extra, called unneeded, or
@@ -12,11 +12,18 @@
 // CHECK 4 — the options agree (joined 2026-11-05, P0-1). When the app offers two
 // vaccines for one dose, both follow the same wait.
 //
+// CHECK 7, FORWARD HALF — the advice still stands on its day (joined
+// 2026-11-07). A card that names a date must, on that date, still offer that
+// vaccine on that date. This is the half that found R3 (Remy: Jan 1, then Jan 29
+// once the date came). The other half — the same record looked at on later days
+// — is whole-app-stable-over-time-gate.test.js; it shares no work with this walk,
+// so it is a separate file and runs beside this one.
+//
 // What it covers, in about 2½ minutes of one core:
 //   • the 17,016 grid patients, each followed forward through the advice — one
-//     walk, both checks;
+//     walk, all three checks;
 //   • check 4 on the first screen of all 60,480 typical patients;
-//   • check 1 on EVERY 11TH typical patient (5,499), followed forward. All
+//   • checks 1 and 7 on EVERY 11TH typical patient (5,499), followed forward. All
 //     60,480 would add over 4 minutes. Measured 2026-11-07: the sample reaches
 //     all 160 risk-and-age groups of the typical list; 11 is prime so it does
 //     not fall into step with the list's own patterns.
@@ -25,7 +32,8 @@
 // Allowed, by name, and nothing else:
 //   • check 4: D3, the owner's ruling (a PPSV23 held 5 years after a thrown-out
 //     one); R4, a thrown-out childhood PPSV23, pinned at exactly 16 patients;
-//   • check 1: nothing.
+//   • check 1: nothing;
+//   • check 7's forward half: nothing (0 patients over all 77,496, 2026-11-07).
 import { describe, it, expect, beforeAll } from 'vitest';
 import { allPatients, firstState, view, walk } from '../../../scripts/wholeApp/replay.mjs';
 import { newTally, replayChecks } from '../../../scripts/wholeApp/checks.mjs';
@@ -37,8 +45,8 @@ let tally;
 let sampled = 0;
 beforeAll(() => {
   tally = newTally();
-  const both = replayChecks(tally, new Set([1, 4]));
-  const checkOne = replayChecks(tally, new Set([1]));
+  const both = replayChecks(tally, new Set([1, 4, 7]));
+  const checkOne = replayChecks(tally, new Set([1, 7]));
   const checkFour = replayChecks(tally, new Set([4]));
   allPatients({ only: 'grid' }).forEach((p) => { tally.setPatient(p); walk(p, both); });
   allPatients({ only: 'typical' }).forEach((p, i) => {
@@ -54,6 +62,12 @@ describe('check 1: a dose given on the date the app advised is accepted', () => 
   it('no patient, grid or sampled typical, has advice the app then faults', () => {
     expect(sampled).toBe(5499);
     expect(show(tally.rows().filter((r) => r.check === 1))).toEqual([]);
+  });
+});
+
+describe('check 7, forward half: a dated card still stands on its date', () => {
+  it('no patient, grid or sampled typical, arrives on an advised date to find it moved or gone', () => {
+    expect(show(tally.rows().filter((r) => r.check === 7))).toEqual([]);
   });
 });
 

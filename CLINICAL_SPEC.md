@@ -1772,7 +1772,10 @@ birthday. That path no longer exists.
 Guard: `regression-2026-11-05-r1-second-ppsv23-waits-eight-weeks.test.js`. Check 4 is now in
 `npm test`: `whole-app-forward-checks-gate.test.js` (renamed 2026-11-07, when check 1 joined it:
 "a dose given on the date the app advised is accepted", over all 17,016 grid patients and every
-11th typical patient, followed forward; it reached 0 patients with PR #129).
+11th typical patient, followed forward; it reached 0 patients with PR #129). Check 7 ("stable over time")
+joined the same day, in two halves: its forward half (a card's advised date still stands when the day
+comes) rides on that walk, and its later-look half (the same record opened on later days) is
+`whole-app-stable-over-time-gate.test.js`, with R4 pinned at exactly 16 grid patients.
 
 ---
 
