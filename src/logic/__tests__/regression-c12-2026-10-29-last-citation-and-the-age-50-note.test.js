@@ -354,6 +354,10 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
         // R2 (2026-11-05, OWNER RULINGS on Tess, Rafi and Cal, CLINICAL_SPEC.md §B-AT19): the third
         // exception: a child shown the adult card, every citation declared.
         if ((r.noteCites ?? []).some((c) => /19th birthday/.test(c.aboutAnotherGroup ?? ''))) continue;
+        // P2-4 / R6 (OWNER RULING 2026-11-07, on Cora, CLINICAL_SPEC.md §B-OPTIONB19): the fourth
+        // exception, by name: a PPSV23 Option B card, saying what the adult card at 19 gives after it.
+        if (/^Option B: 1 dose PPSV23\b/.test(r.doseLabel)
+          && (r.noteCites ?? []).some((c) => /gives this patient at 19/.test(c.aboutAnotherGroup ?? ''))) continue;
         for (const name of chipNames(r)) {
           if (name === 'CDC Adult Notes') offenders.add(`${r.vaccine} / ${r.doseLabel}`);
         }

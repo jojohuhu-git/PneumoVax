@@ -330,6 +330,40 @@ R7 went 312 → 0. Guard: `regression-2026-11-07-healthy-baby-age-50-and-g34.tes
 **Not changed, and noted:** the 24–59-month card carries the line even when the series
 includes PCV20 or an adult-only tick is set. That predates this ruling and was not put to her.
 
+### §B-OPTIONB19 — Option B says what PPSV23 leads to at 19 (owner, 2026-11-07, "Cora")
+
+P2-4 / R6 of the 2026-11-05 whole-app checks. **Cora, 14, cochlear implant, PCV13 at 2, 4, 6
+and 12 months** is offered *Option A: 1 dose PCV20* or *Option B: 1 dose PPSV23*, both saying
+*"Either a single dose of PCV20 or a PPSV23 completes the recommended series."* After PCV20
+she is complete for life. After PPSV23 her complete card says *"At 19, the adult schedule gives
+1 dose of PCV20 or PCV21, at least 5 years after the last pneumococcal dose."* (§B-AT19). The
+clinician choosing today was not told. Shown this, the owner chose **"Add one line to Option
+B"**, in view.
+
+**The line is the adult card's own** (§B-AT19: never hand-written). `optionBAtNineteen()` gives
+the PPSV23 on Option B's own date, runs the patient to the 19th birthday, and words that card
+through `atNineteen()`: *"If PPSV23 is chosen, at 19 the adult schedule gives 1 dose of PCV20 or
+PCV21, at least 5 years after the last pneumococcal dose."* It cites the adult row
+(`adultIc1949BothPcv13Ppsv`, or `adultPpsvOnly1949` when an earlier conjugate's product is not
+recorded) with `aboutAnotherGroup` — an adult source on a child card, the fifth declared place.
+`noteFold.js` keeps it in view. The Rulebook's chronic / cochlear / CSF-leak row says the same
+in its step note.
+
+**Limits, each measured or reasoned, none put to her:**
+- **Immunocompromised children: no line.** CDC's row makes their Option B owe *"then ≥5 years
+  later give 1 dose of PCV20 or a 2nd PPSV23"*, usually before 19, and the card already says
+  so; run forward with the PPSV23 alone, the 19 answer would describe a child who skipped it.
+- **Chronic conditions only: no line.** At 19 they read *"no dose now; re-evaluate at age 50"*
+  after PPSV23 — a review decades away, not a dose.
+- **"Option B-2"**, the PPSV23 after Option B-1's PCV15: not this choice; no line.
+- Option A's road is not run: after its PCV20 every such child is complete for life at 19
+  (0 of 77,496 patients had a line there).
+
+**Measured:** 267 cards carry the line — 91 on the grid (66 the PCV20/PCV21 line, 25 the
+unrecorded-product line), 176 typical. No dose, product, status or date moves. Visible words at
+the wordiest 1 in 10 rose 64 → 65, pinned with the reason. Guard:
+`regression-2026-11-07-option-b-says-what-happens-at-19.test.js`.
+
 ### §B-50NOTE — which "nothing needed" cards say "come back at 50", and which must not
 
 **OWNER DECISION 2026-10-30.** Asked whether the age-50 line should spread to the other

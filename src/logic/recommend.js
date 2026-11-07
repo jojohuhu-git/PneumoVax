@@ -1618,6 +1618,72 @@ function adultAnswerPastNineteen(recs, adultRecs, nineteenth) {
   });
 }
 
+// ── P2-4 / R6 (OWNER RULING 2026-11-07, on "Cora") — what Option B leads to at 19 ──
+//
+// Cora, 14, cochlear implant, a PCV13 baby series, is offered Option A PCV20 or
+// Option B PPSV23, both "completes the recommended series". After PCV20 she is
+// finished for life; after PPSV23 her "complete" card says that at 19 the adult
+// schedule gives PCV20 or PCV21. The clinician choosing today was not told.
+// Asked, she chose "Add one line to Option B", in view.
+//
+// THE LINE IS THE ADULT CARD'S OWN (§B-AT19 — never hand-written): the PPSV23 is
+// given on Option B's own date, the patient is run to the 19th birthday, and
+// `atNineteen()` words what that card says.
+//
+// `optionBLookedAhead` stops the look-ahead from looking ahead again. The run
+// to 19 validates the dose it adds, which asks what card the child had on that
+// day (`cardsOnTheDayOf`), which is this same child pathway — so without the
+// flag each run starts another, forever. The day-of answer needs the card's
+// status and products, never this sentence, so nothing is lost.
+//
+// NOT for an immunocompromised child: CDC's row there makes Option B owe a
+// follow-on dose 5 years later ("then ≥5 years later give 1 dose of PCV20 or a
+// 2nd PPSV23"), usually before 19, and the card already says so. Run forward with
+// the PPSV23 alone, the answer at 19 would describe a child who skipped it.
+function optionBAtNineteen(recs, input, nineteenth, today, rowClass) {
+  if (input.optionBLookedAhead || rowClass !== 'nonIC') return recs;
+  // "Option B:" only — never "Option B-2", the PPSV23 that follows Option B-1's
+  // PCV15: run forward without that PCV15, its answer at 19 would be wrong.
+  const isPpsvOptionB = (r) => /^Option B: /.test(r.doseLabel ?? '') && !ASKS_FOR_NOTHING.has(r.status)
+    && (r.brands ?? []).some((b) => /PPSV23/.test(b.key ?? b));
+  const b = recs.find(isPpsvOptionB);
+  const a = recs.find((r) => /^Option A: /.test(r.doseLabel ?? '') && !ASKS_FOR_NOTHING.has(r.status));
+  if (!b || !a) return recs;
+  const on = (card) => (card.dueToday || !card.earliestNextDate ? today : card.earliestNextDate);
+  // A dose due on or after the 19th birthday is answered by the adult card itself.
+  if (on(b) >= nineteenth || on(a) >= nineteenth) return recs;
+  const afterB = atNineteen(recommendBeforeFold({
+    ...input,
+    optionBLookedAhead: true,
+    ageMonths: ADULT_SCHED_MIN_M,
+    today: nineteenth,
+    ppsv23Doses: [...(input.ppsv23Doses ?? []), { product: 'PPSV23', date: on(b) }],
+  }).recs[0]);
+  // Scoped to the family she was shown: Option B leads to a DOSE at 19. After a
+  // PPSV23, a child with chronic conditions only reads "no dose now; re-evaluate
+  // at age 50" at 19 — the two options then differ only by a review decades
+  // away, which was not put to her, so it is not changed (§B-OPTIONB19).
+  if (!afterB || afterB.cite.key === 'adultChronicOnlyReviewAt50') return recs;
+  // Option A's road is not run: after its PCV20 every such child is complete for
+  // life at 19, so it has no line to differ from. Measured 2026-11-07, 0 of 77,496
+  // patients; a comparison that never fires could not be tested, so it is not
+  // here. Cora's test asserts her Option A road reads complete with no line.
+  // Her words where the line is plain; the comma kept where a "because" clause
+  // follows, or the sentence would run on.
+  const sentence = afterB.sentence
+    .replace(/^At 19, (?!because)/, 'If PPSV23 is chosen, at 19 ')
+    .replace(/^At 19, /, 'If PPSV23 is chosen, at 19, ');
+  return recs.map((r) => {
+    if (r !== b) return r;
+    const note = typeof r.note === 'string'
+      ? `${r.note} ${sentence}`
+      : r.note.detail
+        ? { ...r.note, detail: `${r.note.detail} ${sentence}` }
+        : { ...r.note, lead: `${r.note.lead} ${sentence}` };
+    return { ...r, note, noteCites: [...(r.noteCites ?? []), afterB.cite] };
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4685,6 +4751,7 @@ export function recommendBeforeFold(input) {
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
       recs = sayEightWeekWait(recs);
+      recs = optionBAtNineteen(recs, input, nineteenth, today, pedsRiskRowClass(pedsIds));
       // R2: nothing can be done before 19, so the adult card answers from today.
       const pastNineteen = adultAnswerPastNineteen(recs, adultAt19.recs, nineteenth);
       if (pastNineteen) {

@@ -42,6 +42,7 @@ export const STAY_IN_VIEW = Object.freeze([
   { why: 'S15: 8 weeks is named as an option at 50 and over', re: /^A minimum interval of 8 weeks may be considered/ },
   { why: 'A child answered by the adult schedule must be told why', re: /^This patient turns 19\b|not offered at 19/ },
   { why: 'The usual PPSV23 step does not apply to this child', re: /^This child has already had a PPSV23\b/ },
+  { why: 'Option B is not finished for life; Option A is (owner, 2026-11-07, Cora)', re: /^If PPSV23 is chosen, at 19\b/, alsoFrom: 'detail' },
 ]);
 
 const markers = (s) => (s.match(/\[c\]/g) ?? []).length;

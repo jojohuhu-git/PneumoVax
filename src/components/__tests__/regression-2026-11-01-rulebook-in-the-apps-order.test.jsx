@@ -164,8 +164,14 @@ describe('PneumoVax decisions: written once, named, consistent, opened in place'
 describe('a children\'s row says None only when the app gives no later dose', () => {
   const Y5 = intervalPhrase({ months: PPSV23_REVACC_MIN_MONTHS });
   const later = new RegExp(`${Y5} (later|after)`);
+  // A sentence about what the ADULT schedule gives at 19 is not this row's: the
+  // row's last step is the child schedule, and the Adults table answers for 19.
+  // Cora (owner, 2026-11-07) put one on Option B, worded "If PPSV23 is chosen,
+  // at 19 …"; the row's own note now says so too.
+  const atNineteen = /(^|\. )(If PPSV23 is chosen, at 19|At 19,)[^[]*\[c\]\.?/g;
   const notesOf = (e) => recommend(e.input).recs
-    .map((r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`));
+    .map((r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`))
+    .map((n) => n.replace(atNineteen, '$1'));
 
   it(`no worked patient on a row ending in None is given a dose ${Y5} later`, () => {
     for (const lane of CHILD_LANES.filter((l) => l.steps[2].kind === 'none')) {
