@@ -47,8 +47,14 @@ describe('P2-5: a teen with an adult-only risk is told to look again at 19', () 
     expect(detail(card({ ...G58, riskIds: [] }))).toContain(AT50);
   });
 
-  it('CONTROL: a smoker whose adult card at 19 says complete keeps the age-50 line', () => {
+  // This control used to assert the age-50 line STAYS for a smoker whose series
+  // includes PCV20. Reversed by the owner 2026-11-07 (Leo, "Match the toddler
+  // card", §B-5TO18): once a PCV20 has counted, the card carries no age-50
+  // line — at 50 the app reads Complete. It is still the control for P2-5: the
+  // adult card at 19 says complete, so no "19" line either.
+  it('CONTROL: a smoker whose adult card at 19 says complete gets no 19 line — and, since Leo, no 50 line', () => {
     const r = card({ ...G59, pcvDoses: d('PCV20', ['2009-12-27', '2010-02-27', '2010-04-27', '2010-10-27']) });
-    expect(detail(r)).toContain(AT50);
+    expect(detail(r)).not.toContain('Re-evaluate at age 19');
+    expect(detail(r)).not.toContain(AT50);
   });
 });

@@ -270,7 +270,11 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
       // P2-5 (2026-11-01, owner: "agree with fixing"): -404, the teens whose only
       // tick is smoking (202) or alcohol use disorder (202). The adult schedule
       // gives them a dose at 19, so their card now says 19. 1,584 - 404.
-      'Not indicated (healthy 5–18y)': 1584 - 404,
+      // Owner 2026-11-07, Leo and Nina (§B-5TO18): -192, a PCV20 that counted;
+      // -198, a PCV20 recorded as an extra dose. At 50 both read Complete. 80
+      // cards keep the line with an INVALID PCV20 on record (same-day duplicate,
+      // or a day after a PPSV23): 14 are owed a dose at 50, 66 are not.
+      'Not indicated (healthy 5–18y)': 1584 - 404 - 192 - 198,
       // Owner 2026-11-07, "Match the baby card" (§B-50BABY): -8, the toddlers
       // whose only tick is smoking or alcohol use disorder — the adult schedule
       // gives them a dose at 19. A PCV20 series also loses the line, but the
