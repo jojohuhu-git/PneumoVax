@@ -25,7 +25,9 @@ describe('P2-3: no "at or after age 6" over a dose given before 6', () => {
   it('Ada: complete, and the label and note make no claim about age', () => {
     const r = run(['cochlear_implant'], [...doses('PCV13', BABY), ...doses('PCV15', ['2026-01-01'])], doses('PPSV23', ['2020-07-01']));
     expect(r.recs[0].status).toBe('complete');
-    expect(r.recs[0].doseLabel).toBe('Complete (PCV13 and PCV15 + PPSV23)');
+    // §C-P1-3 (Mateo): the PCV15 is an extra dose now, so the card reads the
+    // history she followed and cites that row. That closes what P2-3 deferred.
+    expect(r.recs[0].doseLabel).toBe('PCV series complete (PCV before age 6 + PPSV23)');
     expect(allText(r)).not.toMatch(AT_6_OR_LATER);
   });
 
@@ -41,8 +43,10 @@ describe('P2-3: no "at or after age 6" over a dose given before 6', () => {
     expect(allText(r)).not.toMatch(AT_6_OR_LATER);
   });
 
-  it('PCV20 as a baby and a PCV15 at 7: says the doses fall both sides of 6', () => {
-    const r = run(['asplenia'], [...doses('PCV20', BABY), ...doses('PCV15', ['2026-01-01'])]);
+  // Was a PCV15 at 7, which §C-P1-3 (Mateo) made an extra dose. A PCV13 is left
+  // out of that ruling, so it still reaches the same sentence.
+  it('PCV20 as a baby and a PCV13 at 7: says the doses fall both sides of 6', () => {
+    const r = run(['asplenia'], [...doses('PCV20', BABY), ...doses('PCV13', ['2026-01-01'])]);
     const c = r.recs[0];
     expect(c.doseLabel).toBe('PCV complete (includes PCV20)');
     expect(c.note.detail).toContain('both before and after age 6');

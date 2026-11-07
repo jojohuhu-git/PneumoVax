@@ -84,8 +84,10 @@ const productsOf = (res) => (res.orderedDoses?.pcv ?? [])
   .map((d, i) => ({ d, v: res.perDose?.pcv?.[i] }))
   // 'noncounting' is PCV7, which never counts; 'invalid' is a rejected dose,
   // which is not a dose any row is written about. 'unknown' DOES count -- it is
-  // the unrecorded-product case, and the whole point of ruling 2.
-  .filter(({ v }) => v && v.status !== 'invalid' && v.status !== 'noncounting')
+  // the unrecorded-product case, and the whole point of ruling 2. An extra dose
+  // (§C-P1-3) is left out for the reason 'invalid' is: it is not in the history a
+  // card's row describes, and it carries its own "not needed" line on its chip.
+  .filter(({ v }) => v && v.status !== 'invalid' && v.status !== 'noncounting' && !v.extraDose)
   .map(({ d }) => d.product || '');
 
 /**

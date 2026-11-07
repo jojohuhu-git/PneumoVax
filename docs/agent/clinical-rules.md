@@ -270,6 +270,10 @@ invalid (it was validly given). Before S14-4 such a dose fell through to the old
 dose and had no way to know the series was already done: a PCV21 given 5 weeks after a
 completing PCV20 read "this dose still counts" when no further PCV was ever recommended.
 
+A **child's** conjugate is extra by a different route: the card the child had on the day of the
+dose did not ask for it (`conjugateNobodyAskedFor`, owner rulings 2026-11-06). `CLINICAL_SPEC.md`
+§C-P1-3 has the families, the limits and what was left alone.
+
 **The extra-dose check runs AFTER the interval table**, so a dose the table voids is
 invalid rather than "extra" — which is why `regression-s14-4-extra-dose.test.js` had to
 space its fixture more than a year apart once S14-7 made the adult PCV13→PCV20 gap a floor.

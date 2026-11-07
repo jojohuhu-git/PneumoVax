@@ -1506,9 +1506,9 @@ appear only when no dated dose they describe was given before 6: `someConjugateB
 and conjugates either side of 6 now reads *"This child's conjugate doses were given both before and
 after age 6, so no single CDC row describes the whole history."*
 
-**Left as it is, and why.** These cards still cite the row they cited before. Most of these children
-had a conjugate nobody asked for, which is the open half of P1-3, and her ruling there may send them
-to the before-6 row. An undated dose is unchanged too: it says nothing either way.
+**Left as it is, and why.** These cards still cited the row they cited before, because most of these
+children had a conjugate nobody asked for. **Closed 2026-11-06 by §C-P1-3:** that dose is now an extra
+dose, so they read the before-6 row. An undated dose is unchanged: it says nothing either way.
 
 ### §D-note — FINDING A: an IC child who has ALREADY had a PPSV23 waits five years
 
@@ -1564,33 +1564,69 @@ Single source: `icPostPpsv23DueState()` in `recommend.js`. Citation:
 `pedsIcPpsvWaitFiveYears` in `refs.js`. Test:
 `regression-2026-10-17-finding-a-ic-ppsv23-five-year-wait.test.js`.
 
-### §C-P1-3 — a PCV15 no card asked for (OWNER RULING 2026-11-06, on Noor)
+### §C-P1-3 — a child's conjugate no card asked for (OWNER RULINGS 2026-11-06, five patients)
 
-**Noor, 10, HIV.** PCV13 at 2, 4, 6 and 12 months, PPSV23 at 5, then a PCV15. Asked whether the
-PCV15 is an extra dose with the 8-week wait kept, the owner answered **"Yes, flag it extra."**
+A dose reads **extra** (not needed, not counted, nothing repeated) when the card the child had on
+the day of the dose did not ask for it. She ruled family by family, one named patient each:
 
-CDC Child Notes, read live 2026-11-06, immunocompromised list, Age 6-18, under "Received PCV before
-age 6 years":
-> "Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after
-> the most recent PCV dose. If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least
-> 5 years after dose 1 PPSV23."
+| Patient | History | Her answer | Test patients flagged |
+|---|---|---|---|
+| **Noor**, 10, HIV | PCV13 at 2, 4, 6, 12 months, PPSV23 at 5, then a PCV15 | **"Yes, flag it extra."** | 3,442 |
+| **Lena**, 8, cochlear implant | PCV13 × 4, no PPSV23 yet, then a PCV15. An immunocompromised child the same | **"Yes, flag it extra."** | 4,116 |
+| **Theo**, 8, no spleen | PCV13 × 4, two PPSV23, then a PCV15. His card said complete | **"No, still complete."** | see Mateo |
+| **Mateo**, 8, cochlear implant | PCV13 × 4, one PPSV23, then a PCV15 or a PCV20. His card said complete | **"Yes, PCV15 and PCV20."** Every at-risk child, immunocompromised or not | 18,430 |
+| **Ben**, 8, healthy | PCV13 × 4, then a PCV15. His card said "Not indicated" | **"Yes, Ben only."** | 10,088 |
+| **Priya**, 8, healthy | No doses, then a first ever PCV20 | Not extra: stays valid, dose 1. That same answer | 0 |
 
-No PCV15 in it, and no row says what a PCV15 given anyway does. That is why the ruling is hers. The
-8 weeks stays because an extra PCV15 IS "the most recent PCV dose": `CHILD-PPSV23-AFTER-PCV` reads
+**Theo is the one that moved a dose.** Before this he was told to wait 8 weeks and have a PCV20,
+because a PCV15 at 6 or older sent him to the row for a conjugate given at that age. CDC's branch for
+his history ends at dose 2 PPSV23. Across all 77,496 patients, 546 cards moved, every one of them his
+family going to complete, and no other dose or date on any card moved.
+
+CDC Child Notes, read live 2026-11-06 (page updated July 1, 2025):
+> at-risk list, Age 6-18, under "Received PCV before age 6 years but have not received PPSV23":
+> "Not previously received PCV20: 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after
+> the most recent PCV dose."
+
+> immunocompromised list, the same branch: "Not previously received PCV20: administer 1 dose PCV20 or
+> 1 dose PPSV23 at least 8 weeks after the most recent PCV dose. If PPSV23 is used, administer either
+> PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23."
+
+> Catch-up: "Healthy children ages 2–4 years with any incomplete* PCV series: 1 dose PCV"
+
+No PCV15 in the first two, and no row says what a PCV15 given anyway does, or a conjugate given
+after a series is finished. That is why these are her rulings and not CDC's. The 8 weeks stays for
+Noor and Lena because an extra PCV15 IS "the most recent PCV dose": `CHILD-PPSV23-AFTER-PCV` reads
 it through `lastPcvReceived`, and the card through `extraConjugate`. The same child with no PCV
 before the PCV15 is NOT this case: CDC's row offers PCV15 ("Not previously received any dose of
 PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or 1 dose of PCV20").
 
-**Scoped to her patient** (`conjugateNobodyAskedFor` in `validate.js`, count pinned in the guard):
-PCV15 only, given at 6-18, a child today, immunocompromising condition, exactly one earlier counted
-PPSV23, and every counted conjugate before 6 with a recorded product and no PCV20 or PCV21. Other
-unasked-for conjugates were not ruled on and read as before. **When the adult card answers from
-today (§B-AT19) the chip stays valid**, because that card counts the dose: "Complete at 19 (PCV15 +
-PPSV23)" cannot sit beside "extra". At 19 the chip reads valid for the same reason, as a PPSV23
-does (§C-P2-ONTIME).
+**"Asked for" is the card's own answer, never a second reading of it.** `conjugateNobodyAskedFor` in
+`validate.js` asks `cardsOnTheDayOf`, which is `recommend()` run on the day of the dose with only the
+doses before it, the way §K-IC-PCV20-5Y asks. A record with an undated dose gets no answer.
 
-The card moves from the at/after-6 row to the row she followed, and the bold wait line now reaches
-the two before-6 blocks. Guard: `regression-2026-11-06-p1-3-noor-pcv15-extra.test.js`.
+**At 19 the dose counts.** The adult rows count every dose received, so at 19 Theo and Mateo read
+"Complete", and their child cards carry no "at 19" line, because `withAtNineteen` repeats the adult
+card and that card asks for nothing. Without the extra dose the same boys are told "Review at age 50,
+or PCV20 or PCV21" and "PCV20 or PCV21". **Shown this on Theo, she accepted it, 2026-11-06.** It is the
+same limit as §C-P2-ONTIME. **When the adult card answers from today (§B-AT19) the chip stays valid**,
+because that card counts the dose: "Complete at 19 (PCV15 + PPSV23)" cannot sit beside "extra".
+
+**What was left as it was, deliberately**, each with its count on the 77,496 so a later ruling can
+start from it:
+- **A PCV13 at any age**, 5,701. The product of its day, and CDC prints rows for a PCV13 at 6 or older.
+- **An unrecorded product in the series with a card asking for a dose**, 1,134 (498 with a PPSV23, 636
+  without). She was shown recorded products. A card that said complete or not indicated does not need
+  the product, so those are extra.
+- **A card asking for PCV20 alone**, 342: a child whose only PPSV23 fell on the day of a PCV and was
+  thrown out, so a second PPSV23 is not offered.
+- **An at-risk child under 6.** Every family she saw was 6 or older, and the grid reaches none with a
+  PCV15 or PCV20.
+
+The card moves from the at/after-6 row to the row the child followed, which closes the citation half
+of §C-AGE6-WORDS, and the bold wait line reaches the two before-6 blocks. Guards:
+`regression-2026-11-06-p1-3-unasked-conjugates-by-family.test.js` (counts pinned per family) and
+`regression-2026-11-06-p1-3-noor-pcv15-extra.test.js`.
 
 ### §D-note-8W — both options wait for the 8 weeks, and the card says so (P0-1, 2026-11-05)
 

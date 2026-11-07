@@ -40,7 +40,7 @@ export const CAUSES = {
   },
   'D5-extra-pcv15-counts-at-19': {
     class: 'ruling',
-    title: "A child's extra PCV15 is counted once the patient is an adult (§C-P1-3: adult rows count every dose received)",
+    title: "A child's extra conjugate is counted once the patient is an adult (§C-P1-3: adult rows count every dose received)",
   },
   'D3-ppsv23-held-5-years-after-thrown-out': {
     class: 'ruling',
@@ -133,7 +133,9 @@ export const askTurnsToComplete = (line, diff) => line === 228
  * other side, so a change INSIDE the four days is the rule working.
  */
 const GRACE_EDGE = new Set(['PCV13@12', 'PCV15@12', 'PCV20@12', 'PPSV23@24', 'PCV21@216']);
-const ROW_EDGE = new Set(['PCV13@7', 'PCV15@7', 'PCV20@7', 'PCV13@24', 'PCV15@24', 'PCV20@24', 'PCV13@72', 'PCV15@72', 'PCV21@228', 'PPSV23@780']);
+// PCV15@60 and PCV20@60 since §C-P1-3 (Ben): CDC's catch-up for a healthy child
+// is "ages 2-4 years", so a dose on the 5th birthday is past it and reads extra.
+const ROW_EDGE = new Set(['PCV13@7', 'PCV15@7', 'PCV20@7', 'PCV13@24', 'PCV15@24', 'PCV20@24', 'PCV15@60', 'PCV20@60', 'PCV13@72', 'PCV15@72', 'PCV21@228', 'PPSV23@780']);
 
 export const expectedAtDoseLine = (line, diff, { product }) => {
   const k = `${product}@${line}`;

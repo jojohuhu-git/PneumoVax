@@ -248,7 +248,9 @@ describe('FINDING K — a nested CDC sub-bullet is cited only inside its parent 
     // -48, 2026-10-25 (the PPSV23-then-PCV floor), was 576. The other side of
     // the +32 above: a child whose at/after-6 conjugate was set aside no longer
     // has one, so this parent branch stops covering her.
-    expect(cited).toBe(528);
+    // -140, 2026-11-06 (§C-P1-3, Mateo): the same 140 children as finding-j. Their
+    // PCV20 no longer counts, so this sub-bullet no longer speaks for them.
+    expect(cited).toBe(388);
   });
 
   it('the card says the PCV20 has been given, so the cited row is not read as still owing a dose', () => {
