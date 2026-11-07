@@ -3636,6 +3636,20 @@ would argue against the card's own advice, and the chip under a dose already exp
 early one. The same session added that note for the one place it was missing
 (§K-IC-PCV20-5Y). **Closed; do not re-open without a new owner decision.**
 
+### §L-2, 2026-11-06 — "Routine", and no interval before a first dose (P2-9, P2-10, OWNER)
+
+**"Routine" when on time.** Mia, 4 months, PCV20 on time at 2 months, read "Catch-up", as every baby
+did once one dose was recorded. She chose "Routine" when on time, with "Catch-up" for a baby who is
+actually behind. On time means the routine 4-dose series, with this dose's routine age not yet past,
+or the closing dose before 16 months (CDC's "12-15 months"). It reads the same `routineAgePassed` as
+the "overdue" sentence, so the label and the note cannot differ. A first dose keeps "Due".
+
+**No interval before a first dose.** Shown a 3-year-old with no spleen and no doses, she asked: *"this
+patient has no prior pneumococcal doses so why is the 8 week interval being mentioned".* With nothing
+on the record, a card has nothing to measure from. "≥8 weeks after the most recent dose" and "if not
+previously given" come off those cards and their headings. The 8 weeks between PCV15 and PPSV23, and
+between two doses, stays. A dose that was thrown out or has no date is still a dose on the record, so
+those cards keep the interval. Kai's PPSV23s are the guard.
 ### §L-2, 2026-11-06 — the row is the one for the age at the dose (P2-2, R3, OWNER)
 
 Remy, born May 6, 2026, HIV, PCV20 on Nov 6 and Dec 4. The app read the child's age on the visit day.

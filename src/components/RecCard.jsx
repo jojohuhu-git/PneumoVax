@@ -11,6 +11,7 @@ import { doseChipLabel, doseChipClass } from './doseChipLabel.js';
 
 const STATUS_LABELS = {
   'due':              'Due',
+  'routine':          'Routine',
   'catchup':          'Catch-up',
   'risk-based':       'Risk-Based',
   'shared-decision':  'Optional (shared decision)',

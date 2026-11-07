@@ -394,6 +394,7 @@ body {
    would compete with it. */
 .status-badge { font-size: var(--fs-sm); font-weight: 700; letter-spacing: 0.02em; }
 .status-badge.due              { color: var(--g); }
+.status-badge.routine          { color: var(--g); }
 .status-badge.catchup          { color: var(--a); }
 .status-badge.risk-based       { color: var(--r); }
 .status-badge.shared-decision  { color: var(--b); }
