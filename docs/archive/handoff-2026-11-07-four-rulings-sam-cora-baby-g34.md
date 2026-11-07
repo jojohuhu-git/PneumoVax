@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by [`handoff-2026-11-07-check-7-required.md`](handoff-2026-11-07-check-7-required.md). PRs #129 and #130 are merged; check 7 is now required (PR #131). Resume from the newer file.
+
 # PneumoVax — Handoff after the four rulings of 2026-11-07 (Sam, Cora, the healthy baby, G34)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
