@@ -528,7 +528,7 @@ the patient is not — via `cite(key, { aboutAnotherGroup: 'why' })`. There are 
 source's `population` to make a wrong quote legal** — that is the one mutation that made the
 sweep go quiet, which is why both lists are pinned. Fix the call site instead.
 
-**Adult sources on CHILD cards are allowed in exactly five places** — a non-immunocompromised child's PPSV23 Option B, saying what it leads to at 19 (2026-11-07, Cora, §B-OPTIONB19, `optionBAtNineteen()`), a child whose next dose falls at 19 or later, shown the adult card itself (2026-11-05, §B-AT19, `adultAnswerPastNineteen()`), C12's age-50 line
+**Adult sources on CHILD cards are allowed in exactly five places** — a non-immunocompromised child's PPSV23 Option B, saying what it leads to at 19 (2026-11-07, Cora, §B-OPTIONB19, `optionBAtNineteen()`) — or, for chronic conditions only, at 50, folded (2026-11-07, Owen, §B-OPTIONB50), a child whose next dose falls at 19 or later, shown the adult card itself (2026-11-05, §B-AT19, `adultAnswerPastNineteen()`), C12's age-50 line
 (2026-10-29), C13's "at 19" lines on the four Group B cards (2026-10-30, `CLINICAL_SPEC.md`
 §B-AT19), and the "re-evaluate at 19" line for a teen whose only tick is an adult risk factor
 (2026-11-01, §B-ADULTRISK19, `cdcAdultRiskFactorList`). The healthy 5–18 card ends with *"Re-evaluate at age 50, when

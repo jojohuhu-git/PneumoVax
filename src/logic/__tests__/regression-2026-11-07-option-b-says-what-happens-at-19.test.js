@@ -10,7 +10,9 @@
 //
 // Limits, each because the line would be wrong or was not put to her:
 //   • immunocompromised: Option B already owes a dose 5 years later, before 19;
-//   • chronic conditions only: at 19 there is no dose, only a review at 50;
+//   • chronic conditions only: at 19 there is no dose, only a review at 50 —
+//     since Owen (2026-11-07) they get the AGE-50 line instead, folded; see
+//     regression-2026-11-07-owen-option-b-says-what-happens-at-50.test.js;
 //   • "Option B-2", the PPSV23 after Option B-1's PCV15: not this choice.
 import { describe, it, expect } from 'vitest';
 import { recommend, recommendBeforeFold } from '../recommend.js';
@@ -62,10 +64,11 @@ describe('Cora: Option B says what PPSV23 leads to at 19', () => {
 });
 
 describe('where the line does not go', () => {
-  it('a child with diabetes only: at 19 there is no dose, so no line', () => {
+  it('a child with diabetes only: at 19 there is no dose, so not this line (Owen\'s age-50 line instead)', () => {
     const b = card(child(['diabetes']), /^Option B: 1 dose PPSV23/);
     expect(b).toBeTruthy();
-    expect(all(b)).not.toMatch(/If PPSV23 is chosen/);
+    expect(all(b)).not.toMatch(/If PPSV23 is chosen, at 19/);
+    expect(lead(b)).not.toMatch(/If PPSV23 is chosen/);
   });
 
   it('an immunocompromised child: Option B owes a 5-year dose first, so no line', () => {

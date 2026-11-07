@@ -1,5 +1,8 @@
 # PneumoVax — Handoff after making check 5 a required test (2026-11-07)
 
+> **SUPERSEDED 2026-11-07** by `handoff-2026-11-07-r6-owen-age-50.md`. Check 5 merged as #133;
+> R6's leftover was ruled on and built (#134). Resume from the newer file.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
 Its promise: never guess, and every clinical line rests on a document that says it. Read `CLAUDE.md` first.
 
