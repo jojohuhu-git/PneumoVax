@@ -37,6 +37,13 @@ export const CAUSES = {
     class: 'real',
     title: "A baby with smoking or alcohol use disorder ticked: \"series complete\" names no later age (left out of §B-50BABY on purpose)",
   },
+  // The TODDLER twin of R7, ruled by the owner 2026-11-07 ("Match the baby card",
+  // §B-50BABY, Ava): offered "Re-evaluate at age 19" for an adult-only tick, she
+  // chose no line, as on the baby card. The baby half above was never put to her.
+  'D6-toddler-adult-only-tick-silent': {
+    class: 'ruling',
+    title: 'A healthy 2-4-year-old with smoking or alcohol use disorder ticked: "series complete" names no later age (§B-50BABY, owner 2026-11-07)',
+  },
   'D1-at-19-and-50-lines': {
     class: 'ruling',
     title: '"Complete" cards that state what happens at 19 or 50 (§B-AT19, §B-5TO18, CLAUDE.md "Adult sources on child cards")',
@@ -80,6 +87,15 @@ export function causeOf(check, kind, group) {
   }
   if (check === 3) {
     if (/card warned of it/.test(kind)) return 'D1-at-19-and-50-lines';
+    // The toddler card's label carries no dose count ("PCV series complete ⇒");
+    // the baby card's does ("PCV series complete (4 doses) ⇒"). The toddler card
+    // is silent only for a PCV20 series (never asked again) or an adult-only
+    // tick, so any silent toddler card that is then asked is the ruled family.
+    // Most are asked at 19. Two grid toddlers (smoking or alcohol use disorder,
+    // PCV13 x3 and a PPSV23) are asked at 50: at 19 the adult chronic row says
+    // "review at age 50", so for them the old line was right — her ruling, as
+    // worded ("an adult box ticked"), still takes it off. Verified 2026-11-07.
+    if (/card silent/.test(kind) && /^PCV series complete ⇒/.test(group)) return 'D6-toddler-adult-only-tick-silent';
     // Only the adult-only-tick babies (the adult card acts at 19) are expected; a
     // silent healthy baby meeting a dose at 50 would be R7 coming back: unsorted.
     if (/card silent/.test(kind) && /at age line 228m/.test(group)) return 'R7-baby-complete-silent-on-adult-schedule';

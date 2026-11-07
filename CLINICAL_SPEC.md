@@ -261,7 +261,8 @@ mutations; seven caught, the eighth is the raw-age check above, reverted).
 - The **healthy** "nothing needed" cards — the 5–18 one, the complete 24–59 month one, and
   since 2026-11-07 the healthy baby's complete card (§B-50BABY) — add **"Re-evaluate at age
   50, when routine pneumococcal vaccination begins for every adult"** (`adultRoutine50`).
-  **No at-risk card does** — see §B-50NOTE.
+  The baby and 24–59 month cards leave it off when the series includes PCV20 or an
+  adult-only box is ticked (§B-50BABY). **No at-risk card does** — see §B-50NOTE.
 
 ### §B-5TO18 — the healthy 5–18 card: what it cites, and the age-50 note
 
@@ -327,8 +328,18 @@ screen** (prose diff: 0 of 35,280 lines moved), so C12's pinned count cannot see
 the whole-app checks reach it by following babies forward, and their "card silent" count for
 R7 went 312 → 0. Guard: `regression-2026-11-07-healthy-baby-age-50-and-g34.test.js`.
 
-**Not changed, and noted:** the 24–59-month card carries the line even when the series
-includes PCV20 or an adult-only tick is set. That predates this ruling and was not put to her.
+**The 24–59-month card now has the same two limits** (owner, 2026-11-07, *"Match the baby
+card"*). It had carried the line since C12 with neither. Shown **Ava** — 3, healthy, PCV20 at
+2, 4, 6 and 12 months; run forward, nothing at 19 and *Complete* at 50 — and a 3-year-old with
+a PCV15 series and smoking ticked, who is given a PPSV23 at 19, she chose the baby card's rule:
+no line when the series includes PCV20 or an adult-only box is ticked; every other healthy
+toddler keeps it. Wording and sources only; 0 verdicts. The grid reaches 12 of these cards (8
+with an adult-only tick, **0** with PCV20 — it cannot build Ava). Guard:
+`regression-2026-11-07-toddler-age-50-matches-baby.test.js`.
+
+**Noted, not put to her** (an unusual history): a healthy toddler given four PCV15 **and a
+PPSV23 she did not need** also reads *Complete (PCV15 + PPSV23)* at 50, and both the baby and
+toddler cards still carry the line for her. Neither ruling covered that history.
 
 ### §B-OPTIONB19 — Option B says what PPSV23 leads to at 19 (owner, 2026-11-07, "Cora")
 

@@ -172,10 +172,12 @@ describe('the completed card credits the rows that end the series', () => {
   it('an undated completing dose gets NO job aid number: the table needs documented doses', () => {
     const rec = pcvCard(healthyChild(30, ['undated'], 'PCV20'));
     expect(rec.status).toBe('complete');
+    // No `adultRoutine50` either: this series includes PCV20, so since the
+    // owner's 2026-11-07 ruling ("Match the baby card", §B-50BABY) the card
+    // carries no age-50 line — at 50 the app reads Complete.
     expect(citeKeys(rec)).toEqual([
       'pedsNoPcv20IfComplete',
       'p2016HealthyComplete24to59',
-      'adultRoutine50',
     ]);
   });
 
@@ -195,7 +197,10 @@ describe('every marker on these cards has a citation behind it', () => {
   ];
   it.each(patients)('age %i months, doses %j', (ageMonths, doses) => {
     const rec = pcvCard(healthyChild(ageMonths, doses));
-    const markers = (leadOf(rec).match(/\[c\]/g) ?? []).length;
+    // Both halves: since 2026-11-07 the complete card's age-50 marker sits in
+    // `detail` ("under Why this"), and the cite list spans lead then detail.
+    const whole = typeof rec.note === 'string' ? rec.note : `${rec.note.lead} ${rec.note.detail ?? ''}`;
+    const markers = (whole.match(/\[c\]/g) ?? []).length;
     expect(markers).toBe(citeKeys(rec).length);
     for (const k of citeKeys(rec)) expect(REFS[k], `${k} missing from REFS`).toBeTruthy();
   });
