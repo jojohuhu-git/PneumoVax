@@ -4481,6 +4481,30 @@ export function recommendBeforeFold(input) {
   // for an adult's PPSV23 after a PCV15 — immunocompromising condition,
   // cochlear implant, CSF leak — and without it every adult is judged against
   // the flat 1-year advice).
+  //
+  // P1-3 (§C-P1-3): the walk asks what card this patient had on the day of a
+  // conjugate, the same way `earlyFiveYearPcv20` asks below. A record with an
+  // undated dose gets no answer, because that dose cannot be placed before or
+  // after anything. A child's own cards are read even where the adult card
+  // answers from today: the dose was given under the child's rules. Reading the
+  // adult card here called a PCV20 extra on a teenager it says "Complete at 19".
+  //
+  // `cardsSeen` is the same patient's answers so far, one per dose date. Each run
+  // walks the doses before it and asks the same question, so without it every
+  // extra late dose doubled the work: 8 of them took 640 ms a screen.
+  const cardsSeen = input.cardsSeen ?? new Map();
+  const cardsOnTheDayOf = (dose) => {
+    if ([...rawPcv, ...rawPpsv].some((d) => !d.date && d.product)) return null;
+    if (!cardsSeen.has(dose.date)) {
+      const earlier = (list) => list.filter((x) => x.date && x.date < dose.date);
+      const then = recommendBeforeFold({
+        ...input, cardsSeen, today: dose.date, ageMonths: ageAtDoseMonths(dose, { dob, ageMonths: am }, today),
+        pcvDoses: earlier(rawPcv), ppsv23Doses: earlier(rawPpsv),
+      });
+      cardsSeen.set(dose.date, then.childCardsReplaced ?? then.recs);
+    }
+    return cardsSeen.get(dose.date);
+  };
   const analysis = analyzeBoth({
     pcvDoses: rawPcv,
     ppsv23Doses: rawPpsv,
@@ -4488,6 +4512,7 @@ export function recommendBeforeFold(input) {
     today,
     dob,
     riskIds,
+    cardsOnTheDayOf,
   });
   const pcvAnalysis = analysis.pcv;
   const ppsvAnalysis = analysis.ppsv23;

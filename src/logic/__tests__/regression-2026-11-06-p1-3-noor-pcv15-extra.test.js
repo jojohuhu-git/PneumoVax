@@ -7,13 +7,13 @@
 // extra dose. The next dose still waits 8 weeks after it, because CDC counts
 // from "the most recent PCV dose", which it is.
 //
-// SCOPED TO HER PATIENT. Other unasked-for conjugates (no PPSV23 yet, a healthy
-// child, a series finished by PCV20) were not ruled on, so the controls below
-// keep them as they were. `CLINICAL_SPEC.md` §C-P1-3.
+// The other families (no PPSV23 yet, a finished series, a healthy child) were
+// ruled on later the same day, on Theo, Mateo, Lena and Ben. Their guard, and the
+// count of every family, is `regression-2026-11-06-p1-3-unasked-conjugates-by-family`.
+// `CLINICAL_SPEC.md` §C-P1-3.
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 import { analyzeHistory } from '../validate.js';
-import { allPatients } from '../../../scripts/wholeApp/replay.mjs';
 
 const DOB = '2016-10-11';
 const babySeries = ['2016-12-11', '2017-02-11', '2017-04-11', '2017-10-11'].map((date) => ({ product: 'PCV13', date }));
@@ -94,28 +94,29 @@ describe('What happens next', () => {
   });
 });
 
-describe('Controls: she ruled on Noor, not on these', () => {
+describe('Controls', () => {
   it('no PCV before the PCV15: CDC offers it, so it counts', () => {
     const r = noor({ pcvDoses: [pcv15] });
     expect(chipFor(r, PCV15_ON).extraDose).toBeFalsy();
     expect(chipFor(r, PCV15_ON).effectiveDoseNum).toBe(1);
   });
 
-  it('no PPSV23 yet: left as it was', () => {
-    expect(chipFor(noor({ ppsv23Doses: [] }), PCV15_ON).extraDose).toBeFalsy();
+  // These four were "left as it was" until her later rulings the same day.
+  it('no PPSV23 yet: extra (Lena)', () => {
+    expect(chipFor(noor({ ppsv23Doses: [] }), PCV15_ON).extraDose).toBe(true);
   });
 
-  it('a child with no immunocompromising condition: left as it was', () => {
-    expect(chipFor(noor({ riskIds: ['chronic_heart'] }), PCV15_ON).extraDose).toBeFalsy();
+  it('a child with no immunocompromising condition: extra (Mateo)', () => {
+    expect(chipFor(noor({ riskIds: ['chronic_heart'] }), PCV15_ON).extraDose).toBe(true);
   });
 
-  it('a series finished with PCV20: left as it was', () => {
+  it('a series finished with PCV20: extra (Mateo)', () => {
     const pcvDoses = [...babySeries.map((d) => ({ ...d, product: 'PCV20' })), pcv15];
-    expect(chipFor(noor({ pcvDoses }), PCV15_ON).extraDose).toBeFalsy();
+    expect(chipFor(noor({ pcvDoses }), PCV15_ON).extraDose).toBe(true);
   });
 
-  it('two PPSV23 doses: left as it was', () => {
-    expect(chipFor(noor({ ppsv23Doses: ppsv('2019-10-11', '2024-10-11') }), PCV15_ON).extraDose).toBeFalsy();
+  it('two PPSV23 doses: extra (Theo)', () => {
+    expect(chipFor(noor({ ppsv23Doses: ppsv('2019-10-11', '2024-10-11') }), PCV15_ON).extraDose).toBe(true);
   });
 
   it('a PPSV23 given AFTER the PCV15 does not make the PCV15 extra', () => {
@@ -171,16 +172,5 @@ describe('A teenager whose next dose falls past 19: the adult answer stands', ()
   it('the record on the answer agrees with the chip', () => {
     const step = teen('2026-10-11').path.find((p) => p.step === 'Doses already given' || p.title === 'Doses already given');
     expect(JSON.stringify(step)).not.toMatch(/extra/i);
-  });
-});
-
-describe('The size of it, so a wider rule fails here', () => {
-  it('flags exactly the patients with her history', () => {
-    let flagged = 0;
-    for (const p of allPatients()) {
-      const r = recommend(p.input);
-      if ((r.perDose?.pcv ?? []).some((d) => d.extraDose && d.notAskedFor)) flagged += 1;
-    }
-    expect(flagged).toBe(3442);
   });
 });

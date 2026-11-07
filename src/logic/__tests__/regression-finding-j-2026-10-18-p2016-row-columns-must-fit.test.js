@@ -178,7 +178,9 @@ describe('FINDING J - p2016 only where its row\'s columns all fit', () => {
     // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
     // counting conjugate and her card family changes with it. The invariant
     // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(unfit).toBe(848);
+    // -140, 2026-11-06 (§C-P1-3, Mateo): a PCV20 given after the card said complete
+    // is an extra dose, so these children left the PCV20-complete card.
+    expect(unfit).toBe(708);
   });
 
   it('the risk-indications chip no longer advertises a single row', () => {

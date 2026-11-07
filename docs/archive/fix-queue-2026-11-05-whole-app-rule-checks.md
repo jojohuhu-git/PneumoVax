@@ -112,7 +112,7 @@ to 0. `CLINICAL_SPEC.md` §L-2. What follows is the history.
 ### P2-3 — R8: a card says "at or after age 6" about doses given before 6
 
 **DONE 2026-11-06 on `fix/p2-wording-items`, wording only.** 19,910 cards to 0. `CLINICAL_SPEC.md`
-§C-AGE6-WORDS. **Deferred:** the cards still cite the row they cited. Most of these children had a
+§C-AGE6-WORDS. **Closed 2026-11-06 by P1-3's rulings.** Deferred at the time: the cards still cite the row they cited. Most of these children had a
 conjugate nobody asked for, so that waits on the open half of P1-3.
 
 - **Patient:** Ada in the report.
@@ -156,7 +156,7 @@ section, so the job aid keeps the claim at 50+. `CLINICAL_SPEC.md` §G.
 - **Size, measured 2026-11-06:** 31,584 of 43,324 patients whose last PCV was given between age 7 and 18 got a dose no card offered, and it reads plain "valid". The count needs splitting into clinical families before any ruling.
 - **Not a fault:** the same child with no PCV at all before the PCV15. CDC's row offers PCV15 and the app's Option B-1 names it.
 - **Noor's own family: DONE 2026-11-06, ruling "Yes, flag it extra".** 3,442 patients, PCV15 now Extra dose, 8-week wait kept (`CLINICAL_SPEC.md` §C-P1-3). 0 of 3,442 had a card offering PCV15.
-- **Still open, not ruled on:** every other unasked-for conjugate, grouped by clinical family before asking: no PPSV23 yet (PCV20 or PPSV23 on offer), a child called complete, a healthy child. Keep the count pinned in the guard so a wider rule fails until she rules.
+- **The other families: DONE 2026-11-06 on `fix/p1-3-unasked-conjugates-by-family`.** Re-counted at 36,736 before limits, ruled on Theo, Mateo, Lena and Ben (and Priya, by the same answer). Flagged now: finished 18,430, healthy 10,088, no PPSV23 yet 4,116, Noor's 3,442 = 36,076. 546 finished children no longer owe a PCV20; no other dose or date moved. `CLINICAL_SPEC.md` §C-P1-3 lists what was left alone, with counts.
 
 ### P2-8 — NEW, found by the wordiness review: "overdue" on the day a dose is due
 

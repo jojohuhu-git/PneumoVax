@@ -48,7 +48,10 @@ const GROUP_B = new Set([
   // none. The 540 cards she was shown on 2026-10-30 are unchanged.
   'PCV series complete (PCV before age 6 + PPSV23)',
 ]);
-const FINISHED_COUNT = 60; // the before-6 card with a PCV15 series, 2026-10-31
+// 60: the before-6 card with a PCV15 series, 2026-10-31. +140, 2026-11-06
+// (§C-P1-3): children with an extra PCV20. The adult rows count it, so at 19 they
+// read complete and carry no line. The test above holds that for every one.
+const FINISHED_COUNT = 200;
 const noteText = (r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`);
 const lineOf = (r) => Object.keys(LINES).filter((k) => noteText(r).includes(LINES[k].replace(' [c].', '')));
 

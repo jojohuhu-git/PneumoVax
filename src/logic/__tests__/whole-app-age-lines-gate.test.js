@@ -96,7 +96,7 @@ describe('check 6: age lines', () => {
     'dose-line-changes-what-the-rule-says',
     'due-today-turns-to-complete-at-19',   // §B-AT19 2026-11-05: due before 19 stays a child's dose
   ]);
-  const sortedAsRuling = (r) => r.cause === 'D2-extra-dose-counts-at-19';
+  const sortedAsRuling = (r) => ['D2-extra-dose-counts-at-19', 'D5-extra-pcv15-counts-at-19'].includes(r.cause);
 
   it('nothing changes at a line that the line\'s rule does not cover', () => {
     const left = rows.filter((r) => !allowedKinds.has(r.kind) && !sortedAsRuling(r));

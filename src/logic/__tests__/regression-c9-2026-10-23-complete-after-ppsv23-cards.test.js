@@ -166,7 +166,9 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
     // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
     // counting conjugate and her card family changes with it. The invariant
     // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(FOUND.case1.length).toBe(810);
+    // +140, 2026-11-06 (§C-P1-3, Mateo): a PCV20 given after the card said complete
+    // is an extra dose, so these children read the row for the doses that count.
+    expect(FOUND.case1.length).toBe(950);
     const withP2016 = FOUND.case1.filter(({ rec }) => chipShorts(rec).includes('immunize.org p2016'));
     expect(withP2016.length).toBe(0);
     // Anti-overreach: CDC must still be there on every one of them.
@@ -300,7 +302,9 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
     // given inside 8 weeks of a PPSV23 is set aside, so she has one fewer
     // counting conjugate and her card family changes with it. The invariant
     // beside this count is unchanged. CLINICAL_SPEC.md §K-PPSV23THENPCV.
-    expect(FOUND.case1.length).toBe(810);
+    // +140, 2026-11-06 (§C-P1-3, Mateo): a PCV20 given after the card said complete
+    // is an extra dose, so these children read the row for the doses that count.
+    expect(FOUND.case1.length).toBe(950);
     expect(FOUND.case2catchup.length).toBe(15);
     expect(FOUND.case2series.length).toBe(5);
   });

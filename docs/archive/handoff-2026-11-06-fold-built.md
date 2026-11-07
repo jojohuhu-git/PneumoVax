@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-06** by `handoff-2026-11-06-p1-3-families-ruled.md`. The fold merged as #127 and the
+> P1-3 item below is done. Do not resume from this file.
+
 # PneumoVax — Handoff after the result-page fold (2026-11-06)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
