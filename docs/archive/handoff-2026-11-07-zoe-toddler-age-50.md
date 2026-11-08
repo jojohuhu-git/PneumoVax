@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by `docs/archive/handoff-2026-11-07-remy-next-dose-due.md`, which lives on PR #140's branch (`fix/2026-11-07-remy-next-dose-due`) until it merges. It covers this PR and #140. Resume from that file.
+
 # PneumoVax — Handoff after Zoe: the toddler card drops "age 50" when 50 would read Complete (2026-11-07)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page that gives pneumococcal vaccine advice.
