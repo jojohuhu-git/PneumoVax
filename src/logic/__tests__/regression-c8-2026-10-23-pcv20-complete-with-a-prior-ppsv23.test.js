@@ -92,9 +92,11 @@ describe('C8 — a prior PCV20 completes the series, and CDC is credited for say
     const card = cardOf(pcv20ThenPpsv23(['asplenia']));
     const cdc = shown(card).find((c) => c.page === NOTES_URL);
     expect(cdc.quote).toBe('Previously received at least 1 dose of PCV20: no additional dose of PCV or PPSV23');
-    // And the link carries a text fragment, so clicking the number lands on
-    // the sentence rather than the top of a long page.
-    expect(cdc.url).toContain('#:~:text=');
+    // And the link opens CDC's closed "Special situations" section, where the
+    // sentence is printed, rather than the top of a long page. (Until
+    // 2026-11-07 this was a text fragment, which a browser cannot follow into
+    // a closed section.)
+    expect(cdc.url).toMatch(/#accordion-panel-pneumo-situations$/);
   });
 
   it('the card says in its own words why the row still covers him', () => {

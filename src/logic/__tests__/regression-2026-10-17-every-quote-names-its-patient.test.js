@@ -98,16 +98,14 @@ describe('the field itself', () => {
     // impossible to do by accident.
     const spanning = quotedKeys.filter((k) => REFS[k].population.length > 1).sort();
     expect(spanning).toEqual([
-      'adultPcv13Only',           // printed identically in both adult blocks
-      // 2026-10-22: read live with the accordion panels expanded and walked
-      // as nested <li>s. "If PCV15 is used, administer 1 dose PPSV23 ..."
-      // is printed TWICE, word for word -- under "Age 50 years or older"
-      // in the routine panel and under "Age 19-49 years with certain
-      // underlying medical conditions" in the special-situations panel.
-      'adultPcv15NeedsPpsvCompletion', // the same sentence in both adult blocks
-      'adultPcv15ThenPpsv',       // printed identically in both adult blocks
+      // 2026-11-07: FOUR came off this list by NARROWING, never widening.
+      // `adultPcv13Only`, `adultPcv15ThenPpsv` and `adultPcv7Only` are printed
+      // word for word under both adult headings, inside two different closed
+      // CDC sections; each became a 50+ key and a `...1949` key, so the link
+      // opens the section whose heading describes the patient (FINDING N).
+      // `adultPcv15NeedsPpsvCompletion` is shown only to a 19-49 patient, so
+      // it was narrowed to that group. A narrowing makes this guard stricter.
       'adultPcv20or21Complete',   // its own words: "Adults aged 19 years and older"
-      'adultPcv7Only',            // printed identically in both adult blocks
       'adultPpsv23Unavailable',   // 2026-10-31, its own words: "adults aged 19 years or older who received PCV15"
       // C10-2 (2026-10-23). CDC's catch-up table draws no healthy/at-risk split
       // in its pneumococcal row — one row, one set of minimum intervals, for
@@ -462,12 +460,14 @@ describe('the guard — swept over every patient the grid can build', () => {
     // whose next dose falls at 19 or later is shown the ADULT card, so that
     // card's own citations come with it, each declared. Three are new here.
     //   adultPcv15ThenPpsv, mmwrIc1949OnePpsv, mmwrPpsvOnlyThenPcv
+    //   (2026-11-07: the first is now `adultPcv15ThenPpsv1949` — at 19 the
+    //   adult card quotes the Special situations copy, whose section it opens)
     // P2-7 (2026-11-06): the same adult card now cites the sentence that says
     // "complete", so Tess's adult card brings it too.
     //   adultPcv15PpsvComplete1949
     expect([...seen.keys()].sort()).toEqual([
       'adultBothNotAt65', 'adultChronicOnlyReviewAt50', 'adultIc1949BothPcv13Ppsv',
-      'adultPcv15PpsvComplete1949', 'adultPcv15ThenPpsv', 'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList',
+      'adultPcv15PpsvComplete1949', 'adultPcv15ThenPpsv1949', 'adultPpsvOnly1949', 'adultRoutine50', 'cdcAdultRiskFactorList',
       'cdcChildSpecialSituations', 'immPCV7', 'mmwrIc1949OnePpsv', 'mmwrIc1949TwoPpsv',
       'mmwrPpsvOnlyThenPcv',
     ]);

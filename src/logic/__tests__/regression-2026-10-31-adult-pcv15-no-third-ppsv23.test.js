@@ -74,7 +74,8 @@ describe('her ruling, at every adult age', () => {
     const [r] = run({ ...IVY_20, riskIds: ['diabetes'] }).recs;
     expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 — completes the series');
     expect([r.dueToday, r.earliestNextDate]).toEqual([false, '2027-09-20']);
-    expect(r.noteCites.map((c) => c.key)).toContain('adultPcv15ThenPpsv');
+    // 2026-11-07: the 19-49 copy of CDC's sentence, so the number opens Special situations.
+    expect(r.noteCites.map((c) => c.key)).toContain('adultPcv15ThenPpsv1949');
     expect(r.noteCites).toHaveLength(markers(r));
   });
 

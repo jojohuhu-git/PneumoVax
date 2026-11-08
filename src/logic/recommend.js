@@ -3482,6 +3482,18 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
 // ═══════════════════════════════════════════════════════════════════════════
 function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null) {
   const isOlderAdult = am >= M.y50;
+  // 2026-11-07 (CDC links open their section). CDC's adult notes print these
+  // three sentences word for word under BOTH the routine (50+) and the Special
+  // situations (19-49) heading, inside closed sections. Each now has two keys,
+  // so the number opens the section whose heading describes THIS patient —
+  // FINDING N's rule that the same sentence in two age bands is two sentences.
+  // Chosen by `isOlderAdult`, never a second age test.
+  const NOTES_ROW_1949 = {
+    adultPcv15ThenPpsv: 'adultPcv15ThenPpsv1949',
+    adultPcv13Only: 'adultPcv13Only1949',
+    adultPcv7Only: 'adultPcv7Only1949',
+  };
+  const notesRow = (key) => (isOlderAdult ? key : NOTES_ROW_1949[key]);
   const anyRisk = hasAnyRisk(riskIds);
   // S15 (owner decision 2026-10-16): the recommended PCV15→PPSV23 interval
   // takes BOTH the age band and the risk class, per mm7401a1 (ACIP, Jan 2025)
@@ -3647,7 +3659,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   // SAME number the card states, so it follows the same predicate.
   const ppsvIntervalCite = ppsvIntervalDays != null
     ? 'adultPcv15ThenPpsvShort'
-    : 'adultPcv15ThenPpsv';
+    : notesRow('adultPcv15ThenPpsv');
   // C8, document 1's CITE for mm7401a1's "None or PCV7 only at any age" row.
   // ACIP prints that row's YEAR wording identically in two blocks — adults
   // >=50, and 19-49 with chronic conditions only — so one entry serves both
@@ -3657,7 +3669,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
   // `adultPcv15ThenPpsvShort`, so it must not get a second number for the
   // same document. Keying on `ppsvIntervalCite` ties this to the ONE
   // interval decision (S15) rather than growing an age test of its own.
-  const mmwrNoneRowCites = ppsvIntervalCite === 'adultPcv15ThenPpsv'
+  const mmwrNoneRowCites = ppsvIntervalCite !== 'adultPcv15ThenPpsvShort'
     ? [cite('mmwrNoneOrPcv7Only')]
     : [];
   const mmwrNoneRowMarker = mmwrNoneRowCites.length ? ' [c]' : '';
@@ -3746,7 +3758,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         : 'PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].',
       noteCites: ppsvFirst
         ? [cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949'), ...jobAidCompleteCites]
-        : [cite('adultPcv15ThenPpsv'), ...(isOlderAdult ? jobAidCompleteCites : [cite('adultPcv15PpsvComplete1949')])],
+        : [cite(notesRow('adultPcv15ThenPpsv')), ...(isOlderAdult ? jobAidCompleteCites : [cite('adultPcv15PpsvComplete1949')])],
       refs: refsSeriesComplete,
     })];
   }
@@ -3887,7 +3899,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         cite('adultPcv20or21Complete'),
         basis === 'ppsv23ToConjugate'
           ? cite(isOlderAdult ? 'adultPpsvOnly' : 'adultPpsvOnly1949')
-          : cite('adultPcv13Only'),
+          : cite(notesRow('adultPcv13Only')),
         ...ppsvOnlyRowCites,
         ...pcv13OnlyRowCites,
         ...substitutionCites,
@@ -3985,7 +3997,12 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
         ...shorterMinimumCites,
         ...notesCompletionCites,
         cite('jobAidPpsv23Unavailable'),
-        ...(turnsFiftyFirst ? [cite('adultPcv15ThenPpsv')] : []),
+        // The 50+ copy, on purpose: the line says what ACIP advises FROM 50, and
+        // this patient turns 50 before the date (2026-11-07: the two copies
+        // became two keys, so the cross-group quote is now declared).
+        ...(turnsFiftyFirst ? [cite('adultPcv15ThenPpsv', {
+          aboutAnotherGroup: 'states the interval this patient falls under once they turn 50, which happens before the date on the card',
+        })] : []),
       ],
       refs: refsWithoutMmwr,
     });
@@ -4085,7 +4102,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       // both halves. The job aid stated the interval only as a table cell, so
       // it comes off.
       noteCites: [
-        cite('adultPcv13Only'),
+        cite(notesRow('adultPcv13Only')),
         cite(mmwrPcv13OnlyCite),
         cite('mmwrPcv13NoPpsv23ToComplete'),
       ],
@@ -4316,7 +4333,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       // Empty below 50, where the 8-week sentence is absent, so the marker
       // count and the cite count stay equal without a second age test.
       ...shorterMinimumCites,
-      cite('adultPcv7Only'),
+      cite(notesRow('adultPcv7Only')),
       // C8, document 2's CITE: the job aid's footnote * says the same thing
       // for the "None*" row, on all four pages.
       cite('jobAidPcv7CountsAsNone'),
@@ -4344,7 +4361,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       cite('adultPcv20or21Complete'),
       cite(ppsvIntervalCite),
       ...mmwrNoneRowCites,
-      cite('adultPcv7Only'),
+      cite(notesRow('adultPcv7Only')),
       cite('jobAidPcv7CountsAsNone'),
       ...greyCites,
     ],

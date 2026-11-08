@@ -98,15 +98,18 @@ const markerCount = (c) => {
 };
 
 describe('CDC Adult Notes earns its number on the 8-week PCV15 card', () => {
-  it('the entry exists, quotes the page verbatim, and names both adult bands', () => {
+  it('the entry exists, quotes the page verbatim, and names the one band it is shown to', () => {
     const ref = REFS[KEY];
     expect(ref, `REFS.${KEY} is missing`).toBeTruthy();
     expect(ref.url).toBe('https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo');
     expect(ref.short).toBe('CDC Adult Notes');
     expect(ref.rulebook).toBe('adult');
     // The sentence is printed under an "Age 50 years or older" parent AND an
-    // "Age 19-49 years with certain underlying medical conditions" parent.
-    expect(ref.population).toEqual(['adult-19to49', 'adult-50plus']);
+    // "Age 19-49 years with certain underlying medical conditions" parent, but
+    // this card exists only at 19-49 — so since 2026-11-07 the entry names that
+    // band alone, and its link opens the Special situations section.
+    expect(ref.population).toEqual(['adult-19to49']);
+    expect(ref.section).toBe('accordion-panel-pneumo-situations');
     expect(ref.quote).toBe('If PCV15 is used, administer 1 dose PPSV23');
     // The interval is NOT in this quote: it has its own home, and this
     // patient's number is 8 weeks, not the year CDC's full sentence names.
@@ -151,7 +154,7 @@ describe('CDC Adult Notes earns its number on the 8-week PCV15 card', () => {
     // 19-49 with chronic conditions only: the year applies, same reasoning.
     const chronic = card({ ageYears: 30, riskIds: ['diabetes'] });
     expect(chronic).toBeTruthy();
-    expect(citeKeys(chronic)).toContain('adultPcv15ThenPpsv');
+    expect(citeKeys(chronic)).toContain('adultPcv15ThenPpsv1949'); // the 19-49 copy (2026-11-07)
     expect(citeKeys(chronic)).not.toContain(KEY);
   });
 
