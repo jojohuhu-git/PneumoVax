@@ -4130,3 +4130,32 @@ Guard: `regression-dose-labels-2026-11-08-every-dose-has-one-label.test.js` swee
 the 18,264 impossible entries and the 60,480 typical patients. It fails if any dose has no label, if a
 counted label sits on a dose that does not count (or the reverse), or if "repeat" and "do not repeat"
 contradict the dose's own line. Proved load-bearing 2026-11-08 by four deliberate breaks, each caught.
+
+### §M-L2 — An adult's second PPSV23 that nobody needed (2026-11-08)
+
+`ADULT-PPSV23-AFTER-PPSV23` fires on an adult's second PPSV23 given under 5 years after the first. It
+still never voids the dose (owner ruling 2026-10-25, "count, note the shortfall"). What changed is who it
+calls **early** and who it calls **not needed**:
+
+- **Immunocompromising condition, CSF leak or cochlear implant** (`adultSecondPpsv23Recognised`):
+  `Counted — given early, accepted`, with the line "Given <gap> after the PPSV23 of <date>. 5 years
+  recommended."
+- **Everyone else:** `Counted — not needed. No more PPSV23.`, with the line "Given <gap> after the PPSV23
+  of <date>. Only one PPSV23 is recommended for this patient."
+
+The source, read live 2026-11-08 (ACIP, mm7401a1): the clinical guidance table prints a
+"PCV13 and 2 doses of PPSV23" row only under *"Adults aged 19–49 years with an immunocompromising
+condition, a CSF leak, or a cochlear implant"*. The chronic-conditions block has only
+"PCV13 and 1 dose of PPSV23". The ≥50 rows, *"PCV13 at any age and PPSV23 at age <65 years"* and
+*"… at age ≥65 years"*, count no doses. The app itself never advises a second PPSV23 for any adult:
+across all 95,760 test patients, no adult card does.
+
+The first PPSV23 of her patient stays `Counted — given early, accepted`. It was due at the time: ACIP,
+2019-11-22 (mm6846a5), *"ACIP continues to recommend that all adults aged ≥65 years receive 1 dose of
+PPSV23"*, at *"≥1 year between pneumococcal vaccines"*. It came 11 months after her PCV13.
+
+Measured over all 95,760 test patients: **392** second PPSV23 doses moved from "given early" to "not
+needed". 0 verdicts moved. Adults with a cochlear implant or CSF leak stay "given early", following ACIP's
+grouping. Guard: `regression-dose-labels-2026-11-08-every-dose-has-one-label.test.js` (her patient and
+the same history with asplenia).
+

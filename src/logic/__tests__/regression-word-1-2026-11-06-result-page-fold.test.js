@@ -226,6 +226,8 @@ describe('WORD-1 — visible words cannot creep back up', () => {
     const worst = totals[totals.length - 1];
     // 64 → 65 at p90, 2026-11-07: Cora's line on Option B (P2-4 / R6), kept in
     // view by her ruling — it is the difference between the two options.
-    expect({ p90, worst }).toEqual({ p90: 65, worst: 164 });
+    // 65 → 64 at p90, 2026-11-08 (§M-L2): a healthy adult's second PPSV23
+    // line is shorter. A FALL; a rise still needs a reason.
+    expect({ p90, worst }).toEqual({ p90: 64, worst: 164 });
   });
 });

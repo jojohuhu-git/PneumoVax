@@ -671,7 +671,10 @@ function applyIntervalRules(result, ctx) {
     r.conjugateAlternative = verdict.conjugateAlternative ?? null;
     return r;
   }
-  return advise(result, verdict.reasons, verdict.ruleId, verdict.whys);
+  const advised = advise(result, verdict.reasons, verdict.ruleId, verdict.whys);
+  // §M-L2: the rule row says the dose was not needed (an adult's second PPSV23
+  // with no immunocompromising condition, CSF leak or cochlear implant).
+  return verdict.notNeeded ? { ...advised, notNeeded: true } : advised;
 }
 
 // ── Validate one PCV dose ────────────────────────────────────────────────

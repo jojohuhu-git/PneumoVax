@@ -114,6 +114,7 @@ import {
   ADULT_PPSV23_INTERVAL_MONTHS,
   adultPpsvShorterMinimumApplies,
   adultPpsvShorterIntervalIsTheAdvice,
+  adultSecondPpsv23Recognised,
 } from '../data/riskFactors.js';
 import { ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 // C12 (2026-10-24, owner decision): one date format on the screen. Every
@@ -210,6 +211,8 @@ function fmtGap(fromISO, toISO) {
 // misread as "no gap was required". Same-visit is the single most likely
 // real-world co-administration error on these pairs, so it is the one phrase
 // that most needs to land.
+const capitalise = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+
 export function fmtSince(fromISO, toISO) {
   return daysBetween(fromISO, toISO) === 0
     ? 'on the same day as'
@@ -1183,10 +1186,25 @@ export const DOSE_INTERVAL_RULES = [
       + 'describes, and two PPSV23 doses is the lifetime maximum. The interval is enforced on the DOSE '
       + 'PAIR, not on the risk row: whether a second PPSV23 was indicated at all is the recommendation '
       + 'engine\'s question. See CLINICAL_SPEC.md \u00a7K.',
-    message: (ctx, anchor, min) => ({
-      reason: `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 of ${fmtDate(anchor.date)}; ${min.words} advised. **Counted; never give a third.**`,
-      why: `This is the one adult interval with direct evidence behind it: immune responses to a repeat PPSV23 were lower than to the first dose for certain serotypes when the gap was under ${min.words}, and no hyporesponsiveness was seen at ${min.words} or more (ACIP, rr7203a1). The dose counts because setting it aside would only invite a third, which would deepen that effect; two PPSV23 doses is the lifetime maximum. Where more protection is wanted the next dose is a conjugate — PCV20 or PCV21.`,
-    }),
+    // §M-L2 (OWNER DECISION 2026-11-08, on her test patient: healthy, PPSV23
+    // at 65 and again 28 days later). The label now says whether the dose was
+    // needed, so the line only gives the gap. Before, every adult read "5
+    // years advised", which told a healthy 66-year-old a second PPSV23 had
+    // been due. Only the three groups ACIP gives a second PPSV23 row
+    // (`adultSecondPpsv23Recognised`) read "given early"; everyone else
+    // reads "not needed". The dose counts either way; nothing else moves.
+    message: (ctx, anchor, min) => {
+      const given = `Given ${fmtSince(anchor.date, ctx.doseDate)} the PPSV23 of ${fmtDate(anchor.date)}.`;
+      const counts = `It still counts, so no further PPSV23 is given. A repeat PPSV23 under ${min.words} after the first gives lower responses to some serotypes (ACIP, rr7203a1). If more protection is needed, the next dose is PCV20 or PCV21.`;
+      return adultSecondPpsv23Recognised(ctx.riskIds)
+        // Her reason of 2026-10-25 for counting it: two is the lifetime maximum.
+        ? { reason: `${given} ${capitalise(min.words)} recommended.`, why: `${counts} Two PPSV23 doses is the lifetime maximum.` }
+        : {
+          reason: `${given} Only one PPSV23 is recommended for this patient.`,
+          why: `ACIP's adult guidance includes a second PPSV23 only for an immunocompromising condition, a CSF leak or a cochlear implant (mm7401a1). ${counts}`,
+          notNeeded: true,
+        };
+    },
   },
 
   // ── Explicitly never flagged ─────────────────────────────────────────
@@ -1747,6 +1765,8 @@ export function evaluateDoseInterval(ctx) {
         authority: rule.authority,
         reason: typeof msg === 'string' ? msg : msg.reason,
         why: typeof msg === 'string' ? null : (msg.why ?? null),
+        // §M-L2: the row's own answer to "was this dose needed at all".
+        notNeeded: typeof msg === 'object' && msg?.notNeeded === true,
       });
       continue;
     }
@@ -1778,6 +1798,7 @@ export function evaluateDoseInterval(ctx) {
       // chip's disclosure shows these; a row with nothing to expand adds
       // nothing, so a dose whose rules are all plain strings has no toggle.
       whys: advisories.map((a) => a.why).filter(Boolean),
+      ...(advisories.some((a) => a.notNeeded) ? { notNeeded: true } : {}),
     };
   }
   return null;

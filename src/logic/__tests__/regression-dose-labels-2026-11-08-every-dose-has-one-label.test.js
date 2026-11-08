@@ -74,4 +74,34 @@ describe('§DOSE-LABELS — every dose in every test patient has one label that 
     const two = recommend({ ageMonths: 720, today: '2026-11-08', riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }, { product: 'PCV20', date: '' }], ppsv23Doses: [] });
     expect(doseChipLabel(two.perDose.pcv[1], null)).toBe('Check the date — none recorded');
   });
+
+  // §M-L2 — her own test patient, 2026-11-08: born 1954-10-01, healthy.
+  it('her test patient: the first PPSV23 was early, the second was not needed', () => {
+    const r = recommend({
+      dob: '1954-10-01', today: '2026-11-08', riskIds: [],
+      pcvDoses: [{ product: 'PCV13', date: '2019-10-17' }, { product: 'PCV20', date: '2026-09-01' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2020-09-25' }, { product: 'PPSV23', date: '2020-10-23' }],
+    });
+    const [first, second] = r.perDose.ppsv23;
+    // At 65 every adult was owed one PPSV23 (ACIP mm6846a5, 2019); it came
+    // 11 months after the PCV13, inside the advised year.
+    expect(doseChipLabel(first, null)).toBe('Counted — given early, accepted');
+    expect(doseChipLabel(second, null)).toBe('Counted — not needed. No more PPSV23.');
+    expect(second.reasons.join(' ')).toBe('Given 28 days after the PPSV23 of Sep 25, 2020. Only one PPSV23 is recommended for this patient.');
+    expect(second.reasons.join(' ')).not.toMatch(/5 years|never give a third/);
+    expect(second.effectiveDoseNum).toBe(2);
+    // Her PCV20 is on schedule: the dose number, no line.
+    expect(doseChipLabel(r.perDose.pcv[1], null)).toBe('Dose 2');
+    expect(r.recs.map((c) => c.status)).toEqual(['complete']);
+  });
+
+  it('the same history with asplenia: one of ACIP\'s three groups, so "given early", not "not needed"', () => {
+    const r = recommend({
+      dob: '1954-10-01', today: '2026-11-08', riskIds: ['asplenia'],
+      pcvDoses: [{ product: 'PCV13', date: '2019-10-17' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2020-09-25' }, { product: 'PPSV23', date: '2020-10-23' }],
+    });
+    expect(doseChipLabel(r.perDose.ppsv23[1], null)).toBe('Counted — given early, accepted');
+    expect(r.perDose.ppsv23[1].reasons.join(' ')).toMatch(/5 years recommended\.$/);
+  });
 });

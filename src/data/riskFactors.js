@@ -231,6 +231,18 @@ export function hasSpecial(riskIds = []) {
   return riskIds.some((id) => RISK_BY_ID[id]?.class === 'special');
 }
 
+// §M-L2 (2026-11-08): may an ADULT have a second PPSV23 at all? ACIP's
+// current adult table (mm7401a1, read live 2026-11-08) prints a "PCV13 and 2
+// doses of PPSV23" row ONLY under "Adults aged 19–49 years with an
+// immunocompromising condition, a CSF leak, or a cochlear implant". The
+// chronic-conditions block has no such row, and the >=50 rows ("PCV13 at any
+// age and PPSV23 at age <65 / >=65 years") count no doses. So for an adult
+// with none of those three, a second PPSV23 is not needed: it counts (the
+// row ADULT-PPSV23-AFTER-PPSV23 never voids a dose), with that said.
+export function adultSecondPpsv23Recognised(riskIds = []) {
+  return hasIC(riskIds) || hasSpecial(riskIds);
+}
+
 // Any non-IC chronic condition selected?
 export function hasNonIC(riskIds = []) {
   return riskIds.some((id) => RISK_BY_ID[id]?.class === 'nonIC');

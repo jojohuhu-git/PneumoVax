@@ -673,6 +673,9 @@ const P = {
   dateUnknown: ex('Healthy 60-year-old, PCV20 on record with no date',
     { ageMonths: 720, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] },
     { status: 'complete', chip: ['pcv', 0, 'Counted — date not recorded'] }),
+  ppsv2ndNotNeeded: ex('Healthy 72-year-old, PCV13 at 65, PPSV23 at 65 and again 28 days later, PCV20 at 71',
+    { dob: '1954-10-01', riskIds: [], pcvDoses: [...doses('PCV13', ['2019-10-17']), ...doses('PCV20', ['2026-09-01'])], ppsv23Doses: doses('PPSV23', ['2020-09-25', '2020-10-23']) },
+    { status: 'complete', chip: ['ppsv23', 1, 'Counted — not needed. No more PPSV23.'] }),
   futureDated: ex('Infant, PCV20 at 2 months and a second dated next year',
     { dob: '2026-05-01', riskIds: [], pcvDoses: doses('PCV20', ['2026-07-01', '2027-01-01']), ppsv23Doses: [] },
     { chip: ['pcv', 1, 'Check the date'] }),
@@ -754,7 +757,7 @@ export const DECISIONS = [
     short: 'A conjugate nobody asked for',
     problem: 'A child had a PCV series, then a conjugate the card did not ask for: a PCV15 where the card offered PCV20 or PPSV23, a PCV15 or PCV20 after the card said complete, or either one for a healthy child after the card said not indicated. It used to read as a valid dose, and a PCV15 could make a finished child with no spleen owe a PCV20.',
     cdc: 'Offer PCV20 or PPSV23 for a history like this, and stop at a finished series. They do not say what to do with a conjugate that was given anyway.',
-    does: `Labels it Extra dose: not counted, nothing repeated, and a finished child stays complete. Where a dose is still owed it waits ${W8} after the extra one, because CDC counts from the most recent PCV. A healthy child's first ever dose stays valid. Not applied to a PCV13, to an at-risk child under ${yrs(72)}, or when the adult schedule answers. From ${yrs(ADULT_SCHED_MIN_M)} the adult schedule counts every dose received.`,
+    does: `Labels it "Not counted — Extra. Do not repeat." A finished child stays complete. Where a dose is still owed it waits ${W8} after the extra one, because CDC counts from the most recent PCV. A healthy child's first ever dose stays valid. Not applied to a PCV13, to an at-risk child under ${yrs(72)}, or when the adult schedule answers. From ${yrs(ADULT_SCHED_MIN_M)} the adult schedule counts every dose received.`,
     ex: [P.noorExtra, P.lenaExtra, P.theoExtra, P.mateoExtra, P.benExtra, P.priyaFirst],
   },
   {
@@ -1075,6 +1078,7 @@ export const CHIP_LEGEND = [
     ex: [P.infantOnTime, P.priyaFirst],
   },
   { chip: 'Counted — given early, accepted', tone: 'valid', text: 'Counted, though given sooner than recommended. The note gives the actual gap and the recommended one. It is not repeated.', ex: [P.adultEarlyPpsv] },
+  { chip: 'Counted — not needed. No more PPSV23.', tone: 'valid', text: `An adult's second PPSV23 within ${Y5}, with no immunocompromising condition, CSF leak or cochlear implant. ACIP gives a second PPSV23 only to those three groups. Counted, so no further PPSV23 is given.`, ex: [P.ppsv2ndNotNeeded] },
   { chip: 'Counted — product not recorded', tone: 'valid', text: 'Counted as a PCV dose of unknown product.', ex: [P.productUnknown] },
   { chip: 'Counted — date not recorded', tone: 'valid', text: 'Counted, but with no date the app cannot check its age or interval. Add the date to check it.', ex: [P.dateUnknown] },
   { chip: 'Not counted — Extra. Do not repeat.', tone: 'extra', text: 'Given correctly, but not needed.', ex: [P.nonIc2nd] },
@@ -1097,10 +1101,10 @@ export const GRACE = {
  */
 export const CHILD_EXCEPTIONS = [
   { text: `A next dose falling at ${yrs(ADULT_SCHED_MIN_M)} or later: the adult schedule answers, shown from today.`, decision: 'nextDoseIsAnAdults', ex: [P.tess14, P.rafi14, P.cal18] },
-  { text: 'A conjugate the card did not ask for, after a PCV series: labelled Extra dose. A finished child stays complete, and a dose still owed waits for it.', decision: 'conjugateNobodyAskedFor', ex: [P.noorExtra, P.lenaExtra, P.theoExtra, P.mateoExtra, P.benExtra, P.priyaFirst] },
+  { text: 'A conjugate the card did not ask for, after a PCV series: not counted, labelled as an extra dose. A finished child stays complete, and a dose still owed waits for it.', decision: 'conjugateNobodyAskedFor', ex: [P.noorExtra, P.lenaExtra, P.theoExtra, P.mateoExtra, P.benExtra, P.priyaFirst] },
   { text: `Given up to ${GRACE_DAYS} days early: CDC's grace, above.`, ex: [P.infantOnTime] },
   { text: `A PCV given <${W8} after a PPSV23 that itself did not count. The ${W8} is advice only.`, decision: 'invalidPpsvTiming', ex: [P.toddlerPcvSoon] },
-  { text: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first. The note states the actual gap. Other children do not need a 2nd PPSV23; it is labelled Extra dose.`, decision: 'icSecondPpsvCounts', ex: [P.ic2ndEarly, P.nonIc2nd] },
+  { text: `An immunocompromised child's 2nd PPSV23 given <${Y5} after the first. The note states the actual gap. Other children do not need a 2nd PPSV23: it is not counted, labelled as an extra dose.`, decision: 'icSecondPpsvCounts', ex: [P.ic2ndEarly, P.nonIc2nd] },
 ];
 
 /** CDC Catch-up Table 2, probed out of the engine's own function. */
@@ -1138,7 +1142,7 @@ export const PCV_AND_PPSV23 = [
     decision: ['invalidPpsvTiming', 'icSecondPpsvCounts'],
     text: `Measured from the previous PPSV23, even one that did not count. Only immunocompromised children receive a 2nd PPSV23; one given <${Y5} after the 1st still counts, and the note states the actual gap.`,
     sub: 'Other children do not need a 2nd PPSV23; it is labelled',
-    subChip: 'Extra dose',
+    subChip: 'Not counted — Extra. Do not repeat.',
     ruleIds: ['CHILD-PPSV23-AFTER-PPSV23', 'CHILD-PPSV23-AFTER-INVALID-PPSV23', 'CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST'],
     cite: ['pedsIcPpsvWaitFiveYears'],
     ex: [P.asplenia5ppsv, P.ic2ndEarly, P.nonIc2nd],

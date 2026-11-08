@@ -153,8 +153,13 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
     expect(a.perDose[1].effectiveDoseNum).toBe(2);
     expect(a.effective).toHaveLength(2);
     expect(a.perDose[1].reasons.length).toBeGreaterThan(0);
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/5 years advised/);
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/never give a third/i);
+    // §M-L2: a healthy adult — the line names the gap and says one was enough.
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/Given 2 years after the PPSV23 of .*Only one PPSV23 is recommended/);
+    expect(a.perDose[1].notNeeded).toBe(true);
+    // An adult in one of ACIP's three groups reads the recommended gap instead.
+    const hiv = ppsvAfter([], twoYears, ADULT, ['hiv']).perDose[1];
+    expect(hiv.reasons.join(' ')).toMatch(/5 years recommended\./);
+    expect(hiv.notNeeded).toBeUndefined();
   });
 
   // The two ages are now the same KIND of answer — both recommendations, so
@@ -164,7 +169,7 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
   // (2026-10-30) the child row was a floor with a `detail` and no `whys`.
   it('both versions are advice now, each citing its own schedule', () => {
     const adult = ppsvAfter([], twoYears, ADULT).perDose[1];
-    expect(adult.whys.join(' ')).toMatch(/lower with repeat|responses to a repeat PPSV23 were lower/i);
+    expect(adult.whys.join(' ')).toMatch(/gives lower responses to some serotypes/i);
     expect(adult.whys.join(' ')).toMatch(/rr7203a1/);
     expect(adult.detail ?? '').not.toMatch(/owner clinical determination/i);
 
@@ -241,7 +246,7 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     const who = { ageMonths: 68 * 12, dob: '1958-05-01' };
     const a = ppsvAfter([], ['2021-06-01', '2024-06-01'], who);
     expect(a.perDose[1].status).toBe('valid');
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/5 years advised/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/Given 3 years after the PPSV23 of .*Only one PPSV23 is recommended/);
   });
 
   // ⚠️ REVERSED BY OWNER RULING 2026-10-25. Nothing is dropped any more, so

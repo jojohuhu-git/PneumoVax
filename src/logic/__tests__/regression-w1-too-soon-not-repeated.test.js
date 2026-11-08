@@ -87,8 +87,8 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     expect(reasons).not.toMatch(/does not count toward the series/);
     expect(reasons).not.toMatch(/Dec 28, 2022/);
     expect(reasons).not.toMatch(/Repeat this dose only/);
-    expect(reasons).toMatch(/5 years advised/);
-    expect(reasons).toMatch(/never give a third/i);
+    // §M-L2: a healthy adult — counted, not needed.
+    expect(reasons).toMatch(/Only one PPSV23 is recommended/);
   });
 
   it('keeps "repeat this dose only" for a dose rejected for a reason OTHER than timing', () => {

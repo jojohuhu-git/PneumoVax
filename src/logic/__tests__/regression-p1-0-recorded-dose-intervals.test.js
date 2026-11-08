@@ -305,7 +305,7 @@ describe('peds audit P1-4 — PPSV23 must follow PCV by 8 weeks, and never the s
     const twoDoses = analyzeHistory('PPSV23', [{ date: '2019-03-01' }, { date: '2020-03-01' }],
       915, '2026-06-01', '1950-06-15');
     expect(statuses(twoDoses)).toEqual(['valid', 'valid']);
-    expect(twoDoses.perDose[1].reasons.join(' ')).toMatch(/never give a third/i);
+    expect(twoDoses.perDose[1].whys.join(' ')).toMatch(/no further PPSV23 is given/i);
     expect(twoDoses.perDose[1].whys.join(' ')).toMatch(/rr7203a1/);
   });
 
