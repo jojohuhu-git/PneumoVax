@@ -449,7 +449,18 @@ const P = {
     { cards: [/^1 dose PCV \(catch-up\)$/] }),
   healthy6: ex('Healthy 6-year-old, unvaccinated',
     { dob: '2020-11-01', riskIds: [], pcvDoses: [], ppsv23Doses: [] },
-    { cards: [/^Not indicated/], status: 'not-indicated' }),
+    { cards: [/^Not indicated/], status: 'not-indicated', note: [/Re-evaluate at age 50/] }),
+  // P2-1 (2026-11-08): one worked patient per clause of the healthy row's
+  // "Re-evaluate" note, so the page's sentence is held to the cards.
+  healthy4done: ex('Healthy 4-year-old, PCV13 at 2, 4, 6 and 12 months',
+    { dob: '2022-11-01', riskIds: [], pcvDoses: INFANT_PCV13_2022, ppsv23Doses: [] },
+    { status: 'complete', note: [/Re-evaluate at age 50/] }),
+  healthy10pcv20: ex('Healthy 10-year-old, PCV20 at 2, 4, 6 and 12 months',
+    { dob: '2016-11-01', riskIds: [], pcvDoses: doses('PCV20', ['2017-01-01', '2017-03-01', '2017-05-01', '2017-11-15']), ppsv23Doses: [] },
+    { cards: [/^Not indicated/], noNote: [/Re-evaluate/] }),
+  healthy10pcv15ppsv: ex('Healthy 10-year-old, PCV15 at 2, 4, 6 and 12 months, PPSV23 at 2',
+    { dob: '2016-11-01', riskIds: [], pcvDoses: doses('PCV15', ['2017-01-01', '2017-03-01', '2017-05-01', '2017-11-15']), ppsv23Doses: doses('PPSV23', ['2018-11-15']) },
+    { cards: [/^Not indicated/], noNote: [/Re-evaluate/] }),
   diabetic4: ex('4-year-old with diabetes, PCV13 at 2, 4, 6 and 12 months',
     { dob: '2022-11-01', riskIds: ['diabetes'], pcvDoses: INFANT_PCV13_2022, ppsv23Doses: [] },
     { cards: [/Option A: 1 dose PCV20/, /Option B: 1 dose PPSV23/] }),
@@ -534,7 +545,7 @@ const P = {
     { status: 'complete', cards: [/includes PCV20/] }),
   smoker10: ex('10-year-old who smokes, unvaccinated (smoking counts only in adults)',
     { dob: '2016-11-01', riskIds: ['smoking'], pcvDoses: [], ppsv23Doses: [] },
-    { status: 'not-indicated' }),
+    { status: 'not-indicated', note: [/Re-evaluate at age 19/], noNote: [/Re-evaluate at age 50/] }),
   csf30: ex('30-year-old with a CSF leak, unvaccinated',
     { ageMonths: 360, riskIds: ['csf_leak'], pcvDoses: [], ppsv23Doses: [] },
     { cards: [/^1 dose PCV \(PCV20, PCV15, or PCV21\)$/], note: [new RegExp(`PPSV23 ≥${W8_ADULT} later`)] }),
@@ -914,11 +925,16 @@ export const CHILD_LANES = [
       { kind: 'none' },
       { kind: 'none' },
     ],
-    // Owner 2026-11-07 (Ava, Leo, Nina, §B-50BABY / §B-5TO18): no "re-evaluate"
-    // once a PCV20 has been given — at 50 the app reads Complete.
-    result: { text: 'Complete', note: `From ${yrs(AGE.m60)}: no catch-up; not indicated. Re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)}, unless a PCV20 has been given.` },
-    cite: ['pedsHealthyCatchup', 'adultRoutine50'],
-    ex: [P.healthy3, P.healthy6],
+    // Owner 2026-11-07 (Ava, Leo, Nina, Kai, Zoe, §B-50BABY / §B-5TO18): no
+    // "re-evaluate" when the adult card at 50 would read Complete — a series
+    // with PCV20, or PCV15 and PPSV23. §B-ADULTRISK19 (2026-11-01): from 5, a
+    // smoking or alcohol tick moves it to 19. P2-1 (2026-11-08) brought this
+    // note up to all three; each clause has a worked patient below whose
+    // `expect` asserts the card's own sentence.
+    result: { text: 'Complete', note: `From ${yrs(AGE.m60)}: no catch-up; not indicated. Re-evaluate at ${yrs(ROUTINE_ADULT_MIN_M)} (under ${yrs(AGE.m60)}, once the series is complete). From ${yrs(AGE.m60)} with smoking or alcohol use disorder selected: at ${yrs(ADULT_SCHED_MIN_M)} instead. Neither, if the series includes PCV20, or PCV15 and PPSV23.` },
+    // cdcAdultRiskFactorList: the sentence smoker10's card cites for "at 19".
+    cite: ['pedsHealthyCatchup', 'adultRoutine50', 'cdcAdultRiskFactorList'],
+    ex: [P.healthy3, P.healthy4done, P.healthy6, P.healthy10pcv20, P.healthy10pcv15ppsv, P.smoker10],
   },
   {
     group: 'Chronic condition, cochlear implant or CSF leak',
@@ -1046,7 +1062,7 @@ export const CHIP_LEGEND = [
     text: `Counts. A baby under ${yrs(AGE.m24)} who is still in the PCV series sees the dose number and the series total, because the total depends on age at the first dose. Everyone else sees the dose number only. A dose given sooner than recommended that still counts (any adult dose, or an immunocompromised child's 2nd PPSV23) has a note under it stating the actual gap and the recommended one.`,
     ex: [P.infantOnTime, P.ic2ndEarly, P.adultEarlyPpsv],
   },
-  { chip: 'Invalid', tone: 'invalid', text: 'Given before the minimum interval or the minimum age. Does not count. The note says whether to repeat it, and when.', ex: [P.infantShort] },
+  { chip: 'Invalid', tone: 'invalid', text: 'Given before the minimum interval or the minimum age. Does not count. The note says whether to repeat it; the recommendation card gives the date.', ex: [P.infantShort] },
   { chip: 'Extra dose — more than this series needs', tone: 'extra', text: 'Given correctly, but not needed for this series. Do not repeat.', ex: [P.nonIc2nd] },
   { chip: 'Extra dose? — no date recorded', tone: 'extra', text: 'A dose with no date, beyond what the series needs. Add the date to check it.', ex: [P.undatedExtra] },
   { chip: 'Not counted', tone: 'extra', text: 'PCV7. Set aside; the patient is treated as unvaccinated. The result card says what to give.', ex: [P.pcv7] },

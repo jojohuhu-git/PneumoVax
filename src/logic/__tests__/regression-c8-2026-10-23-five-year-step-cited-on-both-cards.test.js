@@ -47,6 +47,14 @@ import { noteCiteSlices } from '../../components/citations.jsx';
 
 const PCV20_CARD = '1 dose PCV20 (≥5 years after first PPSV23)';
 const ALTERNATIVE_CARD = '2nd PPSV23 (alternative, ≥5 years after first)';
+// P2-2 (2026-11-08, OWNER RULING "Name the date"): where the first PPSV23 on
+// the record did not count, the same two cards name the one that did — "≥5
+// years after the PPSV23 of Oct 13, 2021" (12 grid patients). Same card, same
+// row, same date; so they are counted as the family they belong to.
+const NAMED = String.raw`the PPSV23 of [A-Z][a-z]{2} \d{1,2}, \d{4}`;
+const PCV20_RE = new RegExp(String.raw`^1 dose PCV20 \(≥5 years after (first PPSV23|${NAMED})\)$`);
+const ALT_RE = new RegExp(String.raw`^2nd PPSV23 \(alternative, ≥5 years after (first|${NAMED})\)$`);
+const familyOf = (label) => (PCV20_RE.test(label ?? '') ? PCV20_CARD : ALT_RE.test(label ?? '') ? ALTERNATIVE_CARD : null);
 const NOTES_URL = 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo';
 
 /** The four rows of CDC's immunocompromising list that state this step. */
@@ -73,8 +81,8 @@ function sweep() {
     let res;
     try { res = recommend(c.input); } catch { continue; }
     if (res.excluded) continue;
-    const pcv20 = (res.recs ?? []).find((x) => x.doseLabel === PCV20_CARD);
-    const alt = (res.recs ?? []).find((x) => x.doseLabel === ALTERNATIVE_CARD);
+    const pcv20 = (res.recs ?? []).find((x) => familyOf(x.doseLabel) === PCV20_CARD);
+    const alt = (res.recs ?? []).find((x) => familyOf(x.doseLabel) === ALTERNATIVE_CARD);
     if (pcv20 || alt) out.push({ c, pcv20, alt });
   }
   return out;
@@ -130,7 +138,7 @@ describe('C8 — the five-year step cites its row on both cards', () => {
       for (const rec of [pcv20, alt].filter(Boolean)) {
         const row = rowOf(rec);
         expect(row, `${rec.doseLabel} quotes no CDC row at all`).toBeTruthy();
-        tally.set(`${rec.doseLabel}|${row}`, (tally.get(`${rec.doseLabel}|${row}`) ?? 0) + 1);
+        tally.set(`${familyOf(rec.doseLabel)}|${row}`, (tally.get(`${familyOf(rec.doseLabel)}|${row}`) ?? 0) + 1);
       }
     }
     // Identical on both cards, which is the symmetry the previous test checks

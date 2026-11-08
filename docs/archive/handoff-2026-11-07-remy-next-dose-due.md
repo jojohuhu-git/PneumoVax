@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-08** by `docs/archive/handoff-2026-11-08-wording-audit-p2-1-p2-2.md`, which carries this file's open items forward. Resume from that file.
+
 # PneumoVax — Handoff after Zoe and Remy (2026-11-07)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page that gives pneumococcal vaccine advice.

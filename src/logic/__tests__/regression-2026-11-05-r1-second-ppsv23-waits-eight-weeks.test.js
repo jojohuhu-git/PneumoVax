@@ -150,7 +150,9 @@ describe('one rule, one reading', () => {
   });
 
   it('every 2nd-PPSV23 card sits beside the PCV20 card that shares its date', () => {
-    const cards = source.match(/doseLabel: `2nd PPSV23 \(alternative, ≥\$\{LONG_GAP_WORDS\} after first\)`/g) ?? [];
+    // P2-2 (2026-11-08): the label names the counted PPSV23 through
+    // `fiveYearsFrom(ppsv)`; still four sites, one per card family.
+    const cards = source.match(/doseLabel: `2nd PPSV23 \(alternative, ≥\$\{LONG_GAP_WORDS\} after \$\{fiveYearsFrom\(ppsv\)\.short\}\)`/g) ?? [];
     expect(cards).toHaveLength(4);
   });
 });
