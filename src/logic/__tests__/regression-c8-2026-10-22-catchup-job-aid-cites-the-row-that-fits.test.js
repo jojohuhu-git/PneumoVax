@@ -205,3 +205,45 @@ describe('every marker on these cards has a citation behind it', () => {
     for (const k of citeKeys(rec)) expect(REFS[k], `${k} missing from REFS`).toBeTruthy();
   });
 });
+
+// OWNER RULING 2026-11-07, "Take it off" (Mila). The tests above check only the
+// NUMBERED citations, so a history the job aid has no row for still carried the
+// job aid as a grey button with no number — `refs` was the pathway default on
+// every route. Mila is the most ordinary toddler there is: healthy, 2½, PCV15
+// at 2, 4, 6 and 12 months. The job aid's p.3 (Revised January 2025, re-read
+// 2026-11-07 with `scripts/pdfLayout.py`, 95,267 bytes, the size CDC serves
+// today) lists "# of previous doses" as 0, 1, 2 and 3 only. Cite it, or take it
+// off: she was shown the card and chose off, for the three histories here.
+//
+// NOT covered by her ruling, and deliberately left as it was: a 2- or 3-dose
+// child on the catch-up card whose dose is NOT yet due (`jobAidCatchupKey`
+// returns null for them). The job aid does have rows for 2 and 3 doses; the
+// question there is a different one and has not been put to her.
+describe('a job aid with no row for the history is not on the card at all', () => {
+  const JOB_AID_URL = REFS.cdcCatchupJobAid.url;
+  const buttonUrls = (rec) => (rec.citations ?? []).map((c) => c.url);
+
+  it.each([
+    ['Mila: 4 routine doses, series complete', 30, [2, 4, 6, 12], 'PCV15', 'complete'],
+    ['4 routine doses at age 4', 48, [2, 4, 6, 12], 'PCV15', 'complete'],
+    ['4 doses all before 12 months, catch-up', 30, [2, 4, 6, 9], 'PCV13', 'catchup'],
+    ['an undated completing dose', 30, ['undated'], 'PCV20', 'complete'],
+  ])('%s → CDC and p2016 only', (_label, ageMonths, doses, product, status) => {
+    const rec = pcvCard(healthyChild(ageMonths, doses, product));
+    expect(rec.status).toBe(status);
+    expect(buttonUrls(rec)).not.toContain(JOB_AID_URL);
+    expect(buttonUrls(rec)).toContain(REFS.cdcChildPneumo.url);
+    expect(buttonUrls(rec)).toContain(REFS.p2016.url);
+  });
+
+  // The control: where the job aid HAS a row, it keeps its button.
+  it.each([
+    ['3 doses with one at 12 months or later', 30, [5, 14, 17], 'complete'],
+    ['3 doses all before 12 months, catch-up', 30, [2, 4, 6], 'catchup'],
+    ['0 doses, catch-up', 30, [], 'due'],
+  ])('%s → the job aid keeps its button', (_label, ageMonths, doses, status) => {
+    const rec = pcvCard(healthyChild(ageMonths, doses));
+    expect(rec.status).toBe(status);
+    expect(buttonUrls(rec)).toContain(JOB_AID_URL);
+  });
+});

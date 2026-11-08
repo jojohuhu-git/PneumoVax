@@ -1837,7 +1837,8 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
       // outside that and get NO cite — a child with four or more conjugate doses
       // (the table stops at three), and one whose completing dose is undated
       // (the job aid requires doses to be documented). Owner case (a) both
-      // times: no document has a row for the history.
+      // times: no document has a row for the history. Both lose the job aid's
+      // grey button too (owner ruling 2026-11-07, Mila: "Take it off").
       const datedAtOrAfter12mo = b.m12to23 + b.ge24;
       const jobAidEndsItHere = b.undated === 0 && datedAtOrAfter12mo >= 1
         && prior >= 1 && prior <= 3;
@@ -1866,7 +1867,11 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
           // reads "not indicated (no risk, <50y)", at 50 a dose falls due.
           ...(reviewAt50 ? [reviewAt50Cite()] : []),
         ],
-        refs,
+        // OWNER RULING 2026-11-07, "Take it off" (Mila: healthy, 2½, PCV15 at
+        // 2, 4, 6 and 12 months). Where the job aid has no row for the history
+        // it has no NUMBER above — and it must not keep a grey button either.
+        // Cite it, or take it off.
+        refs: jobAidEndsItHere ? refs : healthyRefsExcept('cdcCatchupJobAid'),
       })];
     }
     // OWNER DECISION 2026-10-29 — the healthy child's catch-up waits 8 weeks
@@ -1907,9 +1912,9 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
     //
     // ⚠ FOUR OR MORE PREVIOUS DOSES GETS NO CITE. The table stops at three, so a
     // child with four conjugate doses all given before 12 months — who does
-    // still reach this card — has no row here. Left uncredited deliberately:
-    // owner case (a), "no document has a row for the history". Do not point them
-    // at the 3-dose row.
+    // still reach this card — has no row here. Owner case (a), "no document has
+    // a row for the history": no number, and since 2026-11-07 (Mila) no button
+    // either — see `refs` below. Do not point them at the 3-dose row.
     const jobAidCatchupKey = () => {
       if (prior === 0) return 'jobAidPedsCatchupDose1';
       if (prior === 1) return dueToday ? 'jobAidPedsCatchupDose2' : 'jobAidPedsCatchupDose2Later';
@@ -1944,7 +1949,12 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
         cite('p2016HealthyCatchup24to59'),
         ...(jobAidKey ? [cite(jobAidKey)] : []),
       ],
-      refs,
+      // Same ruling (Mila, 2026-11-07): four or more previous doses has no row
+      // in the job aid, so it comes off the card. ONLY that history — a 2- or
+      // 3-dose child whose dose is not yet due also has no job aid number, but
+      // the job aid does have rows for 2 and 3 doses, and that case has not
+      // been put to the owner. Leave it until she rules.
+      refs: prior >= 4 ? healthyRefsExcept('cdcCatchupJobAid') : refs,
     })];
   }
 
