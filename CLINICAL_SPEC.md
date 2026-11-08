@@ -4246,3 +4246,8 @@ sentence; no "either way" or "does not change"; no "~", "paediatric" or "neighbo
 no paragraph over 92 words. Proved by putting back the old PCV15 sentence, a semicolon in the infant line,
 and the "does not change this" sentence: each was caught. Inventory scripts:
 `scripts/wordingAudit/whyParagraphs.mjs` and `whySentences.mjs`.
+
+**A whole-app check read the old wording.** `scripts/wholeApp/checks.mjs` looked for Owen's Option B line
+("no dose is needed at 19 … at 50") inside one sentence. Splitting that sentence at its semicolon made 75 grid
+and 132 typical children look as if Option B never named the dose at 50. The app was right and the check was
+wrong, so the check now accepts the line in either form.
