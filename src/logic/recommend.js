@@ -4694,6 +4694,25 @@ export function recommendBeforeFold(input) {
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
+  // ── THE RECORD A FORWARD RUN STARTS FROM (2026-11-07, after Kai) ──────
+  //
+  // Every run of this same patient at a LATER age (19, 50) starts from this,
+  // never from `input`. A dose dated in the future is "a dose the patient never
+  // had" today, and is not counted; at 19 or 50 its date is in the past and the
+  // adult card WOULD count it. So a 16-year-old who smokes, with a PCV20 typed
+  // as next year, was told "age 50" instead of "age 19": the run to 19 counted
+  // the PCV20 and read Complete. Found by the prose diff on Kai's fix, which had
+  // the same trap at 50; the suite saw neither. The walk's own verdicts decide
+  // what is left out, never re-judged here. Before-birth doses are left out too
+  // (they are record problems at every age, so this changes nothing for them).
+  // Runs BACKWARD in time (`cardsOnTheDayOf`) already keep only earlier doses.
+  const notRecordProblems = (a) => a.doses.filter((_, i) => !a.perDose[i].recordProblem);
+  const forwardInput = {
+    ...input,
+    pcvDoses: notRecordProblems(pcvAnalysis),
+    ppsv23Doses: notRecordProblems(ppsvAnalysis),
+  };
+
   // OWNER RULING 2026-10-24 — what an adult with an UNREPAIRED invalid dose is
   // owed, read off the walk's own verdicts.
   //
@@ -4836,7 +4855,7 @@ export function recommendBeforeFold(input) {
       // 19 — the adult card whose answer each "complete" card's line repeats.
       const nineteenth = addCalendarMonths(dob ?? today, dob ? ADULT_SCHED_MIN_M : ADULT_SCHED_MIN_M - am);
       const fiftieth = addCalendarMonths(dob ?? today, dob ? ROUTINE_ADULT_MIN_M : ROUTINE_ADULT_MIN_M - am);
-      const adultAt19 = recommendBeforeFold({ ...input, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
+      const adultAt19 = recommendBeforeFold({ ...forwardInput, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
       const at19 = atNineteen(adultAt19.recs[0]);
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today, dob).map((r) => withAtNineteen(r, at19));
       noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
@@ -4844,7 +4863,7 @@ export function recommendBeforeFold(input) {
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
       recs = sayEightWeekWait(recs);
-      recs = optionBAtNineteen(recs, input, nineteenth, fiftieth, today, pedsRiskRowClass(pedsIds));
+      recs = optionBAtNineteen(recs, forwardInput, nineteenth, fiftieth, today, pedsRiskRowClass(pedsIds));
       // R2: nothing can be done before 19, so the adult card answers from today.
       const pastNineteen = adultAnswerPastNineteen(recs, adultAt19.recs, nineteenth);
       if (pastNineteen) {
@@ -4862,21 +4881,16 @@ export function recommendBeforeFold(input) {
         riskIds.some((id) => RISK_BY_ID[id]?.adultOnly),
         // Leo, Nina and Kai (2026-11-07): the same patient, nothing more
         // given, on the day they turn 50. Asked only by the 5–18 card.
-        //
-        // WITHOUT THE RECORD PROBLEMS. A dose dated in the future is "a dose
-        // the patient never had" today; at 50 its date would be in the past and
-        // the adult card would count it, so a PCV20 typed as next year would
-        // take the line off. Found by the prose diff (96 impossible entries),
-        // not the suite. The walk's own verdicts decide, never re-judged here.
+        // Without the record problems (`forwardInput`): a PCV20 typed as next
+        // year took the line off 96 impossible entries until the prose diff
+        // caught it.
         () => recommendBeforeFold({
-          ...input,
-          pcvDoses: pcvAnalysis.doses.filter((_, i) => !pcvAnalysis.perDose[i].recordProblem),
-          ppsv23Doses: ppsvAnalysis.doses.filter((_, i) => !ppsvAnalysis.perDose[i].recordProblem),
+          ...forwardInput,
           ageMonths: ROUTINE_ADULT_MIN_M,
           today: addCalendarMonths(dob ?? today, dob ? ROUTINE_ADULT_MIN_M : ROUTINE_ADULT_MIN_M - am),
         }).recs.every((r) => ASKS_FOR_NOTHING.has(r.status)));
       recs = reviewAdultRiskAtNineteen(recs, riskIds, () => recommendBeforeFold({
-        ...input, ageMonths: ADULT_SCHED_MIN_M,
+        ...forwardInput, ageMonths: ADULT_SCHED_MIN_M,
         today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
       }).recs[0]);
     }

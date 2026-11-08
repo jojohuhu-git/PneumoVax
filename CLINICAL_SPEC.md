@@ -329,6 +329,20 @@ a dose typed as next year would be in the past and counted, which took the line 
 impossible entries until the prose diff caught it. The C12 count is now 790 − 237 = **553**.
 Guard: `regression-2026-11-07-kai-pcv15-ppsv23-age-50.test.js`.
 
+**Every forward run leaves out the record problems (owner, 2026-11-07: "Yes, fix it here").** The
+same trap was already on `main` in the runs to **19**: §B-AT19's "At 19" line, the adult card that
+answers past 19 (R2), Option B's look-ahead (§B-OPTIONB19/50), and §B-ADULTRISK19's "19" swap.
+**Jude** — 16, smokes, PCV13 ×4 as a baby, a PCV20 typed as next year — was told "age 50" instead
+of "age 19"; **Ivy** — 12, cochlear implant, series complete — lost her "At 19" line. All four now
+start from one input, `forwardInput`, the record without the doses the walk flags as record
+problems. Measured: 0 real patients moved; 101 of 1,980 future-dated impossible entries had a
+look-ahead line that differed from the same record without the future dose, now 0; by hand,
+737 of 7,056, now 0. **No clinician can reach this through the form** — the date box will not
+take a date after today — so this keeps the engine true to its own rule rather than changing
+anything a user sees. Not covered: today's card can still mention a future-dated PPSV23 in its own
+wording ("≥8 weeks after the most recent pneumococcal vaccine"); that is not a forward run.
+Guard: `regression-2026-11-07-forward-runs-leave-out-future-doses.test.js`.
+
 ### §B-ADULTRISK19 — a teen whose only tick is an adult risk factor looks again at 19 (2026-11-01)
 
 P2-5 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G59 — 17, smokes, a baby
