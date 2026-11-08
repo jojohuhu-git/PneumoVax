@@ -20,9 +20,10 @@ booster, PPSV23 held to 5 years after a too-young PPSV23, and PCV20-or-PCV15-the
 
 ## What's NOT done
 
+**Audit 2 (adults near a line) is DONE** — she said "Yes, mark it done" on 2026-11-08, on the queue
+file's recommendation (2026-11-05 checks plus 0 adult Rulebook mismatches).
+
 **Needs her (ask, don't default):**
-- **Audit 2 (adults near a line):** the queue file recommends calling it done (2026-11-05 checks plus
-  0 adult Rulebook mismatches). She has not said yes yet.
 - **Should `childLines.mjs` become a test?** It is a one-off script now, like `earlyDoseCheckChildren.mjs`.
   It found nothing, so there is no repeat escape arguing for a gate; offer it, don't do it unasked.
 
@@ -39,15 +40,13 @@ history, P4, the "next dose from" sentence on the asplenia 5-year-old.
 
 ## Why this is a good stopping point
 
-All three audits proposed on 2026-11-01 are now either finished (Audits 1 and 3) or finished pending one
-"yes" (Audit 2). Nothing is half-built; this branch only adds a script and documents.
+All three audits proposed on 2026-11-01 are finished (Audits 1, 2 and 3). Nothing is half-built; this branch only adds a script and documents.
 
 ## Resuming
 
 1. Once the PR is merged (`gh pr view <N> --json state`): `cd /Users/joannehuang/Downloads/PneumoVax &&
    git checkout main && git pull`. Run the suite: expect **2,446 passing**.
-2. Ask her about Audit 2 first, in one plain sentence. Then ask what she wants next — there is no
-   queued fix work.
+2. Ask her what she wants next — there is no queued fix work.
 3. Per item, if she gives one: reproduce, failing test, fix, full suite, break the fix (restore from a
    copy, not git), `node scripts/proseDiff.mjs` against a `git worktree` of `main`, whole-app checks on
    both sides, `node scripts/ageLineAudit/childLines.mjs "$PWD"` (expect 95 agree), running app,

@@ -68,7 +68,7 @@ Each of these was traced to a ruling already in `CLINICAL_SPEC.md`. None is a fi
 
 - Every patient uses one fixed today (2026-11-08) and PCV20 or PCV13 by birth year. Mixed
   products and PCV15 near the lines were covered by the 2026-11-05 whole-app checks, not here.
-- Adults were not part of this audit (Audit 2 — the queue file recommends calling it done;
-  that still needs the owner's yes).
+- Adults were not part of this audit. Audit 2 (adults near a line) was marked done by the owner
+  on 2026-11-08, on the 2026-11-05 whole-app checks.
 - The script is a one-off check in `scripts/`, like `earlyDoseCheckChildren.mjs`; it is not
   part of `npm test`.
