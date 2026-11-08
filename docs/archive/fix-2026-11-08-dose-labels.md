@@ -1,6 +1,6 @@
 # Fix queue: one fixed set of dose labels, and plain wording next to each dose (2026-11-08)
 
-> **STATUS: IN PROGRESS.** Started 2026-11-08 on branch `fix/2026-11-08-dose-labels`, off `main` at
+> **STATUS: DONE (L1–L4, PR #144). SUPERSEDED by `handoff-2026-11-08-why-this-wording.md`.** Started 2026-11-08 on branch `fix/2026-11-08-dose-labels`, off `main` at
 > `670e888` (#143). Baseline **2,446 passing, 0 failed** (vitest JSON reporter, `.claude/**` excluded).
 
 ## Why this exists
