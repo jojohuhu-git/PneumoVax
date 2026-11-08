@@ -222,6 +222,24 @@ as two elements; it was trimmed to the parenthetical in P6-3c. Checked live, not
 assumed. Nothing in the suite can catch this — asserting it needs the network — so
 check it by hand when adding a `quote`.
 
+⚠ **A quote CDC prints inside a CLOSED section links to the section, not the sentence**
+(2026-11-07). CDC's child and adult schedule-notes pages keep their pneumococcal text in
+three accordions — `accordion-panel-pneumo-routine`, `-catchup`, `-situations` — and a
+browser never opens one to find a `#:~:text=` fragment, so the reader landed at the top.
+CDC's own page script opens the section named after the `#` and scrolls to it. So such an
+entry declares `section`, and `highlightUrl()` emits `page#section`. The owner clicked
+both forms in her own browser: `#section` and `#section:~:text=…` each opened the
+section, **neither highlighted the sentence** — hence the section alone. The quote still
+shows in the pop-up over the number. A sentence CDC prints word for word under BOTH adult
+headings is two keys (`adultPcv13Only` / `adultPcv13Only1949`, and the same for
+`adultPcv15ThenPpsv` and `adultPcv7Only`), chosen in `pcvAdult` by `isOlderAdult`, so a
+55-year-old is not sent to the 19–49 list. When adding a quote on those two pages, look
+up which section holds it and add it to the written-out map in
+`regression-2026-11-07-cdc-notes-links-open-their-section`. ⚠ Test a CDC link with a full
+page load and the browser pane VISIBLE: a hash change on the same page never runs CDC's
+script, and a hidden pane never scrolls — which is how 2026-11-01 concluded CDC pages
+"never scroll".
+
 A sweep test (`regression-p6-3b-note-cite-parity`) walks 9,024 notes and 7,452 dose
 verdicts and fails if markers and citations ever stop matching one-for-one, or if a
 citation names a ref that does not exist.

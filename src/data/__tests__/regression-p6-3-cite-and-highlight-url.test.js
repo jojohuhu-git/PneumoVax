@@ -54,8 +54,14 @@ describe('P6-3 — cite() builds a per-occurrence citation object', () => {
   // now asserted. Before this the rule was written as "every quoted ref gets
   // #:~:text=", which was the same thing only while every quoted ref was a
   // web page.
+  // 2026-11-07: narrowed again, by WHERE THE SENTENCE IS PRINTED. A quote CDC
+  // prints inside a closed section declares `section` and links to it, because
+  // a browser never opens a closed section for a text fragment (the owner's
+  // browser landed at the top). Those are asserted in
+  // regression-2026-11-07-cdc-notes-links-open-their-section; every other
+  // quoted web page still deep-links to its sentence.
   it('a quoted HTML ref deep-links to its sentence via #:~:text=', () => {
-    const quoted = Object.keys(REFS).filter((k) => REFS[k].quote && !REFS[k].url.endsWith('.pdf'));
+    const quoted = Object.keys(REFS).filter((k) => REFS[k].quote && !REFS[k].url.endsWith('.pdf') && !REFS[k].section);
     expect(quoted.length, 'expected at least one quoted HTML ref').toBeGreaterThan(0);
     for (const k of quoted) {
       expect(cite(k).url, `${k} should deep-link to its quote`).toMatch(/#:~:text=/);

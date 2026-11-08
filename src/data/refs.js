@@ -153,6 +153,7 @@ export const REFS = {
     // Patients this sentence is about: the ** footnote to the Age 19-49 heading, enumerating who qualifies
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Immunization Schedule — pneumococcal, the risk-factor footnote to "Age 19–49 years with certain underlying medical conditions or other risk factors"',
     short: 'CDC Adult Notes',
     quote: 'Underlying medical conditions or other risk factors include alcoholism, chronic heart/liver/lung disease, chronic renal failure, cigarette smoking',
@@ -163,6 +164,7 @@ export const REFS = {
     // Patients this sentence is about: it IS the non-IC list's header, enumerating that list
     population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Immunization Schedule — pneumococcal "Special situations", the non-immunocompromising risk group (CDC\'s complete paediatric enumeration; names neither smoking nor alcohol)',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Children and adolescents with cerebrospinal fluid leak; chronic heart disease; chronic kidney disease (excluding maintenance dialysis and nephrotic syndrome); chronic liver disease; chronic lung disease (including moderate persistent or severe persistent asthma); cochlear implant; or diabetes mellitus',
@@ -193,6 +195,7 @@ export const REFS = {
     // Patients this sentence is about: Routine vaccination, Age 50 years or older
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, routine vaccination at age 50+ with no prior PCV or unknown history',
     short: 'CDC Adult Notes',
     quote: 'Not previously received a dose of PCV13, PCV15, PCV20, or PCV21 or whose previous vaccination history is unknown: 1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21.',
@@ -207,10 +210,27 @@ export const REFS = {
   },
   adultPcv15ThenPpsv: {
     rulebook: 'adult',
-    // Patients this sentence is about: printed identically in both adult blocks
-    population: ['adult-19to49', 'adult-50plus'],
+    // Patients this sentence is about: adults 50+. CDC prints the same words
+    // under the 19-49 Special situations heading too; that copy is `adultPcv15ThenPpsv1949`
+    // (FINDING N: the same sentence in two age bands is two sentences, and the
+    // link must open the section whose heading describes this patient, 2026-11-07).
+    population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this copy is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, the PCV15 -> PPSV23 interval of >=1 year, with 8 weeks named as a minimum that MAY be considered for an immunocompromising condition, cochlear implant or CSF leak. This is the citation for the YEAR: every adult 50+, and 19-49 with chronic conditions only',
+    short: 'CDC Adult Notes',
+    quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
+    lastVerified: '2026-10-16',
+  },
+  adultPcv15ThenPpsv1949: {
+    rulebook: 'adult',
+    // Patients this sentence is about: adults 19-49 with a risk condition. The
+    // same words as `adultPcv15ThenPpsv`, as CDC prints them under Special situations; split
+    // 2026-11-07 so the link opens the section whose heading describes the patient.
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this copy is printed in (measured 2026-11-07)
+    label: 'CDC Adult Schedule Notes — pneumococcal, the PCV15 -> PPSV23 interval of >=1 year, with 8 weeks named as a minimum that MAY be considered for an immunocompromising condition, cochlear implant or CSF leak. This is the citation for the YEAR: every adult 50+, and 19-49 with chronic conditions only — the copy printed under Special situations (19-49)',
     short: 'CDC Adult Notes',
     quote: 'If PCV15 is used, administer 1 dose PPSV23 at least 1 year after the PCV15 dose (may use minimum interval of 8 weeks for adults with an immunocompromising condition,',
     lastVerified: '2026-10-16',
@@ -267,9 +287,13 @@ export const REFS = {
   adultPcv15NeedsPpsvCompletion: {
     rulebook: 'adult',
     // Patients this sentence is about: printed identically under the >=50
-    // parent and the 19-49 at-risk parent, so both.
-    population: ['adult-19to49', 'adult-50plus'],
+    // parent and the 19-49 at-risk parent, but the app shows it ONLY to a
+    // 19-49 adult with an immunocompromising condition, cochlear implant or CSF
+    // leak (`notesCompletionCites`). Narrowed 2026-11-07 so the link's section
+    // (Special situations) is held to the patient it is shown to.
+    population: ['adult-19to49'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal: a PCV15 is not a complete series on its own; a PPSV23 must follow it. Cited for the REQUIREMENT, never for the interval — this card states ACIP\'s 8 weeks, which has its own citation',
     short: 'CDC Adult Notes',
     quote: 'If PCV15 is used, administer 1 dose PPSV23',
@@ -305,10 +329,27 @@ export const REFS = {
   },
   adultPcv13Only: {
     rulebook: 'adult',
-    // Patients this sentence is about: printed identically in both adult blocks
-    population: ['adult-19to49', 'adult-50plus'],
+    // Patients this sentence is about: adults 50+. CDC prints the same words
+    // under the 19-49 Special situations heading too; that copy is `adultPcv13Only1949`
+    // (FINDING N: the same sentence in two age bands is two sentences, and the
+    // link must open the section whose heading describes this patient, 2026-11-07).
+    population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this copy is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PCV13',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PCV13 dose.',
+    lastVerified: '2026-10-10',
+  },
+  adultPcv13Only1949: {
+    rulebook: 'adult',
+    // Patients this sentence is about: adults 19-49 with a risk condition. The
+    // same words as `adultPcv13Only`, as CDC prints them under Special situations; split
+    // 2026-11-07 so the link opens the section whose heading describes the patient.
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this copy is printed in (measured 2026-11-07)
+    label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PCV13 — the copy printed under Special situations (19-49)',
     short: 'CDC Adult Notes',
     quote: 'Previously received only PCV13: 1 dose PCV20 or 1 dose PCV21 at least 1 year after the last PCV13 dose.',
     lastVerified: '2026-10-10',
@@ -323,6 +364,7 @@ export const REFS = {
     // Patients this sentence is about: Special situations, Age 19-49
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal "Special situations", an adult aged 19-49 who previously received only PPSV23',
     short: 'CDC Adult Notes',
     quote: 'Previously received only PPSV23: 1 dose PCV15 or 1 dose PCV20 or PCV21, at least 1 year after the last PPSV23 dose. If PCV15 is used, no additional PPSV23 doses are recommended.',
@@ -333,6 +375,7 @@ export const REFS = {
     // Patients this sentence is about: Routine 50+; the 19-49 twin is adultPpsvOnly1949
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, previously received only PPSV23',
     short: 'CDC Adult Notes',
     // P1-3 (2026-11-01): extended by its next sentence, read live and found
@@ -354,6 +397,7 @@ export const REFS = {
     // Patients this sentence is about: Special situations, Age 19-49, the IC / cochlear implant / CSF leak half
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal "Special situations", an adult aged 19-49 with a cochlear implant, CSF leak or immunocompromising condition who has had PCV13 and one PPSV23',
     short: 'CDC Adult Notes',
     quote: 'Cochlear implant, cerebrospinal fluid leak, or an immunocompromising condition*: 1 dose PCV20 or 1 dose PCV21 at least 5 years after the last pneumococcal vaccine dose.',
@@ -364,6 +408,7 @@ export const REFS = {
     // Patients this sentence is about: Routine 50+; the 19-49 rows for this history are adultIc1949BothPcv13Ppsv and adultChronicOnlyReviewAt50
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, PCV13 + PPSV23 where no PPSV23 was given at 65+',
     short: 'CDC Adult Notes',
     quote: 'Previously received both PCV13 and PPSV23 but NO PPSV23 was received at age 65 years or older: 1 dose PCV20 or 1 dose PCV21 at least 5 years after the last pneumococcal vaccine dose.',
@@ -374,6 +419,7 @@ export const REFS = {
     // Patients this sentence is about: Routine 50+, and its content is about a dose given at 65 or older
     population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, PCV13 + PPSV23 with PPSV23 given at 65+ (shared clinical decision-making)',
     short: 'CDC Adult Notes',
     quote: 'Previously received both PCV13 and PPSV23, AND PPSV23 was received at age 65 years or older: Based on shared clinical decision',
@@ -398,6 +444,7 @@ export const REFS = {
     // Patients this sentence is about: Special situations, Age 19-49, the chronic-conditions half
     population: ['adult-19to49'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal "Special situations", an adult aged 19-49 with chronic conditions only who has had PCV13 and one PPSV23: no further dose now, re-check at age 50',
     short: 'CDC Adult Notes',
     quote: 'Alcoholism, chronic heart/liver/lung disease, cigarette smoking, or diabetes mellitus: no additional PCV or PPSV23 doses recommended at this time. Review pneumococcal recommendations when age 50 years or older.',
@@ -408,6 +455,7 @@ export const REFS = {
     // Patients this sentence is about: printed under Special situations, but its own words are "Adults aged 19 years and older"
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, a series containing PCV20 or PCV21 is complete',
     short: 'CDC Adult Notes',
     quote: 'Adults aged 19 years and older who have received PCV20 or PCV21: no additional pneumococcal vaccine dose recommended.',
@@ -415,10 +463,27 @@ export const REFS = {
   },
   adultPcv7Only: {
     rulebook: 'adult',
-    // Patients this sentence is about: printed identically in both blocks; "the recommendation above" resolves within whichever block the reader is in
-    population: ['adult-19to49', 'adult-50plus'],
+    // Patients this sentence is about: adults 50+. CDC prints the same words
+    // under the 19-49 Special situations heading too; that copy is `adultPcv7Only1949`
+    // (FINDING N: the same sentence in two age bands is two sentences, and the
+    // link must open the section whose heading describes this patient, 2026-11-07).
+    population: ['adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this copy is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, a PCV7-only history is treated as no PCV history',
+    short: 'CDC Adult Notes',
+    quote: 'Previously received only PCV7: follow the recommendation above.',
+    lastVerified: '2026-10-10',
+  },
+  adultPcv7Only1949: {
+    rulebook: 'adult',
+    // Patients this sentence is about: adults 19-49 with a risk condition. The
+    // same words as `adultPcv7Only`, as CDC prints them under Special situations; split
+    // 2026-11-07 so the link opens the section whose heading describes the patient.
+    population: ['adult-19to49'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this copy is printed in (measured 2026-11-07)
+    label: 'CDC Adult Schedule Notes — pneumococcal, a PCV7-only history is treated as no PCV history — the copy printed under Special situations (19-49)',
     short: 'CDC Adult Notes',
     quote: 'Previously received only PCV7: follow the recommendation above.',
     lastVerified: '2026-10-10',
@@ -437,6 +502,7 @@ export const REFS = {
     // Patients this sentence is about: printed under Routine vaccination, but CDC's at-risk rows start at Age 2-5, so the routine infant series IS an at-risk baby's series
     population: ['child-routine', 'child-nonIC', 'child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-routine', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, routine infant 4-dose PCV series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Routine vaccination with PCV 4-dose series at 2, 4, 6, 12–15 months',
@@ -447,6 +513,7 @@ export const REFS = {
     // Patients this sentence is about: its own words: "Healthy children ages 2-4 years"
     population: ['child-routine'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-catchup', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, catch-up for healthy children 2-4 years',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Healthy children ages 2–4 years with any incomplete* PCV series: 1 dose PCV',
@@ -457,6 +524,7 @@ export const REFS = {
     // Patients this sentence is about: its own words: "For children without risk conditions"
     population: ['child-routine'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-catchup', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, PCV20 not indicated for a child without risk conditions who already completed an age-appropriate series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'For children without risk conditions, PCV20 is not indicated if they have received 4 doses of PCV13 or PCV15 or another age appropriate complete PCV series.',
@@ -473,6 +541,7 @@ export const REFS = {
     // Patients this sentence is about: IC list, Age 6-18
     population: ['child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 6-18 with no previous PCV13, PCV15 or PCV20',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received any dose of PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or 1 dose of PCV20. If PCV15 is used and no previous receipt of PPSV23, administer 1 dose of PPSV23 at least 8 weeks after the PCV15 dose.',
@@ -483,6 +552,7 @@ export const REFS = {
     // Patients this sentence is about: non-IC list, Age 6-18 (the IC twin is pedsIc6to18NoPcv)
     population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk 6-18 years with no prior PCV13/15/20 (and the 8-week PCV15 -> PPSV23 interval)',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received any dose of PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or PCV20. If PCV15 is used and no previous receipt of PPSV23, administer 1 dose of PPSV23 at least 8 weeks after the PCV15 dose.',
@@ -526,6 +596,7 @@ export const REFS = {
     // "Received PCV before age 6 years but have not received PPSV23"
     population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 6-18 who received PCV before age 6 and no PPSV23: a prior PCV20 completes the series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
@@ -537,6 +608,7 @@ export const REFS = {
     // Its WORDS differ from the non-IC twin above; do not let the two swap places.
     population: ['child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 6-18 who received PCV before age 6 and no PPSV23: a prior PCV20 completes the series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Previously received at least 1 dose of PCV20: no additional dose of PCV or PPSV23',
@@ -550,6 +622,7 @@ export const REFS = {
     // "at age 2 years or later" — the age this quote is about.
     population: ['child-nonIC', 'child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 2-5 who completed the PCV series and has no PPSV23: a prior PCV20 completes the series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Previously received at least 1 dose of PCV20: no further PCV or PPSV23 doses needed',
@@ -1151,6 +1224,7 @@ export const REFS = {
     // Patients this sentence is about: printed in both lists; the IC instance continues with the five-year tail, which the IC card cites separately
     population: ['child-nonIC', 'child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk child who received PCV13 only at or after age 6',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Received PCV13 only at or after age 6 years: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose.',
@@ -1180,6 +1254,7 @@ export const REFS = {
     // Patients this sentence is about: IC list, Age 6-18
     population: ['child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", IMMUNOCOMPROMISING list: PCV13 + PPSV23 at or after age 6 still owes a dose, at 8 weeks AND 5 years',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose and at least 5 years after dose 1 PPSV23.',
@@ -1191,6 +1266,7 @@ export const REFS = {
     // Patients this sentence is about: non-IC list only; the IC row three lines later says the opposite
     population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", PCV13 + PPSV23 at or after age 6 completes the series',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Received 1 dose PCV13 and 1 dose PPSV23 at or after age 6 years: no further doses of any PCV or PPSV23 indicated.',
@@ -1277,6 +1353,7 @@ export const REFS = {
     // Patients this sentence is about: printed in both lists, Age 2-5, identical
     population: ['child-nonIC', 'child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", at-risk 2-5y with fewer than 3 prior PCV doses',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Less than 3 PCV doses: 2 doses PCV (at least 8 weeks after the most recent dose and administered at least 8 weeks apart)',
@@ -1303,6 +1380,7 @@ export const REFS = {
     // Patients this sentence is about: IC list only, and the only one of the pair carrying the five-year follow-on
     population: ['child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 2-5: a child who completed the PCV series without PCV20 and without PPSV23, including the second dose owed five years later',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV dose. If PPSV23 is used, administer 1 dose of PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23',
@@ -1317,6 +1395,7 @@ export const REFS = {
     // Patients this sentence is about: non-IC list only; CDC's repeated "administer" is the tell
     population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the NON-immunocompromising "Special situations" list: a child who completed the PCV series without PCV20 and without PPSV23',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most recent PCV dose.',
@@ -1351,6 +1430,7 @@ export const REFS = {
     // inconsistency, kept verbatim, and the tell for which block a quote is from.
     population: ['child-nonIC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal "Special situations", age 6-18 who received PCV before age 6 and no PCV20: one dose of PCV20 or PPSV23',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received PCV20: 1 dose PCV20 or 1 dose PPSV23 administer at least 8 weeks after the most recent PCV dose.',
@@ -1364,6 +1444,7 @@ export const REFS = {
     // the Age 2-5 one says "1 dose of PCV20 or dose 2 PPSV23".
     population: ['child-IC'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Child & Adolescent Schedule Notes — pneumococcal, the IMMUNOCOMPROMISING list, age 6-18 who received PCV before age 6 and no PCV20: one dose now, and a further dose five years after the first PPSV23',
     short: 'CDC Child/Adolescent Notes',
     quote: 'Not previously received PCV20: administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV dose. If PPSV23 is used, administer either PCV20 or dose 2 PPSV23 at least 5 years after dose 1 PPSV23.',
@@ -1611,6 +1692,7 @@ export const REFS = {
     // Patients this sentence is about: "adults aged 19 years or older who received PCV15"
     population: ['adult-19to49', 'adult-50plus'],
     url: 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-notes.html#note-pneumo',
+    section: 'accordion-panel-pneumo-situations', // the closed CDC section this quote is printed in (measured 2026-11-07)
     label: 'CDC Adult Schedule Notes — pneumococcal, "PPSV23 not available": after a PCV15, 1 dose of PCV20 or PCV21 completes the series',
     short: 'CDC Adult Notes',
     quote: 'adults aged 19 years or older who received PCV15 but have not yet completed PPSV23 series, can complete the series with either 1 dose of PCV20 or 1 dose of PCV21 if they no longer have access to PPSV23',
@@ -2247,11 +2329,23 @@ export function resolveRefs(keys = []) {
 //
 // A quoted PDF entry with NO `pdfPage` would silently fall through to a text
 // fragment that cannot work, so `refs.test.js` fails if one exists.
-export function highlightUrl(url, quote, pdfPage = undefined) {
+//
+// ⚠ The SECTION rule (2026-11-07). CDC's child and adult schedule-notes pages
+// print their pneumococcal text inside CLOSED sections, and a browser will not
+// open one to find a text fragment — the reader landed at the top of the page
+// (owner, in her own browser, 2026-11-01). CDC's own page script opens the
+// section named after the `#` and scrolls to it, so an entry printed inside one
+// declares `section` and links there instead. The owner clicked both forms on
+// 2026-11-07: `#section` and `#section:~:text=…` each opened the section, and
+// neither highlighted the sentence — so the section ALONE, not a text fragment
+// that looks as if it works. The quote still shows in the pop-up over the
+// number. Guard: regression-2026-11-07-cdc-notes-links-open-their-section.
+export function highlightUrl(url, quote, pdfPage = undefined, section = undefined) {
   if (!url) return undefined;
   if (!quote) return url;
   const page = url.split('#')[0];
   if (pdfPage != null) return `${page}#page=${pdfPage}`;
+  if (section) return `${page}#${section}`;
   return `${page}#:~:text=${encodeURIComponent(quote)}`;
 }
 
@@ -2287,7 +2381,7 @@ export function cite(key, opts = undefined) {
   const out = {
     key,
     page: c?.url,
-    url: highlightUrl(c?.url, c?.quote, c?.pdfPage),
+    url: highlightUrl(c?.url, c?.quote, c?.pdfPage, c?.section),
     label: c?.quote ?? c?.label,
     doc: c?.short,
     quote: c?.quote,

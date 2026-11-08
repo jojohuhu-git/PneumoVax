@@ -128,18 +128,21 @@ describe('P3-9 — RiskAgeNote explains the tick the engine disregards', () => {
       .toMatch(/is an adult pneumococcal risk factor/);
   });
 
-  it('carries two numbered citations that deep-link to the quoted CDC sentences', () => {
+  // 2026-11-07: both sentences are printed in CDC's closed "Special
+  // situations" section, so each number now opens that section rather than
+  // carrying a text fragment the browser could not reach.
+  it('carries two numbered citations that open the CDC section holding each quote', () => {
     render(<StepHarness ageMonths={CHILD} initialRiskIds={['smoking']} />);
     const cites = [...screen.getByTestId('risk-age-note').querySelectorAll('a.note-cite')];
     expect(cites).toHaveLength(2);
     expect(cites.map(a => a.textContent)).toEqual(['[1]', '[2]']);
     // [1] — the adult notes sentence that lists smoking as an adult factor.
     expect(cites[0].getAttribute('href')).toContain('adult-notes.html');
-    expect(cites[0].getAttribute('href')).toContain('#:~:text=');
+    expect(cites[0].getAttribute('href')).toMatch(/#accordion-panel-pneumo-situations$/);
     expect(cites[0].getAttribute('data-title')).toMatch(/cigarette smoking/i);
     // [2] — the child notes "Special situations" list, which omits it.
     expect(cites[1].getAttribute('href')).toContain('child-adolescent-notes.html');
-    expect(cites[1].getAttribute('href')).toContain('#:~:text=');
+    expect(cites[1].getAttribute('href')).toMatch(/#accordion-panel-pneumo-situations$/);
     // The two-fragment bug: a quote link must carry exactly one "#".
     for (const a of cites) {
       expect((a.getAttribute('href').match(/#/g) || []).length).toBe(1);

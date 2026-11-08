@@ -62,7 +62,8 @@ describe('P1-3: an adult who had PPSV23 first is told so, with the row she follo
     const r = card(PCV15_FIRST);
     // P2-7 (2026-11-06): the word "complete" now cites the sentence that says it.
     expect(r.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].');
-    expect(keys(r)).toEqual(['adultPcv15ThenPpsv', 'adultPcv15PpsvComplete1949']);
+    // 2026-11-07: same words, now the 19-49 copy, so the number opens Special situations.
+    expect(keys(r)).toEqual(['adultPcv15ThenPpsv1949', 'adultPcv15PpsvComplete1949']);
   });
 
   it('a PCV13 in the history too: not "only PPSV23", so the old row stays', () => {
