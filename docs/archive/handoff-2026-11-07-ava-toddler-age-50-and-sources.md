@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by `handoff-2026-11-07-mila-job-aid-button.md`. Both PRs here (#135, #136) are merged, and its Job Aid item is done. Resume from the newer file.
+
 # PneumoVax — Handoff after Ava, Leo and Nina: the age-50 line, and the "Sources" button (2026-11-07)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
