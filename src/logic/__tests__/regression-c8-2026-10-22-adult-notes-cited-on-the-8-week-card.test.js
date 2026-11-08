@@ -129,7 +129,7 @@ describe('CDC Adult Notes earns its number on the 8-week PCV15 card', () => {
 
   it('the sentence it is cited beside is the completion claim, not the interval', () => {
     const c = card({ ageYears: 30, riskIds: ['asplenia'] });
-    expect(c.note.detail).toMatch(/the pneumococcal series is complete once it is given \[c\]/);
+    expect(c.note.detail).toMatch(/the series is not complete until the PPSV23 is given \[c\]/);
     // The interval sentence keeps ACIP as its source: one number, one home.
     expect(citeKeys(c)[0]).toBe('adultPcv15ThenPpsvShort');
   });

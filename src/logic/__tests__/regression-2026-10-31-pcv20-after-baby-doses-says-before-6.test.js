@@ -50,7 +50,7 @@ describe('baby PCV13 doses, then a PCV20 at 7', () => {
       ppsv23Doses: d('PPSV23', ['2020-11-01']) });
     expect(r.status).toBe('complete');
     expect(r.note.detail).not.toMatch(/at or after age 6/);
-    expect(r.note.detail).toMatch(/if PPSV23 is used, a PCV20 or a second PPSV23 at least 5 years later/);
+    expect(r.note.detail).toMatch(/If PPSV23 is used, a PCV20 or a second PPSV23 follows at least 5 years later/);
     expect(keysOf(r)).toEqual(['pedsIcBefore6NoPcv20At6to18']);
   });
 

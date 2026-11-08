@@ -101,7 +101,7 @@ describe('C8 — a prior PCV20 completes the series, and CDC is credited for say
 
   it('the card says in its own words why the row still covers him', () => {
     const card = cardOf(pcv20ThenPpsv23(['asplenia']));
-    expect(card.note.detail).toMatch(/written for one who has not yet had PPSV23; this child has had one, which does not change the answer/);
+    expect(card.note.detail).toMatch(/so no further PCV or PPSV23 doses are needed, whether or not a PPSV23 was given \[c\]/);
   });
 
   it('a chronic-condition child gets the NON-immunocompromising wording', () => {
@@ -157,7 +157,7 @@ describe('C8 — a prior PCV20 completes the series, and CDC is credited for say
             return v && v.status !== 'invalid' && v.status !== 'noncounting';
           }).length;
         if (ppsv === 0) continue;
-        if (!/which does not change the answer/.test(rec.note?.detail ?? '')) continue;
+        if (!/whether or not a PPSV23 was given \[c\]/.test(rec.note?.detail ?? '')) continue;
         affected += 1;
         for (const short of uncredited(rec)) strays.set(short, (strays.get(short) ?? 0) + 1);
       }

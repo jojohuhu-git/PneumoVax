@@ -49,7 +49,7 @@ describe('the healthy 5–18 card: no age-50 line once a PCV20 has counted', () 
     expect(c.doseLabel).toBe('Not indicated (healthy 5–18y)');
     expect(noteText(c)).not.toContain('Re-evaluate at age 50');
     expect(c.noteCites.map((x) => x.key)).not.toContain('adultRoutine50');
-    expect(c.note.detail).toMatch(/^CDC's catch-up row covers healthy children only through age 4\./);
+    expect(c.note.detail).toMatch(/^CDC recommends PCV catch-up for healthy children only through age 4\./);
     expect(markers(c)).toBe(c.noteCites.length);
   });
 

@@ -53,7 +53,7 @@ describe('Lily — her on-time third PPSV23 is an extra dose', () => {
   it('her card is still "complete", and now its "both" is true', () => {
     const recs = recsOf(LILY);
     expect(recs.map((r) => [r.vaccine, r.status])).toEqual([['PCV', 'complete']]);
-    expect(JSON.stringify(recs[0].note)).toContain('both PPSV23 doses have been received');
+    expect(JSON.stringify(recs[0].note)).toContain('both PPSV23 doses have been given');
   });
 
   it('an extra third still holds off a conjugate for 8 weeks (the Ben ruling)', () => {

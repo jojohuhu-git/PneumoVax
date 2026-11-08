@@ -46,7 +46,7 @@ describe('P1-1: a PPSV23 already given is not followed by another 8 weeks after 
     const r = card(G01);
     expect(text(r)).not.toContain('add PPSV23');
     expect(r.note.detail).toContain('If PCV15 is used, no PPSV23 follows it now: this child has already had a PPSV23 (Oct 27, 2025).');
-    expect(r.note.detail).toContain('PCV20 or a second PPSV23 — waits until ≥5 years after that PPSV23 [c].');
+    expect(r.note.detail).toContain('PCV20 or a second PPSV23, waits until ≥5 years after that PPSV23 [c].');
     expect(keys(r)).toContain('pedsIcPpsvWaitFiveYears');
     expect(keys(r)).not.toContain('p2016Pcv15NeedsFurtherDoses');
   });
@@ -68,7 +68,7 @@ describe('P1-1: a PPSV23 already given is not followed by another 8 weeks after 
   it('an immunocompromised child with no PPSV23 yet is told about the dose 5 years on', () => {
     const r = card(IC_NO_PPSV);
     expect(r.note.detail).toContain('If PCV15 is used to complete, add PPSV23 ≥8 weeks after the last PCV [c].');
-    expect(r.note.detail).toContain('For an immunocompromising condition, that PPSV23 is followed by one further dose — PCV20 or a second PPSV23 — ≥5 years later [c].');
+    expect(r.note.detail).toContain('For an immunocompromising condition, that PPSV23 is followed by one further dose, PCV20 or a second PPSV23, ≥5 years later [c].');
     expect(keys(r)).toEqual(expect.arrayContaining(['p2016Pcv15NeedsFurtherDoses', 'pedsSecondPpsv5y']));
   });
 

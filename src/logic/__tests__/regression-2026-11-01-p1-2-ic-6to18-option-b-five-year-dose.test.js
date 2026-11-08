@@ -30,7 +30,7 @@ const DIABETES_8 = { ...ISLA, riskIds: ['diabetes'] };
 describe('P1-2: the immunocompromised Option B card names the dose 5 years on', () => {
   it('Isla: Option B-1 says PCV20 or a second PPSV23 follows the PPSV23 by 5 years', () => {
     const r = byLabel(ISLA, 'Option B-1');
-    expect(text(r)).toContain('For an immunocompromising condition, that PPSV23 is followed by one further dose — PCV20 or a second PPSV23 — ≥5 years later [c].');
+    expect(text(r)).toContain('For an immunocompromising condition, that PPSV23 is followed by one further dose, PCV20 or a second PPSV23, ≥5 years later [c].');
     expect(keys(r)).toContain('pedsSecondPpsv5y');
     expect(balanced(r)).toBe(true);
   });

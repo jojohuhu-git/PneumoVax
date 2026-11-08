@@ -97,7 +97,7 @@ describe('C8 — the five-dose catch-up card credits the booster row', () => {
   it('the number sits on the booster clause, never on the total', () => {
     const card = catchupCard(fourDoseInfant(6, '2026-04-11'));
     // The clause the marker is attached to is the one CDC's sentence supports.
-    expect(card.note.detail).toMatch(/the final\/booster dose is given at ≥12 months \[c\]/);
+    expect(card.note.detail).toMatch(/The final \(booster\) dose is given at ≥12 months \[c\]/);
     // And the total carries no marker of its own beyond the lead's MMWR one.
     expect((card.note.lead.match(/\[c\]/g) ?? [])).toHaveLength(1);
     // Found BY DOCUMENT rather than by position: C10-2 added a marker ahead of

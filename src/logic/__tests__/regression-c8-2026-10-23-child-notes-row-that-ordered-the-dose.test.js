@@ -128,7 +128,7 @@ describe('C8 — the complete card credits the row that ordered the dose', () =>
 
   it('the card says the dose that row asked for has been given', () => {
     const card = cardOf(cochlearSixYearOld());
-    expect(card.note.detail).toMatch(/asks for one dose of PCV20 or PPSV23, and that dose has been given \[c\]/);
+    expect(card.note.detail).toMatch(/CDC recommends 1 dose of PCV20 or PPSV23, and that dose has been given \[c\]/);
     // The mobile-app justification is gone: CDC's own row and p2016's footnote
     // say it, and under CLAUDE.md's authority rule the published schedule
     // governs, not PneumoRecs VaxAdvisor.
@@ -161,7 +161,7 @@ describe('C8 — the complete card credits the row that ordered the dose', () =>
       'pedsIcBefore6NoPcv20At6to18',
       'p2016Before6PpsvGivenIcOptions',
     ]);
-    expect(card.note.detail).toMatch(/both doses have been given \[c\]/);
+    expect(card.note.detail).toMatch(/a PCV20 or a second PPSV23 \[c\]\. Both doses have been given\./);
     expect(uncredited(card)).toEqual([]);
   });
 
@@ -184,7 +184,7 @@ describe('C8 — the complete card credits the row that ordered the dose', () =>
         { product: 'PPSV23', date },
       ],
     });
-    const EARLY = 'The second PPSV23 came less than 5 years after the first; it is counted, and no third PPSV23 is given.';
+    const EARLY = 'The second PPSV23 came less than 5 years after the first. It still counts, and no third PPSV23 is given.';
     // Four days early: inside CDC's grace, so it is ON TIME — no sentence.
     const onTime = cardOf(withSecondDoseOn('2026-10-07'));
     expect(onTime).toBeTruthy();

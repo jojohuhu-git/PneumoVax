@@ -97,7 +97,7 @@ const findByNote = (result, needle) =>
 const LOSES = {
   complete20or21: 'A pneumococcal series that includes PCV20 or PCV21 is complete',
   complete15plus: 'PCV15 followed by PPSV23 [c] is a complete pneumococcal series',
-  ppsvAfterPcv15: 'the series is INCOMPLETE until then',
+  ppsvAfterPcv15: 'the series is not complete until the PPSV23 is given',
 };
 const KEEPS = {
   pcv13AndPpsv: 'PCV13 and PPSV23 already given',

@@ -97,7 +97,7 @@ const SOFIA = {
 const LEO_TWO_DAYS_SHORT = child(['asplenia'], ['2018-01-15', '2023-01-13']);
 const AVA_TWO_DAYS_SHORT = child(['cochlear_implant'], ['2018-01-15', '2023-01-13']);
 
-const EARLY_SENTENCE = ' The second PPSV23 came less than 5 years after the first; it is counted, and no third PPSV23 is given.';
+const EARLY_SENTENCE = ' The second PPSV23 came less than 5 years after the first. It still counts, and no third PPSV23 is given.';
 
 const secondPpsv = (p) => analyzeBoth(p).ppsv23.perDose[1];
 const recsOf = (p) => recommend(p).recs;
@@ -128,7 +128,7 @@ describe('Leo — immunocompromised: the early second PPSV23 counts', () => {
 
   it('and the card says the second dose came early and is counted', () => {
     expect(recsOf(LEO)[0].note.detail).toContain(
-      'The second PPSV23 came less than 5 years after the first; it is counted, and no third PPSV23 is given.',
+      'The second PPSV23 came less than 5 years after the first. It still counts, and no third PPSV23 is given.',
     );
   });
 
@@ -141,7 +141,7 @@ describe('Leo — immunocompromised: the early second PPSV23 counts', () => {
     expect(recs[0].note.detail).not.toContain('came less than');
     // Everything else on the card is the same words as Leo's.
     expect(recsOf(LEO)[0].note.detail.replace(
-      ' The second PPSV23 came less than 5 years after the first; it is counted, and no third PPSV23 is given.', '',
+      ' The second PPSV23 came less than 5 years after the first. It still counts, and no third PPSV23 is given.', '',
     )).toBe(recs[0].note.detail);
   });
 });
@@ -231,7 +231,7 @@ describe('Sofia — PPSV23 twice, THEN the conjugate: PCV20 only, never a third 
     ]);
     expect(recs[0].dueToday).toBe(true);
     expect(recs[0].note.lead).toBe(
-      'Give 1 dose of PCV20 ≥5 years after the first PPSV23 [c]. Two PPSV23 doses have already been given, so a PPSV23 is not offered — no third PPSV23 is given.',
+      'Give 1 dose of PCV20 ≥5 years after the first PPSV23 [c]. Two PPSV23 doses have already been given, so no third PPSV23 is offered.',
     );
     expect(recs[0].note.detail).not.toContain('whichever product');
   });

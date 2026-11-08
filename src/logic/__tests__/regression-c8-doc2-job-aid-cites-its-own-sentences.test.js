@@ -279,7 +279,7 @@ describe('statement #7 — no dose now, review at 50', () => {
 describe('statements #8, #9, #12 — the PPSV23 substitution, previously uncited anywhere', () => {
   const rec = (am, riskIds = []) => findByNote(
     adult(am, { riskIds, pcvDoses: [{ date: '2024-01-10', product: 'PCV15' }] }),
-    'the series is INCOMPLETE until then',
+    'the series is not complete until the PPSV23 is given',
   );
 
   it('the detail half now cites the only source in the app that states it', () => {
