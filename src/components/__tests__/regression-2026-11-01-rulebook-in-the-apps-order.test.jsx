@@ -84,9 +84,13 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
     }
   });
 
-  it('the page shows 42 sentences in all — pinned, so a new one is a choice, not drift (was 239)', () => {
+  it('the page shows 43 sentences in all — pinned, so a new one is a choice, not drift (was 239)', () => {
+    // 42 -> 43, P2-1 (2026-11-08): the healthy row now says a 5-18-year-old
+    // with smoking or alcohol use disorder is looked at again at 19, and
+    // cites the sentence that teen's own card cites for it
+    // (cdcAdultRiskFactorList, §B-ADULTRISK19).
     const total = ROWS.reduce((n, [, row]) => n + (row.cite?.length ?? 0), 0);
-    expect(total).toBe(42);
+    expect(total).toBe(43);
   });
 
   it('p2016 appears only where no CDC sentence on that card states the claim', () => {
