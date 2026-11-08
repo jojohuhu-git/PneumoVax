@@ -314,6 +314,35 @@ card at 19 reads *Complete*, so §B-ADULTRISK19's "19" line does not apply eithe
 that asserted the age-50 line stays for that teen was reversed by this ruling and renamed.
 Guard: `regression-2026-11-07-leo-5-to-18-age-50-pcv20.test.js`.
 
+**Nor once a PCV15 and a PPSV23 are on record (owner, 2026-11-07, Kai).** **Kai** — 5, healthy,
+PCV15 at 2, 4, 6 and 12 months and a PPSV23 at 4 he did not need (his chip reads "extra") — kept
+the line, yet at 50 the adult card reads *"Complete (PCV15 + PPSV23)"*. Control: the same boy with
+PCV13 is owed PCV20 or PCV21 at 50, and without the PPSV23 he is owed PPSV23; both keep the line.
+She chose *"Drop it, like Nina"* (237 grid cards; 4,692 of 21,840 hand-built healthy 5–18
+children, every one *Complete* at 50). The 66 invalid-PCV20 cards above are this family: their
+PCV15 + PPSV23, not the PCV20, completes them; the 14 owed a dose keep the line.
+**The rule is now one question, not three:** the card runs the same patient forward to the 50th
+birthday and keeps the line only when the adult card there asks for something. On the grid that
+is Leo's and Nina's histories exactly, plus Kai's — no other card moved. The forward run leaves
+out any dose the engine flags as a **record problem** (dated in the future or before birth): at 50
+a dose typed as next year would be in the past and counted, which took the line off 96
+impossible entries until the prose diff caught it. The C12 count is now 790 − 237 = **553**.
+Guard: `regression-2026-11-07-kai-pcv15-ppsv23-age-50.test.js`.
+
+**Every forward run leaves out the record problems (owner, 2026-11-07: "Yes, fix it here").** The
+same trap was already on `main` in the runs to **19**: §B-AT19's "At 19" line, the adult card that
+answers past 19 (R2), Option B's look-ahead (§B-OPTIONB19/50), and §B-ADULTRISK19's "19" swap.
+**Jude** — 16, smokes, PCV13 ×4 as a baby, a PCV20 typed as next year — was told "age 50" instead
+of "age 19"; **Ivy** — 12, cochlear implant, series complete — lost her "At 19" line. All four now
+start from one input, `forwardInput`, the record without the doses the walk flags as record
+problems. Measured: 0 real patients moved; 101 of 1,980 future-dated impossible entries had a
+look-ahead line that differed from the same record without the future dose, now 0; by hand,
+737 of 7,056, now 0. **No clinician can reach this through the form** — the date box will not
+take a date after today — so this keeps the engine true to its own rule rather than changing
+anything a user sees. Not covered: today's card can still mention a future-dated PPSV23 in its own
+wording ("≥8 weeks after the most recent pneumococcal vaccine"); that is not a forward run.
+Guard: `regression-2026-11-07-forward-runs-leave-out-future-doses.test.js`.
+
 ### §B-ADULTRISK19 — a teen whose only tick is an adult risk factor looks again at 19 (2026-11-01)
 
 P2-5 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G59 — 17, smokes, a baby
@@ -351,9 +380,19 @@ toddler keeps it. Wording and sources only; 0 verdicts. The grid reaches 12 of t
 with an adult-only tick, **0** with PCV20 — it cannot build Ava). Guard:
 `regression-2026-11-07-toddler-age-50-matches-baby.test.js`.
 
-**Noted, not put to her** (an unusual history): a healthy toddler given four PCV15 **and a
-PPSV23 she did not need** also reads *Complete (PCV15 + PPSV23)* at 50, and both the baby and
-toddler cards still carry the line for her. Neither ruling covered that history.
+**Nor once a PCV15 and a PPSV23 are on record (owner, 2026-11-07, Zoe, *"Drop it, like
+Kai"*).** **Zoe** — 2 years 3 months, healthy, PCV15 at 2, 4, 6 and 12 months and a PPSV23 at
+2 she did not need (her chip reads *extra*) — read *"Re-evaluate at age 50"*; run forward, at 50
+she reads *Complete (PCV15 + PPSV23)*. That is Kai's history (§B-5TO18) one card younger. The
+toddler card now asks the **same forward run to 50** as the 5–18 card, in place of its own
+"series includes PCV20" test, and keeps the line only when the adult card there asks for
+something; that run gives Ava's answer too. The adult-only limit stays, because a smoker's dose
+comes at 19 and a run to 50 cannot see it. Control: the same toddler with PCV13 instead is owed
+PCV20 or PCV21 at 50 and keeps the line. Measured over 2,178 hand-built healthy complete
+toddlers: 120 lost the line (every one PCV15 + a PPSV23), 0 gained it. The grid builds none of
+them (prose diff 0 of 35,280 lines; whole-app checks identical). **The baby card needs nothing:**
+a PPSV23 cannot count before age 2, so 0 of 567 hand-built babies differ. Wording and sources
+only; 0 verdicts. Guard: `regression-2026-11-07-zoe-toddler-pcv15-ppsv23-age-50.test.js`.
 
 ### §B-OPTIONB19 — Option B says what PPSV23 leads to at 19 (owner, 2026-11-07, "Cora")
 
