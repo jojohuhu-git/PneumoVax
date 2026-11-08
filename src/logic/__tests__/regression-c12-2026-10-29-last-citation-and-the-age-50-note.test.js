@@ -274,7 +274,10 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
       // -198, a PCV20 recorded as an extra dose. At 50 both read Complete. 80
       // cards keep the line with an INVALID PCV20 on record (same-day duplicate,
       // or a day after a PPSV23): 14 are owed a dose at 50, 66 are not.
-      'Not indicated (healthy 5–18y)': 1584 - 404 - 192 - 198,
+      // Owner 2026-11-07, Kai ("Drop it, like Nina"): -237, a PCV15 and a PPSV23
+      // on record — at 50 the adult card reads "Complete (PCV15 + PPSV23)". The
+      // 66 above are among them; the 14 owed a dose keep the line.
+      'Not indicated (healthy 5–18y)': 1584 - 404 - 192 - 198 - 237,
       // Owner 2026-11-07, "Match the baby card" (§B-50BABY): -8, the toddlers
       // whose only tick is smoking or alcohol use disorder — the adult schedule
       // gives them a dose at 19. A PCV20 series also loses the line, but the

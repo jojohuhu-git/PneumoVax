@@ -1727,7 +1727,7 @@ function appendToOptionB(recs, b, sentence, cites) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  HEALTHY CHILDREN 24 months – 18 years — p2016 Table 2
 // ═══════════════════════════════════════════════════════════════════════════
-function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv20Given = false) {
+function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, fiftyAsksForNothing = () => false) {
   // A CARD CREDITS ONLY THE DOCUMENTS THAT SPEAK FOR IT. This block asks per
   // card -- `healthyRefsExcept` is the twin of `adultRefs` / `childRefsExcept`
   // -- rather than spreading one list over every card it builds.
@@ -1848,7 +1848,14 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
       // so 50 is not the next event; an ADULT-only tick (smoking, alcohol use
       // disorder) is given a dose at 19, so "50" would name the wrong age.
       // Passed in, because `pedsRiskIds()` has already removed those ticks.
-      const reviewAt50 = !pcv.hasPCV20 && !adultOnlyTicked;
+      //
+      // OWNER RULING 2026-11-07, "Drop it, like Kai" (§B-50BABY, Zoe: 2,
+      // healthy, PCV15 at 2, 4, 6 and 12 months and an unneeded PPSV23 at 2).
+      // At 50 she reads "Complete (PCV15 + PPSV23)", which a PCV20 test cannot
+      // see. So the first limit is now the 5–18 card's forward run to 50 — the
+      // adult card's own answer — which gives Ava's answer too. The adult-only
+      // limit stays: a smoker's dose comes at 19, which a run to 50 misses.
+      const reviewAt50 = !adultOnlyTicked && !fiftyAsksForNothing();
       // Same ruling, second half ("Yes, under Why this"): where the line stays,
       // it sits in `detail`, as on the baby card — not on the opened card.
       const lead = `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.)`;
@@ -1977,7 +1984,20 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
   // dose received (§C-P1-3), so at 50 she too reads Complete. A PCV20 that is
   // INVALID (a same-day duplicate, or one day after a PPSV23) is neither, and
   // keeps the line — some of those really are owed a dose at 50.
-  const reviewAt50 = !pcv.hasPCV20 && !extraPcv20Given;
+  //
+  // Then Kai ("Drop it, like Nina"): 5, healthy, PCV15 at 2, 4, 6 and 12
+  // months and an unneeded PPSV23 at 4. At 50 the adult card reads "Complete
+  // (PCV15 + PPSV23)", so 50 brings him nothing either. The 66 "invalid PCV20"
+  // cards that kept the line are this family: their PCV15 + PPSV23, not the
+  // PCV20, is what completes them at 50.
+  //
+  // So the card no longer READS the adult schedule — three hand-made rules
+  // (a PCV20 counted, an extra PCV20, PCV15 + PPSV23) would be a second
+  // reading of it, the §B-AT19 fault. The caller runs the same patient forward
+  // to 50 and the line stays only when the adult card there asks for
+  // something. On the grid that is Leo's and Nina's histories exactly, plus
+  // Kai's 237. Guard: regression-2026-11-07-kai-pcv15-ppsv23-age-50.
+  const reviewAt50 = !fiftyAsksForNothing();
   return [rec({
     vaccine: 'PCV', status: 'not-indicated',
     doseLabel: 'Not indicated (healthy 5–18y)',
@@ -4681,6 +4701,25 @@ export function recommendBeforeFold(input) {
   const effectivePcv = pcvAnalysis.effective;
   const effectivePpsv = ppsvAnalysis.effective;
 
+  // ── THE RECORD A FORWARD RUN STARTS FROM (2026-11-07, after Kai) ──────
+  //
+  // Every run of this same patient at a LATER age (19, 50) starts from this,
+  // never from `input`. A dose dated in the future is "a dose the patient never
+  // had" today, and is not counted; at 19 or 50 its date is in the past and the
+  // adult card WOULD count it. So a 16-year-old who smokes, with a PCV20 typed
+  // as next year, was told "age 50" instead of "age 19": the run to 19 counted
+  // the PCV20 and read Complete. Found by the prose diff on Kai's fix, which had
+  // the same trap at 50; the suite saw neither. The walk's own verdicts decide
+  // what is left out, never re-judged here. Before-birth doses are left out too
+  // (they are record problems at every age, so this changes nothing for them).
+  // Runs BACKWARD in time (`cardsOnTheDayOf`) already keep only earlier doses.
+  const notRecordProblems = (a) => a.doses.filter((_, i) => !a.perDose[i].recordProblem);
+  const forwardInput = {
+    ...input,
+    pcvDoses: notRecordProblems(pcvAnalysis),
+    ppsv23Doses: notRecordProblems(ppsvAnalysis),
+  };
+
   // OWNER RULING 2026-10-24 — what an adult with an UNREPAIRED invalid dose is
   // owed, read off the walk's own verdicts.
   //
@@ -4823,7 +4862,7 @@ export function recommendBeforeFold(input) {
       // 19 — the adult card whose answer each "complete" card's line repeats.
       const nineteenth = addCalendarMonths(dob ?? today, dob ? ADULT_SCHED_MIN_M : ADULT_SCHED_MIN_M - am);
       const fiftieth = addCalendarMonths(dob ?? today, dob ? ROUTINE_ADULT_MIN_M : ROUTINE_ADULT_MIN_M - am);
-      const adultAt19 = recommendBeforeFold({ ...input, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
+      const adultAt19 = recommendBeforeFold({ ...forwardInput, ageMonths: ADULT_SCHED_MIN_M, today: nineteenth });
       const at19 = atNineteen(adultAt19.recs[0]);
       recs = pcvRiskChild(am, pedsIds, pcv, ppsv, today, dob).map((r) => withAtNineteen(r, at19));
       noThird = noThirdPpsv23(recs, ppsvAnalysis, ppsv.count);
@@ -4831,7 +4870,7 @@ export function recommendBeforeFold(input) {
       recs = holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today);
       recs = holdConjugateAfterThrownOut(recs, ppsv.thrownOutDate, today, { child: true });
       recs = sayEightWeekWait(recs);
-      recs = optionBAtNineteen(recs, input, nineteenth, fiftieth, today, pedsRiskRowClass(pedsIds));
+      recs = optionBAtNineteen(recs, forwardInput, nineteenth, fiftieth, today, pedsRiskRowClass(pedsIds));
       // R2: nothing can be done before 19, so the adult card answers from today.
       const pastNineteen = adultAnswerPastNineteen(recs, adultAt19.recs, nineteenth);
       if (pastNineteen) {
@@ -4847,11 +4886,19 @@ export function recommendBeforeFold(input) {
         + (riskIds.length && !pedsIds.length ? ' — the condition ticked is one that only applies to adults' : '')));
       recs = pcvHealthyChild(am, pcv, ppsv, today,
         riskIds.some((id) => RISK_BY_ID[id]?.adultOnly),
-        // Nina (2026-11-07): a PCV20 given but recorded as an extra dose. Read
-        // off the walk's own verdicts, never re-judged here.
-        pcvAnalysis.perDose.some((d, i) => d.extraDose && pcvAnalysis.doses[i]?.product === 'PCV20'));
+        // Leo, Nina and Kai (2026-11-07): the same patient, nothing more
+        // given, on the day they turn 50. Asked by the 5–18 card and, since
+        // Zoe (same day), by the 24–59-month complete card.
+        // Without the record problems (`forwardInput`): a PCV20 typed as next
+        // year took the line off 96 impossible entries until the prose diff
+        // caught it.
+        () => recommendBeforeFold({
+          ...forwardInput,
+          ageMonths: ROUTINE_ADULT_MIN_M,
+          today: addCalendarMonths(dob ?? today, dob ? ROUTINE_ADULT_MIN_M : ROUTINE_ADULT_MIN_M - am),
+        }).recs.every((r) => ASKS_FOR_NOTHING.has(r.status)));
       recs = reviewAdultRiskAtNineteen(recs, riskIds, () => recommendBeforeFold({
-        ...input, ageMonths: ADULT_SCHED_MIN_M,
+        ...forwardInput, ageMonths: ADULT_SCHED_MIN_M,
         today: addCalendarMonths(today, ADULT_SCHED_MIN_M - am),
       }).recs[0]);
     }
