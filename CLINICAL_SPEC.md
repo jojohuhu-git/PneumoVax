@@ -380,9 +380,19 @@ toddler keeps it. Wording and sources only; 0 verdicts. The grid reaches 12 of t
 with an adult-only tick, **0** with PCV20 — it cannot build Ava). Guard:
 `regression-2026-11-07-toddler-age-50-matches-baby.test.js`.
 
-**Noted, not put to her** (an unusual history): a healthy toddler given four PCV15 **and a
-PPSV23 she did not need** also reads *Complete (PCV15 + PPSV23)* at 50, and both the baby and
-toddler cards still carry the line for her. Neither ruling covered that history.
+**Nor once a PCV15 and a PPSV23 are on record (owner, 2026-11-07, Zoe, *"Drop it, like
+Kai"*).** **Zoe** — 2 years 3 months, healthy, PCV15 at 2, 4, 6 and 12 months and a PPSV23 at
+2 she did not need (her chip reads *extra*) — read *"Re-evaluate at age 50"*; run forward, at 50
+she reads *Complete (PCV15 + PPSV23)*. That is Kai's history (§B-5TO18) one card younger. The
+toddler card now asks the **same forward run to 50** as the 5–18 card, in place of its own
+"series includes PCV20" test, and keeps the line only when the adult card there asks for
+something; that run gives Ava's answer too. The adult-only limit stays, because a smoker's dose
+comes at 19 and a run to 50 cannot see it. Control: the same toddler with PCV13 instead is owed
+PCV20 or PCV21 at 50 and keeps the line. Measured over 2,178 hand-built healthy complete
+toddlers: 120 lost the line (every one PCV15 + a PPSV23), 0 gained it. The grid builds none of
+them (prose diff 0 of 35,280 lines; whole-app checks identical). **The baby card needs nothing:**
+a PPSV23 cannot count before age 2, so 0 of 567 hand-built babies differ. Wording and sources
+only; 0 verdicts. Guard: `regression-2026-11-07-zoe-toddler-pcv15-ppsv23-age-50.test.js`.
 
 ### §B-OPTIONB19 — Option B says what PPSV23 leads to at 19 (owner, 2026-11-07, "Cora")
 

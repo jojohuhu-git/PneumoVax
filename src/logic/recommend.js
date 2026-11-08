@@ -1848,7 +1848,14 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, fiftyAsk
       // so 50 is not the next event; an ADULT-only tick (smoking, alcohol use
       // disorder) is given a dose at 19, so "50" would name the wrong age.
       // Passed in, because `pedsRiskIds()` has already removed those ticks.
-      const reviewAt50 = !pcv.hasPCV20 && !adultOnlyTicked;
+      //
+      // OWNER RULING 2026-11-07, "Drop it, like Kai" (§B-50BABY, Zoe: 2,
+      // healthy, PCV15 at 2, 4, 6 and 12 months and an unneeded PPSV23 at 2).
+      // At 50 she reads "Complete (PCV15 + PPSV23)", which a PCV20 test cannot
+      // see. So the first limit is now the 5–18 card's forward run to 50 — the
+      // adult card's own answer — which gives Ava's answer too. The adult-only
+      // limit stays: a smoker's dose comes at 19, which a run to 50 misses.
+      const reviewAt50 = !adultOnlyTicked && !fiftyAsksForNothing();
       // Same ruling, second half ("Yes, under Why this"): where the line stays,
       // it sits in `detail`, as on the baby card — not on the opened card.
       const lead = `Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]${jobAidEndsItHere ? ' [c]' : ''}. (A series that includes PCV20 also needs no PPSV23.)`;
@@ -4880,7 +4887,8 @@ export function recommendBeforeFold(input) {
       recs = pcvHealthyChild(am, pcv, ppsv, today,
         riskIds.some((id) => RISK_BY_ID[id]?.adultOnly),
         // Leo, Nina and Kai (2026-11-07): the same patient, nothing more
-        // given, on the day they turn 50. Asked only by the 5–18 card.
+        // given, on the day they turn 50. Asked by the 5–18 card and, since
+        // Zoe (same day), by the 24–59-month complete card.
         // Without the record problems (`forwardInput`): a PCV20 typed as next
         // year took the line off 96 impossible entries until the prose diff
         // caught it.
