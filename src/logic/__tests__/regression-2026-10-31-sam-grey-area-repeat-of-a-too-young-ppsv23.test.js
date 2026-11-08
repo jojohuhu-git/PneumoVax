@@ -59,7 +59,8 @@ describe('Sam', () => {
   it('the chip under the Jan 5 dose names the grey area, and no longer promises a PPSV23 from Mar 2', () => {
     const chip = out.perDose.ppsv23[1].reasons.join(' ');
     expect(chip).toContain(`Grey area: CDC says a dose given under the minimum age is repeated on or after that age, and states no gap from the invalid dose for a vaccine that is not live. ACIP does not address this case. ${GREY}`);
-    expect(chip).toContain('Not repeated.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(chip).not.toMatch(/Repeat this dose|restart/i);
     expect(chip).not.toContain('Mar 2, 2025');
   });
 });

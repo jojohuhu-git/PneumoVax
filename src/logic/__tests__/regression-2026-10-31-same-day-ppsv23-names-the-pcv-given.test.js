@@ -28,7 +28,7 @@ describe('the sentence names the product given', () => {
   it('PCV13: names PCV13, not PCV15', () => {
     const r = sameDay('PCV13');
     expect(r.status).toBe('invalid');
-    expect(r.reasons[0]).toBe('Same day as PCV; minimum interval 8 weeks.');
+    expect(r.reasons[0]).toBe('Same day as PCV. Minimum interval 8 weeks.');
     expect(r.detail).toContain('Given on the same day as a PCV13 dose.');
   });
 

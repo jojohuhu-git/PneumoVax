@@ -64,8 +64,9 @@ describe('Ivy at 20 with a PCV15 — the patient she was shown', () => {
 
   it('her second chip says it is not repeated', () => {
     const [first, second] = run(IVY_20).perDose.ppsv23.map((x) => x.reasons);
-    expect(first[1]).toBe('Repeated on Sep 1, 2007; see that dose.');
-    expect(second[1]).toBe('Not repeated.');
+    expect(first[1]).toBe('Repeated on Sep 1, 2007. See that dose.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(second[1]).toBeUndefined();
   });
 });
 

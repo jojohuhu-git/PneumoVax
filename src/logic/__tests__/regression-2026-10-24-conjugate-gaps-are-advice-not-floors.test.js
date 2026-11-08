@@ -123,8 +123,8 @@ describe('§K-CONJUGATE — patient A: PCV13 then PCV20 seven months later', () 
     // The owner, reading patient C: *"the 5 years isn't being met right?"*
     // A chip that recites the interval without saying this patient fell
     // short of it leaves the reader to do the subtraction.
-    expect(text).toContain('shorter than the 1 year CDC advises');
-    expect(text).toContain('**Counted; no repeat indicated.**');
+    expect(text).toContain('CDC recommends 1 year');
+    expect(text).not.toContain('**');
     // Short enough to read at a glance — the whole point of the request.
     expect(text.length).toBeLessThan(130);
   });
@@ -132,9 +132,9 @@ describe('§K-CONJUGATE — patient A: PCV13 then PCV20 seven months later', () 
   it('keeps the data-free caveat, behind the disclosure', () => {
     const why = (lastPcv(PATIENT_A).whys ?? []).join(' ');
     expect(why).toContain('recommended timing, not a minimum');
-    expect(why).toContain('does not direct that a dose given inside it be repeated');
-    expect(why).toContain('Immunogenicity at shorter intervals has not been established');
-    expect(why).toContain('clinical judgement');
+    expect(why).toContain('does not say to repeat a dose given sooner');
+    expect(why).toContain('Responses at shorter intervals are unknown');
+    expect(why).toContain('clinical judgment');
   });
 });
 
@@ -153,10 +153,11 @@ describe('§K-CONJUGATE — patient B: a conjugate after a conjugate, PPSV23 lon
     // is asserting something no document says.
     const d = lastPcv(PATIENT_B);
     const why = (d.whys ?? []).join(' ');
-    expect(why).toContain('No ACIP or CDC source specifies an interval between adult conjugate doses');
-    expect(why).toContain('this app’s own convention');
-    // The chip line is bolded and must never ATTRIBUTE the interval.
-    expect(d.reasons[0]).toMatch(/\*\*/);
+    expect(why).toContain('No ACIP or CDC source gives an interval between adult conjugate doses');
+    expect(why).toContain("this app's own spacing");
+    // The chip line must never ATTRIBUTE the interval. (§M-L3: it is no
+    // longer bolded; the decision is the label's.)
+    expect(d.reasons[0]).toMatch(/This app recommends/);
     expect(d.reasons.join(' ')).not.toMatch(/CDC advises/);
     expect(why).not.toMatch(/CDC advises at least 1 year between conjugate doses/);
   });
@@ -181,7 +182,7 @@ describe('§K-CONJUGATE — patient C: inside two advised gaps, told about both'
     expect(r).toHaveLength(2);
     expect(r[0]).toContain('previous conjugate dose of Jan 15, 2026');
     expect(r[1]).toContain('PPSV23 dose of Jun 1, 2024');
-    expect(r[1]).toContain('shorter than the 5 years ACIP advises');
+    expect(r[1]).toContain('ACIP recommends 5 years');
     // ...and one rationale behind the disclosure for each.
     expect(lastPcv(PATIENT_C).whys).toHaveLength(2);
   });

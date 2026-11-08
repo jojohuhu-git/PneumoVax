@@ -12,6 +12,7 @@ import { sentencesOf, foldCard, STAY_IN_VIEW } from '../noteFold.js';
 import { buildCases } from '../../test-grid.js';
 import { noteCiteSlices } from '../../components/citations.jsx';
 import { populationOf } from '../../data/riskFactors.js';
+import { doseChipLabel } from '../../components/doseChipLabel.js';
 
 const TODAY = '2026-11-06';
 const CASES = buildCases();
@@ -176,14 +177,16 @@ describe('WORD-1 — the fold loses nothing', () => {
 
 describe('WORD-1 — under a recorded dose', () => {
   it('every invalid dose still states an action, without a click', () => {
-    const ACTION = /Not repeated|Repeat this dose only|Repeated on|Give .* instead|Give a further dose|A further dose can be given|Do not repeat|check the record|Next dose from|not a dose|does not count|cannot be counted|future|before birth/i;
+    // §M-L3 (2026-11-08): the action moved into the dose's LABEL ("Not counted —
+    // repeat" / "do not repeat" / "Check the date"), which shows without a click.
+    const ACTION = /^Not counted — (repeat|do not repeat)|^Check the date|Not repeated|Repeat this dose only|Repeated on|Give .* instead|Give a further dose|A further dose can be given|Do not repeat|check the record|Next dose from|not a dose|does not count|cannot be counted|future|before birth/i;
     let invalid = 0;
     const silent = [];
     for (const { c, out } of everyone) {
       for (const d of [...out.perDose.pcv, ...out.perDose.ppsv23]) {
         if (d.status !== 'invalid') continue;
         invalid += 1;
-        if (!ACTION.test((d.reasons ?? []).join(' '))) silent.push(`${c.key}: ${(d.reasons ?? []).join(' / ')}`);
+        if (!ACTION.test(`${doseChipLabel(d, null)} ${(d.reasons ?? []).join(' ')}`)) silent.push(`${c.key}: ${(d.reasons ?? []).join(' / ')}`);
       }
     }
     expect(invalid).toBeGreaterThan(10000);
@@ -194,8 +197,9 @@ describe('WORD-1 — under a recorded dose', () => {
     const out = recommend({ dob: '2021-11-06', ageMonths: 60, today: TODAY, riskIds: ['asplenia'],
       pcvDoses: [{ product: 'PCV13', date: '2025-11-06' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-11-06' }] });
     const reasons = out.perDose.ppsv23[0].reasons;
-    expect(reasons[0]).toBe('Same day as PCV; minimum interval 8 weeks.');
-    expect(reasons[1]).toMatch(/^Not repeated\. Next dose from .* at the earliest\.$/);
+    expect(reasons[0]).toBe('Same day as PCV. Minimum interval 8 weeks.');
+    expect(reasons[1]).toMatch(/^Next dose from .* at the earliest\.$/);
+    expect(doseChipLabel(out.perDose.ppsv23[0], null)).toBe('Not counted — do not repeat');
   });
 
   it('the shortened line never says "due": it names the earliest date (2026-10-24)', () => {
@@ -226,6 +230,10 @@ describe('WORD-1 — visible words cannot creep back up', () => {
     const worst = totals[totals.length - 1];
     // 64 → 65 at p90, 2026-11-07: Cora's line on Option B (P2-4 / R6), kept in
     // view by her ruling — it is the difference between the two options.
-    expect({ p90, worst }).toEqual({ p90: 65, worst: 164 });
+    // 65 → 64 at p90, 2026-11-08 (§M-L2): a healthy adult's second PPSV23
+    // line is shorter. A FALL; a rise still needs a reason.
+    // 64 → 56 at p90 and 164 → 155 worst, 2026-11-08 (§M-L3): dose lines lost
+    // the words their new labels now say. A FALL; a rise still needs a reason.
+    expect({ p90, worst }).toEqual({ p90: 56, worst: 155 });
   });
 });

@@ -32,13 +32,13 @@ const ADULT_25 = {
 describe('the patients she was shown', () => {
   it('Leo at 19: his 2016 PPSV23 points to his 2021 dose, and no longer promises Dec 27, 2016', () => {
     const chip = firstChip(LEO_AT_19);
-    expect(chip[1]).toBe('Repeated on Oct 30, 2021; see that dose.');
+    expect(chip[1]).toBe('Repeated on Oct 30, 2021. See that dose.');
     expect(chip.join(' ')).not.toContain('Dec 27, 2016');
     expect(recommend(LEO_AT_19).perDose.ppsv23[0].forwardLookingReason).toBeNull();
   });
 
   it('the 25-year-old: his too-young PPSV23 points to the repeat at age 2', () => {
-    expect(firstChip(ADULT_25)[1]).toBe('Repeated on Feb 1, 2004; see that dose.');
+    expect(firstChip(ADULT_25)[1]).toBe('Repeated on Feb 1, 2004. See that dose.');
   });
 
   it('Leo reads the same at 18 and at 19', () => {
@@ -56,6 +56,6 @@ describe('what does not move', () => {
 
   it('an adult with ONE thrown-out childhood PPSV23 keeps "repeat this dose only"', () => {
     expect(firstChip({ ...ADULT_25, ppsv23Doses: d('PPSV23', ['2003-02-01']) }))
-      .toContain('Repeat this dose only. Do not restart the series.');
+      .toContain('Do not restart the series.');
   });
 });

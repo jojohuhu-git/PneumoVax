@@ -34,8 +34,9 @@ describe('Ivy at 20 — the patient she was shown', () => {
 
   it('her second chip says it is not repeated; her first still points to the second', () => {
     const [first, second] = chips(IVY_20);
-    expect(first[1]).toBe('Repeated on Sep 1, 2007; see that dose.');
-    expect(second[1]).toBe('Not repeated.');
+    expect(first[1]).toBe('Repeated on Sep 1, 2007. See that dose.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(second[1]).toBeUndefined();
   });
 
   it('nothing else moves: same status, due today, no PPSV23 card', () => {
@@ -74,7 +75,7 @@ describe('her ruling, at every adult age', () => {
     // The grey-area sentence carries two CDC citations of its own.
     expect(r.noteCites.map((c) => c.key)).toEqual(expect.arrayContaining(['cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days']));
     expect(r.noteCites).toHaveLength(`${r.note.lead} ${r.note.detail}`.split('[c]').length - 1);
-    expect(chips(p)[1][1]).toContain('Not repeated. Grey area:');
+    expect(chips(p)[1][1]).toMatch(/^Grey area:/);
   });
 });
 

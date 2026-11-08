@@ -81,8 +81,8 @@ describe('her worked child, and the sentence she should see', () => {
     expect(chip.status).toBe('invalid');
     // the half that is about the dose already given SURVIVES — it still does
     // not count, and it is still not repeated
-    expect(textOf(chip)).toContain('Not repeated');
-    expect(textOf(chip)).toContain('Not repeated.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(chip.disposition).toBe('no-repeat');
     // and the forward-looking half, with its date, is gone
     expect(textOf(chip)).not.toContain(FORWARD);
     expect(textOf(chip)).not.toMatch(/\d{4}-\d{2}-\d{2} at the earliest/);
@@ -134,7 +134,7 @@ describe('the boundary: a patient who IS owed something keeps her date', () => {
       // Counted now, with the shortfall stated — her Ruling F wording.
       expect(chip.status).toBe('valid');
       expect(chip.earlyAdvisory).toBe(true);
-      expect(textOf(chip)).toContain('Counted; no further PPSV23 indicated.');
+      expect(chip.disposition).toBe('counted-early');
       // No rejected dose, so no forward-looking clause and no second date.
       expect(chip.forwardLookingReason).toBeUndefined();
       expect(textOf(chip)).not.toContain(FORWARD);
@@ -250,8 +250,7 @@ describe('swept over the grid', () => {
       let out; try { out = recommend(c.input); } catch { continue; }
       for (const d of chipsOf(out).filter((x) => x.forwardLookingReason)) {
         seen++;
-        expect(textOf(d)).toContain('Not repeated');
-        expect(textOf(d)).toContain('Not repeated');
+        expect(d.disposition).toBe('no-repeat');
       }
     }
     // anti-vacuity: the sweep above is worthless if nothing matches

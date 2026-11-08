@@ -50,15 +50,17 @@ function renderWithDose(result) {
 }
 
 describe('S3-N1 — the chip', () => {
-  it('an off-window dose still shows its dose number, not "Invalid"', () => {
+  // §DOSE-LABELS (OWNER DECISION 2026-11-08, superseding S14-2's "the chip
+  // never distinguishes an early dose"): an early dose that counts says so.
+  it('an off-window dose reads "Counted — given early, accepted", not "Invalid"', () => {
     renderWithDose({
       status: 'valid',
       earlyAdvisory: true,
       effectiveDoseNum: 2,
       reasons: ['Given less than a year after the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts — no repeat is needed.'],
     });
-    expect(screen.getByText('Dose 2')).toBeInTheDocument();
-    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(screen.getByText('Counted — given early, accepted')).toBeInTheDocument();
+    expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
   });
 
   it('is not struck through or dimmed like a dropped dose, and reads the plain valid color', () => {
@@ -127,10 +129,10 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
       { product: 'PCV15', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/CDC advises ≥1 year/i)).toBeInTheDocument();
+    expect(screen.getByText(/CDC recommends at least 1 year/i)).toBeInTheDocument();
     // Still counted, not dropped, not relabeled as an error.
-    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
-    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
   });
 
@@ -146,19 +148,20 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
       { product: 'PCV20', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/shorter than the 1 year CDC advises/i)).toBeInTheDocument();
+    expect(screen.getByText(/CDC recommends 1 year/i)).toBeInTheDocument();
 
     // THE BOLD IS THE OWNER'S REQUIREMENT, SO IT IS ASSERTED ON THE RENDERED
     // DOM, not on the string the engine produced. `**...**` in a reason is
     // turned into <strong class="note-emphasis"> by renderNoteWithCites;
     // a reason rendered as a bare string would print literal asterisks.
-    const bold = [...container.querySelectorAll('.note-emphasis')].map((n) => n.textContent).join(' ');
-    expect(bold).toMatch(/Counted; no repeat indicated/);
+    // §M-L3 (2026-11-08): the bolded "Counted; no repeat indicated" is now the
+    // dose's label, "Counted — given early, accepted" — the decision, shown first.
+    expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
     expect(container.textContent).not.toMatch(/\*\*/);
 
     // Counted, numbered, not struck through, not an error.
-    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
-    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
 
     // No repeat date, and no claim of the owner determination it no longer
@@ -178,7 +181,7 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     ]} />);
     openEveryCard(container);
 
-    const RATIONALE = /Immunogenicity at shorter intervals has not been established/i;
+    const RATIONALE = /Responses at shorter intervals are unknown/i;
     expect(screen.queryByText(RATIONALE)).not.toBeInTheDocument();
 
     const toggle = screen.getByTestId('dose-val-toggle');

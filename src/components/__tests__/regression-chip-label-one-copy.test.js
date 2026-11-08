@@ -14,11 +14,17 @@ const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 
 describe('the chip label lives in one module', () => {
   // The literals no file outside doseChipLabel.js may spell out for itself.
+  // §DOSE-LABELS (2026-11-08): the owner's closed list.
   const OWNED = [
-    'Not counted',
-    'Invalid',
-    'Extra dose — more than this series needs',
-    'Extra dose? — no date recorded',
+    'Counted — given early, accepted',
+    'Counted — not needed. No more PPSV23.',
+    'Counted — product not recorded',
+    'Counted — date not recorded',
+    'Not counted — Extra. Do not repeat.',
+    'Not counted — repeat',
+    'Not counted — do not repeat',
+    'Not counted — PCV7',
+    'Check the date',
   ];
 
   const CONSUMERS = [
@@ -48,21 +54,15 @@ describe('the chip label lives in one module', () => {
   }
 });
 
-describe('doseChipLabel branches', () => {
-  // S14-6: reuses MeningoVax's own wording — PCV7 never counts, so a dose IS
-  // genuinely owed (high-risk patients are treated as PCV-naïve for these
-  // doses), the same shape as MeningoVax's "off-window - repeat" meaning.
-  it('noncounting (PCV7) outranks everything else', () => {
-    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: 1 }, 2)).toBe('Not counted');
+describe('doseChipLabel branches (§DOSE-LABELS, owner decision 2026-11-08)', () => {
+  it('PCV7 outranks everything else', () => {
+    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: 1 }, 2)).toBe('Not counted — PCV7');
   });
 
-  // S14-2 (owner decision 2026-10-11): the chip no longer distinguishes an
-  // on-time dose from one given sooner than CDC advises — that word pair is
-  // gone, win or lose the `earlyAdvisory` flag. A valid dose always reads its
-  // count; timing lives in the reasons text (see validate.js, RecCard.jsx).
-  it('a valid dose within the total reads "Dose N of M", with or without earlyAdvisory', () => {
+  it('an on-time dose reads "Dose N of M", an early one that counts says so', () => {
     expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2 }, 2)).toBe('Dose 2 of 2');
-    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2, earlyAdvisory: true }, 2)).toBe('Dose 2 of 2');
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2, earlyAdvisory: true }, 2)).toBe('Counted — given early, accepted (dose 2 of 2)');
+    expect(doseChipLabel({ status: 'valid', effectiveDoseNum: 2, earlyAdvisory: true }, null)).toBe('Counted — given early, accepted');
   });
 
   it('a valid dose with no tracked series total reads "Dose N"', () => {
@@ -75,20 +75,30 @@ describe('doseChipLabel branches', () => {
     expect(label).not.toMatch(/\d/);
   });
 
-  it('invalid and unknown', () => {
-    expect(doseChipLabel({ status: 'invalid' })).toBe('Invalid');
+  it('invalid: repeated unless thrown out for timing, not needed, or not repeated by the card', () => {
+    expect(doseChipLabel({ status: 'invalid' })).toBe('Not counted — repeat');
+    expect(doseChipLabel({ status: 'invalid', intervalRuleId: 'X' })).toBe('Not counted — do not repeat');
+    expect(doseChipLabel({ status: 'invalid', notNeeded: true })).toBe('Not counted — do not repeat');
+    expect(doseChipLabel({ status: 'invalid', notRepeated: true })).toBe('Not counted — do not repeat');
+    expect(doseChipLabel({ status: 'invalid', intervalRuleId: 'X', repeatedOn: '2020-01-01' })).toBe('Not counted — repeat');
+    expect(doseChipLabel({ status: 'invalid', recordProblem: 'future' })).toBe('Check the date');
     expect(doseChipLabel({ status: 'whatever' })).toBe('Unknown');
     expect(doseChipLabel(null)).toBeNull();
+  });
+
+  it('counted without a product, or without a date', () => {
+    expect(doseChipLabel({ status: 'unknown', effectiveDoseNum: 1 }, null)).toBe('Counted — product not recorded');
+    expect(doseChipLabel({ status: 'unknown', effectiveDoseNum: 1, undated: true }, null)).toBe('Counted — date not recorded');
   });
 
   // S14-4: a dose recorded after the series was already complete by product.
   it('an extra dose outranks the numbered-count branches', () => {
     expect(doseChipLabel({ status: 'valid', effectiveDoseNum: null, extraDose: true }, 2))
-      .toBe('Extra dose — more than this series needs');
+      .toBe('Not counted — Extra. Do not repeat.');
   });
 
   it('an undated extra dose asks rather than asserts', () => {
     expect(doseChipLabel({ status: 'unknown', effectiveDoseNum: null, extraDose: true, extraDoseUnverified: true }, 2))
-      .toBe('Extra dose? — no date recorded');
+      .toBe('Check the date — none recorded');
   });
 });

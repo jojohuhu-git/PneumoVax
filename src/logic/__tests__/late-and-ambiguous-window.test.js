@@ -55,7 +55,7 @@ describe('Ambiguous window — PCV before age 6 (72mo) + PPSV23 = complete', () 
   it('CONTRAST: a PCV13 dose given at/after 72 months → NOT complete (PCV20 due)', () => {
     const r = run({
       ...PATIENT,
-      // PCV13 given at ~7 years (after 72mo) instead of 2y10m.
+      // PCV13 given at about 7 years (after 72mo) instead of 2y10m.
       pcvDoses: [{ product: 'PCV13', date: '2014-11-02' }],
     });
     expect(pcv(r).status).not.toBe('complete');

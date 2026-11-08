@@ -228,9 +228,9 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
         .find((d) => d.earlyAdvisory);
       expect(chip.whys?.length).toBeGreaterThan(0);
       expect(chip.whys.join(' ').length).toBeGreaterThan(80);
-      // and the shortfall itself is still bolded on the chip, which is the
-      // emphasis this whole file is about
-      expect(chip.reasons.join(' ')).toMatch(/\*\*Counted;[^*]+\*\*/);
+      // §M-L3 (2026-11-08): the bolded "Counted; ..." moved into the dose's
+      // label ("Counted — given early, accepted"), which is the decision.
+      expect(chip.disposition).toBe('counted-early');
     }
   });
 });
@@ -243,9 +243,14 @@ describe('a dose CHIP renders emphasis too — the owner\'s second-PPSV23 altern
   // printed a literal `**` to a clinician. Nothing in the suite covered it:
   // the renderer tests call `renderNoteWithCites` directly, and the card tests
   // only look at rec notes.
-  const SECOND_PPSV23 = analyzeHistory(
+  // §M-L2 (2026-11-08): this healthy 81-year-old's second PPSV23 now reads
+  // "Counted — not needed", and its line carries no bold. The defect guarded
+  // here is the RENDERER's (a raw `**` reaching a clinician), so the emphasis
+  // is added to the engine's own dose by hand, keeping every other field real.
+  const ENGINE_DOSE = analyzeHistory(
     'PPSV23', [{ date: '2015-01-01' }, { date: '2018-01-01' }], 840, '2026-06-01', '1945-01-01',
   ).perDose[1];
+  const SECOND_PPSV23 = { ...ENGINE_DOSE, reasons: [...ENGINE_DOSE.reasons, '**Counted; never give a third.**'] };
 
   const renderChip = () => render(
     <RecCard
@@ -294,7 +299,7 @@ describe('a dose CHIP renders emphasis too — the owner\'s second-PPSV23 altern
     // The owner's own alternative, verbatim from the rule's rationale. It left
     // the bolded span but it did not leave the card.
     expect(document.body.textContent)
-      .toContain('the next dose is a conjugate — PCV20 or PCV21');
+      .toContain('If more protection is needed, the next dose is PCV20 or PCV21.');
     expect(document.body.textContent).not.toContain('*');
   });
 });

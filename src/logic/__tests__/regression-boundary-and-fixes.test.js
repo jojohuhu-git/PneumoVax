@@ -141,7 +141,7 @@ describe('H5 – boosterGiven requires a dose given AT ≥12mo', () => {
 // ════════════════════════════════════════════════════════════════════════════
 describe('M1 – catch-up target accounts for age-at-prior-dose', () => {
   it('Required scenario 7: 13mo, 1 PCV20 at 2mo → "2 more doses" (target 3 or 4, not 2)', () => {
-    // 1 dose given at ~2mo (before 12mo). Child now 13mo.
+    // 1 dose given at about 2mo (before 12mo). Child now 13mo.
     // Should still need ≥2 more doses (remaining primary + booster).
     const r = run({
       ageMonths: 13,

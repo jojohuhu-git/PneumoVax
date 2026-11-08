@@ -88,6 +88,9 @@ src/
     riskAgeNote.js       Whether a ticked adult-only risk needs explaining at this age,
                          and the cited sentence that does it. Keyed to
                          ADULT_SCHED_MIN_M (228), matching the engine's dispatch.
+    doseDisposition.js   doseDisposition(v) → one of DISPOSITIONS; recommend() stamps it on every
+                         recorded dose as its last step. doseChipLabel.js turns it into words.
+                         CLINICAL_SPEC.md §M.
     validate.js          analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob,
                          riskIds }) → { pcv: {perDose, effective, doses}, ppsv23: {…} }.
                          ⚠ THE ENGINE'S ENTRY POINT — use this, not two analyzeHistory

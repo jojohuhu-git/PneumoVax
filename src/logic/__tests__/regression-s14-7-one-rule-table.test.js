@@ -34,6 +34,7 @@ import {
 } from '../doseIntervalRules.js';
 import { PPSV23_REVACC_MIN_MONTHS } from '../intervals.js';
 import { addCalendarMonths, addDays } from '../dateUtils.js';
+import { doseDisposition } from '../doseDisposition.js';
 
 const TODAY = '2026-10-11';
 const ADULT = { ageMonths: 840, dob: '1956-10-11' };   // 70y
@@ -73,7 +74,7 @@ describe('S14-7 symptom 1 — PCV15 and PPSV23 on the same day', () => {
       // The whole point of S14-7: not silent. One sentence naming the gap,
       // and a rationale behind "Why this".
       expect(a.perDose[0].reasons.join(' ')).toMatch(/on the same day as/);
-      expect(a.perDose[0].reasons.join(' ')).toMatch(/Counted/);
+      expect(doseDisposition(a.perDose[0])).toBe('counted-early');
       expect(a.perDose[0].whys.length).toBeGreaterThan(0);
     }
   });
@@ -112,7 +113,7 @@ describe('S14-7 symptom 2 — PCV15 then PPSV23 two weeks later', () => {
 
     const short = ppsvAfter(pcv, tenWeeks, ADULT, ['diabetes']).perDose[0];
     expect(short.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
-    expect(short.reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(short.reasons.join(' ')).toMatch(/recommends 1 year/);
   });
 });
 
@@ -133,12 +134,12 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
     expect(nonIC.status).toBe('valid');
     expect(nonIC.extraDose).toBe(true);
     expect(nonIC.effectiveDoseNum).toBeNull();
-    expect(nonIC.reasons.join(' ')).toMatch(/^Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition/);
+    expect(nonIC.reasons.join(' ')).toMatch(/^First PPSV23 given/);
     // Asplenia — her ruling of 2026-10-29: count it, never a third.
     const ic = ppsvAfter([], twoYears, CHILD13, ['asplenia']).perDose[1];
     expect(ic.status).toBe('valid');
     expect(ic.effectiveDoseNum).toBe(2);
-    expect(ic.reasons.join(' ')).toMatch(/5 years advised.*never give a third/i);
+    expect(ic.reasons.join(' ')).toMatch(/\. 5 years recommended\.$/);
   });
 
   // ⚠️ THE HEADLINE CASE, AND IT STILL HOLDS WHERE IT MATTERS. Before S14-7
@@ -153,8 +154,13 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
     expect(a.perDose[1].effectiveDoseNum).toBe(2);
     expect(a.effective).toHaveLength(2);
     expect(a.perDose[1].reasons.length).toBeGreaterThan(0);
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/5 years advised/);
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/never give a third/i);
+    // §M-L2: a healthy adult — the line names the gap and says one was enough.
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/Given 2 years after the PPSV23 of .*Only one PPSV23 is recommended/);
+    expect(a.perDose[1].notNeeded).toBe(true);
+    // An adult in one of ACIP's three groups reads the recommended gap instead.
+    const hiv = ppsvAfter([], twoYears, ADULT, ['hiv']).perDose[1];
+    expect(hiv.reasons.join(' ')).toMatch(/5 years recommended\./);
+    expect(hiv.notNeeded).toBeUndefined();
   });
 
   // The two ages are now the same KIND of answer — both recommendations, so
@@ -164,14 +170,14 @@ describe('S14-7 symptom 3 — the silent one: a second PPSV23 two years after th
   // (2026-10-30) the child row was a floor with a `detail` and no `whys`.
   it('both versions are advice now, each citing its own schedule', () => {
     const adult = ppsvAfter([], twoYears, ADULT).perDose[1];
-    expect(adult.whys.join(' ')).toMatch(/lower with repeat|responses to a repeat PPSV23 were lower/i);
+    expect(adult.whys.join(' ')).toMatch(/gives lower responses to some serotypes/i);
     expect(adult.whys.join(' ')).toMatch(/rr7203a1/);
     expect(adult.detail ?? '').not.toMatch(/owner clinical determination/i);
 
     const child = ppsvAfter([], twoYears, CHILD13, ['asplenia']).perDose[1];
     expect(child.status).toBe('valid');
     expect(child.detail).toBeUndefined();
-    expect(child.whys.join(' ')).toMatch(/^CDC's child schedule gives an immunocompromised child a second PPSV23 at least 5 years after the first, and never a third/);
+    expect(child.whys.join(' ')).toMatch(/^CDC gives an immunocompromised child a second PPSV23 at least 5 years after the first, and no third/);
     expect(child.whys.join(' ')).not.toMatch(/rr7203a1/);
   });
 
@@ -204,11 +210,13 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     expect(a.perDose[1].status).toBe('valid');
     expect(a.perDose[1].earlyAdvisory).toBe(true);
     expect(a.perDose[1].intervalRuleId).toBe('ADULT-PCV20-21-5Y-AFTER-PPSV23');
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 5 years ACIP advises/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/ACIP recommends 5 years/);
     // The note must say the dose counts, and must NOT claim the owner
     // enforces the gap — she no longer does, and the row now credits CDC.
     // (2026-10-24: "still counts" moved into the short "Counted" wording.)
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/Counted; no repeat indicated/);
+    // §M-L3 (2026-11-08): the decision ("counted") is the label's now, so the line
+    // gives only the gap. The label is checked through `disposition`.
+    expect(doseDisposition(a.perDose[1])).toBe('counted-early');
     expect((a.perDose[1].whys ?? []).join(' ')).toMatch(/at least 5 years/);
     expect(a.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
@@ -232,8 +240,8 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     const a = analyzeHistory('PCV', [{ date: '2026-03-01', product: 'PCV20' }],
       who.ageMonths, TODAY, who.dob, { ppsv23Doses: [{ date: '2026-01-01' }] });
     expect(a.perDose[0].status).toBe('valid');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
-    expect(a.perDose[0].whys.join(' ')).toMatch(/blunted/);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/recommends 1 year/);
+    expect(a.perDose[0].whys.join(' ')).toMatch(/weaker after a recent PPSV23 but not absent/);
   });
 
   // ⚠️ REVERSED BY OWNER RULING 2026-10-25 — counts, with the shortfall named.
@@ -241,7 +249,7 @@ describe('S14-7 — the adult gaps that nothing used to check', () => {
     const who = { ageMonths: 68 * 12, dob: '1958-05-01' };
     const a = ppsvAfter([], ['2021-06-01', '2024-06-01'], who);
     expect(a.perDose[1].status).toBe('valid');
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/5 years advised/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/Given 3 years after the PPSV23 of .*Only one PPSV23 is recommended/);
   });
 
   // ⚠️ REVERSED BY OWNER RULING 2026-10-25. Nothing is dropped any more, so
@@ -456,18 +464,18 @@ describe('S10-N1 — the PCV21 age message names the age at the dose', () => {
     expect(a.effective).toHaveLength(0);
   });
 
-  it('a 10-year-old\'s PCV21 dated at 9 says "given at ~9 years", not "currently ~10"', () => {
+  it('a 10-year-old\'s PCV21 dated at 9 says "given at about 9 years", not "currently ~10"', () => {
     // Dose date exactly on the 9th birthday, so the age reads as whole years.
     const a = analyzeHistory('PCV', [{ product: 'PCV21', date: '2025-05-01' }],
       10 * 12, TODAY, '2016-05-01');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/given at ~9 years/i);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/given at about 9 years/i);
     expect(a.perDose[0].reasons.join(' ')).not.toMatch(/currently/i);
-    expect(a.perDose[0].detail).toMatch(/Age at administration: ~9 years/);
+    expect(a.perDose[0].detail).toMatch(/Age at administration: about 9 years/);
   });
 
   it('an UNDATED PCV21 still falls back to current age, and says that is what it is', () => {
     const a = analyzeHistory('PCV', [{ product: 'PCV21' }], 10 * 12, TODAY, '2016-05-01');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/currently ~10 years/i);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/about 10 years now/i);
     expect(a.perDose[0].detail).toMatch(/upper bound/i);
   });
 });
@@ -526,7 +534,7 @@ describe('S14-7 — evaluateDoseInterval, directly', () => {
     });
     expect(v.kind).toBe('recommendation');
     expect(v.ruleId).toBe('CHILD-PPSV23-AFTER-PPSV23');
-    expect(v.reasons[0]).toContain('**Counted; never give a third.**');
+    expect(v.reasons[0]).toMatch(/\. 5 years recommended\.$/);
   });
 
   // OWNER DECISION 2026-10-24, §K-CONJUGATE. The PCV13 → PCV20 pair that used

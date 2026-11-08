@@ -67,7 +67,7 @@ describe('S14-4C UI — a same-visit PPSV23 reads the same as one given a day la
   it('the chip reads "Extra dose", not "Dose 1"', () => {
     render(<Harness initial={ONE_VISIT} />);
     openTheCard();
-    const chip = screen.getByText('Extra dose — more than this series needs');
+    const chip = screen.getByText('Not counted — Extra. Do not repeat.');
     expect(chip.className).toMatch(/dose-val-offwindow/);
     expect(chip.className).not.toMatch(/dose-val-invalid/);
   });
@@ -76,14 +76,14 @@ describe('S14-4C UI — a same-visit PPSV23 reads the same as one given a day la
     render(<Harness initial={ONE_VISIT} />);
     openTheCard();
     expect(screen.getByText(
-      /Given at the same visit as the .*PCV20.*no PPSV23 was needed, and this dose does not add to the series/
+      /Given at the same visit as .*PCV20.*which completes the adult series on its own/
     )).toBeTruthy();
   });
 
   it('it never says "after" about two doses carrying one date', () => {
     render(<Harness initial={ONE_VISIT} />);
     openTheCard();
-    expect(screen.queryByText(/Series already complete with/)).toBeNull();
+    expect(screen.queryByText(/The series was already complete with/)).toBeNull();
   });
 
   it('it no longer advises a 1-year gap for a dose no interval would have fixed', () => {
@@ -101,6 +101,6 @@ describe('S14-4C UI — a same-visit PPSV23 reads the same as one given a day la
     expect(engine.perDose.ppsv23[0].effectiveDoseNum).toBe(1);
     render(<Harness initial={PPSV23_WAS_OWED} />);
     openTheCard();
-    expect(screen.queryByText('Extra dose — more than this series needs')).toBeNull();
+    expect(screen.queryByText('Not counted — Extra. Do not repeat.')).toBeNull();
   });
 });

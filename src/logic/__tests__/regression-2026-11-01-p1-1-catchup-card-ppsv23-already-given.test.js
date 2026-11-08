@@ -4,7 +4,7 @@
 // used to complete, add PPSV23 ≥8 weeks after the last PCV" — even for a child
 // who had ALREADY had a PPSV23 that counted. G01: 4, no spleen, PPSV23 at 3,
 // never a PCV. Following the card gave her a second PPSV23 15 months after the
-// first, which the app itself then graded "shorter than the 5 years advised".
+// first, which the app itself then graded "recommends 5 years advised".
 // And no immunocompromised child's card said a dose was owed 5 years on,
 // which the app asked for at the very next visit.
 //

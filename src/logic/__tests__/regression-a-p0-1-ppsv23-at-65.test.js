@@ -127,7 +127,7 @@ describe('A-P0-1 — patients with no date of birth keep the honest approximatio
   });
 
   it('years/months entry still decides, without a birthday to compare against', () => {
-    // 68 years old, PPSV23 four years ago -> given at ~64, under 65.
+    // 68 years old, PPSV23 four years ago -> given at about 64, under 65.
     const s = statusFor({ ageMonths: 816, ppsvDate: '2022-10-10' });
     expect(s).toBe('due');
   });

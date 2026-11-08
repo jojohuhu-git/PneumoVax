@@ -333,7 +333,7 @@ describe('a recorded-dose verdict says what it was judged against', () => {
     // 2026-10-24: the chip states the number tersely ("ACIP advises >=5
     // years") and the disclosure states it in full. The point of this test is
     // that ONE place computes the words, so both are checked against `noun`.
-    expect(late.reasons.join(' ')).toContain(`shorter than the ${noun} ACIP advises`);
+    expect(late.reasons.join(' ')).toContain(`ACIP recommends ${noun}.`);
     expect((late.whys ?? []).join(' ')).toContain(`at least ${noun}`);
     // The old floor sentence must not come back alongside the new one.
     expect(late.detail ?? '').not.toContain('gap is enforced');
@@ -345,7 +345,7 @@ describe('a recorded-dose verdict says what it was judged against', () => {
     const d = graded({ pcvProduct: 'PCV15', gapDays: 90, riskIds: ['hiv'] });
     const article = intervalArticle({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
     const adj = intervalPhraseAdj({ days: PCV_PPSV23_MIN_INTERVAL_DAYS });
-    const text = [d.reasons?.join(' '), d.detail, typeof d.intervalNote === 'string' ? d.intervalNote : ''].join(' ');
+    const text = [d.reasons?.join(' '), d.whys?.join(' '), d.detail, typeof d.intervalNote === 'string' ? d.intervalNote : ''].join(' ');
     expect(text).toContain(`names ${article} ${adj} minimum`);
   });
 });

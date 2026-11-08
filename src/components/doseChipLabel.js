@@ -15,6 +15,7 @@
 // one thing at once (e.g. recorded against an already-complete series AND
 // given too close to the prior dose), and the branch that fires first is the
 // one the chip shows.
+import { doseDisposition } from '../logic/doseDisposition.js';
 
 /**
  * The chip text for one recorded PCV/PPSV23 dose.
@@ -29,46 +30,52 @@
  */
 export function doseChipLabel(result, seriesTotal) {
   if (!result) return null;
-  const { status, effectiveDoseNum, extraDose, extraDoseUnverified } = result;
-
-  // PCV7 (the only 'noncounting' dose). OWNER DECISION 2026-10-31, REVERSING
-  // S14-6 of 2026-10-11, which had borrowed MeningoVax's "Off-window - repeat"
-  // to avoid new vocabulary. Reading the rules-page draft, she agreed it
-  // "should say not counted": "repeat" reads as "give this dose again", but
-  // PCV7 is simply set aside and the patient treated as PCV-naïve — the card,
-  // not the chip, says what is owed. No existing chip fits: "Invalid" is a
-  // dose given wrongly (PCV7 was not), and "Extra dose" means nothing is owed.
-  // MeningoVax keeps "Off-window - repeat" in its own sense — a dose that
-  // really is repeated.
-  if (status === 'noncounting') return 'Not counted';
-  // S14-4: a dose given after the series was already complete by product
-  // (validate.js, `completesSeries`). G6 (MeningoVax, 2026-09-16) — ASK,
-  // don't assert, for an undated row: with no date the app cannot tell a
-  // genuine extra dose from an ordinary series dose whose date is missing.
-  if (extraDoseUnverified) return 'Extra dose? — no date recorded';
-  if (extraDose) return 'Extra dose — more than this series needs';
-  if (status === 'valid') {
-    if (seriesTotal == null) return `Dose ${effectiveDoseNum}`;
-    if (effectiveDoseNum <= seriesTotal) return `Dose ${effectiveDoseNum} of ${seriesTotal}`;
-    // Defensive floor, mirroring MeningoVax's own: never print a dose number
-    // greater than the total. Nothing in PneumoVax should reach this once
-    // S14-4 gives a dose recorded past an already-complete series its own
-    // "Extra dose" wording instead of a numbered slot.
-    return 'Booster';
+  const { effectiveDoseNum } = result;
+  // OWNER DECISION 2026-11-08 (§DOSE-LABELS): one label per dose, from a
+  // closed list. The engine stamps `disposition`; a result built without it
+  // (a test calling `analyzeHistory` directly) is named the same way.
+  const disposition = result.disposition ?? doseDisposition(result);
+  // A baby still in the PCV series needs the dose number on every counted
+  // dose, because the total depends on age at the first dose.
+  const ofTotal = seriesTotal != null && effectiveDoseNum != null && effectiveDoseNum <= seriesTotal
+    ? ` (dose ${effectiveDoseNum} of ${seriesTotal})` : '';
+  switch (disposition) {
+    case 'counted':
+      if (seriesTotal == null) return `Dose ${effectiveDoseNum}`;
+      if (effectiveDoseNum <= seriesTotal) return `Dose ${effectiveDoseNum} of ${seriesTotal}`;
+      // Defensive floor, mirroring MeningoVax's own: never print a dose
+      // number greater than the total.
+      return 'Booster';
+    case 'counted-early': return `Counted — given early, accepted${ofTotal}`;
+    case 'counted-not-needed': return 'Counted — not needed. No more PPSV23.';
+    case 'counted-product-unknown': return `Counted — product not recorded${ofTotal}`;
+    case 'counted-date-unknown': return `Counted — date not recorded${ofTotal}`;
+    // Her wording, 2026-11-08, replacing "Extra dose — more than this series needs".
+    case 'extra': return 'Not counted — Extra. Do not repeat.';
+    // The DATE stays on the result card (owner ruling 2026-10-24: the chip
+    // never states the due date — only the card knows the routine date).
+    case 'repeat': return 'Not counted — repeat';
+    case 'no-repeat': return 'Not counted — do not repeat';
+    // OWNER DECISION 2026-10-31: PCV7 "should say not counted". It is set
+    // aside, and the card says what is owed; "do not repeat" would read as
+    // "no more PCV", which is wrong for a patient treated as PCV-naive.
+    case 'pcv7': return 'Not counted — PCV7';
+    // An extra dose with no date ASKS rather than asserts (G6, MeningoVax
+    // 2026-09-16): it may be a series dose whose date is missing.
+    case 'check-date': return result.extraDoseUnverified ? 'Check the date — none recorded' : 'Check the date';
+    default: return 'Unknown';
   }
-  if (status === 'invalid') return 'Invalid';
-  return 'Unknown';
 }
 
 /** The chip's CSS class, which follows the same verdict. */
 export function doseChipClass(result) {
-  const { status, extraDose, extraDoseUnverified } = result;
-  // S14-4/S14-6: a dose set aside from the count for an administrative
-  // reason (not an error) shares MeningoVax's "off-window" blue — freed up
-  // by S14-2 retiring its old meaning here.
-  if (status === 'noncounting') return 'dose-val-chip dose-val-offwindow';
-  if (extraDose || extraDoseUnverified) return 'dose-val-chip dose-val-offwindow';
-  if (status === 'valid') return 'dose-val-chip dose-val-valid';
-  if (status === 'invalid') return 'dose-val-chip dose-val-invalid';
-  return 'dose-val-chip dose-val-unknown';
+  switch (result.disposition ?? doseDisposition(result)) {
+    case 'counted': case 'counted-early': case 'counted-not-needed':
+    case 'counted-product-unknown': case 'counted-date-unknown':
+      return 'dose-val-chip dose-val-valid';
+    // Set aside for a reason that is not an error: MeningoVax's "off-window" blue.
+    case 'extra': case 'pcv7': return 'dose-val-chip dose-val-offwindow';
+    case 'repeat': case 'no-repeat': return 'dose-val-chip dose-val-invalid';
+    default: return 'dose-val-chip dose-val-unknown';
+  }
 }

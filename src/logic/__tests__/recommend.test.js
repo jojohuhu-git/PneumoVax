@@ -357,7 +357,7 @@ describe('§H Adults ≥50 routine', () => {
   // PCV13 + PPSV23: shared-decision keys on PPSV23-given-at-≥65 (CDC adult notes),
   // computed from the dose date — NOT the patient's current age. Verified against
   // CDC PneumoRecs VaxAdvisor 2026-06-07.
-  it('70yo PCV13 + PPSV23 given at ~60 (<65) → firm recommendation (due), NOT shared', () => {
+  it('70yo PCV13 + PPSV23 given at about 60 (<65) → firm recommendation (due), NOT shared', () => {
     const r = run({ ageMonths: 840, riskIds: [],
       pcvDoses: [{ product: 'PCV13', date: '2014-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2016-06-06' }] }); // age ~60 at PPSV23
@@ -365,7 +365,7 @@ describe('§H Adults ≥50 routine', () => {
     expect(pcv(r).minIntervalMonths).toBe(60);
   });
 
-  it('70yo PCV13 + PPSV23 given at ~67 (≥65) → shared clinical decision', () => {
+  it('70yo PCV13 + PPSV23 given at about 67 (≥65) → shared clinical decision', () => {
     const r = run({ ageMonths: 840, riskIds: [],
       pcvDoses: [{ product: 'PCV13', date: '2019-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2023-06-06' }] }); // age ~67 at PPSV23

@@ -16,7 +16,11 @@ import { analyzeBoth } from '../validate.js';
 
 const TODAY = '2026-01-01';
 const DOB = '2020-01-01';
-const REPEAT = /Repeat this dose only/i;
+// §M-L3: the line under a dose to be repeated now reads "Do not restart the
+// series." — "Repeat this dose only" moved into the label. A conjugate's
+// line ends the same way after "Give PCV20 instead." or "…for the patient's
+// age.", so the sentence on its own is what marks "repeat this dose".
+const REPEAT = /(?:^|(?<!instead\.|age\.)\s)Do not restart the series/i;
 
 function run({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = DOB, today = TODAY, riskIds = [] }) {
   return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds });

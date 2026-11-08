@@ -654,6 +654,12 @@ Guard for Ruling D itself: `regression-2026-10-23-pcv-dose3-floor-follows-cdc-ta
 "the validity floor is untouched" block asserted the opposite and is **kept, renamed**, as
 the record of the reversal — do not delete it.
 
+### Every Recorded Dose Has One Label, And Its Line Does Not Repeat It
+**OWNER DECISION 2026-11-08, `CLINICAL_SPEC.md` §M.** Every dose starts with one label from a closed list
+(`doseDisposition.js` names it; `doseChipLabel.js` words it). The line beside it gives only the reason,
+under her approved style rules (§M-L3); explanations go under "Why this". **Never add a label outside the
+list, or put the label's words back into the line.** The §M sweep fails on either, over every test patient.
+
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
 

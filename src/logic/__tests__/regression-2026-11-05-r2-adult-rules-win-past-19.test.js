@@ -150,7 +150,7 @@ describe('a dose given anyway', () => {
     const dose = r.perDose.pcv.at(-1);
     expect(dose.status).toBe('valid');
     expect(dose.earlyAdvisory).toBe(true);
-    expect(dose.reasons.join(' ')).toContain('shorter than the 5 years');
+    expect(dose.reasons.join(' ')).toContain('recommends 5 years');
   });
 
   it('after 19: accepted, and nothing is flagged', () => {

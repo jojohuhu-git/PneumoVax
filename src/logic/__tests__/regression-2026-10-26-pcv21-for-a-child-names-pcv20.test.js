@@ -9,7 +9,7 @@
 // A 10-year-old with a PCV21 on her record read, in two sentences on one chip:
 //
 //   "PCV21 (Capvaxive) is licensed for adults >=18 years only. This dose was
-//    given at ~10y 1m - it does not count."
+//    given at about 10y 1m - it does not count."
 //   "This dose does not count toward the series - repeat this dose only (do
 //    not restart the series)."
 //
@@ -38,7 +38,11 @@ import { recommend } from '../recommend.js';
 import { buildCases } from '../../test-grid.js';
 
 const TODAY = '2026-10-25';
-const REPEAT = /Repeat this dose only/i;
+// §M-L3: the line under a dose to be repeated now reads "Do not restart the
+// series." — "Repeat this dose only" moved into the label. A conjugate's
+// line ends the same way after "Give PCV20 instead." or "…for the patient's
+// age.", so the sentence on its own is what marks "repeat this dose".
+const REPEAT = /(?:^|(?<!instead\.|age\.)\s)Do not restart the series/i;
 const GIVE_PCV20 = /Give PCV20 instead/i;
 // The sentence an age-rejected CONJUGATE carries since OWNER DECISION
 // 2026-10-29 — product-free, because the product is not what was wrong.
@@ -61,7 +65,7 @@ describe('a child given PCV21 is told to give PCV20', () => {
 
   it('still rejects the dose — the verdict is unchanged', () => {
     expect(firstDose(priya()).status).toBe('invalid');
-    expect(words(priya())).toMatch(/licensed for adults ≥18 years only/);
+    expect(words(priya())).toMatch(/is licensed from 18 years/);
   });
 
   it('names PCV20 and no longer says "repeat this dose only"', () => {
@@ -105,7 +109,8 @@ describe('controls — the other invalid doses keep their own sentences', () => 
     });
     const d = firstDose(res);
     expect(d.status).toBe('valid');
-    expect((d.reasons ?? []).join(' ')).toMatch(/counts and does not need repeating/);
+    expect((d.reasons ?? []).join(' ')).toMatch(/ACIP recommends PCV21 \(Capvaxive\) from 19 years/);
+    expect((d.whys ?? []).join(' ')).toMatch(/counts and does not need repeating/);
     expect((d.reasons ?? []).join(' ')).not.toMatch(GIVE_PCV20);
   });
 

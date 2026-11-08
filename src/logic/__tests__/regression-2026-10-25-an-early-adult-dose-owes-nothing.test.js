@@ -153,12 +153,16 @@ describe('the second PPSV23 — the family she kept OUT of the new clock', () =>
   // rejecting the dose would only invite a THIRD PPSV23, which is the harm the
   // evidence describes — so the dose counts and the card says never give a
   // third.
-  it('counts the second dose, and tells the reader never to give a third', () => {
+  // §M-L2 (OWNER DECISION 2026-11-08): a patient with no immunocompromising
+  // condition, CSF leak or cochlear implant was never owed a second PPSV23, so
+  // the dose still counts and now says it was not needed.
+  it('counts the second dose, says it was not needed, and that no further PPSV23 is given', () => {
     const d = second();
     expect(d.status).toBe('valid');
     expect(d.effectiveDoseNum).toBe(2);
-    expect(d.reasons.join(' ')).toMatch(/5 years advised/);
-    expect(d.reasons.join(' ')).toMatch(/\*\*Counted; never give a third\.\*\*/);
+    expect(d.notNeeded).toBe(true);
+    expect(d.reasons.join(' ')).toMatch(/Only one PPSV23 is recommended for this patient/);
+    expect(d.whys.join(' ')).toMatch(/no further PPSV23 is given/);
   });
 
   it('and the rationale is the hyporesponsiveness evidence, not a bare interval', () => {
@@ -167,10 +171,13 @@ describe('the second PPSV23 — the family she kept OUT of the new clock', () =>
     // direct data behind it, and the card has to say so or the reader cannot
     // tell it apart from the ones that are only scheduling convention.
     const why = second().whys.join(' ');
-    expect(why).toMatch(/lower than to the first dose for certain serotypes/);
-    expect(why).toMatch(/no hyporesponsiveness was seen at 5 years or more/);
+    expect(why).toMatch(/A repeat PPSV23 under 5 years after the first gives lower responses to some serotypes/);
     expect(why).toMatch(/rr7203a1/);
-    expect(why).toMatch(/lifetime maximum/);
+    // §M-L2: for a healthy adult ONE is the maximum, so the lifetime-maximum
+    // sentence (two doses) is said only to ACIP's three groups.
+    expect(why).toMatch(/no further PPSV23 is given/);
+    const ic = analyzeHistory('PPSV23', [{ date: '2020-01-01' }, { date: '2023-01-01' }], Y(70), '2026-06-01', null, { riskIds: ['asplenia'] }).perDose[1];
+    expect(ic.whys.join(' ')).toMatch(/Two PPSV23 doses is the lifetime maximum/);
   });
 
   it('marker pairs are balanced, so the renderer cannot swallow the rest', () => {

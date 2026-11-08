@@ -42,6 +42,7 @@ import path from 'node:path';
 import { analyzeBoth } from '../validate.js';
 import { doseChipLabel, doseChipClass } from '../../components/doseChipLabel.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from '../scheduleConstants.js';
+import { doseDisposition } from '../doseDisposition.js';
 
 const TODAY = '2026-10-16';
 
@@ -77,17 +78,19 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     expect(note).toContain('18 years');
     expect(note).toContain('19 years');
     // The reassurance the owner asked for, in her terms.
-    expect(note).toMatch(/does not need repeating/i);
+    expect(`${note} ${(d.whys ?? []).join(' ')}`).toMatch(/does not need repeating/i);
     // And it must never read like the repeat advice an invalid dose gets.
     expect(note).not.toMatch(/does not count/i);
   });
 
-  it('the chip does NOT move — it still reads "Dose 1 of 1", still green (S14-2)', () => {
+  // §DOSE-LABELS (2026-11-08) supersedes S14-2 here: the chip names the
+  // early dose, and it stays green because the dose counts.
+  it('the chip reads "Counted — given early, accepted", still green', () => {
     const d = pcv21Dose({ dob: '2008-10-16', doseDate: '2026-10-16', ageMonths: 216 });
-    expect(doseChipLabel(d, 1)).toBe('Dose 1 of 1');
+    expect(doseChipLabel(d, 1)).toBe('Counted — given early, accepted (dose 1 of 1)');
     expect(doseChipClass(d)).toBe('dose-val-chip dose-val-valid');
     // Specifically NOT a chip that means the dose does not count.
-    expect(doseChipLabel(d, 1)).not.toMatch(/repeat|Invalid|Off-window|Not counted/i);
+    expect(doseChipLabel(d, 1)).not.toMatch(/Not counted|Invalid|Off-window/i);
   });
 
   it('a dose given at 18y 6m to a patient now 19y 6m still carries the note', () => {
@@ -122,9 +125,9 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     const d = pcv21Dose({ dob: '2008-11-16', doseDate: '2026-10-16', ageMonths: 215 });
     expect(d.status).toBe('invalid');
     expect(d.doesNotCount).toBe(true);
-    expect(d.reasons.join(' ')).toMatch(/licensed for adults ≥18 years only/);
+    expect(d.reasons.join(' ')).toMatch(/is licensed from 18 years/);
     // The owner's "counts from 18" ruling must not have loosened the floor.
-    expect(d.reasons.join(' ')).toMatch(/does not count/);
+    expect(doseDisposition(d)).toBe('repeat');
   });
 
   // ── The dateless dose: say it only when it is certain ────────────────
