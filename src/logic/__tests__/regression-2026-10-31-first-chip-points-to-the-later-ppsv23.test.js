@@ -6,7 +6,7 @@
 // dose in this series Next dose from Jun 24, 2023 at the earliest" — a date
 // three years gone, with his later PPSV23 already on the record. Asked, the
 // owner chose "Point to the later dose": the forward-looking sentence becomes
-// "It was repeated on <date>; see that dose." A child with only ONE
+// "It was repeated on <date>. See that dose." A child with only ONE
 // thrown-out PPSV23 keeps today's wording.
 //
 // Scoped at first to children none of whose PPSV23 shots counted; widened to
@@ -32,25 +32,26 @@ const NOAH = {
   ppsv23Doses: d('PPSV23', ['2023-04-29', addDays('2023-04-29', 42)]),
 };
 const firstChip = (p) => recommend(p).perDose.ppsv23[0].reasons;
-const TOO_YOUNG_REPEAT = 'Repeat this dose only. Do not restart the series.';
+// §M-L3: "Repeat this dose only" moved into the label ("Not counted — repeat").
+const TOO_YOUNG_REPEAT = 'Do not restart the series.';
 
 describe('the patients she was shown', () => {
   it('Sam: his first PPSV23 points to his Jan 5 repeat, and no longer orders one', () => {
     expect(firstChip(SAM)).toEqual([
-      'Given at ~23 months — below the 2-year minimum age for PPSV23[c].',
-      'Repeated on Jan 5, 2025; see that dose.',
+      'Given at about 23 months — below the 2-year minimum age for PPSV23[c].',
+      'Repeated on Jan 5, 2025. See that dose.',
     ]);
   });
 
   it('Noah: his first PPSV23 keeps its timing reason and loses the 2023 date', () => {
     const chip = firstChip(NOAH);
-    expect(chip[1]).toBe('Repeated on Jun 10, 2023; see that dose.');
+    expect(chip[1]).toBe('Repeated on Jun 10, 2023. See that dose.');
     expect(chip.join(' ')).not.toContain('Jun 24, 2023');
   });
 
   it('Ivy (both too young): her first points to her second', () => {
     const ivy = { ...SAM, ppsv23Doses: d('PPSV23', ['2024-02-01', '2024-09-01']) };
-    expect(firstChip(ivy)[1]).toBe('Repeated on Sep 1, 2024; see that dose.');
+    expect(firstChip(ivy)[1]).toBe('Repeated on Sep 1, 2024. See that dose.');
   });
 });
 
@@ -61,7 +62,7 @@ const LEO = {
   dob: '2007-11-01', ageMonths: 216, today: '2025-11-01', riskIds: ['asplenia'],
   pcvDoses: d('PCV13', ['2017-11-01']), ppsv23Doses: d('PPSV23', ['2017-11-01', '2022-10-30']),
 };
-const LEO_CHIP = 'Repeated on Oct 30, 2022; see that dose.';
+const LEO_CHIP = 'Repeated on Oct 30, 2022. See that dose.';
 
 describe('Leo and his twin', () => {
   it('Leo: his 2017 PPSV23 points to his 2022 dose, and no longer promises Dec 27, 2017', () => {
@@ -90,7 +91,7 @@ describe('limits', () => {
 
   it('a repeat that COUNTED is pointed to as well', () => {
     expect(firstChip({ ...SAM, ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-26']) })[1])
-      .toBe('Repeated on Jan 26, 2025; see that dose.');
+      .toBe('Repeated on Jan 26, 2025. See that dose.');
   });
 
   it('with three shots, each points to the NEXT one', () => {
@@ -107,7 +108,7 @@ describe('limits', () => {
       pcvDoses: [], ppsv23Doses: d('PPSV23', ['2006-02-01', '2006-09-01']) };
     const chips = recommend(adult).perDose.ppsv23;
     expect(chips.map((x) => x.status)).toEqual(['invalid', 'invalid']);
-    expect(chips[0].reasons[1]).toBe('Repeated on Sep 1, 2006; see that dose.');
+    expect(chips[0].reasons[1]).toBe('Repeated on Sep 1, 2006. See that dose.');
   });
 
   // The field the 2026-10-25 sweep reads to find a chip still promising a

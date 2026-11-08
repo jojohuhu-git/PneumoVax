@@ -144,7 +144,7 @@ describe('P1-3 — a blank dose row is not a dose', () => {
       });
       expect(ticked.meta.pcvCount).toBe(1);
       expect(ticked.perDose.pcv).toHaveLength(1);
-      expect(ticked.perDose.pcv[0].reasons.join(' ')).toMatch(/No date recorded/);
+      expect(ticked.perDose.pcv[0].reasons.join(' ')).toMatch(/cannot be checked without a date/);
     });
 
     it('a ticked row gives the same answer the old blank row used to give', () => {

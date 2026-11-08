@@ -62,7 +62,7 @@ describe('families 2 and 3 are floors again', () => {
     expect(v).toHaveLength(1);
     expect(v[0].status).toBe('valid');
     expect(v[0].intervalRuleId).toBe('ADULT-PCV-AFTER-PPSV23');
-    expect(v[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(v[0].reasons.join(' ')).toMatch(/recommends 1 year/);
   });
 
   it('and calls that patient complete — her own table\'s answer for this history', () => {
@@ -98,7 +98,7 @@ describe('families 2 and 3 are floors again', () => {
     expect(v).toHaveLength(1);
     expect(v[0].status).toBe('valid');
     expect(v[0].intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15');
-    expect(v[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(v[0].reasons.join(' ')).toMatch(/recommends 1 year/);
   });
 
   it('and calls that patient complete', () => {

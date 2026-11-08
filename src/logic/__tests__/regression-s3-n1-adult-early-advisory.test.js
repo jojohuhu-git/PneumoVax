@@ -99,15 +99,17 @@ describe('§K-CONJUGATE — an adult PCV20 inside the year after PCV13 COUNTS, w
     expect(second.earlyAdvisory).toBe(true);
 
     const text = second.reasons.join(' ');
-    expect(text).toMatch(/shorter than the 1 year CDC advises/);
+    expect(text).toMatch(/CDC recommends 1 year/);
     // The owner's wording instruction: clinical, nuanced, and emphasised.
     // `**...**` is what renderNoteWithCites turns into <strong>. Her second
     // round (same day) moved the rationale behind the chip's disclosure.
-    expect(text).toMatch(/\*\*Counted; no repeat indicated\.\*\*/);
+    // §M-L3 (2026-11-08): the decision ("counted") is the label's now, so the line
+    // gives only the gap. The label is checked through `disposition`.
+    expect(text).not.toContain('**');
     const why = (second.whys ?? []).join(' ');
-    expect(why).toMatch(/Immunogenicity at shorter intervals has not been established/);
-    expect(why).toMatch(/clinical judgement/);
-    expect(why).toMatch(/does not direct that a dose given inside it be repeated/);
+    expect(why).toMatch(/Responses at shorter intervals are unknown/);
+    expect(why).toMatch(/clinical judgment/);
+    expect(why).toMatch(/does not say to repeat a dose given sooner/);
 
     // A recommendation owes NO repeat date and no "earliest valid" date —
     // those belong to a floor and would contradict "the dose is counted".
@@ -160,7 +162,7 @@ describe('§K-CONJUGATE — an adult PCV20 inside the year after PCV13 COUNTS, w
     ], 4, '2026-05-01', '2026-01-01');
     expect(child.perDose[1].status).toBe('invalid');
     // The paediatric minimum, stated by CDC — not the adult owner rule.
-    expect(child.perDose[1].reasons.join(' ')).toMatch(/minimum interval 4 weeks/);
+    expect(child.perDose[1].reasons.join(' ')).toMatch(/Minimum interval 4 weeks/);
     expect(child.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
@@ -181,11 +183,11 @@ describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', (
   it('flags 3 months for an adult with no immunocompromising condition — their interval is the year', () => {
     const a = adultPpsv('2026-04-05', '2026-01-05');
     expect(a.perDose[0].status).toBe('valid');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/recommends 1 year/);
     expect(a.effective).toHaveLength(1);
     // No longer an owner determination: as advice the row asserts only CDC's
     // own interval, so it carries CDC (Ruling F's relabelling).
-    expect(a.perDose[0].whys.join(' ')).toMatch(/CDC states the 1 year/);
+    expect(a.perDose[0].whys.join(' ')).toMatch(/CDC gives the 1 year/);
   });
 
   it('keeps 3 months when the 8-week minimum may be considered — and SAYS it counts', () => {
@@ -200,7 +202,7 @@ describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', (
       expect(a.perDose[0].effectiveDoseNum).toBe(1);
       expect(a.effective).toHaveLength(1);
       expect(a.perDose[0].earlyAdvisory).toBe(true);
-      expect(a.perDose[0].reasons.join(' ')).toMatch(/met that minimum, so it counts/);
+      expect(a.perDose[0].whys.join(' ')).toMatch(/This dose met that minimum\./);
     }
   });
 
@@ -222,7 +224,7 @@ describe('S14-7 — the adult PCV15 to PPSV23 floors, keyed on risk, not age', (
     // ASSERTION EXISTS FOR IS UNCHANGED and still checked: the 8 weeks is the
     // shortest interval ACIP RECOMMENDS for this patient, not a minimum that
     // voids a dose, and the text has to say which.
-    expect(a.perDose[0].whys.join(' ')).toMatch(/shortest interval ACIP recommends/i);
+    expect(a.perDose[0].whys.join(' ')).toMatch(/ACIP recommends at least/i);
     expect(a.perDose[0].detail ?? '').not.toMatch(/owner clinical determination/i);
   });
 
@@ -268,13 +270,13 @@ describe('S14-7 — riskIds actually reach the validator from the engine', () =>
   it('an adult with only a chronic condition has the dose counted and flagged', () => {
     const d = ppsvAfterPcv15(['diabetes']);
     expect(d.status).toBe('valid');
-    expect(d.reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(d.reasons.join(' ')).toMatch(/recommends 1 year/);
   });
 
   it('and so does an adult with no risk factors at all', () => {
     const d = ppsvAfterPcv15([]);
     expect(d.status).toBe('valid');
-    expect(d.reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(d.reasons.join(' ')).toMatch(/recommends 1 year/);
   });
 });
 
@@ -289,8 +291,8 @@ describe('S14-7 — the catch-all keeps an unenumerated adult pair from going si
     expect(second.earlyAdvisory).toBe(true);
     expect(second.effectiveDoseNum).toBe(2);
     expect(a.effective).toHaveLength(2);
-    expect(second.reasons.join(' ')).toMatch(/≥1 year between adult conjugate doses/);
-    expect(second.reasons.join(' ')).toMatch(/\*\*Counted\.\*\*/);
+    expect(second.reasons.join(' ')).toMatch(/at least 1 year between adult conjugate doses/);
+    expect(second.reasons.join(' ')).not.toContain('**');
     expect(second.reasons.join(' ')).not.toMatch(/does not count toward the series/);
     expect(second.reasons.join(' ')).not.toMatch(/Repeat this dose only/);
   });

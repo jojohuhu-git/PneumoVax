@@ -11,7 +11,7 @@
 // had said the opposite:
 //
 //   Grace, 60, HIV: PCV15, then PPSV23 4 weeks later. Her chip read
-//     "… shorter than the 8 weeks (56 days) ACIP recommends for this
+//     "… ACIP recommends 8 weeks (56 days) ACIP recommends for this
 //      patient. Counted …"
 //     "… names an 8-week minimum that may be considered … — this dose met
 //      that minimum, so it counts."
@@ -32,7 +32,9 @@ function ppsvAfterPcv15(ageYears, riskIds, gapDays) {
   });
   return out.perDose.ppsv23[0];
 }
-const MET = 'this dose met that minimum';
+// §M-L3 (2026-11-08): the sentence moved under Why this (`whys`).
+const MET = 'This dose met that minimum';
+const said = (d) => [...(d.reasons ?? []), ...(d.whys ?? [])].join(' ');
 
 describe('§K-MET-ONLY — Grace, 50+, PPSV23 before 8 weeks', () => {
   for (const age of [50, 60, 75]) {
@@ -42,8 +44,8 @@ describe('§K-MET-ONLY — Grace, 50+, PPSV23 before 8 weeks', () => {
           const d = ppsvAfterPcv15(age, riskIds, gap);
           expect(d.status).toBe('valid');
           expect(d.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM');
-          expect(d.reasons.join(' ')).toContain('shorter than the 8 weeks (56 days)');
-          expect(d.reasons.join(' ')).not.toContain(MET);
+          expect(d.reasons.join(' ')).toContain('ACIP recommends 8 weeks (56 days)');
+          expect(said(d)).not.toContain(MET);
         });
       }
     }
@@ -58,11 +60,11 @@ describe('§K-MET-ONLY — the option row still speaks when the option was taken
       const d = ppsvAfterPcv15(60, ['hiv'], gap);
       expect(d.status).toBe('valid');
       if (gap < 56) {
-        expect(d.reasons.join(' ')).not.toContain(MET);
+        expect(said(d)).not.toContain(MET);
       } else {
         expect(d.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM-USED');
         expect(d.reasons).toHaveLength(1);
-        expect(d.reasons[0]).toContain(MET);
+        expect(d.whys.join(' ')).toContain(MET);
       }
     });
   }

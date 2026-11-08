@@ -84,7 +84,7 @@ describe('Ayla — a conjugate thrown out on age names no product', () => {
     // regex matched text that was there before this change and passed for the
     // wrong reason — mutating `stillTooYoung` to a constant `false` broke
     // nothing in the whole 1,684-test suite. Found by mutating, not by review.
-    expect(text).toMatch(/A further dose can be given from the 6 weeks minimum age at the earliest/);
+    expect(text).toMatch(/The replacement can be given from the 6 weeks minimum age, any PCV/);
     expect(text).toMatch(/any PCV approved for that age/i);
     expect(text).toMatch(/Do not restart the series/);
   });
@@ -120,7 +120,7 @@ describe('the three families this does not reach', () => {
       pcvDoses: [], ppsv23Doses: [{ date: '2026-10-01' }], riskIds: ['asplenia'],
     };
     const text = chip(recommend(toddler), 'ppsv23');
-    expect(text).toMatch(/Repeat this dose only/);
+    expect(text).toMatch(/Do not restart the series/);
     expect(text).not.toMatch(/any PCV approved/i);
   });
 
@@ -172,7 +172,7 @@ describe('the whole grid', () => {
       }
     });
     (out.perDose?.ppsv23 ?? []).forEach((d) => {
-      if ((d.reasons ?? []).join(' ').includes('Repeat this dose only')) tally.ppsv23RepeatOnly++;
+      if (d.disposition === 'repeat' && (d.reasons ?? []).join(' ').includes('Do not restart the series')) tally.ppsv23RepeatOnly++;
     });
   }
 

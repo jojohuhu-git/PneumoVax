@@ -83,7 +83,8 @@ describe('§C-P2-ONE — Leah', () => {
     const chip = out.perDose.ppsv23[0].reasons.join(' ');
     expect(chip).not.toContain('Dec 16, 2026');
     expect(chip).not.toContain('can be given from');
-    expect(chip).toContain('Not repeated.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(chip).not.toMatch(/Repeat this dose|restart/i);
   });
 
   it('a PCV20 given today counts and finishes her', () => {

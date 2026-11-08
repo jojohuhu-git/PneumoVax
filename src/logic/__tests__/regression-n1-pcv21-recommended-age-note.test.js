@@ -42,6 +42,7 @@ import path from 'node:path';
 import { analyzeBoth } from '../validate.js';
 import { doseChipLabel, doseChipClass } from '../../components/doseChipLabel.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from '../scheduleConstants.js';
+import { doseDisposition } from '../doseDisposition.js';
 
 const TODAY = '2026-10-16';
 
@@ -77,7 +78,7 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     expect(note).toContain('18 years');
     expect(note).toContain('19 years');
     // The reassurance the owner asked for, in her terms.
-    expect(note).toMatch(/does not need repeating/i);
+    expect(`${note} ${(d.whys ?? []).join(' ')}`).toMatch(/does not need repeating/i);
     // And it must never read like the repeat advice an invalid dose gets.
     expect(note).not.toMatch(/does not count/i);
   });
@@ -124,9 +125,9 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     const d = pcv21Dose({ dob: '2008-11-16', doseDate: '2026-10-16', ageMonths: 215 });
     expect(d.status).toBe('invalid');
     expect(d.doesNotCount).toBe(true);
-    expect(d.reasons.join(' ')).toMatch(/licensed for adults ≥18 years only/);
+    expect(d.reasons.join(' ')).toMatch(/is licensed from 18 years/);
     // The owner's "counts from 18" ruling must not have loosened the floor.
-    expect(d.reasons.join(' ')).toMatch(/does not count/);
+    expect(doseDisposition(d)).toBe('repeat');
   });
 
   // ── The dateless dose: say it only when it is certain ────────────────

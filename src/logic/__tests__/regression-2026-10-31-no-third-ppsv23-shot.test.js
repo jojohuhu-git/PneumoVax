@@ -69,7 +69,8 @@ describe('Max — Sam\'s twin, cochlear implant, not immunocompromised', () => {
   it('the chip under his Jan 5 dose names the grey area and promises no PPSV23', () => {
     const chip = out.perDose.ppsv23[1].reasons.join(' ');
     expect(chip).toContain(GREY_HEAD + MAX_TAIL);
-    expect(chip).toContain('Not repeated.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(chip).not.toMatch(/Repeat this dose|restart/i);
     expect(chip).not.toContain('Mar 2, 2025');
   });
 
@@ -114,7 +115,8 @@ describe('Noah — first PPSV23 thrown out for spacing, the repeat thrown out to
 
   it('the chip under his repeat no longer promises a PPSV23 from Aug 5, 2023', () => {
     const chip = out.perDose.ppsv23[1].reasons.join(' ');
-    expect(chip).toContain('Not repeated.');
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(chip).not.toMatch(/Repeat this dose|restart/i);
     expect(chip).not.toContain('Aug 5, 2023');
   });
 

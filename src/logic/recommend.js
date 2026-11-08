@@ -5029,7 +5029,7 @@ export function recommendBeforeFold(input) {
     const at = ppsvAnalysis.doses[i].date;
     const k = ppsvAnalysis.doses.findIndex((x, j) => x.date > at && !ppsvAnalysis.perDose[j].recordProblem);
     if (k < 0) return d;
-    const said = `Repeated on ${fmtDate(ppsvAnalysis.doses[k].date)}; see that dose.`;
+    const said = `Repeated on ${fmtDate(ppsvAnalysis.doses[k].date)}. See that dose.`;
     // No forward-looking clause is left, so the field that marks one goes too.
     // §DOSE-LABELS: her word for it is "repeated", so the label says repeat.
     return { ...d, forwardLookingReason: null, repeatedOn: ppsvAnalysis.doses[k].date, reasons: d.reasons.map((x) => (x === d.closingSentence ? said : x)) };
@@ -5087,15 +5087,15 @@ export function recommendBeforeFold(input) {
     return {
       ...d,
       earlyAdvisory: true,
-      reasons: [...(d.reasons ?? []), `Given ${fmtSince(first, dose.date)} the first PPSV23 dose of ${fmtDate(first)} — shorter than the ${LONG_GAP_WORDS} CDC advises. **Counted; no repeat indicated.**`],
-      whys: [...(d.whys ?? []), `CDC's child schedule gives an immunocompromised child who has had PPSV23 a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, but states that as the timing of the next dose and does not direct that an earlier one be repeated.`],
+      reasons: [...(d.reasons ?? []), `Given ${fmtSince(first, dose.date)} the first PPSV23 dose of ${fmtDate(first)}. CDC recommends ${LONG_GAP_WORDS}.`],
+      whys: [...(d.whys ?? []), `CDC gives an immunocompromised child who has had PPSV23 a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23. CDC does not say to repeat a dose given sooner, so it counts.`],
     };
   };
 
   const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
   const withdrawForwardLook = (list) => (nothingIsOwed
     ? list.map((d) => (d.forwardLookingReason
-      ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? d.withoutForwardLook : x)) }
+      ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? d.withoutForwardLook : x)).filter(Boolean) }
       : d))
     : list);
 
@@ -5119,7 +5119,7 @@ export function recommendBeforeFold(input) {
       // through Leah's ruling (same-day PCV + PPSV23), and the 2026-10-25
       // sweep reads a marked chip with no date as a date lost wrongly.
       ppsv23: withDisposition(withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
-        ? { ...d, forwardLookingReason: null, notRepeated: true, reasons: d.reasons.map((x) => (x === d.closingSentence ? ['Not repeated.', noThird.chip].filter(Boolean).join(' ') : x)) }
+        ? { ...d, forwardLookingReason: null, notRepeated: true, reasons: d.reasons.map((x) => (x === d.closingSentence ? noThird.chip : x)).filter(Boolean) }
         : withLaterShot(d, i))))),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was

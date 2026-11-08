@@ -129,7 +129,7 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
       { product: 'PCV15', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/CDC advises ≥1 year/i)).toBeInTheDocument();
+    expect(screen.getByText(/CDC recommends at least 1 year/i)).toBeInTheDocument();
     // Still counted, not dropped, not relabeled as an error.
     expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
@@ -148,14 +148,15 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
       { product: 'PCV20', date: '2026-02-09' },
     ]} />);
     openEveryCard(container);
-    expect(screen.getByText(/shorter than the 1 year CDC advises/i)).toBeInTheDocument();
+    expect(screen.getByText(/CDC recommends 1 year/i)).toBeInTheDocument();
 
     // THE BOLD IS THE OWNER'S REQUIREMENT, SO IT IS ASSERTED ON THE RENDERED
     // DOM, not on the string the engine produced. `**...**` in a reason is
     // turned into <strong class="note-emphasis"> by renderNoteWithCites;
     // a reason rendered as a bare string would print literal asterisks.
-    const bold = [...container.querySelectorAll('.note-emphasis')].map((n) => n.textContent).join(' ');
-    expect(bold).toMatch(/Counted; no repeat indicated/);
+    // §M-L3 (2026-11-08): the bolded "Counted; no repeat indicated" is now the
+    // dose's label, "Counted — given early, accepted" — the decision, shown first.
+    expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
     expect(container.textContent).not.toMatch(/\*\*/);
 
     // Counted, numbered, not struck through, not an error.
@@ -180,7 +181,7 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     ]} />);
     openEveryCard(container);
 
-    const RATIONALE = /Immunogenicity at shorter intervals has not been established/i;
+    const RATIONALE = /Responses at shorter intervals are unknown/i;
     expect(screen.queryByText(RATIONALE)).not.toBeInTheDocument();
 
     const toggle = screen.getByTestId('dose-val-toggle');

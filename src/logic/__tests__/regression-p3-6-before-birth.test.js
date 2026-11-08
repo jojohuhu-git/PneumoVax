@@ -3,10 +3,10 @@
 // fmtAgeMonths had no negative branch, so -7 months and 0 months printed the
 // same word: "Birth". validate.js's fmtAgeM had the same hole (`if (m < 0.5)
 // return 'birth'`). A dose dated before the patient was born therefore read
-// "Given at ~birth" — an ordinary-looking newborn dose.
+// "Given at birth" — an ordinary-looking newborn dose.
 //
 // Reproduced before the fix: DOB 2026-01-01 with a PCV13 dated 2025-06-01 gave
-//   "Given at ~birth — below the 6 weeks minimum age for PCV13 (Prevnar 13)."
+//   "Given at birth — below the 6 weeks minimum age for PCV13 (Prevnar 13)."
 //
 // The dose was correctly refused, so this is a message defect rather than a
 // counting one — but it is the message a clinician uses to find the typo, and

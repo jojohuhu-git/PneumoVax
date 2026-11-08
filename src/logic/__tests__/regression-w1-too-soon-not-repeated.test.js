@@ -52,7 +52,7 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // prints anywhere passes for the wrong reason.
     expect(reasons).not.toMatch(/Mar 25, 2026/);
     expect(reasons).not.toMatch(/Apr 8, 2026/);
-    expect(reasons).not.toMatch(/Repeat this dose only/);
+    expect(reasons).not.toMatch(/Do not restart the series/);
   });
 
   it('names the earliest valid date for an adult\'s second PPSV23 given too soon (handoff Case A)', () => {
@@ -86,7 +86,7 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     // date W1 was filed about.
     expect(reasons).not.toMatch(/does not count toward the series/);
     expect(reasons).not.toMatch(/Dec 28, 2022/);
-    expect(reasons).not.toMatch(/Repeat this dose only/);
+    expect(reasons).not.toMatch(/Do not restart the series/);
     // §M-L2: a healthy adult — counted, not needed.
     expect(reasons).toMatch(/Only one PPSV23 is recommended/);
   });
@@ -112,7 +112,7 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     ], 12, '2026-01-20', '2025-01-01', { riskIds: ['cochlear_implant'] });
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
-    expect(first.reasons.join(' ')).toMatch(/Repeat this dose only/);
+    expect(first.reasons.join(' ')).toMatch(/Do not restart the series/);
   });
 
   it('gives a too-young CONJUGATE the product-free sentence instead', () => {
@@ -126,6 +126,8 @@ describe('W1 — a too-soon dose is not repeated, it is simply not yet due', () 
     const first = a.perDose[0];
     expect(first.status).toBe('invalid');
     expect(first.reasons.join(' ')).toMatch(/any PCV approved/i);
-    expect(first.reasons.join(' ')).not.toMatch(/Repeat this dose only/);
+    // §M-L3: only the bare "Do not restart the series." stands for the old
+    // "Repeat this dose only"; the conjugate's line ends it after "age.".
+    expect(first.reasons.join(' ')).not.toMatch(/(?:^|(?<!instead\.|age\.)\s)Do not restart the series/i);
   });
 });

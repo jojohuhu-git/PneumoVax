@@ -129,7 +129,7 @@ describe('RULING F — what became of the floor beside it (reversed 2026-10-24)'
     expect(text).toMatch(/previous conjugate dose of Jun 1, 2025/);
     // ...and the 5-year gap, from ADULT-PCV20-21-5Y-AFTER-PPSV23.
     expect(text).toMatch(/PPSV23 dose of Jan 1, 2025/);
-    expect(text).toMatch(/shorter than the 5 years ACIP advises/);
+    expect(text).toMatch(/ACIP recommends 5 years/);
     expect(v.pcv[1].reasons).toHaveLength(2);
   });
 
@@ -191,7 +191,8 @@ describe('RULING F — the row itself', () => {
     // recommendation message into `{ reason, why }` — the chip's short line
     // and the rationale behind "Why this".
     expect(typeof msg).toBe('object');
-    expect(msg.reason).toMatch(/Counted; no repeat indicated/);
-    expect(msg.why).toMatch(/does not direct that an earlier dose given inside it be repeated/);
+    // §M-L3: the decision is the label's now ("Counted — given early, accepted").
+    expect(msg.reason).toMatch(/ACIP recommends 5 years\./);
+    expect(msg.why).toMatch(/does not say to repeat a dose given sooner/);
   });
 });

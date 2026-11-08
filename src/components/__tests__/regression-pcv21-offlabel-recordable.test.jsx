@@ -197,8 +197,8 @@ describe('PCV21-OFFLABEL — and below the licence floor it does not count', () 
 
   it('says in plain words that it does not count, and names the licensed age', () => {
     const text = allText(offLabel().perDose[0]);
-    expect(text).toMatch(/does not count/i);
-    expect(text).toMatch(/≥18 years/);
+    // §M-L3: "does not count" is the label's ("Not counted — repeat").
+    expect(text).toMatch(/PCV21 \(Capvaxive\) is licensed from 18 years/);
   });
 
   it('is a real dose given at the wrong age, NOT a record problem', () => {

@@ -23,7 +23,7 @@ import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
-const NOT_NEEDED = 'No risk condition recorded: PPSV23 not indicated. Not counted. Do not repeat.';
+const NOT_NEEDED = 'PPSV23 is not indicated without a risk condition.';
 const ZOE = {
   dob: '2022-11-01', ageMonths: 36, today: '2025-11-01', riskIds: [],
   pcvDoses: d('PCV20', ['2023-01-01', '2023-03-01', '2023-05-01', '2023-11-05']),
@@ -35,7 +35,7 @@ describe('Zoe — PPSV23 at 12 months, too young', () => {
 
   it('stays thrown out for age, and the chip says it is not needed instead of "repeat"', () => {
     expect(dose.status).toBe('invalid');
-    expect(dose.reasons[0]).toMatch(/^Given at ~12 months — below the 2-year minimum age for PPSV23/);
+    expect(dose.reasons[0]).toMatch(/^Given at about 12 months — below the 2-year minimum age for PPSV23/);
     expect(dose.reasons).toContain(NOT_NEEDED);
     expect(dose.reasons.join(' ')).not.toMatch(/repeat this dose/);
   });

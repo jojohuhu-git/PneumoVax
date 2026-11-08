@@ -102,7 +102,7 @@ describe('peds P1-1 reproduction B — PPSV23 on the 2nd birthday', () => {
 describe('peds P1-1 — a patient with no date of birth still gets the grace', () => {
   it('grades on the fallback path without regressing', () => {
     // Years/Months entry: 31 months old today, PPSV23 dated 7 months ago, so
-    // given at ~24 months. Must not be voided.
+    // given at about 24 months. Must not be voided.
     const dose = { date: '2026-05-01', product: 'PPSV23' };
     const out = analyzeHistory('PPSV23', [dose], 31, '2026-12-01').perDose[0];
     expect(out.status).toBe('valid');

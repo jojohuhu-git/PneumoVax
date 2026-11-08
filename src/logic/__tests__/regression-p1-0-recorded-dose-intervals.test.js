@@ -190,7 +190,7 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
     // sentence must say what CDC states and must not dress the app's own
     // convention up as CDC's. This row's year IS CDC's, so it says so — and
     // it must not claim the owner determination it no longer rests on.
-    expect(a.perDose[1].reasons.join(' ')).toMatch(/shorter than the 1 year CDC advises/);
+    expect(a.perDose[1].reasons.join(' ')).toMatch(/CDC recommends 1 year/);
     expect((a.perDose[1].whys ?? []).join(' '))
       .toMatch(/recommended timing, not a minimum/);
     expect(a.perDose[1].detail ?? '').not.toMatch(/owner clinical determination/i);
@@ -280,7 +280,7 @@ describe('peds audit P1-4 — PPSV23 must follow PCV by 8 weeks, and never the s
     // "same visit" sentence or the paediatric 8 weeks, which the adult notes
     // do not state.
     expect(a.perDose[0].status).toBe('valid');
-    expect(a.perDose[0].reasons.join(' ')).toMatch(/shorter than the 1 year/);
+    expect(a.perDose[0].reasons.join(' ')).toMatch(/recommends 1 year/);
     expect(a.perDose[0].reasons.join(' ')).toMatch(/on the same day as the PCV13/);
     expect(a.perDose[0].reasons.join(' ')).not.toMatch(/same visit/i);
   });

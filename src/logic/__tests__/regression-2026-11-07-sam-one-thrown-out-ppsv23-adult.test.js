@@ -41,7 +41,8 @@ describe('Sam, 19: one PPSV23 thrown out at 18 — PCV20 or PCV21 only', () => {
   it('the line under the 2025 PPSV23 no longer points to a date five years on', () => {
     const out = recommend({ ...SAM, today: '2026-10-11' });
     const line = out.perDose.ppsv23[0].reasons.join(' ');
-    expect(line).toBe('Same day as PCV; minimum interval 8 weeks. Not repeated.');
+    expect(line).toBe('Same day as PCV. Minimum interval 8 weeks.');
+    expect(out.perDose.ppsv23[0].disposition).toBe('no-repeat');
     expect(out.perDose.ppsv23[0].forwardLookingReason ?? null).toBe(null);
   });
 

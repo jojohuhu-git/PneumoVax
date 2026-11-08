@@ -47,10 +47,10 @@ was not needed. The "5 years advised" was wrong for her: no second PPSV23 was ev
 
 | ID | What | Status |
 |---|---|---|
-| **L1** | The engine stamps one `disposition` on every recorded dose; `doseChipLabel` maps it to the approved words; a test sweeps every test patient (both corpora plus the typical set) and fails if any dose has no disposition. Rulebook page key and `CLINICAL_SPEC.md` updated. | |
-| **L2** | An adult's second PPSV23 within 5 years, with no immunocompromising condition, CSF leak or cochlear implant: `Counted — not needed. No more PPSV23.` (ACIP mm7401a1 prints a two-PPSV23 row only for those three groups, read live 2026-11-08.) | |
-| **L3** | Dose lines rewritten to the style rules: drop words the label now says, move reasons to Why this. | |
-| **L4** | The style rules written into the repo, with a test for the parts a machine can check. | |
+| **L1** | The engine stamps one `disposition` on every recorded dose; `doseChipLabel` maps it to the approved words; a test sweeps every test patient (both corpora plus the typical set) and fails if any dose has no disposition. Rulebook page key and `CLINICAL_SPEC.md` updated. | DONE `3962691` |
+| **L2** | An adult's second PPSV23 within 5 years, with no immunocompromising condition, CSF leak or cochlear implant: `Counted — not needed. No more PPSV23.` (ACIP mm7401a1 prints a two-PPSV23 row only for those three groups, read live 2026-11-08.) | DONE `b3b6933` |
+| **L3** | Dose lines rewritten to the style rules: drop words the label now says, move reasons to Why this. | DONE (this commit) |
+| **L4** | The style rules written into the repo, with a test for the parts a machine can check. | DONE with L3 |
 
 ## Conflicts found with earlier rulings (applied, not re-litigated)
 

@@ -228,9 +228,9 @@ describe('the owner-ruling wording is off the cards (2026-10-24)', () => {
         .find((d) => d.earlyAdvisory);
       expect(chip.whys?.length).toBeGreaterThan(0);
       expect(chip.whys.join(' ').length).toBeGreaterThan(80);
-      // and the shortfall itself is still bolded on the chip, which is the
-      // emphasis this whole file is about
-      expect(chip.reasons.join(' ')).toMatch(/\*\*Counted;[^*]+\*\*/);
+      // §M-L3 (2026-11-08): the bolded "Counted; ..." moved into the dose's
+      // label ("Counted — given early, accepted"), which is the decision.
+      expect(chip.disposition).toBe('counted-early');
     }
   });
 });

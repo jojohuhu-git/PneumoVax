@@ -50,7 +50,7 @@ describe('§K-NONE-KEEPS — Dana: PPSV23 4 weeks after PCV15, aged 19-49, immun
         expect(d.status).toBe('valid');
         expect(d.doesNotCount).toBeFalsy();
         expect(d.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM');
-        expect(d.reasons.join(' ')).toContain('shorter than the 8 weeks (56 days) ACIP recommends');
+        expect(d.reasons.join(' ')).toContain('ACIP recommends 8 weeks (56 days) for this patient.');
       });
     }
   }

@@ -16,8 +16,13 @@
 // cases below hold that in place.
 import { describe, it, expect } from 'vitest';
 import { analyzeBoth } from '../validate.js';
+import { doseDisposition } from '../doseDisposition.js';
 
-const REPEAT = /Repeat this dose only/i;
+// §M-L3: the line under a dose to be repeated now reads "Do not restart the
+// series." — "Repeat this dose only" moved into the label. A conjugate's
+// line ends the same way after "Give PCV20 instead." or "…for the patient's
+// age.", so the sentence on its own is what marks "repeat this dose".
+const REPEAT = /(?:^|(?<!instead\.|age\.)\s)Do not restart the series/i;
 
 function verdicts({ pcvDoses = [], ppsv23Doses = [], ageMonths = 72, dob = '2020-01-01', today = '2026-01-01', riskIds = [] }) {
   return analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds });
@@ -115,7 +120,7 @@ describe('S10-N2 controls — W1 still stands for a dose that was really given',
     ] });
     const v = r.pcv.perDose[1];
     expect(v.status).toBe('invalid');
-    expect(allText(v)).toMatch(/Not repeated/i);
+    expect(doseDisposition(v)).toBe('no-repeat');
     expect(v.recordProblem).toBeUndefined();
   });
 });

@@ -51,7 +51,7 @@ describe('Ava, on time — the second PPSV23 is an extra dose', () => {
     expect(dz.effectiveDoseNum).toBeNull();
     expect(dz.earlyAdvisory).toBeUndefined();
     expect(dz.reasons).toEqual([
-      'Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition; first given Jan 15, 2018. Not counted. Do not repeat.',
+      'First PPSV23 given Jan 15, 2018. CDC gives a 2nd PPSV23 only for an immunocompromising condition.',
     ]);
     expect(analyzeBoth(AVA_ON_TIME).ppsv23.effective.map((x) => x.date)).toEqual(['2018-01-15']);
   });

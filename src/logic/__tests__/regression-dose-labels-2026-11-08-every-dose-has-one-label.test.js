@@ -10,7 +10,11 @@
 //   2. a counted label is on a counted dose, and a "Not counted" one on a dose
 //      that is not counted — the label can never contradict the count;
 //   3. "repeat" and "do not repeat" never contradict the dose's own line;
-//   4. her test patient's second PPSV23 says it was not needed (L2).
+//   4. her test patient's second PPSV23 says it was not needed (L2);
+//   5. the line next to the dose keeps the style rules she approved the same
+//      day that a machine can check (§M-L3): no semicolon, no "~", no bold
+//      "Counted", no word the label already says, and no line longer than
+//      the longest one today (a rise needs a reason).
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
 import { DISPOSITIONS } from '../doseDisposition.js';
@@ -19,7 +23,13 @@ import { buildCases, buildRecordProblemCases, buildTypicalCases } from '../../te
 
 const COUNTED = new Set(['counted', 'counted-early', 'counted-not-needed', 'counted-product-unknown', 'counted-date-unknown']);
 const SAYS_NOT_REPEATED = /not repeated|do not repeat|no repeat|nothing needs to be repeated/i;
-const SAYS_REPEAT = /repeat this dose|give a further dose|instead\.|repeated on/i;
+// §M-L3: a dose to be repeated says how — not to restart, which product, or
+// that it already was. "Repeat" itself is the label's word.
+const SAYS_REPEAT = /do not restart the series|instead\.|repeated on/i;
+// The longest dose line in any test patient on 2026-11-08: two notes stacked
+// on one adult conjugate (the under-4-weeks note and the same-day note).
+const MAX_LINE_WORDS = 44;
+const REPEATS_THE_LABEL = /Not counted\. Do not repeat|Not repeated\.|\*\*Counted|Repeat this dose only|^Not needed/;
 
 function sweep(cases) {
   const problems = [];
@@ -40,6 +50,11 @@ function sweep(cases) {
         if (COUNTED.has(d) !== (v.effectiveDoseNum != null)) say(`counted label ${COUNTED.has(d)} but effectiveDoseNum ${v.effectiveDoseNum}`);
         if (d === 'repeat' && (SAYS_NOT_REPEATED.test(words) || !SAYS_REPEAT.test(words))) say('repeat label, line disagrees');
         if (d === 'no-repeat' && SAYS_REPEAT.test(words)) say('do-not-repeat label, line says repeat');
+        // §M-L3 — the style rules a machine can check.
+        if (/;/.test(words)) say('semicolon in the line');
+        if (/~/.test(words)) say('"~" in the line');
+        if (REPEATS_THE_LABEL.test(words)) say('the line repeats the label');
+        if (words.split(/\s+/).filter(Boolean).length > MAX_LINE_WORDS) say('line longer than any on 2026-11-08');
       }
     }
   }

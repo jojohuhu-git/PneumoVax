@@ -48,9 +48,9 @@ describe('Theo: finished, and a PCV15 does not make him owe another dose', () =>
     const chip = chipFor(r, EXTRA_ON);
     expect(chip.extraDose).toBe(true);
     expect(chip.effectiveDoseNum).toBeNull();
-    expect(reasons(chip)).toContain('Not needed');
+    // §M-L3: "Not needed" and "Do not repeat" are the label's words now.
+    expect(chip.disposition).toBe('extra');
     expect(reasons(chip)).toContain('already complete');
-    expect(reasons(chip)).toContain('Do not repeat');
   });
 
   it('his earlier doses are untouched', () => {
@@ -109,7 +109,7 @@ describe('Lena: no PPSV23 yet, and CDC offers PCV20 or PPSV23, not PCV15', () =>
         const chip = chipFor(r, EXTRA_ON);
         expect(chip.extraDose).toBe(true);
         expect(chip.effectiveDoseNum).toBeNull();
-        expect(reasons(chip)).toContain('CDC offers PCV20 or PPSV23 here, not PCV15');
+        expect(reasons(chip)).toContain('CDC offers PCV20 or PPSV23, not PCV15');
         expect(reasons(chip)).toContain('still waits 8 weeks');
       });
 
@@ -135,7 +135,7 @@ describe('Ben and Priya: healthy, card said "Not indicated"', () => {
     const chip = chipFor(r, EXTRA_ON);
     expect(chip.extraDose).toBe(true);
     expect(chip.effectiveDoseNum).toBeNull();
-    expect(reasons(chip)).toContain('Not needed');
+    expect(chip.disposition).toBe('extra');
     expect(reasons(chip)).toContain('healthy child');
   });
 

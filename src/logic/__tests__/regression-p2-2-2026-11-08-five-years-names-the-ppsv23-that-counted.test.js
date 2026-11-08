@@ -1,7 +1,7 @@
 // P2-2 (wording audit, 2026-11-08) — OWNER RULING 2026-11-08, "Name the date".
 //
 // A 7-year-old with asplenia. Nov 8, 2021 (age 2): PCV13 and PPSV23 on the
-// same day; the PPSV23 is Invalid ("Same day as PCV; minimum interval 8
+// same day; the PPSV23 is Invalid ("Same day as PCV. Minimum interval 8
 // weeks"). Nov 8, 2026: a second PPSV23, which counts as dose 1. Both cards
 // read "≥5 years after first PPSV23", due Nov 8, 2031. The DATE is right — it
 // runs from the PPSV23 that counted — but the record's first PPSV23 is 2021,

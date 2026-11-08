@@ -4159,3 +4159,48 @@ needed". 0 verdicts moved. Adults with a cochlear implant or CSF leak stay "give
 grouping. Guard: `regression-dose-labels-2026-11-08-every-dose-has-one-label.test.js` (her patient and
 the same history with asplenia).
 
+
+### §M-L3 — How the line next to a dose is written (style rules, OWNER-APPROVED 2026-11-08)
+
+She chose rules over approving each sentence (*"Style rules"*). They apply to every line next to a
+recorded dose and to its "Why this":
+
+1. The line is short: the label plus one reason. The rest goes under "Why this".
+2. Answer first, then the reason.
+3. Talk about the patient, not the document ("CDC recommends", not "CDC's row for").
+4. One idea per sentence. No semicolons, and at most one dash per sentence.
+5. No arguing or defending ("which does not change the answer", "either way").
+6. **The line does not repeat the label.** "Not counted. Do not repeat.", "Not repeated.", "Repeat this
+   dose only." and the bold "**Counted; …**" endings are gone, because the label now says them.
+7. The same situation gets the same words everywhere.
+8. Plain clinical terms and US spelling: "at birth", "about 18 months", "judgment".
+9. Next-dose wording: "Next dose from <date> at the earliest". This follows the 2026-10-24 ruling that the
+   chip names only the earliest date, never the due date. That ruling stands over the proposed "on or after".
+10. Bold only the decision. The one bold line left on a dose is "**An optional repeat is reasonable.**"
+    (an adult conjugate under 4 weeks after another). Her emphasised conjugate alternative on a thrown-out
+    child PPSV23 (2026-10-24) is kept as she wrote it.
+
+**Two earlier instructions this replaces, by her approval of rules 6 and 10:** the bold "Counted; no
+repeat indicated" on early adult conjugate doses (her 2026-10-24 *"Also bold it"*), and W1's "Not
+repeated." lead (2026-10-11). Both said what the label now says first.
+
+**Her question that added one sentence** (2026-11-08, on her own test patient): *"why is first PPSV23
+counted and given early, Isn't PPSV23 in someone with no risks unnecessary?"* Her age was the
+indication. So the "Why this" under a PPSV23 given after PCV13 to an adult with no risk condition now
+opens: "Without a risk condition, the indication was age: ACIP's 2019 recommendation gave 1 dose of
+PPSV23 to every adult 65 or older." (mm6846a5, read live 2026-11-08: *"ACIP continues to recommend that
+all adults aged ≥65 years receive 1 dose of PPSV23"*.)
+
+**What moved, measured over every test patient:** no verdict, date, dose number or card. The saved-answer
+files changed only in how many lines a dose carries (3,805 of 17,016 and 426 of 18,264 rows; 0 differ
+once that count is removed). The visible-word pin fell from 64 to 56 (wordiest 1 in 10) and from 164 to
+155 (worst).
+
+**Guarded by machine** (in the §M sweep): no semicolon, no "~", none of the label's own words in the
+line, and no line longer than 44 words, the longest on 2026-11-08 (two notes stacked on one adult
+conjugate). Rules 2, 3, 5 and 7 need a reader. Proved by putting "Not counted. Do not repeat." back into
+one sentence (caught), and "~" back into ages (caught).
+
+**MeningoVax:** the "Check the date" lines (before birth, future, entered twice) were ported from
+MeningoVax's wording in 2026-10. They now differ. That is parked under the 2026-11-07 ruling that
+MeningoVax waits until PneumoVax is done.

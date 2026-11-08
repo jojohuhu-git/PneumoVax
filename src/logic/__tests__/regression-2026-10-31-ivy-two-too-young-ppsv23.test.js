@@ -48,9 +48,10 @@ describe('Ivy', () => {
   // — the chip under the repeat drops its promise of a further PPSV23.
   it('the chip under her second shot says it is not repeated — no "repeat this dose only"', () => {
     expect(out.perDose.ppsv23[1].reasons).toEqual([
-      'Given at ~20 months — below the 2-year minimum age for PPSV23[c].',
-      'Not repeated.',
+      'Given at about 20 months — below the 2-year minimum age for PPSV23[c].',
     ]);
+    // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
+    expect(out.perDose.ppsv23[1].disposition).toBe('no-repeat');
   });
 
   it('no grey-area note: both shots were plainly too young', () => {
@@ -86,7 +87,7 @@ describe('limits — a row that is not a shot is not counted as one', () => {
   it('Sam\'s repeat, thrown out for timing, keeps its timing reason in front of "Not repeated"', () => {
     const sam = { ...IVY, ppsv23Doses: d('PPSV23', ['2024-12-01', '2025-01-05']) };
     expect(recommend(sam).perDose.ppsv23[1].reasons[1]).toMatch(
-      /^Not repeated\. Grey area:/,
+      /^Grey area:/,
     );
   });
 });

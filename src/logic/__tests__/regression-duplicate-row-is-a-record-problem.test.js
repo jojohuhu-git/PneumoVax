@@ -63,7 +63,7 @@ describe('one shot recorded on two rows is a record problem, not a spacing probl
 
   it('says the row was typed twice, and what to do about it', () => {
     const text = allText(twice().perDose[1]);
-    expect(text).toMatch(/already recorded on an earlier row/i);
+    expect(text).toMatch(/Same date as an earlier row/i);
     expect(text).toMatch(/entered twice/i);
     expect(text).toMatch(/correct its date|remove this row/i);
   });
@@ -104,7 +104,7 @@ describe('a row that does not name a brand is still the same dose written twice'
       ],
     }).pcv.perDose[1];
     expect(v.recordProblem).toBe('duplicate');
-    expect(allText(v)).toMatch(/does not name a product/i);
+    expect(allText(v)).toMatch(/names no product/i);
   });
 
   it('does not add that sentence when both rows name the same product', () => {
@@ -114,7 +114,7 @@ describe('a row that does not name a brand is still the same dose written twice'
         { date: SAME_DAY, product: 'PCV20' },
       ],
     }).pcv.perDose[1]);
-    expect(text).not.toMatch(/does not name a product/i);
+    expect(text).not.toMatch(/names no product/i);
   });
 });
 
@@ -133,7 +133,7 @@ describe('a row that does not name a brand is still the same dose written twice'
 // at the record.
 // ─────────────────────────────────────────────────────────────────────────
 describe('two DIFFERENT products on one day keep their verdict and gain a sentence', () => {
-  const SAME_VISIT = /given at the same visit as the/i;
+  const SAME_VISIT = /given at the same visit as/i;
   const CHECK = /check the record/i;
 
   const adultPair = () => run({
@@ -153,7 +153,7 @@ describe('two DIFFERENT products on one day keep their verdict and gain a senten
     const v = adultPair();
     expect(v.extraDose).toBe(true);
     expect(allText(v)).toMatch(SAME_VISIT);
-    expect(allText(v)).not.toMatch(/Series already complete with/);
+    expect(allText(v)).not.toMatch(/The series was already complete with/);
   });
 
   it('and gains the sentence telling the clinician to check the record', () => {

@@ -81,6 +81,9 @@ export function ageAtDoseFromDate(dose, ageMonths, today, dob) {
 // P3-4 (S10): floors, never rounds up — the validator states an age in the
 // same breath as the minimum it is being judged against, so an age rounded up
 // onto a threshold makes the verdict read as a contradiction.
+// §M-L3 (style rules, 2026-11-08): "at birth", "about 23 months" — never "~".
+const about = (age) => (age === 'birth' ? 'birth' : `about ${age}`);
+
 function fmtAgeM(m) {
   if (m == null) return '?';
   if (m < 0) return 'before birth';   // P3-6 — never mistakable for a newborn
@@ -185,8 +188,10 @@ function beforeBirth(dose, dob) {
     : 'The age entered puts this date before the patient was born.';
   return recordProblem(
     'before-birth',
-    ['This date is before the patient was born, so it is not counted. Check the date — a mistyped year is the usual cause. No repeat dose is needed on the strength of it: correct the date, or take the row out if it does not belong to this patient.'],
-    `Recorded date: ${fmtDate(dose.date)}. ${because}`
+    // §M-L3 (2026-11-08): the label is "Check the date"; the line says what
+    // is wrong and what to do, and the rest is under Why this.
+    ["Dated before the patient was born. A mistyped year is the usual cause. Correct the date, or remove the row if it is not this patient's."],
+    `Recorded date: ${fmtDate(dose.date)}. ${because} No repeat dose is needed because of it.`
   );
 }
 
@@ -210,8 +215,8 @@ function futureDated(dose, today) {
   if (!dose?.date || !today || dose.date <= today) return null;
   return recordProblem(
     'future',
-    [`This date is in the future — today is ${fmtDate(today)}. A dose cannot have been given yet, so it is not counted. Check the date: if the year is a typo, correct it; if this is an appointment the patient has not attended yet, take it out of the record, which lists doses already given.`],
-    `Recorded date: ${fmtDate(dose.date)}. Today: ${fmtDate(today)}.`
+    [`Dated in the future (today is ${fmtDate(today)}). Correct a mistyped year, or remove an appointment not yet attended.`],
+    `Recorded date: ${fmtDate(dose.date)}. Today: ${fmtDate(today)}. The record lists doses already given.`
   );
 }
 
@@ -256,12 +261,12 @@ function duplicateEntry(dose, kept) {
   if (!twin) return null;
 
   const reasons = [
-    `The same date is already recorded on an earlier row (${fmtDate(dose.date)}), so this looks like one dose entered twice. It is not counted. Two doses of the same pneumococcal vaccine are never given on the same day — if the patient really did receive another dose, correct its date; otherwise remove this row.`,
+    `Same date as an earlier row (${fmtDate(dose.date)}): most likely one dose entered twice. Correct its date, or remove this row.`,
   ];
   if (!twin.product || !dose.product) {
-    reasons.push('One of the two rows does not name a product, so this is most likely the same dose written down twice — once with the brand and once without.');
+    reasons.push('One of the two rows names no product, so it is most likely the same dose written with and without the brand.');
   }
-  return recordProblem('duplicate', reasons, `Same date as a dose already recorded: ${fmtDate(dose.date)}.`);
+  return recordProblem('duplicate', reasons, `Same date as a dose already recorded: ${fmtDate(dose.date)}. Two doses of the same pneumococcal vaccine are never given on the same day.`);
 }
 
 // TWO DIFFERENT products on one day — a sentence, not a verdict.
@@ -300,7 +305,7 @@ function sameDayDifferentBrandNote(dose, kept) {
   const twin = (kept ?? []).find((k) => k?.date === dose.date
     && k.product && k.product !== dose.product);
   if (!twin) return null;
-  return `Two vaccines recorded on one day (${productLabel(twin.product)} and ${productLabel(dose.product)}). Not given together at one visit: check the record for a mistyped date or brand.`;
+  return `Two PCV products recorded on one day (${productLabel(twin.product)} and ${productLabel(dose.product)}). Check the record for a mistyped date or brand.`;
 }
 
 // ── The same two refusals, said in one line, for the history step ────────
@@ -395,10 +400,9 @@ function recordProblemFor(dose, { ageMonths, today, dob, kept }) {
 function extraDoseSentence(completingDose, dose, vaccine) {
   const label = productLabel(completingDose.product);
   if (completingDose.date !== dose.date) {
-    return `Series already complete with ${label}; this dose does not extend it.`;
+    return `The series was already complete with ${label}.`;
   }
-  const needed = vaccine === 'PPSV23' ? 'no PPSV23 was needed, and this dose' : 'this dose';
-  return `Given at the same visit as the ${label} dose, which completes the adult series on its own: ${needed} does not add to the series.`;
+  return `Given at the same visit as ${label}, which completes the adult series on its own.`;
 }
 
 // ── P1-3 (OWNER RULINGS 2026-11-06): a child's conjugate no card asked for ──
@@ -433,10 +437,12 @@ const CARD_ASKS_NOTHING = new Set(['complete', 'no-dose-now', 'not-indicated']);
 const HEALTHY_NOT_INDICATED_MIN_M = 60;
 
 const NOT_ASKED_FOR_SENTENCE = {
-  finished: 'Not needed: the series was already complete. Not counted. Do not repeat.',
-  healthy: 'Not needed: PCV is not indicated for a healthy child at this age. Not counted. Do not repeat.',
-  afterPpsv23: 'Not needed: after a PCV series before age 6 and one PPSV23, CDC offers PCV20 or a 2nd PPSV23 here, not PCV15. Not counted. Do not repeat. The next dose still waits 8 weeks after it.',
-  noPpsv23: 'Not needed: after a PCV series before age 6, CDC offers PCV20 or PPSV23 here, not PCV15. Not counted. Do not repeat. The next dose still waits 8 weeks after it.',
+  // §M-L3 (2026-11-08): the label now says "Not counted — Extra. Do not
+  // repeat.", so the line gives only the reason.
+  finished: 'The series was already complete.',
+  healthy: 'PCV is not indicated for a healthy child at this age.',
+  afterPpsv23: 'After a PCV series before age 6 and one PPSV23, CDC offers PCV20 or a 2nd PPSV23, not PCV15. The next dose still waits 8 weeks after this one.',
+  noPpsv23: 'After a PCV series before age 6, CDC offers PCV20 or PPSV23, not PCV15. The next dose still waits 8 weeks after this one.',
 };
 
 function conjugateNobodyAskedFor(dose, {
@@ -530,11 +536,15 @@ function adviseIfBeforeRecommendedAge(result, prod, ageAtDose, ageMonths) {
   const licensed = fmtMinAge(PCV21_MIN_AGE_M);
   const recommended = fmtMinAge(ADULT_SCHED_MIN_M);
   const when = dated
-    ? `This dose was given at ~${fmtAgeM(ageAtDose)}`
-    : `The patient is currently ~${fmtAgeM(ageMonths)}, so this dose was given`;
+    ? `Given at ${about(fmtAgeM(ageAtDose))}.`
+    : `The patient is ${about(fmtAgeM(ageMonths))} now, so it was given younger.`;
+  // §M-L3: the label says "Counted — given early, accepted"; the licence that
+  // makes it count goes under Why this.
   return advise(
     result,
-    [`PCV21 (Capvaxive) is FDA-licensed from ${licensed}, but ACIP recommends it from ${recommended}. ${when} — before the recommended starting age. It counts and does not need repeating.`]
+    [`${when} ACIP recommends PCV21 (Capvaxive) from ${recommended}.`],
+    undefined,
+    [`PCV21 is FDA-licensed from ${licensed}, so a dose given before ${recommended} counts and does not need repeating.`],
   );
 }
 
@@ -691,7 +701,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
   // the reader its source. The marker sits on the clause it supports.
   if (prod && prod.key === 'PCV7') {
     return noncounting([
-      'Not counted. Treat as PCV-naïve[c].',
+      'Treat as PCV-naïve[c].',
       // A declared cross-reference (2026-10-17). The quote is written about
       // "an older teen or adult patient at increased risk", and this verdict
       // is applied to EVERY patient, including a healthy child — 108 of them
@@ -720,13 +730,13 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     const atDose = dose.date ? ageAtDoseFromDate(dose, ageMonths, today, dob) : null;
     if (atDose != null && atDose >= 0) {
       return remedyIsAnotherProduct(invalid(
-        [`PCV21 (Capvaxive) is licensed for adults ≥18 years only. This dose was given at ~${fmtAgeM(atDose)} — it does not count.`],
-        `Age at administration: ~${fmtAgeM(atDose)}. PCV21 minimum age: 18 years.`
+        [`Given at ${about(fmtAgeM(atDose))}. PCV21 (Capvaxive) is licensed from 18 years.`],
+        `Age at administration: ${about(fmtAgeM(atDose))}. PCV21 minimum age: 18 years.`
       ));
     }
     return remedyIsAnotherProduct(invalid(
-      [`PCV21 (Capvaxive) is licensed for adults ≥18 years only. The patient is currently ~${fmtAgeM(ageMonths)} — this dose does not count.`],
-      `PCV21 minimum age: 18 years. Current age (upper bound on age at administration): ~${fmtAgeM(ageMonths)}.`
+      [`The patient is ${about(fmtAgeM(ageMonths))} now. PCV21 (Capvaxive) is licensed from 18 years.`],
+      `PCV21 minimum age: 18 years. Current age (upper bound on age at administration): ${about(fmtAgeM(ageMonths))}.`
     ));
   }
 
@@ -738,15 +748,15 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     if (ageMonths < minAgeM) {
       // Dateless and below the minimum TODAY, so still too young by definition.
       return repeatWithAnyApprovedProduct(invalid(
-        [withMarker(`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
-        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${fmtMinAge(minAgeM)}.`,
+        [withMarker(`Recorded without a date, but the patient is currently only ${about(fmtAgeM(ageMonths))} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
+        `Current age: ${about(fmtAgeM(ageMonths))}. Minimum: ${fmtMinAge(minAgeM)}.`,
         ageCites
       ), minAgeM, true);
     }
     return adviseIfBeforeRecommendedAge(
       // §DOSE-LABELS: `undated` names the label ("Counted — date not recorded").
       { ...unknown([
-        withMarker(`No date recorded — cannot verify age or interval. Counted in the series (must have been given at ≥${fmtMinAge(minAgeM)} to be valid).`, ageCites),
+        withMarker(`Age and interval cannot be checked without a date. Counted, assuming it was given at ${fmtMinAge(minAgeM)} or older.`, ageCites),
       ], ageCites), undated: true },
       prod, null, ageMonths
     );
@@ -766,15 +776,15 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     // The dose was below the minimum WHEN GIVEN; whether the patient is still
     // below it today is a separate question, and the one the wording turns on.
     return repeatWithAnyApprovedProduct(invalid(
-      [withMarker(`Given at ~${fmtAgeM(ageAtDose)} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
-      `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`,
+      [withMarker(`Given at ${about(fmtAgeM(ageAtDose))} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
+      `Age at administration: ${about(fmtAgeM(ageAtDose))}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`,
       ageCites
     ), minAgeM, ageMonths < minAgeM);
   }
 
   // Age is settled; now the dose's timing, against the one rule table.
   const result = adviseIfBeforeRecommendedAge(
-    key ? valid() : unknown(['Product not recorded — counted as a generic PCV dose.']),
+    key ? valid() : unknown([]),
     prod, ageAtDose, ageMonths
   );
   const priorPcv = (ctxParts.priorPcv ?? []).filter((d) => d.date && d.date <= dose.date);
@@ -827,12 +837,12 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!dose.date) {
     if (ageMonths < minAgeM) {
       return invalid(
-        [`Recorded without a date, but the patient is currently only ~${fmtAgeM(ageMonths)} — below the ${minAgeAdj} minimum age for PPSV23[c]. This dose does not count.`],
-        `Current age: ~${fmtAgeM(ageMonths)}. Minimum: ${minAgeNoun}.`,
+        [`Recorded without a date, but the patient is currently only ${about(fmtAgeM(ageMonths))} — below the ${minAgeAdj} minimum age for PPSV23[c]. This dose does not count.`],
+        `Current age: ${about(fmtAgeM(ageMonths))}. Minimum: ${minAgeNoun}.`,
         ageCites
       );
     }
-    return { ...unknown([`No date recorded — counted (must have been given at ≥${minAgeNoun} to be valid)[c].`], ageCites), undated: true };
+    return { ...unknown([`Age and interval cannot be checked without a date. Counted, assuming it was given at ${minAgeNoun} or older[c].`], ageCites), undated: true };
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
   // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
@@ -840,8 +850,8 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
     return {
       ...invalid(
-        [`Given at ~${fmtAgeM(ageAtDose)} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
-        `Age at administration: ~${fmtAgeM(ageAtDose)}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
+        [`Given at ${about(fmtAgeM(ageAtDose))} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
+        `Age at administration: ${about(fmtAgeM(ageAtDose))}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
         ageCites
       ),
       // §C-P2-GREY (2026-10-31): read by `stepStream` to name the repeat of a
@@ -991,7 +1001,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     const healthyChildPpsv23 = vaccine === 'PPSV23' && !result.recordProblem
       && populationOf(ageMonths, riskIds) === 'child-routine';
     // WORD-1, her answer of 2026-11-06 on her own wording: "Shorten it".
-    const NOT_NEEDED_HEALTHY_CHILD = 'No risk condition recorded: PPSV23 not indicated. Not counted. Do not repeat.';
+    const NOT_NEEDED_HEALTHY_CHILD = 'PPSV23 is not indicated without a risk condition.';
     const NOT_NEEDED_HEALTHY_CHILD_WHY = 'PPSV23 is given only to children with certain medical conditions or risk factors, per CDC.';
 
     if (result.status === 'invalid') {
@@ -1040,7 +1050,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           // its own field rather than matched by text — string surgery on a
           // sentence built somewhere else is the kind of coupling that breaks
           // silently when the wording changes.
-          ? `Not repeated. ${nextDoseClause(result)}`
+          ? nextDoseClause(result)
           // 2026-10-26 — the product, not the timing, is what is wrong, so
           // repeating THIS dose would be rejected again for the same reason.
           // See `remedyIsAnotherProduct` above.
@@ -1056,9 +1066,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
             // who has passed it is not shown a bar she has already cleared.
             : result.ageRemedy
               ? (result.ageRemedy.stillTooYoung
-                ? `A further dose can be given from the ${result.ageRemedy.minAgeText} minimum age at the earliest, any PCV approved for that age. Do not restart the series.`
-                : 'Give a further dose when due, any PCV approved for the patient\'s age. Do not restart the series.')
-              : 'Repeat this dose only. Do not restart the series.';
+                ? `The replacement can be given from the ${result.ageRemedy.minAgeText} minimum age, any PCV approved for that age. Do not restart the series.`
+                : 'The replacement can be any PCV approved for the patient\'s age. Do not restart the series.')
+              : 'Do not restart the series.';
       // OWNER RULING 2026-10-24 — the second sentence she asked for on a
       // mistimed SECOND PPSV23, emphasised, giving the conjugate option its
       // own date and its own reason. Her words: "bold the alternative option
@@ -1114,7 +1124,8 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         // null unless the split above produced them, so nothing else can be
         // swapped by accident.
         forwardLookingReason: result.recordProblem || !result.intervalRuleId ? null : closingSentence,
-        withoutForwardLook: result.recordProblem || !result.intervalRuleId ? null : 'Not repeated.',
+        // §M-L3: the label says "do not repeat", so nothing is left to say.
+        withoutForwardLook: null,
         // §C-P2-NOTHIRD (Ivy, 2026-10-31): the same handover for EVERY closing
         // sentence, not only the timing one, so `recommend.js` can say "It is
         // not repeated" under a too-young shot whose card offers no further
@@ -1236,11 +1247,11 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         effectiveDoseNum: null,
         extraDose: true,
         ...(undatedExtra ? { extraDoseUnverified: true } : {}),
+        // §M-L3: the label is "Check the date — none recorded"; it still ASKS
+        // (G6) rather than asserting the dose is extra.
+        ...(undatedExtra ? { whys: ['With no date, the app cannot tell a dose beyond the series from a series dose missing its date. It is not counted until the date is added.'] } : {}),
         reasons: undatedExtra
-          ? [
-            'No date recorded, so this dose cannot be placed in time.',
-            'Do you mean this was an extra dose given after the series was already complete? With no date recorded, the app cannot tell whether this is a dose beyond the series or a series dose whose date is missing, so it is not counted. Adding the date settles it.',
-          ]
+          ? ['It may be an extra dose after the series was complete, or a series dose missing its date.']
           : [
             ...reasons,
             extraDoseSentence(priorCompletingDose, dose, vaccine),
@@ -1326,8 +1337,8 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         reasons: [
           ...(ppsvRowFired ? rowReasons.slice(0, -1) : rowReasons),
           icChild
-            ? `Not needed: two PPSV23 doses already given (${fmtDate(kept[0].date)} and ${fmtDate(kept[1].date)}), and CDC never gives a third. Not counted. Do not repeat.`
-            : `Not needed: CDC gives a 2nd PPSV23 only for an immunocompromising condition; first given ${fmtDate(kept[0].date)}. Not counted. Do not repeat.`,
+            ? `Two PPSV23 doses already given (${fmtDate(kept[0].date)} and ${fmtDate(kept[1].date)}). CDC gives no third.`
+            : `First PPSV23 given ${fmtDate(kept[0].date)}. CDC gives a 2nd PPSV23 only for an immunocompromising condition.`,
         ],
       }));
       st.extraChildPpsv23.push(dose);

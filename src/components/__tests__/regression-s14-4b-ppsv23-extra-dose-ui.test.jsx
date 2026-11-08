@@ -82,7 +82,7 @@ describe('S14-4B UI — the PPSV23 extra dose is visible on the card', () => {
     render(<Harness initial={NOT_NEEDED} />);
     openTheCard();
     expect(screen.getByText(
-      /Series already complete with PCV20.*does not extend it/
+      /The series was already complete with PCV20/
     )).toBeTruthy();
   });
 

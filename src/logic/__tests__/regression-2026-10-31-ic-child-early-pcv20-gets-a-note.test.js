@@ -2,7 +2,7 @@
 //
 // A 6-year-old with no spleen, PCV13 as a baby, PPSV23 a year ago. Her card
 // advises PCV20 or a second PPSV23 five years after the first PPSV23. Given
-// the SECOND PPSV23 a year early, her chip read "shorter than the 5 years
+// the SECOND PPSV23 a year early, her chip read "recommends 5 years
 // advised … Counted"; given the PCV20 a year early instead, it read nothing.
 // Shown both, the owner chose "Add a note". The dose counts either way.
 //
@@ -22,7 +22,7 @@ import { buildCases } from '../../test-grid.js';
 import { addDays, calendarMonthsBetween } from '../dateUtils.js';
 
 const d = (product, dates) => dates.map((date) => ({ product, date }));
-const NOTE = 'Given 12 months after the first PPSV23 dose of Oct 11, 2025 — shorter than the 5 years CDC advises. **Counted; no repeat indicated.**';
+const NOTE = 'Given 12 months after the first PPSV23 dose of Oct 11, 2025. CDC recommends 5 years.';
 const BABY = d('PCV13', ['2020-12-01', '2021-02-01', '2021-04-01', '2021-10-05']);
 const HER = { dob: '2020-10-01', ageMonths: 72, today: '2026-10-12', riskIds: ['asplenia'],
   pcvDoses: [...BABY, ...d('PCV20', ['2026-10-12'])], ppsv23Doses: d('PPSV23', ['2025-10-11']) };
@@ -38,7 +38,7 @@ describe('her: PCV20 one year after the PPSV23', () => {
     expect(dose.effectiveDoseNum).toBe(5);
     expect(dose.earlyAdvisory).toBe(true);
     expect(dose.reasons).toEqual([NOTE]);
-    expect(dose.whys).toEqual([expect.stringMatching(/^CDC's child schedule gives an immunocompromised child who has had PPSV23 a PCV20 or a second PPSV23 at least 5 years after the first PPSV23/)]);
+    expect(dose.whys).toEqual([expect.stringMatching(/^CDC gives an immunocompromised child who has had PPSV23 a PCV20 or a second PPSV23 at least 5 years after the first PPSV23/)]);
   });
 
   it('her card is unchanged: complete', () => {
@@ -47,7 +47,7 @@ describe('her: PCV20 one year after the PPSV23', () => {
 
   it('the same sentence shape as her early second PPSV23 (the control she was shown)', () => {
     const twin = recommend({ ...HER, pcvDoses: BABY, ppsv23Doses: d('PPSV23', ['2025-10-11', '2026-10-12']) });
-    expect(twin.perDose.ppsv23[1].reasons[0]).toMatch(/^Given 12 months after the PPSV23 of Oct 11, 2025; 5 years advised\. \*\*Counted;/);
+    expect(twin.perDose.ppsv23[1].reasons[0]).toMatch(/^Given 12 months after the PPSV23 of Oct 11, 2025\. 5 years recommended\.$/);
   });
 });
 
@@ -86,7 +86,7 @@ describe('no note where the card was not holding the PCV20 to five years', () =>
       pcvDoses: d('PCV13', ['2020-07-01', '2026-10-12']).map((x, i) => (i ? { ...x, product: 'PCV20' } : x)),
       ppsv23Doses: d('PPSV23', ['2025-10-11']) });
     const notes = lastPcv(out).reasons;
-    expect(notes.filter((t) => /shorter than the 5 years/.test(t))).toHaveLength(1);
+    expect(notes.filter((t) => /recommends 5 years/.test(t))).toHaveLength(1);
     expect(anyNote(lastPcv(out))).toBe(false);
   });
 });

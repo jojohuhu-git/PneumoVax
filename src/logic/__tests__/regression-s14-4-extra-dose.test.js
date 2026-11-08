@@ -79,7 +79,7 @@ describe('S14-4 — a dose recorded after the series already completed', () => {
     const extra = a.perDose[1];
     expect(extra.extraDose).toBe(true);
     expect(extra.extraDoseUnverified).toBe(true);
-    expect(extra.reasons.join(' ')).toMatch(/cannot be placed in time/i);
+    expect(extra.reasons.join(' ')).toMatch(/missing its date/i);
   });
 
   it('does not misfire on a healthy series with no completing dose yet', () => {

@@ -37,9 +37,10 @@ describe('Noor: the PCV15 is an extra dose', () => {
 
   it('the chip says why, and that nothing is repeated', () => {
     const text = chip.reasons.join(' ');
-    expect(text).toContain('Not needed');
+    // §M-L3: "Not needed" and "Do not repeat" are the label's words now.
+    expect(chip.disposition).toBe('extra');
     expect(text).toContain('PCV20 or a 2nd PPSV23');
-    expect(text).toContain('Do not repeat');
+    expect(text).not.toContain('Do not repeat');
   });
 
   it('the four PCV13 doses and the PPSV23 are untouched', () => {

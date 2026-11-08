@@ -98,13 +98,13 @@ describe('S14-4C — a PPSV23 given at the same visit as a completing PCV20/PCV2
       });
       const t = text(r.ppsv23.perDose[0]);
 
-      expect(t).toMatch(/given at the same visit as the/i);
-      expect(t).toMatch(/does not add to the series/);
+      expect(t).toMatch(/given at the same visit as/i);
+      expect(t).toMatch(/completes the adult series on its own/);
       // "Given after the series was already complete" is a false statement
       // about a record in which both doses carry the same date. This is the
       // exact claim S14-4B refused to make, and it must stay unmade.
       expect(t, 'a same-day dose was not given "after" anything')
-        .not.toMatch(/Series already complete with/);
+        .not.toMatch(/The series was already complete with/);
     });
 
     it(`${product} + PPSV23 at one visit: the CHIP agrees with the sentence`, () => {
@@ -134,7 +134,7 @@ describe('S14-4C — a PPSV23 given at the same visit as a completing PCV20/PCV2
 
     expect(second.extraDose).toBe(true);
     expect(second.reasons.length, 'a dose the series did not need must say so').toBeGreaterThan(0);
-    expect(text(second)).toMatch(/given at the same visit as the/i);
+    expect(text(second)).toMatch(/given at the same visit as/i);
   });
 });
 
@@ -147,16 +147,16 @@ describe('S14-4C — the PCV stream stops saying "after" about a same-day dose',
 
     expect(v.extraDose, 'unchanged — the PCV stream already classed this as an extra dose')
       .toBe(true);
-    expect(text(v)).toMatch(/given at the same visit as the/i);
+    expect(text(v)).toMatch(/given at the same visit as/i);
     expect(text(v), 'two doses with the same date: neither came "after" the other')
-      .not.toMatch(/Series already complete with/);
+      .not.toMatch(/The series was already complete with/);
   });
 
   it('a PCV21 recorded a year AFTER a PCV20 still says "after" — unchanged', () => {
     const r = adult({
       pcvDoses: [{ product: 'PCV20', date: '2024-03-10' }, { product: 'PCV21', date: VISIT }],
     });
-    expect(text(r.pcv.perDose[1])).toMatch(/Series already complete with/);
+    expect(text(r.pcv.perDose[1])).toMatch(/The series was already complete with/);
   });
 });
 
@@ -185,7 +185,7 @@ describe('S14-4C — the controls that bound it', () => {
     const v = r.ppsv23.perDose[0];
 
     expect(v.extraDose).toBe(true);
-    expect(text(v)).toMatch(/Series already complete with/);
+    expect(text(v)).toMatch(/The series was already complete with/);
     expect(text(v)).not.toMatch(/same visit/);
   });
 
@@ -202,7 +202,7 @@ describe('S14-4C — the controls that bound it', () => {
 
     expect(v.extraDose).toBeUndefined();
     expect(v.intervalRuleId).toBe('ADULT-PPSV23-AFTER-PCV-CATCH-ALL');
-    expect(text(v)).toMatch(/≥1 year/);
+    expect(text(v)).toMatch(/at least 1 year/);
   });
 
   it('CONTROL: a same-day PPSV23 after a PCV15 is still voided by the PCV15 floor', () => {
