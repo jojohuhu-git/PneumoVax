@@ -712,6 +712,35 @@ Test: `regression-finding-m-2026-10-22-second-year-series-is-complete.test.js`.
 If a healthy 24–59mo child gets PCV15 for the catch-up dose → **PPSV23 ≥8wk later** (the
 PCV15-requires-PPSV23 rule applies; `cdcChildPneumo`). If PCV20 → complete.
 
+### §B-JOBAID-NOROW — no job aid row, no job aid button (owner, 2026-11-07, Mila)
+
+The CDC PCV Catch-up Job Aid's page 3 (24–59 months; *"Revised January 2025"*, re-read
+2026-11-07 — 95,267 bytes, the size CDC serves today) lists *"AND # of previous doses is"* as
+**0, 1, 2 or 3 only**, and its preamble requires the doses to be *"documented"*. So three
+healthy-toddler histories have no row in it, and since C8 (2026-10-22) carried no job aid
+**number** — but still showed it as a **grey button**, because the card's button list was the
+pathway default on every route:
+
+| History | Card | Job aid row? |
+|---|---|---|
+| **4 or more** doses, one at ≥12 months (the routine 2, 4, 6, 12-month series) | complete | none — the table stops at 3 |
+| **4 or more** doses, all before 12 months | catch-up | none — the table stops at 3 |
+| a completing dose with **no date** | complete | none — the job aid needs documented doses |
+
+The owner was shown **Mila** (healthy, 2½, PCV15 at 2, 4, 6 and 12 months; card "PCV series
+complete", CDC [1], immunize.org [2], job aid with no number) and ruled ***"Take it off"***.
+CDC's notes and p2016 Table 2 stay and both still state her answer; no dose, status or date
+changes. Engine: `refs` on the two cards in `pcvHealthyChild`, gated by the same test that
+gates the number (`jobAidEndsItHere`; `prior >= 4` on the catch-up card).
+
+**Deliberately NOT covered:** a 2- or 3-dose child on the catch-up card whose dose is **not
+yet due**. The job aid has rows for 2 and 3 doses, but they print only a "today" cell, so the
+card has no job aid number and still shows the button (27 of 1,440 probed toddlers). That is a
+different question and has not been put to her.
+
+Guard: `regression-c8-2026-10-22-catchup-job-aid-cites-the-row-that-fits.test.js`, block
+"a job aid with no row for the history is not on the card at all" (four cases, three controls).
+
 ---
 
 ## §C — Risk conditions, children 24 mo–18 y (p2016 Table 3; `cdcChildPneumo`)
