@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by [handoff-2026-11-07-zoe-toddler-age-50.md](handoff-2026-11-07-zoe-toddler-age-50.md). Zoe (the toddler PCV15 + PPSV23 item) is done and the extra-PCV20 item is closed by measurement. Resume from the newer file.
+
 # PneumoVax — Handoff after Kai: no "age 50" line when 50 would read Complete (2026-11-07)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page that gives pneumococcal vaccine advice.
