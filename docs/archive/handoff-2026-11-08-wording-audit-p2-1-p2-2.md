@@ -1,5 +1,7 @@
 # PneumoVax — Handoff after the wording audit's two fixes, P2-1 and P2-2 (2026-11-08)
 
+> **SUPERSEDED 2026-11-08** by `docs/archive/handoff-2026-11-08-children-near-age-lines.md`. PR #142 is merged and Audit 1 is now finished; resume from the newer file, not this one.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page that gives pneumococcal vaccine advice.
 Its promise: never guess, and every clinical line rests on a document that says it. Read `CLAUDE.md` first.
 

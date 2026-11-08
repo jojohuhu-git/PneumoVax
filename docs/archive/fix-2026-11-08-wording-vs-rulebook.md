@@ -144,10 +144,10 @@ Re-run any sweep from the repo root: `OUT_DIR=<scratch dir> node scripts/wording
 
 ## Audits 1 and 2 (proposed 2026-11-01), status measured 2026-11-08
 
-- **Audit 2, adults near a line:** covered by the 2026-11-05 whole-app checks (19, 50 and 65, and adults
+- **Audit 2, adults near a line:** **DONE — owner said yes 2026-11-08 ("Yes, mark it done").** Was: covered by the 2026-11-05 whole-app checks (19, 50 and 65, and adults
   either side of every 8-week, 1-year and 5-year spacing among the 60,480 ordinary patients). And
   (b) above found 0 adult mismatches against the Rulebook. **Recommend: done.**
-- **Audit 1, children near an age line:** half done. Covered: a dose 1 day either side of 7, 12, 24, 60,
+- **Audit 1, children near an age line:** ~~half done~~ **DONE 2026-11-08, no problems — `docs/archive/report-2026-11-08-children-near-age-lines.md`.** Was half done. Covered: a dose 1 day either side of 7, 12, 24, 60,
   72 months and 18–19 years, and 4–5 days short where CDC's grace applies. **Not covered:** the 6-week
   minimum age; anything a week to a month either side; and checking against CDC's own words rather than
   against the line's expected effect.
