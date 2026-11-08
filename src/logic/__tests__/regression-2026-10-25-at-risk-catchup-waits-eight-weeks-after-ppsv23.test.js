@@ -124,7 +124,7 @@ describe('an at-risk child\'s catch-up waits 8 weeks after a PPSV23', () => {
     const card = pcvCards(recommend({ ...noor, riskIds: [] }))[0];
     const lead = typeof card.note === 'string' ? card.note : card.note.lead;
     expect(lead).toMatch(/Held to 8 weeks after this child's PPSV23 of Oct 1, 2026/);
-    expect(card.note.detail).toMatch(/this app's own determination/);
+    expect(card.note.detail).toMatch(/PneumoVax also measures it from a recent PPSV23/);
   });
 
   it('holds the 3-doses-before-12-months row to its PPSV23 too', () => {
@@ -145,7 +145,7 @@ describe('an at-risk child\'s catch-up waits 8 weeks after a PPSV23', () => {
     // clock had long since run out and the card said "due today".
     expect(card.earliestNextDate).toBe('2026-11-29');
     expect(card.note.lead).toMatch(/Held to 8 weeks after this child's PPSV23 of Oct 4, 2026/);
-    expect(card.note.detail).toMatch(/this app's own determination/);
+    expect(card.note.detail).toMatch(/PneumoVax also measures it from a recent PPSV23/);
   });
 
   it('leaves both cards alone for a child with no PPSV23 at all', () => {
@@ -163,7 +163,7 @@ describe('an at-risk child\'s catch-up waits 8 weeks after a PPSV23', () => {
     const healthyCard = pcvCards(recommend(healthyNoPpsv))[0];
     expect(healthyCard.dueToday).toBe(true);
     expect(healthyCard.note.lead).not.toMatch(/Held to/);
-    expect(healthyCard.note.detail).not.toMatch(/this app's own determination/);
+    expect(healthyCard.note.detail).not.toMatch(/PneumoVax also measures it from a recent PPSV23/);
     const riskyNoPpsv = {
       dob: '2022-10-01', ageMonths: 48, today: TODAY,
       pcvDoses: [

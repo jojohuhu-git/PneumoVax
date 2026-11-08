@@ -66,8 +66,8 @@ describe('§C-P2-ONE — Leah', () => {
     expect(lead).toContain('that completes the series');
     expect(lead).toContain('No further PPSV23: 1 PPSV23 dose has been given and it did not count.');
     expect(detail).toBe('A PPSV23 is not offered: it would be a second PPSV23 shot.'
-      + ' The row for this history is worded for PCV13. PCV13 and PCV15 can be used interchangeably'
-      + ' for all recommendations, so it governs this child too [c].');
+      + ' The recommendation is written for PCV13. PCV13 and PCV15 can be used interchangeably'
+      + ' for all recommendations, so it applies to this child too [c].');
   });
 
   it('cites, in marker order: her CDC row, ACIP 2023, and the PCV13/PCV15 bridge', () => {

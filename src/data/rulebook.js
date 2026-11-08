@@ -530,7 +530,7 @@ const P = {
     { cards: [/PCV dose 1 of 2 \(at-risk catch-up\)/] }),
   asplenia10none: ex('10-year-old with asplenia, unvaccinated',
     { dob: '2016-11-01', riskIds: ['asplenia'], pcvDoses: [], ppsv23Doses: [] },
-    { cards: [/Option A: 1 dose PCV20/, /Option B-1: 1 dose PCV15/, /Option B-2: PPSV23/], note: [new RegExp(`PCV20 or a second PPSV23 — ≥${Y5} later`)] }),
+    { cards: [/Option A: 1 dose PCV20/, /Option B-1: 1 dose PCV15/, /Option B-2: PPSV23/], note: [new RegExp(`PCV20 or a second PPSV23, ≥${Y5} later`)] }),
   // 2026-11-01 (logic-order rebuild): the never-vaccinated 6-18 lane's step 3
   // read "None" for every at-risk child while the app gave an immunocompromised
   // one the 5-year dose (P1-2). These two hold both halves of that lane.

@@ -4204,3 +4204,50 @@ one sentence (caught), and "~" back into ages (caught).
 **MeningoVax:** the "Check the date" lines (before birth, future, entered twice) were ported from
 MeningoVax's wording in 2026-10. They now differ. That is parked under the 2026-11-07 ruling that
 MeningoVax waits until PneumoVax is done.
+
+### §M-L5 — The card's "Why this" follows the same style rules (§WHY-THIS, OWNER-APPROVED 2026-11-08)
+
+Shown five before-and-after paragraphs (the five most-seen) and the PCV15 sentence, she answered *"Yes,
+rewrite all"*. The §M-L3 rules now apply to every recommendation card's "Why this" paragraph too.
+
+**What changed is wording only.** Every claim, citation number, dose, date and verdict is the same. The
+rewrite turned "CDC's row for … calls for" into "CDC recommends …", split sentences at semicolons,
+dropped sentences that argued ("which does not change the answer — … either way"), and dropped capitals
+used for emphasis ("ONE further", "INCOMPLETE", "NOT routine").
+
+**Kept, by earlier rulings:**
+- Every "that dose has been given" (2026-10-18 and 2026-10-23: cite the row the patient FOLLOWED, and say
+  that its dose has been given).
+- ACIP's own words "PCV13 and PCV15 can be used interchangeably for all recommendations" in the sentence
+  saying why a PCV13 recommendation applies to a PCV15 (FINDING H).
+- The ACIP 2023 report named in words on the PCV20-complete card that swapped p2016 for it (2026-10-25).
+- Both numbers on the infant card (C10-2): the advised spacing and "it can be given today if needed, as the
+  minimum interval … has already passed" stay one sentence, now joined by "but" instead of a semicolon, so
+  the fold keeps the advised number in view beside the minimum.
+- The PneumoVax-rule disclosures (8 weeks measured from a PPSV23, 2026-10-29; a 1-year gap after a PPSV23
+  that did not count). They now say "PneumoVax also measures it…" and "is a PneumoVax rule".
+- "Choose ONE option, not both." keeps its capitals. It stays in view, never behind "Why this".
+
+**Not in this pass:** the sentences that stay in view above "Why this" (one, the "This child has already had
+a PPSV23 … ; the further dose — PCV20 or a second PPSV23 — waits" line, still has a semicolon and two dashes),
+and the whole note on a "Complete" or "Not indicated" card (shut by default). The one exception is the shared
+PCV15 sentence, which changed everywhere it appears (rule 7), including 400 "Complete" cards.
+
+**Measured over every test patient (95,640 cards with a "Why this"):** 109 → 107 distinct paragraphs, the
+longest 118 → 92 words, the median 51 → 48, over 60 words 36 → 23. Before, 44 matched a word search for talk about the
+document ("row", "prints", "CDC's", "ACIP's"). After, 1: the sentence naming ACIP's 2023 report, kept on
+purpose. The verdict corpora are unchanged (17,016 and 18,264, 0 moved). `scripts/proseDiff.mjs`: 19,953
+of 35,280 lines changed, every one a "Why this" sentence or the shared PCV15 sentence; 0 dose labels, 0 dose
+lines and 0 citation lists changed.
+
+**Guarded by machine:** `regression-why-this-2026-11-08-card-paragraphs-follow-the-style-rules.test.js`
+sweeps all three test sets: no "row", "worded", "footnote" or "prints"; no semicolon; at most one dash per
+sentence; no "either way" or "does not change"; no "~", "paediatric" or "neighbour"; no emphasis capitals;
+no paragraph over 92 words. Proved by putting back the old PCV15 sentence, a semicolon in the infant line,
+and the "does not change this" sentence: each was caught. Inventory scripts:
+`scripts/wordingAudit/whyParagraphs.mjs` and `whySentences.mjs`.
+
+**A whole-app check read the old wording.** `scripts/wholeApp/checks.mjs` looked for Owen's Option B line
+("no dose is needed at 19 … at 50") inside one sentence. Splitting that sentence at its semicolon made 75 grid
+and 132 typical children look as if Option B never named the dose at 50. The app was right and the check was
+wrong, so the check now accepts the line in either form.

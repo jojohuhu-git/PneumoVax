@@ -52,7 +52,7 @@ describe('Kai: no age-50 line when the adult card at 50 would read Complete', ()
     expect(c.dueToday).toBe(false);
     expect(noteText(c)).not.toContain('Re-evaluate at age 50');
     expect(c.noteCites.map((x) => x.key)).not.toContain('adultRoutine50');
-    expect(c.note.detail).toBe("CDC's catch-up row covers healthy children only through age 4. PCV is recommended at this age only if a risk condition is present [c].");
+    expect(c.note.detail).toBe('CDC recommends PCV catch-up for healthy children only through age 4. After that, PCV is recommended only for a child with a risk condition [c].');
     expect(markers(c)).toBe(c.noteCites.length);
   });
 

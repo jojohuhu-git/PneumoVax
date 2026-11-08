@@ -30,7 +30,7 @@ const owen = (extra = {}) => recommend({
   dob: DOB, today: TODAY, riskIds: ['diabetes'], pcvDoses: BABY_PCV13, ppsv23Doses: [], ...extra,
 });
 const card = (out, re) => out.recs.find((r) => re.test(r.doseLabel));
-const LINE = 'If PPSV23 is chosen, no dose is needed at 19 [c]; at 50 the adult schedule gives 1 dose of PCV20 or PCV21 [c].';
+const LINE = 'If PPSV23 is chosen, no dose is needed at 19 [c]. At 50, the adult schedule gives 1 dose of PCV20 or PCV21 [c].';
 
 describe('Owen: Option B says what PPSV23 leads to at 50, under Why this', () => {
   it('the line is on Option B, behind the fold, not in view', () => {

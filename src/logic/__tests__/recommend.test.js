@@ -254,7 +254,7 @@ describe('§G Adults 19–49 with risk', () => {
     const r = run({ ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV15', date: '2020-01-01' }] });
     expect(ppsv(r).vaccine).toBe('PPSV23');
     expect(ppsv(r).minIntervalMonths).toBe(12);
-    expect(noteText(ppsv(r))).toMatch(/INCOMPLETE/);
+    expect(noteText(ppsv(r))).toMatch(/not complete until the PPSV23 is given/);
   });
 
   // A-P1-1 (owner decision 2026-10-10): >=1 year is the recommendation for
@@ -385,7 +385,7 @@ describe('§H Adults ≥50 routine', () => {
   it('55yo PCV15 only → PPSV23 ≥1y INCOMPLETE', () => {
     const r = run({ ageMonths: 660, riskIds: [], pcvDoses: [{ product: 'PCV15', date: '2024-01-01' }] });
     expect(ppsv(r).vaccine).toBe('PPSV23');
-    expect(noteText(ppsv(r))).toMatch(/INCOMPLETE/);
+    expect(noteText(ppsv(r))).toMatch(/not complete until the PPSV23 is given/);
   });
 
   it('55yo PCV20 → complete', () => {

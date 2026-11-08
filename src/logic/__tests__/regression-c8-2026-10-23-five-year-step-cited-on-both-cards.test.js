@@ -192,6 +192,6 @@ describe('C8 — the five-year step cites its row on both cards', () => {
   it('the alternative card says why CDC\'s row covers the second PPSV23', () => {
     const { alt } = pairs.find((p) => p.alt);
     expect(alt.note.lead).toMatch(/Alternative to the PCV20 above/);
-    expect(alt.note.detail).toBe("CDC's own row for this history names both options in one sentence and puts the second PPSV23 at that same five years [c].");
+    expect(alt.note.detail).toBe('CDC recommends either one, at the same 5 years [c].');
   });
 });

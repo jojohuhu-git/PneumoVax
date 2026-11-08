@@ -13,8 +13,8 @@ import { recommend } from '../recommend.js';
 const TODAY = '2026-11-01';
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 const detail = (p) => recommend({ today: TODAY, ...p }).recs[0].note.detail;
-const OLD = 'CDC gives that dose whether or not a PPSV23 was given earlier.';
-const NEW = 'The PPSV23 given after it does not change this.';
+const OLD = 'CDC recommends it whether or not a PPSV23 was given earlier.';
+const NEW = 'No further dose is needed after the later PPSV23.';
 
 const G21 = { dob: '2018-10-27', riskIds: ['chronic_heart'], pcvDoses: d('PCV20', ['2024-10-27']), ppsv23Doses: d('PPSV23', ['2025-10-27']) };
 
