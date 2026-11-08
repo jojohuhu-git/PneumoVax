@@ -1920,7 +1920,8 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
       if (prior === 1) return dueToday ? 'jobAidPedsCatchupDose2' : 'jobAidPedsCatchupDose2Later';
       // The 2- and 3-dose blocks print only a "today" cell; neither states a
       // not-yet-due variant, so when the app is holding the dose back there is
-      // no cell of this document that says what the card says.
+      // no cell of this document that says what the card says — and since
+      // 2026-11-07 (Theo, "Take it off") no job aid button either.
       if (!dueToday) return null;
       if (prior === 2) return 'jobAidPedsCatchupDose3';
       if (prior === 3) return 'jobAidPedsCatchupDose4';
@@ -1949,12 +1950,15 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, extraPcv
         cite('p2016HealthyCatchup24to59'),
         ...(jobAidKey ? [cite(jobAidKey)] : []),
       ],
-      // Same ruling (Mila, 2026-11-07): four or more previous doses has no row
-      // in the job aid, so it comes off the card. ONLY that history — a 2- or
-      // 3-dose child whose dose is not yet due also has no job aid number, but
-      // the job aid does have rows for 2 and 3 doses, and that case has not
-      // been put to the owner. Leave it until she rules.
-      refs: prior >= 4 ? healthyRefsExcept('cdcCatchupJobAid') : refs,
+      // OWNER RULINGS 2026-11-07, both "Take it off". The job aid stays on
+      // this card only when a cell of it is CITED above — one gate, the same
+      // one that decides the number. It is null in exactly two histories:
+      //   • Mila — four or more previous doses: the table stops at three.
+      //   • Theo — 2 or 3 previous doses, the dose not yet due: the row fits
+      //     him, but its action is "Give Dose 3 (Final Dose) today" and the
+      //     card holds the dose to 8 weeks after the last one. A row whose
+      //     action is not the card's is not a source for the card.
+      refs: jobAidKey ? refs : healthyRefsExcept('cdcCatchupJobAid'),
     })];
   }
 
