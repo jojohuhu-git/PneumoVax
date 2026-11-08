@@ -2,10 +2,9 @@
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Read `CLAUDE.md` first.
 
-Branch `fix/2026-11-08-why-this-wording`, **stacked on `fix/2026-11-08-dose-labels` (PR #144)**, not on
-`main`. Its PR targets that branch, so the diff shows only this work. **She merges**, and #144 must go first.
-If #144 is squash-merged and this PR then shows conflicts in files nothing changed, see memory
-`squash-merged-parent-breaks-a-stacked-branch` (prove it with tree hashes, then take ours).
+Branch `fix/2026-11-08-why-this-wording`, PR #145 into `main`. It was built on #144, which she squash-merged
+the same evening. `main` was then merged into this branch; the file tree was identical before and after, so
+nothing moved. **She merges.**
 
 Baseline on #144: **2,463 passing**. Now **2,467 passing, 0 failed** (vitest JSON reporter, `.claude/**` excluded).
 
@@ -36,6 +35,6 @@ Checked in the running app: a healthy 10-year-old and an asplenic 9-year-old (PC
 
 ## Resuming
 
-1. Check `gh pr view 144 --json state` and this branch's PR. Once both are merged: `git checkout main && git pull`,
+1. Check `gh pr view 145 --json state`. Once merged: `git checkout main && git pull`,
    then run the suite and expect **2,467 passing**.
 2. Ask her what she wants next.
