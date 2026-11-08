@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by `handoff-2026-11-07-mila-theo-job-aid-button.md`. #137 is merged and Theo, its open item, is done. Resume from the newer file.
+
 # PneumoVax — Handoff after Mila: the Job Aid button comes off toddler cards it has no row for (2026-11-07)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
