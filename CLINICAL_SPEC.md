@@ -300,6 +300,20 @@ words from the other side. **Not used:** `mmwrChronic1949ReviewAt50` and
 `jobAidChronic1949ReviewAt50` — both are printed about a 19–49 adult **with chronic
 conditions** and tell you to review a risk-based decision, which is a different claim.
 
+**No age-50 line once a PCV20 is given (owner, 2026-11-07, Leo and Nina).** Shown **Leo** — 5,
+healthy, PCV13 at 2, 4 and 6 months and a PCV20 catch-up at 2; run forward, nothing at 19 and
+*Complete* at 50 — she chose *"Match the toddler card"*: no line once a PCV20 has counted (192 grid
+cards). Measuring the build turned up **Nina** — 17, healthy, a PCV20 at 16 she did not need,
+recorded *"Not needed … Not counted. Do not repeat."* Leo's rule left her line on, yet at 50 the
+adult schedule counts every dose received (§C-P1-3) and reads *Complete*. She chose *"Drop it for
+Nina too"* (198 cards). A PCV20 that is **invalid** — a same-day duplicate of another conjugate, or
+one day after a PPSV23 — keeps the line: of 80 such grid cards, 14 are owed a dose at 50. (Before
+building she had been told those 14 would lose the line; measured, they keep it, and she was told.)
+The C12 count is now 1,584 − 404 − 192 − 198 = **790**. With a PCV20 given, a smoking teen's adult
+card at 19 reads *Complete*, so §B-ADULTRISK19's "19" line does not apply either; the P2-5 control
+that asserted the age-50 line stays for that teen was reversed by this ruling and renamed.
+Guard: `regression-2026-11-07-leo-5-to-18-age-50-pcv20.test.js`.
+
 ### §B-ADULTRISK19 — a teen whose only tick is an adult risk factor looks again at 19 (2026-11-01)
 
 P2-5 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G59 — 17, smokes, a baby
