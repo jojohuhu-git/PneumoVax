@@ -361,7 +361,10 @@ export default function RecCard({ rec, doses = [], doseValidations = [], ageMont
         <div className="rec-dose-label">{doseLabel}</div>
 
         {!dueToday && earliestNextDate && !advisory && (
-          <div className="next-date">Not yet due — eligible {fmtDate(earliestNextDate)}</div>
+          // OWNER RULING 2026-11-07 (Remy): "due", not "eligible". This is the
+          // ADVISED date; the note beside it may name an earlier one that
+          // would count ("it can be given from … if needed").
+          <div className="next-date">Next dose due {fmtDate(earliestNextDate)}</div>
         )}
 
         {brands && brands.length > 0 && !isNeutral && (

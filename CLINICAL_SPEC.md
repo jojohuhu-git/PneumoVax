@@ -3989,6 +3989,18 @@ because that row's one remaining dose is held to 12 months.
 **Known and left alone.** The dose TOTAL on the card is still read from the age today. A baby with one
 dose before 7 months reads "of 4" under 7 months and "of 3" over it. That is p2016's own table.
 
+### §L-2, 2026-11-07 — the card's top line says "due", not "eligible" (Remy, OWNER)
+
+On Dec 4 Remy's card read **"Not yet due — eligible Jan 29, 2027"** above a note saying *"it can be
+given from Jan 1, 2027 if needed, which is the minimum interval of 4 weeks"*. "Eligible" sat on the
+later date. For a 10-week-old whose first dose was 4 weeks ago it read "eligible Dec 29" above *"it can
+be given today if needed"*. The date on that line is the **advised** date (§L-2 above), and the
+2026-10-24 ruling has the card state the routine date and comment on the earliest. Shown Remy, the
+owner chose **"Next dose due Jan 29, 2027"**, on every card. Wording only: no date, verdict or note
+moves. Hand-built babies: 2,595 of 9,546 not-yet-due cards named an earlier date or "today" under
+"eligible"; the grid reaches 0 of them. MeningoVax prints the same "eligible" wording and was **not**
+changed. Guard: `src/components/__tests__/regression-2026-11-07-remy-next-dose-due.test.jsx`.
+
 ### §L-3 — RULING D (2026-10-23): the repeat is measured from the dose the patient GOT
 
 **OWNER RULING D, 2026-10-23:** *"the repeat dose should be spaced from the invalid dose by
