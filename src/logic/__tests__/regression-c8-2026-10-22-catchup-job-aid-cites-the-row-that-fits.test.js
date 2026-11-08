@@ -215,10 +215,8 @@ describe('every marker on these cards has a citation behind it', () => {
 // today) lists "# of previous doses" as 0, 1, 2 and 3 only. Cite it, or take it
 // off: she was shown the card and chose off, for the three histories here.
 //
-// NOT covered by her ruling, and deliberately left as it was: a 2- or 3-dose
-// child on the catch-up card whose dose is NOT yet due (`jobAidCatchupKey`
-// returns null for them). The job aid does have rows for 2 and 3 doses; the
-// question there is a different one and has not been put to her.
+// A second ruling the same day covers the one history left over (Theo, below):
+// the job aid HAS a row for him, but the row's action disagrees with the card.
 describe('a job aid with no row for the history is not on the card at all', () => {
   const JOB_AID_URL = REFS.cdcCatchupJobAid.url;
   const buttonUrls = (rec) => (rec.citations ?? []).map((c) => c.url);
@@ -244,6 +242,37 @@ describe('a job aid with no row for the history is not on the card at all', () =
   ])('%s → the job aid keeps its button', (_label, ageMonths, doses, status) => {
     const rec = pcvCard(healthyChild(ageMonths, doses));
     expect(rec.status).toBe(status);
+    expect(buttonUrls(rec)).toContain(JOB_AID_URL);
+  });
+});
+
+// OWNER RULING 2026-11-07, "Take it off" (Theo). Theo turned 2 today, healthy,
+// PCV13 at 2 months and at 23 months — one month ago. The job aid's p.3 HAS a
+// row that fits every column: 24 through 59 months, 2 previous doses, "Dose 1
+// was given before 12 months of age", "Dose 2 was given after 1st birthday" /
+// "before 2nd birthday". But its action is "Give Dose 3 (Final Dose) today",
+// with no interval, while the card holds the dose to 8 weeks after dose 2
+// (p2016: "at least 8 wks after most recent PCV dose"; the job aid's own p.1
+// says to use it "in conjunction with Table 2"). A row whose action is not the
+// card's is not a source for the card. His date does not move.
+describe('a job aid row whose action is not the card\'s is not on the card', () => {
+  const JOB_AID_URL = REFS.cdcCatchupJobAid.url;
+  const buttonUrls = (rec) => (rec.citations ?? []).map((c) => c.url);
+
+  it('Theo: 2 doses, the second a month ago — held 8 weeks, no job aid button', () => {
+    const rec = pcvCard(healthyChild(24, [2, 23]));
+    expect(rec.status).toBe('catchup');
+    expect(rec.dueToday).toBe(false);
+    expect(citeKeys(rec)).toEqual(['pedsHealthyCatchup', 'p2016HealthyCatchup24to59']);
+    expect(buttonUrls(rec)).not.toContain(JOB_AID_URL);
+    expect(buttonUrls(rec)).toContain(REFS.cdcChildPneumo.url);
+    expect(buttonUrls(rec)).toContain(REFS.p2016.url);
+  });
+
+  it('the control: the same child once 8 weeks have passed — due today, the row is cited', () => {
+    const rec = pcvCard(healthyChild(24, [2, 22]));
+    expect(rec.dueToday).toBe(true);
+    expect(citeKeys(rec)).toContain('jobAidPedsCatchupDose3');
     expect(buttonUrls(rec)).toContain(JOB_AID_URL);
   });
 });

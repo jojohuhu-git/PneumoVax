@@ -712,7 +712,7 @@ Test: `regression-finding-m-2026-10-22-second-year-series-is-complete.test.js`.
 If a healthy 24–59mo child gets PCV15 for the catch-up dose → **PPSV23 ≥8wk later** (the
 PCV15-requires-PPSV23 rule applies; `cdcChildPneumo`). If PCV20 → complete.
 
-### §B-JOBAID-NOROW — no job aid row, no job aid button (owner, 2026-11-07, Mila)
+### §B-JOBAID-NOROW — no job aid row, no job aid button (owner, 2026-11-07, Mila and Theo)
 
 The CDC PCV Catch-up Job Aid's page 3 (24–59 months; *"Revised January 2025"*, re-read
 2026-11-07 — 95,267 bytes, the size CDC serves today) lists *"AND # of previous doses is"* as
@@ -731,15 +731,24 @@ The owner was shown **Mila** (healthy, 2½, PCV15 at 2, 4, 6 and 12 months; card
 complete", CDC [1], immunize.org [2], job aid with no number) and ruled ***"Take it off"***.
 CDC's notes and p2016 Table 2 stay and both still state her answer; no dose, status or date
 changes. Engine: `refs` on the two cards in `pcvHealthyChild`, gated by the same test that
-gates the number (`jobAidEndsItHere`; `prior >= 4` on the catch-up card).
+gates the number (`jobAidEndsItHere` on the complete card; on the catch-up card, see below).
 
-**Deliberately NOT covered:** a 2- or 3-dose child on the catch-up card whose dose is **not
-yet due**. The job aid has rows for 2 and 3 doses, but they print only a "today" cell, so the
-card has no job aid number and still shows the button (27 of 1,440 probed toddlers). That is a
-different question and has not been put to her.
+**Theo, the same day — a row that fits but says something else.** Theo turned 2 today, healthy,
+PCV13 at 2 months and at 23 months (one month ago). The Job Aid's p.3 **does** have a row that
+fits every column — 24 through 59 months, 2 previous doses, *"Dose 1 was given before 12 months of
+age"*, *"Dose 2 was given after 1st birthday"* / *"before 2nd birthday"* — but its action is
+*"Give Dose 3 (Final Dose) today"*, with no interval. The card holds the dose to **8 weeks after
+dose 2** (2 December), from p2016 (*"at least 8 wks after most recent PCV dose"*); the Job Aid's own
+p.1 says to use it *"in conjunction with Table 2"*. So the card had no Job Aid number, and still
+showed its button. The owner was shown Theo and ruled ***"Take it off"***. His date does not move.
 
-Guard: `regression-c8-2026-10-22-catchup-job-aid-cites-the-row-that-fits.test.js`, block
-"a job aid with no row for the history is not on the card at all" (four cases, three controls).
+So the catch-up card's rule is now one gate: **the Job Aid button stays only when a Job Aid cell is
+cited** (`jobAidKey` in `pcvHealthyChild`). That is null for exactly Mila's 4+ doses and Theo's 2–3
+doses not yet due.
+
+Guard: `regression-c8-2026-10-22-catchup-job-aid-cites-the-row-that-fits.test.js`, blocks
+"a job aid with no row for the history is not on the card at all" (four cases, three controls) and
+"a job aid row whose action is not the card's is not on the card" (Theo, and a due-today control).
 
 ---
 
