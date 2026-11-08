@@ -314,6 +314,21 @@ card at 19 reads *Complete*, so §B-ADULTRISK19's "19" line does not apply eithe
 that asserted the age-50 line stays for that teen was reversed by this ruling and renamed.
 Guard: `regression-2026-11-07-leo-5-to-18-age-50-pcv20.test.js`.
 
+**Nor once a PCV15 and a PPSV23 are on record (owner, 2026-11-07, Kai).** **Kai** — 5, healthy,
+PCV15 at 2, 4, 6 and 12 months and a PPSV23 at 4 he did not need (his chip reads "extra") — kept
+the line, yet at 50 the adult card reads *"Complete (PCV15 + PPSV23)"*. Control: the same boy with
+PCV13 is owed PCV20 or PCV21 at 50, and without the PPSV23 he is owed PPSV23; both keep the line.
+She chose *"Drop it, like Nina"* (237 grid cards; 4,692 of 21,840 hand-built healthy 5–18
+children, every one *Complete* at 50). The 66 invalid-PCV20 cards above are this family: their
+PCV15 + PPSV23, not the PCV20, completes them; the 14 owed a dose keep the line.
+**The rule is now one question, not three:** the card runs the same patient forward to the 50th
+birthday and keeps the line only when the adult card there asks for something. On the grid that
+is Leo's and Nina's histories exactly, plus Kai's — no other card moved. The forward run leaves
+out any dose the engine flags as a **record problem** (dated in the future or before birth): at 50
+a dose typed as next year would be in the past and counted, which took the line off 96
+impossible entries until the prose diff caught it. The C12 count is now 790 − 237 = **553**.
+Guard: `regression-2026-11-07-kai-pcv15-ppsv23-age-50.test.js`.
+
 ### §B-ADULTRISK19 — a teen whose only tick is an adult risk factor looks again at 19 (2026-11-01)
 
 P2-5 of the 2026-11-01 grey-zone audit (owner: "agree with fixing"). G59 — 17, smokes, a baby
