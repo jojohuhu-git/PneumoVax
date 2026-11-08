@@ -50,15 +50,17 @@ function renderWithDose(result) {
 }
 
 describe('S3-N1 — the chip', () => {
-  it('an off-window dose still shows its dose number, not "Invalid"', () => {
+  // §DOSE-LABELS (OWNER DECISION 2026-11-08, superseding S14-2's "the chip
+  // never distinguishes an early dose"): an early dose that counts says so.
+  it('an off-window dose reads "Counted — given early, accepted", not "Invalid"', () => {
     renderWithDose({
       status: 'valid',
       earlyAdvisory: true,
       effectiveDoseNum: 2,
       reasons: ['Given less than a year after the previous dose. For adults CDC advises at least 1 year between pneumococcal conjugate doses. This dose still counts — no repeat is needed.'],
     });
-    expect(screen.getByText('Dose 2')).toBeInTheDocument();
-    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(screen.getByText('Counted — given early, accepted')).toBeInTheDocument();
+    expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
   });
 
   it('is not struck through or dimmed like a dropped dose, and reads the plain valid color', () => {
@@ -129,8 +131,8 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     openEveryCard(container);
     expect(screen.getByText(/CDC advises ≥1 year/i)).toBeInTheDocument();
     // Still counted, not dropped, not relabeled as an error.
-    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
-    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
   });
 
@@ -157,8 +159,8 @@ describe('S3-N1 — the whole flow agrees, end to end', () => {
     expect(container.textContent).not.toMatch(/\*\*/);
 
     // Counted, numbered, not struck through, not an error.
-    expect(screen.getAllByText(/^Dose 2( of \d+)?$/).length).toBeGreaterThan(0);
-    expect(screen.queryByText('Invalid')).not.toBeInTheDocument();
+    expect(screen.getAllByText(/^Counted — given early, accepted/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Not counted/)).not.toBeInTheDocument();
     expect(container.querySelector('.dose-val-dropped')).toBeNull();
 
     // No repeat date, and no claim of the owner determination it no longer

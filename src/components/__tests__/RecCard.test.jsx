@@ -31,7 +31,10 @@ describe('RecCard dose-validation chip (PC1)', () => {
     expect(chip.className).toMatch(/dose-val-valid/);
   });
 
-  it('labels an invalid dose "Invalid" (red)', () => {
+  // §DOSE-LABELS (2026-11-08): "Invalid" became "Not counted — repeat" or
+  // "Not counted — do not repeat". A hand-built invalid dose with no timing
+  // rule behind it is a missing dose, so it is repeated.
+  it('labels an invalid dose "Not counted — repeat" (red)', () => {
     render(
       <RecCard
         rec={baseRec}
@@ -39,26 +42,27 @@ describe('RecCard dose-validation chip (PC1)', () => {
         doseValidations={[{ status: 'invalid', reasons: ['Given too soon: does not count.'], doesNotCount: true }]}
       />
     );
-    const chip = screen.getByText('Invalid');
+    const chip = screen.getByText('Not counted — repeat');
     expect(chip.className).toMatch(/dose-val-invalid/);
   });
 
-  it('labels an unknown-date dose "Unknown" (gray)', () => {
+  // §DOSE-LABELS: an undated dose is COUNTED, so it is green and says so.
+  it('labels an unknown-date dose "Counted — date not recorded" (green)', () => {
     render(
       <RecCard
         rec={baseRec}
         doses={[{ date: '', product: 'PCV15' }]}
-        doseValidations={[{ status: 'unknown', reasons: ['No date recorded.'] }]}
+        doseValidations={[{ status: 'unknown', undated: true, effectiveDoseNum: 1, reasons: ['No date recorded.'] }]}
       />
     );
-    const chip = screen.getByText('Unknown');
-    expect(chip.className).toMatch(/dose-val-unknown/);
+    const chip = screen.getByText('Counted — date not recorded');
+    expect(chip.className).toMatch(/dose-val-valid/);
   });
 
   // Owner decision 2026-10-31, reversing S14-6: PCV7 reads "Not counted",
   // no longer MeningoVax's "Off-window - repeat" — PCV7 is set aside, not
   // repeated, and the patient is treated as PCV-naïve.
-  it('labels a PCV7 dose "Not counted" (blue), never "Invalid" or "repeat"', () => {
+  it('labels a PCV7 dose "Not counted — PCV7" (blue), never "Invalid" or "repeat"', () => {
     render(
       <RecCard
         rec={baseRec}
@@ -71,7 +75,7 @@ describe('RecCard dose-validation chip (PC1)', () => {
         }]}
       />
     );
-    const chip = screen.getByText('Not counted');
+    const chip = screen.getByText('Not counted — PCV7');
     expect(chip.className).toMatch(/dose-val-offwindow/);
     expect(screen.queryByText('Invalid')).toBeNull();
     expect(screen.queryByText(/repeat/i)).toBeNull();
@@ -99,7 +103,7 @@ describe('RecCard recorded-dose descriptor', () => {
       <RecCard
         rec={baseRec}
         doses={[{ date: '', product: 'PCV15' }]}
-        doseValidations={[{ status: 'unknown', reasons: ['No date recorded.'] }]}
+        doseValidations={[{ status: 'unknown', undated: true, effectiveDoseNum: 1, reasons: ['No date recorded.'] }]}
         ageMonths={132}
       />
     );

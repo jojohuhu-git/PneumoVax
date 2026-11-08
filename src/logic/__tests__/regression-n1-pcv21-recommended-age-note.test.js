@@ -82,12 +82,14 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     expect(note).not.toMatch(/does not count/i);
   });
 
-  it('the chip does NOT move — it still reads "Dose 1 of 1", still green (S14-2)', () => {
+  // §DOSE-LABELS (2026-11-08) supersedes S14-2 here: the chip names the
+  // early dose, and it stays green because the dose counts.
+  it('the chip reads "Counted — given early, accepted", still green', () => {
     const d = pcv21Dose({ dob: '2008-10-16', doseDate: '2026-10-16', ageMonths: 216 });
-    expect(doseChipLabel(d, 1)).toBe('Dose 1 of 1');
+    expect(doseChipLabel(d, 1)).toBe('Counted — given early, accepted (dose 1 of 1)');
     expect(doseChipClass(d)).toBe('dose-val-chip dose-val-valid');
     // Specifically NOT a chip that means the dose does not count.
-    expect(doseChipLabel(d, 1)).not.toMatch(/repeat|Invalid|Off-window|Not counted/i);
+    expect(doseChipLabel(d, 1)).not.toMatch(/Not counted|Invalid|Off-window/i);
   });
 
   it('a dose given at 18y 6m to a patient now 19y 6m still carries the note', () => {

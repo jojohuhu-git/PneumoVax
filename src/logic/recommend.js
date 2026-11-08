@@ -21,6 +21,7 @@
 // components.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { withDisposition } from './doseDisposition.js';
 import { resolveRefs, cite, REFS } from '../data/refs.js';
 import {
   RISK_BY_ID,
@@ -5030,7 +5031,8 @@ export function recommendBeforeFold(input) {
     if (k < 0) return d;
     const said = `Repeated on ${fmtDate(ppsvAnalysis.doses[k].date)}; see that dose.`;
     // No forward-looking clause is left, so the field that marks one goes too.
-    return { ...d, forwardLookingReason: null, reasons: d.reasons.map((x) => (x === d.closingSentence ? said : x)) };
+    // §DOSE-LABELS: her word for it is "repeated", so the label says repeat.
+    return { ...d, forwardLookingReason: null, repeatedOn: ppsvAnalysis.doses[k].date, reasons: d.reasons.map((x) => (x === d.closingSentence ? said : x)) };
   };
 
   // ── §K-IC-PCV20-5Y (OWNER RULING 2026-10-31) ───────────────────────────
@@ -5101,7 +5103,9 @@ export function recommendBeforeFold(input) {
     recs,
     pcv21Geo,
     perDose: {
-      pcv: withdrawForwardLook(pcvChips.map(earlyFiveYearPcv20)),
+      // §DOSE-LABELS (2026-11-08): the last step, after every rewrite above,
+      // so the label names the verdict the dose finally carries.
+      pcv: withDisposition(withdrawForwardLook(pcvChips.map(earlyFiveYearPcv20))),
       // §C-P2-GREY / §C-P2-NOTHIRD: the chip under the thrown-out repeat drops
       // "the next dose in this series can be given from …" — a PPSV23 the
       // card no longer offers — and names the grey area where there is one.
@@ -5114,9 +5118,9 @@ export function recommendBeforeFold(input) {
       // one goes too, as `withLaterShot` does — the grid reaches this family
       // through Leah's ruling (same-day PCV + PPSV23), and the 2026-10-25
       // sweep reads a marked chip with no date as a date lost wrongly.
-      ppsv23: withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
-        ? { ...d, forwardLookingReason: null, reasons: d.reasons.map((x) => (x === d.closingSentence ? ['Not repeated.', noThird.chip].filter(Boolean).join(' ') : x)) }
-        : withLaterShot(d, i)))),
+      ppsv23: withDisposition(withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
+        ? { ...d, forwardLookingReason: null, notRepeated: true, reasons: d.reasons.map((x) => (x === d.closingSentence ? ['Not repeated.', noThird.chip].filter(Boolean).join(' ') : x)) }
+        : withLaterShot(d, i))))),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH

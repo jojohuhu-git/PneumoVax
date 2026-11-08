@@ -4080,3 +4080,53 @@ corpora record, did not change). The app advises the 9th and still **accepts** t
 
 Guards: `regression-ruling-d-2026-10-23-repeat-anchored-on-invalid-dose.test.js` and
 `regression-2026-10-24-advice-never-inside-the-four-day-grace.test.js`.
+
+## §M — The label on a recorded dose (§DOSE-LABELS, OWNER DECISION 2026-11-08)
+
+Every recorded dose starts with **exactly one** label from a closed list. That way the clinician sees
+first whether the dose counted, whether it was needed, and whether to repeat it. The reason, and
+anything a CDC/ACIP source says about it, goes under "Why this", along with any app rule made where CDC
+is silent (her answer, 2026-11-08: *"Ok to live under why this for all explanations"*).
+
+Why it was needed: her test patient (born 1954-10-01, healthy; PCV13 2019-10-17, PPSV23 2020-09-25 and
+2020-10-23, PCV20 2026-09-01) saw her second PPSV23 labelled "Dose 2", the same as an on-time dose. Its
+line read "5 years advised", which implied a second PPSV23 was due for her. None was.
+
+| Label | When (engine field) | Colour |
+|---|---|---|
+| `Dose 2` / `Dose 2 of 4` | counted, on schedule. **No line**: her choice to keep what was done before | green |
+| `Counted — given early, accepted` | counted, `earlyAdvisory` | green |
+| `Counted — not needed. No more PPSV23.` | counted, `notNeeded` (§M-L2 below) | green |
+| `Counted — product not recorded` | `status: 'unknown'` | green |
+| `Counted — date not recorded` | `status: 'unknown'`, `undated` (no grid patient: built by hand in the guard) | green |
+| `Not counted — Extra. Do not repeat.` | `extraDose`. **Her wording**, replacing "Extra dose — more than this series needs" | blue |
+| `Not counted — repeat` | invalid for age or product, or already repeated (`repeatedOn`) | red |
+| `Not counted — do not repeat` | invalid for timing (`intervalRuleId`, W1), not needed (`notNeeded`), or no further PPSV23 (`notRepeated`) | red |
+| `Not counted — PCV7` | `status: 'noncounting'` | blue |
+| `Check the date` | `recordProblem` (future, before birth, duplicate), or an undated extra dose ("— none recorded") | grey |
+
+A baby still in the PCV series also sees the dose total on a counted label that is not on schedule, e.g.
+"Counted — product not recorded (dose 1 of 4)", because the total depends on age at the first dose.
+
+**One function decides, and it decides nothing new.** `doseDisposition()` in `src/logic/doseDisposition.js`
+only names the verdict `validate.js` and `recommend.js` already reached. `recommend()` stamps it as the last
+step, after every rewrite of a dose's line. `doseChipLabel.js` turns it into words. **0 verdicts moved** in
+either saved-answer file.
+
+**Three earlier rulings, applied as they stood:**
+- The proposal was "Not counted — repeat on or after [date]". The 2026-10-24 ruling says the chip never
+  states the due date, because only the result card knows the routine date. So the label is
+  "Not counted — repeat", and the date stays on the card.
+- A dose thrown out for timing is "do not repeat" (W1, 2026-10-11): the next dose in the series is simply
+  due once the interval has passed.
+- A thrown-out PPSV23 that a later PPSV23 replaced reads "Repeated on <date>; see that dose" (§C-P2-LATER).
+  Her word is "repeated", so its label is "Not counted — repeat".
+
+**What this supersedes:** S14-2 (2026-10-11), "the chip no longer distinguishes an on-time dose from one
+given sooner than CDC advises". The owner's label list of 2026-11-08 brings that distinction back, as
+"Counted — given early, accepted".
+
+Guard: `regression-dose-labels-2026-11-08-every-dose-has-one-label.test.js` sweeps the 17,016-patient grid,
+the 18,264 impossible entries and the 60,480 typical patients. It fails if any dose has no label, if a
+counted label sits on a dose that does not count (or the reverse), or if "repeat" and "do not repeat"
+contradict the dose's own line. Proved load-bearing 2026-11-08 by four deliberate breaks, each caught.

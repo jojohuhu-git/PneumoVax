@@ -67,7 +67,7 @@ describe('S14-4C UI — a same-visit PPSV23 reads the same as one given a day la
   it('the chip reads "Extra dose", not "Dose 1"', () => {
     render(<Harness initial={ONE_VISIT} />);
     openTheCard();
-    const chip = screen.getByText('Extra dose — more than this series needs');
+    const chip = screen.getByText('Not counted — Extra. Do not repeat.');
     expect(chip.className).toMatch(/dose-val-offwindow/);
     expect(chip.className).not.toMatch(/dose-val-invalid/);
   });
@@ -101,6 +101,6 @@ describe('S14-4C UI — a same-visit PPSV23 reads the same as one given a day la
     expect(engine.perDose.ppsv23[0].effectiveDoseNum).toBe(1);
     render(<Harness initial={PPSV23_WAS_OWED} />);
     openTheCard();
-    expect(screen.queryByText('Extra dose — more than this series needs')).toBeNull();
+    expect(screen.queryByText('Not counted — Extra. Do not repeat.')).toBeNull();
   });
 });

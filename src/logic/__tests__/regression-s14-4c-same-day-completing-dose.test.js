@@ -115,7 +115,7 @@ describe('S14-4C — a PPSV23 given at the same visit as a completing PCV20/PCV2
       // The second surface. A note reading "this dose does not add to the
       // series" beside a chip reading "Dose 1 of 1" is the single-surface fix
       // CLAUDE.md forbids.
-      expect(doseChipLabel(r.ppsv23.perDose[0], 1)).toBe('Extra dose — more than this series needs');
+      expect(doseChipLabel(r.ppsv23.perDose[0], 1)).toBe('Not counted — Extra. Do not repeat.');
     });
   }
 

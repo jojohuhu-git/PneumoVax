@@ -404,13 +404,13 @@ function Adults() {
 }
 
 // ── 5. Doses on the record ───────────────────────────────────────────────
-const CHIP_CLASS = { valid: 'dose-val-valid', invalid: 'dose-val-invalid', extra: 'dose-val-offwindow' };
+const CHIP_CLASS = { valid: 'dose-val-valid', invalid: 'dose-val-invalid', extra: 'dose-val-offwindow', unknown: 'dose-val-unknown' };
 const Chip = ({ tone, children }) => <span className={`dose-val-chip ${CHIP_CLASS[tone]}`}>{children}</span>;
 
 function Spacing() {
   return (
     <>
-      <p className="rb-lead">Each dose on the record is checked against the dose before it, and the label on the dose shows the result. Children's intervals below are minimums: a dose given sooner is Invalid. Adults' are recommendations: a dose given sooner still counts. Either way, the result card advises the routine date, which can be later than the minimum.</p>
+      <p className="rb-lead">Each dose on the record is checked against the dose before it, and the label on the dose shows the result. Children's intervals below are minimums: a dose given sooner does not count. Adults' are recommendations: a dose given sooner still counts. Either way, the result card advises the routine date, which can be later than the minimum.</p>
 
       <Card id="rb-labels" title="What the label on a dose means">
         <div className="rb-legend">
@@ -424,7 +424,7 @@ function Spacing() {
       </Card>
 
       <Card id="rb-kid-gaps" title="Children: a dose given before the minimum interval does not count, with three exceptions">
-        <p className="rb-band rb-band-green"><strong>{GRACE.title}</strong> {GRACE.text} <Chip tone="invalid">Invalid</Chip></p>
+        <p className="rb-band rb-band-green"><strong>{GRACE.title}</strong> {GRACE.text} <Chip tone="invalid">{INVALID_EXAMPLE.steps[1].chip}</Chip></p>
         <div>
           <h4 className="rb-h4">The dose still counts when</h4>
           <ul className="rb-bullets">
@@ -471,7 +471,7 @@ function Spacing() {
         </div>
 
         <div className="rb-invalid-box">
-          <h4 className="rb-h4">Repeating an <Chip tone="invalid">Invalid</Chip> dose</h4>
+          <h4 className="rb-h4">A dose that does not count</h4>
           <p className="rb-label">{INVALID_EXAMPLE.lead}</p>
           <ol className="rb-steps">
             {INVALID_EXAMPLE.steps.map((st) => (

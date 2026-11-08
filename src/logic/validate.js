@@ -741,9 +741,10 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
       ), minAgeM, true);
     }
     return adviseIfBeforeRecommendedAge(
-      unknown([
+      // §DOSE-LABELS: `undated` names the label ("Counted — date not recorded").
+      { ...unknown([
         withMarker(`No date recorded — cannot verify age or interval. Counted in the series (must have been given at ≥${fmtMinAge(minAgeM)} to be valid).`, ageCites),
-      ], ageCites),
+      ], ageCites), undated: true },
       prod, null, ageMonths
     );
   }
@@ -828,7 +829,7 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
         ageCites
       );
     }
-    return unknown([`No date recorded — counted (must have been given at ≥${minAgeNoun} to be valid)[c].`], ageCites);
+    return { ...unknown([`No date recorded — counted (must have been given at ≥${minAgeNoun} to be valid)[c].`], ageCites), undated: true };
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
   // CDC's 4-day grace — PPSV23's floor is in CALENDAR years, so the grace is
@@ -1091,6 +1092,8 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
           ...result,
           effectiveDoseNum: null,
           doesNotCount: true,
+          // §DOSE-LABELS: nothing to repeat — the child never needed it.
+          notNeeded: true,
           reasons: [...result.reasons, NOT_NEEDED_HEALTHY_CHILD],
           whys: [NOT_NEEDED_HEALTHY_CHILD_WHY],
         }));

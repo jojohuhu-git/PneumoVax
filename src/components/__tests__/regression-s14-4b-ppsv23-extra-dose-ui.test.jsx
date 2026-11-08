@@ -70,7 +70,7 @@ describe('S14-4B UI — the PPSV23 extra dose is visible on the card', () => {
   it('the chip reads "Extra dose", not "Dose 1"', () => {
     render(<Harness initial={NOT_NEEDED} />);
     openTheCard();
-    const chip = screen.getByText('Extra dose — more than this series needs');
+    const chip = screen.getByText('Not counted — Extra. Do not repeat.');
     expect(chip).toBeTruthy();
     // Set aside for an administrative reason, not an error — off-window
     // blue, never the red invalid chip.
@@ -102,7 +102,7 @@ describe('S14-4B UI — the PPSV23 extra dose is visible on the card', () => {
     expect(engine.perDose.ppsv23[0].effectiveDoseNum).toBe(1);
     render(<Harness initial={COMPLETED_IT} />);
     openTheCard();
-    expect(screen.queryByText('Extra dose — more than this series needs')).toBeNull();
+    expect(screen.queryByText('Not counted — Extra. Do not repeat.')).toBeNull();
     // Two "Dose 1" chips: the PCV15, and the PPSV23 that completed it.
     expect(screen.getAllByText('Dose 1')).toHaveLength(2);
   });
