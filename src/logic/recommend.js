@@ -454,10 +454,33 @@ function sayEightWeekWait(recs) {
   });
 }
 
+// ── P2-2 (wording audit 2026-11-08; OWNER RULING 2026-11-08, "Name the date") ──
+//
+// The five-year cards say how long after which PPSV23. "First PPSV23" is
+// right when the first PPSV23 on the record counted. When it did not — a
+// 7-year-old with asplenia whose PPSV23 at 2 was given the same day as her
+// PCV13 (Invalid), then a PPSV23 today that counts — the clock runs from
+// today's dose, and "first PPSV23" reads as the 2021 one: 2021 + 5 years is
+// today, so a reader expects the dose now. Asked, she chose to name the date:
+// "≥5 years after the PPSV23 of Nov 8, 2026". Only that case changes; where the
+// first PPSV23 counted, the words stay as they were.
+//
+// The DATE is not touched — `icPostPpsv23DueState` already runs from the
+// first COUNTED PPSV23. This only says which dose that is. Read off
+// `ppsv.firstOnRecordDidNotCount`, set once where the summary is built.
+// Guard: regression-p2-2-2026-11-08-five-years-names-the-ppsv23-that-counted.
+const FIRST_PPSV23_WORDS = { label: 'first PPSV23', short: 'first', sentence: 'the first PPSV23' };
+function fiveYearsFrom(ppsv) {
+  const counted = ppsv?.firstOnRecordDidNotCount ? ppsv.effective?.[0]?.date : null;
+  if (!counted) return FIRST_PPSV23_WORDS;
+  const named = `the PPSV23 of ${fmtDate(counted)}`;
+  return { label: named, short: named, sentence: named };
+}
+
 // The sentence both the PCV20 card and its 2nd-PPSV23 alternative now carry.
 // One string so the two cards cannot drift apart in wording the way their
 // DATES had drifted apart before Finding A.
-const IC_POST_PPSV23_LEAD = `Give ONE further pneumococcal dose — either 1 dose of PCV20 or a 2nd PPSV23 — ≥${LONG_GAP_WORDS} after the first PPSV23 [c]. Choose ONE option, not both.`;
+const IC_POST_PPSV23_LEAD = (from = FIRST_PPSV23_WORDS) => `Give ONE further pneumococcal dose — either 1 dose of PCV20 or a 2nd PPSV23 — ≥${LONG_GAP_WORDS} after ${from.sentence} [c]. Choose ONE option, not both.`;
 
 // P2 (2026-10-30, OWNER RULING on "Sofia"): an immunocompromised child who has
 // had TWO counting PPSV23 doses is never offered a third (her ruling of
@@ -465,8 +488,8 @@ const IC_POST_PPSV23_LEAD = `Give ONE further pneumococcal dose — either 1 dos
 // finished — it orders "1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after
 // the most recent PCV13 dose" — so the PCV20 is still owed, alone. The lead
 // says why the other option is missing, so its absence is not a mystery.
-const IC_TWO_PPSV23_PCV20_LEAD = `Give 1 dose of PCV20 ≥${LONG_GAP_WORDS} after the first PPSV23 [c]. Two PPSV23 doses have already been given, so a PPSV23 is not offered — no third PPSV23 is given.`;
-const icFurtherDoseLead = (noThird) => (noThird ? IC_TWO_PPSV23_PCV20_LEAD : IC_POST_PPSV23_LEAD);
+const IC_TWO_PPSV23_PCV20_LEAD = (from = FIRST_PPSV23_WORDS) => `Give 1 dose of PCV20 ≥${LONG_GAP_WORDS} after ${from.sentence} [c]. Two PPSV23 doses have already been given, so a PPSV23 is not offered — no third PPSV23 is given.`;
+const icFurtherDoseLead = (noThird, from) => (noThird ? IC_TWO_PPSV23_PCV20_LEAD(from) : IC_POST_PPSV23_LEAD(from));
 const whicheverProduct = (noThird) => (noThird ? '' : ', whichever product is chosen');
 
 // ── C8 (2026-10-23): the five-year step, cited on BOTH of its cards ──────
@@ -482,9 +505,9 @@ const whicheverProduct = (noThird) => (noThird ? '' : ', whichever product is ch
 // PCV20 card speaks for this one too. WHICH row that is depends on the child's
 // history, and the caller passes it: there are four of them, one per branch,
 // and a card must quote the branch its own patient is in (FINDING K, FINDING N).
-const icFiveYearAlternative = (rowCite) => ({
+const icFiveYearAlternative = (rowCite, from = FIRST_PPSV23_WORDS) => ({
   note: {
-    lead: `Alternative to the PCV20 above: a 2nd PPSV23 ≥${LONG_GAP_WORDS} after the first PPSV23 [c]. Choose ONE option (PCV20 or 2nd PPSV23), not both.`,
+    lead: `Alternative to the PCV20 above: a 2nd PPSV23 ≥${LONG_GAP_WORDS} after ${from.sentence} [c]. Choose ONE option (PCV20 or 2nd PPSV23), not both.`,
     detail: "CDC's own row for this history names both options in one sentence and puts the second PPSV23 at that same five years [c].",
   },
   noteCites: [cite('pedsIcPpsvWaitFiveYears'), rowCite],
@@ -2739,14 +2762,14 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       const icPost = icPostPpsv23DueState(ppsv, anchorPneumo, today);
       out.push(rec({
         vaccine: 'PCV', status: 'risk-based',
-        doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after first PPSV23)`,
+        doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
         dueToday: icPost.dueToday,
         earliestNextDate: icPost.earliestNextDate,
         minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)'],
         note: {
-          lead: icFurtherDoseLead(icNoThirdPpsv23),
-          detail: `This is an immunocompromising at-risk child 24–71 months who has had the at-risk PCV catch-up and PPSV23. For an immunocompromising condition the PPSV23 is followed by one further pneumococcal dose; it is not the end of the series. CDC puts that dose at ${LONG_GAP_WORDS} after the first PPSV23${whicheverProduct(icNoThirdPpsv23)}. CDC's schedule notes state that further dose in the same row, for this history [c].`,
+          lead: icFurtherDoseLead(icNoThirdPpsv23, fiveYearsFrom(ppsv)),
+          detail: `This is an immunocompromising at-risk child 24–71 months who has had the at-risk PCV catch-up and PPSV23. For an immunocompromising condition the PPSV23 is followed by one further pneumococcal dose; it is not the end of the series. CDC puts that dose at ${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).sentence}${whicheverProduct(icNoThirdPpsv23)}. CDC's schedule notes state that further dose in the same row, for this history [c].`,
         },
         noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv20orPpsv23')],
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
@@ -2754,12 +2777,12 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       // P2: never a third PPSV23.
       if (!icNoThirdPpsv23) out.push(rec({
         vaccine: 'PPSV23', status: 'risk-based',
-        doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after first)`,
+        doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).short})`,
         dueToday: icPost.dueToday,
         earliestNextDate: icPost.earliestNextDate,
         minIntervalMonths: MO60,
         brands: ['PPSV23 (Pneumovax 23)'],
-        ...icFiveYearAlternative(cite('pedsIcPcv20orPpsv23')),
+        ...icFiveYearAlternative(cite('pedsIcPcv20orPpsv23'), fiveYearsFrom(ppsv)),
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
       }));
       return out;
@@ -3002,32 +3025,32 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     const icBefore6 = icPostPpsv23DueState(ppsv, anchorPneumo, today);
     out.push(withEightWeekWait(rec({
       vaccine: 'PCV', status: 'risk-based',
-      doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after first PPSV23)`,
+      doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
       dueToday: icBefore6.dueToday,
       earliestNextDate: icBefore6.earliestNextDate,
       minIntervalMonths: MO60,
       brands: ['PCV20 (Prevnar 20)'],
       note: {
-        lead: IC_POST_PPSV23_LEAD,
+        lead: IC_POST_PPSV23_LEAD(fiveYearsFrom(ppsv)),
         // Two [c] markers, two citations, in order: the lead's five-year rule,
         // then the history this child actually has. The second one is not
         // decoration -- it is what stops this card being cited to the "PCV13
         // only at or after age 6 years" sentence, which is a true statement
         // about the opposite history, and is asserted by
         // regression-2026-10-17-ic-child-with-ppsv23-is-not-complete.js.
-        detail: `This is an immunocompromising at-risk child whose conjugate doses were all given before age 6, with no PCV20, and who has already received one PPSV23 [c]. For an immunocompromising condition that PPSV23 is followed by one further pneumococcal dose — it is not the end of the series. CDC puts that dose at ${LONG_GAP_WORDS} after the first PPSV23, whichever product is chosen. CDC's schedule notes state that further dose in the same row, for this history [c].`,
+        detail: `This is an immunocompromising at-risk child whose conjugate doses were all given before age 6, with no PCV20, and who has already received one PPSV23 [c]. For an immunocompromising condition that PPSV23 is followed by one further pneumococcal dose — it is not the end of the series. CDC puts that dose at ${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).sentence}, whichever product is chosen. CDC's schedule notes state that further dose in the same row, for this history [c].`,
       },
       noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsBefore6NoPcv20'), cite('pedsIcBefore6NoPcv20At6to18')],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }), icBefore6, pcv, anchorPneumo));
     out.push(withEightWeekWait(rec({
       vaccine: 'PPSV23', status: 'risk-based',
-      doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after first)`,
+      doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).short})`,
       dueToday: icBefore6.dueToday,
       earliestNextDate: icBefore6.earliestNextDate,
       minIntervalMonths: MO60,
       brands: ['PPSV23 (Pneumovax 23)'],
-      ...icFiveYearAlternative(cite('pedsIcBefore6NoPcv20At6to18')),
+      ...icFiveYearAlternative(cite('pedsIcBefore6NoPcv20At6to18'), fiveYearsFrom(ppsv)),
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }), icBefore6, pcv, anchorPneumo));
     return out;
@@ -3131,22 +3154,22 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       const icCompleted = icPostPpsv23DueState(ppsv, anchorPneumo, today);
       const { dueToday, earliestNextDate } = icCompleted;
       out.push(withEightWeekWait(rec({
-        vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after first PPSV23)`,
+        vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)'],
         note: {
-          lead: icFurtherDoseLead(icNoThirdPpsv23),
-          detail: `This applies to an immunocompromising at-risk child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} and has already received PPSV23. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23${whicheverProduct(icNoThirdPpsv23)}. CDC's schedule notes state that further dose in the same row, for this history [c].`,
+          lead: icFurtherDoseLead(icNoThirdPpsv23, fiveYearsFrom(ppsv)),
+          detail: `This applies to an immunocompromising at-risk child who completed ${words.unrecorded ? 'the PCV series' : 'PCV13/15'} and has already received PPSV23. CDC puts the further dose at ${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).sentence}${whicheverProduct(icNoThirdPpsv23)}. CDC's schedule notes state that further dose in the same row, for this history [c].`,
         },
         noteCites: [cite('pedsIcPpsvWaitFiveYears'), before6Cite()],
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
       }), icCompleted, pcv, anchorPneumo));
       // P2: never a third PPSV23.
       if (!icNoThirdPpsv23) out.push(withEightWeekWait(rec({
-        vaccine: 'PPSV23', status: 'risk-based', doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after first)`,
+        vaccine: 'PPSV23', status: 'risk-based', doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).short})`,
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PPSV23 (Pneumovax 23)'],
-        ...icFiveYearAlternative(before6Cite()),
+        ...icFiveYearAlternative(before6Cite(), fiveYearsFrom(ppsv)),
         refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
       }), icCompleted, pcv, anchorPneumo));
       return out;
@@ -3315,27 +3338,27 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     // split on it.
     const icState = icPostPpsv23DueState(ppsv, anchorPneumo, today);
     out.push(withEightWeekWait(rec({
-      vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after first PPSV23)`,
+      vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
       dueToday: icState.dueToday,
       earliestNextDate: icState.earliestNextDate,
       minIntervalMonths: MO60,
       brands: ['PCV20 (Prevnar 20)'],
       note: {
-        lead: icFurtherDoseLead(icNoThirdPpsv23),
+        lead: icFurtherDoseLead(icNoThirdPpsv23, fiveYearsFrom(ppsv)),
         // The IC twin of FINDING H, 228 of its 456 cards product-wrong. Found
         // by sweeping the whole class rather than the one card reported — the
         // spot-check was a sample.
-        detail: `This applies to an immunocompromising at-risk child whose conjugate ${pcv.count === 1 ? 'dose was' : 'doses were'} ${words.label}${someConjugateBefore6 ? '' : ', given at or after age 6,'} and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after the first PPSV23${whicheverProduct(icNoThirdPpsv23)}.${bridge.sentence}`,
+        detail: `This applies to an immunocompromising at-risk child whose conjugate ${pcv.count === 1 ? 'dose was' : 'doses were'} ${words.label}${someConjugateBefore6 ? '' : ', given at or after age 6,'} and who has already received PPSV23 [c]. CDC puts the further dose at ${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).sentence}${whicheverProduct(icNoThirdPpsv23)}.${bridge.sentence}`,
       },
       noteCites: [cite('pedsIcPpsvWaitFiveYears'), cite('pedsIcPcv13AndPpsvAt6'), ...bridge.cites],
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo', ...bridge.refKeys], 'child'),
     }), icState, pcv, anchorPneumo));
     // P2: never a third PPSV23.
     if (!icNoThirdPpsv23) out.push(withEightWeekWait(rec({
-      vaccine: 'PPSV23', status: 'risk-based', doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after first)`,
+      vaccine: 'PPSV23', status: 'risk-based', doseLabel: `2nd PPSV23 (alternative, ≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).short})`,
       dueToday: icState.dueToday, earliestNextDate: icState.earliestNextDate, minIntervalMonths: MO60,
       brands: ['PPSV23 (Pneumovax 23)'],
-      ...icFiveYearAlternative(cite('pedsIcPcv13AndPpsvAt6')),
+      ...icFiveYearAlternative(cite('pedsIcPcv13AndPpsvAt6'), fiveYearsFrom(ppsv)),
       refs: collectRefs(riskIds, ['cdcRiskIndications', 'cdcChildPneumo'], 'child'),
     }), icState, pcv, anchorPneumo));
     return out;
@@ -4757,6 +4780,14 @@ export function recommendBeforeFold(input) {
   pcv.extraConjugate = pcvAnalysis.extraConjugate;
   const ppsv = {
     count: effectivePpsv.length,
+    // P2-2 (2026-11-08): the earliest dated PPSV23 on the record (a record
+    // problem — a future date, or one before birth — is not on it) is earlier
+    // than the first that COUNTED. Read only by `fiveYearsFrom`, for words.
+    firstOnRecordDidNotCount: (() => {
+      const onRecord = ppsvAnalysis.doses.filter((d, i) => d?.date && !ppsvAnalysis.perDose[i]?.recordProblem).map((d) => d.date).sort();
+      const counted = effectivePpsv.map((d) => d.date).filter(Boolean).sort();
+      return onRecord.length > 0 && counted.length > 0 && onRecord[0] < counted[0];
+    })(),
     // P2-10: nothing on the record at all, counted or not. An untouched row in
     // the form is not a dose (`dropBlankDoseRows`).
     noDoseOnRecord: dropBlankDoseRows(rawPcv).length === 0 && dropBlankDoseRows(rawPpsv).length === 0,

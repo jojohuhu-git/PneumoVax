@@ -1,6 +1,10 @@
 # Fix queue: card wording against the card's own date and against the Rulebook (2026-11-08)
 
-> **STATUS: NOT STARTED.** Audit 3 of the three proposed on 2026-11-01 ("a sweep of card wording against
+> **STATUS (2026-11-08, later the same day): DONE.** P2-1 and P2-NOTE-1 in `e82696a`; P2-2 in the
+> commit after it, on the owner's ruling "Name the date". P2-PARK-1 parked as recommended (see the
+> handoff). Tests 2,435 -> 2,446 passing, 0 failed; 0 verdicts moved.
+>
+> Audit 3 of the three proposed on 2026-11-01 ("a sweep of card wording against
 > the Rulebook and the 'complete' rule"). Read-only audit; nothing in `src/` was changed. The owner chose
 > this audit first on 2026-11-08 ("Wording first"). Audits 1 and 2 status: see the end of this file.
 
@@ -98,7 +102,12 @@ The date is right: it counts from the PPSV23 that counted. But the record's firs
 Dose 1 chip says otherwise.
 
 **How many:** 46 typical patients and 6 grid patients, 2 cards each (104 cards). Wording only.
-**Fix options (owner's wording choice):** "≥5 years after the first PPSV23 that counted", or name it:
+**OWNER RULING 2026-11-08: "Name the date"** — only where the first PPSV23 on the record did not
+count; elsewhere "first PPSV23" stays. Built as `fiveYearsFrom(ppsv)` in `recommend.js`, used by all
+four sites. Measured after: the 104 flagged cards read 0 (`gaps3.mjs` E1 "first"); 48 more cards with
+the same history, which already named their date in a "wait until" line, also name the counted dose;
+12 grid patients' prose changed (`proseDiff`), each only by those words.
+**Fix options (as put to the owner):** "≥5 years after the first PPSV23 that counted", or name it:
 "≥5 years after the PPSV23 of Nov 8, 2026". Apply to both labels, and to the detail sentence ("≥5 years
 after the first PPSV23 [c]").
 **Suspected site:** `recommend.js` builds this pair of labels in FOUR places (lines 2742/2757,
