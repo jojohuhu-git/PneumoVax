@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-07** by `handoff-2026-11-07-kai-pcv15-ppsv23-age-50.md`. #138 is merged, and two of its open items (the 66 invalid-PCV20 cards, and PCV15 + PPSV23 on the 5–18 card) are done in #139. Resume from the newer file.
+
 # PneumoVax — Handoff after Mila and Theo: the Job Aid button on toddler cards (2026-11-07)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page for pneumococcal vaccine advice.
