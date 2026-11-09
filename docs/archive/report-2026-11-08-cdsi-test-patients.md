@@ -79,6 +79,19 @@ months and asks for a second dose. You ruled the same question for the **12-mont
 then PCV13: CDSI 4.65 calls this complete; the app asks for PCV20. CDC's sentence the app cites is
 written for *one* PPSV23, so no CDC row names this history. (2016-UC-0171.)
 
+> **Settled 2026-11-09 — the app stays as it is (PCV20).** This was never new: it is the history
+> of the owner's **"Sofia"** ruling of 2026-10-30 (`CLINICAL_SPEC.md` §C-P2 — PPSV23 twice, *then*
+> the conjugate: PCV20 only, never a third PPSV23). Shown this patient, the owner first proposed
+> "complete, re-evaluate at 19", quoting CDC's *"Received 1 dose PCV13 and 1 dose PPSV23 at or
+> after age 6 years: no further doses of any PCV or PPSV23 indicated."* Read live that day, that
+> sentence is in the **non-immunocompromised** list; the immunocompromised list's same row reads
+> *"administer 1 dose PCV20 or 1 dose PPSV23 at least 8 weeks after the most recent PCV13 dose and
+> at least 5 years after dose 1 PPSV23."* Shown both, she answered **"No, keep PCV20."** At 19 the
+> app already gives her adult plan (review at 50, or PCV20/PCV21 ≥5 years after the last dose),
+> because both PPSV23 doses count for an immunocompromised child (Leo, 2026-10-29). CDSI 4.65's own
+> rules build a PPSV-PPSV-PCV series that ends at the conjugate, so this difference with CDSI is
+> deliberate and now listed as such in `scripts/cdsi/runTestCases.mjs`.
+
 ## Limits of this run
 
 - CDC's condition codes were matched to the app's boxes by hand; the choices are written in the
