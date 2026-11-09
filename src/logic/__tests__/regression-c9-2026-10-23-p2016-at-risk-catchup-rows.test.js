@@ -179,7 +179,9 @@ describe('every at-risk catch-up card in the grid is balanced and credited', () 
         // chips themselves carry `short`; the citations do not.
         if (!cites.some((x) => x.doc === 'immunize.org p2016')) uncredited.push(c.key);
         // The card's own sentence says which row it used; the quote must agree.
-        const saysTwoDoses = /Give 2 doses of PCV20 or PCV15/.test(text);
+        // "PCV20 or PCV15", or "PCV20" alone after a thrown-out PPSV23 (Kai,
+        // §C-P2-NOTHIRD; Max, §C-P2-R4) — the same row either way.
+        const saysTwoDoses = /Give 2 doses of PCV20( or PCV15)?,/.test(text);
         const row = cites[1];
         const rowIsIncomplete = row?.key === 'p2016AtRiskCatchup24to71Incomplete';
         if (saysTwoDoses !== rowIsIncomplete) wrongRow.push(c.key);

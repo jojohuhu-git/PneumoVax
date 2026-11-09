@@ -18,15 +18,12 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 export const CAUSES = {
-  // Two of R4's three shapes were fixed 2026-11-08 (CLINICAL_SPEC.md §C-P2-R4).
-  // What remains is Max's family: the 24-71-month catch-up card offers PCV15
-  // ("add PPSV23 ≥8 weeks after") while a PPSV23 is held 5 years, and after a
-  // PCV15 the next card gives PCV20 instead. Put to the owner. The sorting
-  // rules below still name the fixed shapes, so their return is sorted, and the
-  // gate tests fail on it.
+  // All three R4 shapes were fixed 2026-11-08 (CLINICAL_SPEC.md §C-P2-R4; the
+  // third by the owner's ruling on Max, "PCV20 only"). 0 patients. Kept, and
+  // still 'real', so a return is sorted here and the gate tests fail on it.
   'R4-thrown-out-ppsv23-chip': {
     class: 'real',
-    title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other (left: the 24-71-month card offering PCV15, \"Max\")",
+    title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other (fixed 2026-11-08; a return is a regression)",
   },
   // R6 is fixed for both families: the one she was shown first (§B-OPTIONB19,
   // Cora: the dose at 19, in view) and its leftover (§B-OPTIONB50, Owen,

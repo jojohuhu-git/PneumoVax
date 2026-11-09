@@ -128,7 +128,8 @@ describe('§C-P2-ONE — what it does NOT touch', () => {
     expect(live(out).map((c) => c.doseLabel.slice(0, 9))).toEqual(['Option A:', 'Option B:']);
   });
 
-  it('the 24-71-month catch-up card: PCV20 or PCV15, unchanged (not her card)', () => {
+  it('the 24-71-month catch-up card: PCV20 only since the owner\'s ruling on Max (2026-11-08, §C-P2-R4)', () => {
+    // Pinned "unchanged (not her card)" until she widened the ruling to this card.
     // At-risk 3-year-old, 2 baby doses, a catch-up PCV15, then PPSV23 too soon.
     const d = '2023-07-15';
     const c1 = addDays(TODAY, -61);
@@ -141,7 +142,7 @@ describe('§C-P2-ONE — what it does NOT touch', () => {
     expect(out.perDose.ppsv23[0].intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
     const card = live(out)[0];
     expect(card.noteCites[0].key).toBe('pedsRiskIncompleteCatchup');
-    expect(card.brands).toEqual(['PCV20 (Prevnar 20)', 'PCV15 (Vaxneuvance)']);
+    expect(card.brands).toEqual(['PCV20 (Prevnar 20)']);
   });
 
   it('an adult whose childhood PPSV23 came too soon: the adult card, unchanged', () => {

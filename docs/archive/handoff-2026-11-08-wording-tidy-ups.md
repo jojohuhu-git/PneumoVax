@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-08** by `handoff-2026-11-08-r4-and-meningovax-plan.md`. Do not resume from this file.
+
 # PneumoVax — Handoff after the optional wording tidy-ups (2026-11-08)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Read `CLAUDE.md` first.

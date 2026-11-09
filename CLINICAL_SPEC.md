@@ -1359,7 +1359,9 @@ and cite are carried over (owner rulings 2026-10-18).
 out by `CHILD-PPSV23-AFTER-PCV`, on the Option A PCV20 / Option B PPSV23 card. NOT covered, each
 pinned unchanged: a single PPSV23 thrown out for being given under age 2; the 24–71-month
 catch-up card; an adult whose childhood PPSV23 came too soon; and **two** thrown-out shots on
-the at/after-6 card (still offered a third PPSV23 as Option B — parked for her).
+the at/after-6 card (still offered a third PPSV23 as Option B — parked for her). **Since widened by
+her:** adults (Sam, §C-P2-ONE-ADULT, 2026-11-07) and the 24–71-month catch-up card (Max, §C-P2-R4,
+2026-11-08).
 
 **Measured:** **72 / 17,016** verdicts — the PPSV23 option removed, the PCV20 option unchanged:
 children aged 6, 18 and 18y11m, 8 risk groups × 9, whose PPSV23 is on the day of or the day
@@ -1581,18 +1583,31 @@ given today is Dec 6. Both waits apply, so the hold now dates the step only when
 later than 8 weeks after Option B-1 could be given. A later look then found the date gone (check
 7) and the two options disagreeing (check 4). Both are fixed.
 
-**3. Not changed: put to the owner.** **Max, 5, no spleen:** one PCV (product not recorded) and
-a PPSV23 on the same day a year ago, so the PPSV23 does not count. The 24–71-month catch-up card
-offers PCV20 or PCV15, and says *"If PCV15 is used, add PPSV23 ≥8 weeks after"*. But a PPSV23 is
-held until Oct 2030 (§C-P2-FIVE). If PCV15 is given, the next card asks for PCV20 instead (Leah's
-§C-P2-ONE answer), so choosing PCV15 costs him an extra dose. §C-P2-ONE left this card out on
-purpose. 16 grid patients on check 5 and 5 on check 2, 0 typical.
+**3. Max — OWNER RULING 2026-11-08: "PCV20 only".** **Max, 5, no spleen:** one PCV (product not
+recorded) and a PPSV23 on the same day a year ago, so the PPSV23 does not count. The 24–71-month catch-up
+card offered PCV20 or PCV15, saying *"If PCV15 is used, add PPSV23 ≥8 weeks after"*. But a PPSV23 is
+held to Oct 2030 (§C-P2-FIVE), and once a PCV15 was given the next card asked for PCV20 in the PPSV23's
+place (Leah's §C-P2-ONE answer). So choosing PCV15 cost him one extra shot, while PCV20 today finishes
+the series. Shown this, she chose **"PCV20 only"**. The card is now Kai's rebuild of the same card
+(§C-P2-NOTHIRD): *"Give 2 doses of PCV20 …"*, and under "Why this" *"PCV15 is not offered: it would need
+a PPSV23 after it — a second PPSV23 shot."* With no PPSV23 left to offer, the line under his PPSV23 also
+loses its 2030 date (shape 1's rule). **Scope, as worked:** ONE PPSV23 thrown out for coming too soon
+after a PCV, on the 24–71-month card. A single PPSV23 thrown out for being given under age 2 keeps PCV15
+(not put to her; pinned in the guard). Measured against the R4 commit: **16 / 17,016** verdicts (Max's
+family: 5-year-olds, 8 risk groups × 2 histories) and **40 / 18,264** record-problem rows. Each one only
+loses PCV15 from the card and the PPSV23 line's date, checked field by field. The 2026-10-25 sweep's
+`kept` fell 1715 → 1699. Guard: `regression-2026-11-08-max-catchup-card-pcv20-only.test.js`.
 
-**Measured against `main`.** **51 / 17,016** verdicts and **48 / 18,264** record-problem rows
+**And one clause removed.** Shape 1's first draft also kept the PPSV23 date where a card offered PCV15.
+After Max's ruling, 0 patients over the grid and every typical patient reach that, so it was removed: a
+rule nothing can reach cannot be tested. The rule is now just "no card asks for a PPSV23".
+
+**Shapes 1 and 2, measured against `main`.** **51 / 17,016** verdicts and **48 / 18,264** record-problem rows
 moved. Each one is one of two changes, checked field by field: 35 lose one sentence under a
 PPSV23 (all 19-year-olds), and 16 + 48 lose Option B-2's date (all 6-year-olds). Prose: **99 /
 35,280** lines, each differing only by that one dropped sentence. The whole-app R4 count fell from
-57 grid + 60 typical to **16 grid + 0 typical** (check 5 only, the Max family). The 2026-10-25
+57 grid + 60 typical to 16 grid + 0 typical (check 5 only, the Max family), and to **0** after Max's
+ruling. The 2026-10-25
 sweep's `kept` fell 1725 → 1715. Guard:
 `regression-2026-11-08-r4-thrown-out-ppsv23-line-and-option-b2.test.js`. Each new clause was
 broken on purpose, and the test caught every break.
@@ -1961,9 +1976,9 @@ joined the same day, in two halves: its forward half (a card's advised date stil
 comes) rides on that walk, and its later-look half (the same record opened on later days) is
 `whole-app-stable-over-time-gate.test.js` (R4 was pinned there at 16 grid patients until §C-P2-R4 removed it, 2026-11-08).
 Check 5 ("card and chip agree": a recorded dose's chip and the card name one date for the next dose)
-joined it later that day on the same walk. Its only fault over all 77,496 patients is R4, pinned
-at 41 grid patients and 5 of the sampled typical ones until §C-P2-R4 (2026-11-08) cut it to 16 grid
-and 0 typical: the Max family, waiting on the owner.
+joined it later that day on the same walk. Its only fault over all 77,496 patients was R4, pinned
+at 41 grid patients and 5 of the sampled typical ones until §C-P2-R4 and the owner's ruling on Max
+(both 2026-11-08) took it to 0. Check 5 now allows no exceptions.
 
 ---
 

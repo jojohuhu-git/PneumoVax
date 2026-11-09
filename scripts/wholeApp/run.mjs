@@ -112,7 +112,11 @@ function report(rows, causes, totals) {
   for (const r of unsorted.slice(0, Number(arg('show', 40)))) {
     console.log(`  [${r.check}] ${r.kind} — ${r.group}  (grid ${r.grid}, typical ${r.typical})`);
   }
-  return fails.some((r) => CAUSES[r.cause]?.class !== 'ruling') || dead.length > 0;
+  // Only what the header promises: a real or unsorted fault (or a dead age
+  // line). 'info' groups — an age line doing its job, P2-9's "Routine then
+  // Catch-up" — are not faults; they made this exit 1 on a clean run until
+  // 2026-11-08, the first run with no real fault left to hide it.
+  return fails.some((r) => ['real', 'unsorted'].includes(CAUSES[r.cause]?.class)) || dead.length > 0;
 }
 
 if (process.argv[2] === '--shard') {

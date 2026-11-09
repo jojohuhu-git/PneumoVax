@@ -11,10 +11,10 @@
 //    repeated. The line beside that label still read "Next dose from Oct 13,
 //    2026 at the earliest" — a date for a PPSV23 nothing will ask for. The same
 //    for a CSF leak (the 5-year PCV20/PCV21 card) and HIV (the 1-year card).
-//    The date now goes whenever no card asks for a PPSV23 and none offers
-//    PCV15, the one vaccine that always needs a PPSV23 after it (CLAUDE.md,
-//    "PCV15 Always Requires PPSV23"). Where a card does offer PCV15, the date
-//    stays: that is the third R4 shape, which is put to the owner.
+//    The date now goes whenever no card asks for a PPSV23. (A first draft also
+//    kept it where a card offered PCV15; after the owner's ruling on Max — the
+//    third R4 shape, `regression-2026-11-08-max-catchup-card-pcv20-only` — no
+//    patient reaches that, so the clause was removed.)
 //
 // 2. OPTION B's PPSV23 STEP WAS DATED BEFORE ITS OWN FIRST STEP ALLOWED.
 //    Ben, 6, no spleen, no conjugate that counted, a PPSV23 at 12 months (too
@@ -37,9 +37,11 @@ const CSF = { dob: '2007-10-11', riskIds: ['csf_leak'],
   pcvDoses: [{ product: 'PCV13', date: '2021-10-12' }], ppsv23Doses: [{ date: '2016-10-13' }, { date: '2021-10-13' }] };
 const HIV = { dob: '2007-10-11', riskIds: ['hiv'],
   pcvDoses: [{ product: 'PCV13', date: '2021-10-12' }], ppsv23Doses: [{ date: '2021-10-13' }] };
-// The third R4 shape, not changed here: a card that offers PCV15.
-const MAX = { dob: '2021-10-11', riskIds: ['asplenia'],
-  pcvDoses: [{ product: '', date: '2025-10-11' }], ppsv23Doses: [{ date: '2025-10-11' }] };
+// The control: 18, no spleen, first PPSV23 counted at 8, second thrown out a day
+// after a PCV13 — her card still offers a 2nd PPSV23, so her line keeps its date.
+const TEEN = { dob: '2008-10-11', riskIds: ['asplenia'],
+  pcvDoses: [{ product: 'PCV13', date: '2021-10-12' }, { product: 'PCV13', date: '2021-11-09' }],
+  ppsv23Doses: [{ date: '2016-10-13' }, { date: '2021-10-13' }] };
 const BEN = { dob: '2020-10-11', riskIds: ['asplenia'], pcvDoses: [], ppsv23Doses: [{ date: '2021-10-13' }] };
 const BEN_LATER = { ...BEN, ppsv23Doses: [{ date: '2022-09-11' }] };
 
@@ -68,10 +70,10 @@ describe('R4 shape 1: the line under a thrown-out PPSV23 names no date the cards
     expect(text(card)).toContain('No PPSV23 is needed after it.');
   });
 
-  it('the control: a card that offers PCV15 keeps the date (the shape put to the owner)', () => {
-    const out = run(MAX);
-    expect(out.recs.some((r) => (r.brands ?? []).some((b) => String(b).startsWith('PCV15')))).toBe(true);
-    expect(lineOf(out.perDose.ppsv23[0])).toContain('Next dose from Oct 11, 2030 at the earliest.');
+  it('the control: a card that still asks for a PPSV23 keeps the date', () => {
+    const out = run(TEEN);
+    expect(out.recs.some((r) => r.vaccine === 'PPSV23')).toBe(true);
+    expect(lineOf(out.perDose.ppsv23[1])).toContain('Next dose from Oct 13, 2026 at the earliest.');
   });
 });
 
