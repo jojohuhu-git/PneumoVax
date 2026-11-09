@@ -1,3 +1,5 @@
+> **DONE (banner added 2026-11-08).** PR #143 merged (`670e888`). Do not resume from this file.
+
 # PneumoVax — Handoff after Audit 1's second half, children near an age line (2026-11-08)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. A client-side React page that gives pneumococcal vaccine advice.

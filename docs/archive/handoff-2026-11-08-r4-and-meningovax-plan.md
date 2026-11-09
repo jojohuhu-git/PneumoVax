@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-08** by `handoff-2026-11-08-meningovax-port-plan-review.md`. PR #147 has merged; the MeningoVax plan was reviewed and rewritten into nine phases; the open PneumoVax items below are carried into the new handoff. Do not resume from this file.
+
 # PneumoVax — Handoff after R4 and the MeningoVax port plan draft (2026-11-08)
 
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Read `CLAUDE.md` first.

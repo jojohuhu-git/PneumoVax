@@ -1,8 +1,16 @@
-# Plan — bringing PneumoVax's way of working to MeningoVax (DRAFT, 2026-11-08)
+# Plan — bringing PneumoVax's way of working to MeningoVax (REVIEWED DRAFT, 2026-11-08)
 
-**Status: draft for the owner to review. Nothing in MeningoVax has been changed.** Revised the same day to list every presentation decision (the section "Every PneumoVax presentation decision").
-MeningoVax repo: `/Users/joannehuang/Downloads/MeningoVax-main`, `main` at `c1118c1` (2026-10-17).
-PneumoVax's `main` has 50 commits since that date (counted 2026-11-08 with `git log --since`). This is the one real plan for the port; when
+**Status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.**
+Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
+ledger; (3) **a review** at her request (*"Rulebook needs to have the same design philosophies.
+Rules for patients need to be consistent as well as logic for when doses need to be repeated"*),
+which added the section "Review of the draft", the section "How every dose is decided", and
+replaced the eight steps with **nine phases, each with its sessions, its owner stop, and an
+estimate**. The tables A–F and the ledger are kept as they were.
+
+MeningoVax repo: `/Users/joannehuang/Downloads/MeningoVax-main`, `main` at `c1118c1` (2026-10-17),
+working tree clean on 2026-11-08. PneumoVax's `main` has **83** commits after MeningoVax's twin
+`3dc0264` (82 in the ledger plus #147, added below). This is the one real plan for the port; when
 work starts, MeningoVax gets a pointer file to it, not a copy (memory `both-apps-docs-are-pointers-not-copies`).
 
 ## The goal, in the owner's words (2026-11-08)
@@ -17,6 +25,87 @@ work starts, MeningoVax gets a pointer file to it, not a copy (memory `both-apps
 > flagged as to whether they should be repeated or not repeated in future doses. Explanations
 > under why this or next to dose chips should be stated in simple clear clinical language and
 > should not sound AI generated.
+
+## Review of the draft (2026-11-08)
+
+Done by reading MeningoVax's `validate.js`, `intervals.js`, `doseChipLabel.js`, its rulebook
+(`docs/agent/meningococcal-rules-summary.md`) and its rule-docs test, and by reading CDC's own
+forecasting rule set (CDSI v4.64, local copy at `~/Downloads/Version 4.64 - 508/XML/`, the two
+meningococcal files). Each finding below changes what a phase must do.
+
+| # | What the draft said | What is actually there | What changes in the plan |
+|---|---|---|---|
+| R-1 | "50 commits" in the header | 82 in the ledger, 83 with #147 | Header corrected; #147 added to the ledger |
+| R-2 | Ruling D is a *recommendation* fix (step 3): the card advises 9/26, CDC gives 10/17 | **The validator also measures from the last dose that counted** (`prevKeptDated`, `validate.js` lines 597, 920, 990, 1035; the "last-kept" walk, 1074–1236). MeningoVax's own rulebook states the opposite of ACIP as a rule (§4: *"if an early dose is dropped, a later dose isn't wrongly flagged as 'too soon' relative to the dropped one"*). ACIP General Best Practices: *"The repeat dose should be spaced after the invalid dose by the recommended minimum interval."* | Ruling D moves **verdicts**, not just dates: a later dose that counts today may stop counting. It needs the safety nets first, a measured count, and a patient for the owner. Three surfaces, as in PneumoVax: validator, card, chip. |
+| R-3 | Early doses: "decision per vaccine" (A16), no method | PneumoVax decided each gap with one method (below, "How every dose is decided"). Applied to CDSI: **CDC's software writes a hard floor (`minimum − 4 days`) on almost every meningococcal gap, boosters included** — the opposite of adult pneumococcal, where every one of 39 gaps had none. So most MeningoVax floors are CDC-backed, and the port is mostly **labelling who says so**, not reversing rules. | Phase 2 builds the rule table with a "who says so" column filled from live readings plus CDSI. Three rows already look different (R-4). |
+| R-4 | — | Three gaps where MeningoVax and CDSI differ. **Candidates, not findings** — CDSI ranks below ACIP/CDC wording, and each needs a live read first. (a) *"At least 4 weeks between any two MenACWY doses"* voids a dose (`validate.js:722`); MeningoVax's own rulebook says that 4 weeks is stated by ACIP only for MenB, and CDSI's routine dose-2 floor is 8 weeks − 4 days. Looks like an **app rule with no source** that is labelled as if it had one. (b) High-risk MenB dose 3 under **6 months from dose 1** voids the dose (`validate.js` ~968); CDSI's floor for that gap is **0 days** in both high-risk series (the real floor is 4 months − 4 days from dose 2). (c) Healthy MenB 2-dose series: CDSI carries several interval rows per dose; not yet read against the code. | Owner decision packet 1 (Phase 2 stop), each with a meningococcal patient and a control. |
+| R-5 | Labels: map MeningoVax's onto the closed list (A1, decision 5) | **Two vocabulary clashes, not one.** (a) Every invalid MeningoVax dose says *"repeat this dose only (do not restart the series)"*; PneumoVax's W1 calls a dose thrown out for timing *"do not repeat"* because the next dose is simply due once the gap has passed. Same clinical action (one more dose), opposite words. (b) MeningoVax contradicts itself: the chip on a MenACWY dose before 10 / healthy MenB before 16 says **"Off-window - repeat"** (`doseChipLabel.js`), while its rulebook §4 says *"no repeat needed, it's just not counted"*. | Two separate owner questions in Phase 4, asked with patients. |
+| R-6 | Step 2: move intervals into one table | The **numbers** are already in one place (`intervals.js`, guarded by `regression-p2-1-intervals-in-one-place`). What is missing is the **rule** table: which rule, voids or advises, who says so, measured from which dose. | Phase 2 is smaller than the draft implied (~1 session). |
+| R-7 | Step 7: write a rulebook | MeningoVax's rulebook says it is *"synced to vaxapp"*; vaxapp is retired (memory `vaxapp-is-retired`). Its rule-docs test checks ~30 sentences, not a table cell by cell. | Phase 7 drops the vaxapp sync and builds the generated rule table. |
+| R-8 | — | No step names the cross-vaccine question. MenACWY and MenB run on separate clocks, but a **pentavalent** counts for both (`pentavalentCredit.js`). PneumoVax's ANCHOR-1: a dose that did not count never resets **another** vaccine's clock. Unasked for MeningoVax: does a pentavalent rejected for MenB (wrong family) still count, and still anchor, for MenACWY? | Added to decision packet 1. |
+| R-9 | — | No step updates MeningoVax's `CLAUDE.md` rules or the `vaccine-parity` skill, so the next session in MeningoVax would not know the new rules exist. | Each phase adds its rule to MeningoVax's `CLAUDE.md`; Phase 9 checks the skill. |
+| R-10 | Citations last, "the largest" | MeningoVax has **38** source entries and **21** quotes; PneumoVax has 115 and 97. | Phase 8 is about a third of PneumoVax's citation work, not the whole of it. |
+
+**Correction to R-3, same day, after reading CDC's own words live** (CDC Timing and Spacing
+page, content reviewed 2023-08-01; CDC child notes and catch-up table, updated 2025-07-01/02;
+ACIP rr6909a1). R-3 rested on CDSI alone and overstated it. CDC's **wording** backs the
+primary-series gaps and the minimum ages as floors (the generic rule plus Table 3-2, the
+catch-up table's 8 weeks, and the notes' "at least" intervals). It does **not** back the
+**booster** gaps as floors: ACIP gives 3, 5, 1 and 2–3 years as the schedule, never as a
+minimum, and its only booster warning is that a MenACWY booster under 4 years is
+*"not licensed … and considered off-label"*, which is about licensing, not validity. CDSI
+alone treats them as floors. So the booster floors are the same kind of question PneumoVax's
+adult floors were: **owner decision, packet 1**. Also found: ACIP's routine 16-year booster
+needs *"a minimum interval of 8 weeks"* after dose 1, while MeningoVax's catch-all check uses
+4 weeks (R-4a, to test in Phase 0); and CDC's notes still give MenQuadfi's minimum age as 2
+years, where MeningoVax uses 6 weeks on AAP's word (owner decision of 2026-09-23, stands).
+
+## How every dose is decided — the shared philosophy
+
+This is the part that must be **the same in both apps**, whatever the vaccine. The clinical
+numbers differ; the method does not.
+
+### 1. Every rule that can affect a recorded dose is one row, with five answers
+
+| Field | Question it answers | PneumoVax example |
+|---|---|---|
+| Which schedule | Child or adult rules (MeningoVax: routine, high-risk, single-dose indication) | `rulebook: 'child'` |
+| Measured from | The previous dose of the **same vaccine, including one that did not count** (ACIP: the repeat is spaced from the invalid dose), or the last dose **that counted** of a **different** vaccine | Ruling D / ANCHOR-1 |
+| What happens if shorter | **Floor**: does not count (4-day grace applies). **Advice**: counts, with a note stating the shortfall. **None**: never flagged, reason written down | `enforcement` |
+| Who says so | **CDC/ACIP** only when their own words make it a minimum. **This app** when no source states it — an owner determination, dated, and the app says so in words | `authority` |
+| The label it leads to | One label from the closed list (table A1) | §M |
+
+**Never an age test that decides whether a rule may bite** (PneumoVax S14-RC: three adult gaps
+fell in that hole and were checked by nothing). Add a row instead.
+
+### 2. Floor, advice, or no rule? Decide in this order
+
+1. **Read the CDC/ACIP sentence live** (`verify-clinical-source`). Words like *"minimum
+   interval"*, *"should not be counted"*, *"repeat"* → floor, authority CDC. Watch the trap
+   PneumoVax fell into once: *"minimum **recommended** interval"* and *"can be considered"* are
+   advice, not a floor.
+2. **Check CDSI** (local copy). `absMinInt` above 0 means CDC's software treats it as a floor;
+   `0 days` means CDC deliberately set none. CDSI is evidence for the owner, not an authority
+   above the prose.
+3. **AAP breaks a tie** with CDC; **CDC beats an older immunize.org page**; cite CDC first.
+4. **No source at all** → it is an **app rule**: the owner decides, with a worked patient and a
+   control case, and the row says *"This app"*. Never cite CDC for it.
+5. Put every judgement call in the PR body, grouped, so she audits them in one place.
+
+### 3. Rules every patient gets, in both apps
+
+| Rule | PneumoVax source | MeningoVax today |
+|---|---|---|
+| A dose given too soon is measured from **itself** when its repeat is scheduled (ACIP) | Ruling D, §L-3 | **No** — validator and card both measure from the last dose that counted (R-2) |
+| A dose that did not count never resets **another** vaccine's clock | ANCHOR-1 | Question open (R-8) |
+| The 4-day grace decides what the app **accepts**, never what it **advises** | 2026-10-24 ruling | **Yes**, already in its rulebook §0 |
+| The grace applies to minimum **ages** too | §A-GRACE12 | Yes (§0 says so); to confirm in code |
+| The card advises the **routine** date and states the **minimum** beside it | C10-2 | Minimum only (B2) |
+| A dose is **extra** when the card on the day it was given did not ask for it | P1-3 | Only "beyond the series total" (A15) |
+| An early dose with no source saying "repeat" **counts, with a note** | PRs #84, #90 | MenB dose 2/dose 3 already do this; the rest per row (R-4) |
+| A record problem (future, before birth, twice) gets **neither** a repeat **nor** a next-dose sentence | S10-N2 | **Yes** (PneumoVax copied it from here) |
+| **Complete** only when nothing more is owed | §C-COMPLETE | To measure (B3) |
+| A line about a later age is the app's own answer run forward, never hand-written | §B-AT19 | To measure (B17: boosters, the 16-year dose) |
 
 ## Ground rules for every step
 
@@ -40,11 +129,11 @@ Surveyed 2026-11-08 by reading the code; each line still to be measured before i
 | Part of the goal | PneumoVax now | MeningoVax now |
 |---|---|---|
 | Every rule from the rulebook | `CLINICAL_SPEC.md` + a test comparing its rule table to the code cell by cell | `docs/agent/meningococcal-rules-summary.md` + `rule-docs-match-code.test.js` (exists — scope not yet checked) |
-| One place for every interval rule | `doseIntervalRules.js`, each row marked "voids the dose" or "advice only" | No table; intervals are spread through `validate.js` (1,346 lines) and `recommend.js` |
+| One place for every interval rule | `doseIntervalRules.js`, each row marked "voids the dose" or "advice only" | The NUMBERS are in one place (`intervals.js`, guarded); the RULES that use them are spread through `validate.js` (1,346 lines) and `recommend.js` (R-6) |
 | A changed answer cannot slip through | Two committed verdict lists (17,016 real + 18,264 impossible patients) and a prose diff | A shared test grid (`src/test-grid.js`) and three sweeps, but no committed verdict list and no prose diff |
 | The app agrees with itself | Seven whole-app checks over 77,496 patients, four of them required tests | None |
 | Dates clearly stated | "Next dose due <date>" (Remy, 2026-11-07); the routine date advised, the minimum stated beside it | "Next dose not yet due - eligible <date>" (`RecCard.jsx:472`) |
-| Repeat dose measured from the dose given (Ruling D) | Yes | **No** — measured 2026-11-01: a 20-year-old with asplenia, Menveo 8/1 then 8/22, is advised 9/26; CDC's rule gives 10/17 |
+| Repeat dose measured from the dose given (Ruling D) | Yes | **No, on both sides** — measured 2026-11-01: a 20-year-old with asplenia, Menveo 8/1 then 8/22, is advised 9/26; CDC's rule gives 10/17. Read 2026-11-08: the validator measures from the last dose that counted too, and the rulebook says so as a rule (R-2) |
 | Every recorded dose gets one label from a closed list | Yes (§M): counted / extra / valid by catch-up / valid by app rule / not counted–repeat / not counted–do not repeat / record problem | Partly: `doseChipLabel.js` has "Extra dose", "Dose N of M", record problems — but one plain "Invalid" with no repeat / do-not-repeat split |
 | Plain clinical wording | Her §M-L3 style rules, swept by test | "Why this" lead/detail split exists; no style rules applied |
 | Short card with details behind "Why this" | The fold (WORD-1) — **she chose "PneumoVax only" on 2026-11-06** | Not folded |
@@ -58,7 +147,7 @@ the same superscript order, using the same succinct clinical language throughout
 The first draft of this plan named the five goals but **did not list these decisions**. They are listed
 here one by one so that none is lost, and the ledger below marks every PneumoVax commit against them. "MeningoVax now" is from reading its code on 2026-11-08, and
 "to measure" means not yet checked. Each row gets measured before its step starts. The **Step**
-column says which step below carries it.
+column says which step below carries it. (Since the 2026-11-08 review, "step N" here is **Phase N** below; the numbers were kept the same on purpose.)
 
 ### A. The label and line beside a recorded dose
 
@@ -246,60 +335,173 @@ handoffs and notes only. A commit marked P can still carry a general practice, n
 | `65d8186` | 2026-11-08 | Every recorded dose gets one label, in plain wording (dose labels, L1–L4) (#144) | A1, A2, A3, A4 |
 | `d541e8f` | 2026-11-08 | Every card's "Why this" follows your style rules (wording only) (#145) | B9 |
 | `6e637ce` | 2026-11-08 | Sentences in view and Complete cards follow your style rules (wording only) (#146) | B10; A4 |
+| `e45bbdd` | 2026-11-08 | R4: a thrown-out PPSV23's 5-year date only where a PPSV23 can follow; Max gets PCV20 only (#147) | A6 (a dose line never promises a date no card asks for); P |
 
 **When a new PneumoVax commit lands:** add it to this ledger and, if it is not P or Docs, to the table.
 
-## Proposed order (one PR each)
+## The phases, with sessions, owner stops and estimates
 
-**Step 1 — Safety nets first.** A committed verdict list for MeningoVax's grid (real patients, and
-impossible entries in a second file), the prose-diff script, and its own whole-app checks
-(advice is accepted; the plan holds; complete means complete; card and chip agree; stable over
-time). No clinical change. Every later step then shows exactly which patients it moved.
-*Why first:* in PneumoVax, two changes each moved thousands of answers while the older checks
-stayed green.
+Replaces the draft's eight steps (2026-11-08 review). **One PR per numbered item**, in
+MeningoVax, on a branch even though its `main` is unprotected. Each item runs the `fix-queue`
+loop: reproduce with a meningococcal patient, failing test, change, full suite, **break each
+new clause and quote what fails**, check in the running app (`MeningoVax dev server`, port
+5175), commit. A **STOP** means the session ends there with a handoff and waits for her; it
+never defaults a decision. "Session" = one 5-hour window.
 
-**Step 2 — One table for every interval rule.** Move MeningoVax's spacing rules into one table
-like `doseIntervalRules.js`, each row saying which schedule states it and whether it voids the
-dose or is advice only. Verdict list must not move (a pure move).
+Estimates use the 2026-11-05 calibration (memory `usage-estimate-calibration`): a full 5-hour
+window ≈ 14.5% of a week on the Pro plan; an ordinary fix PR ≈ 2.5%; a rule change with owner
+questions and moved patients ≈ 2.5–5%; a whole-app audit ≈ 6.6%. **They are estimates, not
+measurements**: re-measure with `get_usage` at the end of Phase 1 and correct this table.
 
-**Step 3 — Ruling D: measure a repeat from the dose given.** Already measured above. **Owner
-decision needed** — the 2026-11-01 question was never answered. Ask with the asplenia patient.
+### Phase 0 — Measure, change nothing (1 session, ≈ 6%)
 
-**Step 4 — One label per recorded dose, and repeat / do not repeat.** The closed label list,
-with "Not counted — repeat" and "Not counted — do not repeat" split, and "valid by catch-up" /
-"valid by app rule" named. **Owner decision needed per family** where meningococcal guidance
-does not say whether a dose is repeated (to be listed after reading MeningoVax's invalid paths).
+0.1 Add the pointer file `docs/archive/plan-2026-11-08-meningovax-port--SEE-PNEUMOVAX.md` in
+    MeningoVax (the pattern its two earlier pointer files use).
+0.2 Run MeningoVax's suite and record the real count (2026-11-08 baseline: 1,636 passing, 136 files).
+0.3 Fill every "to measure" cell in tables A–E from the code, with file and line.
+0.4 List **every place a dose can be rejected, set aside or adjusted** — read on 2026-11-08:
+    14 `invalidResult` branches in `validate.js`, plus the not-counted-before-10/16 path, the
+    extra-dose path, the early-MenB-dose-2 and early-dose-3 rescue paths, and the three record
+    problems. For each: the condition, the words shown, the gap it measures from.
+0.5 Read live, and save the quotes: CDC child/adolescent and adult schedule notes
+    (meningococcal sections; they are accordions — memory `cdc-notes-pages-are-accordions`),
+    ACIP 2020 RR-9, and the 2024 pentavalent MMWR. Put each beside its CDSI row.
+**Deliverable:** the measured tables and a one-page rule inventory in `docs/archive/`.
+**STOP A — owner:** approve the phase order (no clinical question yet).
 
-**Step 5 — Dates stated plainly.** "Next dose due <date>"; the routine date advised and the
-minimum stated beside it where both exist (MenB dose 3, MenACWY boosters).
-**Owner decision needed:** whether MeningoVax advises a routine date at all where today it states
-only the minimum.
+### Phase 1 — Safety nets (2 sessions, ≈ 10%)
 
-**Step 6 — Wording.** Her §M-L3 style rules and the "Why this" rules applied to every card and
-dose line, with the same sweep test. Whether to fold the result page is **her decision** — her
-2026-11-06 answer was "PneumoVax only".
+1.1 Saved-answer files from `src/test-grid.js`: one for real patients, one for impossible
+    entries, and the test that fails when either moves (E1). No clinical change.
+1.2 The prose diff of every sentence a clinician reads, "Why this" included (E2).
+1.3 A typical-patient list — ordinary on-time histories the grid cannot build (E4).
+1.4 Whole-app checks, adapted to meningococcal: advice is accepted; the plan holds; complete
+    means complete; options agree (pentavalent vs two shots); card and chip agree; age lines
+    clean (10, 11, 16, 19, 22, 24 years; 2, 7, 12, 24 months); stable over time (E3).
+    **Findings are listed, not fixed.**
+1.5 **CDC's CDSI test patients** (M-CDSI-2, added 2026-11-08): run CDC's meningococcal test cases
+    through the app and list where it disagrees. See `plan-2026-11-08-cdsi-checks-both-apps.md`.
+**STOP B — owner:** she sees how many patients each check flags, grouped by clinical family
+with one worked patient each (memory `group-blast-radius-by-clinical-family`). She merges.
 
-**Step 7 — The rulebook.** A MeningoVax `CLINICAL_SPEC.md`-style rulebook with every rule and its
-source, held to the code by test, and the in-app Rulebook page if she wants it there too.
+### Phase 2 — The rule table (1 session, ≈ 4%)
 
-**Step 8 — Citations (C2–C8 of the 2026-10-16 citations plan).** Each card credits only the
-documents that speak for it. MeningoVax has done C1 only. Last, because it is the largest and
-depends on steps 4–7 having settled the wording.
+2.1 A `doseIntervalRules.js`-style table: every row from 0.4, with its five answers as the
+    code **behaves today**. `validate.js` calls it once per dose. **0 answers may move** —
+    the saved-answer files prove it.
+2.2 A "what the sources say" column beside "what the app does", filled from 0.5.
+2.3 **CDSI comparison test** (M-CDSI-1, added 2026-11-08): the rule table held against CDSI's two
+    meningococcal files, with a named list of deliberate differences. Same plan file as 1.5.
+**STOP C — DECISION PACKET 1 (the clinical one).** Each question with a meningococcal patient,
+the app's answer today, the answer after, how many patients move, and a control case:
+- **Q1 Ruling D** (R-2): the asplenia patient (Menveo 8/1, 8/22). Validator and card.
+- **Q2 Each row where app and sources differ** (R-4 a, b, c, plus any 0.5 finds): floor,
+  advice, or app rule?
+- **Q3 The pentavalent** (R-8): rejected for one vaccine, does it count and set the clock for
+  the other?
+- **Q4 Rows with no source**: keep as "This app" rules, and in what words?
 
-## Decisions for the owner before or during the port
+### Phase 3 — Apply packet 1 (2 sessions, ≈ 8–10%)
 
-1. Does this order suit you, or should anything move first? (Recommended: safety nets first.)
-2. Ruling D for MeningoVax (step 3).
-3. Advise a routine date as well as the minimum (step 5, B2)?
-4. Fold MeningoVax's result page like PneumoVax's (step 6, B11)? Her answer on 2026-11-06 was
-   "PneumoVax only". Her 2026-11-08 request for "the same succinct clinical language throughout"
-   may change that, so ask again rather than assume either way.
-5. MeningoVax-only labels with no PneumoVax twin (A1): "Booster" and "Off-window - repeat". Keep them, or
-   map them onto the closed list? (PneumoVax dropped "Off-window - repeat" for PCV7 on 2026-10-31, PR #112,
-   and recorded that MeningoVax keeps it "in its own sense, a dose that really is repeated".)
-6. Early meningococcal doses (A16): for each vaccine, does an early dose count with a note, or is it
-   repeated? To be asked per family with a meningococcal patient once MeningoVax's paths are read.
+3.1 Ruling D on all three surfaces (validator, card, chip), copying PneumoVax's split (the
+    anchor moves; dose numbers and totals stay on doses that counted). Rewrite rulebook §4.
+3.2 One PR per family of rows Q2/Q4 changed. Every moved answer explained in the PR body
+    before the saved-answer files are rewritten.
+**STOP D — owner merges each PR.** Nothing in Phase 4 depends on the order inside Phase 3.
+
+### Phase 4 — One label per dose (1 session, ≈ 5%)
+
+4.1 `doseDisposition()` names the verdict already reached; `doseChipLabel.js` words it;
+    colours as A2. Covers A1, A3, A10, A11, A15, A16, A18.
+**Decision packet 2, asked BEFORE building (STOP E1):**
+- **Q5** A dose thrown out for timing: "Not counted — do not repeat" (PneumoVax W1) or
+  "Not counted — repeat"? (R-5a)
+- **Q6** A MenACWY dose before 10 / a healthy MenB dose before 16: what label? Today
+  "Off-window - repeat", against its own rulebook's "no repeat needed". (R-5b)
+- **Q7** "Booster": keep it as MeningoVax's own label?
+- **Q8** "Extra" means "the card on that day did not ask for it" — apply here?
+**STOP E2 — owner merges.**
+
+### Phase 5 — Dates stated plainly (1 session, ≈ 5%)
+
+5.1 B1, B3–B6, B17; A5, A6, A13, A17.
+**Decision (STOP F1, before building):** **Q9** advise the routine date and state the minimum
+beside it (B2)? Where: MenB dose 3, the MenACWY 16-year dose, boosters.
+**STOP F2 — owner merges.**
+
+### Phase 6 — Wording (2 sessions, ≈ 8%)
+
+6.1 Show her five before/after lines and five "Why this" paragraphs (the most-seen), as in
+    PneumoVax; she approves the style rules for MeningoVax (**STOP G1**).
+6.2 Apply §M-L3, §M-L5 and §WORD-TIDY to every dose line, card and "Why this", with the same
+    sweep test (A4, A7–A9, A12, A14, B7–B10, B12–B14, B16, B18).
+6.3 **Q10** fold the result page (B11)? Her 2026-11-06 answer was "PneumoVax only"; ask
+    again, do not assume. Built only on a yes.
+**STOP G2 — owner merges.**
+
+### Phase 7 — The rulebook (2 sessions, ≈ 9%)
+
+7.1 A MeningoVax `CLINICAL_SPEC.md`: every rule with its quote and date, sections in the
+    app's own order, the app's own decisions numbered. The rule table generated from the
+    Phase 2 describers, held to the code cell by cell (E7). Drop the vaxapp sync (R-7).
+7.2 **Q11** the in-app Rulebook tab (D1, D2)? Built only on a yes.
+7.3 MeningoVax `CLAUDE.md`: add the non-negotiables this port created (one rule table; a moved
+    answer must be explained; one label list; the rulebook is held to the code).
+**STOP H — owner reviews the rulebook and merges.**
+
+### Phase 8 — Citations (3–4 sessions, ≈ 20–25%)
+
+C2–C13, in PneumoVax's order: numbered buttons from one computation; `population` on every
+quote; each (document, sentence) pair cited or taken off; CDC first; one number per sentence;
+links open the closed section; the quote pop-up. One PR per document, each document **read
+whole, tables included, before anything comes off a card** (FINDING F).
+**STOP after each document** where a removal or a no-row case needs her (her three escalation
+cases). Same-dose questions she has delegated (memory `owner-decides-alone-when-dose-unchanged`)
+— **ask her once at the start of Phase 8 whether that delegation carries to MeningoVax**.
+
+### Phase 9 — Close (1 session, ≈ 5%)
+
+9.1 Re-run every whole-app check; live audit of ordinary patients near each age line against
+    CDC's sentences (E6).
+9.2 Check the `vaccine-parity` skill and both `CLAUDE.md` files name the shared rules.
+9.3 Handoff; mark this plan finished.
+
+### Totals
+
+| | Sessions | Share of one week (Pro) |
+|---|---|---|
+| Phases 0–2 (measure, nets, table) | 4 | ≈ 20% |
+| Phases 3–5 (rules, labels, dates) | 4 | ≈ 18–20% |
+| Phases 6–7 (wording, rulebook) | 4 | ≈ 17% |
+| Phase 8 (citations) | 3–4 | ≈ 20–25% |
+| Phase 9 (close) | 1 | ≈ 5% |
+| **All** | **16–17** | **≈ 80–90%, i.e. most of one week's allowance, spread over 2–3 calendar weeks** |
+
+Items 1.5 and 2.3 (added 2026-11-08) add about 7% and half a session each to Phases 1 and 2.
+
+The calendar time is set by her eleven questions and nine stops, not by the work. If a
+findings list from Phase 1 is long (PneumoVax's first whole-app run found families that took
+days), add about 2.5% per fix.
+
+## Decisions for the owner, in the order they come up
+
+| # | Question | Phase | Asked with |
+|---|---|---|---|
+| Q0 | This phase order? | 0 (STOP A) | — |
+| Q1 | Ruling D for MeningoVax | 2 (STOP C) | the asplenia patient, Menveo 8/1 and 8/22 |
+| Q2 | Each row where the app and the sources differ (R-4) | 2 | one patient per row |
+| Q3 | A pentavalent rejected for one vaccine | 2 | a Penbraya after a Bexsero |
+| Q4 | Rows with no source: keep as app rules? | 2 | one patient per row |
+| Q5 | Timing rejection: "repeat" or "do not repeat"? | 4 | — |
+| Q6 | The pre-10 / pre-16 dose label | 4 | a healthy 12-year-old with a MenACWY at 9 |
+| Q7 | Keep "Booster"? | 4 | — |
+| Q8 | "Extra" = not asked for that day? | 4 | — |
+| Q9 | Routine date beside the minimum? | 5 | a high-risk MenB dose 3 |
+| Q10 | Fold the result page? | 6 | — |
+| Q11 | In-app Rulebook tab? | 7 | — |
+| Q12 | Does the "same dose, decide alone" delegation carry over? | 8 | — |
 
 ## Not in this plan
 
 - The 23 "Why this" paragraphs over 60 words in PneumoVax.
+- Any meningococcal rule that has not gone through `verify-clinical-source`.

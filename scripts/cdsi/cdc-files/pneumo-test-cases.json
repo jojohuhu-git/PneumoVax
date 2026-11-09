@@ -1,0 +1,5425 @@
+[
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0575",
+  "name": "Newborn Testing",
+  "dob": "2026-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2026-09-16",
+  "recommended": "2026-10-05",
+  "pastDue": "2026-12-02",
+  "assessmentDate": "2026-08-05",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes the forecasting of a newborn for the first dose of the Pneumoccocal vaccine.",
+  "changedIn": "1.0"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0576",
+  "name": "Dose # 1 PCV 15 at age 18 months",
+  "dob": "2025-02-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2026-09-30",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal vaccine is administered at age 18 months that the dose is considered to be valid and the patient is on a catch-up schedule.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0577",
+  "name": "Dose # 1 of PCV 7 at age 24 months.  Need one dose PCV 13.",
+  "dob": "2008-03-01",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2010-03-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2010-04-26",
+  "recommended": "2010-04-26",
+  "pastDue": "2010-04-26",
+  "assessmentDate": "2010-03-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 7 vaccine is administered at age 24 months that the dose is considered to be valid. Forecast another dose.",
+  "changedIn": "1.3"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0578",
+  "name": "Dose # 1 of PCV 20 at age 24 months.  Series complete.",
+  "dob": "2024-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 20 vaccine is administered at age 24 months that the dose is considered to be valid.  No additional dose should be forecasted.  The series is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0579",
+  "name": "Dose # 2 PCV 20 at age 10 weeks-5 days",
+  "dob": "2026-06-01",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-07-09",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-02",
+  "recommended": "2026-10-01",
+  "pastDue": "2026-11-28",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 of the Pneumococcal 20 vaccine is administered at age 10 weeks - 5 days, that the dose is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0580",
+  "name": "Dose # 2 PCV at age 10 weeks-4 days",
+  "dob": "2026-05-31",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-07-09",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-06",
+  "recommended": "2026-12-01",
+  "pastDue": "2027-01-27",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 of the Pneumococcal vaccine is administered at  age 10 weeks - 4 days, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0581",
+  "name": "Dose # 2 PCV at age 10 weeks",
+  "dob": "2026-05-27",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-07-08",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-11-27",
+  "pastDue": "2027-01-23",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 of the Pneumococcal vaccine is administered at  age 10 weeks, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0582",
+  "name": "Dose # 2 PCV 20 at age 4 months",
+  "dob": "2026-04-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-06-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-10-05",
+  "pastDue": "2026-12-02",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Recommended",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 of the Pneumococcal 20 vaccine is administered at age 4 months, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0583",
+  "name": "Dose # 1 PCV 15 at age 7 months, dose # 2 at age 8 mos and current age \u2265 12 mos.",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-03-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-04-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-08-05",
+  "recommended": "2026-08-05",
+  "pastDue": "2027-01-01",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when a child is currently 12 months of age and was administered dose #1 of PCV15 at age 7 months and dose #2 at age 8 months of age that the doses are considered to be valid. A final dose is recommended at age 12 months.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0584",
+  "name": "Dose # 1 PCV 20 at 12 mo; dose # 2 at 1 yr 8 wks-5 days",
+  "dob": "2025-06-15",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-06-15",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2026-09-30",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Recommended based on minimum interval from invalid dose",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 20 vaccine is administered at 12 months, and the #2 of the Pneumococcal 20 vaccine is administered 8 weeks minus 5 days later, that the second dose is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0585",
+  "name": "Dose # 1 PCV 15 at age 12 mos; # 2 at 1 yr 8 wks-4 days",
+  "dob": "2025-06-14",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-06-14",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 15 vaccine is administered at 12 months, and the #2 dose of the Pneumococcal 20 vaccine is administered at 1 yr, 8 weeks - 4 days, that the second dose is valid. The patient is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0587",
+  "name": "Dose # 1 PCV 20 at age 12 months; # 2 at age 14 mos.  Series complete.",
+  "dob": "2025-06-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-06-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 20 vaccine is administered at 12 months, and the #2 dose of the Pneumococcal 20 vaccine is administered at 14 months, that the second dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0588",
+  "name": "Dose # 1 PCV 15 at 24 mo-5 days.  Valid but child needs another.",
+  "dob": "2024-08-10",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2026-09-30",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when a child is administered the first dose of the Pneumococcal 15 vaccine at 24 months - 5 days, that the dose is considered to be valid, but a second dose is still needed.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0589",
+  "name": "Dose 1 PCV 20 at 24 m-4 days.  Series complete.",
+  "dob": "2024-08-09",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a child is administered the first dose of the Pneumococcal 20 vaccine at 24 months - 4 days, that the dose is considered to be valid. No additional doses are recommended.  The series is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0590",
+  "name": "Dose # 3 PCV 20 at age 14 weeks-5 days.",
+  "dob": "2026-05-04",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-06-12",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-10",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-11-04",
+  "pastDue": "2026-12-31",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #3 of the Pneumococcal 20 vaccine is administered to a child at 14 weeks- 5 days, that the dose is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0591",
+  "name": "Dose # 3 PCV 20 at age 14 weeks-4 days.",
+  "dob": "2026-05-03",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-06-11",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-09",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2027-05-03",
+  "recommended": "2027-05-03",
+  "pastDue": "2027-09-30",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #3 of the Pneumococcal 20 vaccine is administered to a child at 14 weeks- 4 days, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0592",
+  "name": "Dose # 3 PCV 15 at age 14 weeks",
+  "dob": "2026-04-29",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-06-10",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-08",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2027-04-29",
+  "recommended": "2027-04-29",
+  "pastDue": "2027-09-25",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #3 of the Pneumococcal 15 vaccine is administered to a child at 14 weeks, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0593",
+  "name": "Dose # 3 PCV 20 at 6 mo.",
+  "dob": "2026-02-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-04-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-06-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2027-02-05",
+  "recommended": "2027-02-05",
+  "pastDue": "2027-07-02",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Recommended",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #3 of the Pneumococcal 20 vaccine is administered to a child at 6 months, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0594",
+  "name": "Mixed vaccines: dose # 1 PCV 7 at 6 mo; # 2 PCV 13 at 8 mo; # 3 PCV 13 at 12 months.  Series complete.",
+  "dob": "2010-03-04",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2010-09-04",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2010-11-04",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2011-03-04",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2011-03-04",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of PCV 7 is administered at 6 months, dose #2 of PCV 13 is administered at 8 months, and dose #3 of PCV 13 is administered at 12 months, that the doses are considered to be valid.  The series is complete.",
+  "changedIn": "1.0"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0595",
+  "name": "Mixed vaccines: dose # 1 PCV 7 at 7 mo; # 2 PCV 7 at 8 mo; #3 PCV 13 at 12 months.  Series complete.",
+  "dob": "2009-06-01",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2010-01-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2010-02-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2010-06-01",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2010-06-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of PCV 7 is administered at 7 months, dose #2 of PCV 13 is administered at 8 months, and dose #3 of PCV 13 is administered at 12 months, that the doses are considered to be valid.  The series is complete.",
+  "changedIn": "1.1"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0596",
+  "name": "Dose # 1 PCV 20 at age 6 weeks-5 days",
+  "dob": "2026-06-29",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "1",
+  "earliest": "2026-08-10",
+  "recommended": "2026-08-29",
+  "pastDue": "2026-10-26",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal vaccine is administered at age 6 weeks - 5 days that the dose is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0597",
+  "name": "Dose # 1 PCV 20 at 6 mo; # 2 at 11 mo, # 3 at 12 mo",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-02-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2027-01-01",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Recommended based on minimum interval from invalid dose",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of PCV 20 is administered at 6 months, dose #2 of PCV 20 is administered at 11 months, and dose #3 of PCV 20 is administered at 12 months, that dose #3 is not valid.",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0598",
+  "name": "Dose # 4 PCV 15 at age 12 mo-5 days",
+  "dob": "2025-08-10",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2025-10-10",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-12-10",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-10",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2027-01-06",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Recommended based on minimum interval from invalid dose",
+  "guidance": "",
+  "description": "This test case describes when dose #4 of the PCV15 vaccine is administered at age 12 months - 5 days that the dose is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0599",
+  "name": "Dose # 4 PCV 20 at age 12 months-4 days.  Series complete.",
+  "dob": "2025-08-09",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-10-09",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-12-09",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-09",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #4 of the PCV20 vaccine is administered at age 12 months - 4 days that the dose is considered to be valid.  The series is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0600",
+  "name": "Dose # 4 PCV 20 at 1 year.  Series complete.",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-10-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-12-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #4 of the PCV20 vaccine is administered at age 12 months that the dose is considered to be valid.  The series is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0601",
+  "name": "4 doses of PCV 7, requires at least one higher - valent PCV vaccine.",
+  "dob": "2009-06-01",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2009-08-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2009-10-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2009-12-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2010-07-01",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "5",
+  "earliest": "2010-08-26",
+  "recommended": "2010-08-26",
+  "pastDue": "2010-08-26",
+  "assessmentDate": "2010-07-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when 4 doses of PCV 7 is administered that another dose of Pneumococcal is needed.",
+  "changedIn": "4.46"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0602",
+  "name": "Dose 1 invalid (age) as first of others",
+  "dob": "2026-02-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-03-08",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-05-22",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-09-02",
+  "pastDue": "2026-10-02",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when the first dose of the Pneumococcal vaccine is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0603",
+  "name": "Dose 2 invalid (age) in midst of others.",
+  "dob": "2026-03-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-04-14",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-05-09",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-09-05",
+  "pastDue": "2026-11-01",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when the second dose of the Pneumococcal vaccine is  not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0604",
+  "name": "Dose # 3 invalid (age) in midst of others.   Four valid doses not required in this scenario.",
+  "dob": "2025-07-24",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-09-03",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-09-30",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-10-11",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Age: Too Young",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: Below Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when the third dose of the Pneumococcal vaccine is  not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0605",
+  "name": "Dose 1 to dose 2 interval 28-5 days.",
+  "dob": "2026-05-13",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-07-13",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-02",
+  "recommended": "2026-09-13",
+  "pastDue": "2026-11-09",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when the interval between dose #1 and dose #2 of the Pnuemococal vaccine is 28 - 5 days that the second dose is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0606",
+  "name": "Dose 1 to dose 2 interval 28-4 days",
+  "dob": "2026-05-12",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-07-12",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-11-12",
+  "pastDue": "2027-01-08",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #1 and dose #2 of the Pneumococcal 20 vaccine is administered at 28 - 4 days that the second dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0607",
+  "name": "Dose # 1 PCV 20 at age 6 weeks-4 days",
+  "dob": "2026-06-28",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-06",
+  "recommended": "2026-10-28",
+  "pastDue": "2026-12-25",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 20 vaccine is administered at 6 weeks - 4 days that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0608",
+  "name": "Dose 1 PCV 20 to dose 2 interval 28 days",
+  "dob": "2026-05-08",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-07-08",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-11-08",
+  "pastDue": "2027-01-04",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #1 to dose #2 of the Pneumococcal 20 vaccine is administered at an interval of 28 days, that the second dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0609",
+  "name": "Dose 2 to dose 3  interval  28-5 days",
+  "dob": "2026-03-13",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-05-13",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-13",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2026-09-02",
+  "recommended": "2026-09-13",
+  "pastDue": "2026-11-09",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 to dose #3 of the Pneumococcal 20 vaccine is administered at 28-5 days that dose #3 is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0610",
+  "name": "Dose 2 to dose 3 PCV 15 interval 28-4 days",
+  "dob": "2026-02-12",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-04-12",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-12",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2027-02-12",
+  "recommended": "2027-02-12",
+  "pastDue": "2027-07-09",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 to dose #3 of the Pneumococcal 15 vaccine is administered at an interval of 28-4 days that dose #3 is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0611",
+  "name": "Dose 2 to dose 3 PCV 20 interval 28 days",
+  "dob": "2026-02-08",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-04-08",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-07-08",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2027-02-08",
+  "recommended": "2027-02-08",
+  "pastDue": "2027-07-05",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #2 to dose #3 of the Pnuemococcal vaccine is administered at an interval of 28 days that dose #3 is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0612",
+  "name": "Dose 3 PCV 20 to dose 4 interval 8 weeks-5 days",
+  "dob": "2025-07-15",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-01-15",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-05-15",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-06-15",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2026-12-12",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Recommended based on minimum interval from invalid dose",
+  "guidance": "",
+  "description": "This test case describes when dose #3 to dose #4 of the Pneumococcal 20 vaccine is administered at an interval of 8 weeks -5 days that dose #4 is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0613",
+  "name": "Dose 3 PCV 20 to dose 4 interval 8 wks-4 days.  Series complete.",
+  "dob": "2025-07-14",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-01-14",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-05-14",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-06-14",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #3 to dose #4 of the Pneumococcal 20 vaccine is administered at an interval of 8 weeks -4 days that dose #4 is considered to be valid. The series is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0614",
+  "name": "Dose 3 PCV 20 to dose 4 interval 8 weeks.  Series complete.",
+  "dob": "2025-07-10",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-01-10",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-05-10",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-06-10",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: At Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #3 to dose #4 of the Pneumococcal 20 vaccine is administered at an interval of 8 weeks that dose #4 is considered to be valid. The series is complete.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0615",
+  "name": "Invalid dose 2 (interval) in midst of others",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-09-22",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-10-15",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when the second dose of the Pneumococcal vaccine is not valid, but the patient is still complete since the last was after 12 months and 8 weeks from the previous dose.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0616",
+  "name": "Invalid dose 3 (interval) in midst of others",
+  "dob": "2025-07-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-11-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-13",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-03-07",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when the third dose of the Pneumococcal 20 vaccine is not valid, but the patient is still complete since the last dose was after 12 months of age and 8 weeks since the previous dose.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0617",
+  "name": "Invalid dose 4 (interval) in midst of others",
+  "dob": "2025-05-18",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-07-18",
+    "name": "Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-11-18",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-05-08",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-06-08",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Not Valid",
+    "reason": "Interval: too Soon",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-03",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Interval: Below Absolute Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when the fourth dose of the Pneumococcal 15 vaccine is not valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0618",
+  "name": "Dose # 1 PCV 20 at age 6 weeks",
+  "dob": "2026-06-24",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-02",
+  "recommended": "2026-10-24",
+  "pastDue": "2026-12-21",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when the dose #1 of the Pneumococcal 20 vaccine is administered at age 6 weeks, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0619",
+  "name": "4 doses of PCV 7 and 1 dose of PCV 13=series complete",
+  "dob": "2008-06-06",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2008-08-06",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2008-10-06",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2008-12-06",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2009-12-06",
+    "name": "PREVNAR 7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2012-03-05",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2012-03-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when 4 doses of the PCV 7 vaccine and 1 dose of the PCV13 vaccine has been administered that the doses are considered to be valid.  The series is complete.",
+  "changedIn": "1.3"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0622",
+  "name": "Dose # 1 PCV 15 at age 2 months",
+  "dob": "2026-06-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-02",
+  "recommended": "2026-10-05",
+  "pastDue": "2026-12-02",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Recommended",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 15 vaccine is administered at age 2 months, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0624",
+  "name": "Dose # 1 PCV 20 at age 11 months",
+  "dob": "2025-09-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-02",
+  "recommended": "2026-09-02",
+  "pastDue": "2026-09-02",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 20 vaccine is administered at age 11 months, that the dose is considered to be valid, but the patient is now on the catch-up schedule.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2013-0625",
+  "name": "Dose # 1 PCV 20 at age 12 months",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2026-09-30",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the Pneumococcal 20 vaccine is administered at age 12 months, that the dose is considered to be valid.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2015-0021",
+  "name": "Pneumococcal: Patient has received PCV13 and PPSV23",
+  "dob": "1960-07-30",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes the assessment of a patient > age 65 years with a history of PCV13 and PPSV23 vaccine, that no additional doses are recommended.  The series is complete.",
+  "changedIn": "1.0"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2015-0022",
+  "name": "Adult Patient has received PCV13 but has no history of PPSV23",
+  "dob": "1960-10-01",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2025-02-03",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-02-03",
+  "recommended": "2026-02-03",
+  "pastDue": "",
+  "assessmentDate": "2025-10-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "This test case describes the assessment of a patient age 65 years with a history of PCV13 vaccine, but no history of the PPSV23 vaccine.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2015-0023",
+  "name": "Adult Patient has received PPSV23 at age 65 but has no history of PCV.",
+  "dob": "1961-07-20",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2027-08-05",
+  "recommended": "2027-08-05",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "This test case describes when a patient age 65 years with a history of PCV23 vaccine, but has not received a PCV vaccine that one should be forecast.",
+  "changedIn": "4.19"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2019-0008",
+  "name": "Adult Patient 65 years with no history of Pneumococcal vaccine",
+  "dob": "1961-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2011-08-05",
+  "recommended": "2011-08-05",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test cases describes when an adult patient 65 years of age or older with no known history of Pneumococcal vaccine that a dose should be forecast.",
+  "changedIn": "4.40"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2019-0009",
+  "name": "Adult Patient 65 years with a dose of PPSV23 vaccine and PCV",
+  "dob": "1960-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "pneumococcal polysaccharide PPV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "Pneumococcal conjugate PCV20, polysaccharide CRM197 conjugate, adjuvant, PF",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test cases describes when an adult patient age 65 years has received a dose of PPSV23 vaccine, and  a dose of PCV that no additional doses should be forecast.  Series is complete.",
+  "changedIn": "4.19"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0003",
+  "name": "Adult Patient 65 years has received PCV15",
+  "dob": "1961-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2027-08-05",
+  "recommended": "2027-08-05",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "This test case describes when a patient has received PCV15, that a dose of PPSV should be forecast.",
+  "changedIn": "4.19"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0004",
+  "name": "Adult Patient 65 years has received PCV20",
+  "dob": "1961-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "Pneumococcal conjugate PCV20, polysaccharide CRM197 conjugate, adjuvant, PF",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient has received PCV20, that no additional doses should be forecast.  Series is complete.",
+  "changedIn": "4.19"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0010",
+  "name": "Adult Patient 66 years has received PCV13 and PCV20",
+  "dob": "1960-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient has received PCV20 (due to provider not having PPSV23 vaccine in stock) after a previous dose of PCV13, that the dose is valid.  No additional doses should be forecast.  Series is complete.",
+  "changedIn": "4.21"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0011",
+  "name": "Adult Patient 66 years has received PCV15 and PCV20",
+  "dob": "1960-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient has received PCV20 (due to provider not having PPSV23 vaccine in stock) after a previous dose of PCV15, that the dose is valid.  No additional doses should be forecast.  Series is complete.",
+  "changedIn": "4.21"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0012",
+  "name": "Adult Patient 66 years has received PCV15 and PPSV",
+  "dob": "1960-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient has been administered a dose of PCV15 and a dose of PPSV that the doses are valid.  The series is complete.",
+  "changedIn": "4.22"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0072",
+  "name": "Dose # 1 PCV15 at age 18 months",
+  "dob": "2025-02-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-30",
+  "recommended": "2026-09-30",
+  "pastDue": "2026-09-30",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on minimum interval from previous dose (catch-up)",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the PCV15 vaccine is administered at age 18 months that the dose is considered to be valid and the patient is on a catch-up schedule.",
+  "changedIn": "4.27"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0073",
+  "name": "Dose # 4 PCV15 at 1 year.  Series complete.",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-10-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-12-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when dose #4 of the PCV15 vaccine is administered at age 12 months that the dose is considered to be valid.  The series is complete.",
+  "changedIn": "4.27"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2022-0074",
+  "name": "Dose # 1 PCV15 at age 6 weeks-4 days",
+  "dob": "2026-06-28",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-06",
+  "recommended": "2026-10-28",
+  "pastDue": "2026-12-25",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when dose #1 of the PCV15 vaccine is administered at 6 weeks - 4 days that the dose is considered to be valid.",
+  "changedIn": "4.27"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2023-0001",
+  "name": "Adult Patient has received one PPSV23 one dose of PCV 13, and one dose of PCV15",
+  "dob": "1955-11-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2020-11-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2021-08-05",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient has been administered a dose of PPSV23, PCV 13, and one dose of PCV15, that no additional doses should be forecast.  Series is complete.",
+  "changedIn": "4.30"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2023-0002",
+  "name": "Adult Patient has received PCV13 and PPSV23 and PCV20 at five years later",
+  "dob": "1955-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2020-08-05",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2021-08-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes that when a patient is greater than or equal to age 65 years with a history of PCV13, PPSV23 and a dose of PCV 20 at 5 years after the previous dose, that no additional doses are recommended.  The series is complete.",
+  "changedIn": "4.30"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2023-0025",
+  "name": "Dose #1,#2, and #3 PCV15 Dose # 4 PCV20 at 12 months.  Series complete.",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-10-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-12-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 12 months of age and is administered dose #1, dose#2, and dose #3 as PCV15 and dose #4 administered as PCV20 vaccine that the doses are considered to be valid.  The series is complete.",
+  "changedIn": "4.34"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2023-0026",
+  "name": "Dose # 1 PCV 20 at age 6 weeks-4 days",
+  "dob": "2026-06-28",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2026-09-06",
+  "recommended": "2026-10-28",
+  "pastDue": "2026-12-25",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Absolute Minimum",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when a child is administered the first dose of a Pneumococcal vaccine as PCV20 at 6 weeks - 4 days that the dose is considered to be valid.  Another dose should be forecast.",
+  "changedIn": "4.34"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2023-0027",
+  "name": "Patient is a child with four doses of PCV20.  Series complete.",
+  "dob": "2025-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-10-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-12-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-02-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "Age: At Minimum",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is less than 12 months and has been administered four doses of PCV20  that the doses are considered to be valid.  The series is complete.",
+  "changedIn": "4.34"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0062",
+  "name": "Adult Patient 67 years with a dose of PCV21",
+  "dob": "1959-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "CAPVAXIVE",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 67 years old and has been administered a dose of the PCV 21 vaccine that the dose is valid.  The series is complete.",
+  "changedIn": "4.39"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0063",
+  "name": "Adult Patient 68 years with a dose of PPSV23 and PCV21",
+  "dob": "1958-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "CAPVAXIVE",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 68 years old has been administered a dose of the PPSV23 vaccine and a dose of the PCV 21 vaccine that the doses are valid.  The series is complete.",
+  "changedIn": "4.39"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0064",
+  "name": "Adult Patient 80 years with a dose of PCV15 and PCV21.",
+  "dob": "1946-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "CAPVAXIVE",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 80 years old has been administered a dose of the PCV15 and a dose of PCV 21 vaccine that the doses are valid.  The series is complete.",
+  "changedIn": "4.39"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0082",
+  "name": "Patient is 50 years of age and has not been administered a dose of the Pneumococcal vaccine.",
+  "dob": "1976-08-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2026-08-05",
+  "recommended": "2026-08-05",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "No doses administered",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 50 years old and has not been administered a dose of the PCV vaccine, that a dose should be forecast.",
+  "changedIn": "4.40"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0083",
+  "name": "Patient is 50 years of age and has been administered a dose of the Pneumococcal vaccine (PCV20)",
+  "dob": "1976-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 50 years of age and has been administered a dose of the Pneumococcal vaccine (PCV 20), that the dose is valid.  Series is complete.",
+  "changedIn": "4.40"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0084",
+  "name": "Patient is 55 years of age and has been administered a dose of the Pneumococcal vaccine (PCV 21)",
+  "dob": "1971-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "CAPVAXIVE",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 55 years of age and has been administered a dose of the Pneumococcal vaccine (PCV 21), that the dose is valid.  Series is complete",
+  "changedIn": "4.40"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2024-0102",
+  "name": "Patient is 47 years of age and was administered a previous dose of PPSV23",
+  "dob": "1978-12-05",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2025-12-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2028-12-05",
+  "recommended": "2028-12-05",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 47 years of age and was administered a previous dose of PPSV23 that the dose is valid.  Another dose should be forecast.",
+  "changedIn": "4.41"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0001",
+  "name": "Patient is 55 years of age and has been administered a dose of the Pneumococcal vaccine (PCV15)",
+  "dob": "1971-07-21",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2026-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2027-08-05",
+  "recommended": "2027-08-05",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommend based on interval",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 55 years of age and has been administered a dose of the Pneumococcal (PCV15) vaccine, that the dose is valid.  Another dose should be forecast.",
+  "changedIn": "4.42"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0002",
+  "name": "Patient is 55 years of age and has been administered two doses of the Pneumococcal vaccine (PCV15 & PPSV23)",
+  "dob": "1971-07-21",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PNEUMOVAX 23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 55 years of age and has been administered two doses of the Pneumococcal (PCV15 and PPSV23) vaccine, that the doses are valid. The series is complete.",
+  "changedIn": "4.42"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0003",
+  "name": "Patient is 52 years of age and has been administered two doses of the Pneumococcal vaccine (PCV15 & PCV21))",
+  "dob": "1974-08-05",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2025-08-05",
+    "name": "VAXNEUVANCE",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "CAPVAXIVE",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 52 years of age and has been administered two doses of the Pneumococcal (PCV 15 & PCV21) vaccine, that the doses are valid.  Series is complete.",
+  "changedIn": "4.42"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0004",
+  "name": "Patient is 53 years of age and has been administered a previous dose of PCV13 vaccine",
+  "dob": "1972-06-16",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2024-10-02",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2025-10-02",
+  "recommended": "2025-10-02",
+  "pastDue": "",
+  "assessmentDate": "2025-09-30",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "This test case describes when a patient that is currently 53 years of age and has been administered a previous dose of PCV13 vaccine, that the dose is valid.  Another dose should be forecast.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0005",
+  "name": "Patient is 54 years of age and has been administered two doses of Pneumococcal (PCV13 and a dose of PCV20)  vaccine",
+  "dob": "1972-05-29",
+  "observations": [],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-08-05",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2026-08-05",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2026-08-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: series complete",
+  "guidance": "",
+  "description": "This test case describes when a patient that is 54 years of age has been administered two doses of Pneumococcal (PCV13 & PCV 20), that the doses are valid.  Series is complete.",
+  "changedIn": "4.42"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0036",
+  "name": "Dose 1 of PCV 13 at 2 months",
+  "dob": "2023-06-04",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2023-08-04",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2023-09-01",
+  "recommended": "2023-10-04",
+  "pastDue": "2023-12-01",
+  "assessmentDate": "2023-08-04",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when a child was administered a dose of PCV13 (historically) at 2 months of age that the dose was valid.  Another dose should be forecast.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "healthy-4.46",
+  "id": "2025-0037",
+  "name": "Dose #1 and 2 PCV13 at 2 and 4 months with Dose #3 PCV20 at 6 months",
+  "dob": "2025-03-29",
+  "observations": [],
+  "seriesStatus": "Not complete",
+  "doses": [
+   {
+    "date": "2025-05-29",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-07-29",
+    "name": "PREVNAR 13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   },
+   {
+    "date": "2025-09-29",
+    "name": "PREVNAR 20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": ""
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2026-03-29",
+  "recommended": "2026-03-29",
+  "pastDue": "2026-08-25",
+  "assessmentDate": "2025-09-29",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on age",
+  "guidance": "",
+  "description": "This test case describes when a child was administered two valid doses of PCV13 (historically), and the third dose as PCV20 at an interval of 6 months that the doses were valid.  Another dose should be forecast.",
+  "changedIn": "4.45"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0158",
+  "name": "Patient is an adult that smokes cigarettes and has received the PPSV23 vaccine.",
+  "dob": "1997-06-23",
+  "observations": [
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-09-16",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2017-09-16",
+  "recommended": "2017-09-16",
+  "pastDue": "",
+  "assessmentDate": "2022-01-25",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0014",
+  "name": "Anaphylaxis to previous dose of PCV7.  No forecast.",
+  "dob": "2007-07-11",
+  "observations": [
+   {
+    "code": "094",
+    "text": "Severe allergic reaction after previous dose of Pneumococcal"
+   }
+  ],
+  "seriesStatus": "Contraindicated",
+  "doses": [
+   {
+    "date": "2007-09-11",
+    "name": "PCV7",
+    "cvx": "100",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2007-09-11",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not recommended: contraindication",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0153",
+  "name": "Child is 3 years old with cochlear implants,  and has an incomplete schedule (only received 1 dose at 4 months) of the PCV series.",
+  "dob": "2013-01-08",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2013-05-08",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2013-07-03",
+  "recommended": "2013-07-03",
+  "pastDue": "",
+  "assessmentDate": "2016-02-12",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "When cochlear implant placement is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0157",
+  "name": "Patient is adult that smokes cigarettes and has not received a PCV vaccine.",
+  "dob": "1997-03-08",
+  "observations": [
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2016-03-08",
+  "recommended": "2016-03-08",
+  "pastDue": "",
+  "assessmentDate": "2022-01-31",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0163",
+  "name": "Patient is 15 years of age and has cerebrospinal fluid leaks and has received the second dose of the Pneumococcal as PCV13.",
+  "dob": "2001-03-16",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2016-05-02",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2016-06-27",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2016-06-27",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0159",
+  "name": "Child is 8 years of age with  cerebrospinal fluid leaks and has not received (vaccine naive) a dose of the PCV vaccine",
+  "dob": "2008-09-14",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2014-09-14",
+  "recommended": "2014-09-14",
+  "pastDue": "",
+  "assessmentDate": "2016-09-14",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0160",
+  "name": "Patient is 8 years of age and has cerebrospinal fluid leaks and has received the PCV13 vaccine but not the PPSV23 vaccine.",
+  "dob": "2008-09-14",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-09-14",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2016-11-09",
+  "recommended": "2016-11-09",
+  "pastDue": "",
+  "assessmentDate": "2016-09-14",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0161",
+  "name": "Patient is 8 years of age, has cerebrospinal fluid leaks and has received a dose of the PCV13 and a dose of the PPSV23 vaccine.",
+  "dob": "2008-09-14",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2016-09-14",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2016-11-09",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2016-11-09",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0162",
+  "name": "Patient is 15 years of age and has cerebrospinal fluid leaks and has received a dose of the PPSV23 vaccine but not the PCV vaccine.",
+  "dob": "2001-03-16",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-05-02",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2016-06-27",
+  "recommended": "2016-06-27",
+  "pastDue": "",
+  "assessmentDate": "2016-05-02",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0168",
+  "name": "Patient is now 11 years of age, has sickle cell disease, has completed the PCV standard vaccine series, received the first and 5 year booster dose of PPSV23 series.",
+  "dob": "2010-03-21",
+  "observations": [
+   {
+    "code": "160",
+    "text": "Anatomical or functional asplenia"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2010-05-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2010-07-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2010-09-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2011-05-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2016-05-28",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   },
+   {
+    "date": "2021-05-28",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2021-05-28",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "When elective splenectomy is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0164",
+  "name": "Patient is an adult that, has cochlear implants, and has received the PPSV23 vaccine but not  PCV.",
+  "dob": "1977-05-01",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-08-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2017-08-01",
+  "recommended": "2017-08-01",
+  "pastDue": "",
+  "assessmentDate": "2016-08-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "When cochlear implant placement is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0165",
+  "name": "Patient is an adult, has cochlear implants, has received PCV13 one year after the PPSV23 vaccine dose.",
+  "dob": "1977-05-01",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-08-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2017-08-01",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2021-08-01",
+  "recommended": "2021-08-01",
+  "pastDue": "",
+  "assessmentDate": "2017-08-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "When cochlear implant placement is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0166",
+  "name": "Patient is a two year old child with sickle cell disease, who has completed the PCV13 vaccine standard series but has not received a dose of the PPSV23 vaccine.",
+  "dob": "2010-03-21",
+  "observations": [
+   {
+    "code": "160",
+    "text": "Anatomical or functional asplenia"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2010-05-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2010-07-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2010-09-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2012-05-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   }
+  ],
+  "forecastNum": "5",
+  "earliest": "2012-07-16",
+  "recommended": "2012-07-16",
+  "pastDue": "",
+  "assessmentDate": "2012-05-21",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "When elective splenectomy is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0167",
+  "name": "Patient is 6 years of age, has sickle cell disease, has completed the PCV13 standard vaccine series, and has received a dose of PPSV23 vaccine.",
+  "dob": "2010-03-21",
+  "observations": [
+   {
+    "code": "160",
+    "text": "Anatomical or functional asplenia"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2010-05-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2010-07-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2010-09-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2012-05-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "standard"
+   },
+   {
+    "date": "2016-05-28",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "6",
+  "earliest": "2021-05-28",
+  "recommended": "2021-05-28",
+  "pastDue": "",
+  "assessmentDate": "2016-05-28",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "When elective splenectomy is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0169",
+  "name": "Patient is 9 years of age, has HIV infection, and has only received a dose of PPSV23 vaccine  but has not received a dose of the PCV vaccine.",
+  "dob": "2007-04-13",
+  "observations": [
+   {
+    "code": "186",
+    "text": "HIV Infection"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-06-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2016-07-27",
+  "recommended": "2016-07-27",
+  "pastDue": "",
+  "assessmentDate": "2016-06-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.2"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0170",
+  "name": "Patient is 14 years of age, has HIV infection,  and has received a two doses of PPSV23 vaccine  but not a PCV.",
+  "dob": "2007-04-13",
+  "observations": [
+   {
+    "code": "186",
+    "text": "HIV Infection"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-06-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2021-07-27",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2021-09-21",
+  "recommended": "2021-09-21",
+  "pastDue": "",
+  "assessmentDate": "2021-07-27",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0171",
+  "name": "Patient is 14 years of age, has HIV infection, and has received two doses of PPSV23 and a dose of PCV13.",
+  "dob": "2007-04-13",
+  "observations": [
+   {
+    "code": "186",
+    "text": "HIV Infection"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2016-06-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2021-07-27",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2021-09-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2021-09-21",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0172",
+  "name": "Patient is 22 years of age and has General malignant neoplasm and has received a dose of PPSV23 but not a PCV.",
+  "dob": "1994-06-13",
+  "observations": [
+   {
+    "code": "156",
+    "text": "Generalized malignant neoplasm"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-08-21",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2017-08-21",
+  "recommended": "2017-08-21",
+  "pastDue": "",
+  "assessmentDate": "2022-01-25",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0173",
+  "name": "Patient is 22 years of age with General malignant neoplasm and has received a dose of PPSV23 and a dose PCV13 at a year later.",
+  "dob": "1994-06-13",
+  "observations": [
+   {
+    "code": "156",
+    "text": "Generalized malignant neoplasm"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-08-21",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2017-08-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2021-08-21",
+  "recommended": "2021-08-21",
+  "pastDue": "",
+  "assessmentDate": "2017-08-21",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.1"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0174",
+  "name": "Patient is 27 years of age and has General malignant neoplasm, has received a dose of PPSV23, one  dose of  PCV13 and one dose  of PCV20",
+  "dob": "1994-06-13",
+  "observations": [
+   {
+    "code": "156",
+    "text": "Generalized malignant neoplasm"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2016-08-21",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2017-08-21",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-03-21",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-03-21",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "Adults who have received PCV13 but have not completed their recommended pneumococcal vaccine series with PPSV23, one dose of PCV20 may be used if PPSV23 is not available.",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0175",
+  "name": "Patient is 16 years of age and has Persistent Component, properdin,  or Factor B deficiency, has previously received 2 doses of the PPSV23 vaccine   but has not received a dose of PCV",
+  "dob": "2006-04-04",
+  "observations": [
+   {
+    "code": "151",
+    "text": "Persistent complement, properdin, or factor B deficiency"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2017-04-16",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-04-16",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2022-06-11",
+  "recommended": "2022-06-11",
+  "pastDue": "",
+  "assessmentDate": "2022-04-16",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0176",
+  "name": "Patient is 17 years of age and has Persistent Component, properdin,  or Factor B deficiency, has received 2 doses of the PPSV23 and 1 dose PCV20.",
+  "dob": "2006-04-04",
+  "observations": [
+   {
+    "code": "151",
+    "text": "Persistent complement, properdin, or factor B deficiency"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2017-04-16",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-04-16",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-07-11",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-07-11",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0177",
+  "name": "Patient is 25 years of age with  nephrotic syndrome, has previously received two doses of PPSV23 vaccine but has not received a dose of PCV.",
+  "dob": "1986-07-02",
+  "observations": [
+   {
+    "code": "167",
+    "text": "Nephrotic Syndrome"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2006-08-03",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2011-08-03",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2012-08-03",
+  "recommended": "2012-08-03",
+  "pastDue": "",
+  "assessmentDate": "2011-08-03",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0178",
+  "name": "Patient is 26 years of age with nephrotic syndrome, and has received two doses of the PPSV vaccine and a dose of the PCV13 vaccine",
+  "dob": "1986-07-02",
+  "observations": [
+   {
+    "code": "167",
+    "text": "Nephrotic Syndrome"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2006-08-03",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2011-08-03",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2012-08-03",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2016-08-03",
+  "recommended": "2016-08-03",
+  "pastDue": "",
+  "assessmentDate": "2012-08-03",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0190",
+  "name": "Patient is an adult that smokes and has asthma and has not received a dose of the PCV vaccine.",
+  "dob": "1994-07-22",
+  "observations": [
+   {
+    "code": "027",
+    "text": "Asthma"
+   },
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2013-07-22",
+  "recommended": "2013-07-22",
+  "pastDue": "",
+  "assessmentDate": "2022-02-01",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0191",
+  "name": "Patient is a smoker, and has asthma and has received a PCV20 vaccine.",
+  "dob": "1994-07-22",
+  "observations": [
+   {
+    "code": "027",
+    "text": "Asthma"
+   },
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-02-01",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-02-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0192",
+  "name": "Patient is a smoker, has diabetes, and asthma and has not received a PCV vaccine.",
+  "dob": "1965-08-14",
+  "observations": [
+   {
+    "code": "014",
+    "text": "Diabetes"
+   },
+   {
+    "code": "027",
+    "text": "Asthma"
+   },
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "1984-08-14",
+  "recommended": "1984-08-14",
+  "pastDue": "",
+  "assessmentDate": "2016-08-26",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.0"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2016-UC-0193",
+  "name": "Patient is a smoker, has diabetes, and has asthma and has received the PPSV vaccine.",
+  "dob": "1965-03-12",
+  "observations": [
+   {
+    "code": "014",
+    "text": "Diabetes"
+   },
+   {
+    "code": "027",
+    "text": "Asthma"
+   },
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2016-07-12",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2017-07-12",
+  "recommended": "2017-07-12",
+  "pastDue": "",
+  "assessmentDate": "2022-01-25",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2019-UC-0004",
+  "name": "Patient is 2 years of age and has been recently diagnosed with chronic kidney disease failure and has received two doses of the PCV vaccine.",
+  "dob": "2017-04-29",
+  "observations": [
+   {
+    "code": "161",
+    "text": "Chronic kidney disease"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2019-07-01",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2019-08-26",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2019-10-21",
+  "recommended": "2019-10-21",
+  "pastDue": "",
+  "assessmentDate": "2019-08-26",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.2"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2019-UC-0005",
+  "name": "Patient is 2 years of age and has been recently diagnosed with chronic kidney disease and has received two doses of PCV and one dose of PPSV.",
+  "dob": "2017-04-29",
+  "observations": [
+   {
+    "code": "161",
+    "text": "Chronic kidney disease"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2019-07-01",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2019-08-26",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2019-10-21",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2019-10-21",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2019-UC-0008",
+  "name": "Patient is 65 years with Cochlear implants and no doses of PCV or PPSV23.",
+  "dob": "1957-01-06",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "1976-01-06",
+  "recommended": "1976-01-06",
+  "pastDue": "",
+  "assessmentDate": "2022-02-01",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2019-UC-0009",
+  "name": "Patient is 65 years with Cochlear implants with a PCV20.",
+  "dob": "1957-01-06",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-02-01",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-02-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2019-UC-0010",
+  "name": "Patient is 66 years with Cochlear implants and has received PCV13 and PPSV dose",
+  "dob": "1954-08-06",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2019-08-16",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2020-08-06",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2020-08-06",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.6"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0015",
+  "name": "Patient is an adult with Leukemia and has received a PCV20 vaccine for a third dose instead of a PPSV23",
+  "dob": "1972-02-24",
+  "observations": [
+   {
+    "code": "178",
+    "text": "Leukemia"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2015-06-19",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2016-07-23",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-03-01",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-03-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "Adults who have received PCV13 but have not completed their recommended pneumococcal vaccine series with PPSV23, one dose of PCV20 may be used if PPSV23 is not available.",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0016",
+  "name": "Patient is an adult with Lymphoma and has received three doses of the Pneumococcal vaccine with one dose being PCV20.",
+  "dob": "1996-03-06",
+  "observations": [
+   {
+    "code": "179",
+    "text": "Lymphoma"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2016-05-10",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2017-07-01",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-07-05",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-07-05",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "Adults who have received PCV13 but have not completed their recommended pneumococcal vaccine series with PPSV23, one dose of PCV20 may be used if PPSV23 is not available.",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0017",
+  "name": "Patient is an adult with diabetes and has received a PCV15 vaccine.",
+  "dob": "1989-10-17",
+  "observations": [
+   {
+    "code": "014",
+    "text": "Diabetes"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2022-01-24",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2022-03-21",
+  "recommended": "2023-01-24",
+  "pastDue": "",
+  "assessmentDate": "2022-01-24",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0018",
+  "name": "Patient is adult with diabetes and has received a dose of the PCV15 and a dose of the PPSV23 vaccine.",
+  "dob": "1989-10-17",
+  "observations": [
+   {
+    "code": "014",
+    "text": "Diabetes"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-01-24",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-03-22",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-03-22",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0019",
+  "name": "Patient is a 65 year old with multiple myeloma and has received a dose of PPSV23 and PCV15",
+  "dob": "1955-04-12",
+  "observations": [
+   {
+    "code": "181",
+    "text": "Multiple myeloma"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2021-01-13",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-03-10",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-03-10",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0046",
+  "name": "Patient is 3 years of age and has B-lymphocyte [humoral] - Severe antibody deficiencies (145) and has not received any doses of Pneumo",
+  "dob": "2019-07-21",
+  "observations": [
+   {
+    "code": "145",
+    "text": "B-lymphocyte [humoral] - Severe antibody deficiencies"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2021-07-21",
+  "recommended": "2021-07-21",
+  "pastDue": "",
+  "assessmentDate": "2022-09-20",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0047",
+  "name": "Patient is 3 years of age and has B-lymphocyte [humoral] - Severe antibody deficiencies (145) and has been administered the first dose (PCV15) of the Pneumococcal vaccine.",
+  "dob": "2019-07-21",
+  "observations": [
+   {
+    "code": "145",
+    "text": "B-lymphocyte [humoral] - Severe antibody deficiencies"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2022-09-20",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2022-11-15",
+  "recommended": "2022-11-15",
+  "pastDue": "",
+  "assessmentDate": "2022-09-20",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0048",
+  "name": "Patient is 3 years of age and has B-lymphocyte [humoral] - Severe antibody deficiencies (145) and has been administered the second dose (PCV15) of the Pneumococcal vaccine.",
+  "dob": "2019-07-21",
+  "observations": [
+   {
+    "code": "145",
+    "text": "B-lymphocyte [humoral] - Severe antibody deficiencies"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2022-09-20",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-11-15",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2023-01-10",
+  "recommended": "2023-01-10",
+  "pastDue": "",
+  "assessmentDate": "2022-11-15",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2022-UC-0049",
+  "name": "Patient is 3 years of age and has B-lymphocyte [humoral] - Severe antibody deficiencies (145) and has been administered the third dose of the Pneumococcal vaccine (PPSV23).",
+  "dob": "2019-07-21",
+  "observations": [
+   {
+    "code": "145",
+    "text": "B-lymphocyte [humoral] - Severe antibody deficiencies"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2022-09-20",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-11-15",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-01-10",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "4",
+  "earliest": "2028-01-10",
+  "recommended": "2028-01-10",
+  "pastDue": "",
+  "assessmentDate": "2023-01-10",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.4000000000000004"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0031",
+  "name": "Patient is 3 years old with cochlear implants, and has received one dose of PCV and one dose of PPSV23.",
+  "dob": "2020-01-08",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2023-05-08",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-07-03",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "3",
+  "earliest": "2023-08-28",
+  "recommended": "2023-08-28",
+  "pastDue": "",
+  "assessmentDate": "2023-07-03",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "When cochlear implant placement is being planned, PCV13 and/or PPSV23 vaccination should be completed at least 2 weeks before surgery or initiation of therapy.",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0032",
+  "name": "Patient is 3 years old with cochlear implants, and has received two doses of PCV13 and one dose of PPSV23 vaccine.",
+  "dob": "2020-03-17",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-05-08",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-07-03",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-08-28",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-08-28",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0033",
+  "name": "Patient is 5 years old with Moderate persistent or severe persistent asthma and has received one dose of PPSV and two doses of PCV (PCV13 and PCV20).",
+  "dob": "2018-05-17",
+  "observations": [
+   {
+    "code": "253",
+    "text": "Moderate persistent or severe persistent asthma"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-09-27",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-12-13",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-11-17",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-11-17",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.6"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0034",
+  "name": "Patient is 8 years of age, has cerebrospinal fluid leaks and has received a dose of the PCV13 and a dose of the PCV20 vaccine.",
+  "dob": "2015-09-14",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-09-14",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-11-09",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-11-09",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0035",
+  "name": "Patient is 15 years of age and has cerebrospinal fluid leaks and has received a dose of the PCV20 vaccine.",
+  "dob": "2008-03-16",
+  "observations": [
+   {
+    "code": "010",
+    "text": "Cerebrospinal fluid leaks"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-05-02",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-05-02",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0036",
+  "name": "Patient is 39 years of age, has cochlear implants, has received the PCV vaccine one year after the PPSV23 vaccine dose.",
+  "dob": "1984-05-01",
+  "observations": [
+   {
+    "code": "011",
+    "text": "Cochlear implants"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-08-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-09-26",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-09-26",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0037",
+  "name": "Patient is 13 years of age and has anatomical or functional asplenia and has been administered two doses of PPSV23 and one dose of PCV 20",
+  "dob": "2010-03-18",
+  "observations": [
+   {
+    "code": "160",
+    "text": "Anatomical or functional asplenia"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2015-05-21",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2020-07-21",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-09-23",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-09-23",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0038",
+  "name": "Patient is 11 years of age, has HIV infection, and has received a dose of PPSV23 and one dose of PCV20 at greater than 8 weeks after the first dose.",
+  "dob": "2012-08-03",
+  "observations": [
+   {
+    "code": "186",
+    "text": "HIV Infection"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-09-12",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-12-02",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-12-02",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0039",
+  "name": "Patient is 9 years of age, has HIV infection, and has received a dose of PCV20.",
+  "dob": "2014-11-01",
+  "observations": [
+   {
+    "code": "186",
+    "text": "HIV Infection"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-12-01",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-12-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0040",
+  "name": "Patient is 17 years of age, has HIV infection, and has received one dose of PPSV23, one dose of PCV13 and one dose of PCV20.",
+  "dob": "2006-04-13",
+  "observations": [
+   {
+    "code": "186",
+    "text": "HIV Infection"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2018-06-01",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2018-07-27",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-11-01",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-11-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0041",
+  "name": "Patient is a smoker, has diabetes, and has Moderate persistent or severe persistent asthma and has received the PCV20 vaccine.",
+  "dob": "1970-03-12",
+  "observations": [
+   {
+    "code": "014",
+    "text": "Diabetes"
+   },
+   {
+    "code": "253",
+    "text": "Moderate persistent or severe persistent asthma"
+   },
+   {
+    "code": "042",
+    "text": "Smoke cigarettes"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-07-12",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-07-12",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0042",
+  "name": "Patient is 2 years of age and has been recently diagnosed with chronic kidney disease and has not received any dose of the PCV vaccine",
+  "dob": "2021-10-29",
+  "observations": [
+   {
+    "code": "161",
+    "text": "Chronic kidney disease"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [],
+  "forecastNum": "1",
+  "earliest": "2023-10-29",
+  "recommended": "2023-10-29",
+  "pastDue": "",
+  "assessmentDate": "2023-10-29",
+  "evalType": "No Doses Administered",
+  "forecastType": "Recommended based on Condition",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0043",
+  "name": "Patient is 2 years of age and has been recently diagnosed  with chronic kidney disease and has received a dose of PCV20.",
+  "dob": "2021-10-29",
+  "observations": [
+   {
+    "code": "161",
+    "text": "Chronic kidney disease"
+   }
+  ],
+  "seriesStatus": "Not Complete",
+  "doses": [
+   {
+    "date": "2023-11-01",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "2",
+  "earliest": "2023-12-27",
+  "recommended": "2023-12-27",
+  "pastDue": "",
+  "assessmentDate": "2023-11-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Recommended based on interval",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0044",
+  "name": "Patient is 2 years of age and has been recently diagnosed with chronic kidney disease failure and has received one dose of PCV20 and one dose of PCV13.",
+  "dob": "2021-10-29",
+  "observations": [
+   {
+    "code": "161",
+    "text": "Chronic kidney disease"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2023-11-01",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-12-27",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-12-27",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0045",
+  "name": "Patient is 4 years of age and has B-lymphocyte [humoral] - Severe antibody deficiencies and has been administered the third dose of the Pneumococcal vaccine as PCV20.",
+  "dob": "2018-07-21",
+  "observations": [
+   {
+    "code": "145",
+    "text": "B-lymphocyte [humoral] - Severe antibody deficiencies"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2022-11-19",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-01-14",
+    "name": "PCV15",
+    "cvx": "215",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2023-03-11",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2023-03-11",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2023-UC-0046",
+  "name": "Patient is a 67 year old with Hodgkin's disease and has received a dose of PPSV23, PCV13, and PCV20.",
+  "dob": "1955-04-12",
+  "observations": [
+   {
+    "code": "180",
+    "text": "Hodgkin's disease"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2016-01-13",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2017-03-10",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2022-08-10",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2022-08-10",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2024-UC-0001",
+  "name": "Patient is 19 years of age experiencing alcoholism, and has received a dose of the PCV20 vaccine.",
+  "dob": "2004-11-01",
+  "observations": [
+   {
+    "code": "043",
+    "text": "Alcoholism"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2024-04-23",
+    "name": "PCV20",
+    "cvx": "216",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2024-04-23",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5999999999999996"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2024-UC-0002",
+  "name": "Patient is 24 years of age and is a solid organ transplant recipient and has been administered a dose of the Pneumococcal vaccine (PCV21)",
+  "dob": "2000-03-02",
+  "observations": [
+   {
+    "code": "157",
+    "text": "Solid organ transplantation"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2024-08-10",
+    "name": "PCV21",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2024-08-10",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5999999999999996"
+ },
+ {
+  "source": "conditions-4.6",
+  "id": "2024-UC-0003",
+  "name": "Patient is a 41 year old with Iatrongenic immunosuppression and has received a dose of PPSV23, PCV13, and PCV21.",
+  "dob": "1983-08-01",
+  "observations": [
+   {
+    "code": "216",
+    "text": "Iatrogenic Immunosuppression"
+   }
+  ],
+  "seriesStatus": "Complete",
+  "doses": [
+   {
+    "date": "2019-09-19",
+    "name": "PPSV23",
+    "cvx": "33",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2020-10-01",
+    "name": "PCV13",
+    "cvx": "133",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "risk"
+   },
+   {
+    "date": "2024-10-01",
+    "name": "PCV21",
+    "cvx": "327",
+    "status": "Valid",
+    "reason": "",
+    "seriesType": "Risk"
+   }
+  ],
+  "forecastNum": "-",
+  "earliest": "",
+  "recommended": "",
+  "pastDue": "",
+  "assessmentDate": "2024-10-01",
+  "evalType": "All Valid: Forecast Test",
+  "forecastType": "Not Recommended: Series Complete",
+  "guidance": "",
+  "description": "",
+  "changedIn": "4.5999999999999996"
+ }
+]

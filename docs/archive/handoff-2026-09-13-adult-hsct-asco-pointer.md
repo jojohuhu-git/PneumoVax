@@ -1,3 +1,5 @@
+> **SUPERSEDED (banner added 2026-11-08) — do not act on this file.** The post-transplant schedule it describes was deleted on 2026-10-16 (the transplant hard stop; retired text in `retired-2026-10-16-post-transplant-pneumococcal-schedules.md`).
+
 # PneumoVax — adult post-HSCT row moves to ASCO (pointer, 2026-09-13)
 
 The full handoff lives in the vaxapp repo, because this change is part of a three-app
