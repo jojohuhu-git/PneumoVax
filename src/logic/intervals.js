@@ -84,9 +84,16 @@ export const GRACE_DAYS = 4;
  */
 const PCV_GRACE_LINES_M = [12, 24];
 
-export function pcvAgeAtGraceLine(ageAtDose, doseDate, dob) {
+// `at12: false` is the OTHER reading of a dose 1-4 days before the first
+// birthday — at its real age, before the line — and exists only so that
+// recommend.js can judge a history both ways (§A-GRACE12-HELPS, OWNER RULING
+// 2026-11-09, "Ivy": the grace only where it means fewer doses owed). It never
+// turns off the 24-month line, whose own "only when it helps" lives in
+// recommend.js's `ge24`.
+export function pcvAgeAtGraceLine(ageAtDose, doseDate, dob, { at12 = true } = {}) {
   if (!dob || !doseDate || ageAtDose == null) return ageAtDose;
   const line = PCV_GRACE_LINES_M.find((m) => ageAtDose < m);
+  if (line === 12 && !at12) return ageAtDose;
   if (line == null) return ageAtDose;
   return doseDate >= addDays(addCalendarMonths(dob, line), -GRACE_DAYS) ? line : ageAtDose;
 }

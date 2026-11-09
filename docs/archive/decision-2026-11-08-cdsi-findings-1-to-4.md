@@ -26,6 +26,7 @@ All five reproduced on 2026-11-08 with `npx vite-node scripts/cdsi/runTestCases.
 | 4 | Mila, born 2024-08-09, first PCV20 2026-08-05 (4 days before 24 months): app asks for dose 2 | **"Grace applies; she's done."** Mirror §A-GRACE12 at the 2nd birthday. |
 | 4b (2026-11-09) | Rosa, born 2024-08-09, asplenia, PCV13 at 2 and 4 months, PCV20 on 2026-08-07 (2 days before age 2), seen 2026-09-15. Today "complete"; read as a birthday dose she would owe one more PCV. Control: same PCV20 5 days early → complete | **"Only when it helps"** — use the grace only where it means fewer doses owed. |
 | 5 | Teen with HIV, 2×PPSV23 then PCV13 | Not asked — parked (rare; her 2026-10-31 "skip unlikely scenarios"). |
+| 4c (2026-11-09) | Ivy, asplenia, first-ever PCV20 2 days before age 1, then +4 wk, +8 wk. Read as a 12-month dose (§A-GRACE12), dose 2 was thrown out and at 2 she owed 2 more PCVs; at its real age, complete. Controls: 6 days early → complete; on the birthday → 2 more | **"Only when it helps"** at 12 months too: judge the history both ways, keep the reading that owes fewer doses, on a tie keep today's. `CLINICAL_SPEC.md` §A-GRACE12-HELPS. 2,496 of 214,200 hand-built views moved, 0 lost complete, 0 owe more; 0 grid / 0 record-problem / 0 of 35,280 prose lines; CDSI 122 of 140 unchanged; tests 2,534. |
 
 ## Sources read live 2026-11-08
 

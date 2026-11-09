@@ -839,7 +839,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     doseDate: dose.date,
     // §A-GRACE12: 1-4 days before the first birthday counts as 12 months for
     // Table 2's cells, so a booster in that window owes the booster's 8 weeks.
-    ageAtDose: pcvAgeAtGraceLine(ageAtDose, dose.date, dob),
+    ageAtDose: pcvAgeAtGraceLine(ageAtDose, dose.date, dob, { at12: ctxParts.graceAt12 ?? true }),
     prev,
     priorPcv,
     priorPpsv23: (ctxParts.priorPpsv23 ?? []).filter((d) => d.date && d.date <= dose.date),
@@ -968,7 +968,7 @@ function freshStreamState() {
 // for sitting too close to a PPSV23 that had itself been rejected. The owner's
 // words: that dose "is rejected not because it is too soon but because it was
 // unnecessary", and an unnecessary dose cannot reset a clock.
-function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds, otherExtra = [], cardsOnTheDayOf = null) {
+function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds, otherExtra = [], cardsOnTheDayOf = null, graceAt12 = true) {
   // P0 (2026-10-12): the dose is recorded here, at the single entry point
   // that also produces its verdict, so `st.doses[i]` is BY CONSTRUCTION the
   // dose `st.perDose[i]` was computed for. The UI used to hold its own copy
@@ -983,7 +983,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       st.prev = {
         date: d.date,
         // §A-GRACE12: the dose measured FROM is read at the 12-month line too.
-        ageAtDose: vaccine === 'PCV' ? pcvAgeAtGraceLine(age, d.date, dob) : age,
+        ageAtDose: vaccine === 'PCV' ? pcvAgeAtGraceLine(age, d.date, dob, { at12: graceAt12 }) : age,
         product: d.product || '',
       };
     }
@@ -1000,6 +1000,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       ? {
         priorPcv: kept, priorPpsv23: crossStream, riskIds,
         ppsv23ExtraGiven: (otherExtra ?? []).filter((d) => d && d.date),
+        graceAt12,
       }
       : {
         priorPcv: crossStream, priorPpsv23: kept, riskIds,
@@ -1457,7 +1458,7 @@ function runWalk(vaccine, rawDoses, ageMonths, today, dob, otherStream, riskIds)
 // that was not given before it — and it is the narrower, more honest reading:
 // of a same-day PCV15 + PPSV23 pair, the PPSV23 is the dose that was early,
 // and it is now the only one set aside.
-function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds, cardsOnTheDayOf }) {
+function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds, cardsOnTheDayOf, graceAt12 = true }) {
   const pcv = freshStreamState();
   const ppsv23 = freshStreamState();
   const queue = [
@@ -1483,7 +1484,7 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
   for (const { dose, vaccine } of queue) {
     const self = vaccine === 'PCV' ? pcv : ppsv23;
     const other = vaccine === 'PCV' ? ppsv23 : pcv;
-    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds, vaccine === 'PCV' ? ppsv23.extraChildPpsv23 : pcv.extraChildPcv, cardsOnTheDayOf);
+    stepStream(vaccine, dose, self, other.kept, ageMonths, today, dob, riskIds, vaccine === 'PCV' ? ppsv23.extraChildPpsv23 : pcv.extraChildPcv, cardsOnTheDayOf, graceAt12);
   }
 
   // `anchor` is the stream's last DATED dose — the one a same-stream interval
@@ -1578,7 +1579,7 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
  *            ppsv23: {perDose: Array, effective: Array, doses: Array}}}
  *   `doses[i]` is the dose `perDose[i]` was computed for, in date order.
  */
-export function analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds, cardsOnTheDayOf }) {
+export function analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds, cardsOnTheDayOf, graceAt12 = true }) {
   const ref = todayISO(today);
   return walkBothStreams({
     pcvDoses: sortDosesChronologically(dropBlankDoseRows((pcvDoses ?? []).filter(Boolean))),
@@ -1588,6 +1589,7 @@ export function analyzeBoth({ pcvDoses, ppsv23Doses, ageMonths, today, dob, risk
     dob,
     riskIds: riskIds ?? [],
     cardsOnTheDayOf,
+    graceAt12,
   });
 }
 
