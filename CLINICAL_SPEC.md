@@ -4059,6 +4059,64 @@ moves. Hand-built babies: 2,595 of 9,546 not-yet-due cards named an earlier date
 "eligible"; the grid reaches 0 of them. MeningoVax prints the same "eligible" wording and was **not**
 changed. Guard: `src/components/__tests__/regression-2026-11-07-remy-next-dose-due.test.jsx`.
 
+### §L-FIRSTDOSE — a baby under 2 months with no doses (CDSI finding 1, OWNER RULING 2026-11-08)
+
+Found by CDC's CDSI test patient 2013-0575, a newborn. With no dose to measure from, the card was due
+today at every age, so a 2-week-old read **"Due today: PCV dose 1 of 4"**. A first dose cannot count
+before 6 weeks. CDC's child notes, read live 2026-11-08: *"(minimum age: 6 weeks [PCV15], [PCV 20]; 2
+years [PPSV23])"* and *"4-dose series at 2, 4, 6, 12–15 months"*. CDSI forecasts the same newborn
+earliest 6 weeks, recommended 2 months.
+
+Shown Ava (2 weeks) and Ben (7 weeks), the owner chose, for **every** baby under 2 months with no doses,
+the routine date plus the earliest (her 2026-10-24 rule):
+
+- Ava: *"Due at 2 months, on Dec 25, 2026. It can be given from Dec 6, 2026 (age 6 weeks) if needed."*
+- Ben, past 6 weeks: *"Due at 2 months, on Nov 19, 2026. It can be given today if needed, as the
+  minimum age of 6 weeks has passed."* The last clause is the app's: it is what the [c] (CDC's
+  6-week sentence) stands on, as in the 4-week sentence above.
+- Age entered without a date of birth: *"It can be given from age 6 weeks if needed"*, with no date.
+- The top line reads "Next dose due <2-month date>", the summary reads "No pneumococcal doses due
+  today", and the label reads **"Routine"**, not "Due". This narrows §L-2's "A first dose keeps
+  'Due'" (2026-11-06) for these babies only, because "Due" above "Next dose due Dec 25" contradicts
+  itself. A first dose that is due today keeps "Due".
+- The day a baby turns 2 months is on time, so the dose is due today (P2-8). A baby whose only dose
+  was thrown out keeps her card, which measures from that dose (Ruling D).
+
+Both sentences stay in view (`noteFold.js`). The test grid's youngest patient is 2 months, so **no grid
+patient reaches this**: 0 verdicts moved in either saved-answer file. Guard:
+`src/components/__tests__/regression-cdsi-1-2026-11-08-newborn-first-dose-date.test.jsx`.
+
+### §L-BOOSTERDATE — the 12-month final dose states its date (CDSI finding 2, OWNER RULING 2026-11-08)
+
+Found by CDC's CDSI test patient 2013-0598. A final dose held to the first birthday carried **no date**:
+the card said only *"This final dose is not due until the patient reaches 12 months."* That dose also
+needs 8 weeks after the most recent one. CDC's catch-up table (read live 2026-11-08) says: *"8 weeks (as
+final dose for healthy children) if previous dose was administered between 7–11 months (wait until at
+least 12 months old)"*. When the 8 weeks end after the birthday, the age the card named was too early.
+Nora (born Nov 1, 2025; PCV20 Jul 1 and Sep 15, 2026) given her booster on Nov 1 had that dose
+**thrown out by the app's own checker**.
+
+Shown Nora, the owner chose **"date plus reason"**:
+
+- When the 8 weeks end after the birthday: *"This final dose is due on Nov 10, 2026: 8 weeks after the
+  most recent dose, which is after the 1st birthday."* She was shown "her 1st birthday". The app cannot
+  know a patient's sex, so the card says "the 1st birthday".
+- Otherwise: *"This final dose is due at 12 months, on Nov 1, 2026."*
+- The top line reads "Next dose due <same date>". The date is the later of the 12-month birthday
+  (exact, never inside the 4-day grace, ruling 2026-10-24) and the minimum interval from the dose given.
+  The minimum interval is the one `pcvNextDoseMinIntervalCell` already returns for a dose at 12 months.
+  Nothing about what counts changed.
+
+Measured: **132 of 17,016** saved answers and **264 of 18,264** impossible-entry rows moved. A
+field-by-field comparison found that every one differs **only** in the card's next date going from
+blank to a date, on a card not due today. All 132 grid patients get the birthday itself, which the old
+wording already meant. The grid reaches **no** patient whose 8 weeks end after the birthday. Nora and
+CDSI 2013-0598 reach it by hand. The whole-app age-line gate's 12-month rule now also allows "dated →
+due" on the birthday, the same pattern as R2's 19th-birthday rule. `scripts/wholeApp/replay.mjs`
+still reads an undated "not due until" card as the birthday, but the app no longer makes one. The
+`proveChecks.mjs` control H1 therefore mutates a branch no card reaches. Guard:
+`src/components/__tests__/regression-cdsi-2-2026-11-08-booster-card-states-its-date.test.jsx`.
+
 ### §L-3 — RULING D (2026-10-23): the repeat is measured from the dose the patient GOT
 
 **OWNER RULING D, 2026-10-23:** *"the repeat dose should be spaced from the invalid dose by

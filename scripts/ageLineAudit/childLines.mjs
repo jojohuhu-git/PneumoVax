@@ -168,8 +168,8 @@ function appView(out, dob) {
   if (!live.length) return { cat: 'NONE', labels: all };
   const r = live[0];
   const text = live.map((x) => x.doseLabel + ' ' + (x.brands || []).join(',')).join(' || ');
-  // A card waiting for the first birthday names the AGE, not a date (settled design;
-  // noteFold keeps "not due until the patient reaches 12 months" in view for that reason).
+  // A card waiting for the first birthday named only the AGE until CDSI finding 2
+  // (2026-11-08); it now carries `earliestNextDate`, so `at12` is a fallback only.
   const at12 = !r.dueToday && !r.earliestNextDate && /reaches 12 months/.test((r.note && r.note.lead) || '');
   const on = r.dueToday ? T : (r.earliestNextDate || (at12 ? addM(dob, 12) : T));
   // A PPSV23 that only follows a PCV15 option is the PCV15 path's second step, not a

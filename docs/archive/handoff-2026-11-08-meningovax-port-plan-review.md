@@ -118,3 +118,6 @@ After this work merges, that path is gone and the task will skip it silently. Up
 refused by the permission check; the owner decides (Dec 1 is the first run).
 
 **Still needs her:** merging #148 and MeningoVax #74; Q0 (phase order); the scheduled-task path; whether to work findings 1 and 2.
+
+> **2026-11-08, later:** the CDSI findings moved on — she answered 1–4, and 1 and 2 are built. See
+> `decision-2026-11-08-cdsi-findings-1-to-4.md`, which supersedes this file for the CDSI items.

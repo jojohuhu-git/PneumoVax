@@ -101,6 +101,9 @@ describe('what does not move', () => {
     const r = run(BABY, '2026-01-12');
     const card = r.recs.find((x) => x.vaccine === 'PCV');
     expect(card.dueToday).toBe(false);
-    expect(card.note.lead).toContain('This final dose is not due until the patient reaches 12 months.');
+    // CDSI finding 2 (2026-11-08): the card now names the date — the birthday
+    // itself, never a day inside the grace.
+    expect(card.earliestNextDate).toBe('2026-01-15');
+    expect(card.note.lead).toContain('This final dose is due at 12 months, on Jan 15, 2026.');
   });
 });

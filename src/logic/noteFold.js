@@ -28,8 +28,9 @@ const NOT_FOLDED = new Set(['complete', 'not-indicated', 'deferred', 'no-dose-no
 export const STAY_IN_VIEW = Object.freeze([
   { why: 'Bold: her request of 2026-10-24; these qualify the heading', re: /\*\*/ },
   { why: 'Stops two doses being given', re: /^Choose\b/, alsoFrom: 'detail' },
-  { why: 'This card has no date anywhere else', re: /not due until the patient reaches 12 months/ },
+  { why: 'The final dose\'s date, and why it is later than the 1st birthday when it is (CDSI finding 2, 2026-11-08)', re: /^This final dose is due (at 12 months, on|on) / },
   { why: 'Both numbers go on the card (C10-2)', re: /can be given (today|from) .*minimum interval/, alsoFrom: 'detail' },
+  { why: 'A baby too young for dose 1: when it is due, and the earliest it counts (CDSI finding 1, 2026-11-08)', re: /^Due at 2 months, on |^It can be given (today|from) .*6 weeks/, alsoFrom: 'detail' },
   {
     why: 'Option B owes more than its heading shows, and PCV15 needs its PPSV23',
     re: /^Option B\b.*\bthen\b/,
