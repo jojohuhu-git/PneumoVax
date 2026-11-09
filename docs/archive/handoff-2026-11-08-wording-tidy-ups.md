@@ -4,12 +4,12 @@ Repo: `/Users/joannehuang/Downloads/PneumoVax`. Read `CLAUDE.md` first.
 
 **Supersedes** `handoff-2026-11-08-why-this-wording.md`.
 
-Branch `fix/2026-11-08-visible-and-closed-note-wording`, stacked on `fix/2026-11-08-why-this-wording` (PR #145).
-Its PR targets #145's branch. **Merge #145 first.** If she squash-merges #145, this branch needs re-targeting
-to `main` (memory `squash-merged-parent-breaks-a-stacked-branch`). **She merges.**
+Branch `fix/2026-11-08-visible-and-closed-note-wording`, off `main` at `d541e8f` (#145, merged 2026-11-08 while
+this was being built; the commit was moved onto `main` after checking that the file trees were identical).
+PR into `main`. **She merges.**
 
-Baseline (on #145's branch): **2,467 passing, 0 failed**. Now: see the PR's "Checks" section for the measured
-count (vitest JSON reporter, `.claude/**` excluded).
+Baseline: **2,467 passing, 0 failed**. After: **2,467 passing, 0 failed** (vitest JSON reporter, `.claude/**`
+excluded). No new test cases. The existing §WHY-THIS guard was widened instead.
 
 ## What's done
 
@@ -36,6 +36,6 @@ R4 and R7 in the whole-app checks.
 
 ## Resuming
 
-1. `gh pr view 145 --json state` and this branch's PR. Once both are merged: `git checkout main && git pull`, then
+1. Check this branch's PR with `gh pr view <N> --json state`. Once it's merged: `git checkout main && git pull`, then
    run the suite.
 2. Ask her what she wants next.
