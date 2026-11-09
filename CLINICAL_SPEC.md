@@ -216,7 +216,8 @@ absolute minimum age of **"12 months - 4 days"**. Owner: *"Grace applies"*, incl
 first-ever dose.
 
 **The rule:** with a date of birth on file, a PCV dose given 1–4 days before the first birthday
-is read as given **at 12 months**, for every purpose — the age bands that pick the Table 1 row,
+is read as given **at 12 months** — unless reading it at its real age owes fewer doses
+(§A-GRACE12-HELPS, 2026-11-09) — for every purpose: the age bands that pick the Table 1 row,
 and the ages Table 2's spacing cells key on (this dose's and the dose it is measured from). One
 helper, `pcvAgeAtGraceLine()` in `intervals.js`, answers it for all of them (and, since §A-GRACE24,
 for the second birthday too).
@@ -244,6 +245,47 @@ rendered lines (the grid never places a dose in those four days). Hand-built: **
 babies moved — every one with a dose 1–4 days before the birthday; the 72 with a dose 7 days
 early did not. Guard: `regression-2026-10-31-four-day-grace-at-first-birthday.test.js` (eight
 mutations; seven caught, the eighth is the raw-age check above, reverted).
+
+### §A-GRACE12-HELPS — the 12-month grace only where it means fewer doses owed (OWNER RULING 2026-11-09, "Ivy")
+
+§A-GRACE12's "for every purpose" could take credit away, the harm Rosa showed at the 2nd birthday
+(§A-GRACE24). A dose read at 12 months owes the next dose **8 weeks**; the same dose read at its real
+age, before the birthday, owes it **4** — CDC Catch-up Table 2: *"4 weeks if first dose was
+administered before the 1st birthday / 8 weeks (as final dose for healthy children) if first dose
+was administered at the 1st birthday or after"*.
+
+**Ivy**, asplenia: first-ever PCV20 2 days before her 1st birthday, the next 4 weeks later, a third 8
+weeks after that. As a 12-month dose, dose 2 was thrown out, and at age 2 she owed **two more PCVs**
+(§C-COMPLETE: an at-risk child with fewer than 3 doses). At its real age all three count and she is
+**complete**. Controls: 6 days early → complete; on the birthday → two more. CDSI v4.64 (local copy)
+counts all three: its 4-dose series has dose 1→2 at *"4 weeks - 4 days"*, and CDSI keeps whichever
+series is most complete. Asked whether the 12-month grace should be used "only when it helps", as for
+Rosa, the owner chose **"Only when it helps"** — read the history both ways, keep the reading that owes
+fewer doses, and **on a tie keep today's reading** (the 12-month dose).
+
+**The rule:** with a date of birth on file and a PCV dose 1–4 days before the first birthday,
+`recommendBeforeFold()` judges the whole history twice — the dose as the 12-month dose, and the dose at
+its real age (`graceAt12: false`, read by `pcvAgeAtGraceLine()` and nothing else) — and keeps the
+reading whose PCV card owes **fewer** PCV doses. A complete card owes 0; a card asking for doses carries
+`pcvDosesOwed`; an "up to date for age" card is asked again on the 2nd birthday, where its doses fall
+due. A card that does not say keeps today's reading.
+
+- **Whole readings, never a mix.** The 12-month reading's age band with the real age's 4-week spacing
+  would finish a healthy baby on two doses 4 weeks apart, which neither reading — nor CDSI — allows.
+- **Unchanged:** Lily and every tie (a healthy Ivy is complete either way, so her dose 2 stays thrown
+  out); 5+ days early; no date of birth; the 24-month line (§A-GRACE24 adds credit by its own route);
+  what the app **advises** (ruling 2026-10-24).
+- **Assumes the next dose is PCV20** where the card offers it: an at-risk 13-month-old whose window dose
+  was followed 8 weeks later owes, read at real age, dose 3 now and nothing after it if that dose is
+  PCV20 — one dose, against two at age 2 on the 12-month reading.
+
+Measured 2026-11-09 against untouched `main`, 214,200 hand-built baby views (17 histories with a dose
+0–5 days before the 1st birthday × 7 follow-up patterns × 5 risk profiles × 4 product mixes × 5 visit
+dates × 3 birthdays): **2,496 moved, 0 lost "complete", 0 owe more**, 0 with the dose on the birthday or
+5 days early. Two families, at-risk only: **Ivy's** (window, +4 weeks, +8 weeks) — 960 views, 720 now
+complete; and **window, then a dose 8 or 10 weeks later** — 1,536 views, "up to date for age, 2 more at
+age 2" → "PCV dose 3 of 3". Guard: `regression-2026-11-09-grace12-only-when-it-helps.test.js` (six
+mutations, all caught).
 
 ### §A-GRACE24 — a PCV dose 1–4 days before the 2nd birthday also counts as given at 2 years (OWNER RULINGS 2026-11-08 "Mila", 2026-11-09 "Rosa")
 

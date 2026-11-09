@@ -41,7 +41,7 @@ import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { dropBlankDoseRows } from './doseIdentity.js';
-import { pcvNextDoseMinIntervalCell, intervalPhrase, pcvAgeAtGraceLine } from './intervals.js';
+import { pcvNextDoseMinIntervalCell, intervalPhrase, pcvAgeAtGraceLine, GRACE_DAYS } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 import { fmtSince } from './doseIntervalRules.js';
 import { foldCard } from './noteFold.js';
@@ -172,6 +172,11 @@ function rec(o) {
     // renders ungrouped rather than showing a denominator that doesn't match.
     seriesTotal: o.seriesTotal ?? null,
     primaryTotal: o.primaryTotal ?? null,
+    // §A-GRACE12-HELPS (2026-11-09): how many more PCV doses this card asks
+    // for, set only on the children's cards that ask for some. It exists so
+    // that two readings of one history can be compared by what they OWE —
+    // `pcvOwedOf()` — never parsed back out of `doseLabel`. Not shown.
+    pcvDosesOwed: o.pcvDosesOwed ?? null,
     citations: resolveRefs(o.refs ?? []),
   };
 }
@@ -227,7 +232,7 @@ export function collectRefs(riskIds, defaults, rulebook) {
 // rather than recomputed here because the validator already decides which
 // doses may anchor, and two places deciding that separately is exactly the
 // fault RULING D fixes (see the `anchorDate` field below).
-function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = null) {
+function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = null, { graceAt12 = true } = {}) {
   const products = pcvDoses.map((d) => d.product).filter(Boolean);
   const has = (k) => products.includes(k);
   const hasPCV20 = has('PCV20');
@@ -275,7 +280,7 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     // ALSO counted toward "given at 24 months or older" in `ge24` below. Every
     // reader of `ge24` asks for fewer doses as it rises, so this can only add
     // credit. Measured on 1,575 hand-built children: see §A-GRACE24.
-    const graced = pcvAgeAtGraceLine(rawAge, d.date, dob);
+    const graced = pcvAgeAtGraceLine(rawAge, d.date, dob, { at12: graceAt12 });
     const at24ByGrace = graced === M.m24 && rawAge < M.m24;
     if (at24ByGrace) band.at24ByGrace += 1;
     else if (graced !== rawAge) band.at12ByGrace += 1;
@@ -1152,6 +1157,7 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
     vaccine: 'PCV', status: prior === 0 && !firstDoseWaits ? 'due' : onSchedule ? 'routine' : 'catchup',
     ...pcvSeriesShape(pcv, am, target),
     doseLabel: `PCV dose ${doseNum} of ${target}`,
+    pcvDosesOwed: target - prior,
     dueToday: due,
     earliestNextDate: needs12moFloor ? boosterDate : earliestNextDate,
     minIntervalDays: minInterval,
@@ -1491,7 +1497,7 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     const bridgeCites = bridgeText ? optionA.noteCites.filter((c) => c.key === 'pedsPcv13Pcv15Interchangeable') : [];
     return { ...r, recs: [{
       ...optionA,
-      doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`,
+      doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`, pcvDosesOwed: 1,
       note: {
         lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c], to complete the series [c]. No further PPSV23: ${neither}.`,
         detail: (isGrey ? r.detailGrey.trim() : `A PPSV23 is not offered: it would be ${third}.`) + bridgeText,
@@ -1529,7 +1535,7 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     const r = result(' If it were counted, PCV15 could be offered too, with no PPSV23 after it.');
     return { ...r, recs: recs.filter((x) => !x.doseLabel?.startsWith('Option B-')).map((x) => (x !== optionA ? x : {
       ...optionA,
-      doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS})`,
+      doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS})`, pcvDosesOwed: 1,
       note: {
         lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent pneumococcal vaccine [c] [c]. No further PPSV23: ${neither}.`,
         detail: `PCV15 is not offered: after it a PPSV23 would be owed — ${third}.${r.detailGrey}`,
@@ -2049,6 +2055,7 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, fiftyAsk
     return [rec({
       vaccine: 'PCV', status: prior === 0 ? 'due' : 'catchup',
       doseLabel: '1 dose PCV (catch-up)',
+      pcvDosesOwed: 1,
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: pcvRecBrands({ adult: false }),
       note: {
@@ -2812,7 +2819,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       if (ppsv.count === 0) {
         out.push(rec({
           vaccine: 'PCV', status: 'risk-based',
-          doseLabel: `Option A: 1 dose PCV20 (≥${PNEUMO_GAP_WORDS})`,
+          doseLabel: `Option A: 1 dose PCV20 (≥${PNEUMO_GAP_WORDS})`, pcvDosesOwed: 1,
           dueToday: done.dueToday, earliestNextDate: done.earliestNextDate, minIntervalDays: WK8,
           brands: ['PCV20 (Prevnar 20)'],
           note: {
@@ -2849,7 +2856,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       const icPost = icPostPpsv23DueState(ppsv, anchorPneumo, today);
       out.push(rec({
         vaccine: 'PCV', status: 'risk-based',
-        doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
+        doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`, pcvDosesOwed: 1,
         dueToday: icPost.dueToday,
         earliestNextDate: icPost.earliestNextDate,
         minIntervalMonths: MO60,
@@ -2930,6 +2937,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     out.push(rec({
       vaccine: 'PCV', status: 'risk-based',
       doseLabel: target === 1 ? '1 dose PCV (at-risk catch-up)' : `PCV dose ${doseNum} of 2 (at-risk catch-up)`,
+      pcvDosesOwed: remaining,
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: pcvRecBrands({ adult: false }),
       // C9 (2026-10-23). p2016 was listed on all 976 of these cards and credited
@@ -3112,7 +3120,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     const icBefore6 = icPostPpsv23DueState(ppsv, anchorPneumo, today);
     out.push(withEightWeekWait(rec({
       vaccine: 'PCV', status: 'risk-based',
-      doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
+      doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`, pcvDosesOwed: 1,
       dueToday: icBefore6.dueToday,
       earliestNextDate: icBefore6.earliestNextDate,
       minIntervalMonths: MO60,
@@ -3241,7 +3249,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       const icCompleted = icPostPpsv23DueState(ppsv, anchorPneumo, today);
       const { dueToday, earliestNextDate } = icCompleted;
       out.push(withEightWeekWait(rec({
-        vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
+        vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`, pcvDosesOwed: 1,
         dueToday, earliestNextDate, minIntervalMonths: MO60,
         brands: ['PCV20 (Prevnar 20)'],
         note: {
@@ -3273,7 +3281,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       ? 'ACIP recommends either a single dose of PCV20, or PPSV23 on its previously recommended schedule [c]. Only PCV20 finishes the series in one dose.'
       : 'Either a single dose of PCV20 or a PPSV23 completes the recommended series [c].';
     out.push(rec({
-      vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)',
+      vaccine: 'PCV', status: 'risk-based', doseLabel: 'Option A: 1 dose PCV20 (≥8 weeks)', pcvDosesOwed: 1,
       dueToday, earliestNextDate, minIntervalDays: WK8,
       brands: ['PCV20 (Prevnar 20)'],
       // "PCV13/15" is a fair description of a PCV13 or a PCV15 — it is p2016's
@@ -3425,7 +3433,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     // split on it.
     const icState = icPostPpsv23DueState(ppsv, anchorPneumo, today);
     out.push(withEightWeekWait(rec({
-      vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`,
+      vaccine: 'PCV', status: 'risk-based', doseLabel: `1 dose PCV20 (≥${LONG_GAP_WORDS} after ${fiveYearsFrom(ppsv).label})`, pcvDosesOwed: 1,
       dueToday: icState.dueToday,
       earliestNextDate: icState.earliestNextDate,
       minIntervalMonths: MO60,
@@ -3481,7 +3489,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   const aState = dueState(anchorForA, WK8, today);
 
   out.push(rec({
-    vaccine: 'PCV', status: 'risk-based', doseLabel: `Option A: 1 dose PCV20${noPneumococcalDose ? '' : ' (≥8 weeks)'}`,
+    vaccine: 'PCV', status: 'risk-based', doseLabel: `Option A: 1 dose PCV20${noPneumococcalDose ? '' : ' (≥8 weeks)'}`, pcvDosesOwed: 1,
     dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
     brands: ['PCV20 (Prevnar 20)'],
     // C9 (2026-10-23): p2016's Option A cell for rows 6/7 is this sentence, and
@@ -3526,7 +3534,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       : { text: ` ${CATCHUP_IC_FIVE_YEAR_SENTENCE}`, cite: cite('pedsSecondPpsv5y') };
     // Option B: PCV15 then PPSV23 ≥8wk later (rows 6/7).
     out.push(rec({
-      vaccine: 'PCV', status: 'risk-based', doseLabel: `Option B-1: 1 dose PCV15${noPneumococcalDose ? '' : ' (≥8 weeks)'}`,
+      vaccine: 'PCV', status: 'risk-based', doseLabel: `Option B-1: 1 dose PCV15${noPneumococcalDose ? '' : ' (≥8 weeks)'}`, pcvDosesOwed: 1,
       dueToday: aState.dueToday, earliestNextDate: aState.earliestNextDate, minIntervalDays: WK8,
       brands: ['PCV15 (Vaxneuvance)'],
       note: {
@@ -4455,7 +4463,69 @@ export function recommend(input) {
   return { ...result, recs: result.recs.map(foldCard), perDose: { ...result.perDose, pcv: pcv7LineOnce(result.perDose.pcv) } };
 }
 
+// §A-GRACE12-HELPS (OWNER RULING 2026-11-09, "Ivy"): the 12-month grace only
+// where it means fewer doses owed — her "Only when it helps", ruled first for
+// the 24-month line (Rosa, §A-GRACE24) and put to her again for this one.
+//
+// Ivy has asplenia. Her first-ever PCV20 came 2 days before her 1st birthday,
+// the next 4 weeks later, a third 8 weeks after that. Read at its real age,
+// dose 1 was given before the birthday: CDC Catch-up Table 2's "4 weeks if
+// first dose was administered before the 1st birthday" counts dose 2, and at
+// age 2 she is complete. Read as a 12-month dose, dose 1 needs "8 weeks (as
+// final dose)", dose 2 is thrown out, and at age 2 she owes TWO more PCVs.
+// CDC's own decision-support software scores a history against several
+// series and keeps the best (CDSI v4.64: the 4-dose series counts all three
+// of her doses), so the two readings below are the same idea.
+//
+// A dose 1-4 days before the first birthday makes ONE yes/no question about
+// the whole history — is it the 12-month dose? — so the history is judged
+// both ways and the reading that owes FEWER PCV doses is kept. On a tie, or
+// when either card does not say how many it owes, today's reading (the
+// 12-month dose, §A-GRACE12) stays: she chose "if equal, keep today's".
+// Whole results, never a mix: taking the 12-month reading's age band and the
+// real age's 4-week spacing together would finish a healthy baby on two doses
+// 4 weeks apart, which neither reading — nor CDSI — allows.
 export function recommendBeforeFold(input) {
+  const asTwelveMonthDose = recommendOneReading(input);
+  if (input.graceAt12 === false || !hasPcvDoseInTwelveMonthGrace(input)) return asTwelveMonthDose;
+  const atRealAge = recommendOneReading({ ...input, graceAt12: false });
+  const owedTwelve = pcvOwedOf(asTwelveMonthDose, input);
+  const owedReal = pcvOwedOf(atRealAge, { ...input, graceAt12: false });
+  return owedTwelve != null && owedReal != null && owedReal < owedTwelve ? atRealAge : asTwelveMonthDose;
+}
+
+// A PCV dose, dated, with a date of birth on file, that the 12-month grace
+// moves — the same two dates `pcvAgeAtGraceLine()` tests (the birthday, and
+// 4 days before it), compared as dates because this runs on every engine
+// call, look-aheads included.
+function hasPcvDoseInTwelveMonthGrace(input) {
+  const dob = input.dob ?? null;
+  if (!dob) return false;
+  const firstBirthday = addCalendarMonths(dob, M.m12);
+  const graceFrom = addDays(firstBirthday, -GRACE_DAYS);
+  return (input.pcvDoses ?? []).some((d) => d?.date && d.date >= graceFrom && d.date < firstBirthday);
+}
+
+// How many more PCV doses one reading asks for: 0 when its card is complete
+// (or not indicated), the card's own `pcvDosesOwed` when it asks for some,
+// null when it does not say. A card that is "up to date for age" owes its
+// doses at the 2nd birthday (§C-COMPLETE), so that reading is asked again on
+// that day — that is where Ivy's two extra doses are.
+function pcvOwedOf(result, input) {
+  const card = (result.recs ?? []).find((r) => r.vaccine === 'PCV');
+  if (!card) return null;
+  if (card.status === 'complete' || card.status === 'not-indicated') return 0;
+  if (card.status === 'no-dose-now' && input.dob) {
+    const secondBirthday = addCalendarMonths(input.dob, M.m24);
+    if (secondBirthday > todayISO(input.today)) {
+      const atTwo = { ...input, today: secondBirthday, ageMonths: M.m24 };
+      return pcvOwedOf(recommendOneReading(atTwo), atTwo);
+    }
+  }
+  return card.pcvDosesOwed ?? null;
+}
+
+function recommendOneReading(input) {
   // P3-1 (S10): the patient's date of birth, when the clinician gave one. It is
   // what lets the engine compare a dose date against a real birthday — the
   // 65th for the PPSV23 shared-decision rule, the minimum ages in validate.js —
@@ -4566,6 +4636,7 @@ export function recommendBeforeFold(input) {
     dob,
     riskIds,
     cardsOnTheDayOf,
+    graceAt12: input.graceAt12 ?? true,
   });
   const pcvAnalysis = analysis.pcv;
   const ppsvAnalysis = analysis.ppsv23;
@@ -4606,7 +4677,7 @@ export function recommendBeforeFold(input) {
   // dose only leaves something owing if it is the LAST dose on the record —
   // a properly spaced dose after it has already filled the gap, and the
   // counting history speaks for itself.
-  const pcv = summarizePcv(effectivePcv, am, today, dob, pcvAnalysis.anchor);
+  const pcv = summarizePcv(effectivePcv, am, today, dob, pcvAnalysis.anchor, { graceAt12: input.graceAt12 ?? true });
   pcv.extraConjugate = pcvAnalysis.extraConjugate;
   const ppsv = {
     count: effectivePpsv.length,
