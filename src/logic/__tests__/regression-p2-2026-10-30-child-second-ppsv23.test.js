@@ -196,7 +196,7 @@ describe('no immunocompromised child with two counted PPSV23 doses is offered a 
     const card = recsOf(MAYA_AGE_4)[0];
     expect(card.doseLabel).toBe('Complete (PCV series + 2 PPSV23)');
     expect(card.note).toBe(
-      "At-risk immunocompromised child who completed the PCV series and has received both PPSV23 doses — complete. CDC's row for an immunocompromised child this age gives a PCV20 or a second PPSV23 at least 5 years after the first PPSV23, and the second PPSV23 has been given [c]." + EARLY_SENTENCE + AT_19,
+      "At-risk immunocompromised child who completed the PCV series and has received both PPSV23 doses — complete. For an immunocompromised child this age, CDC recommends a PCV20 or a second PPSV23 at least 5 years after the first PPSV23, and the second PPSV23 has been given [c]." + EARLY_SENTENCE + AT_19,
     );
     // Age 2-5: CDC's IC row printed under "Age 2-5 years", not the 6-18 one.
     expect(card.noteCites.map((c) => c.key)).toEqual(['pedsIcPcv20orPpsv23', 'mmwrIc1949TwoPpsv']);
@@ -206,7 +206,7 @@ describe('no immunocompromised child with two counted PPSV23 doses is offered a 
     const card = recsOf(NOAH_AGE_4)[0];
     expect(card.doseLabel).toBe('PCV complete (at-risk catch-up done)');
     expect(card.note).toBe(
-      "At-risk immunocompromised child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and both PPSV23 doses — complete. CDC's row for an immunocompromised child this age gives a PCV20 or a second PPSV23 at least 5 years after the first PPSV23, and the second PPSV23 has been given [c]." + EARLY_SENTENCE + AT_19,
+      "At-risk immunocompromised child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and both PPSV23 doses — complete. For an immunocompromised child this age, CDC recommends a PCV20 or a second PPSV23 at least 5 years after the first PPSV23, and the second PPSV23 has been given [c]." + EARLY_SENTENCE + AT_19,
     );
     expect(card.noteCites.map((c) => c.key)).toEqual(['pedsIcPcv20orPpsv23', 'mmwrIc1949TwoPpsv']);
   });
@@ -216,7 +216,7 @@ describe('no immunocompromised child with two counted PPSV23 doses is offered a 
     const onTime = recsOf(ZOE_ON_TIME)[0];
     expect(early.doseLabel).toBe('Complete (PCV13 + 2 PPSV23 at/after age 6)');
     expect(onTime.note).toBe(
-      "Immunocompromising at-risk child with PCV13 at/after age 6 who has received both PPSV23 doses — complete. CDC's row for this history gives a PCV20 or a second PPSV23 at least 5 years after the first PPSV23, and the second PPSV23 has been given [c]." + AT_19,
+      "Immunocompromising at-risk child with PCV13 at/after age 6 who has received both PPSV23 doses — complete. For this history, CDC recommends a PCV20 or a second PPSV23 at least 5 years after the first PPSV23, and the second PPSV23 has been given [c]." + AT_19,
     );
     expect(early.note).toBe(onTime.note.replace(AT_19, '') + EARLY_SENTENCE + AT_19);
     expect(early.noteCites.map((c) => c.key)).toEqual(['pedsIcPcv13AndPpsvAt6', 'mmwrIc1949TwoPpsv']);

@@ -38,7 +38,7 @@ const withCites = (s) => s
   .replace('on or after that age,', 'on or after that age [c],')
   .replace('not live.', 'not live [c].');
 const ONE_PCV20 = '1 dose PCV20 (≥8 weeks) — completes the series';
-const SAM_LEAD = '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c]; that completes the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.';
+const SAM_LEAD = '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c], to complete the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.';
 
 describe('Max — Sam\'s twin, cochlear implant, not immunocompromised', () => {
   const MAX = { ...SAM, riskIds: ['cochlear_implant'] };

@@ -103,7 +103,7 @@ describe('the toddler — the card never advises a PPSV23 the dose check refuses
     const optionA = out.recs.find((r) => r.vaccine === 'PCV');
     expect(optionA.dueToday).toBe(false);
     expect(optionA.earliestNextDate).toBe('2026-11-10');
-    expect(String(optionA.note.lead ?? optionA.note)).toContain('it can be given today if needed');
+    expect(String(optionA.note.lead ?? optionA.note)).toContain('It can be given today if needed');
   });
 
   it('a PPSV23 given on the advised date counts; one given today does not', () => {

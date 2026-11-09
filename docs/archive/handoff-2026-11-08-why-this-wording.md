@@ -1,5 +1,7 @@
 # PneumoVax — Handoff after the "Why this" wording pass (2026-11-08)
 
+> **SUPERSEDED** by `handoff-2026-11-08-wording-tidy-ups.md`.
+
 Repo: `/Users/joannehuang/Downloads/PneumoVax`. Read `CLAUDE.md` first.
 
 Branch `fix/2026-11-08-why-this-wording`, PR #145 into `main`. It was built on #144, which she squash-merged

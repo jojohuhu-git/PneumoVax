@@ -143,7 +143,7 @@ describe('a teenager whose adult card will read "No dose now" still hears about 
   it('a 15-year-old with an adult-only risk factor is not told the adult schedule recommends a dose', () => {
     const card = only(patient(15 * Y, ['chronic_heart', 'smoking'], [...baby('PCV13')], [5 * Y]));
     expect(card.status).toBe('complete');
-    expect(text(card)).toMatch(/At 19, the adult schedule gives no dose now; re-evaluate at age 50/);
+    expect(text(card)).toMatch(/At 19, the adult schedule gives no dose until a review at age 50/);
   });
 });
 

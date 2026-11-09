@@ -234,6 +234,8 @@ describe('WORD-1 — visible words cannot creep back up', () => {
     // line is shorter. A FALL; a rise still needs a reason.
     // 64 → 56 at p90 and 164 → 155 worst, 2026-11-08 (§M-L3): dose lines lost
     // the words their new labels now say. A FALL; a rise still needs a reason.
-    expect({ p90, worst }).toEqual({ p90: 56, worst: 155 });
+    // 155 → 154 worst, 2026-11-08 (§WORD-TIDY): the reason after "It can be given
+    // today if needed" on a thrown-out-PPSV23 card moved under "Why this".
+    expect({ p90, worst }).toEqual({ p90: 56, worst: 154 });
   });
 });

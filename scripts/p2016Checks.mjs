@@ -15,7 +15,7 @@ import { buildCases } from '../src/test-grid.js';
 import { recommend } from '../src/logic/recommend.js';
 
 const IC = new Set(['asplenia', 'hiv']);           // Table 3's IC list, app ids
-const COMPLETE = 'the paediatric high-risk series is complete';
+const COMPLETE = 'The pediatric high-risk series is complete';
 const THREE_BY_24 = 'who had 3 PCV doses before 24 months';
 const TOTAL = /(\d+) doses in total for this child/;
 

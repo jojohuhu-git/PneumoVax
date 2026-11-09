@@ -28,7 +28,7 @@ describe('Ivy at 20 — the patient she was shown', () => {
     expect(recs).toHaveLength(1);
     expect(recs[0].doseLabel).toBe('1 dose PCV (PCV20 or PCV21)');
     expect(recs[0].brands.join(' ')).not.toContain('PCV15');
-    expect(recs[0].note.lead).toBe('**Give 1 dose of PCV20 or PCV21**; either completes the series alone [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
+    expect(recs[0].note.lead).toBe('**Give 1 dose of PCV20 or PCV21**, either of which completes the series alone [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
     expect(recs[0].note.detail).toContain('PCV15 is not offered: after it a PPSV23 would be owed ≥8 weeks later [c] — a third PPSV23 shot.');
   });
 

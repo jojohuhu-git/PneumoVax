@@ -39,7 +39,7 @@ describe('children — the PCV card waits 8 weeks after a PPSV23 that did not co
     expect(optionA.dueToday).toBe(false);
     expect(optionA.earliestNextDate).toBe('2026-11-10');
     expect(lead(optionA)).toContain('Advised ≥8 weeks after this child\'s PPSV23 of Sep 15, 2026, which did not count');
-    expect(lead(optionA)).toContain('it can be given today if needed');
+    expect(lead(optionA)).toContain('It can be given today if needed');
   });
 
   it('the toddler: Option B PPSV23 keeps its 5-year hold', () => {
@@ -51,7 +51,7 @@ describe('children — the PCV card waits 8 weeks after a PPSV23 that did not co
     const [card] = recommend({ ...ELI, today: '2023-05-10' }).recs;
     expect(card.vaccine).toBe('PCV');
     expect(card.earliestNextDate).toBe('2023-06-24');
-    expect(lead(card)).toContain('it can be given from May 27, 2023 if needed');
+    expect(lead(card)).toContain('It can be given from May 27, 2023 if needed');
   });
 
   it('Eli: his Jun 1 PCV20 still counts and his series is complete', () => {

@@ -42,7 +42,7 @@ describe('Sam', () => {
     ]);
     expect(out.recs[0].dueToday).toBe(true);
     expect(out.recs[0].note.lead).toBe(
-      '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c]; that completes the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.',
+      '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c], to complete the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.',
     );
   });
 

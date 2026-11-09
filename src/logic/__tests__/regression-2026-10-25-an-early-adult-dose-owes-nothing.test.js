@@ -270,23 +270,24 @@ describe('the advice is never inside CDC\'s 4-day grace', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────
-describe('THE ADULT INVALID-DOSE CARD IS NOW UNREACHABLE, said out loud', () => {
-  // `adultInvalidDoseCard` in recommend.js is gated on
-  // `CARD_FOLLOWS_INVALID_DOSE`, a set of four adult rule ids. All four became
-  // recommendations on 2026-10-25, so no adult dose can carry one of those ids
-  // and be invalid at the same time, and the card can never build.
+describe('THE ADULT INVALID-DOSE CARD WAS REMOVED, and this says when it would be needed', () => {
+  // The adult "given too soon to count … INCOMPLETE" card in recommend.js was
+  // gated on a set of adult rule ids. All of them became recommendations on
+  // 2026-10-25 (PR #90), so no adult dose could be invalid under one and the
+  // card could never build: 0 of 95,760 test patients, and the full suite
+  // green with the card set to crash if reached (2026-11-08).
   //
-  // CLAUDE.md's rule is that a branch nothing can execute cannot be tested, so
-  // the unreachability is the assertion. The code is LEFT IN PLACE rather than
-  // deleted, because it is the implementation of a ruling she might restore —
-  // but a future session must not read it as live behaviour. If a floor ever
-  // returns to one of those rows this test fails and says so.
+  // OWNER DECISION 2026-11-08, "Yes, remove it". The code is kept verbatim in
+  // docs/archive/retired-2026-11-08-adult-invalid-dose-card.md. If a floor ever
+  // returns to one of these rows, this test fails, and that is the signal to
+  // restore the card from that file.
   it('no adult rule that the card follows is a floor any more', () => {
     const followed = [
       'ADULT-PCV-AFTER-PPSV23',
       'ADULT-PPSV23-AFTER-PCV15',
       'ADULT-PPSV23-AFTER-PCV15-SHORTER-MINIMUM',
       'ADULT-PPSV23-AFTER-PCV13',
+      'ADULT-PPSV23-AFTER-PCV13-SHORTER-MINIMUM',
     ];
     for (const id of followed) {
       const rule = DOSE_INTERVAL_RULES.find((r) => r.id === id);

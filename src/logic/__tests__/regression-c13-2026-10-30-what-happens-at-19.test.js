@@ -24,7 +24,7 @@ import { addCalendarMonths } from '../dateUtils.js';
 
 const LINES = {
   dose: 'At 19, the adult schedule gives 1 dose of PCV20 or PCV21, at least 5 years after the last pneumococcal dose [c].',
-  none: 'At 19, the adult schedule gives no dose now; re-evaluate at age 50 [c].',
+  none: 'At 19, the adult schedule gives no dose until a review at age 50 [c].',
   twoPpsv: 'At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21 at least 5 years after the last pneumococcal dose [c].',
   unrecorded: 'At 19, because the earlier conjugate’s product is not recorded, the adult schedule gives 1 dose of PCV15, PCV20 or PCV21, at least 1 year after the PPSV23 [c].',
 };

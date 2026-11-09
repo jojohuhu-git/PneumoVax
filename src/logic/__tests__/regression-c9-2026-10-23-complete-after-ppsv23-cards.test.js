@@ -189,7 +189,7 @@ describe('C9 — the "complete because PPSV23 has been given" cards', () => {
     // The card now says the dose on record IS the one that row called for —
     // the owner's 2026-10-23 rule. Without this the CDC number reads as an
     // order for a dose on a card that says none is needed.
-    expect(noteOf(card)).toContain('the dose on record is that dose');
+    expect(noteOf(card)).toContain('and that PPSV23 has been given');
     expect(chipShorts(card)).not.toContain('immunize.org p2016');
     expect(chipShorts(card)).toContain('PCV15 Children MMWR');
   });
