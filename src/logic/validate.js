@@ -39,7 +39,7 @@
 import { daysBetween, todayISO, AVG_DAYS_PER_MONTH } from './dateUtils.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { floorAge, FLOOR_EPS, fmtDate } from './format.js';
-import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS, PPSV23_PRODUCT } from '../data/brands.js';
+import { productByKey, productLabel, PCV_MIN_AGE_M, PCV_MIN_AGE_DAYS, PPSV23_PRODUCT, pcvMinAgeDaysForDose } from '../data/brands.js';
 import { cite } from '../data/refs.js';
 // S14-7: only the MINIMUM-AGE helpers are imported here. Every minimum
 // INTERVAL — and every decision about whether a gap can void a dose — lives in
@@ -47,13 +47,13 @@ import { cite } from '../data/refs.js';
 // yourself importing an interval constant into this file, the rule you are
 // adding belongs in that table instead. `doseIntervalRules.test.js` has a
 // drift guard that fails if one appears here.
-import { ageMeetsMinimum, ageMeetsMinimumDays, pcvAgeAtTwelveMonthLine } from './intervals.js';
+import { ageMeetsMinimum, ageMeetsMinimumDays, pcvAgeAtGraceLine } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Where CDC's "Age 6-18 years" rows begin. `recommend.js` calls the same line M.m72.
 const CHILD_LATE_ROW_MIN_M = 72;
 import { hasIC, populationOf } from '../data/riskFactors.js';
-import { evaluateDoseInterval, lastPpsv23HoldingAConjugate } from './doseIntervalRules.js';
+import { evaluateDoseInterval, lastPpsv23HoldingAConjugate, pcvRepeatAfterUnderAgeDose } from './doseIntervalRules.js';
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
 // dose. Dropped HERE, at the walk, so that no caller can count one by
 // forgetting to filter — the UI sweeps them too, but only for tidiness.
@@ -782,19 +782,64 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     ), minAgeM, ageMonths < minAgeM);
   }
 
+  const priorPcv = (ctxParts.priorPcv ?? []).filter((d) => d.date && d.date <= dose.date);
+  const anyPriorDoseBefore12 = priorPcv.some((d) => {
+    const a = ageAtDoseFromDate(d, ageMonths, today, dob);
+    return a != null && a < 12;
+  });
+
+  // §A-DOSEAGE (OWNER RULING 2026-11-08, CDSI finding 3, "Leo"): dose 2 and
+  // dose 3 have their OWN minimum ages, 10 and 14 weeks (ACIP General Best
+  // Practices Table 3-2), each with the 4-day grace. Leo's PCV15 at 38 days
+  // and PCV20 27 days later each used the grace once; together they put dose 2
+  // at 65 days, under 10 weeks, and the app counted it. Her words: "Leo's dose
+  // 2 does not count; repeat ≥4 weeks after it (Ruling D)." The number is the
+  // COUNTING dose number — the same one Table 2's cells key on — so a dose
+  // after a rejected one takes the rejected one's number. No age test decides
+  // whether this bites: past 14 weeks it cannot fail.
+  const doseNumber = priorPcv.length + 1;
+  const doseMinDays = pcvMinAgeDaysForDose(doseNumber);
+  if (doseMinDays != null && doseMinDays > (minDays ?? 0)) {
+    const oldEnoughForThisDose = ageAtDoseDays != null
+      ? ageMeetsMinimumDays(ageAtDoseDays, doseMinDays)
+      : ageMeetsMinimum(ageAtDose, doseMinDays / AVG_DAYS_PER_MONTH, { doseDate: dose.date, ageMonths, today, dob });
+    if (!oldEnoughForThisDose) {
+      const weeks = `${doseMinDays / 7} weeks`;
+      // Stated in WEEKS, the unit of the floor: "about 2 months" beside "10
+      // weeks" reads as older than the minimum (seen in the running app).
+      const givenAt = ageAtDoseDays != null
+        ? `${Math.floor(ageAtDoseDays / 7)} weeks${ageAtDoseDays % 7 ? ` ${ageAtDoseDays % 7} day${ageAtDoseDays % 7 === 1 ? '' : 's'}` : ''}`
+        : about(fmtAgeM(ageAtDose));
+      const ordinal = doseNumber === 2 ? '2nd' : '3rd';
+      const cites = [cite(doseNumber === 2 ? 'acipGbpPcvDose2MinAge' : 'acipGbpPcvDose3MinAge')];
+      const repeatFromDate = pcvRepeatAfterUnderAgeDose({
+        doseDate: dose.date, ageAtDose, doseNumber, anyPriorDoseBefore12,
+      });
+      return {
+        ...invalid(
+          [withMarker(`Given at ${givenAt} — below the ${weeks} minimum age for a ${ordinal} PCV dose.`, cites)],
+          `Age at administration: ${givenAt}. Minimum for PCV dose ${doseNumber}: ${weeks} (doses up to 4 days early still count, per ACIP).`,
+          cites
+        ),
+        // Read by the closing sentence in `stepStream`: the repeat is spaced
+        // from THIS dose (Ruling D), so it names a date, not an age.
+        ageRemedy: { minAgeText: weeks, stillTooYoung: false, repeatFromDate },
+      };
+    }
+  }
+
   // Age is settled; now the dose's timing, against the one rule table.
   const result = adviseIfBeforeRecommendedAge(
     key ? valid() : unknown([]),
     prod, ageAtDose, ageMonths
   );
-  const priorPcv = (ctxParts.priorPcv ?? []).filter((d) => d.date && d.date <= dose.date);
   return applyIntervalRules(result, {
     vaccine: 'PCV',
     product: key,
     doseDate: dose.date,
     // §A-GRACE12: 1-4 days before the first birthday counts as 12 months for
     // Table 2's cells, so a booster in that window owes the booster's 8 weeks.
-    ageAtDose: pcvAgeAtTwelveMonthLine(ageAtDose, dose.date, dob),
+    ageAtDose: pcvAgeAtGraceLine(ageAtDose, dose.date, dob),
     prev,
     priorPcv,
     priorPpsv23: (ctxParts.priorPpsv23 ?? []).filter((d) => d.date && d.date <= dose.date),
@@ -811,11 +856,8 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     // how a catch-up table counts them: `ctxParts.priorPcv` is validate.js's
     // `kept` list, so a PCV7 and a dose already rejected for spacing are both
     // absent, and the dose after a rejected one takes the rejected one's number.
-    doseNumber: priorPcv.length + 1,
-    anyPriorDoseBefore12: priorPcv.some((d) => {
-      const a = ageAtDoseFromDate(d, ageMonths, today, dob);
-      return a != null && a < 12;
-    }),
+    doseNumber,
+    anyPriorDoseBefore12,
   });
 }
 
@@ -941,7 +983,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       st.prev = {
         date: d.date,
         // §A-GRACE12: the dose measured FROM is read at the 12-month line too.
-        ageAtDose: vaccine === 'PCV' ? pcvAgeAtTwelveMonthLine(age, d.date, dob) : age,
+        ageAtDose: vaccine === 'PCV' ? pcvAgeAtGraceLine(age, d.date, dob) : age,
         product: d.product || '',
       };
     }
@@ -1065,7 +1107,11 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
             // patient still below the floor is told where the floor is; one
             // who has passed it is not shown a bar she has already cleared.
             : result.ageRemedy
-              ? (result.ageRemedy.stillTooYoung
+              // §A-DOSEAGE: a dose 2 or 3 under its own minimum age is repeated
+              // from the dose given (Ruling D); the date is the table's.
+              ? (result.ageRemedy.repeatFromDate
+                ? `The replacement can be given from ${fmtDate(result.ageRemedy.repeatFromDate)}, any PCV approved for that age. Do not restart the series.`
+                : result.ageRemedy.stillTooYoung
                 ? `The replacement can be given from the ${result.ageRemedy.minAgeText} minimum age, any PCV approved for that age. Do not restart the series.`
                 : 'The replacement can be any PCV approved for the patient\'s age. Do not restart the series.')
               : 'Do not restart the series.';

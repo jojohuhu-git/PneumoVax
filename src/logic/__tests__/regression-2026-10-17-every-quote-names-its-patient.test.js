@@ -98,6 +98,11 @@ describe('the field itself', () => {
     // impossible to do by accident.
     const spanning = quotedKeys.filter((k) => REFS[k].population.length > 1).sort();
     expect(spanning).toEqual([
+      // §A-DOSEAGE (2026-11-09). ACIP's Table 3-2 gives ONE row per dose for
+      // every infant: the table carries no risk column at all, so all three
+      // child groups is transcription, not widening.
+      'acipGbpPcvDose2MinAge',
+      'acipGbpPcvDose3MinAge',
       // 2026-11-07: FOUR came off this list by NARROWING, never widening.
       // `adultPcv13Only`, `adultPcv15ThenPpsv` and `adultPcv7Only` are printed
       // word for word under both adult headings, inside two different closed

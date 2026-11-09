@@ -2,18 +2,17 @@
 
 Findings: `report-2026-11-08-cdsi-test-patients.md` §"Open". Branch `fix/2026-11-08-cdsi-findings`
 off `main` at `5ee7e03`. Baseline 2,481 passing, 0 failed (vitest JSON reporter, `.claude/**` excluded).
-**Status (end of 2026-11-08 session): 1 and 2 DONE, committed locally (`acafff3`, `12c748a`), not pushed,
-no PR. 3 and 4 NOT STARTED. 5 parked.** Tests 2,481 → **2,495 passing, 0 failed**. CDSI 117 → **118 of 140** agree.
+**Status (2026-11-09): 1, 2, 3 and 4 DONE, committed locally on this branch, not pushed, no PR.
+5 parked.** Tests 2,495 → **2,521 passing, 0 failed**. CDSI 118 → **122 of 140** agree.
 
 | # | State | Detail |
 |---|---|---|
 | 1 | Done | `CLINICAL_SPEC.md` §L-FIRSTDOSE. 0 grid patients (youngest is 2 months). Label "Routine", not "Due", for a baby too young for dose 1 — narrows §L-2's "a first dose keeps Due"; tell her. Ben's line adds "as the minimum age of 6 weeks has passed" (what the [c] stands on); tell her. |
 | 2 | Done | `CLINICAL_SPEC.md` §L-BOOSTERDATE. Moved 132 / 264 saved answers, every one ONLY the next date blank → date (field diff). "her 1st birthday" became "the 1st birthday" (app can't know sex); tell her. `proveChecks.mjs` H1 now mutates a branch no card reaches — re-aim it at a dated card. |
-| 4 | Next | Smaller than 3. Find every place "first dose at ≥24 months" is decided; mirror `pcvAgeAtTwelveMonthLine()`. Moves verdicts: show movers grouped before `sweep:update`. |
-| 3 | After 4 | Moves verdicts; she asked to see the count before it lands. |
+| 4 | Done | `CLINICAL_SPEC.md` §A-GRACE24. **Second ruling, 2026-11-09 ("Rosa"): "Only when it helps"** — built first as "read as the birthday", it took Rosa (asplenia, PCV13 ×2, PCV20 2 days before age 2) from complete to owing a PCV. Now the dose stays "before 24" and ALSO counts toward "at 24+". 0 grid / 0 record-problem verdicts; 636 of 1,575 hand-built moved, 0 lost "complete", 0 chip texts. The whole-app age-lines check now lists PCV@24 as a grace edge. §A-GRACE12 (12 months) still moves the dose outright — not checked for the same harm; ask her. |
+| 3 | Done (owner approved the movers 2026-11-09, "Yes, commit it") | `CLINICAL_SPEC.md` §A-DOSEAGE. Dose 2 ≥70 days (66 with grace), dose 3 ≥98 (94); repeat 4 weeks after (Ruling D, from the rule table); card never offers a date under the next dose's age. REVERSES the 2026-10-26 "grace per interval" test (38/62/86 → 38/66/94). 0 grid / 0 record-problem / 0 of 77,496 whole-app patients moved; 502 of 2,736 hand-built baby views (23 histories, all a dose 1–4 days early followed by another early dose). CDSI 119 → 122. Tests 2,521. |
 
-**Resume:** `git checkout fix/2026-11-08-cdsi-findings`. Push and open a PR for 1+2 when she says (ship skill);
-she merges. Then 4, then 3, each by the fix-queue loop.
+**Resume:** `git checkout fix/2026-11-08-cdsi-findings`. Push and open a PR for 1-4 when she says (ship skill); she merges.
 
 All five reproduced on 2026-11-08 with `npx vite-node scripts/cdsi/runTestCases.mjs`, plus hand probes.
 
@@ -25,6 +24,7 @@ All five reproduced on 2026-11-08 with `npx vite-node scripts/cdsi/runTestCases.
 | 2 | Nora, born 2025-11-01, PCV20 2026-07-01 and 2026-09-15, seen 2026-09-20: "not due until 12 months" — a dose on 2026-11-01 is **thrown out by the app's own checker** (probe: `invalid`) | **"Date plus reason."** Nora: *"This final dose is due on Nov 10, 2026: 8 weeks after the most recent dose, which is after her 1st birthday."* Control (last dose at 9 months): *"This final dose is due at 12 months, on Nov 1, 2026."* The card's date line shows the same date. |
 | 3 | Leo, born 2026-06-01, PCV15 at 38 days, PCV20 at 65 days (27-day gap) — both count in the app | **Use ACIP's per-dose minimum ages** (6 wk, 10 wk, 14 wk, 12 mo; 4-day grace on each). Leo's dose 2 does not count; repeat ≥4 weeks after it (Ruling D). **Moves verdicts: count every mover and show her before it lands.** |
 | 4 | Mila, born 2024-08-09, first PCV20 2026-08-05 (4 days before 24 months): app asks for dose 2 | **"Grace applies; she's done."** Mirror §A-GRACE12 at the 2nd birthday. |
+| 4b (2026-11-09) | Rosa, born 2024-08-09, asplenia, PCV13 at 2 and 4 months, PCV20 on 2026-08-07 (2 days before age 2), seen 2026-09-15. Today "complete"; read as a birthday dose she would owe one more PCV. Control: same PCV20 5 days early → complete | **"Only when it helps"** — use the grace only where it means fewer doses owed. |
 | 5 | Teen with HIV, 2×PPSV23 then PCV13 | Not asked — parked (rare; her 2026-10-31 "skip unlikely scenarios"). |
 
 ## Sources read live 2026-11-08

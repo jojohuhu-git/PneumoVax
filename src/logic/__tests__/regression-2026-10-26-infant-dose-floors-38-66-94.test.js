@@ -1,5 +1,10 @@
 // 2026-10-26 — P5: the infant PCV floors, 38 / 66 / 94 days.
 //
+// ⚠ PARTLY REVERSED 2026-11-08 (owner, CDSI finding 3, §A-DOSEAGE): the
+// "grace per interval" reading argued below no longer holds. Each dose now
+// has its own minimum age, so 38 / 66 / 94 holds for every history. See the
+// REVERSED block further down; the reasoning is kept as the record.
+//
 // Her children's table says doses 1-3 are invalid before **38 / 66 / 94 days**
 // of age. The previous handoff marked this row "already correct, no work
 // needed - 38+28+28 = 94 exactly. Zero slack, so it deserves a guard."
@@ -113,31 +118,33 @@ describe('her row exactly — a child vaccinated on the routine schedule', () =>
   });
 });
 
-describe('a child whose earlier doses were themselves early — the grace per interval', () => {
-  // NOT a defect. CDC gives the grace to "the minimum interval or age", and
-  // measures the interval from the dose the patient actually received. These
-  // numbers are pinned so that the behaviour cannot change in silence; if the
-  // owner ever rules that the floors are fixed ages regardless of history,
-  // this block is what records the reversal.
-  it('each dose at its own earliest gives 38 / 62 / 86, not 38 / 66 / 94', () => {
+// ── REVERSED 2026-11-08 by the owner (CDSI finding 3, "Leo"; §A-DOSEAGE) ──
+//
+// This block used to pin 38 / 62 / 86 — the grace taken once per interval, so
+// a baby whose doses each came 4 days early reached dose 3 eight days under her
+// row — and said: "if the owner ever rules that the floors are fixed ages
+// regardless of history, this block is what records the reversal." She did.
+// Shown Leo (PCV15 at 38 days, PCV20 at 65 days), she ruled: "Use ACIP's
+// per-dose minimum ages (6 wk, 10 wk, 14 wk, 12 mo; 4-day grace on each)."
+// ACIP General Best Practices Table 3-2 (read live 2026-11-09) gives each dose
+// its own minimum age, which the grace reaches once: 42-4, 70-4, 98-4. So her
+// row now holds for EVERY history. Kept, renamed, as the record of the change.
+describe('REVERSED 2026-11-08: her row holds whatever the history — each dose has its own minimum age', () => {
+  it('each dose at its own earliest now gives 38 / 66 / 94, the same as the routine child', () => {
     expect([
       earliestNextDose([], 30, 50),
       earliestNextDose([38], 50, 80),
-      earliestNextDose([38, 62], 80, 110),
-    ]).toEqual([38, 62, 86]);
+      earliestNextDose([38, 66], 80, 110),
+    ]).toEqual([38, 66, 94]);
   });
 
-  it('the shortfall against her row is exactly one grace per earlier interval', () => {
-    // 0 days at dose 1, 4 at dose 2, 8 at dose 3 — the grace accumulating,
-    // stated as arithmetic rather than as three magic numbers.
-    expect(66 - earliestNextDose([38], 50, 80)).toBe(GRACE_DAYS);
-    expect(94 - earliestNextDose([38, 62], 80, 110)).toBe(2 * GRACE_DAYS);
+  it('the old chain is now refused: dose 2 at 62 days and dose 3 at 86 days do not count', () => {
+    expect(statuses([38, 62])).toEqual(['valid', 'invalid']);
+    expect(statuses([38, 66, 86])).toEqual(['valid', 'valid', 'invalid']);
   });
 
-  it('the interval is measured from the dose GIVEN, graced, wherever it falls', () => {
-    // The mechanism itself, over a spread of first-dose ages. Each later dose
-    // is accepted exactly 28 - 4 days after the one before it.
-    for (const first of [38, 42, 50, 70, 100]) {
+  it('once the dose ages are past the minimum, the interval is still 28 - 4 days from the dose given', () => {
+    for (const first of [42, 50, 70, 100]) {
       const second = earliestNextDose([first], first + 10, first + 60);
       expect(second - first).toBe(PCV_MIN_INTERVAL_DAYS_UNDER_12M - GRACE_DAYS);
     }

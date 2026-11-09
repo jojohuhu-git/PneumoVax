@@ -35,13 +35,13 @@ import {
   pedsRiskRowClass,
   pedsRiskIds,
 } from '../data/riskFactors.js';
-import { productByKey, pcvRecBrands, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { productByKey, pcvRecBrands, PCV_MIN_AGE_DAYS, pcvMinAgeDaysForDose } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
 import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
 import { ageAtDoseMonths } from './patientAge.js';
 import { dropBlankDoseRows } from './doseIdentity.js';
-import { pcvNextDoseMinIntervalCell, intervalPhrase, pcvAgeAtTwelveMonthLine } from './intervals.js';
+import { pcvNextDoseMinIntervalCell, intervalPhrase, pcvAgeAtGraceLine } from './intervals.js';
 import { ADULT_SCHED_MIN_M, ROUTINE_ADULT_MIN_M } from './scheduleConstants.js';
 import { fmtSince } from './doseIntervalRules.js';
 import { foldCard } from './noteFold.js';
@@ -244,7 +244,7 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
   // on it ("1 or 2 before age 7 months" vs "1 at age 7 months or older") and
   // CDC Catch-up Table 2 keys the dose 2->3 interval on it too (P0-2). Both
   // are DATED-ONLY; see the undated policy where the ladder consumes them.
-  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0, at12ByGrace: 0 };
+  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0, at12ByGrace: 0, at24ByGrace: 0 };
   // The same before/after-6 split for every dose that is NOT a PCV20/PCV21 —
   // the conjugates a completing dose was given on top of. §B-PCV20-AFTER-
   // BEFORE6 (2026-10-31): `band.ge72` counts the PCV20 itself, so a child whose
@@ -263,8 +263,23 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     // before the first birthday is the 12-month dose — read through the one
     // helper the validator uses too, so the bands and the dose verdicts cannot
     // disagree about which side of the line a dose is on.
-    const ageAtDose = pcvAgeAtTwelveMonthLine(rawAge, d.date, dob);
-    if (ageAtDose !== rawAge) band.at12ByGrace += 1;
+    //
+    // §A-GRACE24 (OWNER RULINGS 2026-11-08 "Mila" and 2026-11-09 "Rosa") is
+    // NOT the same move one birthday later. Read as given ON the 2nd birthday,
+    // a dose leaves "doses before 24 months", and Rosa — asplenia, PCV13 at 2
+    // and 4 months, PCV20 two days before age 2 — went from complete to owing
+    // a PCV. Asked whether the grace may ever take credit away, the owner
+    // chose "Only when it helps". ACIP's grace is for a MINIMUM age ("≤4 days
+    // before the minimum interval or age are considered valid"), so the dose
+    // stays banded at its real age (it WAS given before 24 months) and is
+    // ALSO counted toward "given at 24 months or older" in `ge24` below. Every
+    // reader of `ge24` asks for fewer doses as it rises, so this can only add
+    // credit. Measured on 1,575 hand-built children: see §A-GRACE24.
+    const graced = pcvAgeAtGraceLine(rawAge, d.date, dob);
+    const at24ByGrace = graced === M.m24 && rawAge < M.m24;
+    if (at24ByGrace) band.at24ByGrace += 1;
+    else if (graced !== rawAge) band.at12ByGrace += 1;
+    const ageAtDose = at24ByGrace ? rawAge : graced;
     if (ageAtDose < M.m12) {
       band.before12 += 1;
       if (ageAtDose < M.m7) band.before7 += 1;
@@ -279,7 +294,9 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
   band.before24 = band.before12 + band.m12to23 + band.undated;
   // Doses given at/after 24 months (progress toward the at-risk 2-dose catch-up).
   // Dated only — we never ASSUME an undated dose was a ≥24mo catch-up dose.
-  band.ge24 = band.m24to71 + band.ge72;
+  // `at24ByGrace`: §A-GRACE24 — a dose 1-4 days before the 2nd birthday counts
+  // here AND stays in `before24`, where its real age puts it.
+  band.ge24 = band.m24to71 + band.ge72 + band.at24ByGrace;
 
   // A completing dose (PCV20/PCV21) that we CANNOT prove was given before 24mo —
   // i.e. undated, or dated at ≥24mo. Used by the healthy-child completeness check:
@@ -956,7 +973,18 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // P2-8 (2026-11-06): strictly earlier. The day the routine age arrives is on
   // time, not overdue: Mia, due the day she turned 4 months.
   const routineAgePassed = routineAgeDate != null && routineAgeDate < today;
-  const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
+  const intervalMinDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
+  // §A-DOSEAGE (OWNER RULING 2026-11-08, "Leo"): dose 2 and dose 3 have their
+  // own minimum ages, 10 and 14 weeks — the floor validate.js now grades by.
+  // The interval alone can fall short of it only when the dose before came in
+  // the 4-day grace (dose 1 at 38 days + 4 weeks = 66 days, under 10 weeks),
+  // and the card offered that date, which the checker would then throw out.
+  // The earliest date is the later of the two; no grace, it is advice.
+  const doseMinAgeDays = anchor && dob && doseNum >= 2 ? pcvMinAgeDaysForDose(doseNum) : null;
+  const doseMinAgeDate = doseMinAgeDays != null ? addDays(dob, doseMinAgeDays) : null;
+  const minByAge = intervalMinDate != null && doseMinAgeDate != null && doseMinAgeDate > intervalMinDate;
+  const minDate = minByAge ? doseMinAgeDate : intervalMinDate;
+  const minAgeRef = minByAge ? (doseNum === 2 ? 'acipGbpPcvDose2MinAge' : 'acipGbpPcvDose3MinAge') : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
   // ladder picked `t1row` from this child's actual history, so its history
@@ -1043,13 +1071,16 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // Table 2 actually prints a branch for this patient (`minCell`). Where it does
   // not, the number is still stated and simply credits nobody, rather than
   // borrowing the nearest-looking row.
-  const minClauseCite = showMinClause && minCell ? minCell : null;
+  const minClauseCite = !showMinClause ? null : minByAge ? minAgeRef : (minCell || null);
   const minMark = minClauseCite ? ' [c]' : '';
+  const minWhat = !showMinClause ? null : minByAge
+    ? `minimum age of ${doseMinAgeDays / 7} weeks for this dose`
+    : `minimum interval of ${intervalPhrase({ days: minInterval })}`;
   const minClause = !showMinClause
     ? ''
     : minDate <= today
-      ? `, but it can be given today if needed, as the minimum interval of ${intervalPhrase({ days: minInterval })} has already passed${minMark}`
-      : `, but it can be given from ${fmtDate(minDate)} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
+      ? `, but it can be given today if needed, as the ${minWhat} has already passed${minMark}`
+      : `, but it can be given from ${fmtDate(minDate)} if needed, which is the ${minWhat}${minMark}`;
   // The document that states the advised number itself. Each branch is credited
   // to the one source whose own words carry it:
   //   routineAge -> CDC's notes, "4-dose series at 2, 4, 6, and 12-15 months"
@@ -1060,7 +1091,7 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   const advisedCiteRaw = !anchor ? null
     : advisedReason === 'routineAge' ? 'pedsRoutine4Dose'
       : advisedReason === 'spacing' ? spacingRow
-        : minCell;
+        : (minByAge ? minAgeRef : minCell);
   // The lead's one marker, named here so the detail can avoid repeating it.
   const leadCite = target > 4
     ? 'pedsInfantLastDose1215mo'
@@ -4674,7 +4705,14 @@ export function recommendBeforeFold(input) {
   // the child's rules, whatever the adult card says from 19.
   let childCardsReplaced = null;
   let adultChips = null;
-  if (am < M.m24) {
+  // §A-GRACE24 (OWNER RULING 2026-11-08, "Mila"): a child holding a dose that
+  // counts as given AT 24 months is on the 2–18 rules even on that dose's own
+  // day, when she is still 23 months old — the twin of `rowAm` at 12 months.
+  // CDC's own test case 2013-0589 is assessed on exactly that day.
+  const atTwoByGrace = am < M.m24 && pcv.band.at24ByGrace > 0;
+  const graceWords = atTwoByGrace
+    ? ' — a PCV dose given 1–4 days before the 2nd birthday counts as given at 2 years' : '';
+  if (am < M.m24 && !atTwoByGrace) {
     // FINDING D (2026-10-17): the infant pathway gets the paediatric risk ids
     // too. `pedsRiskIds` strips adult-only ticks here for the same reason it
     // does below — a tick that does not apply to a child must not reach a
@@ -4704,7 +4742,7 @@ export function recommendBeforeFold(input) {
     const pedsIds = pedsRiskIds(riskIds);
     if (pedsRiskRowClass(pedsIds)) {
       path.push(pathStep('Which rules apply', 'Children with a risk condition',
-        `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}, with a risk condition that applies at this age`));
+        `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}, with a risk condition that applies at this age${graceWords}`));
       // §B-AT19: the same patient, nothing more given, on the day she turns
       // 19 — the adult card whose answer each "complete" card's line repeats.
       const nineteenth = addCalendarMonths(dob ?? today, dob ? ADULT_SCHED_MIN_M : ADULT_SCHED_MIN_M - am);
@@ -4729,7 +4767,7 @@ export function recommendBeforeFold(input) {
       }
     } else {
       path.push(pathStep('Which rules apply', 'Children with no risk condition',
-        `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}`
+        `at least ${ageWords(M.m24)} and under ${ageWords(M.y18)}${graceWords}`
         + (riskIds.length && !pedsIds.length ? ' — the condition ticked is one that only applies to adults' : '')));
       recs = pcvHealthyChild(am, pcv, ppsv, today,
         riskIds.some((id) => RISK_BY_ID[id]?.adultOnly),

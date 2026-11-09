@@ -46,6 +46,20 @@ export const VAX = {
 export const PCV_MIN_AGE_DAYS = 42;
 export const PCV_MIN_AGE_M = PCV_MIN_AGE_DAYS / AVG_DAYS_PER_MONTH;
 
+// §A-DOSEAGE (OWNER RULING 2026-11-08, CDSI finding 3, "Leo"): each conjugate
+// dose has its OWN minimum age. ACIP General Best Practices Table 3-2 (read
+// live 2026-11-09): "PCV13-2 4 months 10 weeks …", "PCV13-3 6 months 14 weeks
+// …"; PCV15 and PCV20 "See footnote x below". Without these, the 4-day grace
+// could be used twice in a row — dose 1 at 38 days, dose 2 24 days later —
+// bringing dose 2 in under 10 weeks. Dose 4's "12 months" is NOT here: a 4th
+// dose before the first birthday is an extra infant dose, kept and not counted
+// (owner ruling 2026-10-23), which the engine's 12-month logic already does.
+// Weeks are exact days, as for dose 1. Keyed on the COUNTING dose number.
+const PCV_MIN_AGE_DAYS_BY_DOSE = { 1: PCV_MIN_AGE_DAYS, 2: 70, 3: 98 };
+export function pcvMinAgeDaysForDose(doseNumber) {
+  return PCV_MIN_AGE_DAYS_BY_DOSE[doseNumber] ?? null;
+}
+
 // PCV product catalog. `key` matches the value stored in history doses.
 export const PCV_PRODUCTS = [
   {

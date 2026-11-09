@@ -218,7 +218,8 @@ first-ever dose.
 **The rule:** with a date of birth on file, a PCV dose given 1–4 days before the first birthday
 is read as given **at 12 months**, for every purpose — the age bands that pick the Table 1 row,
 and the ages Table 2's spacing cells key on (this dose's and the dose it is measured from). One
-helper, `pcvAgeAtTwelveMonthLine()` in `intervals.js`, answers it for all of them.
+helper, `pcvAgeAtGraceLine()` in `intervals.js`, answers it for all of them (and, since §A-GRACE24,
+for the second birthday too).
 
 - Lily → **complete (4 doses)**. A baby started at 7 months (doses at 7 and 9) whose 3rd dose
   falls in the window → **complete (3 doses)**. A first-ever PCV in the window → a series
@@ -243,6 +244,89 @@ rendered lines (the grid never places a dose in those four days). Hand-built: **
 babies moved — every one with a dose 1–4 days before the birthday; the 72 with a dose 7 days
 early did not. Guard: `regression-2026-10-31-four-day-grace-at-first-birthday.test.js` (eight
 mutations; seven caught, the eighth is the raw-age check above, reverted).
+
+### §A-GRACE24 — a PCV dose 1–4 days before the 2nd birthday also counts as given at 2 years (OWNER RULINGS 2026-11-08 "Mila", 2026-11-09 "Rosa")
+
+Found by CDC's own test patients (CDSI test case 2013-0589, *"Dose 1 PCV 20 at 24 m-4 days. Series
+complete."*). Mila, healthy, born 2024-08-09, had her first-ever PCV20 on 2026-08-05 — **4 days**
+before she turned 2. The app read her as 23 months at that dose and asked for another; the same dose
+on her birthday read "complete". Owner, shown her: *"Grace applies; she's done."*
+
+Sources, read live 2026-11-09: ACIP General Best Practices, timing and spacing — *"vaccine doses
+administered ≤4 days before the minimum interval or age are considered valid"*. CDC Catch-up Table 2
+(addendum updated July 2, 2025), PCV dose 1 to dose 2 — *"No further doses needed for healthy children
+if first dose was administered at age 24 months or older"*. CDSI 4.65 (local copy) — *"Target Dose not
+required if current dose was administered on or after 24 months - 4 days of age."*
+
+**Not §A-GRACE12 one birthday later — the grace only ever adds credit.** The first build read such a
+dose exactly as one given ON the birthday. That took credit away from Rosa: asplenia, PCV13 at 2 and 4
+months, PCV20 2 days before age 2. As a dose before 24 months her PCV20 finished her series ("complete");
+moved to 24 months it left "doses before 24 months" and she was asked for another PCV. Shown Rosa beside
+the 5-days-early control, the owner ruled **"Only when it helps"** — use the grace only where it means
+fewer doses owed.
+
+**The rule:** with a date of birth on file, a PCV dose given 1–4 days before the 2nd birthday stays
+counted as given before 24 months (it was), and is **also** counted toward "given at 24 months or older"
+(`band.ge24`), because the grace is for that minimum age. Every reader of that count asks for fewer
+doses as it rises, so the grace cannot cost a child credit. On the dose's own day, when the child is
+still 23 months old, she is put on the 2–18 rules — the answer she will be given 4 days later, with the
+grace's credit — and the "Which rules apply" line says why. The age test is `pcvAgeAtGraceLine()`, the
+same helper as §A-GRACE12; each dose is tested only against the next line above it.
+
+- Mila → **complete**, on the dose day and after. A healthy child with one baby PCV13 then a dose in the
+  window → complete. An at-risk child with 0 or 1 dose before → **1** more PCV, not 2.
+- Rosa → **still complete**. The same child with a PCV13 instead owes one dose under either reading, so
+  her card does not move.
+- **Unchanged:** 5+ days early; no date of birth (no grace); what the app **advises** is never moved
+  inside the grace (ruling 2026-10-24); per-dose chips (no Table 2 spacing cell keys on 24 months).
+
+Measured 2026-11-09: **0 of 17,016** grid verdicts and **0 of 18,264** record-problem rows (the grid
+never places a dose in those four days). Hand-built, old engine against new: **636 of 1,575** children
+moved, every one with a dose 1–4 days before age 2 (0 on the birthday, 0 at 5 or 7 days); **0** lost
+"complete"; **0** per-dose chip texts changed. Seen a month or more later, every mover owes fewer doses
+(48 healthy → complete; 288 at-risk owe 1 instead of 2); the rest are dose-day cards now showing the
+age-2 answer. CDSI test patients 118 → **119 of 140** agree. Guard:
+`regression-2026-11-09-four-day-grace-at-second-birthday.test.js` (five mutations, all caught).
+
+### §A-DOSEAGE — each PCV dose has its own minimum age: 6, 10 and 14 weeks (OWNER RULING 2026-11-08, "Leo")
+
+Found by CDC's own test patients (CDSI cases 2013-0579, 2013-0590, 2013-0603). Leo, born 2026-06-01:
+PCV15 at **38 days** (6 weeks less 4, counted by the grace), PCV20 at **65 days**, 27 days later (4 weeks
+less 1, counted by the grace). The app counted both: it checked only dose 1's age, and then the gaps,
+so the grace could be taken twice in a row. Owner: *"Use ACIP's per-dose minimum ages (6 wk, 10 wk, 14
+wk, 12 mo; 4-day grace on each). Leo's dose 2 does not count; repeat ≥4 weeks after it (Ruling D)."*
+
+Source, read live 2026-11-09: ACIP General Best Practices, Timing and Spacing, **Table 3-2**,
+"Recommended and minimum ages and intervals between vaccine doses", column "Minimum age for this dose":
+*"PCV13-1 … 6 weeks"*, *"PCV13-2 4 months 10 weeks 8 weeks 4 weeks"*, *"PCV13-3 6 months 14 weeks 6 months
+8 weeks"*, *"PCV13-4 12-15 months 12 months"*. PCV15 and PCV20 rows: *"See footnote x below"*; footnote
+x: *"Infants and children can optionally receive PCV15 instead of PCV13."* It does not name PCV20; the
+owner applied the ages to every conjugate (Leo's dose 2 was a PCV20), so the app's own words say "PCV
+dose", never "PCV13". Grace: *"vaccine doses administered ≤4 days before the minimum interval or age are
+considered valid"*.
+
+**The rule:** the COUNTING dose 2 must be given at **70 days or older (66 with the grace)**, dose 3 at
+**98 days (94)**. Dose 4's 12 months is not added: a 4th dose before the first birthday is already an
+extra infant dose, kept and not counted (owner ruling 2026-10-23). A dose under its own minimum age does
+not count and is repeated **4 weeks after it** (Ruling D) — the date comes from the rule table's own
+CHILD-PCV-AFTER-PCV row (`pcvRepeatAfterUnderAgeDose()`), the row that will grade the repeat. The card's
+"can be given from" date is never earlier than the next dose's own minimum age, and names it when it is
+the later of the two ("which is the minimum age of 10 weeks for this dose"). One home for the ages:
+`pcvMinAgeDaysForDose()` in `brands.js`. Cited to `acipGbpPcvDose2MinAge` / `acipGbpPcvDose3MinAge`,
+whose links jump to the table row.
+
+**This REVERSES the "grace per interval" reading** of 2026-10-26
+(`regression-2026-10-26-infant-dose-floors-38-66-94.test.js`), which pinned 38 / 62 / 86 days as
+correct for a baby whose doses each came 4 days early and said the block would record a reversal if the
+owner ruled the floors fixed. The floors are now 38 / 66 / 94 for every history.
+
+Measured 2026-11-09: **0 of 17,016** grid verdicts, **0 of 18,264** record-problem rows, and **0 of
+77,496** whole-app patients changed in any way (no standing test patient has a dose under 10 or 14
+weeks). Hand-built, old engine against new: **502 of 2,736** baby views moved, all with a dose 1–4 days
+under its minimum age followed by another early dose — 23 dose histories, each × 3 risk profiles × 2
+products × 3 visit dates. Verdicts moved on 414 (dose 2 thrown out: 54 + 216; dose 3 thrown out: 144);
+the other 88 changed only the card's "can be given from" sentence. CDSI test patients 119 → **122 of 140** agree (all three of finding 3), 0 new disagreements.
+Guard: `regression-2026-11-09-pcv-per-dose-minimum-ages.test.js`.
 
 ---
 
