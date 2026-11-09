@@ -39,7 +39,7 @@ describe('Ivy at 20 with a PCV15 — the patient she was shown', () => {
     expect(r.vaccine).toBe('PCV');
     expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥8 weeks after PCV15 — completes the series');
     expect(r.brands).toEqual(['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)']);
-    expect(r.note.lead).toBe('**Give 1 dose of PCV20 or PCV21** ≥8 weeks after the PCV15 dose, in place of the PPSV23 [c] [c]; it completes the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
+    expect(r.note.lead).toBe('**Give 1 dose of PCV20 or PCV21** ≥8 weeks after the PCV15 dose, in place of the PPSV23 [c] [c], to complete the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
     expect(r.note.detail).toBe('The timing is the PPSV23\'s: ACIP gives the PPSV23 ≥8 weeks after a PCV15 [c], and no document states a separate timing for the PCV20 or PCV21 that replaces it. A PPSV23 is not given: it would be a third PPSV23 shot.');
   });
 

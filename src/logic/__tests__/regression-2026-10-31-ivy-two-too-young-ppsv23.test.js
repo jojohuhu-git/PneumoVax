@@ -38,7 +38,7 @@ describe('Ivy', () => {
   it('her card offers PCV20 only — no Option B, which would be her third PPSV23 shot', () => {
     expect(out.recs.map((r) => [r.vaccine, r.doseLabel])).toEqual([['PCV', PCV20_ONLY[0]]]);
     expect(out.recs[0].note.lead).toBe(
-      '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c]; that completes the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.',
+      '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c], to complete the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.',
     );
     expect(out.recs[0].note.detail).toBe('A PPSV23 is not offered: it would be a third PPSV23 shot.');
   });

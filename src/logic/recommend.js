@@ -1273,7 +1273,7 @@ const reviewAt50Cite = () => cite('adultRoutine50', {
 const AT_NINETEEN_LINES = [
   ['mmwrIc1949TwoPpsv', 'At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21 at least 5 years after the last pneumococcal dose [c].'],
   ['adultPpsvOnly1949', 'At 19, because the earlier conjugate’s product is not recorded, the adult schedule gives 1 dose of PCV15, PCV20 or PCV21, at least 1 year after the PPSV23 [c].'],
-  ['adultChronicOnlyReviewAt50', 'At 19, the adult schedule gives no dose now; re-evaluate at age 50 [c].'],
+  ['adultChronicOnlyReviewAt50', 'At 19, the adult schedule gives no dose until a review at age 50 [c].'],
   ['adultIc1949BothPcv13Ppsv', 'At 19, the adult schedule gives 1 dose of PCV20 or PCV21, at least 5 years after the last pneumococcal dose [c].'],
 ];
 function atNineteen(adultCard) {
@@ -1425,7 +1425,7 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
       ...optionA,
       doseLabel: `1 dose PCV20 (≥${PNEUMO_GAP_WORDS}) — completes the series`,
       note: {
-        lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; that completes the series [c]. No further PPSV23: ${neither}.`,
+        lead: `**Give 1 dose of PCV20**, ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c], to complete the series [c]. No further PPSV23: ${neither}.`,
         detail: (isGrey ? r.detailGrey.trim() : `A PPSV23 is not offered: it would be ${third}.`) + bridgeText,
       },
       noteCites: [optionA.noteCites[0], cite('cdcPcv20Children2023CompleteWithoutPcv20'), ...greyCites, ...bridgeCites],
@@ -1550,7 +1550,7 @@ function holdConjugateAfterThrownOut(recs, thrownOut, today, { child }) {
     if (!r.dueToday && r.earliestNextDate && r.earliestNextDate >= hold.earliestNextDate) return r;
     const could = r.dueToday || !r.earliestNextDate ? 'today' : `from ${fmtDate(r.earliestNextDate)}`;
     const why = child
-      ? ` **Advised ≥${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(thrownOut)}, which did not count; it can be given ${could} if needed, as a PPSV23 that did not count does not change when a PCV is valid.**`
+      ? ` **Advised ≥${PNEUMO_GAP_WORDS} after this child's PPSV23 of ${fmtDate(thrownOut)}, which did not count. It can be given ${could} if needed.** A PPSV23 that did not count has no effect on when a PCV counts.`
       : ` **Held to ≥${ADULT_GAP_WORDS} after this patient's PPSV23 of ${fmtDate(thrownOut)}, which did not count: a conjugate is given ≥${ADULT_GAP_WORDS} after any PPSV23.**`;
     const note = typeof r.note === 'string' ? `${r.note}${why}` : { ...r.note, lead: `${r.note.lead}${why}` };
     return { ...r, dueToday: false, earliestNextDate: hold.earliestNextDate, note };
@@ -2427,7 +2427,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     // for PCV20, so a PCV21 card says that rather than letting it be assumed.
     const done = pcv.hasPCV20 ? 'PCV20' : 'PCV21';
     const pcv21Bridge = done === 'PCV21'
-      ? " CDC's child rows name PCV20; PCV21 is licensed from age 18, and this app counts one given at 18 as completing the series as a PCV20 would (owner decision 2026-10-16)."
+      ? " CDC's child schedule names PCV20. PCV21 is licensed from age 18, and PneumoVax counts one given at 18 as completing the series, as a PCV20 would."
       : '';
     const complete = `At-risk child whose PCV series includes ${done} — no additional PCV or PPSV23 doses needed [c].`;
     // The conjugates on record BEFORE the completing dose -- the only ones
@@ -2708,8 +2708,8 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
           // of her, so it is not cited, and CDC's IC row — the one that ordered
           // her second dose — is, with the card saying that dose was given.
           note: isIC
-            ? `At-risk immunocompromised child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and both PPSV23 doses — complete. CDC's row for an immunocompromised child this age gives a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${earlySecondPpsv23(ppsv)}`
-            : `At-risk (non-immunocompromising) child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and has had PPSV23 — complete [c]. ACIP puts that at a single dose of PPSV23 once the conjugate doses are done [c].`,
+            ? `At-risk immunocompromised child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and both PPSV23 doses — complete. For an immunocompromised child this age, CDC recommends a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${earlySecondPpsv23(ppsv)}`
+            : `At-risk (non-immunocompromising) child 24–71 months who has received the age-appropriate at-risk PCV catch-up dose(s) at ≥24 months and has had PPSV23 — complete [c]. ACIP recommends a single dose of PPSV23 once the conjugate doses are done [c].`,
           noteCites: isIC
             ? [cite('pedsIcPcv20orPpsv23')]
             : [cite('pedsRiskPcv20orPpsv23'), cite('pedsRiskSinglePpsv23AfterPcv')],
@@ -2744,7 +2744,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
           dueToday: done.dueToday, earliestNextDate: done.earliestNextDate, minIntervalDays: WK8,
           brands: ['PPSV23 (Pneumovax 23)'],
           note: isIC
-            ? `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; then ≥${LONG_GAP_WORDS} later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both.`
+            ? `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c], then ≥${LONG_GAP_WORDS} later 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both.`
             : `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]. Choose Option A or B, not both.`,
           noteCites: isIC
             ? [cite(isIC ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23'), cite('pedsSecondPpsv5y')]
@@ -2990,7 +2990,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       // Both read from a live download today. With these, every document listed
       // on this card is credited.
       note: {
-        lead: 'No further PCV or PPSV23 is needed — the paediatric high-risk series is complete [c].',
+        lead: 'No further PCV or PPSV23 is needed. The pediatric high-risk series is complete [c].',
         detail: `All PCV doses were given before age 6, and ${isIC ? 'both PPSV23 doses have' : 'the PPSV23 has'} been given. ${isIC
           ? 'For an immunocompromised child, CDC recommends a PPSV23 and then, at least 5 years later, a PCV20 or a second PPSV23 [c]. Both doses have been given. immunize.org gives the same two options [c].'
           : 'For a child who had PCV before age 6, CDC recommends 1 dose of PCV20 or PPSV23, and that dose has been given [c]. immunize.org lists a child who has had PPSV23 as complete [c].'}${earlySecondPpsv23(ppsv)} PCV7 doses never count toward the series.`,
@@ -3127,7 +3127,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
           //       on the card that its dose has been given") applied to the
           //       sentence that used to read as a live offer.
           // p2016 comes off: see the 840-card removal below for the reading.
-          note: `At-risk (non-immunocompromising) child who completed the PCV series and has received PPSV23 — complete [c]. ACIP puts that at a single dose of PPSV23 once the conjugate doses are done. The row this child followed offered either a PCV20 or that PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV, and the dose on record is that dose [c].`,
+          note: `At-risk (non-immunocompromising) child who completed the PCV series and has received PPSV23 — complete [c]. ACIP recommends a single dose of PPSV23 once the conjugate doses are done. CDC recommends either a PCV20 or a PPSV23 ≥${PNEUMO_GAP_WORDS} after the last PCV for this child, and that PPSV23 has been given [c].`,
           noteCites: [cite('pedsRiskSinglePpsv23AfterPcv'), before6Cite()],
           refs: childRefsSwap('p2016', 'mmwr7137a3'),
         }));
@@ -3143,7 +3143,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       if (icTwoPpsv23Done) {
         out.push(rec({
           vaccine: 'PCV', status: 'complete', doseLabel: 'Complete (PCV series + 2 PPSV23)',
-          note: `At-risk immunocompromised child who completed the PCV series and has received both PPSV23 doses — complete. CDC's row for an immunocompromised child this age gives a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${earlySecondPpsv23(ppsv)}`,
+          note: `At-risk immunocompromised child who completed the PCV series and has received both PPSV23 doses — complete. For an immunocompromised child this age, CDC recommends a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${earlySecondPpsv23(ppsv)}`,
           noteCites: [before6Cite()],
           refs: childRefsExcept('p2016'),
         }));
@@ -3230,7 +3230,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       // to `pedsSecondPpsv5y` and Table 1 is silent on it — never let the 2023
       // marker drift onto that one.
       note: isIC
-        ? `Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]; then ≥5 years later give 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both. ${before6CompletesSentence}`
+        ? `Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c], then ≥5 years later 1 dose of PCV20 or a 2nd PPSV23 [c]. Choose Option A or B, not both. ${before6CompletesSentence}`
         : `Option B — 1 dose of PPSV23 ≥8 weeks after the most recent PCV [c]. Choose Option A or B, not both. ${before6CompletesSentence}`,
       noteCites: isIC
         ? [before6Cite(), cite('pedsSecondPpsv5y'), cite('cdcPcv20Children2023CompleteWithoutPcv20')]
@@ -3307,7 +3307,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       out.push(rec({
         vaccine: 'PCV', status: 'complete',
         doseLabel: `Complete (${words.label} + 2 PPSV23${historyAt6Words})`,
-        note: `Immunocompromising at-risk child with ${words.label}${conjugateAt6Words} who has received both PPSV23 doses — complete. CDC's row for this history gives a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${bridge.sentence}${earlySecondPpsv23(ppsv)}`,
+        note: `Immunocompromising at-risk child with ${words.label}${conjugateAt6Words} who has received both PPSV23 doses — complete. For this history, CDC recommends a PCV20 or a second PPSV23 at least ${LONG_GAP_WORDS} after the first PPSV23, and the second PPSV23 has been given [c].${bridge.sentence}${earlySecondPpsv23(ppsv)}`,
         noteCites: [cite('pedsIcPcv13AndPpsvAt6'), ...bridge.cites],
         refs: collectRefs(riskIds, ['cdcChildPneumo', ...bridge.refKeys], 'child'),
       }));
@@ -3434,7 +3434,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     const firstPpsvDate = ppsv.effective.find((x) => x.date)?.date;
     const icOptionB = !isIC ? null : ppsvGiven
       ? {
-        text: ` This child has already had a PPSV23${firstPpsvDate ? ` (${fmtDate(firstPpsvDate)})` : ''}, so none follows the PCV15 now; the further dose — PCV20 or a second PPSV23 — waits until ≥${LONG_GAP_WORDS} after that PPSV23 [c].`,
+        text: ` This child has already had a PPSV23${firstPpsvDate ? ` (${fmtDate(firstPpsvDate)})` : ''}, so none follows the PCV15 now, and the further dose (PCV20 or a second PPSV23) waits until ≥${LONG_GAP_WORDS} after that PPSV23 [c].`,
         cite: cite('pedsSecondPpsv5y'),
       }
       : { text: ` ${CATCHUP_IC_FIVE_YEAR_SENTENCE}`, cite: cite('pedsSecondPpsv5y') };
@@ -3482,7 +3482,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       brands: ['PPSV23 (Pneumovax 23)'],
       note: isIC
         ? {
-          lead: `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c]; then ≥${LONG_GAP_WORDS} after the first PPSV23, give 1 dose of PCV20 or a 2nd PPSV23 [c].`,
+          lead: `Option B — 1 dose of PPSV23 ≥${PNEUMO_GAP_WORDS} after the most recent PCV [c], then ≥${LONG_GAP_WORDS} after the first PPSV23, 1 dose of PCV20 or a 2nd PPSV23 [c].`,
           detail: 'With an immunocompromising condition, the 5-year dose is part of the plan, not optional. Choose Option A or B, not both.',
         }
         : {
@@ -3971,7 +3971,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       dueToday, earliestNextDate, minIntervalMonths: MO12,
       brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
       note: {
-        lead: `**Give 1 dose of PCV20 or PCV21** ≥${ADULT_GAP_WORDS} after the PPSV23 of ${fmtDate(ppsv.thrownOutDate)}, which did not count, in place of the PPSV23 [c] [c]; it completes the series [c]. No PPSV23 is needed after it.`,
+        lead: `**Give 1 dose of PCV20 or PCV21** ≥${ADULT_GAP_WORDS} after the PPSV23 of ${fmtDate(ppsv.thrownOutDate)}, which did not count, in place of the PPSV23 [c] [c], to complete the series [c]. No PPSV23 is needed after it.`,
         detail: `The PPSV23 did not count, so the PCV15 still needs its follow-on dose. ACIP recommends a conjugate ≥${ADULT_GAP_WORDS} after a PPSV23 [c]. Applying that to a PPSV23 that did not count is a PneumoVax rule, because the spacing is about the immune response, not whether the dose counted.`,
       },
       noteCites: [
@@ -4043,7 +4043,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
       doseLabel: `1 dose PCV (PCV20 or PCV21) ≥${ppsvIntervalLabel} after PCV15 — completes the series`,
       brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
       note: {
-        lead: `**Give 1 dose of PCV20 or PCV21** ≥${ppsvIntervalLabel} after the PCV15 dose, in place of the PPSV23 [c] [c]; it completes the series [c]. No further PPSV23: ${neither}.${shorterMinimumNote}`,
+        lead: `**Give 1 dose of PCV20 or PCV21** ≥${ppsvIntervalLabel} after the PCV15 dose, in place of the PPSV23 [c] [c], to complete the series [c]. No further PPSV23: ${neither}.${shorterMinimumNote}`,
         detail: `The timing is the PPSV23's: ACIP gives the PPSV23 ≥${ppsvIntervalLabel} after a PCV15 [c], and no document states a separate timing for the PCV20 or PCV21 that replaces it. A PPSV23 is not given: it would be ${third}.${detailGrey}`,
       },
       noteCites: [
@@ -4377,7 +4377,7 @@ function pcvAdult(am, riskIds, pcv, ppsv, today, dob = null, adultRepeat = null)
     doseLabel: '1 dose PCV (PCV20 or PCV21)',
     brands: adultBrands.filter((b) => !b.startsWith('PCV15')),
     note: {
-      lead: `**Give 1 dose of PCV20 or PCV21**${isOlderAdult ? ' [c]' : ''}; either completes the series alone [c]. No further PPSV23: ${neither}.`,
+      lead: `**Give 1 dose of PCV20 or PCV21**${isOlderAdult ? ' [c]' : ''}, either of which completes the series alone [c]. No further PPSV23: ${neither}.`,
       detail: `PCV15 is not offered: after it a PPSV23 would be owed ≥${ppsvIntervalLabel} later [c]${mmwrNoneRowMarker} — ${third}. A PCV7-only history counts as no PCV history [c] [c].${detailGrey}`,
     },
     noteCites: [
