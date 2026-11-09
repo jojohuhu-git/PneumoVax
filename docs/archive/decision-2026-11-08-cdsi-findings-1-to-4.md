@@ -2,7 +2,18 @@
 
 Findings: `report-2026-11-08-cdsi-test-patients.md` §"Open". Branch `fix/2026-11-08-cdsi-findings`
 off `main` at `5ee7e03`. Baseline 2,481 passing, 0 failed (vitest JSON reporter, `.claude/**` excluded).
-**Status: rulings recorded, no code changed yet.**
+**Status (end of 2026-11-08 session): 1 and 2 DONE, committed locally (`acafff3`, `12c748a`), not pushed,
+no PR. 3 and 4 NOT STARTED. 5 parked.** Tests 2,481 → **2,495 passing, 0 failed**. CDSI 117 → **118 of 140** agree.
+
+| # | State | Detail |
+|---|---|---|
+| 1 | Done | `CLINICAL_SPEC.md` §L-FIRSTDOSE. 0 grid patients (youngest is 2 months). Label "Routine", not "Due", for a baby too young for dose 1 — narrows §L-2's "a first dose keeps Due"; tell her. Ben's line adds "as the minimum age of 6 weeks has passed" (what the [c] stands on); tell her. |
+| 2 | Done | `CLINICAL_SPEC.md` §L-BOOSTERDATE. Moved 132 / 264 saved answers, every one ONLY the next date blank → date (field diff). "her 1st birthday" became "the 1st birthday" (app can't know sex); tell her. `proveChecks.mjs` H1 now mutates a branch no card reaches — re-aim it at a dated card. |
+| 4 | Next | Smaller than 3. Find every place "first dose at ≥24 months" is decided; mirror `pcvAgeAtTwelveMonthLine()`. Moves verdicts: show movers grouped before `sweep:update`. |
+| 3 | After 4 | Moves verdicts; she asked to see the count before it lands. |
+
+**Resume:** `git checkout fix/2026-11-08-cdsi-findings`. Push and open a PR for 1+2 when she says (ship skill);
+she merges. Then 4, then 3, each by the fix-queue loop.
 
 All five reproduced on 2026-11-08 with `npx vite-node scripts/cdsi/runTestCases.mjs`, plus hand probes.
 
