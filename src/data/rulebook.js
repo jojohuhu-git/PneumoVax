@@ -486,7 +486,7 @@ const P = {
   // cochlear answer for every at-risk child).
   diabetic15: ex('15-year-old with diabetes, PCV13 series, PPSV23 at 10',
     { dob: '2011-11-01', riskIds: ['diabetes'], pcvDoses: doses('PCV13', ['2012-01-01', '2012-03-01', '2012-05-01', '2012-11-15']), ppsv23Doses: doses('PPSV23', ['2021-11-15']) },
-    { status: 'complete', note: [/At 19, the adult schedule gives no dose now; re-evaluate at age 50/] }),
+    { status: 'complete', note: [/At 19, the adult schedule gives no dose until a review at age 50/] }),
   asplenia16two: ex('16-year-old with asplenia, PCV13 series, PPSV23 at 2 and 7',
     { dob: '2010-11-01', riskIds: ['asplenia'], pcvDoses: doses('PCV13', ['2011-01-01', '2011-03-01', '2011-05-01', '2011-11-15']), ppsv23Doses: doses('PPSV23', ['2013-01-01', '2018-02-01']) },
     { status: 'complete', note: [/At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21/] }),
@@ -634,7 +634,7 @@ const P = {
     { chip: ['pcv', 1, 'Dose 2 of 4'] }),
   toddler: ex('25-month-old with diabetes, PCV15 series, PPSV23 at 23½ months (too young, invalid)',
     { dob: '2024-09-30', riskIds: ['diabetes'], pcvDoses: doses('PCV15', ['2024-11-30', '2025-01-30', '2025-03-30', '2025-09-30']), ppsv23Doses: doses('PPSV23', ['2026-09-15']) },
-    { cards: [/Option A: 1 dose PCV20/, /Option B: 1 dose PPSV23/], due: '2026-11-10', note: [/it can be given today if needed/], chip: ['ppsv23', 0, 'Not counted — repeat'] }),
+    { cards: [/Option A: 1 dose PCV20/, /Option B: 1 dose PPSV23/], due: '2026-11-10', note: [/It can be given today if needed/], chip: ['ppsv23', 0, 'Not counted — repeat'] }),
   toddlerPcvSoon: ex('25-month-old with diabetes, PCV15 series, PPSV23 at 23½ months (too young, invalid), PCV20 4 weeks later',
     { dob: '2024-09-30', riskIds: ['diabetes'], pcvDoses: [...doses('PCV15', ['2024-11-30', '2025-01-30', '2025-03-30', '2025-09-30']), ...doses('PCV20', ['2026-10-13'])], ppsv23Doses: doses('PPSV23', ['2026-09-15']) },
     { status: 'complete', chip: ['pcv', 4, 'Dose 5'] }),

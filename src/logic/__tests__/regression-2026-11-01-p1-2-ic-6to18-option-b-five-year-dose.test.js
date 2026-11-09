@@ -45,7 +45,7 @@ describe('P1-2: the immunocompromised Option B card names the dose 5 years on', 
   it('a PPSV23 already counted: no PPSV23 after the PCV15, the further dose 5 years after hers', () => {
     const r = byLabel(ISLA_PPSV_AT_7, 'Option B-1');
     expect(text(r)).toContain('This child has already had a PPSV23 (Oct 27, 2025), so none follows the PCV15 now');
-    expect(text(r)).toContain('PCV20 or a second PPSV23 — waits until ≥5 years after that PPSV23 [c]');
+    expect(text(r)).toContain('and the further dose (PCV20 or a second PPSV23) waits until ≥5 years after that PPSV23 [c]');
     expect(balanced(r)).toBe(true);
     expect(byLabel(ISLA_PPSV_AT_7, 'Option B-2')).toBeUndefined();
   });

@@ -509,7 +509,7 @@ not the handoff's "a dose is due at 19" — is what she decided on:
 | Group | Cards | What the adult card says at 19 | The line on the child's card | Cited to |
 |---|---|---|---|---|
 | (1) cochlear implant / CSF leak, one PPSV23 | 156 | PCV20 or PCV21 ≥5 years after the last dose | *"At 19, the adult schedule gives 1 dose of PCV20 or PCV21, at least 5 years after the last pneumococcal dose."* | CDC Adult Notes (`adultIc1949BothPcv13Ppsv`) |
-| (2) chronic condition only | 282 | No dose now — review at age 50 | *"At 19, the adult schedule gives no dose now; re-evaluate at age 50."* | CDC Adult Notes (`adultChronicOnlyReviewAt50`) |
+| (2) chronic condition only | 282 | No dose now — review at age 50 | *"At 19, the adult schedule gives no dose until a review at age 50."* (reworded from "gives no dose now; re-evaluate at age 50", §WORD-TIDY) | CDC Adult Notes (`adultChronicOnlyReviewAt50`) |
 | (3) cochlear implant / CSF leak, **two** PPSV23 received | 32 | Review at 50 — or PCV20 or PCV21 ≥5 years | *"At 19, the adult schedule says to review again at age 50, or give 1 dose of PCV20 or PCV21 at least 5 years after the last pneumococcal dose."* | ACIP 2025 (`mmwrIc1949TwoPpsv`) — CDC's notes give only the dose |
 | (4) a conjugate of unrecorded product | 70 | PCV15, PCV20 or PCV21 ≥1 year after the PPSV23 | *"At 19, because the earlier conjugate's product is not recorded, the adult schedule gives 1 dose of PCV15, PCV20 or PCV21, at least 1 year after the PPSV23."* | CDC Adult Notes (`adultPpsvOnly1949`) |
 
@@ -2211,9 +2211,9 @@ Routine for ALL adults ≥50 regardless of risk.
 
 P2-2 of the 2026-11-01 grey-zone audit. G27 — 18y5m, diabetes, PCV21 at 18y1m — read
 "PCV complete (includes PCV20)". The child "complete" cards now name the product on record,
-and a PCV21 card adds: *"CDC's child rows name PCV20; PCV21 is licensed from age 18, and this
-app counts one given at 18 as completing the series as a PCV20 would (owner decision
-2026-10-16)."* No new source; 0 grid patients (the grid cannot build this child); hand-built
+and a PCV21 card adds: *"CDC's child schedule names PCV20. PCV21 is licensed from age 18, and
+PneumoVax counts one given at 18 as completing the series, as a PCV20 would."* (reworded
+§WORD-TIDY; the rule is the owner decision of 2026-10-16) No new source; 0 grid patients (the grid cannot build this child); hand-built
 guard `regression-2026-11-01-p2-2-pcv21-at-18-is-named.test.js`.
 
 ### §I-REMEDY — A child's rejected PCV21 names PCV20, not a repeat (2026-10-26)
@@ -3630,7 +3630,7 @@ counts (advise only)"**. So:
 
 | | Before | Now |
 |---|---|---|
-| Child's PCV card, last PPSV23 thrown out | measured from the last PCV only | the **later** of 8 weeks after the last PCV and 8 weeks after the thrown-out PPSV23, and the card says the earlier date it *could* be given (*"it can be given today if needed, as a PPSV23 that did not count does not change when a PCV is valid"*) — the C10-2 rule for a card carrying two numbers |
+| Child's PCV card, last PPSV23 thrown out | measured from the last PCV only | the **later** of 8 weeks after the last PCV and 8 weeks after the thrown-out PPSV23, and the card says the earlier date it *could* be given (*"It can be given today if needed."*, with the reason under "Why this" since §WORD-TIDY) — the C10-2 rule for a card carrying two numbers |
 | Child's dose check | a thrown-out PPSV23 holds off no conjugate | **unchanged** — Eli's PCV20 counts, Rosa's booster counts |
 | Adult's PCV card, last PPSV23 thrown out | measured from the PCV only | the later of that and **1 year** after the thrown-out PPSV23 |
 | Adult, PCV15 then a thrown-out PPSV23 | *"PPSV23 (≥… after PCV15)"* | **PCV20 or PCV21, ≥1 year after the PPSV23**, in place of the PPSV23 — citing mm7401a1's footnote *, the job aid's ¶ and CDC's adult notes for the substitution, and CDC's "PPSV23 only" row for the year. No PPSV23 at any risk class (the 19–49 IC row's 8 weeks is the PCV15→PPSV23 gap, and no PPSV23 is given) |
@@ -4294,3 +4294,60 @@ and the "does not change this" sentence: each was caught. Inventory scripts:
 ("no dose is needed at 19 … at 50") inside one sentence. Splitting that sentence at its semicolon made 75 grid
 and 132 typical children look as if Option B never named the dose at 50. The app was right and the check was
 wrong, so the check now accepts the line in either form.
+
+### §WORD-TIDY — The same style rules reach the sentences in view and the shut cards (2026-11-08)
+
+Asked what was left, the owner chose *"work on option wording tidy ups"*: the two things §M-L5 left out
+(the sentences that stay in view above "Why this", and the whole note on a "Complete" or "Not indicated"
+card) and the 23 "Why this" paragraphs over 60 words. The §M-L3 rules are already hers, so they were
+applied, not re-asked. Every before-and-after is listed in the PR body for her to check.
+
+**What changed, in 16 places in `recommend.js`, wording only:**
+- In view, on cards asking for a dose: semicolons became commas, so each line stays one sentence and keeps
+  its WORD-1 fold rule ("Option B — … [c], then ≥5 years later 1 dose of PCV20 or a 2nd PPSV23 [c]";
+  "… to complete the series [c]"; "This child has already had a PPSV23 (…), so none follows the PCV15 now,
+  and the further dose (PCV20 or a second PPSV23) waits until ≥5 years after that PPSV23 [c]").
+- A child whose PPSV23 did not count: *"**Advised ≥8 weeks after this child's PPSV23 of <date>, which did
+  not count. It can be given <today | from date> if needed.**"* Both numbers stay in view (C10-2). The
+  reason ("A PPSV23 that did not count has no effect on when a PCV counts") moved under "Why this", by rule 1,
+  and no longer argues ("does not change", rule 5).
+- Shut cards: "CDC's row for … gives" became "CDC recommends" (three IC "two PPSV23" complete cards);
+  "ACIP puts that at" became "ACIP recommends"; "The row this child followed offered … and the dose on record
+  is that dose" became "CDC recommends either a PCV20 or a PPSV23 ≥8 weeks after the last PCV for this child,
+  and that PPSV23 has been given" (the 2026-10-23 "say its dose has been given" ruling is kept);
+  "paediatric" became "pediatric" and its dash a full stop (15,753 card showings); the §B-AT19 group (2) line
+  is now *"At 19, the adult schedule gives no dose until a review at age 50."* (still one line, per "One line
+  per group"); the §I-NAMED PCV21 line is now *"CDC's child schedule names PCV20. PCV21 is licensed from age
+  18, and PneumoVax counts one given at 18 as completing the series, as a PCV20 would."*, which names the
+  rule as PneumoVax's, as §M-L5 does for the other disclosures.
+
+**Left alone, and why:**
+- "Choose ONE option, not both." keeps its capitals (§M-L5).
+- **The 23 long "Why this" paragraphs.** What makes them long is the heading sentence the fold moved down
+  (WORD-1: nothing is deleted) and the approved PCV13/PCV15 sentence (FINDING H, §M-L5). Shortening either
+  is an owner decision, so neither was touched.
+- **The adult "given too soon to count … INCOMPLETE" card in `pcvAdult` was REMOVED, not reworded**
+  (OWNER DECISION 2026-11-08, *"Yes, remove it"*). It could not appear: it needs an adult dose marked invalid
+  under one of five interval rules, and since PR #90 (2026-10-25) all five are `'recommendation'`. With its
+  code set to crash if reached, **0 of 95,760** test patients reached it and the full suite passed 2,467 / 0.
+  The 11,974 adults whose last dose did not count all had it thrown out under a child's rule (a dose before 19).
+  Removing it moved **0** of 35,280 rendered lines and no verdict. The code is kept verbatim in
+  `docs/archive/retired-2026-11-08-adult-invalid-dose-card.md`. The guard
+  `regression-2026-10-25-an-early-adult-dose-owes-nothing.test.js` (now covering all five rules) fails if any
+  of them becomes a floor again, which is the signal to restore it.
+
+**Measured:** 0 verdicts, dose labels, dates or citations moved. `scripts/proseDiff.mjs` against the
+`fix/2026-11-08-why-this-wording` branch: 1,049 of 35,280 lines changed, every one a note sentence listed
+above. Visible sentences breaking a machine-checkable rule, over all three test sets
+(`scripts/wordingAudit/leadSentences.mjs`): 13 → 2 kinds, both "Choose ONE option".
+
+**Two pinned numbers moved, both explained.** The visible-word pin (WORD-1) fell from 155 to 154 worst,
+because the "did not count" reason left the line in view. The longest "Why this" rose from 92 to 100 words,
+on 2 of the 60,480 typical patients: an immunocompromised child with a PCV of unrecorded product and a
+PPSV23 that did not count, whose paragraph that same reason joined. The grid still tops out at 92 and the
+impossible entries at 84. Deleting the reason would have kept 92, but it would have dropped an explanation,
+so the pin rose instead.
+
+**Guarded by machine:** the §WHY-THIS guard now checks every sentence in view (`note.lead`) and every shut
+card's note too, with "Choose ONE option" exempt by name, and adds "CDC's row", "ACIP's own row" and "ACIP
+puts" to rule 3. Proved by running it against the old `recommend.js`: all three sweeps failed.

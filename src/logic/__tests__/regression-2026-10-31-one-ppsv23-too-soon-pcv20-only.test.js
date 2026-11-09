@@ -56,14 +56,14 @@ describe('§C-P2-ONE — Leah', () => {
     expect(cards[0].doseLabel).toBe('1 dose PCV20 (≥8 weeks) — completes the series');
     expect(cards[0].dueToday).toBe(false);
     expect(cards[0].earliestNextDate).toBe('2026-12-16');
-    expect(String(cards[0].note.lead ?? cards[0].note)).toContain('it can be given today if needed');
+    expect(String(cards[0].note.lead ?? cards[0].note)).toContain('It can be given today if needed');
     expect(out.recs.some((r) => r.vaccine === 'PPSV23')).toBe(false);
   });
 
   it('the note says her PPSV23 did not count and why none is offered', () => {
     const { lead, detail } = live(out)[0].note;
     expect(lead).toContain('**Give 1 dose of PCV20**');
-    expect(lead).toContain('that completes the series');
+    expect(lead).toContain('to complete the series');
     expect(lead).toContain('No further PPSV23: 1 PPSV23 dose has been given and it did not count.');
     expect(detail).toBe('A PPSV23 is not offered: it would be a second PPSV23 shot.'
       + ' The recommendation is written for PCV13. PCV13 and PCV15 can be used interchangeably'

@@ -14,7 +14,7 @@ const TODAY = '2026-11-01';
 const d = (product, dates) => dates.map((date) => ({ product, date }));
 const card = (p) => recommend({ today: TODAY, ...p }).recs[0];
 const text = (r) => `${r.note.lead} ${r.note.detail}`;
-const BRIDGE = "CDC's child rows name PCV20; PCV21 is licensed from age 18, and this app counts one given at 18 as completing the series as a PCV20 would (owner decision 2026-10-16).";
+const BRIDGE = "CDC's child schedule names PCV20. PCV21 is licensed from age 18, and PneumoVax counts one given at 18 as completing the series, as a PCV20 would.";
 
 const G27 = { dob: '2008-05-27', riskIds: ['diabetes'], pcvDoses: d('PCV21', ['2026-06-27']), ppsv23Doses: [] };
 const BABY_THEN_PCV21 = { ...G27, pcvDoses: [...d('PCV13', ['2008-07-27', '2008-09-27', '2008-11-27', '2009-05-27']), ...d('PCV21', ['2026-06-27'])] };

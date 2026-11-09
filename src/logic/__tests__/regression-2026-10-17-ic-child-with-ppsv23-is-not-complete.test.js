@@ -158,7 +158,7 @@ describe('IC-1 — an IC child whose PCV was all before age 6 and who has had PP
   it('is NOT told the series is complete', () => {
     const r = run({ ...history, riskIds: IC_RISK });
     expect(r.recs.some((x) => x.status === 'complete')).toBe(false);
-    expect(prose(r)).not.toContain('the paediatric high-risk series is complete');
+    expect(prose(r)).not.toContain('The pediatric high-risk series is complete');
   });
 
   it('is offered PCV20 now, or a 2nd PPSV23 at 5 years — p2016 footnote ||', () => {
