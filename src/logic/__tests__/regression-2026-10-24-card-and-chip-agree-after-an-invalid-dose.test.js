@@ -106,7 +106,15 @@ describe('the contract itself, on the population that still has floors', () => {
   it('the chip names its date as the earliest, never as the due date', () => {
     // The 2026-10-24 ruling: the rec card is the only surface that knows the
     // routine date, so it is the only one that may state one.
-    const chip = invalidOf(run(CHILD))[0];
+    // CHILD's chip carries no date since §C-P2-R4 (2026-11-08): her card is
+    // PCV20 only and no PPSV23 follows. An 18-year-old still offered a 2nd
+    // PPSV23 carries one, so she holds the contract now.
+    const TEEN = {
+      dob: '2008-10-24', riskIds: ['asplenia'],
+      pcvDoses: [{ product: 'PCV13', date: '2021-10-12' }, { product: 'PCV13', date: '2021-11-09' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2016-10-13' }, { product: 'PPSV23', date: '2021-10-13' }],
+    };
+    const chip = invalidOf(run(TEEN)).find((d) => d.intervalRuleId === 'CHILD-PPSV23-AFTER-PCV');
     const text = [...(chip.reasons ?? []), chip.detail ?? ''].join(' ');
     expect(text).toMatch(/earliest|can be given from/i);
   });

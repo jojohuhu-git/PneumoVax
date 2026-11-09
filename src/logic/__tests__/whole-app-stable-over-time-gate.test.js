@@ -28,12 +28,10 @@
 //     to "counted", on the 19th birthday); the reverse would be a new fault.
 //   • p2-9 — information, not a fault (§L-2): a baby's card reads "Routine" until
 //     the routine date passes, then "Catch-up".
-//   • R4 — parked (the report's P2, an unlikely history the owner asked on
-//     2026-10-31 not to be brought to her). A child with a PPSV23 that did not
-//     count is held 5 years on Option B's second step; that date can fall before
-//     the 8 weeks after Option B's own PCV15, and it vanishes once it passes.
-//     PINNED at exactly 16 grid patients and 0 typical: more means it spread,
-//     fewer means it was fixed and this pin should go.
+//   • R4 was allowed here until 2026-11-08 (16 grid, 0 typical): a child with a
+//     PPSV23 that did not count was held 5 years on Option B's second step, a
+//     date that could fall before the 8 weeks after Option B's own PCV15 and
+//     then vanished. Fixed (CLINICAL_SPEC.md §C-P2-R4) and no longer allowed.
 //
 // What it covers, in about 26 seconds of one core: all 17,016 grid patients and
 // every 11th typical patient (5,499; the same sample as check 1, which reaches
@@ -53,7 +51,6 @@ const ALLOWED = new Set([
   'D2-extra-dose-counts-at-19',
   'D5-extra-pcv15-counts-at-19',
   'p2-9-routine-then-behind',
-  'R4-thrown-out-ppsv23-chip',
 ]);
 const show = (rows) => rows.map((r) => `${r.cause} — ${r.kind} — ${r.group} — e.g. ${r.examples[0]?.key}`);
 
@@ -76,13 +73,16 @@ describe('check 7: a later look at the same record does not change the answer', 
     expect({ grid, sampled }).toEqual({ grid: 17016, sampled: 5499 });
   });
 
-  it('no change on any patient except the four groups allowed by name', () => {
+  it('no change on any patient except the three groups allowed by name', () => {
     expect(show(tally.rows().filter((r) => r.check === 7 && !ALLOWED.has(r.cause)))).toEqual([]);
   });
 
-  it('R4 is pinned at exactly 16 grid patients, 0 typical', () => {
+  it('R4 is gone from this check (was 16 grid, 0 typical, until 2026-11-08)', () => {
+    // §C-P2-R4: Option B's PPSV23 step no longer carries a hold date that ends
+    // before its own PCV15 could be 8 weeks old, so a later look no longer
+    // finds that date gone. Removed from ALLOWED above, so a return fails twice.
     const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 7);
-    expect({ grid: r4?.grid, typical: r4?.typical }).toEqual({ grid: 16, typical: 0 });
+    expect(r4).toBeUndefined();
   });
 
   it('the two at-19 rulings only ever turn an extra dose into a counted one', () => {

@@ -146,9 +146,13 @@ describe('the boundary: a patient who IS owed something keeps her date', () => {
     }
   });
 
-  it('a child who still owes a dose keeps hers — and she is the boundary now', () => {
-    // Same asplenic 5-year-old, but only ONE PCV20 — her series is unfinished,
-    // so a dose IS owed and the forward-looking date is honest.
+  it('the 5-year-old who held the boundary until 2026-11-08 now loses her date, by ruling', () => {
+    // Same asplenic 5-year-old, but only ONE PCV20, and a PPSV23 21 days after
+    // it (thrown out). She held this boundary because a dose WAS owed (a PCV)
+    // while the clause sat on a PPSV23, and nothing on her screen was a PPSV23
+    // card. The owner's ruling on Max (2026-11-08, CLINICAL_SPEC.md §C-P2-R4:
+    // "PCV20 only") means no PPSV23 follows for her at all — PCV20 completes
+    // her series — so a PPSV23 date five years on was a promise nothing keeps.
     const out = run({
       ageMonths: 60,
       riskIds: ['asplenia'],
@@ -156,12 +160,22 @@ describe('the boundary: a patient who IS owed something keeps her date', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2026-06-22' }],
     });
     expect(out.recs.some((r) => !ASKS_FOR_NOTHING.has(r.status))).toBe(true);
-    expect(textOf(out.perDose.ppsv23[0])).toContain(FORWARD);
-    // THIS is what makes her the replacement for the two adults above: the
-    // clause she keeps sits on a PPSV23, and nothing on her screen is a
-    // PPSV23 card. An implementation that asked "is a dose of THIS vaccine
-    // owed" would strip it from her, and only this assertion would notice.
-    expect(out.recs.map((r) => r.vaccine)).toEqual(['PCV']);
+    expect(out.recs.map((r) => [r.vaccine, r.brands])).toEqual([['PCV', ['PCV20 (Prevnar 20)']]]);
+    expect(textOf(out.perDose.ppsv23[0])).not.toContain(FORWARD);
+  });
+
+  it('the boundary now: a teenager still offered a PPSV23 keeps her date', () => {
+    // 18, no spleen. First PPSV23 at 8 counted; the second, a day after a
+    // PCV13, did not. Her cards offer PCV20 or a 2nd PPSV23, so the PPSV23
+    // date under the thrown-out dose is one a card really asks for.
+    const out = run({
+      dob: '2008-10-24',
+      riskIds: ['asplenia'],
+      pcvDoses: [{ product: 'PCV13', date: '2021-10-12' }, { product: 'PCV13', date: '2021-11-09' }],
+      ppsv23Doses: [{ product: 'PPSV23', date: '2016-10-13' }, { product: 'PPSV23', date: '2021-10-13' }],
+    });
+    expect(out.recs.some((r) => r.vaccine === 'PPSV23' && !ASKS_FOR_NOTHING.has(r.status))).toBe(true);
+    expect(textOf(out.perDose.ppsv23[1])).toContain(FORWARD);
   });
 });
 
@@ -241,7 +255,19 @@ describe('swept over the grid', () => {
     // childhood is now offered PCV20 or PCV21 only, so that chip's "Next dose
     // from <date>" — a PPSV23 no card offers — becomes "Not repeated." The grid
     // family is the 10 a228 patients, one per qualifying risk tick.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1725 });
+    // KEPT FELL by 10 again, 2026-11-08: 1725 -> 1715. R4 (CLINICAL_SPEC.md
+    // §C-P2-R4): a thrown-out childhood PPSV23's "Next dose from <date>" is a
+    // PPSV23 date, so it goes when no card asks for a PPSV23 and none offers
+    // PCV15. The grid family is 10 a228 patients, one per risk tick: PCV13 and
+    // PPSV23 on the same day at 9, card "PCV20 or PCV21 … no PPSV23 needed",
+    // line promising a PPSV23 "from Oct 13, 2021". Listed by key, old against
+    // new, before this pin was moved. Withdrawn is untouched.
+    // KEPT FELL by 16 more the same day: 1715 -> 1699. The owner's ruling on
+    // Max ("PCV20 only", §C-P2-R4): the 24-71-month catch-up card no longer
+    // offers PCV15 after a PPSV23 thrown out for coming too soon after a PCV,
+    // so no PPSV23 follows and the line's 2030-ish PPSV23 date goes. All 16
+    // are the a60 family Max belongs to. Listed by key before this pin moved.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1699 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {

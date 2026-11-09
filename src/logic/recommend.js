@@ -1449,7 +1449,11 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
   // his second PPSV23 shot. Shown Leah's and Ivy's rulings, she chose "PCV20 or
   // PCV21 only". So one shot thrown out for coming too soon after a PCV now
   // reaches the adult cards Ivy's two shots reach, and nothing else.
-  if (oneTooSoon) return adultNoSecondShot();
+  // MAX (OWNER RULING 2026-11-08, §C-P2-R4): the 24-71-month catch-up card
+  // joins too. Offered PCV20 or PCV15, a PCV15 needed a PPSV23 the 5-year hold
+  // kept until 2030, and the next card then gave PCV20 in its place — one extra
+  // shot. Shown that, she chose "PCV20 only". Kai's rebuild of this card, below.
+  if (oneTooSoon) return catchup24to71() ?? adultNoSecondShot();
 
   // Kai at 6-18: the no-prior-PCV three-option card. Option A is rebuilt and
   // Option B (B-1 PCV15, B-2 PPSV23) dropped; any other card is left alone.
@@ -1466,10 +1470,16 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
     })) };
   }
 
+  const catchup = catchup24to71();
+  if (catchup) return catchup;
+
+  return adultNoSecondShot();
+
   // Kai at 2: the 24-71-month at-risk catch-up card, either row. Only that
-  // card is rebuilt; any other card is left alone.
-  const c = recs.find((x) => x.noteCites?.[0]?.key === 'pedsRiskIncompleteCatchup');
-  if (c) {
+  // card is rebuilt; any other card is left alone. Max (one shot) uses it too.
+  function catchup24to71() {
+    const c = recs.find((x) => x.noteCites?.[0]?.key === 'pedsRiskIncompleteCatchup');
+    if (!c) return null;
     const r = result('');
     const why = `PCV15 is not offered: it would need a PPSV23 after it [c] — ${third}.${r.detailGrey}`;
     return { ...r, recs: recs.map((x) => (x !== c ? x : {
@@ -1485,8 +1495,6 @@ function noThirdPpsv23(recs, ppsvAnalysis, ppsvCount) {
       noteCites: [...c.noteCites.filter((x) => x.key !== 'pedsSecondPpsv5y'), ...greyCites],
     })) };
   }
-
-  return adultNoSecondShot();
 }
 
 // ── §C-P2-FIVE (OWNER RULING 2026-10-31) ─────────────────────────────────
@@ -1514,9 +1522,19 @@ function holdPpsv23AfterThrownOut(recs, ppsvAnalysis, today) {
   const hold = dueStateMonths(thrownOut, MO60, today);
   if (hold.dueToday) return recs;
   const why = ` **Held to ${LONG_GAP_WORDS} after this child's PPSV23 of ${fmtDate(thrownOut)}, which did not count — a PPSV23 after another PPSV23 waits ${LONG_GAP_WORDS}.**`;
+  // R4 (2026-11-08): Option B-2 is dated by a dose not yet given — "PPSV23 ≥8
+  // weeks after the PCV15" — so it carries no date of its own. Its earliest
+  // day is 8 weeks after Option B-1's. A hold ending sooner does not bind, and
+  // stamping it on the card dated the second step before the first allowed
+  // (Ben, 6: "Oct 13, 2026" two days away, a PCV15 due today).
+  const stepOne = recs.find((x) => x.doseLabel?.startsWith('Option B-1'));
+  const stepOneAllows = stepOne
+    ? addDays(stepOne.dueToday || !stepOne.earliestNextDate ? today : stepOne.earliestNextDate, WK8)
+    : null;
   return recs.map((r) => {
     if (r.vaccine !== 'PPSV23' || ASKS_FOR_NOTHING.has(r.status)) return r;
     if (!r.dueToday && r.earliestNextDate && r.earliestNextDate >= hold.earliestNextDate) return r;
+    if (r.doseLabel?.startsWith('Option B-2') && stepOneAllows && hold.earliestNextDate <= stepOneAllows) return r;
     const note = typeof r.note === 'string' ? `${r.note}${why}` : { ...r.note, lead: `${r.note.lead}${why}` };
     return { ...r, dueToday: false, earliestNextDate: hold.earliestNextDate, note };
   });
@@ -4836,9 +4854,27 @@ export function recommendBeforeFold(input) {
   };
 
   const nothingIsOwed = recs.length > 0 && recs.every((r) => ASKS_FOR_NOTHING.has(r.status));
-  const withdrawForwardLook = (list) => (nothingIsOwed
+  // R4 (2026-11-08). The look-ahead under a thrown-out childhood PPSV23 is
+  // always a PPSV23 date (§C-P2-FIVE: `repeatDueDate` is 5 years from it), so
+  // it is withdrawn too when no card asks for a PPSV23. Ana, 19: her card says
+  // "No PPSV23 is needed after it" (§K-THROWNOUTTIMING) and her dose's label
+  // "Not repeated", while its line read "Next dose from Oct 13, 2026".
+  // Only the PPSV23 stream: a thrown-out PCV's look-ahead is the next PCV,
+  // which a PCV card does ask for.
+  // A first draft also kept the date when a card offered PCV15 (which always
+  // needs a PPSV23 after it). After Max's ruling (§C-P2-R4, "PCV20 only") no
+  // patient reaches that — 0 over the grid and all typical patients — so the
+  // clause went: a branch nothing can reach cannot be tested (CLAUDE.md).
+  const noPpsv23Ahead = !recs.some((r) => r.vaccine === 'PPSV23' && !ASKS_FOR_NOTHING.has(r.status));
+  // With something still owed, the line's date is gone for good, so the field
+  // marking a dated line goes too — as `withLaterShot` and §C-P2-ONE do.
+  const withdrawForwardLook = (list, { ppsv23Stream = false } = {}) => (nothingIsOwed || (ppsv23Stream && noPpsv23Ahead)
     ? list.map((d) => (d.forwardLookingReason
-      ? { ...d, reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? d.withoutForwardLook : x)).filter(Boolean) }
+      ? {
+        ...d,
+        reasons: d.reasons.map((x) => (x === d.forwardLookingReason ? d.withoutForwardLook : x)).filter(Boolean),
+        ...(nothingIsOwed ? {} : { forwardLookingReason: null }),
+      }
       : d))
     : list);
 
@@ -4863,7 +4899,7 @@ export function recommendBeforeFold(input) {
       // sweep reads a marked chip with no date as a date lost wrongly.
       ppsv23: withDisposition(withdrawForwardLook(ppsvAnalysis.perDose.map((d, i) => (noThird && i === noThird.index
         ? { ...d, forwardLookingReason: null, notRepeated: true, reasons: d.reasons.map((x) => (x === d.closingSentence ? noThird.chip : x)).filter(Boolean) }
-        : withLaterShot(d, i))))),
+        : withLaterShot(d, i))), { ppsv23Stream: true })),
     },
     // P0 (2026-10-12): `orderedDoses[v][i]` is the dose `perDose[v][i]` was
     // computed for. A caller rendering a verdict beside its dose reads BOTH

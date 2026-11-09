@@ -14,12 +14,11 @@
 //
 // CHECK 5 — the card and the chip agree (joined 2026-11-07). When the chip
 // under a recorded dose names a date for the next dose, the card does not ask
-// for that dose on a different date. Its one known fault is R4, parked by the
-// report (a thrown-out childhood PPSV23: the chip promises the PPSV23 series'
-// 5-year date while the card asks for a PCV sooner — Max, 5, no spleen). The
-// report's gate table: "when R4 is fixed, or parked with its count pinned".
-// Measured 2026-11-07 over all 77,496 patients (`node scripts/wholeApp/run.mjs
-// --checks 5`): 41 grid + 60 typical, every one R4, 0 unsorted.
+// for that dose on a different date. Its one known fault was R4 (a thrown-out
+// childhood PPSV23: the chip promised the PPSV23 series' 5-year date while the
+// card asked for a PCV sooner — Max, 5, no spleen): 41 grid + 60 typical on
+// 2026-11-07. Fixed 2026-11-08 (CLINICAL_SPEC.md §C-P2-R4, and the owner's
+// ruling on Max, "PCV20 only"): 0 over all 77,496 patients. No exceptions now.
 //
 // CHECK 7, FORWARD HALF — the advice still stands on its day (joined
 // 2026-11-07). A card that names a date must, on that date, still offer that
@@ -40,9 +39,8 @@
 //
 // Allowed, by name, and nothing else:
 //   • check 4: D3, the owner's ruling (a PPSV23 held 5 years after a thrown-out
-//     one); R4, a thrown-out childhood PPSV23, pinned at exactly 16 patients;
-//   • check 5: R4 only, pinned at exactly the counts below — a fix makes the pin
-//     fail too, and that is the moment to lower it;
+//     one). R4 was allowed here and in check 5 until §C-P2-R4 (2026-11-08);
+//   • check 5: nothing;
 //   • check 1: nothing;
 //   • check 7's forward half: nothing (0 patients over all 77,496, 2026-11-07).
 import { describe, it, expect, beforeAll } from 'vitest';
@@ -84,20 +82,20 @@ describe('check 7, forward half: a dated card still stands on its date', () => {
 
 describe('check 4: alternative cards for one dose follow one wait', () => {
   it('no new disagreement, on any patient', () => {
-    const allowed = new Set(['D3-ppsv23-held-5-years-after-thrown-out', 'R4-thrown-out-ppsv23-chip']);
+    // R4's 16 grid children left on 2026-11-08 (§C-P2-R4): Option B's PPSV23
+    // step was dated by a 5-year hold that ended before its own PCV15 could be
+    // 8 weeks old. R4 is no longer allowed here, so its return fails.
+    const allowed = new Set(['D3-ppsv23-held-5-years-after-thrown-out']);
     expect(show(tally.rows().filter((r) => r.check === 4 && !allowed.has(r.cause)))).toEqual([]);
-    const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 4);
-    expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 16, typical: 0 });
   });
 });
 
 describe('check 5: the card and the chip agree on the date of one dose', () => {
-  it('no disagreement but R4, and R4 at exactly its pinned count', () => {
-    expect(show(tally.rows().filter((r) => r.check === 5 && r.cause !== 'R4-thrown-out-ppsv23-chip'))).toEqual([]);
-    const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 5);
-    // 41 is every grid patient (the full run says 41). 5 is the typical SAMPLE:
-    // the 60 typical R4 patients are all a few screens into the walk, not on the
-    // first screen, so only the every-11th walk reaches them — 5 of 60.
-    expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 41, typical: 5 });
+  it('no disagreement on any patient — R4 included', () => {
+    // Was R4 only, 41 grid / 5 sampled typical. 2026-11-08 (§C-P2-R4): the 25
+    // grid 19-year-olds and all 60 typical patients left when the line under a
+    // thrown-out PPSV23 stopped naming a PPSV23 no card asks for; the last 16
+    // (Max's family, 5-year-olds) left with the owner's "PCV20 only".
+    expect(show(tally.rows().filter((r) => r.check === 5))).toEqual([]);
   });
 });

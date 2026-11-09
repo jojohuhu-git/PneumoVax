@@ -198,7 +198,10 @@ describe('WORD-1 — under a recorded dose', () => {
       pcvDoses: [{ product: 'PCV13', date: '2025-11-06' }], ppsv23Doses: [{ product: 'PPSV23', date: '2025-11-06' }] });
     const reasons = out.perDose.ppsv23[0].reasons;
     expect(reasons[0]).toBe('Same day as PCV. Minimum interval 8 weeks.');
-    expect(reasons[1]).toMatch(/^Next dose from .* at the earliest\.$/);
+    // The action is in the label (§M-L3, 2026-11-08). The "Next dose from <2030>"
+    // that followed went with the owner's ruling on Max the same day ("PCV20
+    // only", §C-P2-R4): no PPSV23 follows for him, so no PPSV23 date is promised.
+    expect(reasons).toHaveLength(1);
     expect(doseChipLabel(out.perDose.ppsv23[0], null)).toBe('Not counted — do not repeat');
   });
 
