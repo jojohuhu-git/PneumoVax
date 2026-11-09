@@ -1,3 +1,5 @@
+> **DONE (banner added 2026-11-08).** PR #116 merged (`1de9b7e`). Do not resume from this file.
+
 # PneumoVax — Handoff after the grey-zone audit and its 8 fixes (2026-11-01)
 
 **Repo:** `/Users/joannehuang/Downloads/PneumoVax`, a client-side pneumococcal decision-support app. Live at https://jojohuhu-git.github.io/PneumoVax/, which deploys from `main`.

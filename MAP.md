@@ -16,15 +16,17 @@ folder — they go where the table at the bottom says.**
 | `src/data/rulebook.js` | What the **Rulebook** page says. Every age and interval in it comes from the numbers the engine itself uses, and every sentence comes with an example patient that a test runs through the app, so the page cannot quietly stop matching what the app does. |
 | `src/logic/` | The "brain" — `recommend.js` decides what's due; `validate.js` checks recorded doses; `doseIntervalRules.js` is the single list of "how long must there be between two doses" rules; `doseIdentity.js` decides whether a row of the history counts as a dose at all (an empty row you never typed in does not); `doseDisposition.js` names the one label each recorded dose gets ("Counted — given early, accepted", "Not counted — repeat" and the rest). |
 | `src/data/` | The facts the brain uses: brands, risk factors, schedules. |
-| `src/test-grid.js` | A list of about 16,000 made-up patients (every age, risk tick and vaccination history worth testing). Used only by the tests, never shipped to anyone using the app. |
+| `src/test-grid.js` | A list of about 17,000 made-up patients a clinician could really enter, plus about 18,000 impossible entries (a dose dated before birth or in the future) (every age, risk tick and vaccination history worth testing). Used only by the tests, never shipped to anyone using the app. |
 | `public/` | Images and files shipped with the app exactly as-is. |
 | `index.html` | The single web page the app loads into. |
 | `scripts/` | Verification tools: compare this app's answers against CDC's PneumoRecs tool, and rebuild the saved answers file below. Not part of the app. |
 | `scripts/wholeApp/` | The whole-app rule checks (2026-11-05): seven questions asked of every patient, such as "if you follow the card, does the app accept the dose?". `run.mjs` runs them, `causes.mjs` sorts what they find, `proveChecks.mjs` breaks the app on purpose to prove each check can fail. Not part of the app. |
 | `scripts/wordingAudit/` | The 2026-11-08 wording audit: checks that dates and numbers written in a card's sentences match the date the card shows, and that every card says what the Rulebook page says. `adultRows.mjs` and `childRows.mjs` hold each patient against the Rulebook's tables. `whyParagraphs.mjs` and `whySentences.mjs` list every card's "Why this" paragraph and sentence over all test patients, with counts (`CLINICAL_SPEC.md` §M-L5); `leadSentences.mjs` does the same for the sentences that show without a click (§WORD-TIDY). Findings: `docs/archive/fix-2026-11-08-wording-vs-rulebook.md`. Not part of the app. |
 | `scripts/ageLineAudit/` | The 2026-11-08 check of ordinary children a week to a month either side of each age line (6 weeks, 7 and 12 months, 2, 5, 6 and 19 years), graded against CDC's own sentences. `childLines.mjs` runs it. Findings: `docs/archive/report-2026-11-08-children-near-age-lines.md` (none). Not part of the app. |
+| `scripts/cdsi/` | CDC's CDSI files (CDC's own rules in machine form, version 4.65, and CDC's 140 pneumococcal test patients) and two tools that check the app against them: `runTestCases.mjs` runs CDC's test patients through the app, `cdsiCompare.mjs` compares minimum ages and gaps. `README.md` there says how to re-run them when CDC publishes a new release. First results: `docs/archive/report-2026-11-08-cdsi-test-patients.md`. Not part of the app. |
+| `scripts/__tests__/` | Small tests that check the verification tools above still work. |
 | `scripts/pneumorecs/` | CDC's PneumoRecs VaxAdvisor, read out of its own code on 2026-10-25: all 175 recommendations it can print, which of them nobody can reach, the seven answers checked by hand against the live site, and how its answers compared with ours. `pneumorecs-rulebook.txt` is the readable version. |
-| `src/logic/__tests__/__corpus__/` | The app's saved answers for all ~16,000 made-up patients. The tests re-run the app over them and complain if any answer changed, so a change that quietly moves thousands of patients' advice can't slip through. If a change was meant to move them, run `npm run sweep:update` and say in the pull request how many moved. |
+| `src/logic/__tests__/__corpus__/` | The app's saved answers for every made-up patient — two files, one for the real patients and one for the impossible entries. The tests re-run the app over them and complain if any answer changed, so a change that quietly moves thousands of patients' advice can't slip through. If a change was meant to move them, run `npm run sweep:update` and say in the pull request how many moved. |
 
 ## Instructions and manuals
 
@@ -35,7 +37,7 @@ folder — they go where the table at the bottom says.**
 | `README.md` | The public description of the app for anyone visiting the code online. |
 | `CLINICAL_SPEC.md` | **The active rulebook** — every clinical rule with its source citation. The code and tests refer to it by name, which is why it stays at the top level. Its section K now holds a table that must match the code exactly; a test checks it on every run, so the document can't quietly fall behind. |
 | `docs/agent/` | The technical manuals (architecture, clinical rules, testing rules). |
-| `docs/archive/` | Old session notes, handoffs, past reviews. Nothing here is current; kept for history. Safe to ignore. |
+| `docs/archive/` | Session notes, handoffs, plans and reports, kept for history. **A few files here are current:** the newest handoff with no "SUPERSEDED" banner at its top, and any plan whose status line says it is not finished (today: the MeningoVax port plan and the CDSI-checks plan, both `plan-2026-11-08-*.md`). Everything else is history. |
 
 ## Machine-managed — never edit by hand
 
@@ -44,7 +46,9 @@ folder — they go where the table at the bottom says.**
 | `dist/` | The packaged copy of the app that gets published. Rebuilt by machine; edits here are overwritten. |
 | `node_modules/` | Third-party building blocks, downloaded automatically by `npm install`. |
 | `package.json` / `package-lock.json` | The app's parts list and the exact versions in use. |
-| `.claude/` | Settings and saved prompts for the AI assistant. |
+| `.claude/` | Settings and saved prompts for the AI assistant. This folder is not saved to GitHub, so anything that must be kept goes in `docs/archive/` instead. |
+| `.github/` | The instructions GitHub follows to test the app on every change and publish it from `main`. |
+| `.githooks/` | The save-time guardrail's hook (switched on by `npm install`). |
 | `vite.config.js` | Build machinery settings. |
 
 ## Where do new things go?

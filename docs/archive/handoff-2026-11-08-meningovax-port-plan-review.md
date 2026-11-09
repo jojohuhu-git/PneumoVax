@@ -82,3 +82,39 @@ phase that changes code (Phase 1) changes no clinical answer.
   `docs/archive/plan-2026-11-08-cdsi-checks-both-apps.md`.
 - **Not started:** P-CDSI-1, P-CDSI-2 (PneumoVax); M-CDSI-1, M-CDSI-2 (now items 2.3 and 1.5 of the
   port plan). They need three files from CDC that the owner downloads (listed in that plan).
+
+## Added by a second session, 2026-11-08 evening (organizing + CDC test patients)
+
+The planning work above was committed and pushed by then as **PR #148** (open, not merged). This
+session's work sits **uncommitted on top of it**, in both repos:
+
+**PneumoVax** (branch `docs/2026-11-08-meningovax-port-plan-review`):
+- `scripts/cdsi/` — new home for the CDSI checks: `cdsiCompare.mjs` (moved from `scripts/`),
+  `runTestCases.mjs` + `extractTestCases.py` (CDC's 140 pneumococcal test patients), `README.md`
+  (how to re-run and update), `cdc-files/` (CDC's 4.65 XML and both test workbooks).
+- `docs/archive/report-2026-11-08-cdsi-test-patients.md` — **117 of 140 agree; 23 differ, all
+  explained; brands and age limits unchanged 4.64 → 4.65 (508 rows, 0 differences).**
+  Five OPEN findings. Two are typical-patient bugs for the `fix-queue`: (1) a baby under 6 weeks
+  with no doses is told "Due today: PCV dose 1 of 4" (confirmed on screen, 2-week-old); (2) the
+  12-month booster card gives no date and its stated age is too early when the 8-week gap ends
+  after the birthday. Three are owner questions: (3) per-dose minimum ages 10/14 weeks;
+  (4) the 4-day grace at the 24-month line; (5, rare) a teen with HIV, two PPSV23 then PCV13.
+- MAP.md, README.md, CLAUDE.md (source table) brought up to date; four stale handoffs bannered;
+  four `.claude/prompts/` queues copied into `docs/archive/` with an "archived copy" banner.
+- `plan-2026-11-08-cdsi-checks-both-apps.md` — status, paths, P-CDSI-2's findings half marked done.
+
+**MeningoVax** (new branch `docs/2026-11-08-organize-cdsi-files-and-port-pointer`, off `main` at
+`c1118c1`; iCloud-synced, so commit soon or re-apply edits that vanish):
+- `scripts/cdsi/` — CDC's 4.65 MenACWY and MenB XML, the code list, both test workbooks, `README.md`.
+  CDSI 4.65 moved MenQuadfi's minimum age to 6 weeks everywhere — CDC's software now agrees with
+  the app's 2026-09-23 rule. No MenB change in 4.65.
+- `docs/archive/plan-2026-11-08-meningovax-port--SEE-PNEUMOVAX.md` — the pointer (plan item 0.1, done early).
+- CLAUDE.md: a "Current Work" pointer; two rules it was missing (transplant hard stop mirrored,
+  dateUtils mirrored); vaxapp removed from it and from three `docs/agent/` files. MAP.md updated.
+  Two finished handoffs bannered; nine `.claude/prompts/` queues copied into `docs/archive/`.
+
+**Blocked:** the monthly scheduled task still runs `scripts/cdsiCompare.mjs` "if that file exists".
+After this work merges, that path is gone and the task will skip it silently. Updating the task was
+refused by the permission check; the owner decides (Dec 1 is the first run).
+
+**Still needs her:** Q0 (phase order); whether to commit/push these changes; whether to work findings 1 and 2.

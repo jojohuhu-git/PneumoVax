@@ -11,7 +11,7 @@ runs in the browser.
 ```bash
 npm install
 npm run dev        # http://localhost:5173/PneumoVax/
-npm test           # Vitest (78 tests)
+npm test           # Vitest (about 2,500 tests)
 npm run build      # production build → dist/
 ```
 
@@ -37,7 +37,9 @@ or immunize.org p2016).
 ## Documentation
 - **`CLINICAL_SPEC.md`** — every clinical rule with its source citation.
 - **`CLAUDE.md`** — architecture and engine-design rules.
-- **`HANDOFF.md`** — author-review checklist, modeling notes, and ambiguities.
+- **`MAP.md`** — a plain-English guide to every folder.
+- **`docs/agent/`** — technical manuals; **`docs/archive/`** — handoffs, plans and reports.
+- **`scripts/cdsi/`** — checks against CDC's CDSI rules and test patients.
 
 ## Disclaimer
 Clinical decision support only — not a substitute for clinical judgment. Verify

@@ -29,7 +29,8 @@ Also read before changing any rule: `CLINICAL_SPEC.md` (every rule with source c
 | Architecture, file map, engine API, schedule constants | [docs/agent/architecture.md](docs/agent/architecture.md) |
 | Pneumococcal clinical rules, product semantics, HSCT | [docs/agent/clinical-rules.md](docs/agent/clinical-rules.md) |
 | Test files and coverage requirements | [docs/agent/testing.md](docs/agent/testing.md) |
-| PneumoRecs comparison harnesses (dev-only) | `scripts/{adult,peds,hsct}Cases.mjs` |
+| PneumoRecs comparison harnesses (dev-only) | `scripts/{adult,peds}Cases.mjs`, `scripts/pneumoRecs*.mjs`, `scripts/pneumorecs/` |
+| CDC CDSI files and checks (dev-only; CDSI is a cross-check, never the authority) | [scripts/cdsi/README.md](scripts/cdsi/README.md) |
 | Session history (2026-06-07 through 2026-06-12) | [docs/archive/agent-session-log.md](docs/archive/agent-session-log.md) |
 
 ## Non-Negotiable Rules

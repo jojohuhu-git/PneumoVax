@@ -1,7 +1,7 @@
 // Measurement (not yet a test), first run 2026-11-08: PneumoVax's minimum ages and gaps against CDSI 4.65.
 // CDSI values below were read from supporting-data-4.65 (pneumococcal XML) the same day;
 // children's rows are identical in 4.64 (on disk). Nothing in src/ is changed.
-const R = new URL('../src', import.meta.url).pathname;
+const R = new URL('../../src', import.meta.url).pathname;
 const { DOSE_INTERVAL_RULES } = await import(`${R}/logic/doseIntervalRules.js`);
 const I = await import(`${R}/logic/intervals.js`);
 const B = await import(`${R}/data/brands.js`);

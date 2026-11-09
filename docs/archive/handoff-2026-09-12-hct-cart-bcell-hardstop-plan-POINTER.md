@@ -1,3 +1,5 @@
+> **SUPERSEDED (banner added 2026-11-08) — do not act on this file.** It points at a plan in vaxapp, which is retired; the transplant rule it describes was replaced on 2026-10-16 by the hard stop (`plan-2026-10-16-transplant-hard-stop-both-apps.md`).
+
 # Pointer: HCT/CAR-T/B-cell hard-stop plan lives in vaxapp
 
 The full plan/handoff for this cross-repo change is at:
