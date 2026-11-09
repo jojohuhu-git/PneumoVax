@@ -18,9 +18,15 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 export const CAUSES = {
+  // Two of R4's three shapes were fixed 2026-11-08 (CLINICAL_SPEC.md §C-P2-R4).
+  // What remains is Max's family: the 24-71-month catch-up card offers PCV15
+  // ("add PPSV23 ≥8 weeks after") while a PPSV23 is held 5 years, and after a
+  // PCV15 the next card gives PCV20 instead. Put to the owner. The sorting
+  // rules below still name the fixed shapes, so their return is sorted, and the
+  // gate tests fail on it.
   'R4-thrown-out-ppsv23-chip': {
     class: 'real',
-    title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other",
+    title: "A thrown-out childhood PPSV23's 5-year date is followed by one surface and not the other (left: the 24-71-month card offering PCV15, \"Max\")",
   },
   // R6 is fixed for both families: the one she was shown first (§B-OPTIONB19,
   // Cora: the dose at 19, in view) and its leftover (§B-OPTIONB50, Owen,
@@ -32,10 +38,13 @@ export const CAUSES = {
   },
   // R7 was fixed 2026-11-07 (§B-50BABY). What remains is babies with an ADULT-only
   // tick (smoking, alcohol use disorder): left silent on purpose, since "50" would
-  // name the wrong age and the adult schedule acts at 19.
+  // name the wrong age and the adult schedule acts at 19. OWNER, 2026-11-08: "you
+  // can remove any planning for impossible cases such as a baby with smoking
+  // clicked" — so it is a ruling now, not an open fault. Still sorted by name, so
+  // a HEALTHY baby going silent again lands in unsorted (see causeOf, check 3).
   'R7-baby-complete-silent-on-adult-schedule': {
-    class: 'real',
-    title: "A baby with smoking or alcohol use disorder ticked: \"series complete\" names no later age (left out of §B-50BABY on purpose)",
+    class: 'ruling',
+    title: "A baby with smoking or alcohol use disorder ticked: \"series complete\" names no later age (an impossible patient; owner 2026-11-08: no planning for it)",
   },
   // The TODDLER twin of R7, ruled by the owner 2026-11-07 ("Match the baby card",
   // §B-50BABY, Ava): offered "Re-evaluate at age 19" for an adult-only tick, she

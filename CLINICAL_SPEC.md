@@ -1555,6 +1555,48 @@ weeks passed long ago, so neither card changes.
 Guard: `regression-2026-10-31-ppsv23-repeat-waits-five-years.test.js` (Noah, Sam, the toddler,
 the IC teenager, the grace, a 5-year repeat that counts, a child with no thrown-out dose).
 
+### §C-P2-R4 — the 5-year date after a thrown-out PPSV23 goes only where a PPSV23 can follow (2026-11-08)
+
+R4 of the 2026-11-05 whole-app checks: two parts of the screen read a thrown-out childhood
+PPSV23's 5-year date differently. The owner asked for it to be worked on 2026-11-08. Two of its
+three shapes are fixed here. Neither needed a new ruling, because in both the card already said
+what happens, and only a second part of the screen disagreed with it.
+
+**1. The line under the dose gave a date for a PPSV23 the card says will not be given.**
+**Ana, 19, heart disease:** PCV15 at 14, then a PPSV23 the next day, which does not count
+(`CHILD-PPSV23-AFTER-PCV`). Her card follows §K-THROWNOUTTIMING: *"Give 1 dose of PCV20 or
+PCV21 … No PPSV23 is needed after it."* Her dose's label already said *"Not counted — do not
+repeat"*, but the line beside it still read *"Next dose from Oct 13, 2026 at the earliest."*
+That is a PPSV23 date, because `repeatDueDate` for a child's thrown-out PPSV23 is always 5 years
+on (§C-P2-FIVE). Now that sentence is dropped whenever no card asks for a PPSV23 **and** none
+offers PCV15. A card offering PCV15 counts because PCV15 always needs a PPSV23 after it (CLAUDE.md,
+"PCV15 Always Requires PPSV23"). The same applied to a CSF leak (the 5-year PCV20/PCV21 card) and
+HIV (the 1-year card).
+
+**2. Option B's PPSV23 step was dated before its own first step allowed.** **Ben, 6, no
+spleen:** no conjugate that counted, and a PPSV23 at 12 months that was too young to count.
+Option B is PCV15 today, then PPSV23 ≥8 weeks later. `holdPpsv23AfterThrownOut` dated that step
+*"Oct 13, 2026"*, two days away, because that is when the 5 years ended. But 8 weeks after a PCV15
+given today is Dec 6. Both waits apply, so the hold now dates the step only when the 5 years end
+later than 8 weeks after Option B-1 could be given. A later look then found the date gone (check
+7) and the two options disagreeing (check 4). Both are fixed.
+
+**3. Not changed: put to the owner.** **Max, 5, no spleen:** one PCV (product not recorded) and
+a PPSV23 on the same day a year ago, so the PPSV23 does not count. The 24–71-month catch-up card
+offers PCV20 or PCV15, and says *"If PCV15 is used, add PPSV23 ≥8 weeks after"*. But a PPSV23 is
+held until Oct 2030 (§C-P2-FIVE). If PCV15 is given, the next card asks for PCV20 instead (Leah's
+§C-P2-ONE answer), so choosing PCV15 costs him an extra dose. §C-P2-ONE left this card out on
+purpose. 16 grid patients on check 5 and 5 on check 2, 0 typical.
+
+**Measured against `main`.** **51 / 17,016** verdicts and **48 / 18,264** record-problem rows
+moved. Each one is one of two changes, checked field by field: 35 lose one sentence under a
+PPSV23 (all 19-year-olds), and 16 + 48 lose Option B-2's date (all 6-year-olds). Prose: **99 /
+35,280** lines, each differing only by that one dropped sentence. The whole-app R4 count fell from
+57 grid + 60 typical to **16 grid + 0 typical** (check 5 only, the Max family). The 2026-10-25
+sweep's `kept` fell 1725 → 1715. Guard:
+`regression-2026-11-08-r4-thrown-out-ppsv23-line-and-option-b2.test.js`. Each new clause was
+broken on purpose, and the test caught every break.
+
 ### §C-P2-HEALTHY — a healthy child's PPSV23 is not needed, at any age (owner, 2026-10-31)
 
 **Zoe**, 3, healthy, four PCV20 doses, given a PPSV23 by mistake at 12 months. Her card read
@@ -1917,10 +1959,11 @@ Guard: `regression-2026-11-05-r1-second-ppsv23-waits-eight-weeks.test.js`. Check
 11th typical patient, followed forward; it reached 0 patients with PR #129). Check 7 ("stable over time")
 joined the same day, in two halves: its forward half (a card's advised date still stands when the day
 comes) rides on that walk, and its later-look half (the same record opened on later days) is
-`whole-app-stable-over-time-gate.test.js`, with R4 pinned at exactly 16 grid patients.
+`whole-app-stable-over-time-gate.test.js` (R4 was pinned there at 16 grid patients until §C-P2-R4 removed it, 2026-11-08).
 Check 5 ("card and chip agree": a recorded dose's chip and the card name one date for the next dose)
-joined it later that day on the same walk. Its only fault over all 77,496 patients is R4, parked, pinned
-at exactly 41 grid patients and 5 of the sampled typical ones.
+joined it later that day on the same walk. Its only fault over all 77,496 patients is R4, pinned
+at 41 grid patients and 5 of the sampled typical ones until §C-P2-R4 (2026-11-08) cut it to 16 grid
+and 0 typical: the Max family, waiting on the owner.
 
 ---
 

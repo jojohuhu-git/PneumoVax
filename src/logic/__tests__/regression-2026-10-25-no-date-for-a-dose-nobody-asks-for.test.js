@@ -241,7 +241,14 @@ describe('swept over the grid', () => {
     // childhood is now offered PCV20 or PCV21 only, so that chip's "Next dose
     // from <date>" — a PPSV23 no card offers — becomes "Not repeated." The grid
     // family is the 10 a228 patients, one per qualifying risk tick.
-    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1725 });
+    // KEPT FELL by 10 again, 2026-11-08: 1725 -> 1715. R4 (CLINICAL_SPEC.md
+    // §C-P2-R4): a thrown-out childhood PPSV23's "Next dose from <date>" is a
+    // PPSV23 date, so it goes when no card asks for a PPSV23 and none offers
+    // PCV15. The grid family is 10 a228 patients, one per risk tick: PCV13 and
+    // PPSV23 on the same day at 9, card "PCV20 or PCV21 … no PPSV23 needed",
+    // line promising a PPSV23 "from Oct 13, 2021". Listed by key, old against
+    // new, before this pin was moved. Withdrawn is untouched.
+    expect({ withdrawn, kept }).toEqual({ withdrawn: 2404, kept: 1715 });
   });
 
   it('the surviving lead is on every one of them — the dose still does not count', () => {

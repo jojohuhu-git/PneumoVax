@@ -84,10 +84,11 @@ describe('check 7, forward half: a dated card still stands on its date', () => {
 
 describe('check 4: alternative cards for one dose follow one wait', () => {
   it('no new disagreement, on any patient', () => {
-    const allowed = new Set(['D3-ppsv23-held-5-years-after-thrown-out', 'R4-thrown-out-ppsv23-chip']);
+    // R4's 16 grid children left on 2026-11-08 (§C-P2-R4): Option B's PPSV23
+    // step was dated by a 5-year hold that ended before its own PCV15 could be
+    // 8 weeks old. R4 is no longer allowed here, so its return fails.
+    const allowed = new Set(['D3-ppsv23-held-5-years-after-thrown-out']);
     expect(show(tally.rows().filter((r) => r.check === 4 && !allowed.has(r.cause)))).toEqual([]);
-    const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 4);
-    expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 16, typical: 0 });
   });
 });
 
@@ -95,9 +96,11 @@ describe('check 5: the card and the chip agree on the date of one dose', () => {
   it('no disagreement but R4, and R4 at exactly its pinned count', () => {
     expect(show(tally.rows().filter((r) => r.check === 5 && r.cause !== 'R4-thrown-out-ppsv23-chip'))).toEqual([]);
     const r4 = tally.causes().find((c) => c.cause === 'R4-thrown-out-ppsv23-chip' && c.check === 5);
-    // 41 is every grid patient (the full run says 41). 5 is the typical SAMPLE:
-    // the 60 typical R4 patients are all a few screens into the walk, not on the
-    // first screen, so only the every-11th walk reaches them — 5 of 60.
-    expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 41, typical: 5 });
+    // Was 41 grid / 5 sampled typical. 2026-11-08 (§C-P2-R4): the 25 grid
+    // 19-year-olds and all 60 typical patients left — their cards ask for no
+    // PPSV23 and offer no PCV15, so the line under the thrown-out PPSV23 no
+    // longer names a PPSV23 date. The 16 left are 5-year-olds on the 24-71-month
+    // catch-up card, which offers PCV15: put to the owner ("Max"), not changed.
+    expect({ grid: r4.grid, typical: r4.typical }).toEqual({ grid: 16, typical: 0 });
   });
 });
