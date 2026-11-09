@@ -81,8 +81,6 @@ const KNOWN = {
     ['2013-0580'],
   'Contraindication (severe allergic reaction): the app has no such input — NOT COMPARABLE':
     ['2016-UC-0014'],
-  'OPEN 1: a baby under 6 weeks with no doses is told dose 1 is due today':
-    ['2013-0575'],
   'OPEN 2: the 12-month booster card gives no date; when the 8-week gap ends after the birthday, its stated age is too early':
     ['2013-0598'],
   'OPEN 3: CDSI gives dose 2 a minimum age of 10 weeks and dose 3 of 14 weeks; the app checks only dose 1 age and the gaps':

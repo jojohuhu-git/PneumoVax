@@ -35,7 +35,7 @@ import {
   pedsRiskRowClass,
   pedsRiskIds,
 } from '../data/riskFactors.js';
-import { productByKey, pcvRecBrands } from '../data/brands.js';
+import { productByKey, pcvRecBrands, PCV_MIN_AGE_DAYS } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
 import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
@@ -990,7 +990,24 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
     : advisedDate === routineAgeDate && advisedDate !== spacingDate && advisedDate !== minDate
       ? 'routineAge'
       : advisedDate === spacingDate ? 'spacing' : 'minimum';
-  const advisedDueToday = anchor ? (advisedDate == null || advisedDate <= today) : true;
+  // CDSI FINDING 1 (OWNER RULING 2026-11-08, Ava and Ben; CLINICAL_SPEC.md
+  // §L-FIRSTDOSE). With no dose to measure from, this card used to be due today
+  // at every age, so a 2-week-old read "Due today: PCV dose 1 of 4" though a
+  // first dose cannot count before 6 weeks. A baby under 2 months with no dose
+  // now gets the routine date (2 months, which `advisedDate` already is) and the
+  // earliest one, the minimum age. On the day she turns 2 months she is on time,
+  // so it is due today (P2-8). Not `prior === 0` alone: a rejected dose anchors
+  // (Ruling D), and that card already measures from it.
+  const firstDoseWaits = prior === 0 && !anchor && routineAgeDate != null && routineAgeDate > today;
+  const minAgeDate = firstDoseWaits && dob ? addDays(dob, PCV_MIN_AGE_DAYS) : null;
+  // Her words, with the reason the [c] stands on when the 6 weeks has passed.
+  const firstDoseSentence = !firstDoseWaits ? null
+    : `Due at 2 months, on ${fmtDate(routineAgeDate)}. ${!dob
+      ? 'It can be given from age 6 weeks if needed [c]'
+      : minAgeDate > today
+        ? `It can be given from ${fmtDate(minAgeDate)} (age 6 weeks) if needed [c]`
+        : 'It can be given today if needed, as the minimum age of 6 weeks has passed [c]'}`;
+  const advisedDueToday = anchor ? (advisedDate == null || advisedDate <= today) : !firstDoseWaits;
   const dueToday = advisedDueToday;
   const earliestNextDate = advisedDueToday ? null : advisedDate;
   const due = needs12moFloor ? false : dueToday;
@@ -1082,7 +1099,9 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   const pcv15LeavesPpsv23Owed = rowClass !== null && !pcv.hasPCV20 && brands.some((b) => /PCV15/.test(b));
 
   return [rec({
-    vaccine: 'PCV', status: prior === 0 ? 'due' : onSchedule ? 'routine' : 'catchup',
+    // A baby waiting for her first dose (CDSI finding 1) is on the routine
+    // schedule, not "Due": the badge must not contradict "Next dose due <date>".
+    vaccine: 'PCV', status: prior === 0 && !firstDoseWaits ? 'due' : onSchedule ? 'routine' : 'catchup',
     ...pcvSeriesShape(pcv, am, target),
     doseLabel: `PCV dose ${doseNum} of ${target}`,
     dueToday: due,
@@ -1122,8 +1141,8 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
       // the most recent one" for a 4-month-old whose routine date is 6 months),
       // and `minInterval === 28 ? '4 weeks' : '8 weeks'` hand-typed the words
       // beside the number — the exact drift `intervalPhrase` exists to stop.
-      detail: `${!anchor
-        ? 'No earlier dose has a date, so there is no interval to measure'
+      detail: `${firstDoseSentence ?? ''}${!anchor
+        ? (firstDoseSentence ? '' : 'No earlier dose has a date, so there is no interval to measure')
         : advisedReason === 'routineAge'
           ? (routineAgePassed
             // Past tense, and it says what the clinician can do about it. The
@@ -1172,6 +1191,7 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
       cite(leadCite),
       ...(pcv15LeavesPpsv23Owed ? [cite(rowClass === 'IC' ? 'pedsIcPcv20orPpsv23' : 'pedsRiskPcv20orPpsv23')] : []),
       // The detail, in reading order.
+      ...(firstDoseSentence ? [cite('pedsMinAge')] : []),
       ...(anchor && advisedCite ? [cite(advisedCite)] : []),
       ...(minClauseCite ? [cite(minClauseCite)] : []),
       // The closing "final/booster dose is given at ≥12 months", which only

@@ -1,0 +1,50 @@
+# CDSI test-patient findings 1–4: owner rulings and fix plan (2026-11-08)
+
+Findings: `report-2026-11-08-cdsi-test-patients.md` §"Open". Branch `fix/2026-11-08-cdsi-findings`
+off `main` at `5ee7e03`. Baseline 2,481 passing, 0 failed (vitest JSON reporter, `.claude/**` excluded).
+**Status: rulings recorded, no code changed yet.**
+
+All five reproduced on 2026-11-08 with `npx vite-node scripts/cdsi/runTestCases.mjs`, plus hand probes.
+
+## Rulings (owner, 2026-11-08, from worked patients)
+
+| # | Patient put to her | Ruling |
+|---|---|---|
+| 1 | Ava, 2 wk, no doses, reads "Due today: PCV dose 1 of 4"; Ben, 7 wk, same | **Every baby under 2 months with no doses:** "Due at 2 months, on DATE. It can be given from DATE (age 6 weeks) if needed" — or "…can be given today if needed" once past 6 weeks. (Her 2026-10-24 rule: the routine date plus the earliest.) |
+| 2 | Nora, born 2025-11-01, PCV20 2026-07-01 and 2026-09-15, seen 2026-09-20: "not due until 12 months" — a dose on 2026-11-01 is **thrown out by the app's own checker** (probe: `invalid`) | **"Date plus reason."** Nora: *"This final dose is due on Nov 10, 2026: 8 weeks after the most recent dose, which is after her 1st birthday."* Control (last dose at 9 months): *"This final dose is due at 12 months, on Nov 1, 2026."* The card's date line shows the same date. |
+| 3 | Leo, born 2026-06-01, PCV15 at 38 days, PCV20 at 65 days (27-day gap) — both count in the app | **Use ACIP's per-dose minimum ages** (6 wk, 10 wk, 14 wk, 12 mo; 4-day grace on each). Leo's dose 2 does not count; repeat ≥4 weeks after it (Ruling D). **Moves verdicts: count every mover and show her before it lands.** |
+| 4 | Mila, born 2024-08-09, first PCV20 2026-08-05 (4 days before 24 months): app asks for dose 2 | **"Grace applies; she's done."** Mirror §A-GRACE12 at the 2nd birthday. |
+| 5 | Teen with HIV, 2×PPSV23 then PCV13 | Not asked — parked (rare; her 2026-10-31 "skip unlikely scenarios"). |
+
+## Sources read live 2026-11-08
+
+- **ACIP General Best Practices, Timing and Spacing, Table 3-2** "Recommended and minimum ages and intervals
+  between vaccine doses" (https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html,
+  page updated July 24, 2024). Column "Minimum age for this dose": PCV13-1 **6 weeks**, PCV13-2 **10 weeks**,
+  PCV13-3 **14 weeks**, PCV13-4 **12 months**. Footnote (x): *"Infants and children can optionally receive
+  PCV15 instead of PCV13."* (PCV20 row says only "See footnote x", and (x) does not mention PCV20 for
+  infants — the table predates PCV20 for children.) Grace: *"vaccine doses administered ≤4 days before the
+  minimum interval or age are considered valid"*.
+- **CDC Child Schedule Notes** (child-adolescent-notes.html): *"(minimum age: 6 weeks [PCV15], [PCV 20]…)"*;
+  *"Healthy children ages 2–4 years with any incomplete* PCV series: 1 dose PCV"*. No per-dose ages for doses 2–3.
+- **CDC Catch-up Table 2** (child-adolescent-catch-up.html, addendum updated July 2, 2025): PCV minimum age
+  for dose 1 *"6 weeks"*; dose 1→2 *"No further doses needed for healthy children if first dose was
+  administered at age 24 months or older"*.
+
+## Where each fix goes (found 2026-11-08)
+
+- **1:** `src/logic/recommend.js`, infant block (~line 990): `advisedDueToday = anchor ? … : true` — with no
+  anchor the card is always due today. `routineAgeDate` for dose 1 is already computed (2 months). Earliest =
+  dob + `PCV_MIN_AGE_DAYS` (42, `brands.js`). Card fields: `dueToday`, `earliestNextDate`, `note.lead`.
+- **2:** same block: `needs12moFloor` sets `earliestNextDate: null` and the lead adds *"This final dose is not
+  due until the patient reaches 12 months."* `minInterval` already uses `ageAtThisDose: M.m12` (so 56 days).
+  Date = later of the 12-month birthday (exact, no grace — ruling 2026-10-24) and anchor + `minInterval`.
+  `noteFold.js:31` keeps that sentence in view "because this card has no date anywhere else" — update the
+  pattern and its reason, and the WORD-1 guard's written-out list.
+- **3:** `validate.js:771` checks only dose 1's minimum age. Needs per-dose ages 10 wk / 14 wk (12 mo is
+  already the booster floor). Cite `cdcGbpTimingSpacing` (`refs.js:2223`) — needs a quoted entry with
+  `population`. Guard both corpora; group movers by family before `sweep:update`.
+- **4:** `pcvAgeAtTwelveMonthLine()` in `intervals.js` is the 12-month helper; the 24-month line needs the
+  same treatment wherever "first dose at ≥24 months" is decided. §A-GRACE12 lists the places it reached.
+
+Each: failing test first, full suite, live-verify, one commit per finding, `CLINICAL_SPEC.md` updated.

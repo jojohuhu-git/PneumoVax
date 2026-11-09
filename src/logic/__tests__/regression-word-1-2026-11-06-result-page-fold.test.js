@@ -123,6 +123,12 @@ describe('WORD-1 — what must stay in view', () => {
     expect(lead(out.recs[0])).toMatch(/can be given from .* if needed, which is the minimum interval of 4 weeks/);
   });
 
+  it('a baby too young for dose 1: the 2-month date and the 6-week date are both in view (CDSI finding 1, Ava)', () => {
+    // Written out, not imported from noteFold.js, so deleting the rule fails here.
+    const out = recommend({ dob: '2026-10-23', today: TODAY, riskIds: [], pcvDoses: [], ppsv23Doses: [] });
+    expect(lead(out.recs[0])).toMatch(/^Due at 2 months, on Dec 23, 2026\. It can be given from Dec 4, 2026 \(age 6 weeks\) if needed \[c\]\.$/);
+  });
+
   it('Option B says what PPSV23 leads to at 19, in view (owner, 2026-11-07, Cora)', () => {
     const cards = everyone.flatMap(({ out }) => out.recs).filter((r) => /If PPSV23 is chosen, at 19/.test(`${lead(r)} ${detail(r)}`));
     expect(cards.length).toBeGreaterThan(50);
@@ -170,8 +176,13 @@ describe('WORD-1 — the fold loses nothing', () => {
       }
     }
     // Both numbers appear on no grid patient, because the grid's dates never fall
-    // in that window. Remy, above, reaches that rule by hand.
-    expect(STAY_IN_VIEW.filter((_, i) => !seen.has(i)).map((x) => x.why)).toEqual(['Both numbers go on the card (C10-2)']);
+    // in that window. Remy, above, reaches that rule by hand. The grid's youngest
+    // patient is 2 months, so a baby too young for dose 1 is never in it: Ava,
+    // above, reaches that rule by hand (CDSI finding 1).
+    expect(STAY_IN_VIEW.filter((_, i) => !seen.has(i)).map((x) => x.why)).toEqual([
+      'Both numbers go on the card (C10-2)',
+      'A baby too young for dose 1: when it is due, and the earliest it counts (CDSI finding 1, 2026-11-08)',
+    ]);
   });
 });
 
