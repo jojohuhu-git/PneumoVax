@@ -166,7 +166,11 @@ export const askTurnsToComplete = (line, diff) => line === 228
  * a table row or a recommendation, where a dose 4 days short is simply on the
  * other side, so a change INSIDE the four days is the rule working.
  */
-const GRACE_EDGE = new Set(['PCV13@12', 'PCV15@12', 'PCV20@12', 'PPSV23@24', 'PCV21@216']);
+// PCV13/15/20@24 since §A-GRACE24 (owner rulings 2026-11-08 "Mila", 2026-11-09
+// "Only when it helps"): a conjugate 1-4 days before the 2nd birthday also
+// counts as given at 2 years. They stay in ROW_EDGE too: the grace only ADDS
+// credit, so a child it cannot help (Rosa) still changes inside the four days.
+const GRACE_EDGE = new Set(['PCV13@12', 'PCV15@12', 'PCV20@12', 'PCV13@24', 'PCV15@24', 'PCV20@24', 'PPSV23@24', 'PCV21@216']);
 // PCV15@60 and PCV20@60 since §C-P1-3 (Ben): CDC's catch-up for a healthy child
 // is "ages 2-4 years", so a dose on the 5th birthday is past it and reads extra.
 const ROW_EDGE = new Set(['PCV13@7', 'PCV15@7', 'PCV20@7', 'PCV13@24', 'PCV15@24', 'PCV20@24', 'PCV15@60', 'PCV20@60', 'PCV13@72', 'PCV15@72', 'PCV21@228', 'PPSV23@780']);

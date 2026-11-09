@@ -47,7 +47,7 @@ import { cite } from '../data/refs.js';
 // yourself importing an interval constant into this file, the rule you are
 // adding belongs in that table instead. `doseIntervalRules.test.js` has a
 // drift guard that fails if one appears here.
-import { ageMeetsMinimum, ageMeetsMinimumDays, pcvAgeAtTwelveMonthLine } from './intervals.js';
+import { ageMeetsMinimum, ageMeetsMinimumDays, pcvAgeAtGraceLine } from './intervals.js';
 import { PCV21_MIN_AGE_M, ADULT_SCHED_MIN_M } from './scheduleConstants.js';
 
 // Where CDC's "Age 6-18 years" rows begin. `recommend.js` calls the same line M.m72.
@@ -794,7 +794,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     doseDate: dose.date,
     // §A-GRACE12: 1-4 days before the first birthday counts as 12 months for
     // Table 2's cells, so a booster in that window owes the booster's 8 weeks.
-    ageAtDose: pcvAgeAtTwelveMonthLine(ageAtDose, dose.date, dob),
+    ageAtDose: pcvAgeAtGraceLine(ageAtDose, dose.date, dob),
     prev,
     priorPcv,
     priorPpsv23: (ctxParts.priorPpsv23 ?? []).filter((d) => d.date && d.date <= dose.date),
@@ -941,7 +941,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
       st.prev = {
         date: d.date,
         // §A-GRACE12: the dose measured FROM is read at the 12-month line too.
-        ageAtDose: vaccine === 'PCV' ? pcvAgeAtTwelveMonthLine(age, d.date, dob) : age,
+        ageAtDose: vaccine === 'PCV' ? pcvAgeAtGraceLine(age, d.date, dob) : age,
         product: d.product || '',
       };
     }

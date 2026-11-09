@@ -85,8 +85,6 @@ const KNOWN = {
     ['2013-0598'],
   'OPEN 3: CDSI gives dose 2 a minimum age of 10 weeks and dose 3 of 14 weeks; the app checks only dose 1 age and the gaps':
     ['2013-0579', '2013-0590', '2013-0603'],
-  'OPEN 4: a first dose 1–4 days before age 2 — CDSI applies the 4-day grace to the 24-month line (one dose, done); the app does not':
-    ['2013-0589'],
   'OPEN 5 (rare): child 6–18 with HIV, two PPSV23 then PCV13 — CDSI complete; app asks for PCV20':
     ['2016-UC-0171'],
 };

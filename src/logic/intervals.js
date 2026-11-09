@@ -66,10 +66,29 @@ export const GRACE_DAYS = 4;
  * Only with a date of birth: an age-only entry cannot place a dose to the day.
  * This decides what a dose given COUNTS as; what the app ADVISES is still the
  * birthday itself (owner ruling 2026-10-24).
+ *
+ * §A-GRACE24 (OWNER RULING 2026-11-08, CDSI finding 4, "Mila"): the SAME
+ * grace at the SECOND birthday. Mila's first PCV20 came 4 days before she
+ * turned 2 and the app asked for another; on the birthday itself it read
+ * "complete". CDC Catch-up Table 2: "No further doses needed for healthy
+ * children if first dose was administered at age 24 months or older"; CDSI
+ * 4.65: "Target Dose not required if current dose was administered on or
+ * after 24 months - 4 days of age." Owner: "Grace applies; she's done." And
+ * (2026-11-09, "Rosa") "Only when it helps": recommend.js does not move such
+ * a dose OUT of "before 24 months" — it counts it toward "at 24 months or
+ * older" as well, so the grace only ever adds credit. No Table 2 interval
+ * cell keys on 24 months, so the validator's spacing is unaffected.
+ *
+ * Each dose is read against the NEXT line above it only: 11.9 months is
+ * tested at 12, 23.9 at 24. Lines are calendar months from the birthday.
  */
-export function pcvAgeAtTwelveMonthLine(ageAtDose, doseDate, dob) {
-  if (!dob || !doseDate || ageAtDose == null || ageAtDose >= 12) return ageAtDose;
-  return doseDate >= addDays(addCalendarMonths(dob, 12), -GRACE_DAYS) ? 12 : ageAtDose;
+const PCV_GRACE_LINES_M = [12, 24];
+
+export function pcvAgeAtGraceLine(ageAtDose, doseDate, dob) {
+  if (!dob || !doseDate || ageAtDose == null) return ageAtDose;
+  const line = PCV_GRACE_LINES_M.find((m) => ageAtDose < m);
+  if (line == null) return ageAtDose;
+  return doseDate >= addDays(addCalendarMonths(dob, line), -GRACE_DAYS) ? line : ageAtDose;
 }
 
 // ── The pneumococcal minimum intervals, in one place (queue P1-0) ────────
