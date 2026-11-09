@@ -4283,10 +4283,15 @@ applied, not re-asked. Every before-and-after is listed in the PR body for her t
 - **The 23 long "Why this" paragraphs.** What makes them long is the heading sentence the fold moved down
   (WORD-1: nothing is deleted) and the approved PCV13/PCV15 sentence (FINDING H, §M-L5). Shortening either
   is an owner decision, so neither was touched.
-- **The adult "given too soon to count … INCOMPLETE" card in `pcvAdult`.** It cannot appear: it needs an
-  adult dose marked invalid under one of five interval rules, and since PR #90 (2026-10-25) all five are
-  `'recommendation'`, so no adult dose is ever invalid under them (checked 2026-11-08). Rewording a card no
-  patient can reach could not be tested; whether to remove it is a separate question.
+- **The adult "given too soon to count … INCOMPLETE" card in `pcvAdult` was REMOVED, not reworded**
+  (OWNER DECISION 2026-11-08, *"Yes, remove it"*). It could not appear: it needs an adult dose marked invalid
+  under one of five interval rules, and since PR #90 (2026-10-25) all five are `'recommendation'`. With its
+  code set to crash if reached, **0 of 95,760** test patients reached it and the full suite passed 2,467 / 0.
+  The 11,974 adults whose last dose did not count all had it thrown out under a child's rule (a dose before 19).
+  Removing it moved **0** of 35,280 rendered lines and no verdict. The code is kept verbatim in
+  `docs/archive/retired-2026-11-08-adult-invalid-dose-card.md`. The guard
+  `regression-2026-10-25-an-early-adult-dose-owes-nothing.test.js` (now covering all five rules) fails if any
+  of them becomes a floor again, which is the signal to restore it.
 
 **Measured:** 0 verdicts, dose labels, dates or citations moved. `scripts/proseDiff.mjs` against the
 `fix/2026-11-08-why-this-wording` branch: 1,049 of 35,280 lines changed, every one a note sentence listed

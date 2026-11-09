@@ -23,10 +23,13 @@ Checked in the running app: a 2-year-old with a heart condition (Complete card) 
 
 - **The 23 "Why this" paragraphs over 60 words.** Two things make them long: the heading sentence the fold moved
   down (WORD-1: the fold deletes nothing) and her approved PCV13/PCV15 sentence. Shortening either needs her.
-- **A card no patient can reach:** the adult "given too soon to count … INCOMPLETE" card in `pcvAdult` (the
-  `adultRepeat` branch). It needs an adult dose marked invalid under one of five rules in
-  `CARD_FOLLOWS_INVALID_DOSE`, and since PR #90 all five are `'recommendation'`. Ask her whether to delete it.
-  Don't reword it, because a rewrite can't be tested.
+- ~~A card no patient can reach~~ **REMOVED** on her *"Yes, remove it"* (second commit on this PR). It was the
+  adult "given too soon to count … INCOMPLETE" card: 0 of 95,760 patients reached it, 0 rendered lines moved,
+  and the code is archived in `retired-2026-11-08-adult-invalid-dose-card.md`. The `doseIntervalRules.js`
+  helpers it read from (`adultRepeatAfterInvalidDose`, `adultRepeatDueDate`) were left. They sit in the dose
+  check, outside this card, and the guard still calls `adultRepeatAfterInvalidDose` directly. **Not checked:**
+  whether their adult branch is unreachable too, for the same PR #90 reason. Measure it the same way (make it
+  crash, run all patients and the suite) before proposing removal.
 - `riskAgeNote.js` still says "CDC's child and adolescent schedule does not list it …". It names a document on
   purpose (it is about what the schedule lists), and it isn't a card note.
 
