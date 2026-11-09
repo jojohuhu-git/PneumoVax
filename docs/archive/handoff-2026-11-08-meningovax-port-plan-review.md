@@ -85,8 +85,9 @@ phase that changes code (Phase 1) changes no clinical answer.
 
 ## Added by a second session, 2026-11-08 evening (organizing + CDC test patients)
 
-The planning work above was committed and pushed by then as **PR #148** (open, not merged). This
-session's work sits **uncommitted on top of it**, in both repos:
+The planning work above was committed and pushed by then as **PR #148**. This session's work was
+then committed and pushed too, at the owner's request: PneumoVax `2c296cf` on the same branch (PR #148,
+open), and MeningoVax `eb02c2a` as **MeningoVax PR #74** (open). **She merges both.**
 
 **PneumoVax** (branch `docs/2026-11-08-meningovax-port-plan-review`):
 - `scripts/cdsi/` — new home for the CDSI checks: `cdsiCompare.mjs` (moved from `scripts/`),
@@ -103,8 +104,7 @@ session's work sits **uncommitted on top of it**, in both repos:
   four `.claude/prompts/` queues copied into `docs/archive/` with an "archived copy" banner.
 - `plan-2026-11-08-cdsi-checks-both-apps.md` — status, paths, P-CDSI-2's findings half marked done.
 
-**MeningoVax** (new branch `docs/2026-11-08-organize-cdsi-files-and-port-pointer`, off `main` at
-`c1118c1`; iCloud-synced, so commit soon or re-apply edits that vanish):
+**MeningoVax** (branch `docs/2026-11-08-organize-cdsi-files-and-port-pointer`, off `main` at `c1118c1`, PR #74):
 - `scripts/cdsi/` — CDC's 4.65 MenACWY and MenB XML, the code list, both test workbooks, `README.md`.
   CDSI 4.65 moved MenQuadfi's minimum age to 6 weeks everywhere — CDC's software now agrees with
   the app's 2026-09-23 rule. No MenB change in 4.65.
@@ -117,4 +117,4 @@ session's work sits **uncommitted on top of it**, in both repos:
 After this work merges, that path is gone and the task will skip it silently. Updating the task was
 refused by the permission check; the owner decides (Dec 1 is the first run).
 
-**Still needs her:** Q0 (phase order); whether to commit/push these changes; whether to work findings 1 and 2.
+**Still needs her:** merging #148 and MeningoVax #74; Q0 (phase order); the scheduled-task path; whether to work findings 1 and 2.
