@@ -1618,6 +1618,22 @@ export function adultRepeatAfterInvalidDose(ctx) {
   return { ...clocks, owedProducts: ADULT_OWED_AFTER_INVALID_DOSE };
 }
 
+/**
+ * §A-DOSEAGE (OWNER RULING 2026-11-08, "Leo"): the earliest date the REPEAT
+ * of a child's PCV dose given under its own minimum age (10 weeks for dose 2,
+ * 14 for dose 3) can be given. Her words: "repeat ≥4 weeks after it (Ruling
+ * D)". So it is this table's own CHILD-PCV-AFTER-PCV row, measured from the
+ * dose GIVEN — the same row that will grade the repeat when it comes — with no
+ * grace, because it is a date ADVISED (owner ruling 2026-10-24). Kept here so
+ * validate.js states the date without owning the interval.
+ */
+export function pcvRepeatAfterUnderAgeDose({ doseDate, ageAtDose, doseNumber, anyPriorDoseBefore12 }) {
+  if (!doseDate) return null;
+  const rule = DOSE_INTERVAL_RULES.find((r) => r.id === 'CHILD-PCV-AFTER-PCV');
+  return intervalFrom(rule, { date: doseDate, ageAtDose },
+    { doseDate, ageAtDose, doseNumber, anyPriorDoseBefore12 }, doseDate);
+}
+
 function repeatDueDate(rule, anchor, ctx) {
   if (!ctx.doseDate) return null;
   // An ADULT dose follows the owner's ruling above: the clock length comes

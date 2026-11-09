@@ -2,18 +2,17 @@
 
 Findings: `report-2026-11-08-cdsi-test-patients.md` §"Open". Branch `fix/2026-11-08-cdsi-findings`
 off `main` at `5ee7e03`. Baseline 2,481 passing, 0 failed (vitest JSON reporter, `.claude/**` excluded).
-**Status (2026-11-09): 1, 2 and 4 DONE, committed locally on this branch, not pushed, no PR. 3 NOT STARTED.
-5 parked.** Tests 2,495 → **2,511 passing, 0 failed**. CDSI 118 → **119 of 140** agree.
+**Status (2026-11-09): 1, 2, 3 and 4 DONE, committed locally on this branch, not pushed, no PR.
+5 parked.** Tests 2,495 → **2,521 passing, 0 failed**. CDSI 118 → **122 of 140** agree.
 
 | # | State | Detail |
 |---|---|---|
 | 1 | Done | `CLINICAL_SPEC.md` §L-FIRSTDOSE. 0 grid patients (youngest is 2 months). Label "Routine", not "Due", for a baby too young for dose 1 — narrows §L-2's "a first dose keeps Due"; tell her. Ben's line adds "as the minimum age of 6 weeks has passed" (what the [c] stands on); tell her. |
 | 2 | Done | `CLINICAL_SPEC.md` §L-BOOSTERDATE. Moved 132 / 264 saved answers, every one ONLY the next date blank → date (field diff). "her 1st birthday" became "the 1st birthday" (app can't know sex); tell her. `proveChecks.mjs` H1 now mutates a branch no card reaches — re-aim it at a dated card. |
 | 4 | Done | `CLINICAL_SPEC.md` §A-GRACE24. **Second ruling, 2026-11-09 ("Rosa"): "Only when it helps"** — built first as "read as the birthday", it took Rosa (asplenia, PCV13 ×2, PCV20 2 days before age 2) from complete to owing a PCV. Now the dose stays "before 24" and ALSO counts toward "at 24+". 0 grid / 0 record-problem verdicts; 636 of 1,575 hand-built moved, 0 lost "complete", 0 chip texts. The whole-app age-lines check now lists PCV@24 as a grace edge. §A-GRACE12 (12 months) still moves the dose outright — not checked for the same harm; ask her. |
-| 3 | Next | Moves verdicts; she asked to see the count before it lands. |
+| 3 | Done (owner approved the movers 2026-11-09, "Yes, commit it") | `CLINICAL_SPEC.md` §A-DOSEAGE. Dose 2 ≥70 days (66 with grace), dose 3 ≥98 (94); repeat 4 weeks after (Ruling D, from the rule table); card never offers a date under the next dose's age. REVERSES the 2026-10-26 "grace per interval" test (38/62/86 → 38/66/94). 0 grid / 0 record-problem / 0 of 77,496 whole-app patients moved; 502 of 2,736 hand-built baby views (23 histories, all a dose 1–4 days early followed by another early dose). CDSI 119 → 122. Tests 2,521. |
 
-**Resume:** `git checkout fix/2026-11-08-cdsi-findings`. Push and open a PR for 1, 2 and 4 when she says (ship skill);
-she merges. Then 3, by the fix-queue loop.
+**Resume:** `git checkout fix/2026-11-08-cdsi-findings`. Push and open a PR for 1-4 when she says (ship skill); she merges.
 
 All five reproduced on 2026-11-08 with `npx vite-node scripts/cdsi/runTestCases.mjs`, plus hand probes.
 

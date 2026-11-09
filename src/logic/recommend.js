@@ -35,7 +35,7 @@ import {
   pedsRiskRowClass,
   pedsRiskIds,
 } from '../data/riskFactors.js';
-import { productByKey, pcvRecBrands, PCV_MIN_AGE_DAYS } from '../data/brands.js';
+import { productByKey, pcvRecBrands, PCV_MIN_AGE_DAYS, pcvMinAgeDaysForDose } from '../data/brands.js';
 import { todayISO, addDays, daysBetween, intervalElapsed, addCalendarMonths, DAYS } from './dateUtils.js';
 import { dobToAgeMonths, fmtDate } from './format.js';
 import { analyzeBoth } from './validate.js';
@@ -973,7 +973,18 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // P2-8 (2026-11-06): strictly earlier. The day the routine age arrives is on
   // time, not overdue: Mia, due the day she turned 4 months.
   const routineAgePassed = routineAgeDate != null && routineAgeDate < today;
-  const minDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
+  const intervalMinDate = anchor && minInterval != null ? addDays(anchor, minInterval) : null;
+  // §A-DOSEAGE (OWNER RULING 2026-11-08, "Leo"): dose 2 and dose 3 have their
+  // own minimum ages, 10 and 14 weeks — the floor validate.js now grades by.
+  // The interval alone can fall short of it only when the dose before came in
+  // the 4-day grace (dose 1 at 38 days + 4 weeks = 66 days, under 10 weeks),
+  // and the card offered that date, which the checker would then throw out.
+  // The earliest date is the later of the two; no grace, it is advice.
+  const doseMinAgeDays = anchor && dob && doseNum >= 2 ? pcvMinAgeDaysForDose(doseNum) : null;
+  const doseMinAgeDate = doseMinAgeDays != null ? addDays(dob, doseMinAgeDays) : null;
+  const minByAge = intervalMinDate != null && doseMinAgeDate != null && doseMinAgeDate > intervalMinDate;
+  const minDate = minByAge ? doseMinAgeDate : intervalMinDate;
+  const minAgeRef = minByAge ? (doseNum === 2 ? 'acipGbpPcvDose2MinAge' : 'acipGbpPcvDose3MinAge') : null;
   // `t1row`, not `table1Row`: the citable-for-the-total test is an equality on
   // the TOTAL, and it has no bearing on whether the row states a spacing. The
   // ladder picked `t1row` from this child's actual history, so its history
@@ -1060,13 +1071,16 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // Table 2 actually prints a branch for this patient (`minCell`). Where it does
   // not, the number is still stated and simply credits nobody, rather than
   // borrowing the nearest-looking row.
-  const minClauseCite = showMinClause && minCell ? minCell : null;
+  const minClauseCite = !showMinClause ? null : minByAge ? minAgeRef : (minCell || null);
   const minMark = minClauseCite ? ' [c]' : '';
+  const minWhat = !showMinClause ? null : minByAge
+    ? `minimum age of ${doseMinAgeDays / 7} weeks for this dose`
+    : `minimum interval of ${intervalPhrase({ days: minInterval })}`;
   const minClause = !showMinClause
     ? ''
     : minDate <= today
-      ? `, but it can be given today if needed, as the minimum interval of ${intervalPhrase({ days: minInterval })} has already passed${minMark}`
-      : `, but it can be given from ${fmtDate(minDate)} if needed, which is the minimum interval of ${intervalPhrase({ days: minInterval })}${minMark}`;
+      ? `, but it can be given today if needed, as the ${minWhat} has already passed${minMark}`
+      : `, but it can be given from ${fmtDate(minDate)} if needed, which is the ${minWhat}${minMark}`;
   // The document that states the advised number itself. Each branch is credited
   // to the one source whose own words carry it:
   //   routineAge -> CDC's notes, "4-dose series at 2, 4, 6, and 12-15 months"
@@ -1077,7 +1091,7 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   const advisedCiteRaw = !anchor ? null
     : advisedReason === 'routineAge' ? 'pedsRoutine4Dose'
       : advisedReason === 'spacing' ? spacingRow
-        : minCell;
+        : (minByAge ? minAgeRef : minCell);
   // The lead's one marker, named here so the detail can avoid repeating it.
   const leadCite = target > 4
     ? 'pedsInfantLastDose1215mo'

@@ -2247,6 +2247,40 @@ export const REFS = {
     quote: 'If the vaccine is a live vaccine, ensuring that a minimum interval of 28 days has elapsed from the invalid dose is recommended',
     lastVerified: '2026-10-31',
   },
+  // §A-DOSEAGE (OWNER RULING 2026-11-08, "Leo"). ACIP's Table 3-2, "Recommended
+  // and minimum ages and intervals between vaccine doses", one ROW per dose.
+  // The quote is the row's cells in page order, exactly as the page's text
+  // reads (columns: dose, recommended age, MINIMUM AGE, recommended interval,
+  // minimum interval). A text fragment cannot cross table cells, so the link
+  // jumps to the row's first cell instead (`fragment`, unique on the page,
+  // read live 2026-11-09). The rows are written for PCV13; the table's PCV15
+  // and PCV20 rows read "See footnote x below", and footnote x reads
+  // "Infants and children can optionally receive PCV15 instead of PCV13" —
+  // it does not name PCV20. The owner applied the ages to every conjugate
+  // (Leo's dose 2 was a PCV20), so the chip's own words say "PCV dose", never
+  // "PCV13".
+  acipGbpPcvDose2MinAge: {
+    rulebook: 'child',
+    // Patients this row is about: any infant receiving a 2nd conjugate dose
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    label: 'ACIP General Best Practices, Table 3-2 — PCV dose 2: minimum age 10 weeks (PCV13 row; PCV15 and PCV20 refer to footnote x)',
+    short: 'CDC Timing and Spacing',
+    quote: 'PCV13-2 4 months 10 weeks 8 weeks 4 weeks',
+    fragment: 'PCV13-2',
+    lastVerified: '2026-11-09',
+  },
+  acipGbpPcvDose3MinAge: {
+    rulebook: 'child',
+    // Patients this row is about: any infant receiving a 3rd conjugate dose
+    population: ['child-routine', 'child-nonIC', 'child-IC'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    label: 'ACIP General Best Practices, Table 3-2 — PCV dose 3: minimum age 14 weeks (PCV13 row; PCV15 and PCV20 refer to footnote x)',
+    short: 'CDC Timing and Spacing',
+    quote: 'PCV13-3 6 months 14 weeks 6 months 8 weeks',
+    fragment: 'PCV13-3',
+    lastVerified: '2026-11-09',
+  },
 
   // CAR-T / B-cell malignancy / B-cell-depleting therapy hard stop -------
   cdcAlteredImmunocompetence: {
@@ -2340,13 +2374,18 @@ export function resolveRefs(keys = []) {
 // neither highlighted the sentence — so the section ALONE, not a text fragment
 // that looks as if it works. The quote still shows in the pop-up over the
 // number. Guard: regression-2026-11-07-cdc-notes-links-open-their-section.
-export function highlightUrl(url, quote, pdfPage = undefined, section = undefined) {
+//
+// ⚠ The TABLE-ROW rule (§A-DOSEAGE, 2026-11-09). A quote made of a table
+// row's cells cannot match as a text fragment (a fragment does not cross
+// table cells), so such an entry declares `fragment`, the row's first cell,
+// and the link jumps to that row. The quote still shows over the number.
+export function highlightUrl(url, quote, pdfPage = undefined, section = undefined, fragment = undefined) {
   if (!url) return undefined;
   if (!quote) return url;
   const page = url.split('#')[0];
   if (pdfPage != null) return `${page}#page=${pdfPage}`;
   if (section) return `${page}#${section}`;
-  return `${page}#:~:text=${encodeURIComponent(quote)}`;
+  return `${page}#:~:text=${encodeURIComponent(fragment ?? quote)}`;
 }
 
 // One citation occurrence: keyed, but deliberately NOT numbered. Each one
@@ -2381,7 +2420,7 @@ export function cite(key, opts = undefined) {
   const out = {
     key,
     page: c?.url,
-    url: highlightUrl(c?.url, c?.quote, c?.pdfPage, c?.section),
+    url: highlightUrl(c?.url, c?.quote, c?.pdfPage, c?.section, c?.fragment),
     label: c?.quote ?? c?.label,
     doc: c?.short,
     quote: c?.quote,

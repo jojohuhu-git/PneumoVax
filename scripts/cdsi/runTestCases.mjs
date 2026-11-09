@@ -83,8 +83,6 @@ const KNOWN = {
     ['2016-UC-0014'],
   'A dose 5+ days before the 1st birthday after 3 infant doses is an extra infant dose (owner 2026-10-23); CDSI calls it too young. Same booster, same date (CDSI finding 2 fixed 2026-11-08) — DELIBERATE':
     ['2013-0598'],
-  'OPEN 3: CDSI gives dose 2 a minimum age of 10 weeks and dose 3 of 14 weeks; the app checks only dose 1 age and the gaps':
-    ['2013-0579', '2013-0590', '2013-0603'],
   'OPEN 5 (rare): child 6–18 with HIV, two PPSV23 then PCV13 — CDSI complete; app asks for PCV20':
     ['2016-UC-0171'],
 };
