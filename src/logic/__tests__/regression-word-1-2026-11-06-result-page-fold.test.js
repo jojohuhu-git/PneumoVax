@@ -110,10 +110,11 @@ describe('WORD-1 — what must stay in view', () => {
     expect(bolded).toBeGreaterThan(100);
   });
 
-  it('the final-dose line stays: that card has no date anywhere else', () => {
-    const cards = everyone.flatMap(({ out }) => out.recs).filter((r) => /not due until the patient reaches 12 months/.test(`${lead(r)} ${detail(r)}`));
+  it('the final-dose line stays: its date, and why it is later than the birthday (CDSI finding 2)', () => {
+    const FINAL = /This final dose is due (at 12 months, on|on) /;
+    const cards = everyone.flatMap(({ out }) => out.recs).filter((r) => FINAL.test(`${lead(r)} ${detail(r)}`));
     expect(cards.length).toBeGreaterThan(50);
-    expect(cards.every((r) => /not due until the patient reaches 12 months/.test(lead(r)))).toBe(true);
+    expect(cards.every((r) => FINAL.test(lead(r)))).toBe(true);
   });
 
   it('both numbers: the minimum beside an advised date is in view (C10-2)', () => {

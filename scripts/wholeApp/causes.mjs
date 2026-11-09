@@ -140,7 +140,8 @@ export function causeOf(check, kind, group) {
 const CARD_MOVES = [
   [7, /^cards: PCV dose \d of 4 → PCV dose \d of 3$/, 'p2016 Table 1: from 7 months a series is 3 doses, not 4'],
   [12, /^cards: PCV dose \d of 3 → PCV dose \d of 2$/, 'p2016 Table 1: from 12 months a series is 2 doses'],
-  [12, /^card PCV dose (\d) of \1: dueToday false → true$/, 'the final dose stops being held to the first birthday'],
+  // CDSI finding 2 (2026-11-08): the day before, the card is dated the birthday; on it, due.
+  [12, /^card PCV dose (\d) of \1: (dueToday false → true|dated true → false)$/, 'the final dose stops being held to the first birthday, and the date set to it falls due on it'],
   [24, /^cards: (PCV dose \d of 2|PCV series (complete|up to date for age) \(3 doses\)) → /, 'under-2 rules end; healthy or at-risk 2-5 rules begin'],
   [60, /→ Not indicated \(healthy 5–18y\)$/, 'CDC: no PCV for a healthy child from 5'],
   [72, /^cards: (PCV dose \d of 2 \(at-risk catch-up\)|PCV complete \(at-risk catch-up done\)) → /, 'the 2-5 at-risk rows end; the 6-18 rows begin'],

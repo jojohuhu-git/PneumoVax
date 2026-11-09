@@ -179,7 +179,7 @@ describe('C10-2 — the recommended date is the routine one, the minimum is comm
     expect(card.doseLabel).toBe('PCV dose 4 of 4');
     expect(card.dueToday).toBe(false);
     expect(card.minIntervalDays).toBe(PCV_MIN_INTERVAL_DAYS_FROM_12M);
-    expect(noteTextOf(card)).toMatch(/not due until the patient reaches 12 months/);
+    expect(noteTextOf(card)).toMatch(/This final dose is due at 12 months, on /); // CDSI finding 2: now with its date
   });
 
   it('patient G is unchanged — 11 months, doses at 2 and 9, held to 12 months', () => {
@@ -220,6 +220,9 @@ describe('C10-2 — the recommended date is the routine one, the minimum is comm
     // than asserted on one patient: the recommendation may be LATER than the
     // minimum, never earlier. A fix that moved the floor instead of the advice
     // would pass every test above and fail this one.
+    // 4 → 7 (CDSI finding 2, 2026-11-08): the three cards held to the first
+    // birthday now carry their date too, so the sweep reaches them — and they
+    // pass, which is the point of that finding.
     const ages = [2, 3, 4, 5, 6, 7, 9, 11, 12, 15, 18, 23];
     const histories = [[], [2], [2, 3], [2, 4], [2, 4, 6], [3], [9], [11, 12.5]];
     let checked = 0;
@@ -242,6 +245,6 @@ describe('C10-2 — the recommended date is the routine one, the minimum is comm
     // them read its floor out as the plan — so the count is itself the
     // evidence the change took effect. It is small because most of these
     // histories leave the child overdue, where advice and floor coincide.
-    expect(checked).toBe(4);
+    expect(checked).toBe(7);
   });
 });
