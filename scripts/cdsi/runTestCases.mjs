@@ -83,7 +83,11 @@ const KNOWN = {
     ['2016-UC-0014'],
   'A dose 5+ days before the 1st birthday after 3 infant doses is an extra infant dose (owner 2026-10-23); CDSI calls it too young. Same booster, same date (CDSI finding 2 fixed 2026-11-08) — DELIBERATE':
     ['2013-0598'],
-  'OPEN 5 (rare): child 6–18 with HIV, two PPSV23 then PCV13 — CDSI complete; app asks for PCV20':
+  // Finding 5, settled 2026-11-09: the owner's "Sofia" ruling (2026-10-30, CLINICAL_SPEC.md §C-P2),
+  // reconfirmed on this patient — "keep PCV20". CDC's immunocompromised row for PCV13 + PPSV23 at
+  // 6–18 still orders a dose after the conjugate; the "no further doses" wording is the
+  // non-immunocompromised list's. CDSI 4.65 builds a PPSV-PPSV-PCV series that ends at the conjugate.
+  'IC child 6–18, both PPSV23 BEFORE the conjugate: PCV20 still owed (owner "Sofia" 2026-10-30, reconfirmed 2026-11-09); CDSI calls it complete — DELIBERATE':
     ['2016-UC-0171'],
 };
 const familyOf = (id) => Object.entries(KNOWN).filter(([, ids]) => ids.includes(id)).map(([f]) => f);
