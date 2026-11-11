@@ -279,7 +279,15 @@ describe('C14 — the page renders, and reads as a clinician page', () => {
   it('renders without a single decorative icon or emoji', () => {
     const { container } = render(<Rulebook />);
     expect(container.textContent).not.toMatch(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/u);
-    expect(container.querySelectorAll('svg').length).toBe(0);
+    // Owner requests 2026-11-10: two exceptions, both functional — the info
+    // icon on the "Rules verified" line, and the expand/collapse chevron on
+    // each part's header. Every other icon is still refused.
+    const svgs = [...container.querySelectorAll('svg')];
+    expect(svgs.filter((s) => !s.closest('.rb-verified, .rb-panel-mark')).length).toBe(0);
+    expect(container.querySelectorAll('.rb-verified svg').length).toBeLessThanOrEqual(1);
+    for (const m of container.querySelectorAll('.rb-panel-mark')) {
+      expect(m.querySelectorAll('svg').length).toBe(1);
+    }
   });
 
   it('turns months into the words a clinician uses', () => {

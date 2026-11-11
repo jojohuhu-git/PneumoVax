@@ -27,23 +27,23 @@
   --hsctmd:  #fcd34d;
   --hscthdr: #fef3c7;
 
-  --gy:   #2f3a33;
-  --gy2:  #51605a;
-  --gy3:  #76857e;
-  --gy4:  #a8b3ad;
-  --gy5:  #cdd6d1;
-  --gy6:  #eef2ef;
+  --gy:   #0f1f3d;
+  --gy2:  #3b4a63;
+  --gy3:  #5f6b80;
+  --gy4:  #94a0b4;
+  --gy5:  #e3e8ef;
+  --gy6:  #f3f5f9;
   --wh:   #ffffff;
-  --bg:   #f4f6f4;
+  --bg:   #f7f8fa;
 
   /* Shape */
-  --rad:  8px;
-  --rads: 4px;
-  --radp: 6px;
+  --rad:  16px;
+  --rads: 10px;
+  --radp: 10px;
 
   /* Shadow */
-  --sh: 0 2px 8px rgba(0,0,0,0.10);
-  --sh2: 0 4px 16px rgba(0,0,0,0.13);
+  --sh: 0 1px 2px rgba(15,31,61,0.04), 0 1px 3px rgba(15,31,61,0.04);
+  --sh2: 0 8px 24px rgba(15,31,61,0.10);
 
   /* Type scale — ported from MeningoVax (PD1), consolidates ~18 ad-hoc font
      sizes to these 7 steps. */
@@ -70,7 +70,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg);
   color: var(--gy);
   min-height: 100vh;
@@ -943,3 +943,185 @@ body {
 .rb-step { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-4); border: 1px solid var(--gy6); border-radius: var(--radp); padding: var(--sp-12); background: var(--wh); }
 .rb-step-when { font-size: var(--fs-sm); font-weight: 600; color: var(--gy); }
 @media (max-width: 640px) { .rb-steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── UI refresh 2026-11-10: minimalist clinical dashboard ─────────
+   Two columns (summary sidebar + workflow), white rounded cards with hairline
+   borders, pill-shaped selection controls. Overrides only — every rule above
+   keeps its meaning. */
+.app-header { box-shadow: none; border-bottom: 1px solid var(--gy5); }
+.app-header-inner, .app-nav-inner { max-width: 1120px; padding-left: var(--sp-24); padding-right: var(--sp-24); }
+.app-logo-title { color: var(--gy); letter-spacing: -0.01em; }
+
+.app-layout {
+  flex: 1; width: 100%; max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: var(--sp-24);
+  padding: 32px var(--sp-24) 110px; align-items: start;
+}
+.app-layout .app-main { max-width: none; margin: 0; padding: 0; }
+.app-aside { position: sticky; top: 88px; display: flex; flex-direction: column; gap: var(--sp-16); }
+.aside-card { background: var(--wh); border: 1px solid var(--gy5); border-radius: var(--rad); padding: 20px; box-shadow: var(--sh); }
+.aside-heading { font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gy3); margin-bottom: var(--sp-12); }
+.aside-summary { display: flex; flex-direction: column; gap: var(--sp-12); }
+.aside-summary > div { display: flex; justify-content: space-between; gap: var(--sp-12); font-size: var(--fs-base); }
+.aside-summary dt { color: var(--gy3); }
+.aside-summary dd { color: var(--gy); font-weight: 600; text-align: right; }
+
+/* Vertical stepper inside the sidebar */
+.app-aside .stepper { flex-direction: column; align-items: stretch; gap: var(--sp-4); overflow: visible; }
+.app-aside .stepper-item { flex-direction: row; gap: var(--sp-12); padding: var(--sp-8) var(--sp-12); border-radius: 999px; }
+.app-aside .stepper-item::after { display: none; }
+.app-aside .stepper-item.active { background: var(--clt); }
+.app-aside .stepper-dot { width: 26px; height: 26px; font-size: var(--fs-xs); }
+.app-aside .stepper-label { font-size: var(--fs-base); max-width: none; text-align: left; color: var(--gy3); }
+.app-aside .stepper-item.active .stepper-label { color: var(--gy); }
+.app-aside .stepper-item.done .stepper-dot { background: var(--glt); border-color: var(--gmd); color: var(--g); }
+
+/* Cards */
+.step-card, .results-header, .rec-card, .howpath { border: 1px solid var(--gy5); box-shadow: var(--sh); }
+.step-card { padding: 32px; }
+.step-title { font-size: 1.4rem; letter-spacing: -0.01em; }
+.rec-card-head { border-bottom-color: var(--gy5); }
+
+/* Pill controls */
+.btn, .history-toggle-btn, .viewnav, .add-dose-btn, .age-edit-btn, .meta-chip, .due-pill, .citation-chip, .rb-nav a { border-radius: 999px; }
+.btn { padding: 0 28px; }
+.btn-next { background: var(--c); box-shadow: 0 1px 2px rgba(15,118,110,0.25); }
+.btn-next:hover { background: #115e59; }
+.viewnav { padding: 3px; background: var(--gy6); border-color: var(--gy5); gap: 2px; }
+.viewnav button { border-radius: 999px; background: transparent; padding: 6px 16px; }
+.viewnav button + button { border-left: none; }
+.viewnav button.active { background: var(--wh); color: var(--gy); box-shadow: 0 1px 2px rgba(15,31,61,0.08); }
+.history-toggle-btn.selected { background: var(--c); border-color: var(--c); color: var(--wh); }
+.risk-item { border: 1px solid var(--gy5); border-radius: 12px; }
+.risk-item.selected { border-color: var(--c2); }
+.age-field input[type="number"], .age-field input[type="date"],
+.dose-field input[type="date"], .dose-field input[type="text"], .dose-field select { border: 1px solid var(--gy5); border-radius: 10px; }
+
+@media (max-width: 860px) {
+  .app-layout { grid-template-columns: 1fr; padding: var(--sp-16) var(--sp-16) 110px; }
+  .app-aside { position: static; }
+  .app-aside .stepper { flex-direction: row; }
+  .app-aside .stepper-item { flex: 1; justify-content: center; padding: var(--sp-8); }
+  .app-aside .stepper-label { display: none; }
+  .app-aside .stepper-item.active .stepper-label { display: block; }
+  .step-card { padding: var(--sp-24) var(--sp-16); }
+}
+
+/* ── UI refresh 2026-11-10, round 2: page intro, numbered steps, rulebook panels ── */
+.header-badge {
+  margin-left: auto; display: inline-flex; align-items: center; gap: var(--sp-8);
+  padding: 6px 14px; border-radius: 999px; background: var(--clt); color: var(--c);
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+}
+.header-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--g); }
+.header-badge + .viewnav { margin-left: var(--sp-12); }
+
+.page-intro { width: 100%; max-width: 1120px; margin: 0 auto; padding: 40px var(--sp-24) 0; }
+.page-eyebrow { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--g); margin-bottom: var(--sp-8); }
+.page-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; color: var(--gy); line-height: 1.15; }
+.page-sub { margin-top: var(--sp-12); max-width: 720px; font-size: var(--fs-md); line-height: 1.6; color: var(--gy2); }
+.page-intro + .app-layout { padding-top: 28px; }
+
+/* Numbered step headers (step number comes from main[data-step]) */
+.step-title { display: flex; align-items: center; gap: var(--sp-12); }
+.step-title::before {
+  flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--c); color: var(--wh);
+  display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-sm); font-weight: 700;
+}
+.app-main[data-step="0"] .step-title::before { content: "1"; }
+.app-main[data-step="1"] .step-title::before { content: "2"; }
+.app-main[data-step="2"] .step-title::before { content: "3"; }
+.step-sub { padding-left: 42px; }
+.step-title { font-size: var(--fs-xl); }
+
+/* Risk conditions: a two-column grid of selectable cards */
+.risk-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-8); }
+.risk-group-title { grid-column: 1 / -1; }
+.risk-item { background: var(--wh); }
+.risk-item:hover { border-color: var(--cmd); background: var(--wh); }
+.risk-item.selected { background: var(--clt); }
+.risk-none { border-radius: 12px; }
+.dose-row { background: var(--gy6); border: 1px solid var(--gy5); border-radius: 12px; }
+.add-dose-btn { border-style: solid; border-color: var(--clt); background: var(--clt); color: var(--c); font-weight: 600; }
+.family-note, .risk-age-note, .disclaimer, .advisory-banner, .dose-row-date-problem { border-radius: 12px; }
+
+/* Results */
+.results-summary-line { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+.rec-section-title { color: var(--gy3); letter-spacing: 0.1em; }
+.rec-card { border-radius: var(--rad); }
+.rec-card-inner { padding: 20px 22px; }
+
+/* Rulebook */
+.rb { max-width: 1120px; padding: 40px var(--sp-24) 64px; gap: var(--sp-16); }
+.rb-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); letter-spacing: -0.02em; }
+.rb-intro { color: var(--gy2); line-height: 1.6; }
+.rb-toolbar { display: flex; align-items: flex-start; gap: var(--sp-12); flex-wrap: wrap; }
+.rb-toolbar .rb-nav { flex: 1; min-width: 0; }
+.rb-nav a { font-size: var(--fs-sm); font-weight: 500; color: var(--gy2); border-color: var(--gy5); padding: 6px 14px; }
+.rb-nav a:hover { color: var(--c); }
+.rb-expand-all {
+  font: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--c); cursor: pointer;
+  background: var(--clt); border: none; border-radius: 999px; padding: 7px 16px; white-space: nowrap;
+  margin-left: auto; /* far right, even when the link row wraps above it */
+}
+/* Owner 2026-11-10: deep green while it says "Expand all", pale once it says "Collapse all". */
+.rb-expand-all { background: #e8f5e9; color: var(--g); }
+.rb-expand-all:hover { background: #d4ecd7; }
+.rb-expand-all-open { background: #065f46; color: var(--wh); }
+.rb-expand-all-open:hover { background: #064e3b; }
+.rb-card { border-radius: var(--rad); box-shadow: var(--sh); }
+.rb-card-stop { border-radius: var(--rad); }
+
+.rb-panel { background: var(--wh); border: 1px solid var(--gy5); border-radius: var(--rad); box-shadow: var(--sh); gap: 0; }
+.rb-panel .rb-h2 { margin: 0; font-size: inherit; }
+.rb-panel-head {
+  display: flex; align-items: center; gap: var(--sp-16); cursor: pointer;
+  padding: 20px var(--sp-24); border-radius: var(--rad);
+}
+.rb-panel-head:hover { background: var(--gy6); }
+.rb-panel-btn {
+  background: none; border: none; padding: 0; cursor: pointer; font: inherit; color: var(--gy);
+  font-size: var(--fs-lg); font-weight: 700; text-align: left;
+}
+.rb-panel-btn:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+.rb-panel-num {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: #e8f5e9; color: var(--g);
+  display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-sm); font-weight: 700;
+}
+.rb-panel-open .rb-panel-num { background: #065f46; color: var(--wh); }
+.rb-panel-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rb-panel-sum { font-size: var(--fs-sm); font-weight: 400; color: var(--gy3); line-height: 1.45; }
+.rb-panel-mark {
+  flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--g); border: 1px solid var(--gy5);
+}
+.rb-panel-mark svg { width: 14px; height: 14px; margin-left: 0 !important; }
+.rb-panel-open .rb-panel-mark { color: #065f46; border-color: var(--gmd); }
+.rb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.rb-panel-body { display: flex; flex-direction: column; gap: var(--sp-16); padding: 0 var(--sp-24) var(--sp-24); border-top: 1px solid var(--gy5); padding-top: var(--sp-24); }
+.rb-panel-closed .rb-panel-body { display: none; }
+.rb-panel-body > .rb-card { box-shadow: none; background: var(--bg); border-color: var(--gy5); }
+
+@media (max-width: 720px) {
+  .header-badge { display: none; }
+  .page-intro { padding: var(--sp-24) var(--sp-16) 0; }
+  .risk-group { grid-template-columns: 1fr; }
+  .step-sub { padding-left: 0; }
+  .rb { padding: var(--sp-24) var(--sp-12) 48px; }
+  .rb-panel-head { padding: var(--sp-16); gap: var(--sp-12); }
+  .rb-panel-body { padding: var(--sp-16) var(--sp-12); }
+}
+
+/* Results: inline risk-factor editor (mirrors Adjust age / Recorded doses) */
+.risk-edit-panel { flex-direction: column; align-items: stretch; }
+.risk-list-compact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-8); }
+.risk-edit-panel .btn { align-self: flex-start; }
+@media (max-width: 600px) { .risk-list-compact { grid-template-columns: 1fr; } }
+.age-edit-or { align-self: center; color: var(--gy4); font-size: var(--fs-sm); padding-top: 18px; }
+.age-edit-row .age-error { flex-basis: 100%; }
+
+/* Rulebook: "Rules verified <date>" line under the title */
+.rb-verified { display: flex; align-items: center; gap: var(--sp-8); color: var(--gy3); font-size: var(--fs-base); margin: var(--sp-8) 0 var(--sp-12); }
+.rb-verified svg { flex-shrink: 0; color: var(--gy4); }
+.rb-verified a { color: inherit; text-decoration: underline; }

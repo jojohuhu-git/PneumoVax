@@ -22,6 +22,7 @@ export default function Disclaimer() {
           asked about. Deliberately NOT a per-dose prompt, and deliberately no
           promise that the app will ask: unlike MeningoVax, PneumoVax has no
           "Needs input" machinery to ask with. */}
+      <br/>
       <button
         type="button"
         className="rec-note-toggle disclaimer-toggle"

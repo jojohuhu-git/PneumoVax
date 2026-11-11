@@ -7,9 +7,10 @@ import Results from './components/Results.jsx';
 import Rulebook from './components/Rulebook.jsx';
 import { dropBlankDoseRows } from './logic/doseIdentity.js';
 import { hasExclusion } from './data/riskFactors.js';
+import Disclaimer from './components/Disclaimer.jsx';
 import { patientAgeMonths } from './logic/patientAge.js';
 import { todayISO } from './logic/dateUtils.js';
-import { ageGroup as deriveGroup } from './logic/format.js';
+import { ageGroup as deriveGroup, fmtAgeMonths } from './logic/format.js';
 
 const STEPS = ['Age', 'Risks', 'History', 'Results'];
 
@@ -157,10 +158,8 @@ export default function App() {
             <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="PneumoVax" className="app-logo-icon" />
             <div>
               <div className="app-logo-title">PneumoVax</div>
-              <div className="app-logo-sub">Pneumococcal Vaccine Advisor</div>
             </div>
           </div>
-          {!rulebookOpen && <Stepper steps={STEPS} current={state.step} />}
           <nav className="viewnav" aria-label="View">
             <button type="button" className={rulebookOpen ? '' : 'active'} aria-pressed={!rulebookOpen} onClick={() => showView('patient')}>
               Patient
@@ -195,7 +194,31 @@ export default function App() {
           dose" advance the step. */}
       <form className="app-form" onSubmit={e => { e.preventDefault(); goNext(); }} hidden={rulebookOpen}>
 
-      <main className="app-main" ref={mainRef}>
+      <div className="page-intro">
+        <p className="page-eyebrow">Pneumococcal Vaccine Advisor</p>
+        <h1 className="page-title">What is due for this patient?</h1>
+        <p className="page-sub">Enter the patient&rsquo;s age, risk conditions and dated vaccine history. No patient information is stored.<br />Recommendations follow CDC and ACIP guidance.</p>
+        <Disclaimer />
+      </div>
+
+      <div className="app-layout">
+      {/* UI refresh 2026-11-10: two-column dashboard. The left column holds the
+          progress stepper and a read-only summary of what has been entered — no
+          clinical logic, only the state the wizard already holds. */}
+      <aside className="app-aside" aria-label="Patient summary">
+        <div className="aside-card">
+          <div className="aside-heading">Patient</div>
+          <dl className="aside-summary">
+            <div><dt>Current age</dt><dd>{ageMonths != null && ageMonths >= 0 ? fmtAgeMonths(ageMonths) : '—'}</dd></div>
+            <div><dt>Risk conditions</dt><dd>{state.riskIds.length ? `${state.riskIds.length} selected` : 'None selected'}</dd></div>
+            <div><dt>Prior doses</dt><dd>{state.historyAnswered == null ? 'Not answered' : `${state.pcvDoses.length} PCV · ${state.ppsv23Doses.length} PPSV23`}</dd></div>
+          </dl>
+        </div><div className="aside-card">
+          <div className="aside-heading">Progress</div>
+          <Stepper steps={STEPS} current={state.step} />
+        </div>
+      </aside>
+      <main className="app-main " ref={mainRef} data-step={state.step}>
         {state.step === 0 && (
           <StepAge
             ageMonths={ageMonths}
@@ -233,6 +256,7 @@ export default function App() {
             onBack={goBack} />
         )}
       </main>
+      </div>
 
       {state.step < 3 && !rulebookOpen && (
         <div className="app-nav">

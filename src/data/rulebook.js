@@ -365,6 +365,16 @@ export const SOURCES = Object.values(
   }, {}),
 ).map((d) => ({ ...d, quotes: d.quotes.size }));
 
+// "Rules verified <date>" on the Rulebook page: the OLDEST lastVerified across
+// every cited source, i.e. the date by which every rule's source had been
+// re-read. Using the newest would overstate it. The app cannot check CDC live
+// from the browser; refreshing this means re-reading sources and updating
+// lastVerified in refs.js (citation-freshness.test.js enforces <=12 months).
+export const RULES_VERIFIED = SOURCES
+  .map((d) => d.lastVerified)
+  .filter(Boolean)
+  .sort()[0] ?? null;
+
 const SCOPE_NAME = { child: 'About children', adult: 'About adults', any: 'Used at any age' };
 export const SOURCE_GROUPS = ['child', 'adult', 'any']
   .map((book) => ({

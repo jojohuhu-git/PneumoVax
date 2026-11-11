@@ -16,12 +16,13 @@
 // every one of those patients through recommend().
 // ─────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react';
+import { Info, Chevron } from './icons.jsx';
 import {
   ROUTINE_INFANT, CHILD_LANES, AT_NINETEEN, ADULT_BANDS, ADULT_OPTIONS, CHILD_EXCEPTIONS, INVALID_EXAMPLE,
   ADULT_HISTORY, TRANSPLANT_STOP, AGE_LINES, RISK_COLUMNS, RISK_RANKING, VACCINE_ROWS,
   SERIES_PATTERNS, CHIP_LEGEND, GRACE, PCV_AFTER_PCV, PCV_AND_PPSV23,
   INVALID_ACTIONS, ADULT_INTERVALS, SOURCE_GROUPS, HEADINGS, DECISIONS, DECISION, DECISION_USES,
-  decisionsOf, sourcesFor,
+  decisionsOf, sourcesFor, RULES_VERIFIED,
 } from '../data/rulebook.js';
 
 const SECTIONS = [
@@ -588,11 +589,45 @@ const BODY = {
   'rb-spacing': Spacing, 'rb-decisions': DecisionList, 'rb-sources': Sources,
 };
 
+// UI refresh 2026-11-10: each numbered part is a collapsible panel so the
+// page reads as an index first. Content stays MOUNTED when closed (hidden by
+// CSS via `.rb-panel-closed`), so in-page links, the tests and find-in-page
+// still reach every rule. A link to a part opens it.
+const SUMMARIES = {
+  'rb-vaccines': 'Conjugate (PCV) and polysaccharide (PPSV23) products, and which ones count.',
+  'rb-who': 'Age lines and the risk-condition groups that route a patient.',
+  'rb-kids': 'Routine infant series, catch-up and at-risk children.',
+  'rb-adults': 'Routine 50+, and risk-based adults aged 19–49.',
+  'rb-spacing': 'How each recorded dose is checked against its minimum interval.',
+  'rb-decisions': 'Rules PneumoVax had to decide where CDC and ACIP are silent.',
+  'rb-sources': 'Every CDC, ACIP and immunize.org document the app cites.',
+};
+
 export default function Rulebook() {
+  const [open, setOpen] = React.useState(() => new Set());
+  const toggle = (id) => setOpen((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+  const openOnly = (id) => setOpen((prev) => new Set(prev).add(id));
+  const allOpen = open.size === SECTIONS.length;
+
   return (
     <div className="rb">
       <div className="rb-top">
+        <p className="page-eyebrow">How PneumoVax decides</p>
         <h1 className="rb-title">Rulebook</h1>
+        {RULES_VERIFIED && (
+          <p className="rb-verified" data-testid="rb-verified">
+            <Info />
+            <span>
+              Rules verified {new Date(RULES_VERIFIED + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {' '}against current{' '}
+              <a href="https://www.cdc.gov/vaccines/hcp/imz-schedules/index.html" target="_blank" rel="noopener noreferrer">CDC schedules</a>
+            </span>
+          </p>
+        )}
         <p className="rb-intro">
           Recommendations are based on age, risk conditions and dated vaccine history. The parts
           below follow the order the app decides in. Source shows the CDC or ACIP sentence a rule
@@ -600,18 +635,39 @@ export default function Rulebook() {
         </p>
       </div>
 
-      <nav aria-label="On this page" className="rb-nav">
-        {SECTIONS.map(([id, name], i) => <a key={id} href={`#${id}`}>{i + 1}. {name}</a>)}
-      </nav>
-
       <Stop />
 
+      <div className="rb-toolbar">
+        <button type="button" className={`rb-expand-all${allOpen ? '' : ' rb-expand-all-open'}`}
+          onClick={() => setOpen(allOpen ? new Set() : new Set(SECTIONS.map(([id]) => id)))}>
+          {allOpen ? 'Collapse all' : 'Expand all'}
+        </button>
+      </div>
       {SECTIONS.map(([id, name], i) => {
         const Body = BODY[id];
+        const isOpen = open.has(id);
         return (
-          <section key={id} className="rb-section" aria-labelledby={id}>
-            <h2 id={id} className="rb-h2">{i + 1}. {name}</h2>
-            <Body />
+          <section key={id} className={`rb-section rb-panel${isOpen ? ' rb-panel-open' : ' rb-panel-closed'}`} aria-labelledby={id}>
+            {/* The heading's text stays exactly "N. Name" (C14 guard); the badge,
+                summary and Expand cue sit beside it, and a click anywhere on the
+                bar toggles, while the button inside the h2 is what a keyboard or
+                screen-reader user operates. */}
+            <div className="rb-panel-head" onClick={(e) => { if (!e.target.closest('button')) toggle(id); }}>
+              <span className="rb-panel-num" aria-hidden="true">{i + 1}</span>
+              <div className="rb-panel-text">
+                <h2 id={id} className="rb-h2">
+                  <button type="button" className="rb-panel-btn" aria-expanded={isOpen}
+                    aria-controls={`${id}-body`} onClick={() => toggle(id)}>
+                    <span className="rb-sr">{i + 1}. </span>{name}
+                  </button>
+                </h2>
+                <p className="rb-panel-sum">{SUMMARIES[id]}</p>
+              </div>
+              <span className="rb-panel-mark" aria-hidden="true"><Chevron open={isOpen} /></span>
+            </div>
+            <div id={`${id}-body`} className="rb-panel-body">
+              <Body />
+            </div>
           </section>
         );
       })}

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { recommend } from '../logic/recommend.js';
-import { fmtAgeMonths, ageGroup } from '../logic/format.js';
+import { fmtAgeMonths, ageGroup, dobToAgeMonths } from '../logic/format.js';
+import { ageEntryProblem } from '../logic/ageEntry.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
 import { PPSV23_PRODUCT, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
-import Disclaimer from './Disclaimer.jsx';
 import HowThisWasWorkedOut from './HowThisWasWorkedOut.jsx';
 import RiskAgeNote from './RiskAgeNote.jsx';
 import DoseEditor from './DoseEditor.jsx';
+import DobInput from './DobInput.jsx';
 import { Chevron } from './icons.jsx';
 import { todayISO, daysBetween } from '../logic/dateUtils.js';
 import { dropBlankDoseRows } from '../logic/doseIdentity.js';
@@ -44,6 +45,10 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
   const maxDate = todayISO(today);
   const [editingAge, setEditingAge] = useState(false);
   const [editingDoses, setEditingDoses] = useState(false);
+  const [editingRisks, setEditingRisks] = useState(false);
+  // Local draft so a half-typed or implausible date never reaches the engine.
+  const [dobDraft, setDobDraft] = useState(dob || '');
+  const [dobError, setDobError] = useState('');
 
   // S11 / P5-5 (2026-10-12): Escape closes whichever panel is open. Both
   // panels could be opened and neither could be closed from the keyboard
@@ -69,10 +74,11 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
       if (e.key !== 'Escape') return;
       if (editingDoses) closeDosePanel();
       else if (editingAge) setEditingAge(false);
+      else if (editingRisks) setEditingRisks(false);
     }
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [editingAge, editingDoses, pcvDoses, ppsv23Doses]);
+  }, [editingAge, editingDoses, editingRisks, pcvDoses, ppsv23Doses]);
 
   const result = recommend({
     // P3-1 (S10): the date of birth goes to the engine, which uses it to
@@ -114,7 +120,6 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             </div>
           )}
         </div>
-        <Disclaimer />
         <div className="results-actions">
           {onBack && (
             <button type="button" className="btn btn-outline" onClick={onBack}>Edit risk factors</button>
@@ -218,6 +223,17 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     onChange?.({ dob: null, ageMonths: am, ageGroup: ageGroup(am) });
   }
 
+  // A plausible date of birth replaces any years/months entry; an empty or
+  // implausible one leaves the current age in place and says why.
+  function setDobValue(v) {
+    setDobDraft(v);
+    const problem = ageEntryProblem({ mode: 'dob', dob: v, today });
+    setDobError(problem || '');
+    if (!v || problem) return;
+    const am = dobToAgeMonths(v, maxDate);
+    onChange?.({ dob: v, ageMonths: am, ageGroup: ageGroup(am) });
+  }
+
   // P1-3 (2026-10-12): what the "Recorded doses (N)" button counts. Rows the
   // clinician has not typed in are not doses, and the engine does not count
   // them, so the button must not either — a button reading "(1)" above a card
@@ -286,7 +302,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
           <div className="meta-actions">
             {onChange && (
               <button type="button" className="age-edit-btn"
-                onClick={() => { setEditingAge(v => !v); if (editingDoses) closeDosePanel(); }}
+                onClick={() => { setEditingAge(v => !v); setEditingRisks(false); if (editingDoses) closeDosePanel(); }}
                 aria-expanded={editingAge}>
                 {/* P6-6: the label stays when open; the chevron carries the
                     state. "Done" discarded the only words saying what the
@@ -297,7 +313,15 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
             )}
             {onChange && (
               <button type="button" className="age-edit-btn"
-                onClick={() => { if (editingDoses) closeDosePanel(); else setEditingDoses(true); setEditingAge(false); }}
+                onClick={() => { setEditingRisks(v => !v); setEditingAge(false); if (editingDoses) closeDosePanel(); }}
+                aria-expanded={editingRisks}>
+                {`Risk factors${riskIds.length > 0 ? ` (${riskIds.length})` : ''}`}
+                <Chevron open={editingRisks} />
+              </button>
+            )}
+            {onChange && (
+              <button type="button" className="age-edit-btn"
+                onClick={() => { if (editingDoses) closeDosePanel(); else setEditingDoses(true); setEditingAge(false); setEditingRisks(false); }}
                 aria-expanded={editingDoses}>
                 {/* P1-3: count DOSES, not rows. An untouched row the engine
                     ignores must not be announced as a recorded dose. */}
@@ -310,16 +334,49 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
         {editingAge && (
           <div className="age-edit-row" data-testid="age-edit-row">
             <div className="age-field">
+              <label htmlFor="results-dob">Date of Birth</label>
+              <DobInput id="results-dob" max={maxDate} value={dobDraft} onChange={setDobValue} />
+            </div>
+            <span className="age-edit-or">or</span>
+            <div className="age-field">
               <label htmlFor="results-years">Years</label>
               <input id="results-years" type="number" min="0" max="120"
-                value={years} onChange={e => setAge(e.target.value, months)} />
+                value={years} onChange={e => { setDobDraft(''); setDobError(''); setAge(e.target.value, months); }} />
             </div>
             <div className="age-field">
               <label htmlFor="results-months">Months</label>
               <input id="results-months" type="number" min="0" max="11"
-                value={months} onChange={e => setAge(years, e.target.value)} />
+                value={months} onChange={e => { setDobDraft(''); setDobError(''); setAge(years, e.target.value); }} />
             </div>
             <span className="age-edit-hint">Recommendations update as you change the age.</span>
+            {dobError && <div className="age-error">{dobError}</div>}
+          </div>
+        )}
+        {editingRisks && (
+          <div className="age-edit-row risk-edit-panel" data-testid="risk-edit-panel">
+            <div className="risk-list risk-list-compact" role="group" aria-label="Risk factors">
+              {RISK_FACTORS.map(rf => {
+                const selected = riskIds.includes(rf.id);
+                return (
+                  <label key={rf.id} className={`risk-item${selected ? ' selected' : ''}${rf.exclude ? ' risk-item-exclude' : ''}`}>
+                    <input type="checkbox" className="risk-checkbox" checked={selected}
+                      onChange={() => onChange?.({
+                        riskIds: selected ? riskIds.filter(r => r !== rf.id) : [...riskIds, rf.id],
+                      })} />
+                    <div className="risk-text">
+                      <div className="risk-label">{rf.label}</div>
+                      {rf.sublabel && <div className="risk-sublabel">{rf.sublabel}</div>}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            {riskIds.length > 0 && (
+              <button type="button" className="btn btn-outline" onClick={() => onChange?.({ riskIds: [] })}>
+                Clear all risk factors
+              </button>
+            )}
+            <span className="age-edit-hint">Changes update recommendations immediately.</span>
           </div>
         )}
         {editingDoses && (
@@ -381,8 +438,6 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
           entirely for the transplant hard stop, so nothing is needed here to
           keep that screen bare. */}
       <HowThisWasWorkedOut path={path} />
-
-      <Disclaimer />
 
       <div className="results-actions">
         {onBack && (

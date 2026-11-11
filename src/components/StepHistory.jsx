@@ -103,11 +103,6 @@ export default function StepHistory({
       {historyAnswered == null && (
         <div className="history-select-hint">Select yes or no above</div>
       )}
-
-      <div className="family-note family-note-neutral">
-        Unknown / undocumented history is treated as unvaccinated. PCV7 doses are recorded for
-        completeness but ignored when calculating current needs (per ACIP/immunize.org).
-      </div>
     </div>
   );
 }
