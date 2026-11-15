@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-15** by `handoff-2026-11-15-meningovax-phase0-done.md`. PRs #148–#152 are merged; the owner approved Q0 and Phase 0 is done. Its CDSI items were already superseded by `decision-2026-11-08-cdsi-findings-1-to-4.md`. Do not resume from this file.
+
 # PneumoVax / MeningoVax — Handoff after reviewing the MeningoVax port plan (2026-11-08)
 
 Repos: `/Users/joannehuang/Downloads/PneumoVax` (this file, and the plan) and
