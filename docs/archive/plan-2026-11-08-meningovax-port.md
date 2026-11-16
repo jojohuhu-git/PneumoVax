@@ -6,7 +6,9 @@ done and changed no MeningoVax code.** Its results are in MeningoVax's `docs/arc
 read live, and twelve new findings N1–N12 listed, not fixed) and
 `inventory-2026-11-15-every-place-a-dose-is-judged.md` (item 0.4). **Phase 1: 1.1–1.5 built** (1.1–1.4 merged as MeningoVax #80–#83; 1.5, CDC's CDSI test
 patients, is PR #84: 65 of 104 agree, 39 differ, sorted into families in MeningoVax
-`docs/archive/report-2026-11-15-cdsi-test-patients.md`). Next: STOP B. See `handoff-2026-11-15-meningovax-phase1-5-done.md`.
+`docs/archive/report-2026-11-15-cdsi-test-patients.md`). #84 merged 2026-11-16. **STOP B answered
+2026-11-15** (five answers, table under Phase 1). Next: end-of-Phase-1 usage measure, make 1.5 a
+required test, then Phase 2.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
@@ -399,6 +401,24 @@ measurements**: re-measure with `get_usage` at the end of Phase 1 and correct th
     through the app and list where it disagrees. See `plan-2026-11-08-cdsi-checks-both-apps.md`.
 **STOP B — owner:** she sees how many patients each check flags, grouped by clinical family
 with one worked patient each (memory `group-blast-radius-by-clinical-family`). She merges.
+
+**STOP B — ANSWERED 2026-11-15 (owner, five questions, one patient each).** Sources read live
+that day: ACIP MMWR RR-9 (2020-09-25) Tables 8 and 10 and the college text; CDC child/adolescent
+schedule notes (updated 2025-07-01). Applied in Phase 3 (each with `verify-clinical-source`
+re-read before the code changes); no code changed at STOP B.
+
+| # | Question (report) | Patient | Owner answer |
+|---|---|---|---|
+| B-1 | The 4-day grace at an age line that picks the schedule (1.4 E + 1.5 family 5) | Travel baby, Menveo 2 days before 7 months: today 4-dose series; on the 7-month day 2 doses. CDC 2013-0500: MenACWY 1 day before 10, app counts it (CDSI: dose at 11) | **"Only when it helps"** — the PneumoVax §A-GRACE12-HELPS ruling (2026-11-09) carried over: use the grace at an age line only where it means fewer doses owed. 7-month baby → 2-dose series; age-10 dose keeps counting (a DELIBERATE CDSI difference, family 5). Also 2 years and 7 years |
+| B-2 | Outbreak box still ticked (1.4 B; 1.5 families 1, 11) | Born 2007-09-15, MenQuadfi at 11 and 16: "Complete for this outbreak", then a "top-up" 5 years on | **Keep asking for the dose 5 years on (3 if last dose <7 y) while the box is ticked, and drop "Complete".** Owner wording note: *"do not use 'top up'. Similar to pneumovax, use succinct clinical language for the app recommendations"* — e.g. "Booster Sep 15, 2028 if outbreak risk continues" (ACIP Table 8 calls it a booster dose) |
+| B-3 | Military recruit, one dose (1.5 family 12) | 20 y, Penmenvy 2025-07-06: "Complete — check the service's requirement" | **Show the 5-year booster date with the assignment caveat, no "Complete"** (ACIP Table 10: "Every 5 yrs on basis of assignment"). CDSI 2025-UC-0019 should then agree |
+| B-4 | Military/college box under 16 (1.4 A = Phase 0 N9) | 11 y, college-dorm ticked, MenQuadfi 2026-09-01 and today: card asks, chip refuses, for ever | **Routine only under 16**: the box adds nothing; the card follows the routine schedule and says the college/military dose is given at 16 or older. Card and chip then agree |
+| B-5 | Pentavalent card before the dose questions are answered (1.5 side finding) | CDC 2020-UC-0004: MenB "Answers needed" beside "Both … are due today" | **Wait for the answers**, as the MenB card does |
+
+**Not asked — the owner's rule already decides it:** a healthy 10–15-year-old with a routine dose
+says "Complete" beside "Booster due at 16y" (1.4 B, first row). PneumoVax owner rule 2026-11-01,
+*"Complete should only be used if no additional doses/boosters are needed"*, applies: the status
+stops saying Complete (Phase 3, with B-2/B-3).
 
 ### Phase 2 — The rule table (1 session, ≈ 4%)
 
