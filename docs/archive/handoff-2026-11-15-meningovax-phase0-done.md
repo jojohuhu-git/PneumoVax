@@ -16,6 +16,9 @@ waited on has merged, MeningoVax #74 included (squash-merged 2026-11-15, `2f4697
 | MeningoVax | **#76** | `docs/2026-11-15-phase-0-measured` | `main` at `2f46974` |
 | PneumoVax | **#153** | `docs/2026-11-15-meningovax-phase0-done` | `main` at `6d58990` |
 
+| MeningoVax | **#77** N1 fix | `fix/2026-11-15-n1-penmenvy-six-months` | `main` at `2f46974` |
+| MeningoVax | **#78** N5 fix | `fix/2026-11-15-n5-16y-booster-8-weeks` | **#77's branch** (both edit the test-count table). Merge #78 first, then #77 |
+
 MeningoVax #75 (same commit, stacked on #74's branch) was closed and replaced by #76 once #74
 was squash-merged. The two branches carry identical content (checked by tree hash), and #74's
 squash was identical to its branch. The old branch `docs/2026-11-15-phase-0-measure` is still
@@ -39,25 +42,33 @@ Tests, run 2026-11-15 after the edits (vitest JSON reporter, `.claude/**` exclud
 
 R-2, R-4a, R-4b, R-5b and R-8 were each confirmed with a worked patient (P1, P3, P4, P6, P7).
 
+**Owner rulings, 2026-11-15, and the fixes (done, in open PRs):**
+- **N1 — yes:** Penmenvy is not offered again within 6 months of a Penmenvy dose (Penmenvy MMWR).
+  PR #77; tests 1,636 → 1,642. The old test pinning "Penmenvy deliberately untouched" was
+  removed with a note.
+- **N5 — yes, "advise and count":** the 16-year booster waits 8 weeks after dose 1, and a
+  booster given sooner (beyond the 4-day grace) does not count. Also the college, military
+  and outbreak cards that ask for that booster. PR #78; tests → **1,656 passing, 0 failed
+  (138 files)**. Its repeat is still measured from dose 1 (Ruling D undecided).
+- **Fix now**, ahead of the port: both done before Phase 1, as she chose.
+- **How she wants clinical questions** (memory `clinical-questions-issue-sources-recommendation-examples`):
+  the issue, the sources with quotes, my recommended answer, full worked patients with a
+  control, all of it **short**. A long box got *"These explanations are way too long for me to
+  understand"*; the 5-sentence re-ask was answered at once.
+
 ## What's NOT done
 
 **New findings, listed, not fixed** (report §"Things found that the plan did not list"):
-- **N1** Penmenvy is re-offered within 6 months of a Penmenvy dose. The Penmenvy MMWR
-  (mm7501a2, Jan 8 2026) says to use separate vaccines then. The code's comment rests on the
-  CDC notes page, which never names Penmenvy. → owner
+- ~~N1~~ and ~~N5~~: ruled and fixed, see above (PRs #77, #78).
 - **N2** High-risk MenB early dose 3: mm7349a3's "unless ≥6 months after dose 1" is not in the
   app. Following it would mean fewer doses, so AAP must be read first. → packet 1
 - **N3** Healthy MenB dose 2 has no lower limit (7 days counts). → packet 1 (was R-4c)
 - **N4** Travel, microbiologist and outbreak boosters have no gap check beyond 4 weeks. → packet 1
-- **N5** The 16-year booster card is due 5 weeks after dose 1; ACIP says 8 weeks. → packet 1
 - N6–N12: wording, labels and colours, for Phases 1.4, 4, 5 and 6.
 
 **Needs the owner (ask, don't default):**
-1. Merge MeningoVax #76 and PneumoVax #153 (independent of each other).
-2. Should N1 and/or N5 be fixed **now**, ahead of the port? The plan's default holds every
-   clinical change for packet 1 (STOP C). Each card currently advises something a current CDC
-   source advises against.
-3. The monthly scheduled task `monthly-vaccine-source-check` still runs
+1. Merge MeningoVax #76 and PneumoVax #153 (independent), and MeningoVax **#78 then #77**.
+2. The monthly scheduled task `monthly-vaccine-source-check` still runs
    `scripts/cdsiCompare.mjs`, which moved to `scripts/cdsi/cdsiCompare.mjs`. The task skips it
    silently. First run Dec 1. Its "known result" line may also be out of date since #149–#152.
 
@@ -72,11 +83,15 @@ STOP B.
 
 ## Resuming
 
-1. `cd ~/Downloads/MeningoVax-main && git checkout main && git pull` (once #76 is merged; until
-   then `docs/2026-11-15-phase-0-measured`). Run the suite and confirm **1,636 passing**. Start
-   Phase 1 on a fresh branch off `main`, never stacked on an open PR.
-2. Read the report and the inventory before starting. The inventory is the row list Phase 2 builds from.
-3. Ask decisions 1–3 above if they are still open.
+1. `cd ~/Downloads/MeningoVax-main && git checkout main && git pull`. Once #76, #77 and #78
+   are all merged, the suite should be **1,656 passing (138 files)**; with only #76, 1,636. If
+   #77 was squash-merged before #78, move #78's one commit (`0363ae8`) onto `main` with a
+   cherry-pick on a fresh branch (as #75 → #76 was done). Start Phase 1 on a fresh branch off
+   `main`, never stacked on an open PR.
+2. Read the report and the inventory before starting. The inventory is the row list Phase 2
+   builds from. **Inventory row A6 and the report's N1/N5 lines describe the code before #77
+   and #78.**
+3. Ask decisions 1–2 above if they are still open.
 4. Phase 1, one PR per numbered item, `fix-queue` loop: 1.1 saved-answer files from
    `src/test-grid.js`, 1.2 the prose diff, 1.3 typical patients, 1.4 the whole-app checks
    (findings listed, not fixed), 1.5 CDC's test patients (copy PneumoVax's
