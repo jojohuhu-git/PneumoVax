@@ -1,3 +1,6 @@
+> **SUPERSEDED (2026-11-15)** by `handoff-2026-11-15-meningovax-phase2-2-sources.md`. #86 merged;
+> Phase 2.2 is built and open as MeningoVax PR #87. Do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 2.1, the rule table (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and

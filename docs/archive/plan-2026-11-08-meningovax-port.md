@@ -8,7 +8,8 @@ read live, and twelve new findings N1–N12 listed, not fixed) and
 patients, is PR #84: 65 of 104 agree, 39 differ, sorted into families in MeningoVax
 `docs/archive/report-2026-11-15-cdsi-test-patients.md`). #84 merged 2026-11-16. **STOP B answered
 2026-11-15** (five answers, table under Phase 1). Next: end-of-Phase-1 usage measure, make 1.5 a
-required test (done: MeningoVax PR #85), then Phase 2. See `handoff-2026-11-15-meningovax-stop-b-answered.md`.
+required test (done: MeningoVax PR #85), then Phase 2. **2.1 merged (#86); 2.2 built (MeningoVax PR #87).**
+Next: 2.3, then STOP C. See `handoff-2026-11-15-meningovax-phase2-2-sources.md`.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
@@ -429,6 +430,9 @@ stops saying Complete (Phase 3, with B-2/B-3).
     prose diff 0 of 23,400 and CDSI "moved 0" all unchanged; `dose-rules-table.test.js`). The file
     is `doseRules.js`, not `doseIntervalRules.js`: it holds age, family and record rules too.
 2.2 A "what the sources say" column beside "what the app does", filled from 0.5.
+    **BUILT 2026-11-15 — MeningoVax PR #87** (`sourcesSay` on all 35 rows: verdict, quotes read
+    live, note; 0 of 23,400 sentences moved). STOP C Q2 = 8 rows, Q4 = 4 rows, frozen in
+    `dose-rules-table.test.js` §5. Not read: CDC's general advice on undated records (before STOP C).
 2.3 **CDSI comparison test** (M-CDSI-1, added 2026-11-08): the rule table held against CDSI's two
     meningococcal files, with a named list of deliberate differences. Same plan file as 1.5.
 **STOP C — DECISION PACKET 1 (the clinical one).** Each question with a meningococcal patient,
