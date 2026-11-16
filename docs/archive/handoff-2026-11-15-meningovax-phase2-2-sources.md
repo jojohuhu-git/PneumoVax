@@ -1,3 +1,6 @@
+> **SUPERSEDED (2026-11-15)** by `handoff-2026-11-15-meningovax-phase2-3-cdsi-rules.md`. #87 merged;
+> Phase 2.3 is built and open as MeningoVax PR #88. Do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 2.2, what the sources say (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
