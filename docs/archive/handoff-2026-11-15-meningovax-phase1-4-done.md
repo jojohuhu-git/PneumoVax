@@ -14,11 +14,10 @@ early, re-apply an edit that "disappears".
 |---|---|---|---|---|
 | 1.1 | — | `b070b14` on `main` | **merged (#80)** | — |
 | 1.2 | — | `420d4d1` on `main` | **merged (#81)**, 2026-11-16 02:06 UTC | — |
-| 1.3 | `feature/2026-11-15-phase1-3-typical-patients-pr` | replay of `95bd68a` onto `420d4d1` | **PR #82** against `main`, waiting for CI and the owner | **1,682 / 141**, measured on this branch (build OK) |
-| 1.4 | `feature/2026-11-15-phase1-4-whole-app-checks` | `2f70a1b` (on the pre-merge `95bd68a`) | **local only**, working tree clean | **1,692 / 142**, measured (build OK) |
+| 1.3 | — | `ed1ec16` on `main` | **merged (#82)**, 2026-11-16 02:09 UTC | — |
+| 1.4 | `feature/2026-11-15-phase1-4-whole-app-checks-pr` | replay of `2f70a1b` onto `ed1ec16` | **PR #83** against `main`, waiting for CI and the owner | **1,692 / 142**, measured on this branch (build OK); `npm run whole-app` re-run on it gives the report's numbers exactly |
 
-The other local branches (`…-phase1-2-…`, `…-phase1-3-typical-patients`,
-`…-phase1-3-typical-patients-onto-main`) are pre-merge copies; ignore them.
+Every other local `feature/2026-11-15-phase1-*` branch is a pre-merge copy; ignore them.
 
 ## What's done
 
@@ -58,19 +57,14 @@ The other local branches (`…-phase1-2-…`, `…-phase1-3-typical-patients`,
 
 1.4 is complete as a unit, committed, and proven (every zero check shown to fail on a
 break). 1.5 is self-contained and not begun. Nothing is half-built; the only pending
-thing is the owner merging #82, then 1.4's PR.
+thing is the owner merging #83.
 
 ## Resuming
 
 1. `cd ~/Downloads/MeningoVax-main && git fetch && gh pr view 81 --json state`.
 2. **Land the stack one PR at a time, each against `main`** (never a PR against another
    PR's branch — that stranded N5 once):
-   - #81 (1.2) is merged; **#82 (1.3) is open** → ask the owner to merge it.
-   - #82 merged → `git fetch && git checkout -b feature/2026-11-15-phase1-4-whole-app-checks-pr origin/main`,
-     `git cherry-pick 2f70a1b`, suite (expect 1,692 / 142), push, PR against `main`. Its PR body must carry
-     the E4 checklist: (1) no clinical numbers added to tests; (2) no capability added — the
-     checks are new sweeps over every patient; (3) no clinical rule changed; (4) +10 tests,
-     +1 file.
+   - #80, #81, #82 (1.1–1.3) are merged; **#83 (1.4) is open** → ask the owner to merge it.
    - `docs/agent/testing.md`, `MAP.md` and `CLAUDE.md` conflicts are counts and added
      sections: keep both, and re-measure the counts table (a test checks it).
 3. Then 1.5 on a fresh branch from `main` (it needs nothing from 1.3/1.4), `fix-queue` loop;
