@@ -13,7 +13,7 @@ early, re-apply an edit that "disappears".
 | Repo | Branch | Commit | State | Suite |
 |---|---|---|---|---|
 | MeningoVax | `main` | `4c1ff52` | #87 (2.2) **merged** 2026-11-16 03:51 UTC | 1,808 / 144 at session start (verified) |
-| MeningoVax | `feature/2026-11-15-port-2-3-cdsi-comparison` (pushed) | `6cf2340` | **PR #88** against `main`, CI not yet reported at handoff, waiting for the owner | **1,824 passed, 0 failed, 145 files** (verified after the last edit) |
+| MeningoVax | `feature/2026-11-15-port-2-3-cdsi-comparison` (pushed) | `2c1e15e` | **PR #88** against `main`, CI not yet reported at handoff, waiting for the owner | **1,824 passed, 0 failed, 145 files** (verified after the last edit) |
 | PneumoVax | `docs/2026-11-15-meningovax-phase1-midpoint` (pushed) | plan status + this handoff | **PR #154**, docs only, still open | not run (docs only) |
 
 Dev server: "MeningoVax dev server" ran on port 5176 this session (5175 was taken). If
@@ -28,7 +28,7 @@ Dev server: "MeningoVax dev server" ran on port 5176 this session (5175 was take
   - `scripts/cdsi/cdsiRuleMap.mjs`: every one of the 35 rows of `doseRules.js` is either compared
     (18) or says why CDSI has no counterpart (17). Plus `CDSI_ONLY` (rules the app lacks),
     `OTHER_NUMBERS` (10 app ages that aren't dose rules), `NOT_COMPARED` (patterns + reasons).
-  - Result: **57 agree; 26 differ** — 3 `wording`, 7 `owner`, 16 `open` (= 8 STOP C questions).
+  - Result: **57 agree; 26 differ** — 3 `wording`, 5 `owner`, 18 `open` (= 9 STOP C questions).
     Printed by `npx vite-node scripts/cdsi/runRuleComparison.mjs`.
   - Test `src/logic/__tests__/cdsi-rule-comparison.test.js` (16 tests). Shown red by five breaks,
     each undone (listed in MeningoVax `docs/agent/testing.md`).
@@ -36,7 +36,8 @@ Dev server: "MeningoVax dev server" ran on port 5176 this session (5175 was take
     at 26+ (CDSI stops at 26); N2 high-risk Bexsero 2-dose course before 2024-10-25 (app asks
     dose 3, CDSI complete); N3 healthy MenB dose 2 1–4 days before 6 months (app rescue dose 3,
     CDSI complete via grace); N4 upper ages for counting a dose; plus grace on high-risk MenB
-    dose 3 at 4 months. Report: MeningoVax `docs/archive/report-2026-11-15-cdsi-rule-comparison.md`.
+    dose 3 at 4 months; N5 MenQuadfi from 6 weeks — does it reach an unknown-brand dose and dose 1
+    of the infant series (CDSI starts that series at 2 months)? Report: MeningoVax `docs/archive/report-2026-11-15-cdsi-rule-comparison.md`.
   - Corrections: the 2.2 `sourcesSay` note on `MENB-HEALTHY-EARLY-DOSE-2` (lowest CDSI dose-2
     gap is 4 weeks for both brands, not "Trumenba 4 months"); `scripts/cdsi/README.md`'s claim
     that CDSI fully agrees on MenQuadfi from 6 weeks (product yes, infant series no).
@@ -48,17 +49,15 @@ Dev server: "MeningoVax dev server" ran on port 5176 this session (5175 was take
 ## What's NOT done
 
 - **Owner merges PR #88 (MeningoVax) and PR #154 (PneumoVax).**
-- **Owner to confirm two labels** (in the PR body): unknown-brand MenACWY from 6 weeks, and a
-  MenQuadfi dose 1 at 6–7 weeks counting, are marked "owner-decided" as consequences of the
-  2026-09-23 MenQuadfi decision. If she says they are questions, change `status` to `'open'` in
-  `cdsiRuleMap.mjs` and add their ids to the frozen list in the test.
+- **Answered this session:** the owner asked (2026-11-15) that the two MenQuadfi-from-6-weeks
+  consequences be questions, not owner-decided labels. Done (`2c1e15e`): now N5 on the Q2 list.
 - **Before STOP C, read live and quote** (`verify-clinical-source`): (a) CDC's General Best
   Practice advice on **undated** records (the two Q4 undated rows; deferred since 2.2); (b) what
   CDC/ACIP say about pentavalents from 26 years (N1); (c) whether ACIP's October 2024 Bexsero
   statement `mm7349a3` says a completed 2-dose course stands (N2). CDC blocks curl; use the
   built-in browser.
 - **STOP C, decision packet 1** — not started. Q1 Ruling D (asplenia patient, Menveo 8/1, 8/22);
-  Q2 = 2.2's 8 rows plus 2.3's N1–N4 and the MenB dose-3 grace; Q3 pentavalent; Q4 = the 4
+  Q2 = 2.2's 8 rows plus 2.3's N1–N5 and the MenB dose-3 grace; Q3 pentavalent; Q4 = the 4
   no-source rows. Each question: a meningococcal patient, a control, issue / sources with quotes /
   recommendation (memory `clinical-questions-issue-sources-recommendation-examples`). Ask, don't
   default.

@@ -436,10 +436,11 @@ stops saying Complete (Phase 3, with B-2/B-3).
 2.3 **CDSI comparison test** (M-CDSI-1, added 2026-11-08): the rule table held against CDSI's two
     meningococcal files, with a named list of deliberate differences. Same plan file as 1.5.
     **BUILT 2026-11-15 — MeningoVax PR #88** (`cdsi-rule-comparison.test.js`; 442 CDSI rules read
-    from the XML, all accounted for; 57 agree, 26 differ: 3 wording, 7 owner, 16 open = 8 questions;
+    from the XML, all accounted for; 57 agree, 26 differ: 3 wording, 5 owner, 18 open = 9 questions;
     0 moved). Adds to STOP C Q2: N1 pentavalent at 26+, N2 Bexsero 2-dose course before 2024-10-25,
     N3 grace at the healthy MenB 6-month line, N4 upper ages, and the grace on high-risk MenB dose 3.
-    Owner to confirm two "owner-decided" labels (unknown brand / MenQuadfi dose 1 from 6 weeks).
+    N5: MenQuadfi from 6 weeks — unknown brand, and dose 1 of the infant series (owner asked
+    2026-11-15 for these to be questions, not consequences of her 2026-09-23 decision).
     Report: MeningoVax `docs/archive/report-2026-11-15-cdsi-rule-comparison.md`.
 **STOP C — DECISION PACKET 1 (the clinical one).** Each question with a meningococcal patient,
 the app's answer today, the answer after, how many patients move, and a control case:
