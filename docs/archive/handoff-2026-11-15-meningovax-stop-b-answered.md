@@ -13,7 +13,7 @@ early, re-apply an edit that "disappears".
 | Repo | Branch | Commit | State | Suite |
 |---|---|---|---|---|
 | MeningoVax | — | `e9bea07` on `main` | 1.5 **merged (#84)** 2026-11-16 02:32 UTC | 1,692 / 142 at session start (verified) |
-| MeningoVax | `feature/2026-11-15-cdsi-required-test` (pushed) | `7cbf69e` off `e9bea07` | **PR #85** against `main`, waiting for CI and the owner | **1,697 passed, 0 failed, 143 files**, build OK, measured on this branch |
+| MeningoVax | `feature/2026-11-15-cdsi-required-test` (pushed) | `7cbf69e` + `c08ff84` (pointer doc) off `e9bea07` | **PR #85** against `main`, waiting for CI and the owner | **1,697 passed, 0 failed, 143 files**, build OK, measured on this branch |
 | PneumoVax | `docs/2026-11-15-meningovax-phase1-midpoint` (pushed) | `fd75149` + this handoff | **PR #154**, docs only, open | not run (docs only; CI runs it) |
 
 ## What's done
