@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-15** by `handoff-2026-11-15-meningovax-stop-c-answered.md`: PR #88 merged, the
+> three reads done and STOP C answered. Do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 2.3, the rule table against CDSI's rules (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
