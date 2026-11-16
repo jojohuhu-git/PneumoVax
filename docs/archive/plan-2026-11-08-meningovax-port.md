@@ -1,6 +1,12 @@
 # Plan — bringing PneumoVax's way of working to MeningoVax (REVIEWED DRAFT, 2026-11-08)
 
-**Status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.**
+**Status 2026-11-15: the owner approved the phase order (Q0, "Yes, start Phase 0"). Phase 0 is
+done and changed no MeningoVax code.** Its results are in MeningoVax's `docs/archive/`:
+`report-2026-11-15-phase0-measured.md` (the measured cells, eleven worked patients, the sources
+read live, and twelve new findings N1–N12 listed, not fixed) and
+`inventory-2026-11-15-every-place-a-dose-is-judged.md` (item 0.4). Next: Phase 1.
+
+*Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
 ledger; (3) **a review** at her request (*"Rulebook needs to have the same design philosophies.
 Rules for patients need to be consistent as well as logic for when doses need to be repeated"*),
@@ -336,6 +342,14 @@ handoffs and notes only. A commit marked P can still carry a general practice, n
 | `d541e8f` | 2026-11-08 | Every card's "Why this" follows your style rules (wording only) (#145) | B9 |
 | `6e637ce` | 2026-11-08 | Sentences in view and Complete cards follow your style rules (wording only) (#146) | B10; A4 |
 | `e45bbdd` | 2026-11-08 | R4: a thrown-out PPSV23's 5-year date only where a PPSV23 can follow; Max gets PCV20 only (#147) | A6 (a dose line never promises a date no card asks for); P |
+| `5ee7e03` | 2026-11-08 | MeningoVax port plan reviewed, and PneumoVax checked against CDC's CDSI (docs + one script) (#148) | Docs |
+| `08a7428` | 2026-11-09 | CDSI findings 1 and 2: a newborn's first-dose date, and the 12-month booster's date (#149) | B1 (a next-dose card always carries a date); P |
+| `2aec24c` | 2026-11-09 | CDSI findings 3 and 4: each PCV dose's own minimum age, and the 4-day grace at age 2 (#150) | A18 (grace on minimum ages); Ruling D taken from the rule table; P |
+| `9f6e398` | 2026-11-09 | GRACE12-HELPS: the 12-month grace only where it means fewer doses owed (Ivy) (#151) | A18 (the grace applied only where it helps the patient); P |
+| `6d58990` | 2026-11-09 | CDSI finding 5 is the Sofia history: keep PCV20 (owner, 2026-11-09) (#152) | P |
+
+Rows `5ee7e03`–`6d58990` were added 2026-11-15 and marked from their titles and
+`decision-2026-11-08-cdsi-findings-1-to-4.md`, not read in full; read each before porting it.
 
 **When a new PneumoVax commit lands:** add it to this ledger and, if it is not P or Docs, to the table.
 
