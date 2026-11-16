@@ -9,7 +9,9 @@ patients, is PR #84: 65 of 104 agree, 39 differ, sorted into families in Meningo
 `docs/archive/report-2026-11-15-cdsi-test-patients.md`). #84 merged 2026-11-16. **STOP B answered
 2026-11-15** (five answers, table under Phase 1). Next: end-of-Phase-1 usage measure, make 1.5 a
 required test (done: MeningoVax PR #85), then Phase 2. **2.1 merged (#86); 2.2 merged (#87); 2.3 built (MeningoVax PR #88).**
-Next: read CDC's advice on undated records, then STOP C. See `handoff-2026-11-15-meningovax-phase2-3-cdsi-rules.md`.
+The three reads before STOP C done; **STOP C ANSWERED 2026-11-15** (18 answers, C1–C18, in MeningoVax
+`docs/archive/stop-c-packet-2026-11-15.md`; MeningoVax PR #89, no code changed). Next: Phase 3. See
+`handoff-2026-11-15-meningovax-stop-c-answered.md`.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
@@ -442,6 +444,15 @@ stops saying Complete (Phase 3, with B-2/B-3).
     N5: MenQuadfi from 6 weeks — unknown brand, and dose 1 of the infant series (owner asked
     2026-11-15 for these to be questions, not consequences of her 2026-09-23 decision).
     Report: MeningoVax `docs/archive/report-2026-11-15-cdsi-rule-comparison.md`.
+**STOP C — ANSWERED 2026-11-15** (owner; packet and answers: MeningoVax
+`docs/archive/stop-c-packet-2026-11-15.md`). In short: C1 an undated dose does not count (and ask PneumoVax
+the same for PCV); C2 Ruling D; C3 old Bexsero courses get the current schedule (owner principle, a
+deliberate difference from ACIP mm7349a3); C4 pentavalents from 26 keep counting; C5 a high-risk MenB
+dose 3 ≥4 months after dose 2 counts; C6 the MMWR "unless"; C7 4-day grace on series-length gaps;
+C8 keep 4 weeks; C9 keep booster minimums, repeat timed from the early booster; C10 travel boosters
+checked; C11 8 weeks between MenACWY doses; C12 healthy MenB dose 2 under 4 weeks not counted; C13
+unknown brand from 2 months; C14–C16, C18 no change; C17 moot.
+
 **STOP C — DECISION PACKET 1 (the clinical one).** Each question with a meningococcal patient,
 the app's answer today, the answer after, how many patients move, and a control case:
 - **Q1 Ruling D** (R-2): the asplenia patient (Menveo 8/1, 8/22). Validator and card.
