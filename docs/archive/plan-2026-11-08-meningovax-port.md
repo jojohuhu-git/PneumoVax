@@ -4,7 +4,12 @@
 done and changed no MeningoVax code.** Its results are in MeningoVax's `docs/archive/`:
 `report-2026-11-15-phase0-measured.md` (the measured cells, eleven worked patients, the sources
 read live, and twelve new findings N1–N12 listed, not fixed) and
-`inventory-2026-11-15-every-place-a-dose-is-judged.md` (item 0.4). Next: Phase 1.
+`inventory-2026-11-15-every-place-a-dose-is-judged.md` (item 0.4). **Phase 1: 1.1–1.5 built** (1.1–1.4 merged as MeningoVax #80–#83; 1.5, CDC's CDSI test
+patients, is PR #84: 65 of 104 agree, 39 differ, sorted into families in MeningoVax
+`docs/archive/report-2026-11-15-cdsi-test-patients.md`). #84 merged 2026-11-16. **STOP B answered
+2026-11-15** (five answers, table under Phase 1). Next: end-of-Phase-1 usage measure, make 1.5 a
+required test (done: MeningoVax PR #85), then Phase 2. **2.1 merged (#86); 2.2 merged (#87); 2.3 built (MeningoVax PR #88).**
+Next: read CDC's advice on undated records, then STOP C. See `handoff-2026-11-15-meningovax-phase2-3-cdsi-rules.md`.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
@@ -398,14 +403,45 @@ measurements**: re-measure with `get_usage` at the end of Phase 1 and correct th
 **STOP B — owner:** she sees how many patients each check flags, grouped by clinical family
 with one worked patient each (memory `group-blast-radius-by-clinical-family`). She merges.
 
+**STOP B — ANSWERED 2026-11-15 (owner, five questions, one patient each).** Sources read live
+that day: ACIP MMWR RR-9 (2020-09-25) Tables 8 and 10 and the college text; CDC child/adolescent
+schedule notes (updated 2025-07-01). Applied in Phase 3 (each with `verify-clinical-source`
+re-read before the code changes); no code changed at STOP B.
+
+| # | Question (report) | Patient | Owner answer |
+|---|---|---|---|
+| B-1 | The 4-day grace at an age line that picks the schedule (1.4 E + 1.5 family 5) | Travel baby, Menveo 2 days before 7 months: today 4-dose series; on the 7-month day 2 doses. CDC 2013-0500: MenACWY 1 day before 10, app counts it (CDSI: dose at 11) | **"Only when it helps"** — the PneumoVax §A-GRACE12-HELPS ruling (2026-11-09) carried over: use the grace at an age line only where it means fewer doses owed. 7-month baby → 2-dose series; age-10 dose keeps counting (a DELIBERATE CDSI difference, family 5). Also 2 years and 7 years |
+| B-2 | Outbreak box still ticked (1.4 B; 1.5 families 1, 11) | Born 2007-09-15, MenQuadfi at 11 and 16: "Complete for this outbreak", then a "top-up" 5 years on | **Keep asking for the dose 5 years on (3 if last dose <7 y) while the box is ticked, and drop "Complete".** Owner wording note: *"do not use 'top up'. Similar to pneumovax, use succinct clinical language for the app recommendations"* — e.g. "Booster Sep 15, 2028 if outbreak risk continues" (ACIP Table 8 calls it a booster dose) |
+| B-3 | Military recruit, one dose (1.5 family 12) | 20 y, Penmenvy 2025-07-06: "Complete — check the service's requirement" | **Show the 5-year booster date with the assignment caveat, no "Complete"** (ACIP Table 10: "Every 5 yrs on basis of assignment"). CDSI 2025-UC-0019 should then agree |
+| B-4 | Military/college box under 16 (1.4 A = Phase 0 N9) | 11 y, college-dorm ticked, MenQuadfi 2026-09-01 and today: card asks, chip refuses, for ever | **Routine only under 16**: the box adds nothing; the card follows the routine schedule and says the college/military dose is given at 16 or older. Card and chip then agree |
+| B-5 | Pentavalent card before the dose questions are answered (1.5 side finding) | CDC 2020-UC-0004: MenB "Answers needed" beside "Both … are due today" | **Wait for the answers**, as the MenB card does |
+
+**Not asked — the owner's rule already decides it:** a healthy 10–15-year-old with a routine dose
+says "Complete" beside "Booster due at 16y" (1.4 B, first row). PneumoVax owner rule 2026-11-01,
+*"Complete should only be used if no additional doses/boosters are needed"*, applies: the status
+stops saying Complete (Phase 3, with B-2/B-3).
+
 ### Phase 2 — The rule table (1 session, ≈ 4%)
 
 2.1 A `doseIntervalRules.js`-style table: every row from 0.4, with its five answers as the
     code **behaves today**. `validate.js` calls it once per dose. **0 answers may move** —
     the saved-answer files prove it.
+    **BUILT 2026-11-15 — MeningoVax PR #86** (`src/logic/doseRules.js`, 34 rows; saved answers,
+    prose diff 0 of 23,400 and CDSI "moved 0" all unchanged; `dose-rules-table.test.js`). The file
+    is `doseRules.js`, not `doseIntervalRules.js`: it holds age, family and record rules too.
 2.2 A "what the sources say" column beside "what the app does", filled from 0.5.
+    **BUILT 2026-11-15 — MeningoVax PR #87** (`sourcesSay` on all 35 rows: verdict, quotes read
+    live, note; 0 of 23,400 sentences moved). STOP C Q2 = 8 rows, Q4 = 4 rows, frozen in
+    `dose-rules-table.test.js` §5. Not read: CDC's general advice on undated records (before STOP C).
 2.3 **CDSI comparison test** (M-CDSI-1, added 2026-11-08): the rule table held against CDSI's two
     meningococcal files, with a named list of deliberate differences. Same plan file as 1.5.
+    **BUILT 2026-11-15 — MeningoVax PR #88** (`cdsi-rule-comparison.test.js`; 442 CDSI rules read
+    from the XML, all accounted for; 57 agree, 26 differ: 3 wording, 5 owner, 18 open = 9 questions;
+    0 moved). Adds to STOP C Q2: N1 pentavalent at 26+, N2 Bexsero 2-dose course before 2024-10-25,
+    N3 grace at the healthy MenB 6-month line, N4 upper ages, and the grace on high-risk MenB dose 3.
+    N5: MenQuadfi from 6 weeks — unknown brand, and dose 1 of the infant series (owner asked
+    2026-11-15 for these to be questions, not consequences of her 2026-09-23 decision).
+    Report: MeningoVax `docs/archive/report-2026-11-15-cdsi-rule-comparison.md`.
 **STOP C — DECISION PACKET 1 (the clinical one).** Each question with a meningococcal patient,
 the app's answer today, the answer after, how many patients move, and a control case:
 - **Q1 Ruling D** (R-2): the asplenia patient (Menveo 8/1, 8/22). Validator and card.
@@ -492,6 +528,17 @@ cases). Same-dose questions she has delegated (memory `owner-decides-alone-when-
 | **All** | **16–17** | **≈ 80–90%, i.e. most of one week's allowance, spread over 2–3 calendar weeks** |
 
 Items 1.5 and 2.3 (added 2026-11-08) add about 7% and half a session each to Phases 1 and 2.
+
+**End-of-Phase-1 re-measure (2026-11-15) — could not be done honestly.** `get_usage` read
+**weekly 0%, 5-hour 2%** (Pro; week resets 2026-11-19), although the Phase 0–1 sessions ran inside
+this week. The weekly counter appears to have been reset, so it says nothing about Phase 1's cost,
+and the table above is left as an estimate. Next try: read `get_usage` at the start and the end of
+the Phase 2 session and record the difference here.
+
+**Phase 2.1 measured (2026-11-15):** start weekly 2%, 5-hour 8%; end weekly 3%, 5-hour 23%. So
+2.1 cost about **1 weekly point** (the weekly counter shows whole numbers only, so 0.5–1.5) and 15
+points of one 5-hour window — inside the ≈ 4% estimate for the whole of Phase 2. One item, one
+reading: not yet enough to correct the table.
 
 The calendar time is set by her eleven questions and nine stops, not by the work. If a
 findings list from Phase 1 is long (PneumoVax's first whole-app run found families that took
