@@ -13,16 +13,12 @@ early, re-apply an edit that "disappears".
 | Item | Branch | Commit | State | Expected suite |
 |---|---|---|---|---|
 | 1.1 | — | `b070b14` on `main` | **merged (#80)** | — |
-| 1.2 | `feature/2026-11-15-phase1-2-prose-diff-onto-main` | `db97147` | **PR #81** against `main`, CI green, mergeable; waiting for the owner | 1,675 / 140 files |
-| 1.3 | `feature/2026-11-15-phase1-3-typical-patients-onto-main` | `95bd68a` (on `db97147`) | **local only** | 1,682 / 141 |
-| 1.4 | `feature/2026-11-15-phase1-4-whole-app-checks` | `2f70a1b` (on `95bd68a`) | **local only**, working tree clean | **1,692 / 142** |
+| 1.2 | — | `420d4d1` on `main` | **merged (#81)**, 2026-11-16 02:06 UTC | — |
+| 1.3 | `feature/2026-11-15-phase1-3-typical-patients-pr` | replay of `95bd68a` onto `420d4d1` | **PR #82** against `main`, waiting for CI and the owner | **1,682 / 141**, measured on this branch (build OK) |
+| 1.4 | `feature/2026-11-15-phase1-4-whole-app-checks` | `2f70a1b` (on the pre-merge `95bd68a`) | **local only**, working tree clean | **1,692 / 142**, measured (build OK) |
 
-Measured 2026-11-15: 1.2 branch 1,675 passing, 0 failed, 140 files (build OK); 1.4 branch
-**1,692 passing, 0 failed, 0 skipped, 142 files** (build OK). 1.3 was not re-run on its own
-branch this session (same commit as last session's `c4e1f3d`, replayed with no conflicts).
-
-The old local branches `feature/2026-11-15-phase1-{2,3}-…` (without `-onto-main`) are the
-pre-merge originals; ignore them.
+The other local branches (`…-phase1-2-…`, `…-phase1-3-typical-patients`,
+`…-phase1-3-typical-patients-onto-main`) are pre-merge copies; ignore them.
 
 ## What's done
 
@@ -62,17 +58,16 @@ pre-merge originals; ignore them.
 
 1.4 is complete as a unit, committed, and proven (every zero check shown to fail on a
 break). 1.5 is self-contained and not begun. Nothing is half-built; the only pending
-thing is the owner merging #81.
+thing is the owner merging #82, then 1.4's PR.
 
 ## Resuming
 
 1. `cd ~/Downloads/MeningoVax-main && git fetch && gh pr view 81 --json state`.
 2. **Land the stack one PR at a time, each against `main`** (never a PR against another
    PR's branch — that stranded N5 once):
-   - #81 open → ask the owner to merge it.
-   - #81 merged → `git checkout -b feature/2026-11-15-phase1-3-typical-patients-pr origin/main`,
-     `git cherry-pick 95bd68a`, suite (expect 1,682 / 141), push, PR against `main`.
-   - That merged → same with `2f70a1b` for 1.4 (expect 1,692 / 142). Its PR body must carry
+   - #81 (1.2) is merged; **#82 (1.3) is open** → ask the owner to merge it.
+   - #82 merged → `git fetch && git checkout -b feature/2026-11-15-phase1-4-whole-app-checks-pr origin/main`,
+     `git cherry-pick 2f70a1b`, suite (expect 1,692 / 142), push, PR against `main`. Its PR body must carry
      the E4 checklist: (1) no clinical numbers added to tests; (2) no capability added — the
      checks are new sweeps over every patient; (3) no clinical rule changed; (4) +10 tests,
      +1 file.
