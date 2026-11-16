@@ -1,3 +1,7 @@
+> **SUPERSEDED (2026-11-15)** by `handoff-2026-11-15-meningovax-phase1-4-done.md`. #80 (1.1)
+> has merged; 1.2 is PR #81; 1.3 and 1.4 are built and committed locally; the monthly-task
+> question was answered and fixed. Do not resume from this file.
+
 # MeningoVax port — Handoff at the Phase 1 midpoint (1.1–1.3 done) (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
