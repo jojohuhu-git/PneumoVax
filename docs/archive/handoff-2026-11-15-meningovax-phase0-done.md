@@ -7,14 +7,19 @@ MeningoVax is live at https://jojohuhu-git.github.io/MeningoVax/ and is iCloud-s
 early, re-apply an edit that "disappears".
 
 **Supersedes** `handoff-2026-11-08-meningovax-port-plan-review.md` (banner added). Every PR it
-waited on has merged except MeningoVax #74.
+waited on has merged, MeningoVax #74 included (squash-merged 2026-11-15, `2f46974`).
 
-## Branches (committed locally, NOT pushed: the owner decides, and she merges)
+## PRs (pushed at the owner's request, 2026-11-15; she merges)
 
-| Repo | Branch | Off | Commit(s) |
+| Repo | PR | Branch | Off |
 |---|---|---|---|
-| MeningoVax | `docs/2026-11-15-phase-0-measure` | `docs/2026-11-08-organize-cdsi-files-and-port-pointer` (open **PR #74**, not yet merged), so this branch is stacked on #74 | `62a649a` |
-| PneumoVax | `docs/2026-11-15-meningovax-phase0-done` | `origin/main` at `6d58990` | the plan's status and ledger, this handoff and the banner (one commit) |
+| MeningoVax | **#76** | `docs/2026-11-15-phase-0-measured` | `main` at `2f46974` |
+| PneumoVax | **#153** | `docs/2026-11-15-meningovax-phase0-done` | `main` at `6d58990` |
+
+MeningoVax #75 (same commit, stacked on #74's branch) was closed and replaced by #76 once #74
+was squash-merged. The two branches carry identical content (checked by tree hash), and #74's
+squash was identical to its branch. The old branch `docs/2026-11-15-phase-0-measure` is still
+on GitHub and can be deleted.
 
 Tests, run 2026-11-15 after the edits (vitest JSON reporter, `.claude/**` excluded):
 - MeningoVax: **1,636 passing, 0 failed, 0 skipped (136 files)**, the same as the baseline
@@ -25,7 +30,7 @@ Tests, run 2026-11-15 after the edits (vitest JSON reporter, `.claude/**` exclud
 | Item | What | Where |
 |---|---|---|
 | Q0 | Owner approved the phase order, 2026-11-15 ("Yes, start Phase 0"). STOP A is passed | plan status line |
-| 0.1 | Pointer file (done earlier; its "latest handoff" line now points here) | MeningoVax PR #74 + `62a649a` |
+| 0.1 | Pointer file (done earlier; its "latest handoff" line now points here) | MeningoVax #74 (merged) + #76 |
 | 0.2 | Baseline confirmed: 1,636 / 136 | report |
 | 0.3 | Every "to measure" cell in tables A–E and §3 filled, with file:line or a grid count | MeningoVax `docs/archive/report-2026-11-15-phase0-measured.md` |
 | 0.4 | Every place a dose is judged: 14 not-counted rules, 6 set-aside rules, 2 count-early rules, 3 record problems, the extra cap. Each has its source quote and CDSI 4.65 row | MeningoVax `docs/archive/inventory-2026-11-15-every-place-a-dose-is-judged.md` |
@@ -48,7 +53,7 @@ R-2, R-4a, R-4b, R-5b and R-8 were each confirmed with a worked patient (P1, P3,
 - N6–N12: wording, labels and colours, for Phases 1.4, 4, 5 and 6.
 
 **Needs the owner (ask, don't default):**
-1. Merge MeningoVax PR #74, then push and PR this session's two branches (or say not to).
+1. Merge MeningoVax #76 and PneumoVax #153 (independent of each other).
 2. Should N1 and/or N5 be fixed **now**, ahead of the port? The plan's default holds every
    clinical change for packet 1 (STOP C). Each card currently advises something a current CDC
    source advises against.
@@ -67,8 +72,9 @@ STOP B.
 
 ## Resuming
 
-1. `cd ~/Downloads/MeningoVax-main && git checkout docs/2026-11-15-phase-0-measure` (or `main`
-   once #74 and this branch are merged). Run the suite and confirm **1,636 passing**.
+1. `cd ~/Downloads/MeningoVax-main && git checkout main && git pull` (once #76 is merged; until
+   then `docs/2026-11-15-phase-0-measured`). Run the suite and confirm **1,636 passing**. Start
+   Phase 1 on a fresh branch off `main`, never stacked on an open PR.
 2. Read the report and the inventory before starting. The inventory is the row list Phase 2 builds from.
 3. Ask decisions 1–3 above if they are still open.
 4. Phase 1, one PR per numbered item, `fix-queue` loop: 1.1 saved-answer files from
