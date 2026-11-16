@@ -1,3 +1,6 @@
+> **SUPERSEDED (2026-11-15)** by `handoff-2026-11-15-meningovax-phase1-5-done.md`. #83 (1.4)
+> has merged; 1.5 is built and open as MeningoVax PR #84. Do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 1.4 (whole-app checks built) (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
