@@ -425,6 +425,9 @@ stops saying Complete (Phase 3, with B-2/B-3).
 2.1 A `doseIntervalRules.js`-style table: every row from 0.4, with its five answers as the
     code **behaves today**. `validate.js` calls it once per dose. **0 answers may move** —
     the saved-answer files prove it.
+    **BUILT 2026-11-15 — MeningoVax PR #86** (`src/logic/doseRules.js`, 34 rows; saved answers,
+    prose diff 0 of 23,400 and CDSI "moved 0" all unchanged; `dose-rules-table.test.js`). The file
+    is `doseRules.js`, not `doseIntervalRules.js`: it holds age, family and record rules too.
 2.2 A "what the sources say" column beside "what the app does", filled from 0.5.
 2.3 **CDSI comparison test** (M-CDSI-1, added 2026-11-08): the rule table held against CDSI's two
     meningococcal files, with a named list of deliberate differences. Same plan file as 1.5.
@@ -520,6 +523,11 @@ Items 1.5 and 2.3 (added 2026-11-08) add about 7% and half a session each to Pha
 this week. The weekly counter appears to have been reset, so it says nothing about Phase 1's cost,
 and the table above is left as an estimate. Next try: read `get_usage` at the start and the end of
 the Phase 2 session and record the difference here.
+
+**Phase 2.1 measured (2026-11-15):** start weekly 2%, 5-hour 8%; end weekly 3%, 5-hour 23%. So
+2.1 cost about **1 weekly point** (the weekly counter shows whole numbers only, so 0.5–1.5) and 15
+points of one 5-hour window — inside the ≈ 4% estimate for the whole of Phase 2. One item, one
+reading: not yet enough to correct the table.
 
 The calendar time is set by her eleven questions and nine stops, not by the work. If a
 findings list from Phase 1 is long (PneumoVax's first whole-app run found families that took
