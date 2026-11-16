@@ -8,7 +8,7 @@ read live, and twelve new findings N1–N12 listed, not fixed) and
 patients, is PR #84: 65 of 104 agree, 39 differ, sorted into families in MeningoVax
 `docs/archive/report-2026-11-15-cdsi-test-patients.md`). #84 merged 2026-11-16. **STOP B answered
 2026-11-15** (five answers, table under Phase 1). Next: end-of-Phase-1 usage measure, make 1.5 a
-required test, then Phase 2.
+required test (done: MeningoVax PR #85), then Phase 2. See `handoff-2026-11-15-meningovax-stop-b-answered.md`.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
@@ -514,6 +514,12 @@ cases). Same-dose questions she has delegated (memory `owner-decides-alone-when-
 | **All** | **16–17** | **≈ 80–90%, i.e. most of one week's allowance, spread over 2–3 calendar weeks** |
 
 Items 1.5 and 2.3 (added 2026-11-08) add about 7% and half a session each to Phases 1 and 2.
+
+**End-of-Phase-1 re-measure (2026-11-15) — could not be done honestly.** `get_usage` read
+**weekly 0%, 5-hour 2%** (Pro; week resets 2026-11-19), although the Phase 0–1 sessions ran inside
+this week. The weekly counter appears to have been reset, so it says nothing about Phase 1's cost,
+and the table above is left as an estimate. Next try: read `get_usage` at the start and the end of
+the Phase 2 session and record the difference here.
 
 The calendar time is set by her eleven questions and nine stops, not by the work. If a
 findings list from Phase 1 is long (PneumoVax's first whole-app run found families that took

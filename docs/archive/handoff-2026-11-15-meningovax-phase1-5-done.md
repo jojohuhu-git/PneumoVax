@@ -1,3 +1,7 @@
+> **SUPERSEDED (2026-11-15)** by `handoff-2026-11-15-meningovax-stop-b-answered.md`. #84 (1.5)
+> merged; STOP B is answered and recorded in the plan; 1.5 is now a required test (MeningoVax PR #85).
+> Do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 1.5 (CDC's CDSI test patients) (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
