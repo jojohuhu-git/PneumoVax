@@ -4,7 +4,8 @@
 done and changed no MeningoVax code.** Its results are in MeningoVax's `docs/archive/`:
 `report-2026-11-15-phase0-measured.md` (the measured cells, eleven worked patients, the sources
 read live, and twelve new findings N1–N12 listed, not fixed) and
-`inventory-2026-11-15-every-place-a-dose-is-judged.md` (item 0.4). Next: Phase 1.
+`inventory-2026-11-15-every-place-a-dose-is-judged.md` (item 0.4). **Phase 1: 1.1–1.3 done** (MeningoVax PR #80 for 1.1; 1.2 and 1.3 committed locally, waiting to be
+re-landed one at a time against `main`). Next: 1.4, then 1.5. See `handoff-2026-11-15-meningovax-phase1-midpoint.md`.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit

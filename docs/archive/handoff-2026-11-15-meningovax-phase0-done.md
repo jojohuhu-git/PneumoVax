@@ -1,3 +1,7 @@
+> **SUPERSEDED (2026-11-15)** by `handoff-2026-11-15-meningovax-phase1-midpoint.md`. Everything
+> this file waited on has merged (MeningoVax #76, #77; N5 re-landed as #79 after #78 merged into
+> #77's branch instead of `main`; PneumoVax #153). Do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 0 (measure, change nothing) (2026-11-15)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
