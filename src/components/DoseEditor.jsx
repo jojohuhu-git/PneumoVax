@@ -197,7 +197,7 @@ export default function DoseEditor({
                 this; MeningoVax's shared editor does it too, and the design
                 parity rule sends its layout decisions here. */}
             <div className="dose-field">
-              <label htmlFor={`${uid}-date-${i}`}>Date (optional)</label>
+              <label htmlFor={`${uid}-date-${i}`}>Date</label>
               <input
                 type="date"
                 id={`${uid}-date-${i}`}

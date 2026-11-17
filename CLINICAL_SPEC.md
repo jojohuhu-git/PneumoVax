@@ -413,6 +413,17 @@ with any approved product"), and an undated PCV21 under 18 (rejected, another pr
 DoseEditor's "dose given, date and product unknown" tick on the PCV side now gives "not counted",
 consistent with CDC's "history is unknown" sentence.
 
+**What the dose-entry screen says (OWNER DECISIONS 2026-11-17).** Two places still told the
+clinician the old rule. The date box's label **"Date (optional)" is now "Date"** — offered a
+per-vaccine label, plain "Date", or no change, she chose plain "Date". A blank date is still
+accepted on both rows (the box is not made required). The History step's intro line, *"Date is
+optional (counting works without it)"*, found by driving the app, now reads **"Enter the date if
+known; a PCV with no date does not count. PCV7 is recorded but never counts toward the series."**
+— her choice of three. Both rows come from the one shared `DoseEditor.jsx`, so the Results page's
+"Recorded doses" panel changed with them. Guard:
+`regression-2026-11-17-dose-date-label-not-optional.test.jsx`. MeningoVax still says "Date
+(optional)"; its own undated rule (port Phase 3 family 2, C1) is where its label is decided.
+
 Guard: `regression-2026-11-15-undated-pcv-not-counted.test.js`.
 
 ---

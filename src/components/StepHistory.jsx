@@ -4,7 +4,9 @@ import DoseEditor from './DoseEditor.jsx';
 // Vaccination history for PneumoVax — two product streams in one step:
 //   • PCV doses (product dropdown: PCV7/13/15/20/21 + Unknown)
 //   • PPSV23 doses (date only)
-// Each dose is { date?, product? }. Both optional; counting works without dates.
+// Each dose is { date?, product? }. Both may be left blank, but a PCV with no
+// date does not count (§A-UNDATED, owner 2026-11-15); an undated PPSV23 does.
+// The intro line and the "Date" label say so (owner 2026-11-17).
 //
 // S9 / P4-1 (2026-10-15): the rows themselves are `DoseEditor.jsx`, shared with
 // the inline editor on the Results page. This step used to hand-write them, and
@@ -70,8 +72,8 @@ export default function StepHistory({
       {historyAnswered === true && (
         <>
           <div className="step-sub history-detail-sub">
-            Date is optional (counting works without it). PCV7 is recorded but never
-            counts toward the series.
+            Enter the date if known; a PCV with no date does not count. PCV7 is
+            recorded but never counts toward the series.
           </div>
 
           {/* ── PCV stream ── */}
