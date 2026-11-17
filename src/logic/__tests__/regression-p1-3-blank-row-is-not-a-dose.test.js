@@ -135,28 +135,36 @@ describe('P1-3 — a blank dose row is not a dose', () => {
       expect(JSON.stringify(blank.recs)).toBe(JSON.stringify(none.recs));
     });
 
-    it('a TICKED row still counts, and still says the date is unknown', () => {
-      // The control that stops this fix becoming a silent drop of real input.
+    // §A-UNDATED (OWNER DECISION 2026-11-15) changed what a ticked PCV row
+    // gives. It used to count ("cannot be checked without a date") and the
+    // child was on the catch-up path. A PCV with no date now does not count, so
+    // the ticked row gives the answer for a child with no dose — CDC's adult
+    // notes give the same dose to anyone "whose previous vaccination history is
+    // unknown". It is still NOT a silent drop: unlike a blank row, the ticked
+    // row stays on the record with its own label and reason.
+    it('a TICKED PCV row is kept on the record, labelled, and not counted', () => {
       const ticked = recommend({
         ...CHILD,
         pcvDoses: [{ date: '', product: '', detailsUnknown: true }],
         ppsv23Doses: [],
       });
-      expect(ticked.meta.pcvCount).toBe(1);
       expect(ticked.perDose.pcv).toHaveLength(1);
-      expect(ticked.perDose.pcv[0].reasons.join(' ')).toMatch(/cannot be checked without a date/);
+      expect(ticked.perDose.pcv[0].noDate).toBe(true);
+      expect(ticked.perDose.pcv[0].reasons.join(' ')).toMatch(/written, dated record/);
+      expect(ticked.meta.pcvCount).toBe(0);
     });
 
-    it('a ticked row gives the same answer the old blank row used to give', () => {
-      // Nothing about the UNDOCUMENTED-dose pathway changes — only who has to
-      // say that is what the row means.
-      const ticked = recommend({
-        ...CHILD,
-        pcvDoses: [{ date: '', product: '', detailsUnknown: true }],
-        ppsv23Doses: [],
-      });
-      expect(ticked.recs.map((r) => r.status)).toEqual(['catchup']);
-      expect(ticked.meta.pcvCount).toBe(1);
+    it('a ticked PCV row gives the answer for a child with no dose on record', () => {
+      const ticked = recommend({ ...CHILD, pcvDoses: [{ date: '', product: '', detailsUnknown: true }], ppsv23Doses: [] });
+      const none = recommend({ ...CHILD, pcvDoses: [], ppsv23Doses: [] });
+      expect(JSON.stringify(ticked.recs)).toBe(JSON.stringify(none.recs));
+    });
+
+    it('a TICKED PPSV23 row still counts, and still says the date is unknown', () => {
+      const adult = { ageMonths: 840, dob: '1956-01-01', riskIds: [], today: '2026-10-12' };
+      const ticked = recommend({ ...adult, pcvDoses: [], ppsv23Doses: [{ date: '', product: 'PPSV23', detailsUnknown: true }] });
+      expect(ticked.meta.ppsv23Count).toBe(1);
+      expect(ticked.perDose.ppsv23[0].reasons.join(' ')).toMatch(/cannot be checked without a date/);
     });
 
     it('analyzeBoth drops blank rows too, so no caller has to remember', () => {

@@ -67,19 +67,18 @@ describe('S14-4 — a dose recorded after the series already completed', () => {
     expect(a.perDose[1].status).toBe('valid');
   });
 
-  it('an undated dose after a completing dose asks rather than asserts', () => {
-    // Undated doses sort before all dated ones (an undated historical dose is
-    // assumed to be the earlier dose, matching the rest of the app's
-    // convention) — so the only way for one undated dose to land AFTER
-    // another in the walk is for both to be undated, in input order.
+  // §A-UNDATED (OWNER DECISION 2026-11-15) retired "an undated dose after a
+  // completing dose asks rather than asserts" (`extraDoseUnverified`, "Check
+  // the date — none recorded"). An undated PCV is not counted, so it can
+  // neither complete a series nor be an extra dose after one.
+  it('two undated doses: neither completes, neither is extra — both are "no date"', () => {
     const a = analyzeHistory('PCV', [
-      { product: 'PCV20' },  // no date — assumed earlier, completes
-      { product: 'PCV21' },  // no date — could be an extra, or a series dose
+      { product: 'PCV20' },
+      { product: 'PCV21' },
     ], AM, TODAY, DOB);
-    const extra = a.perDose[1];
-    expect(extra.extraDose).toBe(true);
-    expect(extra.extraDoseUnverified).toBe(true);
-    expect(extra.reasons.join(' ')).toMatch(/missing its date/i);
+    expect(a.perDose.map((d) => d.noDate)).toEqual([true, true]);
+    expect(a.perDose.some((d) => d.extraDose)).toBe(false);
+    expect(a.effective).toHaveLength(0);
   });
 
   it('does not misfire on a healthy series with no completing dose yet', () => {

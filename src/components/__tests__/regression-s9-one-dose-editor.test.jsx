@@ -214,12 +214,12 @@ describe('S9 — the dose editor has one home', () => {
   describe('both surfaces render the same fields in the same order', () => {
     it.each(SURFACES)('%s puts Date before Product on a PCV row', (which) => {
       renderSurface(which, ONE_OF_EACH);
-      expect(fieldLabelsOfRow(0)).toEqual(['Date (optional)', 'Product']);
+      expect(fieldLabelsOfRow(0)).toEqual(['Date', 'Product']);
     });
 
     it.each(SURFACES)('%s puts Date before Product on a PPSV23 row', (which) => {
       renderSurface(which, ONE_OF_EACH);
-      expect(fieldLabelsOfRow(1)).toEqual(['Date (optional)', 'Product']);
+      expect(fieldLabelsOfRow(1)).toEqual(['Date', 'Product']);
     });
 
     it.each(SURFACES)('%s shows the PPSV23 product as fixed, not a dropdown', (which) => {
@@ -296,7 +296,7 @@ describe('S9 — the dose editor has one home', () => {
     it.each(SURFACES)('%s withdraws it once a PPSV23 date is entered', (which) => {
       renderSurface(which, { pcvDoses: [], ppsv23Doses: [{ date: '', product: 'PPSV23' }] });
       expect(unknownTicksPpsv23()).toHaveLength(1);
-      fireEvent.change(screen.getByLabelText('Date (optional)'), {
+      fireEvent.change(screen.getByLabelText('Date'), {
         target: { value: '2020-01-01' },
       });
       expect(unknownTicksPpsv23()).toHaveLength(0);

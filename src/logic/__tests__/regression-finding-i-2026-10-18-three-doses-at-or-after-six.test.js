@@ -188,23 +188,19 @@ describe('FINDING I - a dated dose at or after age 6 is never called a before-6 
       expect(proseAll(r)).not.toContain('before age 6');
     });
 
-    it('an UNDATED three-dose history still lands on rows 4/5, as FINDING G intended', () => {
-      // The `>= 3` half of the gate exists for exactly this patient and is kept.
-      const r = patient({
-        ageMonths: 216,
-        riskIds: ['asplenia'],
-        pcv: [['PCV13', null], ['PCV13', null], ['PCV13', null]],
-      });
-      expect(proseAll(r)).toContain('completed PCV13/15 before age 6');
-    });
-
-    it('a 1-2 dose UNDATED history does not move: it stays on rows 8/9', () => {
-      // The control for the short-form fix that would have been wrong. These
-      // children are not described by either row; this change does not claim to
-      // settle them, and must not silently reclassify them.
-      const r = patient({ ageMonths: 216, riskIds: ['asplenia'], pcv: [['PCV13', null]] });
-      expect(proseAll(r)).toContain('(at/after age 6)');
-      expect(proseAll(r)).not.toContain('before age 6');
+    // §A-UNDATED (OWNER DECISION 2026-11-15) retired the two undated cases
+    // that stood here: an undated three-dose history on rows 4/5 (the patient
+    // the `>= 3` half of the gate was kept for) and a one-dose undated history
+    // on rows 8/9. Undated PCV doses no longer count, so both children now get
+    // the card of a child with no conjugate on record — and neither card says
+    // anything about "before age 6" about doses whose dates nobody knows.
+    it('an UNDATED history, three doses or one, gets the card of a child with no conjugate', () => {
+      const none = patient({ ageMonths: 216, riskIds: ['asplenia'], pcv: [] });
+      for (const pcv of [[['PCV13', null], ['PCV13', null], ['PCV13', null]], [['PCV13', null]]]) {
+        const r = patient({ ageMonths: 216, riskIds: ['asplenia'], pcv });
+        expect(proseAll(r)).toBe(proseAll(none));
+        expect(proseAll(r)).not.toContain('before age 6');
+      }
     });
   });
 });

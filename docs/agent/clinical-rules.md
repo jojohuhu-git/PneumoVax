@@ -94,6 +94,11 @@ both repos or neither.
 
 ## Product Rules
 
+### A PCV With No Date Does Not Count (OWNER DECISION 2026-11-15)
+"Not counted — no date"; the card plans as if it was never given. An undated PPSV23 still
+counts — CDC's written-dated-records rule names PPSV23 as its exception
+(`gbpWrittenDatedRecords`). Full rule and patients: `CLINICAL_SPEC.md` §A-UNDATED.
+
 ### PCV7
 NEVER counts. Records as `noncounting`, dropped from effective series. High-risk patients treated as PCV-naïve. Source: immunize.org Ask the Experts.
 
@@ -284,9 +289,9 @@ space its fixture more than a year apart once S14-7 made the adult PCV13→PCV20
   completeness checks require more than "includes PCV20" (age band, catch-up count).
   Applying this rule to children was the exact over-generalisation the S14-RC root-cause
   review flagged.
-- **An undated extra dose asks, not asserts** (`extraDoseUnverified`) — mirrors
-  MeningoVax's G6: with no date, the app cannot tell a genuine extra dose from an ordinary
-  series dose whose date is missing.
+- **An undated PCV never reaches this rule** (since §A-UNDATED, 2026-11-15): it is "Not
+  counted — no date" before the extra-dose test runs. The old question
+  ("Check the date — none recorded") is gone.
 - **Outranks the early-advisory flag.** If the dose would also have triggered
   `earlyAdvisory`, that flag and its "still counts" sentence are dropped — they'd
   contradict "this dose does not extend the series."

@@ -97,8 +97,12 @@ describe('doseChipLabel branches (§DOSE-LABELS, owner decision 2026-11-08)', ()
       .toBe('Not counted — Extra. Do not repeat.');
   });
 
-  it('an undated extra dose asks rather than asserts', () => {
-    expect(doseChipLabel({ status: 'unknown', effectiveDoseNum: null, extraDose: true, extraDoseUnverified: true }, 2))
-      .toBe('Check the date — none recorded');
+  // §A-UNDATED (OWNER DECISION 2026-11-15) replaced "Check the date — none
+  // recorded": an undated PCV is not counted, whatever came before it.
+  it('an undated PCV reads "Not counted — no date", outranking extra and PCV7', () => {
+    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: null, noDate: true }, 2))
+      .toBe('Not counted — no date');
+    expect(doseChipLabel({ status: 'noncounting', effectiveDoseNum: null, noDate: true, extraDose: true }, 2))
+      .toBe('Not counted — no date');
   });
 });

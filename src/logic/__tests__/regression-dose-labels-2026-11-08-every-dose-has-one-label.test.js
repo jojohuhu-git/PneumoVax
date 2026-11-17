@@ -82,12 +82,29 @@ describe('§DOSE-LABELS — every dose in every test patient has one label that 
     expect(problems.slice(0, 10)).toEqual([]);
   }, 300_000);
 
-  it('the two labels no grid patient reaches, built by hand: an undated dose, and an undated extra dose', () => {
-    const one = recommend({ ageMonths: 720, today: '2026-11-08', riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] });
-    expect(one.perDose.pcv[0].disposition).toBe('counted-date-unknown');
-    expect(doseChipLabel(one.perDose.pcv[0], null)).toBe('Counted — date not recorded');
-    const two = recommend({ ageMonths: 720, today: '2026-11-08', riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }, { product: 'PCV20', date: '' }], ppsv23Doses: [] });
-    expect(doseChipLabel(two.perDose.pcv[1], null)).toBe('Check the date — none recorded');
+  // §A-UNDATED (OWNER DECISION 2026-11-15): an undated PCV is "Not counted —
+  // no date"; only an undated PPSV23 is still "Counted — date not recorded".
+  // "Check the date — none recorded" (an undated extra PCV) is gone. No grid
+  // patient has an undated dose, so these are built by hand and put through
+  // the same sweep, style rules included.
+  it('the labels no grid patient reaches, built by hand: an undated PCV, two of them, an undated PPSV23', () => {
+    const base = { ageMonths: 720, today: '2026-11-08', riskIds: [] };
+    const one = recommend({ ...base, pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] });
+    expect(one.perDose.pcv[0].disposition).toBe('no-date');
+    expect(doseChipLabel(one.perDose.pcv[0], null)).toBe('Not counted — no date');
+    const two = recommend({ ...base, pcvDoses: [{ product: 'PCV20', date: '' }, { product: 'PCV20', date: '' }], ppsv23Doses: [] });
+    expect(two.perDose.pcv.map((v) => doseChipLabel(v, null))).toEqual(['Not counted — no date', 'Not counted — no date']);
+    const ppsv = recommend({ ...base, pcvDoses: [], ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }] });
+    expect(ppsv.perDose.ppsv23[0].disposition).toBe('counted-date-unknown');
+    expect(doseChipLabel(ppsv.perDose.ppsv23[0], null)).toBe('Counted — date not recorded');
+    const { problems, seen } = sweep([one, two, ppsv].map((_, i) => ({ input: [
+      { ...base, pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] },
+      { ...base, pcvDoses: [{ product: 'PCV20', date: '' }, { product: 'PCV13', date: '' }], ppsv23Doses: [] },
+      { ...base, pcvDoses: [], ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }] },
+    ][i] })));
+    expect(problems).toEqual([]);
+    expect(seen.get('no-date')).toBe(3);
+    expect(seen.get('counted-date-unknown')).toBe(1);
   });
 
   // §M-L2 — her own test patient, 2026-11-08: born 1954-10-01, healthy.
