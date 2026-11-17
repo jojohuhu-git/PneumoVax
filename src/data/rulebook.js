@@ -656,9 +656,6 @@ const P = {
   pcv7: ex('3-year-old, PCV7 only',
     { dob: '2023-11-01', riskIds: [], pcvDoses: doses('PCV7', ['2024-01-01']), ppsv23Doses: [] },
     { chip: ['pcv', 0, 'Not counted — PCV7'] }),
-  undatedExtra: ex('Healthy 60-year-old, two PCV20 doses on record, neither dated',
-    { ageMonths: 720, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }, { product: 'PCV20', date: '' }], ppsv23Doses: [] },
-    { chip: ['pcv', 1, 'Check the date — none recorded'] }),
   adultEarlyPpsv: ex('Healthy 55-year-old, PCV15 on Jan 1, 2026 and PPSV23 a month later',
     { ageMonths: 660, riskIds: [], pcvDoses: doses('PCV15', ['2026-01-01']), ppsv23Doses: doses('PPSV23', ['2026-02-01']) },
     { status: 'complete', chip: ['ppsv23', 0, 'Counted — given early, accepted'] }),
@@ -670,9 +667,14 @@ const P = {
   productUnknown: ex('30-year-old with diabetes, a PCV on Sep 1, 2026, product not recorded',
     { ageMonths: 360, riskIds: ['diabetes'], pcvDoses: [{ product: '', date: '2026-09-01' }], ppsv23Doses: [] },
     { chip: ['pcv', 0, 'Counted — product not recorded'] }),
-  dateUnknown: ex('Healthy 60-year-old, PCV20 on record with no date',
-    { ageMonths: 720, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] },
-    { status: 'complete', chip: ['pcv', 0, 'Counted — date not recorded'] }),
+  // §A-UNDATED (OWNER DECISION 2026-11-15): only an undated PPSV23 is still
+  // counted; an undated PCV is "Not counted — no date" (Ruth, below).
+  dateUnknown: ex('Healthy 70-year-old, PPSV23 on record with no date',
+    { ageMonths: 840, riskIds: [], pcvDoses: [], ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }] },
+    { chip: ['ppsv23', 0, 'Counted — date not recorded'] }),
+  noDate: ex('Healthy 65-year-old, PCV20 on record with no date',
+    { ageMonths: 780, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] },
+    { status: 'due', chip: ['pcv', 0, 'Not counted — no date'] }),
   ppsv2ndNotNeeded: ex('Healthy 72-year-old, PCV13 at 65, PPSV23 at 65 and again 28 days later, PCV20 at 71',
     { dob: '1954-10-01', riskIds: [], pcvDoses: [...doses('PCV13', ['2019-10-17']), ...doses('PCV20', ['2026-09-01'])], ppsv23Doses: doses('PPSV23', ['2020-09-25', '2020-10-23']) },
     { status: 'complete', chip: ['ppsv23', 1, 'Counted — not needed. No more PPSV23.'] }),
@@ -1080,12 +1082,14 @@ export const CHIP_LEGEND = [
   { chip: 'Counted — given early, accepted', tone: 'valid', text: 'Counted, though given sooner than recommended. The note gives the actual gap and the recommended one. It is not repeated.', ex: [P.adultEarlyPpsv] },
   { chip: 'Counted — not needed. No more PPSV23.', tone: 'valid', text: `An adult's second PPSV23 within ${Y5}, with no immunocompromising condition, CSF leak or cochlear implant. ACIP gives a second PPSV23 only to those three groups. Counted, so no further PPSV23 is given.`, ex: [P.ppsv2ndNotNeeded] },
   { chip: 'Counted — product not recorded', tone: 'valid', text: 'Counted as a PCV dose of unknown product.', ex: [P.productUnknown] },
-  { chip: 'Counted — date not recorded', tone: 'valid', text: 'Counted, but with no date the app cannot check its age or interval. Add the date to check it.', ex: [P.dateUnknown] },
+  { chip: 'Counted — date not recorded', tone: 'valid', text: 'A PPSV23 with no date. Counted, because CDC accepts PPSV23 without a dated record. With no date the app cannot check its age or interval. Add the date to check it.', ex: [P.dateUnknown] },
   { chip: 'Not counted — Extra. Do not repeat.', tone: 'extra', text: 'Given correctly, but not needed.', ex: [P.nonIc2nd] },
   { chip: 'Not counted — repeat', tone: 'invalid', text: 'Given below the minimum age, or the wrong product for the age. The result card gives the date for the replacement dose.', ex: [P.toddler] },
   { chip: 'Not counted — do not repeat', tone: 'invalid', text: 'Given too soon after the dose before it. This dose is not repeated: the next dose is due once the interval has passed, and the result card gives the date.', ex: [P.infantShort] },
+  // §A-UNDATED (OWNER DECISION 2026-11-15).
+  { chip: 'Not counted — no date', tone: 'unknown', text: 'A PCV with no date. CDC accepts only written, dated records for PCV. The result card plans as if it was not given. Add the date if the record has one.', ex: [P.noDate] },
   { chip: 'Not counted — PCV7', tone: 'extra', text: 'PCV7. Set aside; the patient is treated as having had no PCV. The result card says what to give.', ex: [P.pcv7] },
-  { chips: ['Check the date', 'Check the date — none recorded'], tone: 'unknown', text: 'The date is in the future, before birth, or missing on a dose beyond the series. Not counted until the date is corrected.', ex: [P.futureDated, P.undatedExtra] },
+  { chip: 'Check the date', tone: 'unknown', text: 'The date is in the future or before birth. Not counted until the date is corrected.', ex: [P.futureDated] },
 ];
 
 export const GRACE = {

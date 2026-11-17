@@ -68,9 +68,18 @@ describe('Min-age validation', () => {
 });
 
 describe('Unknown / dateless doses', () => {
-  it('dateless PCV15 for an adult → unknown, counts', () => {
+  // §A-UNDATED (OWNER DECISION 2026-11-15): was "→ unknown, counts".
+  it('dateless PCV15 for an adult → not counted (no date)', () => {
     const { perDose, effective } = analyzeHistory('PCV',
       [{ product: 'PCV15' }], 660, TODAY);
+    expect(perDose[0].status).toBe('noncounting');
+    expect(perDose[0].noDate).toBe(true);
+    expect(effective.length).toBe(0);
+  });
+
+  it('dateless PPSV23 for an adult → unknown, still counts (CDC\'s own exception)', () => {
+    const { perDose, effective } = analyzeHistory('PPSV23',
+      [{ product: 'PPSV23', detailsUnknown: true }], 840, TODAY);
     expect(perDose[0].status).toBe('unknown');
     expect(effective.length).toBe(1);
   });

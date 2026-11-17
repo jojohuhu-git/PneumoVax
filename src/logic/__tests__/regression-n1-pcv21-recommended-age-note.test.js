@@ -130,21 +130,19 @@ describe('N1 — a PCV21 dose given before ACIP\'s recommended age counts, and s
     expect(doseDisposition(d)).toBe('repeat');
   });
 
-  // ── The dateless dose: say it only when it is certain ────────────────
-  it('an undated PCV21 on a patient who is currently 18 carries the note', () => {
-    // A past dose cannot have been given later than today, so a patient who is
-    // 18 TODAY cannot have had it at 19 — the note is certain even with no
-    // date. Same reasoning the dateless minimum-age verdict already uses.
-    const d = pcv21Dose({ dob: '2008-10-16', doseDate: null, ageMonths: 216 });
-    expect(d.status).toBe('unknown');
-    expect(d.doesNotCount).toBeFalsy();
-    expect(noteOf(d)).not.toBeNull();
-  });
-
-  it('CONTROL — an undated PCV21 on a 25-year-old says nothing (it cannot be known)', () => {
-    const d = pcv21Dose({ dob: '2001-10-16', doseDate: null, ageMonths: 300 });
-    expect(d.status).toBe('unknown');
-    expect(noteOf(d)).toBeNull();
+  // ── The dateless dose ─────────────────────────────────────────────────
+  // §A-UNDATED (OWNER DECISION 2026-11-15) retired the two tests that stood
+  // here ("an undated PCV21 on a patient who is currently 18 carries the
+  // note", and its 25-year-old control). An undated PCV21 is now not counted,
+  // so there is no counted dose for the "ahead of ACIP's age" note to qualify.
+  it('an undated PCV21, at 18 or at 25, is "no date", not counted, and carries no early-age note', () => {
+    for (const [dob, ageMonths] of [['2008-10-16', 216], ['2001-10-16', 300]]) {
+      const d = pcv21Dose({ dob, doseDate: null, ageMonths });
+      expect(d.status).toBe('noncounting');
+      expect(d.noDate).toBe(true);
+      expect(d.doesNotCount).toBe(true);
+      expect(noteOf(d)).toBeNull();
+    }
   });
 });
 

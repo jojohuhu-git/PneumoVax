@@ -60,9 +60,12 @@ export function doseChipLabel(result, seriesTotal) {
     // aside, and the card says what is owed; "do not repeat" would read as
     // "no more PCV", which is wrong for a patient treated as PCV-naive.
     case 'pcv7': return 'Not counted — PCV7';
-    // An extra dose with no date ASKS rather than asserts (G6, MeningoVax
-    // 2026-09-16): it may be a series dose whose date is missing.
-    case 'check-date': return result.extraDoseUnverified ? 'Check the date — none recorded' : 'Check the date';
+    // §A-UNDATED, OWNER DECISION 2026-11-15: the wording of the option she chose.
+    case 'no-date': return 'Not counted — no date';
+    // A dose dated in the future or before birth. (An undated extra PCV used
+    // to read "Check the date — none recorded"; since §A-UNDATED, 2026-11-15,
+    // every undated PCV is 'no-date' instead.)
+    case 'check-date': return 'Check the date';
     default: return 'Unknown';
   }
 }

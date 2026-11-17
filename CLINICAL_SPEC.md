@@ -370,6 +370,62 @@ products × 3 visit dates. Verdicts moved on 414 (dose 2 thrown out: 54 + 216; d
 the other 88 changed only the card's "can be given from" sentence. CDSI test patients 119 → **122 of 140** agree (all three of finding 3), 0 new disagreements.
 Guard: `regression-2026-11-09-pcv-per-dose-minimum-ages.test.js`.
 
+### §A-UNDATED — a PCV dose with no date does not count (OWNER DECISION 2026-11-15)
+
+Applies at **every age**, child and adult. It is filed under §A only because the test that guards it
+names this section.
+
+**The rule.** A PCV dose recorded **with no date** is not counted. Its label is **"Not counted — no
+date"**, and the card plans as if the dose was never given: same card, same dose, same date as the
+same patient with no dose on record. An undated **PPSV23 still counts** ("Counted — date not
+recorded"), because the source names PPSV23 as its exception.
+
+**Sources, read live 2026-11-15:**
+- CDC General Best Practice Guidelines, Timing and Spacing (page updated 2024-07-24): *"With the
+  exception of influenza vaccine and PPSV23, providers should only accept written, dated records as
+  evidence of vaccination"* (`gbpWrittenDatedRecords`, cited on every undated PCV dose).
+- CDC's adult notes give *"1 dose PCV15 or 1 dose PCV20 or 1 dose PCV21"* to an adult *"whose
+  previous vaccination history is unknown"* — the same answer the card now gives.
+
+**How she decided.** She was shown three patients, each beside the same patient with no dose —
+**Ruth**, 65, healthy, PCV20 with no date (was Complete, now PCV20 or PCV21 today); **Omar**, 3,
+healthy, one PCV20 with no date (was Complete, now 1 catch-up dose); a **30-year-old with diabetes**,
+PCV15 with no date (was the PPSV23 follow-up, now a PCV) — and chose **"Not counted"**, the answer
+she gave for MeningoVax the same day (STOP C, C1).
+
+**What it replaces.** Until 2026-11-15 an undated PCV **counted** ("Counted — date not recorded"),
+and the infant ladder assumed it was an infant dose. That was an agent's choice — the old code
+called it *"the audit's open question, decided here"* — and never hers. The undated **extra** dose
+(*"Check the date — none recorded"*, §K S14-4) is gone with it: an undated
+PCV now stops at the date check and never reaches the extra-dose test.
+
+**Three things that follow from "as if never given":**
+1. **No interval from it.** It never anchors a gap, and a card whose only PCV is undated no longer
+   says *"≥8 weeks after the most recent PCV"* (P2-10's `noDoseOnRecord` leaves it out; a thrown-out
+   DATED dose and an undated PPSV23 still count as a dose there).
+2. **Every undated PCV has its own line.** It is not folded like a run of PCV7 doses, because each
+   is a separate record the clinician may be able to date.
+3. **The "card on the day of a dose" look-back** (§C-P1-3) is no longer blocked by an undated PCV —
+   only by an undated PPSV23, which still counts and still cannot be placed in time.
+
+**Unchanged:** an undated PCV the patient is **too young today** to have had validly (rejected, "repeat
+with any approved product"), and an undated PCV21 under 18 (rejected, another product). The
+DoseEditor's "dose given, date and product unknown" tick on the PCV side now gives "not counted",
+consistent with CDC's "history is unknown" sentence.
+
+**What the dose-entry screen says (OWNER DECISIONS 2026-11-17).** Two places still told the
+clinician the old rule. The date box's label **"Date (optional)" is now "Date"** — offered a
+per-vaccine label, plain "Date", or no change, she chose plain "Date". A blank date is still
+accepted on both rows (the box is not made required). The History step's intro line, *"Date is
+optional (counting works without it)"*, found by driving the app, now reads **"Enter the date if
+known; a PCV with no date does not count. PCV7 is recorded but never counts toward the series."**
+— her choice of three. Both rows come from the one shared `DoseEditor.jsx`, so the Results page's
+"Recorded doses" panel changed with them. Guard:
+`regression-2026-11-17-dose-date-label-not-optional.test.jsx`. MeningoVax still says "Date
+(optional)"; its own undated rule (port Phase 3 family 2, C1) is where its label is decided.
+
+Guard: `regression-2026-11-15-undated-pcv-not-counted.test.js`.
+
 ---
 
 ## §B — Healthy children 24 months – 18 years (p2016 Table 2; `cdcCatchupJobAid`)
@@ -813,8 +869,9 @@ quotes the Age 2–5 sentence (FINDING N).
   *"for healthy children"*, so CDC (*"Less than 3 PCV doses: 2 doses PCV"*) and p2016 row 1
   both ask for two more. With **three** such doses the child is complete.
 - A child whose only possible booster is **undated** (three baby doses, then a PCV20 with no
-  date): it might have been a 4th dose before the first birthday, so she keeps the PCV20 /
-  PPSV23 offer, as before.
+  date): *superseded by §A-UNDATED (2026-11-15)* — the undated PCV20 is not counted, so she is
+  the three-baby-dose child and owes 1 dose PCV. (Until then she kept the PCV20 / PPSV23 offer
+  as a possible 4th infant dose.)
 
 **Measured** against untouched `main`: **0 / 17,016** verdicts, **0 / 18,264** record-problem
 rows, **0 / 35,280** rendered lines — the grid's only four-dose series is dated in the last five
@@ -867,9 +924,9 @@ here.** (That row was keyed on the age at the PREVIOUS dose alone until 2026-10-
 now CDC's Catch-up Table 2, dose by dose — see the rule table in §K and the sub-section
 below it.)
 
-An **undated** dose counts toward the total but can never be the ≥12-month dose, because it
-cannot be placed — the engine's standing policy assumes an undated historical dose is an
-infant dose, which is the conservative reading (the child is still offered the dose).
+An **undated** PCV no longer counts at all (§A-UNDATED, OWNER DECISION 2026-11-15). Until then
+it counted toward the total but could never be the ≥12-month dose, because the engine assumed
+an undated historical dose was an infant dose.
 
 Engine: `secondYearSeriesComplete` in `pcvHealthyChild` (`recommend.js`).
 Test: `regression-finding-m-2026-10-22-second-year-series-is-complete.test.js`.
@@ -890,7 +947,7 @@ pathway default on every route:
 |---|---|---|
 | **4 or more** doses, one at ≥12 months (the routine 2, 4, 6, 12-month series) | complete | none — the table stops at 3 |
 | **4 or more** doses, all before 12 months | catch-up | none — the table stops at 3 |
-| a completing dose with **no date** | complete | none — the job aid needs documented doses |
+| a completing dose with **no date** | *since §A-UNDATED (2026-11-15): not counted, so the 0-dose catch-up card, which the job aid does print* | was none — the job aid needs documented doses |
 
 The owner was shown **Mila** (healthy, 2½, PCV15 at 2, 4, 6 and 12 months; card "PCV series
 complete", CDC [1], immunize.org [2], job aid with no number) and ruled ***"Take it off"***.
@@ -2025,7 +2082,9 @@ PCV13, PCV15, or PCV20: administer 1 dose of PCV15 or 1 dose of PCV20").
 
 **"Asked for" is the card's own answer, never a second reading of it.** `conjugateNobodyAskedFor` in
 `validate.js` asks `cardsOnTheDayOf`, which is `recommend()` run on the day of the dose with only the
-doses before it, the way §K-IC-PCV20-5Y asks. A record with an undated dose gets no answer.
+doses before it, the way §K-IC-PCV20-5Y asks. A record with an undated PPSV23 gets no answer (since
+§A-UNDATED, 2026-11-15, an undated PCV no longer blocks it: it does not count, so the card on the day is
+the card without it).
 
 **At 19 the dose counts.** The adult rows count every dose received, so at 19 Theo and Mateo read
 "Complete", and their child cards carry no "at 19" line, because `withAtNineteen` repeats the adult
@@ -3099,9 +3158,9 @@ catch-up row**.
   previous dose ... this dose still counts" — an advisory for a dose no recommendation
   ever asked for. Such a dose now reads `extraDose: true`, `effectiveDoseNum: null`,
   excluded from the effective count — validly administered, but it does not extend the
-  series. Mirrors MeningoVax's own "extra dose" shape (`doseChipLabel.js`); an undated
-  extra dose asks rather than asserts (`extraDoseUnverified`), because the app cannot
-  place an undated row in time.
+  series. Mirrors MeningoVax's own "extra dose" shape (`doseChipLabel.js`). An undated
+  extra dose used to ask rather than assert ("Check the date — none recorded"); since
+  §A-UNDATED (2026-11-15) an undated PCV is "Not counted — no date" before this rule runs.
 
   **ADULTS ONLY, deliberately** (`ADULT_SCHED_MIN_M`, not the PCV21 product gate — ages
   18–18.99y route through the paediatric rulebook, see scheduleConstants.js). For a CHILD,
@@ -3132,8 +3191,8 @@ catch-up row**.
 
   **One deliberate limit, narrower than the PCV side** (the second, "strictly earlier",
   was lifted by S14-4C below):
-  1. **No undated mirror.** The PCV side asks rather than asserts when a dose has no date
-     (`extraDoseUnverified`). That is not carried over: an undated PPSV23 alongside a
+  1. **No undated mirror.** The PCV side used to ask rather than assert when a dose had no
+     date (retired by §A-UNDATED, 2026-11-15). That was never carried over: an undated PPSV23 alongside a
      PCV20 is overwhelmingly an old dose whose date was forgotten and which was given
      *before* the conjugate — the opposite of an extra dose — so the question would be
      wrong more often than right.
@@ -4340,12 +4399,13 @@ line read "5 years advised", which implied a second PPSV23 was due for her. None
 | `Counted — given early, accepted` | counted, `earlyAdvisory` | green |
 | `Counted — not needed. No more PPSV23.` | counted, `notNeeded` (§M-L2 below) | green |
 | `Counted — product not recorded` | `status: 'unknown'` | green |
-| `Counted — date not recorded` | `status: 'unknown'`, `undated` (no grid patient: built by hand in the guard) | green |
+| `Counted — date not recorded` | `status: 'unknown'`, `undated` — a **PPSV23** only since §A-UNDATED (no grid patient: built by hand in the guard) | green |
 | `Not counted — Extra. Do not repeat.` | `extraDose`. **Her wording**, replacing "Extra dose — more than this series needs" | blue |
 | `Not counted — repeat` | invalid for age or product, or already repeated (`repeatedOn`) | red |
 | `Not counted — do not repeat` | invalid for timing (`intervalRuleId`, W1), not needed (`notNeeded`), or no further PPSV23 (`notRepeated`) | red |
 | `Not counted — PCV7` | `status: 'noncounting'` | blue |
-| `Check the date` | `recordProblem` (future, before birth, duplicate), or an undated extra dose ("— none recorded") | grey |
+| `Not counted — no date` | a **PCV** with no date, `noDate`. **Added 2026-11-15 (§A-UNDATED, OWNER DECISION)**, the wording of the option she chose | grey |
+| `Check the date` | `recordProblem` (future, before birth, duplicate). *"— none recorded"*, for an undated extra PCV, was retired by §A-UNDATED | grey |
 
 A baby still in the PCV series also sees the dose total on a counted label that is not on schedule, e.g.
 "Counted — product not recorded (dose 1 of 4)", because the total depends on age at the first dose.

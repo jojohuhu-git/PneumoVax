@@ -89,7 +89,7 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
     it('each recorded dose has a date box its label is attached to', () => {
       renderStep();
       // 2 PCV rows + 1 PPSV23 row = 3 date boxes.
-      expect(labelledControls('Date (optional)')).toHaveLength(3);
+      expect(labelledControls('Date')).toHaveLength(3);
     });
 
     it('each PCV dose has a product box its label is attached to', () => {
@@ -99,7 +99,7 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
 
     it('the labels point at the real boxes, not all at the first row', () => {
       renderStep();
-      const ids = labelledControls('Date (optional)').map(el => el.id);
+      const ids = labelledControls('Date').map(el => el.id);
       expect(ids).toHaveLength(3); // not vacuous: an empty list would pass below
       expect(new Set(ids).size).toBe(ids.length); // no duplicate ids
       expect(ids.every(Boolean)).toBe(true);
@@ -130,7 +130,7 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
 
     it('each recorded dose has a date box its label is attached to', () => {
       openEditor();
-      expect(labelledControls('Date (optional)')).toHaveLength(3);
+      expect(labelledControls('Date')).toHaveLength(3);
     });
 
     it('each PCV dose has a product box its label is attached to', () => {
@@ -140,7 +140,7 @@ describe('S11 — dose-row labels name their field, on both editors', () => {
 
     it('its ids do not collide with the history step\'s', () => {
       openEditor();
-      const ids = labelledControls('Date (optional)').map(el => el.id);
+      const ids = labelledControls('Date').map(el => el.id);
       expect(ids).toHaveLength(3); // not vacuous: an empty list would pass below
       expect(new Set(ids).size).toBe(ids.length);
       expect(ids.every(Boolean)).toBe(true);
