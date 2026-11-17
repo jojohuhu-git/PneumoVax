@@ -474,10 +474,11 @@ the app's answer today, the answer after, how many patients move, and a control 
 family 4 C10/C11/C13 + `fmtMinAge` fix (#93); family 5 relabels (#94); STOP B B-2–B-5 + the
 Complete rule + C10's outbreak half (#95). #92–#95 merged into their stacked base branches, so
 MeningoVax **#96** lands them on `main` (merged 2026-11-17). **Owner answers D1–D8 (2026-11-17)
-built** in MeningoVax #97 (open): college 5-year cover (reverses M17), set-aside dose starts the
+built** in MeningoVax #97 (merged): college 5-year cover (reverses M17), set-aside dose starts the
 clock, MenB 6-month grace lines, MenACWY too-young repeat 8 weeks, military booster check, outbreak
-wording, MenB switch line. **Not built: B-1** (grace at age lines, "only when it helps") — next.
-Handoff: `handoff-2026-11-17-meningovax-d1-d8-built.md`.
+wording, MenB switch line. **D9** (college: no repeat for staying in a dorm; no code) and **D10**
+(serogroup B outbreak: one MenB booster; MeningoVax #98, open). **Not built: B-1** (grace at age
+lines, "only when it helps") — next, after #98. Handoff: `handoff-2026-11-17-meningovax-d10-built.md`.
 
 ### Phase 4 — One label per dose (1 session, ≈ 5%)
 

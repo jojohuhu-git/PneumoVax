@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-17** by `handoff-2026-11-17-meningovax-d10-built.md`. #97 merged; questions
+> 1–2 below were asked (D9: no code; D10: built in MeningoVax PR #98). Do not resume from this file.
+
 # MeningoVax port — Handoff after owner answers D1–D8 were asked and built (2026-11-17)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
