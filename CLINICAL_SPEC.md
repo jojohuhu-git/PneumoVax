@@ -399,6 +399,15 @@ called it *"the audit's open question, decided here"* — and never hers. The un
 (*"Check the date — none recorded"*, §K S14-4) is gone with it: an undated
 PCV now stops at the date check and never reaches the extra-dose test.
 
+**The old code is deleted (2026-11-17).** Once no counted PCV could be undated, the engine's
+undated-dose policy — an undated dose counted in its own age band and assumed to be an infant
+dose, an undated PCV20 completing a toddler's series, and the three-dose half of the FINDING G/I
+gate, kept only for an undated history — always read zero and was removed. `summarizePcv()` now **stops with an error** if an undated PCV ever reaches
+it, instead of guessing. Measured before and after: **0** answers changed for 50,472 hand-built
+patients with an undated PCV, and **0** of 35,280 card lines over both test grids. Guard:
+`regression-2026-11-17-no-undated-pcv-reaches-the-engine.test.js` (fails if the validator is made
+to count an undated PCV, with or without the error).
+
 **Three things that follow from "as if never given":**
 1. **No interval from it.** It never anchors a gap, and a card whose only PCV is undated no longer
    says *"≥8 weeks after the most recent PCV"* (P2-10's `noDoseOnRecord` leaves it out; a thrown-out
@@ -812,7 +821,7 @@ for a child whose **first** conjugate came at 6 or later (the 17-year-old with P
 PCV20 at 17; OWNER DECISION 2026-10-18, unchanged).
 
 **Fix.** `summarizePcv()` now also counts, for the doses that are **not** PCV20/PCV21, how many
-were given at or after 6 and how many are undated (`priorBand`). When none was either, the
+were given at or after 6 (`priorBand`; its undated count was removed 2026-11-17, §A-UNDATED). When none was, the
 card says *"The conjugate doses before the PCV20 (PCV13 only) were all given before age 6"*
 and cites the row she **followed**: CDC's "Received PCV before age 6 years but have not
 received PPSV23 → Not previously received PCV20" — the non-IC or IC instance (the IC one adds

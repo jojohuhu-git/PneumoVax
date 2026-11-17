@@ -1,5 +1,9 @@
 # PneumoVax — Handoff after the undated-PCV screen wording (2026-11-17)
 
+> **SUPERSEDED 2026-11-17** by `handoff-2026-11-17-undated-code-removed.md`. PR #157 merged; item 2
+> (dead undated code) is built there. Do not resume from this file.
+
+
 Branch `feat/2026-11-15-undated-pcv-not-counted`, off `main` 36e7cc6. Pushed; **PR #157 open**, the
 owner squash-merges (PneumoVax `main` is protected; agents cannot merge in auto mode).
 Baseline was 2,543 passing; now **2,548 tests: 2,547 passed, 1 failed** in one full run on commit
