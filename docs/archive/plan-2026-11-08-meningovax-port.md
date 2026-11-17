@@ -470,6 +470,11 @@ the app's answer today, the answer after, how many patients move, and a control 
 3.2 One PR per family of rows Q2/Q4 changed. Every moved answer explained in the PR body
     before the saved-answer files are rewritten.
 **STOP D — owner merges each PR.** Nothing in Phase 4 depends on the order inside Phase 3.
+**BUILT 2026-11-16/17** — family 1 Ruling D (#90); family 2 C1/C17 (#91); family 3 C5–C7 (#92);
+family 4 C10/C11/C13 + `fmtMinAge` fix (#93); family 5 relabels (#94); STOP B B-2–B-5 + the
+Complete rule + C10's outbreak half (#95). #92–#95 merged into their stacked base branches, so
+MeningoVax **#96** lands them on `main` (open, 2026-11-17). **Not built: B-1** (grace at age
+lines, "only when it helps") — next. Handoff: `handoff-2026-11-17-meningovax-phase3-built.md`.
 
 ### Phase 4 — One label per dose (1 session, ≈ 5%)
 
