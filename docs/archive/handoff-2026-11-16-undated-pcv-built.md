@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-17** by `handoff-2026-11-17-undated-pcv-screen-wording.md`. Item 1 (the "Date (optional)" question) is answered and built; resume from the newer file.
+
 # PneumoVax — Handoff after building §A-UNDATED, undated PCV not counted (2026-11-16)
 
 Branch `feat/2026-11-15-undated-pcv-not-counted`, off `main` 36e7cc6. Pushed; PR open (see below).
