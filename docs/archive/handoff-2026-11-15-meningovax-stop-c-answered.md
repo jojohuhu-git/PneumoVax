@@ -1,5 +1,8 @@
 # MeningoVax port — Handoff after STOP C was answered (2026-11-15)
 
+> **SUPERSEDED 2026-11-16** by `handoff-2026-11-16-meningovax-ruling-d-built.md`. PR #89 merged;
+> Phase 3 family 1 is built (MeningoVax PR #90). Do not resume from this file.
+
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
 `/Users/joannehuang/Downloads/PneumoVax` (this file and the plan,
 `docs/archive/plan-2026-11-08-meningovax-port.md`). Read each repo's `CLAUDE.md` first.
