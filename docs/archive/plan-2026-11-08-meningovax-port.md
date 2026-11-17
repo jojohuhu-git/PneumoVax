@@ -10,8 +10,9 @@ patients, is PR #84: 65 of 104 agree, 39 differ, sorted into families in Meningo
 2026-11-15** (five answers, table under Phase 1). Next: end-of-Phase-1 usage measure, make 1.5 a
 required test (done: MeningoVax PR #85), then Phase 2. **2.1 merged (#86); 2.2 merged (#87); 2.3 built (MeningoVax PR #88).**
 The three reads before STOP C done; **STOP C ANSWERED 2026-11-15** (18 answers, C1–C18, in MeningoVax
-`docs/archive/stop-c-packet-2026-11-15.md`; MeningoVax PR #89, no code changed). Next: Phase 3. See
-`handoff-2026-11-15-meningovax-stop-c-answered.md`.
+`docs/archive/stop-c-packet-2026-11-15.md`; MeningoVax PR #89 merged, no code changed). **Phase 3
+family 1 (Ruling D) built 2026-11-16: MeningoVax PR #90**, waiting for the owner. Next: Phase 3
+families 2–5. See `handoff-2026-11-16-meningovax-ruling-d-built.md`.
 
 *Earlier status: reviewed draft, waiting on the owner. Nothing in MeningoVax has been changed.*
 Revised three times on 2026-11-08: (1) the presentation-decision table; (2) the 82-commit
