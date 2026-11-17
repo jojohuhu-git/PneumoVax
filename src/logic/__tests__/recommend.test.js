@@ -87,18 +87,23 @@ describe('§B Healthy children 24mo–18y', () => {
   });
 
   it('30mo, 4 PCV doses → complete', () => {
+    // §A-UNDATED (2026-11-15): dated, because an undated PCV no longer counts.
     const r = run({ ageMonths: 30, riskIds: [], pcvDoses: [
-      { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' },
+      { product: 'PCV13', date: '2024-02-06' }, { product: 'PCV13', date: '2024-04-06' },
+      { product: 'PCV13', date: '2024-06-06' }, { product: 'PCV13', date: '2024-12-06' },
     ] });
     expect(pcv(r).status).toBe('complete');
   });
 
-  it('30mo with an undated PCV20 → complete (benefit of the doubt)', () => {
-    // Undated PCV20 can't be proven to be a sub-24mo dose, so it completes.
-    // (Contrast: a PCV20 DATED in infancy does not complete — see the P09 test.)
+  it('30mo with an undated PCV20 → not counted, the catch-up is owed (§A-UNDATED)', () => {
+    // REVERSED 2026-11-15 (OWNER DECISION): this test used to assert "complete
+    // (benefit of the doubt)". An undated PCV now does not count, so the card
+    // is the one the same child gets with no dose on record (Omar's case).
     const r = run({ ageMonths: 30, riskIds: [], pcvDoses: [{ product: 'PCV20' }] });
-    expect(pcv(r).status).toBe('complete');
-    expect(noteText(pcv(r))).toMatch(/PCV20|PPSV23/i);
+    const none = run({ ageMonths: 30, riskIds: [], pcvDoses: [] });
+    expect(pcv(r).status).not.toBe('complete');
+    expect(pcv(r).status).toBe(pcv(none).status);
+    expect(pcv(r).doseLabel).toBe(pcv(none).doseLabel);
   });
 
   it('30mo with a PCV20 DATED at 12mo → NOT complete, 1 more dose due (P09)', () => {
@@ -128,21 +133,22 @@ describe('§D At-risk children — Table 4 rows', () => {
 
   it('Row 2: 30mo diabetes (non-IC), 3 PCV before 12mo → 1 dose', () => {
     const r = run({ ageMonths: 30, riskIds: ['diabetes'], pcvDoses: [
-      { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' },
+      { product: 'PCV13', date: '2024-02-06' }, { product: 'PCV13', date: '2024-04-06' }, { product: 'PCV13', date: '2024-06-06' },
     ] });
     expect(pcv(r).doseLabel).toMatch(/1 dose PCV/);
   });
 
   it('Row 3: child completed series including PCV20 → no additional doses', () => {
     const r = run({ ageMonths: 96, riskIds: ['asplenia'], pcvDoses: [
-      { product: 'PCV20' }, { product: 'PCV13' },
+      { product: 'PCV13', date: '2018-08-06' }, { product: 'PCV13', date: '2018-10-06' },
+      { product: 'PCV13', date: '2018-12-06' }, { product: 'PCV20', date: '2019-06-06' },
     ] });
     expect(pcv(r).status).toBe('complete');
   });
 
   it('Row 4 (non-IC): 10yo chronic_heart, completed PCV13/15 no PCV20/PPSV23 → A) PCV20 or B) PPSV23', () => {
     const r = run({ ageMonths: 120, riskIds: ['chronic_heart'], pcvDoses: [
-      { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' },
+      { product: 'PCV13', date: '2016-08-06' }, { product: 'PCV13', date: '2016-10-06' }, { product: 'PCV13', date: '2016-12-06' }, { product: 'PCV13', date: '2017-06-06' },
     ] });
     const a = r.recs.find((x) => x.doseLabel.includes('Option A'));
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
@@ -152,14 +158,14 @@ describe('§D At-risk children — Table 4 rows', () => {
 
   it('Row 4 (non-IC): PPSV23 already given → complete', () => {
     const r = run({ ageMonths: 120, riskIds: ['chronic_heart'],
-      pcvDoses: [{ product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }],
+      pcvDoses: [{ product: 'PCV13', date: '2016-08-06' }, { product: 'PCV13', date: '2016-10-06' }, { product: 'PCV13', date: '2016-12-06' }, { product: 'PCV13', date: '2017-06-06' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2024-01-01' }] });
     expect(pcv(r).status).toBe('complete');
   });
 
   it('Row 5 (IC): 10yo HIV completed PCV13, no PPSV23 → PCV20 A; PPSV23 B with 5y note', () => {
     const r = run({ ageMonths: 120, riskIds: ['hiv'], pcvDoses: [
-      { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' },
+      { product: 'PCV13', date: '2016-08-06' }, { product: 'PCV13', date: '2016-10-06' }, { product: 'PCV13', date: '2016-12-06' }, { product: 'PCV13', date: '2017-06-06' },
     ] });
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
     expect(noteLead(b)).toMatch(/5 years/);
@@ -167,7 +173,7 @@ describe('§D At-risk children — Table 4 rows', () => {
 
   it('Row 5 (IC): PPSV23 already given → PCV20 or 2nd PPSV23 ≥5y', () => {
     const r = run({ ageMonths: 120, riskIds: ['hiv'],
-      pcvDoses: [{ product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }, { product: 'PCV13' }],
+      pcvDoses: [{ product: 'PCV13', date: '2016-08-06' }, { product: 'PCV13', date: '2016-10-06' }, { product: 'PCV13', date: '2016-12-06' }, { product: 'PCV13', date: '2017-06-06' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2024-01-01' }] });
     expect(r.recs.some((x) => x.vaccine === 'PCV' && x.brands.includes('PCV20 (Prevnar 20)'))).toBe(true);
     expect(r.recs.some((x) => x.vaccine === 'PPSV23' && x.minIntervalMonths === 60)).toBe(true);
@@ -190,7 +196,7 @@ describe('§D At-risk children — Table 4 rows', () => {
   });
 
   it('Row 8 (non-IC): 10yo diabetes, PCV13 only (1 dose at/after 6y) → A) PCV20, B) PPSV23', () => {
-    const r = run({ ageMonths: 120, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV13' }] });
+    const r = run({ ageMonths: 120, riskIds: ['diabetes'], pcvDoses: [{ product: 'PCV13', date: '2023-06-06' }] });
     const a = r.recs.find((x) => x.doseLabel.includes('Option A'));
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
     expect(a.brands).toEqual(['PCV20 (Prevnar 20)']);
@@ -199,7 +205,7 @@ describe('§D At-risk children — Table 4 rows', () => {
   });
 
   it('Row 9 (IC): 10yo asplenia, PCV13 only → B has the 5y PCV20/2nd-PPSV23 step', () => {
-    const r = run({ ageMonths: 120, riskIds: ['asplenia'], pcvDoses: [{ product: 'PCV13' }] });
+    const r = run({ ageMonths: 120, riskIds: ['asplenia'], pcvDoses: [{ product: 'PCV13', date: '2023-06-06' }] });
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
     expect(noteLead(b)).toMatch(/5 years/);
   });
@@ -448,7 +454,7 @@ describe('§K Cross-cutting rules', () => {
   });
 
   it('multi-condition peds: IC + non-IC → IC row class', () => {
-    const r = run({ ageMonths: 120, riskIds: ['diabetes', 'hiv'], pcvDoses: [{ product: 'PCV13' }] });
+    const r = run({ ageMonths: 120, riskIds: ['diabetes', 'hiv'], pcvDoses: [{ product: 'PCV13', date: '2023-06-06' }] });
     const b = r.recs.find((x) => x.doseLabel.includes('Option B'));
     expect(noteLead(b)).toMatch(/5 years/); // IC has the 5y step
   });

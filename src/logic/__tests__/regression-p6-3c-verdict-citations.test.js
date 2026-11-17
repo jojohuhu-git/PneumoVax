@@ -138,14 +138,23 @@ describe('P6-3c — minimum-age verdicts show CDC\'s minimum-age sentence', () =
     expectPaired(ppsv);
   });
 
-  it('an undated dose that is OLD ENOUGH still cites the minimum it names', () => {
-    // "must have been given at >=6 weeks to be valid" is a claim about the
-    // minimum age just as much as a verdict that voids a dose is.
+  // §A-UNDATED (OWNER DECISION 2026-11-15): an undated PCV that is old enough
+  // no longer "counts, assuming it was given at 6 weeks or older" — it is not
+  // counted, and its line cites the CDC sentence that says why.
+  it('an undated PCV that is OLD ENOUGH cites the written-dated-records rule', () => {
     const v = run({ pcvDoses: [{ product: 'PCV15', date: '' }], ageMonths: 60, dob: '2021-10-12' })
       .pcv.perDose[0];
+    expect(v.status).toBe('noncounting');
+    expectPaired(v);
+    expect(cites(v).map((c) => c.key)).toEqual(['gbpWrittenDatedRecords']);
+  });
+
+  it('an undated PPSV23 that is OLD ENOUGH still counts and still cites the minimum it names', () => {
+    const v = run({ ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }], ageMonths: 60, dob: '2021-10-12' })
+      .ppsv23.perDose[0];
     expect(v.status).toBe('unknown');
     expectPaired(v);
-    expect(cites(v).map((c) => c.key)).toEqual(['pedsMinAge']);
+    expect(cites(v).length).toBeGreaterThan(0);
   });
 
   it('the pedsMinAge link deep-links to a sentence that exists on the page', () => {

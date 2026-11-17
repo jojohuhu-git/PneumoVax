@@ -268,6 +268,9 @@ describe('CONTROLS — what must NOT become a duplicate', () => {
       pcvDoses: [{ product: 'PCV13' }, { product: 'PCV13' }],
     }).pcv;
     expect(r.perDose.every((v) => (v.recordProblem ?? null) === null)).toBe(true);
-    expect(r.effective.length).toBe(2);
+    // §A-UNDATED (OWNER DECISION 2026-11-15): neither counts any more — each
+    // is "Not counted — no date" — but both stay on the record as two doses.
+    expect(r.perDose.map((v) => v.noDate)).toEqual([true, true]);
+    expect(r.effective.length).toBe(0);
   });
 });

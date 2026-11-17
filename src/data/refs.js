@@ -2227,6 +2227,18 @@ export const REFS = {
     short: 'CDC Timing and Spacing',
     lastVerified: '2026-10-31',
   },
+  // §A-UNDATED (OWNER DECISION 2026-11-15). Read live 2026-11-15; the same
+  // entry MeningoVax carries (STOP C, C1). Cited on every undated PCV dose.
+  gbpWrittenDatedRecords: {
+    rulebook: 'any',
+    // Patients this sentence is about: anyone with a vaccination record; it carries no age or risk of its own
+    population: ['child-routine', 'child-nonIC', 'child-IC', 'adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    quote: 'With the exception of influenza vaccine and PPSV23, providers should only accept written, dated records as evidence of vaccination',
+    label: 'CDC General Best Practices, Timing and Spacing — only written, dated records are evidence of vaccination (except influenza and PPSV23)',
+    short: 'CDC Timing and Spacing',
+    lastVerified: '2026-11-15',
+  },
   cdcGbpRepeatUnderMinAge: {
     rulebook: 'any',
     // Patients this sentence is about: its own words, "the child"

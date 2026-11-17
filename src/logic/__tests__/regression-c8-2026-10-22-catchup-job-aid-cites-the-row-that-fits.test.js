@@ -169,16 +169,17 @@ describe('the completed card credits the rows that end the series', () => {
     ]);
   });
 
-  it('an undated completing dose gets NO job aid number: the table needs documented doses', () => {
+  // REVERSED by §A-UNDATED (OWNER DECISION 2026-11-15). This child used to be
+  // complete, with no job aid number because "the table needs documented
+  // doses". The undated PCV20 is now not counted at all, so she has 0
+  // documented doses — a row the job aid DOES print — and she gets the card,
+  // and the citations, of a child with nothing on record.
+  it('an undated completing dose is not counted: the card and its citations are those of a child with no dose', () => {
     const rec = pcvCard(healthyChild(30, ['undated'], 'PCV20'));
-    expect(rec.status).toBe('complete');
-    // No `adultRoutine50` either: this series includes PCV20, so since the
-    // owner's 2026-11-07 ruling ("Match the baby card", §B-50BABY) the card
-    // carries no age-50 line — at 50 the app reads Complete.
-    expect(citeKeys(rec)).toEqual([
-      'pedsNoPcv20IfComplete',
-      'p2016HealthyComplete24to59',
-    ]);
+    const none = pcvCard(healthyChild(30, [], 'PCV20'));
+    expect(rec.status).not.toBe('complete');
+    expect(rec.status).toBe(none.status);
+    expect(citeKeys(rec)).toEqual(citeKeys(none));
   });
 
   it('the two p2016 rows are the two halves of Table 2 and say opposite things', () => {
@@ -225,7 +226,8 @@ describe('a job aid with no row for the history is not on the card at all', () =
     ['Mila: 4 routine doses, series complete', 30, [2, 4, 6, 12], 'PCV15', 'complete'],
     ['4 routine doses at age 4', 48, [2, 4, 6, 12], 'PCV15', 'complete'],
     ['4 doses all before 12 months, catch-up', 30, [2, 4, 6, 9], 'PCV13', 'catchup'],
-    ['an undated completing dose', 30, ['undated'], 'PCV20', 'complete'],
+    // (An undated completing dose was a fourth row here until §A-UNDATED,
+    // 2026-11-15: it is no longer counted, so it is no longer complete.)
   ])('%s → CDC and p2016 only', (_label, ageMonths, doses, product, status) => {
     const rec = pcvCard(healthyChild(ageMonths, doses, product));
     expect(rec.status).toBe(status);

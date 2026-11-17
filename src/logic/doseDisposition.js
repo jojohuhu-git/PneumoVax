@@ -26,7 +26,8 @@ export const DISPOSITIONS = Object.freeze([
   'repeat',                   // not counted, and a replacement dose is owed
   'no-repeat',                // not counted, and this dose is not replaced
   'pcv7',                     // PCV7: set aside, the patient treated as PCV-naive
-  'check-date',               // the date is missing or impossible
+  'no-date',                  // a PCV with no date: not counted (§A-UNDATED, 2026-11-15)
+  'check-date',               // the date is impossible (future, or before birth)
 ]);
 
 /**
@@ -35,9 +36,10 @@ export const DISPOSITIONS = Object.freeze([
  */
 export function doseDisposition(v) {
   if (!v) return null;
-  // An impossible entry (dated in the future, before birth, or a duplicate),
-  // or an extra dose with no date: nothing to grade until the date is fixed.
-  if (v.recordProblem || v.extraDoseUnverified) return 'check-date';
+  // An impossible entry (dated in the future, before birth, or a duplicate):
+  // nothing to grade until the date is fixed.
+  if (v.recordProblem) return 'check-date';
+  if (v.noDate) return 'no-date';
   if (v.status === 'noncounting') return 'pcv7';
   if (v.extraDose) return 'extra';
   if (v.status === 'invalid') {

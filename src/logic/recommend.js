@@ -2357,9 +2357,10 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   const anchorPneumo = mostRecent(mostRecent(pcv.lastDate, pcv.extraConjugate?.date), ppsv.holdDate);
   // P2-10 (OWNER 2026-11-06): "this patient has no prior pneumococcal doses so why
   // is the 8 week interval being mentioned". With nothing on record, a card has
-  // nothing to measure from. Undated and thrown-out doses are still doses, so
-  // this reads the record and not the counted doses: Kai's PPSV23s were thrown
-  // out, and his card keeps the interval.
+  // nothing to measure from. Thrown-out doses and an undated PPSV23 are still
+  // doses, so this reads the record and not the counted doses: Kai's PPSV23s
+  // were thrown out, and his card keeps the interval. An undated PCV is not
+  // (§A-UNDATED, 2026-11-15) — see `noDoseOnRecord`.
   const noPneumococcalDose = ppsv.noDoseOnRecord;
   // ── 2026-10-25: the 24-71-month catch-up card's 8 weeks ─────────────────
   //
@@ -4444,10 +4445,13 @@ function doseWords(pcvAnalysis, ppsvAnalysis) {
 
 // WORD-1: four PCV7 doses printed the same line four times. The chip under every
 // one still says "Not counted", so nothing is lost by saying the rest once.
+// An undated PCV (§A-UNDATED, 2026-11-15) is also 'noncounting' but is not
+// PCV7: each one keeps its own line, because each one is a separate record
+// the clinician may be able to date.
 function pcv7LineOnce(doses) {
   let said = false;
   return doses.map((d) => {
-    if (d.status !== 'noncounting') return d;
+    if (d.status !== 'noncounting' || d.noDate) return d;
     if (!said) { said = true; return d; }
     return { ...d, reasons: [], reasonCites: [] };
   });
@@ -4607,7 +4611,7 @@ function recommendOneReading(input) {
   //
   // P1-3 (§C-P1-3): the walk asks what card this patient had on the day of a
   // conjugate, the same way `earlyFiveYearPcv20` asks below. A record with an
-  // undated dose gets no answer, because that dose cannot be placed before or
+  // undated PPSV23 gets no answer, because that dose cannot be placed before or
   // after anything. A child's own cards are read even where the adult card
   // answers from today: the dose was given under the child's rules. Reading the
   // adult card here called a PCV20 extra on a teenager it says "Complete at 19".
@@ -4617,7 +4621,10 @@ function recommendOneReading(input) {
   // extra late dose doubled the work: 8 of them took 640 ms a screen.
   const cardsSeen = input.cardsSeen ?? new Map();
   const cardsOnTheDayOf = (dose) => {
-    if ([...rawPcv, ...rawPpsv].some((d) => !d.date && d.product)) return null;
+    // §A-UNDATED (2026-11-15): an undated PCV does not count, so the card on
+    // the day plans without it — exactly what `earlier()` below does. Only an
+    // undated PPSV23, which still counts, cannot be placed.
+    if (rawPpsv.some((d) => !d.date && d.product)) return null;
     if (!cardsSeen.has(dose.date)) {
       const earlier = (list) => list.filter((x) => x.date && x.date < dose.date);
       const then = recommendBeforeFold({
@@ -4691,7 +4698,14 @@ function recommendOneReading(input) {
     })(),
     // P2-10: nothing on the record at all, counted or not. An untouched row in
     // the form is not a dose (`dropBlankDoseRows`).
-    noDoseOnRecord: dropBlankDoseRows(rawPcv).length === 0 && dropBlankDoseRows(rawPpsv).length === 0,
+    //
+    // §A-UNDATED (OWNER DECISION 2026-11-15): a PCV with no date is left out
+    // too. Her ruling is that the card plans as if that dose was never given,
+    // and with no date there is nothing to measure "8 weeks after the most
+    // recent PCV" from. A thrown-out DATED dose still counts here (Kai, P2-10),
+    // and so does an undated PPSV23, which still counts as a dose.
+    noDoseOnRecord: (pcvAnalysis.perDose ?? []).filter((v) => !v.noDate).length === 0
+      && dropBlankDoseRows(rawPpsv).length === 0,
     // C13 (2026-10-30): PPSV23 doses RECEIVED, an extra dose included — the
     // count the ADULT rows read ("PCV13 and 2 doses of PPSV23"). Never use it
     // for a child's own series; that is `count`.

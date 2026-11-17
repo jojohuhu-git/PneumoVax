@@ -23,8 +23,9 @@
 // (13 and 15 months). CDC's catch-up table calls the second dose final only
 // "for healthy children", so CDC ("Less than 3 PCV doses: 2 doses PCV") and
 // p2016 Table 4 ("0, 1, or 2 PCV doses by age 24 months") both ask for two
-// more. Pinned below. So is a child whose only possible booster is UNDATED: it
-// might have been a 4th dose before her first birthday.
+// more. Pinned below. (A child whose only possible booster was UNDATED used to
+// be pinned here too, as a possible 4th infant dose. Since §A-UNDATED, OWNER
+// DECISION 2026-11-15, an undated PCV is not counted at all.)
 
 import { describe, it, expect } from 'vitest';
 import { recommend } from '../recommend.js';
@@ -78,9 +79,14 @@ describe('Maya: a finished baby series with a PCV20 in it', () => {
     expect(r.status).toBe('complete');
   });
 
-  it('four dated baby PCV13 and a PCV20 with no date: complete — the date does not matter to CDC\'s row', () => {
-    const r = only(run({ months: [2, 4, 6, 12, null], products: [...P13x3, 'PCV13', 'PCV20'] }));
-    expect(r.status).toBe('complete');
+  // REVERSED by §A-UNDATED (OWNER DECISION 2026-11-15): this used to be
+  // "complete — the date does not matter to CDC's row". The PCV20 with no
+  // date is now not counted, so she gets the card she gets without it.
+  it('four dated baby PCV13 and a PCV20 with no date: the PCV20 is not counted, so PCV20 or PPSV23 is still offered', () => {
+    const out = run({ months: [2, 4, 6, 12, null], products: [...P13x3, 'PCV13', 'PCV20'] });
+    const without = run({ months: [2, 4, 6, 12], products: [...P13x3, 'PCV13'] });
+    expect(out.recs.map((r) => r.doseLabel)).toEqual(without.recs.map((r) => r.doseLabel));
+    expect(out.recs.map((r) => r.doseLabel)).toEqual(['Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)']);
   });
 
   it('at 6 and older the card still quotes CDC\'s Age 6-18 row', () => {
@@ -103,10 +109,14 @@ describe('children who are NOT finished keep their dose', () => {
     expect(r.doseLabel).toBe('1 dose PCV (at-risk catch-up)');
   });
 
-  it('three baby doses before 12 months and an undated PCV20 are not called complete — it might have been a 4th infant dose', () => {
-    // Unchanged from before §B-TODDLER-PCV20: still offered PCV20 or PPSV23.
+  // §A-UNDATED (OWNER DECISION 2026-11-15): the undated PCV20 is not counted,
+  // so this is the three-baby-dose child — "3 PCV doses: 1 dose PCV". It used
+  // to read as a possible 4th infant dose and was offered PCV20 or PPSV23.
+  it('three baby doses before 12 months and an undated PCV20: the PCV20 is not counted, so 1 dose PCV is owed', () => {
     const out = run({ months: [2, 4, 6, null], products: ['PCV13', 'PCV13', 'PCV13', 'PCV20'] });
-    expect(out.recs.map((r) => r.doseLabel)).toEqual(['Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)']);
+    const without = run({ months: [2, 4, 6], products: P13x3 });
+    expect(out.recs.map((r) => r.doseLabel)).toEqual(without.recs.map((r) => r.doseLabel));
+    expect(out.recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV (at-risk catch-up)']);
   });
 
   it('a series started at 12-23 months with two doses still owes two at age 2 (CDC and p2016 agree)', () => {

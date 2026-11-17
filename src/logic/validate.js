@@ -29,6 +29,9 @@
 //     Dateless doses use current age as an upper bound on age-at-administration
 //     (a past dose can't have been given later than today), mirroring MeningoVax.
 //   • Unknown product, dated, plausible age → counts as a generic PCV (unknown).
+//   • PCV with NO DATE → does NOT count ('noncounting', `noDate`; §A-UNDATED,
+//     OWNER DECISION 2026-11-15, CDC's written-dated-records rule). An undated
+//     PPSV23 still counts — CDC names PPSV23 as the exception.
 //   • PPSV23 below 24 months → INVALID.
 //
 // "effective" PCV list contains only COUNTING PCV doses (PCV7 excluded). The
@@ -753,13 +756,22 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
         ageCites
       ), minAgeM, true);
     }
-    return adviseIfBeforeRecommendedAge(
-      // §DOSE-LABELS: `undated` names the label ("Counted — date not recorded").
-      { ...unknown([
-        withMarker(`Age and interval cannot be checked without a date. Counted, assuming it was given at ${fmtMinAge(minAgeM)} or older.`, ageCites),
-      ], ageCites), undated: true },
-      prod, null, ageMonths
-    );
+    // §A-UNDATED (OWNER DECISION 2026-11-15): a PCV dose with no date does
+    // NOT count, and the card plans as if it was never given. CDC General
+    // Best Practices, Timing and Spacing (updated 2024-07-24, read live
+    // 2026-11-15): "With the exception of influenza vaccine and PPSV23,
+    // providers should only accept written, dated records as evidence of
+    // vaccination". Until this ruling the app counted the dose and assumed
+    // it was an infant dose — an agent's choice, never hers. PPSV23 is the
+    // exception the sentence itself names, so validateOnePPSV23 still counts
+    // an undated PPSV23. `noncounting` keeps the dose out of the series and
+    // never anchors a gap (stepStream); `noDate` names the label.
+    const dateCites = [cite('gbpWrittenDatedRecords')];
+    return {
+      ...noncounting([withMarker('Only a written, dated record counts as proof of a PCV dose.', dateCites)], dateCites),
+      noDate: true,
+      whys: ['Without a date, the plan is made as if this dose was not given. Add the date if the record has one. An undated PPSV23 is the exception and still counts.'],
+    };
   }
 
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, today, dob);
@@ -1231,8 +1243,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
     // One deliberate limit on the PPSV23 side, in CLINICAL_SPEC.md §K:
     //   • NO undated mirror. An undated PPSV23 alongside a PCV20 is
     //     overwhelmingly an old dose whose date was forgotten and which was
-    //     given BEFORE the conjugate; the PCV side's `extraDoseUnverified`
-    //     question would be wrong more often than right here.
+    //     given BEFORE the conjugate. (The PCV side's old "check the date"
+    //     question went with §A-UNDATED, 2026-11-15: an undated PCV is now
+    //     "Not counted — no date" before it reaches this branch.)
     //
     // S14-4C (2026-10-12, owner decision): the PPSV23 side's OTHER limit —
     // "the completing dose must be STRICTLY EARLIER" — is gone. It was there
@@ -1282,8 +1295,9 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
             && !(d.date === dose.date && sameDayPpsv23WasOwed))
           : null;
     if (priorCompletingDose) {
-      // PCV only, by construction: the PPSV23 arm above requires a date.
-      const undatedExtra = !dose.date;
+      // Both arms reach here only with a date: the PPSV23 arm above requires
+      // one, and an undated PCV is 'noncounting' (§A-UNDATED, 2026-11-15) and
+      // returned before this branch. So this dose is always placed in time.
       // Strip the early-advisory flag/sentence if validateOnePCV or
       // validateOnePPSV23 attached one — "still counts" would contradict
       // "does not extend the series".
@@ -1293,16 +1307,10 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         ...rest,
         effectiveDoseNum: null,
         extraDose: true,
-        ...(undatedExtra ? { extraDoseUnverified: true } : {}),
-        // §M-L3: the label is "Check the date — none recorded"; it still ASKS
-        // (G6) rather than asserting the dose is extra.
-        ...(undatedExtra ? { whys: ['With no date, the app cannot tell a dose beyond the series from a series dose missing its date. It is not counted until the date is added.'] } : {}),
-        reasons: undatedExtra
-          ? ['It may be an extra dose after the series was complete, or a series dose missing its date.']
-          : [
-            ...reasons,
-            extraDoseSentence(priorCompletingDose, dose, vaccine),
-          ],
+        reasons: [
+          ...reasons,
+          extraDoseSentence(priorCompletingDose, dose, vaccine),
+        ],
       }));
       // Validly given, with a real date — worth anchoring the next dose's gap
       // check, same as an invalid dose does.
@@ -1465,9 +1473,9 @@ function walkBothStreams({ pcvDoses, ppsv23Doses, ageMonths, today, dob, riskIds
     ...pcvDoses.map((dose) => ({ dose, vaccine: 'PCV' })),
     ...ppsv23Doses.map((dose) => ({ dose, vaccine: 'PPSV23' })),
   ];
-  // Undated doses first — they count but can never anchor a gap, and an
-  // undated historical dose is assumed to be the earlier one (the same
-  // convention summarizePcv uses). Then by date; on a tie, PCV before PPSV23.
+  // Undated doses first — none can anchor a gap (an undated PCV does not count
+  // at all, §A-UNDATED; an undated PPSV23 counts but cannot be placed). Then by
+  // date; on a tie, PCV before PPSV23.
   // `sort` is stable, so each stream's own order survives untouched.
   queue.sort((a, b) => {
     const da = a.dose?.date || '';
@@ -1543,8 +1551,8 @@ export function analyzeHistory(vaccine, doses, ageMonths, today, dob, opts = {})
   // Sort chronologically before the walk. The last-kept algorithm and the engine both
   // assume ascending order (interval anchoring, "first/last dated dose"), so doses entered
   // out of order must be re-sorted. Dated doses ascending; undated doses sort FIRST — they
-  // count but are never a timing anchor, and an undated historical dose is assumed to be
-  // the earlier (infant) dose, matching summarizePcv's convention.
+  // are never a timing anchor (an undated PCV does not count at all, §A-UNDATED, 2026-11-15;
+  // an undated PPSV23 counts but cannot be placed).
   const filtered = sortDosesChronologically(dropBlankDoseRows((doses ?? []).filter(Boolean)));
   if (filtered.length === 0) return { perDose: [], effective: [], doses: [], anchor: null };
   // The OTHER stream's doses, which the cross-stream rule rows measure from.

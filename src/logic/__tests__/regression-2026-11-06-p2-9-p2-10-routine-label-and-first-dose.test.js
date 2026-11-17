@@ -119,8 +119,20 @@ describe('P2-10: no dose on record, nothing to measure from', () => {
     expect(text(c)).toContain('after the most recent pneumococcal dose');
   });
 
-  it('CONTROL: an undated dose keeps it, because a dose exists', () => {
+  // REVERSED by §A-UNDATED (OWNER DECISION 2026-11-15): this was "an undated
+  // dose keeps it, because a dose exists". An undated PCV is now planned as if
+  // never given, and has no date to measure 8 weeks from, so it reads as no
+  // dose. An undated PPSV23 still counts as a dose and keeps the 8 weeks.
+  it('an undated PCV does NOT keep it: the card plans as if it was never given', () => {
     const c = run('2023-11-06', ['asplenia'], [['PCV13', '']]).recs[0];
-    expect(text(c)).toContain('after the most recent pneumococcal dose');
+    const none = run('2023-11-06', ['asplenia'], []).recs[0];
+    expect(text(c)).not.toContain('after the most recent pneumococcal dose');
+    expect(text(c)).toBe(text(none));
+  });
+
+  it('CONTROL: an undated PPSV23 keeps it, because it still counts as a dose', () => {
+    const r = recommend({ dob: '2016-11-06', today: '2026-11-06', riskIds: ['cochlear_implant'], pcvDoses: [],
+      ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }] });
+    expect(allText(r)).toContain('after the most recent pneumococcal vaccine');
   });
 });

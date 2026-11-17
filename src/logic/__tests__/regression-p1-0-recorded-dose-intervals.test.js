@@ -156,12 +156,16 @@ describe('queue P1-0 — PCV series minimum interval between recorded doses', ()
   });
 
   it('cannot check an interval it has no dates for', () => {
+    // §A-UNDATED (OWNER DECISION 2026-11-15): the undated PCV no longer counts
+    // ('noncounting', was 'unknown'), so it is not in the series and the dated
+    // dose is judged as the first.
     const a = analyzeHistory('PCV', [
       { product: 'PCV13' },
       { date: '2026-03-01', product: 'PCV13' },
     ], 4, '2026-05-01', DOB);
-    expect(statuses(a)).toEqual(['unknown', 'valid']);
-    expect(a.effective).toHaveLength(2);
+    expect(statuses(a)).toEqual(['noncounting', 'valid']);
+    expect(a.effective).toHaveLength(1);
+    expect(a.perDose[1].effectiveDoseNum).toBe(1);
   });
 
   // REVERSED TWICE, AND BOTH REVERSALS ARE RECORDED HERE BECAUSE THE SECOND

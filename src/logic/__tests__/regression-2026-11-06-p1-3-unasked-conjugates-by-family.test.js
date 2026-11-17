@@ -184,9 +184,25 @@ describe('Controls: the card asked for these, or she was not asked', () => {
     expect(chipFor(r, '2026-06-01').extraDose).toBeFalsy();
   });
 
-  it('a dose with no date on the record anywhere: nothing can be placed, left as it was', () => {
-    const pcvDoses = [...series(), { product: 'PCV13' }, given('PCV15')];
-    expect(chipFor(child(['cochlear_implant'], pcvDoses, ppsv(AT_2)), EXTRA_ON).extraDose).toBeFalsy();
+  // §A-UNDATED (OWNER DECISION 2026-11-15) split this case. An undated PCV no
+  // longer counts, so the card on the day is the card without it and the
+  // look-back runs: the PCV15 reads exactly as it does with no undated row.
+  // (Before the ruling an undated PCV blocked the look-back, "nothing can be
+  // placed".) An undated PPSV23 still counts and still cannot be placed, so it
+  // still leaves the dose as it was.
+  it('an undated PCV on the record: not counted, so the dose reads as it does without it', () => {
+    const withUndated = child(['cochlear_implant'], [...series(), { product: 'PCV13' }, given('PCV15')], ppsv(AT_2));
+    const without = child(['cochlear_implant'], [...series(), given('PCV15')], ppsv(AT_2));
+    const a = chipFor(withUndated, EXTRA_ON);
+    const b = chipFor(without, EXTRA_ON);
+    expect(!!a.extraDose).toBe(!!b.extraDose);
+    expect(a.reasons).toEqual(b.reasons);
+    expect(withUndated.recs.map((c) => c.doseLabel)).toEqual(without.recs.map((c) => c.doseLabel));
+  });
+
+  it('an undated PPSV23 on the record: it still counts and cannot be placed, left as it was', () => {
+    const r = child(['cochlear_implant'], [...series(), given('PCV15')], [{ product: 'PPSV23', date: '', detailsUnknown: true }]);
+    expect(chipFor(r, EXTRA_ON).extraDose).toBeFalsy();
   });
 
   it('a teenager the adult card answers for: the chip stays valid, as for Noor', () => {

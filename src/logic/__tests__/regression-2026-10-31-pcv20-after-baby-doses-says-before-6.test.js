@@ -64,15 +64,18 @@ describe('baby PCV13 doses, then a PCV20 at 7', () => {
 });
 
 describe('the age band is the patient\'s, from the one shared age test (FINDING N)', () => {
-  // Reachable only with an undated PCV20 (a dated one before 6 makes the whole
-  // series "before age 6", which is the card's Group A/B): a 4-year-old with a
-  // PCV13 at 3 years, so the 24-71-month catch-up is met.
-  it('a 4-year-old quotes CDC\'s Age 2-5 row, not the Age 6-18 one', () => {
-    const r = recommend({ dob: '2022-06-01', ageMonths: 52, today: '2026-10-11', riskIds: ['diabetes'],
-      pcvDoses: [...d('PCV13', ['2022-08-01', '2022-10-01', '2022-12-01', '2023-06-05', '2025-07-01']),
-        { product: 'PCV20', date: '' }], ppsv23Doses: [] }).recs[0];
-    expect(r.note.detail).toMatch(/were all given before age 6/);
-    expect(keysOf(r)).toEqual(['pedsRiskPcv20orPpsv23']);
+  // This case was reachable only with an undated PCV20 (a dated one before 6
+  // makes the whole series "before age 6", which is the card's Group A/B). Since
+  // §A-UNDATED (OWNER DECISION 2026-11-15) an undated PCV20 is not counted, so
+  // the under-6 half of this card can no longer be reached: the 4-year-old
+  // below gets the card she gets with no PCV20 on record at all.
+  it('a 4-year-old with an undated PCV20 gets the card she gets without it (§A-UNDATED)', () => {
+    const base = { dob: '2022-06-01', ageMonths: 52, today: '2026-10-11', riskIds: ['diabetes'], ppsv23Doses: [] };
+    const series = d('PCV13', ['2022-08-01', '2022-10-01', '2022-12-01', '2023-06-05', '2025-07-01']);
+    const r = recommend({ ...base, pcvDoses: [...series, { product: 'PCV20', date: '' }] });
+    const without = recommend({ ...base, pcvDoses: series });
+    expect(r.recs.map((x) => x.doseLabel)).toEqual(without.recs.map((x) => x.doseLabel));
+    expect(r.recs[0].note.detail ?? '').not.toMatch(/were all given before age 6/);
   });
 });
 
