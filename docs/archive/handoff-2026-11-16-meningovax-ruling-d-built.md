@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-17** by `handoff-2026-11-17-meningovax-phase3-built.md`. Families 2–5
+> and STOP B are built; do not resume from this file.
+
 # MeningoVax port — Handoff after Phase 3 family 1, Ruling D (2026-11-16)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
