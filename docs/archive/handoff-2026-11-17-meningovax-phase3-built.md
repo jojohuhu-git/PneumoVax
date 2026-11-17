@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-11-17** by `handoff-2026-11-17-meningovax-d1-d8-built.md`. #96 merged; the
+> six open questions below were asked and answered (D1–D8) and built in MeningoVax PR #97. Do not
+> resume from this file.
+
 # MeningoVax port — Handoff after Phase 3 families 2–5 and STOP B (2026-11-17)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and
