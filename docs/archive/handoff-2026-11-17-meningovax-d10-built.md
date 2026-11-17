@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-17** by `handoff-2026-11-17-meningovax-b1-built.md`. #98 merged; B-1 built
+> (MeningoVax #99). Do not resume from this file.
+
 # MeningoVax port — Handoff after D9/D10 were asked and D10 built (2026-11-17, later)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and

@@ -477,8 +477,11 @@ MeningoVax **#96** lands them on `main` (merged 2026-11-17). **Owner answers D1�
 built** in MeningoVax #97 (merged): college 5-year cover (reverses M17), set-aside dose starts the
 clock, MenB 6-month grace lines, MenACWY too-young repeat 8 weeks, military booster check, outbreak
 wording, MenB switch line. **D9** (college: no repeat for staying in a dorm; no code) and **D10**
-(serogroup B outbreak: one MenB booster; MeningoVax #98, open). **Not built: B-1** (grace at age
-lines, "only when it helps") — next, after #98. Handoff: `handoff-2026-11-17-meningovax-d10-built.md`.
+(serogroup B outbreak: one MenB booster; MeningoVax #98, merged). **B-1 built 2026-11-17**
+(MeningoVax #99, open): the 4-day grace at the MenACWY 3-month, 7-month, 2-year and 16-year lines,
+only when it means fewer doses, from the dose day on; owner D11 (age 7: no grace, 3-year booster),
+D12 (3 months: yes), D13 (16 years: Complete on the dose day). **Phase 3 is complete.** Next:
+Phase 4 (ask Q5–Q8 first). Handoff: `handoff-2026-11-17-meningovax-b1-built.md`.
 
 ### Phase 4 — One label per dose (1 session, ≈ 5%)
 
