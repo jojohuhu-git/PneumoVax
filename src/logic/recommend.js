@@ -226,7 +226,12 @@ export function collectRefs(riskIds, defaults, rulebook) {
 // `pcvDoses` here is the EFFECTIVE list (PCV7 already excluded by validate.js).
 // `am`/`today` let us bucket each dated dose by the age it was given — matching
 // the age-band model CDC PneumoRecs uses (before 12mo / 12–23mo / 24–71mo / ≥6y).
-// Undated doses can't be banded; they're counted in `undated` and the total only.
+// Every dose here is DATED: since §A-UNDATED (OWNER DECISION 2026-11-15) an
+// undated PCV does not count, so the validator never puts one on this list.
+// The engine's old undated-dose policy (an undated dose "assumed to be an
+// infant dose") was deleted on 2026-11-17 because nothing could reach it; an
+// undated dose arriving here now throws instead of being quietly guessed at.
+// Guard: regression-2026-11-17-no-undated-pcv-reaches-the-engine.
 // `anchorDose` is validate.js's own anchor for this stream — the last DATED
 // dose, INCLUDING one rejected for spacing and EXCLUDING PCV7. It is passed in
 // rather than recomputed here because the validator already decides which
@@ -248,17 +253,19 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
   // before7 / m7to11 split the infant band because p2016 Table 1 keys its rows
   // on it ("1 or 2 before age 7 months" vs "1 at age 7 months or older") and
   // CDC Catch-up Table 2 keys the dose 2->3 interval on it too (P0-2). Both
-  // are DATED-ONLY; see the undated policy where the ladder consumes them.
-  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, undated: 0, at12ByGrace: 0, at24ByGrace: 0 };
+  // are DATED-ONLY, as every band is.
+  const band = { before7: 0, m7to11: 0, before12: 0, m12to23: 0, m24to71: 0, ge72: 0, at12ByGrace: 0, at24ByGrace: 0 };
   // The same before/after-6 split for every dose that is NOT a PCV20/PCV21 —
   // the conjugates a completing dose was given on top of. §B-PCV20-AFTER-
   // BEFORE6 (2026-10-31): `band.ge72` counts the PCV20 itself, so a child whose
   // baby doses were all before 6 read as "at or after age 6" once her PCV20
   // came at 7. An unrecorded product is counted here: it is not a PCV20.
-  const priorBand = { ge72: 0, undated: 0 };
+  const priorBand = { ge72: 0 };
   for (const d of pcvDoses) {
     const isPrior = d.product !== 'PCV20' && d.product !== 'PCV21';
-    if (!d.date || !today) { band.undated += 1; if (isPrior) priorBand.undated += 1; continue; }
+    if (!d.date || !today) {
+      throw new Error('summarizePcv: a counted PCV dose has no date (or no today). Since §A-UNDATED an undated PCV never counts, so validate.js must not have kept it.');
+    }
     // P3-3 (S10): measured from the birthday when one is on file, instead of
     // subtracting two spans counted on different rulers. These bands decide HOW
     // MANY doses a child needs, so a fraction of a month moved the dose count in
@@ -294,29 +301,18 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     else band.ge72 += 1;
     if (isPrior && ageAtDose >= M.m72) priorBand.ge72 += 1;
   }
-  // Doses "by 24 months" (p2016 Table 4 rows 1/2 split). Undated doses are folded
-  // in here — an undated historical dose is assumed to be an infant dose.
-  band.before24 = band.before12 + band.m12to23 + band.undated;
+  // Doses "by 24 months" (p2016 Table 4 rows 1/2 split).
+  band.before24 = band.before12 + band.m12to23;
   // Doses given at/after 24 months (progress toward the at-risk 2-dose catch-up).
-  // Dated only — we never ASSUME an undated dose was a ≥24mo catch-up dose.
   // `at24ByGrace`: §A-GRACE24 — a dose 1-4 days before the 2nd birthday counts
   // here AND stays in `before24`, where its real age puts it.
   band.ge24 = band.m24to71 + band.ge72 + band.at24ByGrace;
-
-  // A completing dose (PCV20/PCV21) that we CANNOT prove was given before 24mo —
-  // i.e. undated, or dated at ≥24mo. Used by the healthy-child completeness check:
-  // a single PCV20 dated in infancy does NOT complete (case P09), but an undated
-  // one gets the benefit of the doubt (preserves prior behavior).
-  const hasUndatedCompleting = pcvDoses.some(
-    (d) => (d.product === 'PCV20' || d.product === 'PCV21') && !d.date,
-  );
 
   return {
     count: pcvDoses.length,
     products,
     hasPCV20, hasPCV21, hasPCV15, hasPCV13,
     includesCompleting,
-    hasUndatedCompleting,
     lastDate: lastDated?.date || null,
     // The product of the dose `lastDate` names, as the record shows it.
     lastProduct: lastDated?.product || null,
@@ -328,7 +324,7 @@ function summarizePcv(pcvDoses, am = 0, today = null, dob = null, anchorDose = n
     firstCompletingDate: pcvDoses.filter((d) => (d.product === 'PCV20' || d.product === 'PCV21') && d.date).map((d) => d.date).sort()[0] ?? null,
     // Age in months at the dose `lastDate` names. Derived from `lastDated`
     // rather than counted in the loop above so that a key and a date can
-    // never refer to different doses. null when undated.
+    // never refer to different doses. null when there is no dose.
     lastAgeAtDose: lastDated && today
       ? ageAtDoseMonths(lastDated, { dob, ageMonths: am }, today)
       : null,
@@ -634,17 +630,12 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // summarizePcv's bands; the totals below are `prior + (doses Table 1 says
   // are still owed)`, which is what the table's third column states.
   //
-  // UNDATED DOSES (the audit's open question, decided here): an undated dose
-  // cannot be placed in a before-7-months band, so it is treated as an infant
-  // dose — the convention `band.before24` already states, and the same
-  // benefit-of-the-doubt `boosterGiven` below gives it. For a 7-11-month-old
-  // the two possible readings agree (total 3 either way); for a 12-23-month-old
-  // it yields the HIGHER total, which is the direction the authority rule
-  // allows (never fewer doses than a source supports).
-  const undatedAsInfant = pcv.band.undated;
-  const before7 = pcv.band.before7 + undatedAsInfant;
+  // Every counted dose is dated (§A-UNDATED, 2026-11-15), so each one sits in
+  // exactly one band. The old "undated dose is an infant dose" policy that
+  // stood here was an agent's choice, never the owner's; deleted 2026-11-17.
+  const before7 = pcv.band.before7;
   const m7to11 = pcv.band.m7to11;
-  const before12 = pcv.band.before12 + undatedAsInfant;
+  const before12 = pcv.band.before12;
   const at12plus = pcv.band.m12to23;
 
   // The arithmetic that makes every cell come out right:
@@ -738,9 +729,7 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // whether the patient's CURRENT age is ≥12mo.  A 13-month-old with 4 doses
   // all given at <12mo still needs the ≥12mo booster — prior >= target alone
   // does not prove the series is complete.
-  // Undated doses get benefit-of-the-doubt (matching completedInfantSeries logic
-  // in pcvHealthyChild) — consistent with validate.js counting policy.
-  const boosterGiven = (pcv.band.m12to23 + pcv.band.ge72 + pcv.band.undated) >= 1 && prior >= target;
+  const boosterGiven = (pcv.band.m12to23 + pcv.band.ge72) >= 1 && prior >= target;
 
   // P1-2 — "PCV dose 5 of 4" was an impossible label. A child can hold more
   // doses than p2016 Table 1 contemplates (four infant doses, say, where the
@@ -874,8 +863,8 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
   // ── The interval to the NEXT dose: CDC Catch-up Table 2, dose by dose ──
   //
   // Keyed off `anchor`, not off `prior`: an interval only exists when there is
-  // a DATED earlier dose to measure it from. With no prior dose (or only
-  // undated ones) the honest answer is null, not a number nothing was measured
+  // a DATED earlier dose to measure it from. With no prior dose the honest
+  // answer is null, not a number nothing was measured
   // against — dueState short-circuits on a null anchor anyway.
   //
   // `ageAtThisDose` is the age at which the advised dose will be GIVEN, which
@@ -891,7 +880,7 @@ function pcvInfant(am, riskIds, pcv, today, dob, adultOnlyTicked = false) {
       doseNumber: prior + 1,
       ageAtPrevDose: pcv.anchorAgeAtDose,
       currentAgeMonths: am,
-      anyDoseBefore12: pcv.band.before12 >= 1 || pcv.band.undated >= 1,
+      anyDoseBefore12: pcv.band.before12 >= 1,
       ageAtThisDose: needs12moFloor ? M.m12 : am,
     })
     : null;
@@ -1874,7 +1863,7 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, fiftyAsk
   //   • a catch-up dose was given at ≥24mo (the single 24–59mo catch-up dose suffices), OR
   //   • the series was STARTED in the second year of life and two doses are on
   //     record (FINDING M, below).
-  const completedInfantSeries = prior >= 4 && (b.m12to23 >= 1 || b.undated >= 1);
+  const completedInfantSeries = prior >= 4 && b.m12to23 >= 1;
   const caughtUpAt24mo = b.ge24 >= 1;
 
   // FINDING M (2026-10-22). A series begun at 12–23 months is a TWO-dose series,
@@ -1930,19 +1919,13 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, fiftyAsk
   // the two guards and finding that NOTHING failed — so the cases below now
   // cover both lines, and that mutation fails.
   //
-  // An undated dose is counted toward the total but can never be the ≥12-month
-  // dose, because it cannot be placed: the engine's standing policy assumes an
-  // undated historical dose is an infant dose. That is the conservative reading
-  // (the child is still offered the dose) and it keeps `b.undated` out of the
-  // "started in the second year" test.
-  const startedInSecondYear = b.before12 === 0 && b.undated === 0;
+  const startedInSecondYear = b.before12 === 0;
   const dosesThatFinishIt = startedInSecondYear ? 2 : 3;
   const secondYearSeriesComplete = b.m12to23 >= 1 && prior >= dosesThatFinishIt;
 
   // 24–59 months
   if (am < M.m60) {
-    if (completedInfantSeries || caughtUpAt24mo || secondYearSeriesComplete
-        || pcv.hasUndatedCompleting) {
+    if (completedInfantSeries || caughtUpAt24mo || secondYearSeriesComplete) {
       // C8, documents 3 and 5. Both were listed on this card and credited with
       // nothing. p2016 Table 2's "Completed any PCV schedule … by 24 mos" row is
       // this card's sentence and fits every route to it.
@@ -1951,12 +1934,12 @@ function pcvHealthyChild(am, pcv, ppsv, today, adultOnlyTicked = false, fiftyAsk
       // the catch-up card below: its table is keyed on 1–3 DOCUMENTED previous
       // doses, at least one of them at 12 months or later. Two routes here fall
       // outside that and get NO cite — a child with four or more conjugate doses
-      // (the table stops at three), and one whose completing dose is undated
-      // (the job aid requires doses to be documented). Owner case (a) both
-      // times: no document has a row for the history. Both lose the job aid's
-      // grey button too (owner ruling 2026-11-07, Mila: "Take it off").
+      // (the table stops at three). Owner case (a): no document has a row for
+      // the history. It loses the job aid's grey button too (owner ruling
+      // 2026-11-07, Mila: "Take it off"). (A second route, a completing dose
+      // with no date, ended with §A-UNDATED: an undated PCV no longer counts.)
       const datedAtOrAfter12mo = b.m12to23 + b.ge24;
-      const jobAidEndsItHere = b.undated === 0 && datedAtOrAfter12mo >= 1
+      const jobAidEndsItHere = datedAtOrAfter12mo >= 1
         && prior >= 1 && prior <= 3;
       // OWNER RULING 2026-11-07, "Match the baby card" (§B-50BABY, Ava). The
       // age-50 line carries the baby card's two limits, each found by running
@@ -2318,9 +2301,8 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   // the cards repeated that about a child whose baby series was before 6 with
   // one conjugate on top: Ada, 8, four PCV13 as a baby, PCV15 at 7. A card says
   // it only when the record bears it out. One reading of the record, here, and
-  // every sentence below asks it. Dated doses only, as `band` is: an undated dose
-  // says nothing either way, and rows 8/9 keep their standing treatment of it.
-  const someConjugateBefore6 = pcv.count - pcv.band.ge72 - pcv.band.undated > 0;
+  // every sentence below asks it. Every counted dose is dated (§A-UNDATED).
+  const someConjugateBefore6 = pcv.count - pcv.band.ge72 > 0;
   const somePpsv23Before6 = ppsv.effective.some(
     (d) => d.date && ageAtDoseMonths(d, { dob, ageMonths: am }, today) < M.m72,
   );
@@ -2440,10 +2422,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   const firstCountedPpsv23 = ppsv.effective.find((d) => d.date)?.date ?? null;
   const icTwoPpsv23Done = icNoThirdPpsv23 && !!pcv.lastDate && !!firstCountedPpsv23
     && ppsv.effective.every((d) => d.date) && firstCountedPpsv23 > pcv.lastDate;
-  // Every counting PCV dose is DATED and was given before age 6 (72 months).
-  // See the long note at its first use below for why an undated dose fails it.
-  const allCountingPcvBefore72mo =
-    pcv.count >= 1 && pcv.band.ge72 === 0 && pcv.band.undated === 0;
+  // Every counting PCV dose was given before age 6 (72 months). Every counting
+  // dose is dated (§A-UNDATED), so the bands place all of them.
+  const allCountingPcvBefore72mo = pcv.count >= 1 && pcv.band.ge72 === 0;
   const out = [];
 
   // Row 3: completed series before 6y including ≥1 PCV20 → no additional doses.
@@ -2474,9 +2455,7 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   // 12-23 months (not row 2, "3 doses of PCV, all before 12 months"). That
   // dose is also what makes it a finished series in CDC's words: its
   // catch-up table asks for a 4th dose only of a child "who received 3 doses
-  // before age 12 months". An undated dose cannot be that 12-23 month dose —
-  // it might have been a 4th dose before the first birthday — so a child
-  // whose only possible booster is undated keeps the dose.
+  // before age 12 months".
   //
   // A series STARTED at 12-23 months with only two doses stays in row 1, and
   // rightly: CDC's catch-up table calls that second dose final only "for
@@ -2508,13 +2487,11 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
       && pcv.products.length === pcv.count;
     const completedBefore6 = allCountingPcvBefore72mo;
     // Every conjugate under the PCV20 was dated and given before age 6; the
-    // PCV20 came at 6 or later (else `completedBefore6` would hold) or is
-    // undated. Undated earlier doses fail it, as they fail
-    // `allCountingPcvBefore72mo`: no card asserts an age nobody recorded.
+    // PCV20 came at 6 or later (else `completedBefore6` would hold).
     //
     // No "at least one earlier dose" clause: a series of PCV20/PCV21 alone is
     // `pcv20IsFirstConjugate`, whose branch runs first.
-    const priorsAllBefore6 = pcv.priorBand.ge72 === 0 && pcv.priorBand.undated === 0;
+    const priorsAllBefore6 = pcv.priorBand.ge72 === 0;
     // P2-2 (2026-11-01): name the completing product the record SHOWS. A
     // PCV21 counts from 18 (§I, owner decision 2026-10-16) and reached this
     // card titled "includes PCV20" (FINDING H). CDC's child rows are written
@@ -2731,13 +2708,9 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   // before age 6 years with PCV13 and/or PCV15". So they fall through to rows
   // 4/5 below. Note those rows' age band is "2 through 18 years" — the 24–71
   // month rows are not a ceiling, and a 24-month-old reads them too.
-  //
-  // `undated === 0` keeps undated histories on their existing path: a dose with
-  // no date cannot be placed before or after 12 months, so rerouting it would
-  // be a guess. Same reasoning as `allCountingPcvBefore72mo` below.
   const threeByAge24mo = pcv.band.before24 >= 3;
   const threeAllBefore12mo = pcv.band.before12 >= 3;
-  const matchesNoTable4Row = threeByAge24mo && !threeAllBefore12mo && pcv.band.undated === 0;
+  const matchesNoTable4Row = threeByAge24mo && !threeAllBefore12mo;
   if (am < M.m72 && pcv.count < 4 && !matchesNoTable4Row) {
     const target = threeByAge24mo ? 1 : 2; // row 2 (1) vs row 1 (2)
     const remaining = Math.max(0, target - pcv.band.ge24);
@@ -3020,9 +2993,8 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
   // given before age 72 months, who has received PPSV23 and never PCV20/PCV21, has COMPLETED
   // the pediatric PCV + PPSV23 series — no adult/older-child PCV20 catch-up. The decisive
   // gate is PneumoRecs' question "did the patient only receive PCV before age 72 months?".
-  // Requires all counting PCV doses to be DATED and before 72mo: an undated dose cannot be
-  // confirmed pre-72mo, so it falls through to the standard rows (matches "PPSV23 already
-  // given → PCV20/2nd-PPSV23" for undated-history IC cases).
+  // Requires all counting PCV doses to be before 72mo (every counting dose is dated since
+  // §A-UNDATED, 2026-11-15).
   //
   // Defined once at the top of this function since FINDING J (2026-10-18) —
   // p2016's row 3 asks the same question of a PCV20 history that rows 4/5 ask
@@ -3152,27 +3124,18 @@ function pcvRiskChild(am, riskIds, pcv, ppsv, today, dob = null) {
     return out;
   }
 
-  // FINDING G: `|| allCountingPcvBefore72mo` is the fix. Rows 4/5 describe a
-  // child whose conjugate doses were all given before age 6, whatever the
-  // count; rows 8/9 below describe one with a dose at or after age 6. The
-  // `>= 3` is kept rather than replaced so a three-dose history with an
-  // undated dose — which `allCountingPcvBefore72mo` deliberately excludes —
-  // lands exactly where it did before.
-  //
-  // FINDING I (2026-10-18): `&& pcv.band.ge72 === 0` is the condition the kept
-  // half was missing. `pcv.count >= 3` on its own also caught a fully DATED
-  // three-dose history given at or after age 6 — a teenager with three PCV13
-  // doses at 16 was told they "completed PCV13/15 before age 6". 64 cards made
-  // that claim; another 32 were routed here without claiming anything about
-  // age. The undated case the `>= 3` exists for is untouched, because
-  // `band.ge72` counts DATED doses only.
-  //
-  // Not written as the shorter `pcv.count >= 1 && pcv.band.ge72 === 0`, which
-  // reads better and is wrong: it would pull a child with one or two UNDATED
-  // doses out of rows 8/9 and into rows 4/5, asserting "completed before age 6"
-  // about doses whose dates nobody knows. Neither row describes that child;
-  // this change does not pretend to settle them and leaves them where they are.
-  if ((pcv.count >= 3 && pcv.band.ge72 === 0) || allCountingPcvBefore72mo) {
+  // FINDING G: rows 4/5 describe a child whose conjugate doses were all given
+  // before age 6, whatever the count; rows 8/9 below describe one with a dose at
+  // or after age 6. FINDING I (2026-10-18) was the same question asked wrongly:
+  // a `pcv.count >= 3` half with no age test sent a teenager with three PCV13
+  // doses at 16 here, and 64 cards told such a child they "completed PCV13/15
+  // before age 6". That half was then narrowed to `pcv.count >= 3 &&
+  // pcv.band.ge72 === 0` and kept only for a history with an UNDATED dose.
+  // Since §A-UNDATED (2026-11-15) no counted dose is undated, so that half was
+  // exactly `allCountingPcvBefore72mo` restricted to three doses and was
+  // deleted on 2026-11-17. Guards: regression-finding-i-2026-10-18-three-doses-at-or-after-six and
+  // regression-2026-11-17-no-undated-pcv-reaches-the-engine.
+  if (allCountingPcvBefore72mo) {
     // Rows 4 (non-IC) / 5 (IC): completed before 6y with PCV13/15 (no PCV20, no PPSV23).
     //
     // FINDING N (2026-10-23). CDC's notes print this row FOUR times — once in

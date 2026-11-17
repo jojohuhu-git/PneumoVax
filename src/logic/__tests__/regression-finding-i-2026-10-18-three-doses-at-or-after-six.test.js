@@ -32,6 +32,11 @@
 // that child; the fix does not pretend to settle it, and leaves them where they
 // were. The control below pins that.
 //
+// 2026-11-17: HISTORY, not the current code. Since §A-UNDATED (2026-11-15) no
+// counted dose is undated, so the `>= 3` half had become a copy of
+// `allCountingPcvBefore72mo` for three doses, and the gate is now just
+// `if (allCountingPcvBefore72mo)`. Every test in this file still holds.
+//
 // WHAT IT MOVES, measured over the committed grid before the fix: 64 cards
 // claim a before-6 history to a child with a dated dose at or after 6 — 16 with
 // no PPSV23 ("completed PCV13/15 before age 6") and 48 with one ("who completed
