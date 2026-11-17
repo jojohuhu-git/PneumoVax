@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-16** by `handoff-2026-11-16-undated-pcv-built.md`. The build below was
+> done on this branch (commit `b966f92`); do not resume from this file.
+
 # Handoff: undated PCV dose is NOT counted (owner decision 2026-11-15). Build NOT started
 
 Supersedes nothing in PneumoVax (`handoff-2026-11-15-meningovax-stop-c-answered.md` still governs the
