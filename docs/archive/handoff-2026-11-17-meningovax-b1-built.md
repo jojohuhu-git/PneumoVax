@@ -1,3 +1,8 @@
+> **SUPERSEDED 2026-11-17.** Phase 4 was built after this (MeningoVax PR #100). The port plan and its
+> handoffs moved to MeningoVax (owner decision): read
+> `~/Downloads/MeningoVax-main/docs/archive/handoff-2026-11-17-meningovax-phase4-built.md`.
+> Do not resume from this file.
+
 # MeningoVax port — Handoff after B-1 was built (2026-11-17, latest)
 
 Repos: `/Users/joannehuang/Downloads/MeningoVax-main` (the work) and

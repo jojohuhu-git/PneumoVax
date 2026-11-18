@@ -72,7 +72,7 @@ downloads from the shell, and the browser cannot save files to disk.
   "fixed": cases where CDSI differs from an owner ruling (e.g. an extra dose that still sets the next
   date — Noor, PR #122; CDSI never measures from an extra dose). **STOP:** owner sees the families.
 
-### MeningoVax — added to the port plan (`plan-2026-11-08-meningovax-port.md`)
+### MeningoVax — added to the port plan (`plan-2026-11-08-meningovax-port.md`, in MeningoVax since 2026-11-17)
 
 - **M-CDSI-2, CDC's test patients — Phase 1, item 1.5.** An outside check before any clinical
   decision, beside the whole-app checks.

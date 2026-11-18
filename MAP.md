@@ -37,7 +37,7 @@ folder — they go where the table at the bottom says.**
 | `README.md` | The public description of the app for anyone visiting the code online. |
 | `CLINICAL_SPEC.md` | **The active rulebook** — every clinical rule with its source citation. The code and tests refer to it by name, which is why it stays at the top level. Its section K now holds a table that must match the code exactly; a test checks it on every run, so the document can't quietly fall behind. |
 | `docs/agent/` | The technical manuals (architecture, clinical rules, testing rules). |
-| `docs/archive/` | Session notes, handoffs, plans and reports, kept for history. **A few files here are current:** the newest handoff with no "SUPERSEDED" banner at its top, and any plan whose status line says it is not finished (today: the MeningoVax port plan and the CDSI-checks plan, both `plan-2026-11-08-*.md`). Everything else is history. |
+| `docs/archive/` | Session notes, handoffs, plans and reports, kept for history. **A few files here are current:** the newest handoff with no "SUPERSEDED" banner at its top, and any plan whose status line says it is not finished (today: the CDSI-checks plan, `plan-2026-11-08-cdsi-checks-both-apps.md`; the MeningoVax port plan moved to MeningoVax on 2026-11-17 and a `--SEE-MENINGOVAX.md` pointer stands in its place). Everything else is history. |
 
 ## Machine-managed — never edit by hand
 
