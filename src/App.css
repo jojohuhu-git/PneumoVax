@@ -274,6 +274,9 @@ body {
   font-size: var(--fs-base);
   color: var(--r);
 }
+/* An undated PPSV23 still counts (CDC's exception), so its line is a note in
+   neutral grey, not a red problem (2026-11-27). */
+.dose-row-date-note { background: var(--wh); border-left-color: var(--gy4); color: var(--gy2); }
 
 .dose-field { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; min-width: 130px; }
 .dose-field label { font-size: var(--fs-sm); color: var(--gy3); font-weight: 500; }

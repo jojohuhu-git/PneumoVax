@@ -179,6 +179,7 @@ describe('the warning and the verdict cannot drift apart', () => {
     const warning = dateEntryWarning(row, { ageMonths: 81, today: TODAY, dob: DOB });
     expect(warning.kind).toBe('no-date');
     expect(warning.text).toMatch(/still counts/);
+    expect(warning.counts).toBe(true);   // drawn as a grey note, not a red problem
     const verdict = analyzeBoth({ pcvDoses: [], ppsv23Doses: [row], ageMonths: 81, today: TODAY, dob: DOB, riskIds: [] }).ppsv23.perDose[0];
     expect(verdict.doesNotCount).toBeFalsy();
     // Under 2, the same row is not counted (below PPSV23's minimum age), and says so.

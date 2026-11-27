@@ -349,7 +349,7 @@ export function dateEntryWarning(dose, { ageMonths, today, dob } = {}) {
     if (ageMonths != null && ageMonths < PPSV23_PRODUCT.minAgeM) {
       return { kind: 'no-date', text: `With no date, this PPSV23 is not counted: the patient is below the ${fmtMinAgeAdj(PPSV23_PRODUCT.minAgeM)} minimum age for PPSV23.` };
     }
-    return { kind: 'no-date', text: 'With no date, this PPSV23 still counts: CDC accepts an undated PPSV23 record. Its age and interval are not checked until a date is added.' };
+    return { kind: 'no-date', counts: true, text: 'With no date, this PPSV23 still counts: CDC accepts an undated PPSV23 record. Its age and interval are not checked until a date is added.' };
   }
   const ref = todayISO(today);
   if (futureDated(dose, ref)) {

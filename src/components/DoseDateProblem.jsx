@@ -37,7 +37,9 @@ export default function DoseDateProblem({ dose, ageMonths, today, dob }) {
   const warning = dateEntryWarning(dose, { ageMonths, today, dob });
   if (!warning) return null;
   return (
-    <div className="dose-row-date-problem" role="status" data-problem={warning.kind}>
+    // A dose that still counts (an undated PPSV23) is a note, not a problem:
+    // red means something is wrong (2026-11-27).
+    <div className={warning.counts ? 'dose-row-date-problem dose-row-date-note' : 'dose-row-date-problem'} role="status" data-problem={warning.kind}>
       {warning.text}
     </div>
   );
