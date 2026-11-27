@@ -112,7 +112,7 @@ export default function StepAge({ ageMonths, error, onChange, today }) {
               value={years} onChange={e => handleYearsChange(e.target.value)} />
           </div>
           <div className="age-field">
-            <label htmlFor="age-months">Months (optional)</label>
+            <label htmlFor="age-months">Months</label>
             <input id="age-months" type="number" min="0" max="11" placeholder="0"
               value={months} onChange={e => handleMonthsChange(e.target.value)} />
           </div>
