@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PneumoVax Rulebook — reorganization mock-up v1 (2026-11-27)</title>
+<style>
+  :root { --ink:#1f2933; --muted:#5f6b76; --line:#dfe3e8; --bg:#f6f7f9; --card:#fff;
+          --pcv:#2f7d4f; --pcvbg:#e7f4ec; --pp:#2563a8; --ppbg:#e6eef9;
+          --dec:#6b3fa0; --decbg:#f1eaf9; --edit:#8a5a00; --editbg:#fdf0d5; --grey:#f1f3f5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:680px; margin:0 auto; padding:16px 14px 40px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  h2 { font-size:17px; margin:0; }
+  h3 { font-size:15px; margin:16px 0 6px; }
+  h4 { font-size:14px; margin:12px 0 4px; }
+  p { margin:6px 0; }
+  .lead { color:var(--muted); }
+  .mock { background:var(--editbg); color:var(--edit); border-radius:8px; padding:8px 10px; font-size:13px; margin-bottom:12px; }
+  details { background:var(--card); border:1px solid var(--line); border-radius:10px; margin:8px 0; }
+  details > summary { list-style:none; cursor:pointer; padding:10px 12px; display:flex; gap:10px; align-items:flex-start; }
+  details > summary::-webkit-details-marker { display:none; }
+  details > .body { padding:0 12px 12px; }
+  details details { background:var(--bg); }
+  .num { flex:none; width:22px; height:22px; border-radius:50%; background:var(--ppbg); color:var(--pp); font-size:12px; font-weight:600; text-align:center; line-height:22px; }
+  .sum { font-size:13px; color:var(--muted); display:block; font-weight:400; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  /* Copied from MeningoVax App.css: .rb-full-btn, .rb-fold-mark, .rb-how-head, .rb-show-all, .rb-step* */
+  details { background:none; border:none; border-radius:0; margin:0; }
+  details > summary { border:1px solid #9dd4e8; border-radius:6px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; background:transparent; }
+  details > summary:hover { background:#e8f5fb; }
+  details > summary::after { content:"Show"; flex:none; font-size:12.5px; font-weight:600; color:#1a6b8a; text-decoration:underline; }
+  details[open] > summary::after { content:"Hide"; }
+  details > .body { padding:12px 0 0; }
+  details > summary h2 { font-size:19px; font-weight:700; color:#1a6b8a; margin:0; line-height:1.25; }
+  .foldrow { display:flex; align-items:center; gap:8px; }
+  .showall { padding:0 12px; font:inherit; font-size:12.5px; font-weight:600; color:#1a6b8a; background:#fff; border:1px solid #9dd4e8; border-radius:4px; white-space:nowrap; cursor:pointer; }
+  .showall:hover { background:#e8f5fb; }
+  .foldwrap { position:relative; }
+  .foldwrap > .showall { position:absolute; top:0; right:0; }
+  #decides > summary { width:calc(100% - 92px); }
+  .step { display:grid; grid-template-columns:30px minmax(0,1fr); gap:12px; position:relative; padding-bottom:16px; }
+  .step:not(:last-of-type)::before { content:""; position:absolute; left:14px; top:30px; bottom:0; width:2px; background:#cfd8dc; }
+  .step > .num { width:30px; height:30px; border-radius:50%; border:2px solid #b0bec5; color:#546e7a; background:#fff; display:grid; place-items:center; font-weight:700; font-size:0.78rem; line-height:1; position:relative; z-index:1; }
+  .step > details > summary { padding:8px 12px; }
+  .step .words { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .step .words .lbl { font-size:0.92rem; font-weight:700; color:#1a6b8a; }
+  .step .words .sum { font-size:0.78rem; color:#546e7a; line-height:1.45; }
+  .reflabel { margin:16px 0 8px; font-size:0.78rem; font-weight:600; color:#546e7a; }
+  .refsec { margin:0 0 12px; }
+  .ref { font-size:12px; color:var(--muted); margin:16px 0 4px; text-transform:none; }
+  table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:13px; margin:6px 0; }
+  th, td { text-align:left; vertical-align:top; padding:6px 6px; border-bottom:1px solid var(--line); overflow-wrap:break-word; hyphens:auto; }
+  th { font-weight:600; color:var(--muted); font-size:12px; }
+  td.min, th.min { background:var(--grey); }
+  .tag { display:inline; font-size:11px; border-radius:5px; padding:0 5px; margin:1px 2px 1px 0; line-height:1.9; -webkit-box-decoration-break:clone; box-decoration-break:clone; overflow-wrap:anywhere; }
+  .src { border:1px solid var(--line); color:var(--muted); background:#fff; }
+  .dec { background:var(--decbg); color:var(--dec); }
+  .e { background:var(--editbg); color:var(--edit); font-weight:600; }
+  .pcv { background:var(--pcvbg); color:var(--pcv); font-weight:600; }
+  .pp { background:var(--ppbg); color:var(--pp); font-weight:600; }
+  .det { font-size:12px; color:var(--pp); }
+  .lbl { display:inline-block; font-size:12px; font-weight:600; border-radius:5px; padding:1px 6px; }
+  .ok { background:var(--pcvbg); color:var(--pcv); }
+  .warn { background:#fbf1dc; color:#7a5200; }
+  .bad { background:#fbe7e7; color:#9b2c2c; }
+  .neutral { background:var(--grey); color:var(--muted); }
+  .keyrow { padding:6px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .keyrow:last-child { border-bottom:none; }
+  .flow { display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:13px; margin:4px 0; }
+  .flow .arrow { color:var(--muted); }
+  .opt { border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:6px 0; font-size:13px; }
+  .timeline { border-left:2px solid var(--line); margin:6px 0 6px 6px; padding-left:12px; font-size:13px; }
+  .timeline div { margin:0 0 8px; }
+  .stop { background:#fbe7e7; border:1px solid #f1c4c4; border-radius:8px; padding:10px 12px; font-size:13px; }
+  ol.rank { margin:4px 0; padding-left:20px; font-size:13px; }
+  .decision { border-bottom:1px solid var(--line); padding:8px 0; font-size:13px; }
+  .decision:last-child { border-bottom:none; }
+  .decision b { font-weight:600; }
+  .src-item { font-size:13px; padding:4px 0; }
+  .src-item span { display:block; color:var(--muted); font-size:12px; }
+  footer { font-size:12px; color:var(--muted); margin-top:16px; }
+  ul.tight { margin:4px 0; padding-left:18px; font-size:13px; }
+  ul.tight li { margin:3px 0; }
+  @media (max-width: 480px) {
+    table.stack, table.stack tbody, table.stack tr, table.stack td { display:block; width:100%; }
+    table.stack colgroup, table.stack tr.head { display:none; }
+    table.stack tr { border-bottom:1px solid var(--line); padding:6px 0; }
+    table.stack td { border:none; padding:2px 4px 2px 0; }
+    table.stack td:first-child { font-weight:600; }
+    table.stack td[data-label]::before { content: attr(data-label) ": "; color:var(--muted); font-size:12px; font-weight:400; }
+    table.stack td.min { background:var(--grey); padding:2px 6px; border-radius:4px; margin:2px 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<div class="mock">Mock-up only, not the app. Every fold is open here for review; in the app all start closed. Fold buttons copy MeningoVax: each fold has its own Show/Hide, and "Show all" opens every fold, including Decisions and Sources. <span class="tag e">E18</span> <span class="tag e">E1</span> tags mark the proposed edits listed in chat. Clinical content is unchanged except where an edit says so.</div>
+
+<h1>Rulebook</h1>
+<p class="lead">Recommendations are based on age, risk conditions and dated vaccine history. <span class="tag e">E1</span></p>
+<p style="font-size:13px;margin:2px 0"><span class="tag src">Source</span> CDC or ACIP text the rule rests on</p>
+<p style="font-size:13px;margin:2px 0 10px"><span class="tag dec">PneumoVax decision</span> a rule CDC and ACIP do not state</p>
+
+<div class="foldwrap">
+<button type="button" class="showall" id="showall">Hide all</button>
+<details open id="decides">
+<summary><h2>How PneumoVax decides</h2></summary>
+<div class="body">
+<p class="lead" style="font-size:13px;margin:0 0 10px">Five steps, always in this order.</p>
+
+<!-- STEP 1 -->
+<div class="step"><span class="num">1</span>
+<details open>
+<summary><span class="words"><span class="lbl">Stop check</span><span class="sum">A transplant, CAR-T therapy or B-cell therapy stops the app.</span></span></summary>
+<div class="body">
+<div class="stop"><b>Hematopoietic cell transplant (HCT/HSCT), CAR-T therapy, B-cell malignancy, or B-cell-depleting therapy</b> <span class="tag e">E2</span><br>
+Individualized revaccination schedule required. No recommendation is shown. <span class="tag dec">PneumoVax decision: Transplant stop</span></div>
+</div>
+</details>
+</div>
+
+<!-- STEP 2 -->
+<div class="step"><span class="num">2</span>
+<details open>
+<summary><span class="words"><span class="lbl">Read the record</span><span class="sum">Each recorded dose is checked and given one label.</span></span></summary>
+<div class="body">
+<h3>The vaccines <span class="tag e">E3</span></h3>
+<p style="font-size:13px">Conjugate vaccines (<span class="tag pcv">PCV</span>) form every series. <span class="tag pp">PPSV23</span> is added after a PCV, for at-risk patients only.</p>
+<table class="stack">
+<colgroup><col style="width:26%"><col style="width:20%"><col style="width:54%"></colgroup>
+<tr><th>Vaccine</th><th>Minimum age</th><th>Use</th></tr>
+<tr><td><span class="tag pcv">PCV15</span><br><span class="sum">Vaxneuvance</span></td><td>6 weeks</td><td><b>Children:</b> routine series. At risk: then PCV20 or PPSV23, ≥8 weeks after the last PCV.<br><b>Adults:</b> then PPSV23 (PCV20 or PCV21 if PPSV23 is unavailable).</td></tr>
+<tr><td><span class="tag pcv">PCV20</span><br><span class="sum">Prevnar 20</span></td><td>6 weeks</td><td><b>Children:</b> routine series. A series that includes PCV20 needs no PPSV23.<br><b>Adults:</b> one dose completes the series.</td></tr>
+<tr><td><span class="tag pcv">PCV21</span><br><span class="sum">Capvaxive</span></td><td>18 years</td><td><b>Adults:</b> one dose completes the series. Not licensed under 18 years.</td></tr>
+<tr><td><span class="tag pp">PPSV23</span><br><span class="sum">Pneumovax 23</span></td><td>2 years</td><td><b>Children:</b> at risk only, after the PCV series.<br><b>Adults:</b> after PCV15, to complete the series.</td></tr>
+<tr><td colspan="3" class="sum" style="font-weight:600">No longer used: history only</td></tr>
+<tr><td><span class="tag pcv">PCV13</span><br><span class="sum">Prevnar 13</span></td><td>6 weeks</td><td><b>Children:</b> counts toward the routine series. At risk: then PCV20 or PPSV23, ≥8 weeks after the last PCV.<br><b>Adults:</b> then PCV20 or PCV21, ≥1 year later.</td></tr>
+<tr><td><span class="tag pcv">PCV7</span><br><span class="sum">Prevnar 7</span></td><td>6 weeks</td><td>Does not count. A PCV7-only history is treated as unvaccinated.</td></tr>
+</table>
+
+<h3>What the label on a dose means <span class="tag e">E4</span></h3>
+<div class="keyrow"><span class="lbl ok">Dose 2 of 4</span> <span class="lbl ok">Dose 1</span><br>Counted, on schedule. A child under 2 years still in the PCV series also sees the series total, which depends on age at dose 1.</div>
+<div class="keyrow"><span class="lbl ok">Counted — given early, accepted</span><br>Given sooner than recommended. The line under the dose states the interval given and the one recommended. Not repeated.</div>
+<div class="keyrow"><span class="lbl warn">Counted — not needed. No more PPSV23.</span><br>An adult's second PPSV23 within 5 years, without an immunocompromising condition, cochlear implant or CSF leak. ACIP gives a second PPSV23 only to those three groups.</div>
+<div class="keyrow"><span class="lbl ok">Counted — product not recorded</span><br>Counted as a PCV of unknown product.</div>
+<div class="keyrow"><span class="lbl ok">Counted — date not recorded</span><br>A PPSV23 with no date. CDC accepts an undated PPSV23 record. Its age and interval are not checked until a date is added.</div>
+<div class="keyrow"><span class="lbl neutral">Not counted — Extra. Do not repeat.</span><br>Given correctly, but not needed.</div>
+<div class="keyrow"><span class="lbl bad">Not counted — repeat</span><br>Given below the minimum age, or the wrong product for the age. The result card gives the date of the replacement dose.</div>
+<div class="keyrow"><span class="lbl bad">Not counted — do not repeat</span><br>Given too soon after the previous dose. The next dose is due once the interval has passed; the result card gives the date.</div>
+<div class="keyrow"><span class="lbl bad">Not counted — no date</span><br>A PCV with no date. CDC accepts only written, dated PCV records. The result card plans as if it was not given.</div>
+<div class="keyrow"><span class="lbl neutral">Not counted — PCV7</span><br>Set aside. The patient is treated as having had no PCV.</div>
+<div class="keyrow"><span class="lbl neutral">Check the date</span><br>Dated in the future or before birth. Not counted until the date is corrected.</div>
+
+<h3>A dose that does not count <span class="tag e">E5</span></h3>
+<h4>General rules</h4>
+<ul class="tight">
+<li>Repeat that dose only. Do not restart the series. <span class="tag src">Source</span></li>
+<li>The next dose is given at least the minimum interval after the dose that did not count. <span class="tag src">Source</span></li>
+</ul>
+<p style="font-size:13px;color:var(--muted);margin-top:8px">Example: an infant's 2nd PCV given too soon</p>
+<div class="timeline">
+<div><b>2 months</b> <span class="lbl ok">Dose 1 of 4</span></div>
+<div><b>2 weeks later</b> <span class="lbl bad">Not counted — do not repeat</span><br>Before the 4-week minimum interval.</div>
+<div><b>≥4 weeks after that dose</b> <span class="lbl ok">Dose 2 of 4</span><br>The next counted dose takes its number.</div>
+</div>
+<h4>Special cases</h4>
+<table>
+<colgroup><col style="width:42%"><col style="width:58%"></colgroup>
+<tr><th>Dose that did not count</th><th>What to give</th></tr>
+<tr><td>PPSV23 given before 2 years</td><td>PCV20, ≥8 weeks after it. A repeat PPSV23 waits ≥5 years after it. <span class="tag dec">PneumoVax decision: Invalid PPSV23 still sets the timing</span></td></tr>
+<tr><td>First PPSV23, &lt;8 weeks after a PCV</td><td>PCV20 (adults: PCV20 or PCV21), not PPSV23. <span class="tag dec">PneumoVax decision: PPSV23 not repeated</span></td></tr>
+<tr><td>Two PPSV23 doses, neither counted</td><td>PCV20 (adults: PCV20 or PCV21), not a third PPSV23. <span class="tag dec">PneumoVax decision: PPSV23 not repeated</span></td></tr>
+<tr><td>A PCV the card did not recommend, after a PCV series <span class="tag e">E6</span></td><td>Labelled "Not counted — Extra. Do not repeat." A completed series stays complete. <span class="tag dec">PneumoVax decision: A PCV given when none was due</span></td></tr>
+</table>
+</div>
+</details>
+</div>
+
+<!-- STEP 3 -->
+<div class="step"><span class="num">3</span>
+<details open>
+<summary><span class="words"><span class="lbl">Children's schedule</span><span class="sum">Birth to 18 years. The risk group decides what follows the PCV series.</span></span></summary>
+<div class="body">
+<table class="stack">
+<colgroup><col style="width:30%"><col style="width:32%"><col style="width:38%"></colgroup>
+<tr><th>Group <span class="tag e">E7</span></th><th>PCV doses</th><th>After the PCV series</th></tr>
+<tr><td>Healthy<br><span class="det">Details</span></td><td>Routine series. 2–4 years: 1 catch-up dose if incomplete.</td><td>None. Not indicated from 5 years. <span class="tag e">E8</span><br>The card adds a re-evaluation age: 50 years, or 19 years if smoking or alcohol use disorder is selected. Not added if the series includes PCV20, or PCV15 and PPSV23.</td></tr>
+<tr><td>Chronic condition, cochlear implant or CSF leak<br><span class="det">Details</span></td><td>Routine series. 2–5 years: 1 or 2 catch-up doses, ≥8 weeks apart.</td><td>PCV20 or PPSV23, ≥8 weeks after the last PCV. None if the series included PCV20.</td></tr>
+<tr><td>Immunocompromising<br><span class="det">Details</span></td><td>As above.</td><td>PCV20 or PPSV23, ≥8 weeks after the last PCV. After PPSV23: PCV20 or a 2nd PPSV23, ≥5 years later.</td></tr>
+<tr><td>At risk, 6–18 years, no PCV yet<br><span class="det">Details</span></td><td>PCV20 or PCV15. If a PCV was already given at 6 years or older: PCV20 or PPSV23 instead.</td><td>After PCV15: PPSV23, ≥8 weeks later. Immunocompromising, after PPSV23: PCV20 or a 2nd PPSV23, ≥5 years later.</td></tr>
+</table>
+<p style="font-size:13px"><span class="tag src">Source</span></p>
+
+<h3>Routine PCV series</h3>
+<table>
+<colgroup><col style="width:20%"><col style="width:26%"><col style="width:54%"></colgroup>
+<tr><th>Dose</th><th>Routine</th><th class="min">Minimum interval</th></tr>
+<tr><td>Dose 1</td><td>2 months</td><td class="min">Minimum age 6 weeks</td></tr>
+<tr><td>Dose 2</td><td>4 months</td><td class="min">4 weeks after dose 1 (8 weeks if dose 1 was at ≥12 months)</td></tr>
+<tr><td>Dose 3</td><td>6 months</td><td class="min">4 weeks after dose 2 (8 weeks if dose 2 was at 7–11 months)</td></tr>
+<tr><td>Dose 4</td><td>12–15 months</td><td class="min">8 weeks after dose 3, at ≥12 months</td></tr>
+</table>
+<p style="font-size:13px"><span class="tag src">Source</span></p>
+
+<h4>Doses in all, by age at dose 1 <span class="tag e">E9</span></h4>
+<table>
+<colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+<tr><th>Age at dose 1</th><th>PCV doses in all</th></tr>
+<tr><td>2–6 months</td><td>4</td></tr>
+<tr><td>7–11 months</td><td>3</td></tr>
+<tr><td>12–23 months</td><td>2</td></tr>
+<tr><td>2–4 years, healthy</td><td>1</td></tr>
+<tr><td>5 years and older, healthy</td><td>None (not indicated)</td></tr>
+</table>
+<p style="font-size:13px">At-risk children: see the group table above. <span class="tag src">Source</span></p>
+
+<h3>From 19 years <span class="tag e">E10</span></h3>
+<p style="font-size:13px">The adult schedule applies, and counts doses given in childhood (step 4). A child's next dose that falls at 19 years or later is answered by the adult schedule. <span class="tag dec">PneumoVax decision: Next dose falls after 19 years</span></p>
+
+<h3>More than one condition</h3>
+<p style="font-size:13px">The highest-ranked group decides. Every selected condition is listed on the result.</p>
+<ol class="rank"><li>Immunocompromising</li><li>Cochlear implant or CSF leak</li><li>Chronic condition</li></ol>
+<p style="font-size:13px;color:var(--muted)">Smoking and alcohol use disorder are not risk conditions under 19 years.</p>
+</div>
+</details>
+</div>
+
+<!-- STEP 4 -->
+<div class="step"><span class="num">4</span>
+<details open>
+<summary><span class="words"><span class="lbl">Adults' schedule</span><span class="sum">19 years and over. A risk condition is required until 50 years.</span></span></summary>
+<div class="body">
+<table>
+<colgroup><col style="width:44%"><col style="width:56%"></colgroup>
+<tr><th>Group <span class="tag e">E11</span></th><th>Recommended</th></tr>
+<tr><td>19–49 years: immunocompromising condition, cochlear implant or CSF leak<br><span class="det">Details</span></td><td>Option A or B. Option B interval ≥8 weeks.</td></tr>
+<tr><td>19–49 years: chronic condition, smoking or alcohol use disorder<br><span class="det">Details</span></td><td>Option A or B. Option B interval ≥1 year.</td></tr>
+<tr><td>19–49 years: no risk condition<br><span class="det">Details</span></td><td>Not indicated. Routine vaccination begins at 50 years.</td></tr>
+<tr><td>50 years and over<br><span class="det">Details</span></td><td>Option A or B. Option B interval ≥1 year; ≥8 weeks may be considered for an immunocompromising condition, cochlear implant or CSF leak.</td></tr>
+</table>
+<p style="font-size:13px"><span class="tag src">Source</span></p>
+
+<h3>No prior pneumococcal vaccine</h3>
+<div class="opt"><b>Option A</b><div class="flow"><span class="tag pcv">PCV20 or PCV21</span><span class="arrow">→</span><span>Complete</span></div></div>
+<div class="opt"><b>Option B</b><div class="flow"><span class="tag pcv">PCV15</span><span class="arrow">→ Option B interval →</span><span class="tag pp">PPSV23</span><span class="arrow">→</span><span>Complete</span></div></div>
+<p style="font-size:13px"><span class="tag src">Source</span></p>
+
+<h3>Prior pneumococcal vaccines <span class="tag e">E11</span></h3>
+<table>
+<colgroup><col style="width:44%"><col style="width:56%"></colgroup>
+<tr><th>Vaccine history</th><th>Next dose</th></tr>
+<tr><td>PCV13 only</td><td>PCV20 or PCV21, ≥1 year after PCV13 <span class="tag src">Source</span></td></tr>
+<tr><td>PPSV23 only</td><td>PCV15, PCV20 or PCV21, ≥1 year after the last PPSV23 <span class="tag src">Source</span></td></tr>
+<tr><td>PCV15 only</td><td>PPSV23 at the Option B interval. If PPSV23 is unavailable: PCV20 or PCV21. <span class="tag src">Source</span></td></tr>
+<tr><td>PCV15, then a PPSV23 given before 19 years that did not count</td><td>PCV20 or PCV21, ≥1 year after the PPSV23 <span class="tag dec">PneumoVax decision: PPSV23 not repeated</span> <span class="tag dec">PneumoVax decision: Invalid PPSV23 still sets the timing</span></td></tr>
+<tr><td>PCV13 and one PPSV23; 19–49 years; immunocompromising condition, cochlear implant or CSF leak</td><td>PCV20 or PCV21, ≥5 years after the last dose <span class="tag src">Source</span></td></tr>
+<tr><td>PCV13 and two PPSV23; 19–49 years; same conditions</td><td>Review at 50 years, or PCV20 or PCV21 ≥5 years after the last dose <span class="tag src">Source</span></td></tr>
+<tr><td>PCV13 and PPSV23; 19–49 years; chronic condition, smoking or alcohol use disorder</td><td>None now; review at 50 years <span class="tag dec">PneumoVax decision: No dose now, not Complete</span></td></tr>
+<tr><td>PCV13 and PPSV23; 50 years and over</td><td>PCV20 or PCV21, ≥5 years after the last dose. Shared clinical decision-making if PPSV23 was given at ≥65 years. <span class="tag src">Source</span></td></tr>
+<tr><td>PCV20, PCV21, or PCV15 and PPSV23</td><td>Complete <span class="tag src">Source</span></td></tr>
+</table>
+
+<h3>More than one condition</h3>
+<p style="font-size:13px">The highest-ranked group decides. Every selected condition is listed on the result.</p>
+<ol class="rank"><li>Immunocompromising</li><li>Cochlear implant or CSF leak</li><li>Chronic condition, smoking or alcohol use disorder</li></ol>
+</div>
+</details>
+</div>
+
+<!-- STEP 5 -->
+<div class="step"><span class="num">5</span>
+<details open>
+<summary><span class="words"><span class="lbl">Time between doses</span><span class="sum">The shortest and the recommended time between two doses, and what happens to a dose given too soon.</span></span></summary>
+<div class="body">
+<h3>Children: a dose given before the minimum interval does not count <span class="tag e">E12</span></h3>
+<p style="font-size:13px">A dose given 5 or more days early does not count. Up to 4 days early still counts. <span class="tag src">Source</span></p>
+
+<h4>PCV after PCV</h4>
+<table>
+<colgroup><col style="width:22%"><col style="width:48%"><col style="width:30%"></colgroup>
+<tr><th>Doses</th><th>When</th><th class="min">Minimum interval</th></tr>
+<tr><td rowspan="2">Dose 1 → 2</td><td>Dose 1 before 12 months</td><td class="min">4 weeks</td></tr>
+<tr><td>Dose 1 at ≥12 months</td><td class="min">8 weeks</td></tr>
+<tr><td rowspan="2">Dose 2 → 3</td><td>Dose 2 before 7 months, dose 3 before 12 months</td><td class="min">4 weeks</td></tr>
+<tr><td>Dose 2 at 7–11 months</td><td class="min">8 weeks</td></tr>
+<tr><td rowspan="2">Dose 3 → 4</td><td>Dose 4 is the booster, at ≥12 months</td><td class="min">8 weeks</td></tr>
+<tr><td>Dose 4 before 12 months: counted ("Dose 4 of 5"); the booster is still due</td><td class="min">4 weeks</td></tr>
+</table>
+<p style="font-size:13px"><span class="tag src">Source</span></p>
+
+<h4>PCV and PPSV23 <span class="tag e">E13</span></h4>
+<table class="stack">
+<colgroup><col style="width:40%"><col style="width:22%"><col style="width:38%"></colgroup>
+<tr><th>Doses</th><th class="min">Minimum interval</th><th>If given sooner</th></tr>
+<tr><td>PCV, then PPSV23</td><td class="min">8 weeks</td><td>Not counted <span class="tag src">Source</span></td></tr>
+<tr><td>PPSV23, then PCV</td><td class="min">8 weeks</td><td>Not counted <span class="tag dec">PneumoVax decision: PCV too soon after PPSV23</span></td></tr>
+<tr><td>PPSV23 that did not count, then PCV</td><td class="min">8 weeks (advised)</td><td>Counted <span class="tag dec">PneumoVax decision: Invalid PPSV23 still sets the timing</span></td></tr>
+<tr><td>PPSV23, then a 2nd PPSV23 (immunocompromising only)</td><td class="min">5 years</td><td>Counted, not repeated <span class="tag dec">PneumoVax decision: Early 2nd PPSV23 still counts</span></td></tr>
+</table>
+<p style="font-size:13px">A 2nd PPSV23 for any other child is labelled "Not counted — Extra. Do not repeat."</p>
+
+<h3>Adults: a dose given sooner than recommended still counts</h3>
+<p style="font-size:13px"><span class="tag dec">PneumoVax decision: An early adult dose still counts</span></p>
+<table class="stack">
+<colgroup><col style="width:30%"><col style="width:34%"><col style="width:36%"></colgroup>
+<tr><th>Doses</th><th class="min">Recommended interval</th><th>If given sooner</th></tr>
+<tr><td>PCV, then PPSV23</td><td class="min">≥1 year; ≥8 weeks for an immunocompromising condition, cochlear implant or CSF leak (19–49 years; an option from 50 years)</td><td>Counted, even under 8 weeks <span class="tag dec">PneumoVax decision: PPSV23 under 8 weeks after a PCV</span></td></tr>
+<tr><td>PCV13, then PCV20 or PCV21</td><td class="min">1 year</td><td>Counted <span class="tag src">Source</span></td></tr>
+<tr><td>PPSV23, then any PCV</td><td class="min">1 year, including after a PPSV23 that did not count</td><td>Counted <span class="tag dec">PneumoVax decision: Invalid PPSV23 still sets the timing</span></td></tr>
+<tr><td>PCV13 and PPSV23, then PCV20 or PCV21</td><td class="min">5 years after the last dose</td><td>Counted <span class="tag src">Source</span></td></tr>
+<tr><td>PPSV23, then a 2nd PPSV23</td><td class="min">5 years</td><td>Counted. Without an immunocompromising condition, cochlear implant or CSF leak: "Counted — not needed. No more PPSV23."</td></tr>
+<tr><td>PCV15, then PCV20 or PCV21</td><td class="min">None stated</td><td>Counted at any interval <span class="tag dec">PneumoVax decision: Adult PCV after PCV</span></td></tr>
+<tr><td>PCV, then another PCV, &lt;4 weeks apart</td><td class="min">None stated</td><td>Counted. A repeat (PCV20 or PCV21) ≥8 weeks later may be considered. <span class="tag dec">PneumoVax decision: Adult PCV after PCV</span></td></tr>
+</table>
+<p style="font-size:13px">Doses given before 19 years follow the children's rules. A dose below the vaccine's minimum age does not count.</p>
+</div>
+</details>
+</div>
+
+</div>
+</details>
+</div>
+
+<p class="reflabel">Reference</p>
+
+<div class="refsec"><details open>
+<summary><h2>PneumoVax decisions <span class="tag e">E14</span></h2></summary>
+<div class="body">
+<p style="font-size:13px" class="lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is listed once and marked wherever it applies.</p>
+
+<div class="decision"><b>Transplant stop</b><br>
+<b>Problem:</b> Stem cell transplant, CAR-T therapy, B-cell malignancy or B-cell-depleting therapy. Revaccination is individualized.<br>
+<b>CDC and ACIP say:</b> A separate schedule applies, outside the routine and risk-based schedules.<br>
+<b>PneumoVax decision:</b> No recommendation is shown, even with another condition selected. Follow institutional guidelines (ASCO, NCCN, IDSA, CDC).<br>
+<b>Applies in:</b> Step 1, Stop check</div>
+
+<div class="decision"><b>A PCV given when none was due</b> <span class="tag e">E6</span><br>
+<b>Problem:</b> A child received a PCV the card did not recommend: PCV15 where PCV20 or PPSV23 was offered, a PCV after the series was complete, or a PCV for a healthy child for whom it was not indicated.<br>
+<b>CDC and ACIP say:</b> PCV20 or PPSV23 at this point, and nothing after a completed series. They do not say how to count a PCV given anyway.<br>
+<b>PneumoVax decision:</b> Labelled "Not counted — Extra. Do not repeat." A completed series stays complete. A dose still owed is given ≥8 weeks after the extra PCV. Not applied to a healthy child's first dose, PCV13, an at-risk child under 6 years, or from 19 years.<br>
+<b>Applies in:</b> Step 2, A dose that does not count</div>
+
+<div class="decision"><b>PPSV23 not repeated</b><br>
+<b>Problem:</b> A PPSV23 did not count: the first was given &lt;8 weeks after a PCV, or two PPSV23 doses both did not count. Each additional PPSV23 dose produces a weaker immune response to some serotypes.<br>
+<b>CDC and ACIP say:</b> PPSV23 at this point, as for a patient who has had none. They do not say what to give when a PPSV23 on record did not count.<br>
+<b>PneumoVax decision:</b> PCV20 instead (adults: PCV20 or PCV21). Not PPSV23, and not PCV15, which would require PPSV23 after it.<br>
+<b>Applies in:</b> Step 2, A dose that does not count · Step 4, Prior pneumococcal vaccines</div>
+
+<div class="decision"><b>Invalid PPSV23 still sets the timing</b><br>
+<b>Problem:</b> A PPSV23 did not count (given before 2 years, or &lt;8 weeks after a PCV), but the patient received it.<br>
+<b>CDC and ACIP say:</b> Intervals are measured from a PPSV23. They do not say whether one that did not count starts the interval.<br>
+<b>PneumoVax decision:</b> The next dose is timed from it. Children: PCV ≥8 weeks after it (a PCV given sooner still counts); a repeat PPSV23 ≥5 years after it. Adults: PCV ≥1 year after it.<br>
+<b>Applies in:</b> Step 2, A dose that does not count · Step 4, Prior pneumococcal vaccines · Step 5, children's and adults' tables</div>
+
+<div class="decision"><b>Next dose falls after 19 years</b><br>
+<b>Problem:</b> A child's next dose falls at 19 years or later, when the adult schedule may differ: no dose, another product, or a longer interval.<br>
+<b>CDC and ACIP say:</b> The child schedule until 19 years, the adult schedule after. They do not say which governs a dose the child schedule places after 19 years.<br>
+<b>PneumoVax decision:</b> The card gives the adult schedule's answer and states why. A dose that can be given before 19 years stays on the child schedule.<br>
+<b>Applies in:</b> Step 3, From 19 years</div>
+
+<div class="decision"><b>PCV too soon after PPSV23</b><br>
+<b>Problem:</b> A child's PCV was given &lt;8 weeks after a PPSV23 that counted. A PCV given soon after PPSV23 produces a weaker immune response.<br>
+<b>CDC and ACIP say:</b> PCV ≥8 weeks after PPSV23. They do not say whether a PCV given sooner counts.<br>
+<b>PneumoVax decision:</b> Not counted. If the series is complete without it, nothing more is given. If a PCV is still needed, it is given ≥8 weeks after the one that did not count.<br>
+<b>Applies in:</b> Step 5, children's PCV and PPSV23 table</div>
+
+<div class="decision"><b>Early 2nd PPSV23 still counts</b><br>
+<b>Problem:</b> An immunocompromised child's 2nd PPSV23 was given &lt;5 years after the 1st. Repeating it would mean a 3rd PPSV23.<br>
+<b>CDC and ACIP say:</b> The 2nd PPSV23 ≥5 years after the 1st. They do not say whether one given sooner counts.<br>
+<b>PneumoVax decision:</b> Counted and not repeated. The line under the dose states the interval given and the 5 years recommended. No further PPSV23.<br>
+<b>Applies in:</b> Step 5, children's PCV and PPSV23 table</div>
+
+<div class="decision"><b>An early adult dose still counts</b> <span class="tag e">E15</span><br>
+<b>Problem:</b> An adult dose was given sooner than recommended after an earlier dose, for example PCV20 3 months after PPSV23, where 1 year is recommended.<br>
+<b>CDC and ACIP say:</b> Adult intervals are recommended timing: 8 weeks for PPSV23 after a PCV with an immunocompromising condition, cochlear implant or CSF leak (19–49 years; an option from 50 years); 1 year for PPSV23 after a PCV in other adults, PCV20 or PCV21 after PCV13, and any PCV after PPSV23; 5 years for PCV20 or PCV21 after PCV13 and PPSV23, and for a second PPSV23. They do not say an earlier dose is invalid or must be repeated. CDC's immunization software sets no minimum for any adult interval.<br>
+<b>PneumoVax decision:</b> The dose counts and is not repeated. The line under the dose states the interval, for example "Given 3 months after the PPSV23 dose of Jan 10, 2026. CDC recommends 1 year." Exceptions with their own entries: PPSV23 under 8 weeks after a PCV; Adult PCV after PCV. A second PPSV23 without an immunocompromising condition, cochlear implant or CSF leak is labelled "Counted — not needed. No more PPSV23."<br>
+<b>Applies in:</b> Step 5, adults' table</div>
+
+<div class="decision"><b>PPSV23 under 8 weeks after a PCV</b> <span class="tag e">E15</span><br>
+<b>Problem:</b> An adult's PPSV23 was given &lt;8 weeks after a PCV. ACIP calls the 8 weeks a "minimum interval", unlike any other adult interval.<br>
+<b>CDC and ACIP say:</b> "A minimum interval of 8 weeks can be considered" for an immunocompromising condition, cochlear implant or CSF leak. This allows PPSV23 sooner than the usual 1 year. They do not say whether a PPSV23 given before 8 weeks counts.<br>
+<b>PneumoVax decision:</b> Counted and not repeated, because another PPSV23 produces a weaker immune response to some serotypes. The line under the dose states the interval, for example "Given on the same day as the PCV15 dose of Jan 10, 2026. ACIP recommends 8 weeks (56 days) for this patient."<br>
+<b>Applies in:</b> Step 5, adults' table, row "PCV, then PPSV23"</div>
+
+<div class="decision"><b>Adult PCV after PCV</b><br>
+<b>Problem:</b> An adult received a PCV &lt;4 weeks after another PCV, for example PCV20 after an unrecorded PCV15. Other ACIP schedules (infants, transplant recipients) space PCV doses ≥4 weeks apart; there are no data on a shorter interval.<br>
+<b>CDC and ACIP say:</b> No interval between two adult PCV doses.<br>
+<b>PneumoVax decision:</b> Counted at any interval. Under 4 weeks, the line under the dose offers an optional repeat (PCV20 or PCV21) ≥8 weeks later, mainly for an immunocompromised patient.<br>
+<b>Applies in:</b> Step 5, adults' table</div>
+
+<div class="decision"><b>No dose now, not Complete</b><br>
+<b>Problem:</b> Every dose due today has been given, and a further dose is due later on the current schedule. "Complete" would imply nothing more is needed.<br>
+<b>CDC and ACIP say:</b> Give the later dose. They do not say how to describe the visits before it.<br>
+<b>PneumoVax decision:</b> Status "No dose now", with the later dose shown. "Complete" means nothing further on the current schedule. A child who finishes the child schedule stays Complete, even if the adult schedule adds a dose at 19 years.<br>
+<b>Applies in:</b> Step 4, Prior pneumococcal vaccines</div>
+</div>
+</details></div>
+
+<div class="refsec"><details open>
+<summary><h2>Sources <span class="tag e">E16</span></h2></summary>
+<div class="body">
+<h4>ACIP recommendations</h4>
+<div class="src-item">ACIP 2025 Adult MMWR<span>Expanded routine pneumococcal vaccination of adults aged ≥50 years (mm7401a1)</span></div>
+<div class="src-item">Adult Pneumococcal MMWR<span>Use of pneumococcal vaccines among U.S. adults ≥19 years (rr7203a1)</span></div>
+<div class="src-item">PCV21 MMWR<span>Use of PCV21 (Capvaxive) in adults (mm7336a3)</span></div>
+<div class="src-item">PCV15 Children MMWR<span>Use of PCV15 among U.S. children (mm7137a3)</span></div>
+<div class="src-item">ACIP 2023 PCV20 Children<span>Use of PCV20 among U.S. children: updated recommendations (Supplementary Report, MMWR 72(39))</span></div>
+<div class="src-item">PCV20 Children MMWR<span>Use of PCV20 among children (mm7239a5)</span></div>
+<h4>CDC schedule notes</h4>
+<div class="src-item">CDC Child/Adolescent Notes<span>Child and adolescent immunization schedule, pneumococcal notes</span></div>
+<div class="src-item">CDC catch-up schedule<span>Catch-up schedule for children who start late or are more than 1 month behind</span></div>
+<div class="src-item">CDC Adult Notes<span>Adult immunization schedule, pneumococcal notes</span></div>
+<h4>Other CDC and ACIP guidance</h4>
+<div class="src-item">CDC Risk-based Pneumococcal<span>Summary of risk-based pneumococcal vaccination recommendations</span></div>
+<div class="src-item">CDC PCV Catch-up Job Aid<span>Healthy children 4 months–4 years</span></div>
+<div class="src-item">CDC Adult Timing Job Aid<span>Adult pneumococcal vaccine timing</span></div>
+<div class="src-item">CDC Timing and Spacing<span>General Best Practice Guidelines: timing and spacing of immunobiologics</span></div>
+<div class="src-item">CDC Altered Immunocompetence<span>General Best Practice Guidelines: altered immunocompetence</span></div>
+<div class="src-item">CDC Pneumococcal Recommendations<span>Pneumococcal vaccine recommendations for healthcare providers</span></div>
+<h4>immunize.org</h4>
+<div class="src-item">immunize.org p2016<span>Recommendations for pneumococcal vaccine use in children and teens</span></div>
+<div class="src-item">immunize.org PCV7 rule<span>Ask the Experts: accounting for a history of PCV7</span></div>
+<div class="src-item">immunize.org Ask the Experts<span>Pneumococcal</span></div>
+</div>
+</details></div>
+
+<footer>This page explains the app's reasoning; it is not a clinical reference. Where it and a CDC or ACIP document disagree, the document governs. Report the discrepancy. <span class="tag e">E17</span></footer>
+
+</main>
+<script>
+document.querySelectorAll('table.stack').forEach(t => {
+  const rows = [...t.rows]; const head = rows.find(r => r.querySelector('th'));
+  if (!head) return; head.classList.add('head');
+  const labels = [...head.cells].map(c => c.childNodes[0].textContent.trim());
+  rows.forEach(r => { if (r === head) return; [...r.cells].forEach((c, i) => { if (i > 0 && c.colSpan === 1) c.dataset.label = labels[i]; }); });
+});
+</script>
+<script>
+const all = document.getElementById('showall');
+const folds = () => [...document.querySelectorAll('details')];
+const fit = () => { const sm = document.querySelector('#decides > summary'); all.style.height = sm.offsetHeight + 'px'; };
+fit(); addEventListener('resize', fit);
+const sync = () => { all.textContent = folds().every(d => d.open) ? 'Hide all' : 'Show all'; };
+all.addEventListener('click', () => { const open = all.textContent === 'Show all'; folds().forEach(d => { d.open = open; }); sync(); });
+folds().forEach(d => d.addEventListener('toggle', sync));
+</script>
+</body>
+</html>

@@ -69,16 +69,16 @@ describe('P1-3 — a blank dose row is not a dose', () => {
       expect(isBlankDoseRow({ date: '', product: '', detailsUnknown: false })).toBe(true);
     });
 
-    it('a new PPSV23 row is blank even though the app stamped its product on', () => {
-      // The PPSV23 stream has one product, so every row is born carrying it —
-      // the card prints the product of each recorded dose and a row without
-      // one reads "product unknown". That stamp is a label, not an answer, so
-      // it must not make an untouched row into a dose. Without this, half of
-      // P1-3 would be fixed and half left standing.
-      expect(isBlankDoseRow({ date: '', product: 'PPSV23' })).toBe(true);
+    it('a PPSV23 row with its product CHOSEN and no date is a dose (OWNER DECISION 2026-11-27)', () => {
+      // Until 2026-11-27 every PPSV23 row was born carrying `product:
+      // 'PPSV23'`, so that stamp had to read as blank and only the
+      // details-unknown tick could keep an undated PPSV23. The tick is gone
+      // and the row now chooses its product like a PCV row (her words: "If a
+      // PPSV product was chosen without a date should be left in the record
+      // like PCV"), so a chosen PPSV23 is an answer, not a stamp.
+      expect(isBlankDoseRow({ date: '', product: 'PPSV23' })).toBe(false);
       expect(isBlankDoseRow({ date: '2020-01-01', product: 'PPSV23' })).toBe(false);
-      expect(isBlankDoseRow({ date: '', product: 'PPSV23', detailsUnknown: true })).toBe(false);
-      // and a PCV product is a real answer, never a stamp
+      expect(isBlankDoseRow({ date: '', product: '' })).toBe(true);
       expect(isBlankDoseRow({ date: '', product: 'PCV13' })).toBe(false);
     });
 

@@ -2239,6 +2239,21 @@ export const REFS = {
     short: 'CDC Timing and Spacing',
     lastVerified: '2026-11-15',
   },
+  // Rulebook reorganization (OWNER DECISION 2026-11-27, "Rulebook only"). The
+  // grace rule the engine applies (GRACE_DAYS), read live 2026-11-27 from the
+  // page below and found exactly once. No card quotes it — the line under a
+  // too-soon dose says "per CDC" — so it is shown on the Rulebook's step 5
+  // heading only, the one entry in rulebook.js's RULEBOOK_ONLY_SOURCES.
+  gbpFiveDaysEarlyNotCounted: {
+    rulebook: 'any',
+    // Patients this sentence is about: its own words, "Doses of any vaccine" — no age or risk of its own
+    population: ['child-routine', 'child-nonIC', 'child-IC', 'adult-19to49', 'adult-50plus'],
+    url: 'https://www.cdc.gov/vaccines/hcp/imz-best-practices/timing-spacing-immunobiologics.html',
+    label: 'CDC General Best Practices, Timing and Spacing — a dose given 5 or more days before the minimum interval or age does not count',
+    short: 'CDC Timing and Spacing',
+    quote: 'Doses of any vaccine administered ≥5 days earlier than the minimum interval or age should not be counted as valid doses and should be repeated as age appropriate',
+    lastVerified: '2026-11-27',
+  },
   cdcGbpRepeatUnderMinAge: {
     rulebook: 'any',
     // Patients this sentence is about: its own words, "the child"

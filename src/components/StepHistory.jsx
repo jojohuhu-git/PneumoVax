@@ -1,4 +1,4 @@
-import { PPSV23_PRODUCT, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
+import { PPSV23_HISTORY_PRODUCTS, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import DoseEditor from './DoseEditor.jsx';
 
 // Vaccination history for PneumoVax — two product streams in one step:
@@ -85,7 +85,6 @@ export default function StepHistory({
             product={{ kind: 'select', options: PCV_HISTORY_PRODUCTS }}
             addDoseLabel="+ Add PCV dose"
             removeLabel={(i) => `Remove PCV dose ${i + 1}`}
-            unknownHint="An empty row is removed when you continue."
           />
 
           {/* ── PPSV23 stream ── */}
@@ -94,10 +93,9 @@ export default function StepHistory({
             {...shared}
             doses={ppsv23Doses}
             onChange={onChangePpsv}
-            product={{ kind: 'fixed', key: PPSV23_PRODUCT.key, label: PPSV23_PRODUCT.label }}
+            product={{ kind: 'select', options: PPSV23_HISTORY_PRODUCTS }}
             addDoseLabel="+ Add PPSV23 dose"
             removeLabel={(i) => `Remove PPSV23 dose ${i + 1}`}
-            unknownHint="An empty row is removed when you continue."
           />
         </>
       )}
@@ -107,8 +105,11 @@ export default function StepHistory({
       )}
 
       <div className="family-note family-note-neutral">
-        Unknown / undocumented history is treated as unvaccinated. PCV7 doses are recorded for
-        completeness but ignored when calculating current needs (per ACIP/immunize.org).
+        {/* Owner wording, 2026-11-27: "unless otherwise specified" — a PPSV23
+            with no date still counts (CDC's exception). */}
+        Unknown / undocumented history is treated as unvaccinated unless otherwise specified. PCV7
+        doses are recorded for completeness but ignored when calculating current needs (per
+        ACIP/immunize.org).
       </div>
     </div>
   );

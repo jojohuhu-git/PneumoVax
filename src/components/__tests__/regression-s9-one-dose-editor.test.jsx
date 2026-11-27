@@ -172,8 +172,9 @@ describe('S9 — the dose editor has one home', () => {
     it('DoseEditor.jsx exists and renders the row markup', () => {
       const code = read('../DoseEditor.jsx');
       expect(code).toContain('dose-field');
-      expect(code).toContain('dose-row-unknown');
       expect(code).toContain('dose-remove');
+      // The details-unknown tick was removed 2026-11-27 (owner decision).
+      expect(code).not.toContain('dose-row-unknown');
     });
 
     // The point of the item: a row cannot be hand-written into a caller any
@@ -222,15 +223,17 @@ describe('S9 — the dose editor has one home', () => {
       expect(fieldLabelsOfRow(1)).toEqual(['Date', 'Product']);
     });
 
-    it.each(SURFACES)('%s shows the PPSV23 product as fixed, not a dropdown', (which) => {
+    // Until 2026-11-27 the PPSV23 product was a fixed, greyed box. OWNER
+    // DECISION that day: "If a PPSV product was chosen without a date should
+    // be left in the record like PCV" — so both streams choose.
+    it.each(SURFACES)('%s lets the PPSV23 row choose its product, like the PCV row', (which) => {
       renderSurface(which, ONE_OF_EACH);
       const rows = document.querySelectorAll('.dose-row');
-      // The PCV row's product is chosen; the PPSV23 row's is stated.
       expect(rows[0].querySelector('select')).not.toBeNull();
-      expect(rows[1].querySelector('select')).toBeNull();
-      const fixed = rows[1].querySelector('input[type="text"]');
-      expect(fixed.disabled).toBe(true);
-      expect(fixed.value).toBe(PPSV23_PRODUCT.label);
+      const ppsv = rows[1].querySelector('select');
+      expect([...ppsv.options].map((o) => o.value)).toEqual(['', PPSV23_PRODUCT.key]);
+      expect(ppsv.options[1].textContent).toBe(PPSV23_PRODUCT.label);
+      expect(rows[1].querySelector('input[type="text"]')).toBeNull();
     });
   });
 
@@ -266,40 +269,17 @@ describe('S9 — the dose editor has one home', () => {
     });
   });
 
-  // ── 4. The tick condition differs per stream, and must keep doing so ───
-  describe('the details-unknown tick, on both surfaces', () => {
-    it.each(SURFACES)('%s offers it on an untouched PCV row', (which) => {
+  // ── 4. The details-unknown tick is gone, on both surfaces ─────────────
+  // OWNER DECISION 2026-11-27 (both apps): a dose is kept on the record by
+  // choosing its product, so no row offers the tick, in either stream.
+  describe('no details-unknown tick, on both surfaces', () => {
+    it.each(SURFACES)('%s offers no tick on an untouched PCV or PPSV23 row', (which) => {
       renderSurface(which, { pcvDoses: [], ppsv23Doses: [] });
-      expect(unknownTicks()).toHaveLength(0);
       fireEvent.click(screen.getByText('+ Add PCV dose'));
-      expect(unknownTicks()).toHaveLength(1);
-    });
-
-    it.each(SURFACES)('%s withdraws it once a PCV product is chosen', (which) => {
-      renderSurface(which, { pcvDoses: [{ date: '', product: '' }], ppsv23Doses: [] });
-      expect(unknownTicks()).toHaveLength(1);
-      fireEvent.change(screen.getByLabelText('Product'), {
-        target: { value: 'PCV13' },
-      });
-      expect(unknownTicks()).toHaveLength(0);
-    });
-
-    // A PPSV23 row is BORN carrying `product: 'PPSV23'` — stamped by the app,
-    // not typed by anybody. So "otherwise empty" for this stream means "no
-    // date", and judging it by the product too would hide the tick forever.
-    it.each(SURFACES)('%s offers it on an untouched PPSV23 row', (which) => {
-      renderSurface(which, { pcvDoses: [], ppsv23Doses: [] });
       fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
-      expect(unknownTicksPpsv23()).toHaveLength(1);
-    });
-
-    it.each(SURFACES)('%s withdraws it once a PPSV23 date is entered', (which) => {
-      renderSurface(which, { pcvDoses: [], ppsv23Doses: [{ date: '', product: 'PPSV23' }] });
-      expect(unknownTicksPpsv23()).toHaveLength(1);
-      fireEvent.change(screen.getByLabelText('Date'), {
-        target: { value: '2020-01-01' },
-      });
+      expect(unknownTicks()).toHaveLength(0);
       expect(unknownTicksPpsv23()).toHaveLength(0);
+      expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
     });
   });
 

@@ -1,8 +1,8 @@
-// Audit 3(b), children 2-18: each claim in the Rulebook's CHILD_LANES, checked over every child.
+// Audit 3(b), children 2-18: each claim in the Rulebook's CHILD_GROUPS (the children's group table), checked over every child.
 import { allPatients } from '../../scripts/wholeApp/replay.mjs';
 import { recommend } from '../../src/logic/recommend.js';
 import { RISK_FACTORS } from '../../src/data/riskFactors.js';
-import { CHILD_LANES } from '../../src/data/rulebook.js';
+import { CHILD_GROUPS } from '../../src/data/rulebook.js';
 import { addCalendarMonths, addDays } from '../../src/logic/dateUtils.js';
 import { writeFileSync } from 'node:fs';
 
@@ -21,7 +21,7 @@ const t = new Map();
 const add = (k, e) => { const x = t.get(k) ?? { n: 0, grid: 0, typical: 0, e }; x.n++; x[e.group]++; t.set(k, x); };
 const monthsBetween = (a, b) => { const [y1, m1, d1] = a.split('-').map(Number); const [y2, m2, d2] = b.split('-').map(Number); return (y2 - y1) * 12 + (m2 - m1) - (d2 < d1 ? 1 : 0); };
 
-console.log('Rulebook child lanes:', CHILD_LANES.map((l) => l.group).join(' | '));
+console.log('Rulebook child groups:', CHILD_GROUPS.map((l) => l.group).join(' | '));
 let n = 0;
 for (const p of allPatients()) {
   const { input } = p;

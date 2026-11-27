@@ -31,9 +31,10 @@ import Rulebook from '../Rulebook.jsx';
 import RecCard from '../RecCard.jsx';
 import { doseChipLabel } from '../doseChipLabel.js';
 import {
-  BOUNDARIES, PRODUCTS, RISK_GROUPS, SOURCE_GROUPS, monthsInWords, WORKED_PATIENTS,
-  CHILD_LANES, CHILD_EXCEPTIONS, INVALID_EXAMPLE, ADULT_HISTORY, ADULT_OPTIONS, RISK_RANKING, RISK_COLUMNS, DECISIONS,
-  SERIES_PATTERNS, CHIP_LEGEND, PCV_AND_PPSV23, INVALID_ACTIONS, SPACING_RULE_IDS, ROUTINE_INFANT,
+  BOUNDARIES, PRODUCTS, RISK_GROUPS, SOURCES, SOURCE_TYPES, monthsInWords, WORKED_PATIENTS,
+  CHILD_GROUPS, ADULT_GROUPS, CHILD_RANKING, ADULT_RANKING, NOT_COUNTED, FROM_NINETEEN, GRACE, DOSES_BY_AGE,
+  INVALID_EXAMPLE, ADULT_HISTORY, ADULT_OPTIONS, DECISIONS, ADULT_INTERVALS,
+  CHIP_LEGEND, PCV_AND_PPSV23, SPACING_RULE_IDS, ROUTINE_INFANT,
   PCV_AFTER_PCV, TRANSPLANT_STOP, VACCINE_ROWS, sourcesFor,
 } from '../../data/rulebook.js';
 import { ADULT_SCHED_MIN_M, PCV21_MIN_AGE_M, ROUTINE_ADULT_MIN_M } from '../../logic/scheduleConstants.js';
@@ -83,11 +84,15 @@ describe('C14 — every claim on the page is true of the app, patient by patient
   });
 
   it('every written row carries at least one worked patient', () => {
+    // 2026-11-27 reorganization: the same rule over the new parts.
     const rows = [
-      ...CHILD_LANES, ...CHILD_EXCEPTIONS, ...ADULT_HISTORY.flatMap((h) => h.splits), ADULT_OPTIONS, TRANSPLANT_STOP,
-      ...RISK_RANKING.steps, ...SERIES_PATTERNS, ...CHIP_LEGEND, ...PCV_AND_PPSV23, ...INVALID_ACTIONS.rows, ...DECISIONS,
+      ...CHILD_GROUPS, ...ADULT_GROUPS, ...ADULT_HISTORY, ADULT_OPTIONS, TRANSPLANT_STOP, FROM_NINETEEN, GRACE,
+      ROUTINE_INFANT, PCV_AFTER_PCV, DOSES_BY_AGE, ...DOSES_BY_AGE.rows, ADULT_INTERVALS,
+      ...CHILD_RANKING.steps, CHILD_RANKING.note, ...ADULT_RANKING.steps, ...CHIP_LEGEND,
+      ...NOT_COUNTED.general, ...NOT_COUNTED.special, ...PCV_AND_PPSV23.rows, PCV_AND_PPSV23.note,
+      ...ADULT_INTERVALS.rows, ADULT_INTERVALS.note, ...DECISIONS,
     ];
-    const bare = rows.filter((r) => !r.ex?.length).map((r) => r.text ?? r.next ?? r.history ?? r.name ?? r.doses ?? r.dose ?? r.title);
+    const bare = rows.filter((r) => !r.ex?.length).map((r) => r.text ?? r.next ?? r.history ?? r.name ?? r.group ?? r.doses ?? r.dose ?? r.age ?? r.title);
     expect(bare).toEqual([]);
   });
 
@@ -187,11 +192,17 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
     expect(PRODUCTS.map((p) => p.key)).toEqual(ALL_PRODUCTS.map((p) => p.key));
   });
 
-  it('every risk condition is listed exactly once, and the transplant row is not', () => {
-    const listed = RISK_COLUMNS.flatMap((c) => c.conditions);
-    const expected = RISK_FACTORS.filter((r) => !r.exclude).map((r) => r.label);
-    expect(listed.slice().sort()).toEqual(expected.slice().sort());
-    expect(new Set(listed).size).toBe(listed.length);
+  it('each schedule\'s group table lists every risk condition exactly once, and the transplant row is not', () => {
+    // 2026-11-27 (L3): the separate risk-group lists are gone; each group's
+    // conditions sit under its name, in BOTH schedules. The children's table
+    // carries no adult-only condition (L4: smoking, alcohol use disorder).
+    const all = RISK_FACTORS.filter((r) => !r.exclude);
+    const child = CHILD_GROUPS.flatMap((g) => g.conditions);
+    expect(child.slice().sort()).toEqual(all.filter((r) => !r.adultOnly).map((r) => r.label).sort());
+    expect(new Set(child).size).toBe(child.length);
+    const adult = ADULT_GROUPS.flatMap((g) => g.conditions);
+    expect(adult.slice().sort()).toEqual(all.map((r) => r.label).sort());
+    expect(new Set(adult).size).toBe(adult.length);
     expect(RISK_GROUPS.find((g) => g.group === 'exclude').conditions.map((c) => c.id)).toEqual(['hct_cart_bcell_exclude']);
   });
 
@@ -204,7 +215,8 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
   });
 
   it('every source listed has a real URL and a date it was read', () => {
-    const all = SOURCE_GROUPS.flatMap((g) => g.docs);
+    // The screen no longer prints the date (E16); the freshness tripwire still needs it.
+    const all = SOURCE_TYPES.flatMap((g) => g.docs);
     expect(all.length).toBeGreaterThan(10);
     for (const s of all) {
       expect(s.url).toMatch(/^https?:\/\//);
@@ -213,40 +225,47 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
     }
   });
 
-  it('files every document under one heading, CDC first, and "children and adults" holds only documents about both', () => {
-    const names = SOURCE_GROUPS.flatMap((g) => g.docs.map((d) => d.name));
+  it('files every document under exactly one type heading, in MeningoVax\'s order (E16, 2026-11-27)', () => {
+    const names = SOURCE_TYPES.flatMap((g) => g.docs.map((d) => d.name));
     expect(new Set(names).size).toBe(names.length);
-    expect(SOURCE_GROUPS.map((g) => g.book)).toEqual(['child', 'adult', 'any']);
-    for (const g of SOURCE_GROUPS) {
-      const rank = g.docs.map((d) => (d.publisher === 'CDC / ACIP' ? 0 : 1));
-      expect(rank).toEqual(rank.slice().sort());
-    }
-    // Owner, 2026-10-31: the PCV21 report is about adults.
-    const any = SOURCE_GROUPS.find((g) => g.book === 'any').docs.map((d) => d.name);
-    expect(any).not.toContain('PCV21 MMWR');
+    expect(names.slice().sort()).toEqual(SOURCES.map((d) => d.name).sort());
+    expect(SOURCE_TYPES.map((g) => g.name)).toEqual(['ACIP recommendations', 'CDC schedule notes', 'Other CDC and ACIP guidance', 'immunize.org', 'Other']);
+    const where = (n) => SOURCE_TYPES.find((g) => g.docs.some((d) => d.name === n)).name;
+    expect(where('ACIP 2025 Adult MMWR')).toBe('ACIP recommendations');
+    expect(where('ACIP 2023 PCV20 Children')).toBe('ACIP recommendations');
+    expect(where('CDC Child/Adolescent Notes')).toBe('CDC schedule notes');
+    expect(where('CDC catch-up schedule')).toBe('CDC schedule notes');
+    expect(where('CDC PCV Catch-up Job Aid')).toBe('Other CDC and ACIP guidance');
+    expect(where('CDC Timing and Spacing')).toBe('Other CDC and ACIP guidance');
+    expect(where('immunize.org p2016')).toBe('immunize.org');
   });
 
   it('a row\'s Source is the sentences the app\'s own cards cite for its patient', () => {
-    const quotes = sourcesFor(ADULT_HISTORY[0].splits[0].ex).map((q) => q.quote);
+    const quotes = sourcesFor(ADULT_HISTORY[0].ex).map((q) => q.quote);
     expect(quotes.length).toBeGreaterThan(0);
-    const out = recommend(ADULT_HISTORY[0].splits[0].ex[0].input);
-    const cited = out.recs.flatMap((r) => r.noteCites ?? []).map((c) => c.quote).filter(Boolean);
+    const out = recommend(ADULT_HISTORY[0].ex[0].input);
+    // The card's note and, since 2026-11-27, the lines under its recorded doses.
+    const doseLines = Object.values(out.perDose ?? {}).flat().flatMap((d) => d?.reasonCites ?? []);
+    const cited = [...out.recs.flatMap((r) => r.noteCites ?? []), ...doseLines].map((c) => c.quote).filter(Boolean);
     expect(quotes.slice().sort()).toEqual([...new Set(cited)].sort());
   });
 });
 
 describe('C14 — the page renders, and reads as a clinician page', () => {
-  it('renders the seven parts in the order the app decides (owner, 2026-11-01)', () => {
-    render(<Rulebook />);
-    const heads = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
-    expect(heads).toEqual([
-      '1. The vaccines', '2. Age and risk group', '3. Children, birth to 18 years',
-      '4. Adults, 19 years and over', '5. Doses on the record', '6. PneumoVax decisions', '7. Sources',
-    ]);
+  it('renders the five steps in the order the app decides, then the Reference parts (2026-11-27, L1)', () => {
+    const { container } = render(<Rulebook />);
+    const label = (h) => h.querySelector('.rb-fold-label').textContent;
+    expect(screen.getAllByRole('heading', { level: 2 }).map(label))
+      .toEqual(['How PneumoVax decides', 'PneumoVax decisions', 'Sources']);
+    fireEvent.click(screen.getByRole('button', { name: 'Show all' }));
+    expect(screen.getAllByRole('heading', { level: 3 }).filter((h) => h.classList.contains('rb-step-h')).map(label))
+      .toEqual(['Stop check', 'Read the record', 'Children\'s schedule', 'Adults\' schedule', 'Time between doses']);
+    expect([...container.querySelectorAll('.rb-step-num')].map((n) => n.textContent)).toEqual(['1', '2', '3', '4', '5']);
   });
 
   it('opens a Source on request: quotes with their documents linked, and no test patients', () => {
     const { container } = render(<Rulebook />);
+    fireEvent.click(screen.getByRole('button', { name: 'Show all' }));
     const btn = container.querySelector('.rb-src-btn');
     fireEvent.click(btn);
     const panel = container.querySelector('.rb-src-panel');
@@ -263,6 +282,7 @@ describe('C14 — the page renders, and reads as a clinician page', () => {
 
   it('shows no internal rule id to a clinician', () => {
     const { container } = render(<Rulebook />);
+    fireEvent.click(screen.getByRole('button', { name: 'Show all' }));
     for (const r of DOSE_INTERVAL_RULES) expect(container.textContent).not.toContain(r.id);
   });
 
@@ -270,6 +290,7 @@ describe('C14 — the page renders, and reads as a clinician page', () => {
     // Her rounds of 2026-10-31: "baby series", "ticked", "shot", "shortest
     // gap", and the engineering-log phrasing of the first page.
     const { container } = render(<Rulebook />);
+    fireEvent.click(screen.getByRole('button', { name: 'Show all' }));
     const text = container.textContent;
     for (const w of [/baby series/i, /\bticked\b/i, /\bshots?\b/i, /shortest gap/i, /PneumoRecs/, /Does not count \/ Counts with a note/i, /app's judgement/i]) {
       expect(text).not.toMatch(w);
@@ -278,6 +299,7 @@ describe('C14 — the page renders, and reads as a clinician page', () => {
 
   it('renders without a single decorative icon or emoji', () => {
     const { container } = render(<Rulebook />);
+    fireEvent.click(screen.getByRole('button', { name: 'Show all' }));
     expect(container.textContent).not.toMatch(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/u);
     expect(container.querySelectorAll('svg').length).toBe(0);
   });

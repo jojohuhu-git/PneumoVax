@@ -62,20 +62,15 @@ import DoseDateProblem from './DoseDateProblem.jsx';
  * @param {Array}    props.doses        the rows to render
  * @param {Function} props.onChange     called with the COMPLETE next array
  * @param {object}   props.product
- *   How this stream's product is entered. Either
- *     `{ kind: 'select', options: [{key,label},…] }` — the clinician chooses;
- *   or
- *     `{ kind: 'fixed', key, label }`               — the stream has exactly
- *                                                     one product (PPSV23).
- *   This one field decides three things that have to agree, and used to be
- *   three separate hand-written facts per copy: whether a dropdown or a
- *   stated value is rendered, what a new row is stamped with, and what
- *   "this row is otherwise empty" means (see below).
+ *   How this stream's product is entered:
+ *     `{ kind: 'select', options: [{key,label},…] }` — the clinician chooses.
+ *   Every stream chooses since 2026-11-27 (owner decision): PPSV23 used to be
+ *   `kind: 'fixed'`, born with its one product stamped on, which is why it
+ *   needed the details-unknown tick to record a dose with no date.
  * @param {string}   props.addDoseLabel   wording of the add button
  * @param {Function} props.removeLabel    (i) => accessible name for row i's ×
  * @param {string}   [props.emptyMessage] shown instead of rows when there are none
  * @param {string}   [props.listClassName] extra class on the list, for density
- * @param {string}   props.unknownHint    last line of the details-unknown hint
  * @param {number}   props.ageMonths      passed through to the date warning
  * @param {string}   props.today          the clinician's LOCAL today
  * @param {string?}  props.dob            passed through to the date warning
@@ -88,7 +83,6 @@ export default function DoseEditor({
   removeLabel,
   emptyMessage,
   listClassName,
-  unknownHint,
   ageMonths,
   today,
   dob,
@@ -108,7 +102,11 @@ export default function DoseEditor({
   // exists only for a component test that mounts this editor on its own.
   const maxDate = todayISO(today);
 
-  const productIsFixed = product.kind === 'fixed';
+  // A stream with ONE real product (PPSV23): typing a date into a row whose
+  // product has not been chosen chooses it, so the dose never reads "product
+  // unknown" for a vaccine that has only one product.
+  const realProducts = product.options.filter((o) => o.key);
+  const onlyProduct = realProducts.length === 1 ? realProducts[0].key : null;
 
   // P4-3 (2026-10-15). Ported from MeningoVax K6/Item-1 (`d608c14`): since S9
   // this editor already has one home on every surface, so the fix lands once
@@ -155,34 +153,25 @@ export default function DoseEditor({
   }
 
   function addDose() {
-    // A fixed-product stream stamps its product on at creation, because the
-    // recommendation card prints the product of every recorded dose and a row
-    // without one reads "product unknown". `isBlankDoseRow` knows that stamp
-    // is a label the app wrote rather than an answer anybody gave, so an
-    // untouched row is still not a dose.
-    onChange([...doses, productIsFixed ? newDoseRow({ product: product.key }) : newDoseRow()]);
+    onChange([...doses, newDoseRow()]);
   }
   function removeDose(i) {
     onChange(doses.filter((_, idx) => idx !== i));
   }
   function updateDose(i, field, value) {
-    onChange(doses.map((d, idx) => (idx === i ? { ...d, [field]: value } : d)));
+    onChange(doses.map((d, idx) => {
+      if (idx !== i) return d;
+      const next = { ...d, [field]: value };
+      if (field === 'date' && value && onlyProduct && !next.product) next.product = onlyProduct;
+      return next;
+    }));
   }
 
-  // P1-3 (2026-10-12): an empty row means two things — "I have not typed yet"
-  // and "a dose was given, but I have no card". The app cannot tell them
-  // apart, and it used to guess the second, so a row nobody had touched was
-  // graded as a dose of unknown date. The clinician now says which it is. The
-  // tick appears only while the row is otherwise empty, because that is the
-  // only case where the two readings differ.
-  //
-  // "Otherwise empty" DEPENDS ON THE STREAM, and this is the one place that
-  // difference is written down. Where the product is chosen, an untouched row
-  // has neither a date nor a product. Where the product is fixed, every row is
-  // born carrying it, so judging the row by its product too would hide the
-  // tick forever and leave half of P1-3 unfixed.
-  const isOtherwiseEmpty = (dose) =>
-    productIsFixed ? !dose.date : !dose.date && !dose.product;
+  // P1-3 (2026-10-12) asked the clinician to tick "a dose was given, but the
+  // date is unknown" to tell such a row from an untouched one. OWNER DECISION
+  // 2026-11-27 removed the tick from both apps: a dose is kept on the record by
+  // choosing its product, and a row with neither a date nor a product is
+  // empty. `isBlankDoseRow` still decides that, in one place.
 
   return (
     <>
@@ -209,25 +198,15 @@ export default function DoseEditor({
 
             <div className="dose-field">
               <label htmlFor={`${uid}-product-${i}`}>Product</label>
-              {productIsFixed ? (
-                <input
-                  type="text"
-                  id={`${uid}-product-${i}`}
-                  value={product.label}
-                  disabled
-                  className="dose-field-disabled"
-                />
-              ) : (
-                <select
-                  id={`${uid}-product-${i}`}
-                  value={dose.product || ''}
-                  onChange={(e) => updateDose(i, 'product', e.target.value)}
-                >
-                  {product.options.map((p) => (
-                    <option key={p.key || 'unknown'} value={p.key}>{p.label}</option>
-                  ))}
-                </select>
-              )}
+              <select
+                id={`${uid}-product-${i}`}
+                value={dose.product || ''}
+                onChange={(e) => updateDose(i, 'product', e.target.value)}
+              >
+                {product.options.map((p) => (
+                  <option key={p.key || 'none'} value={p.key}>{p.label}</option>
+                ))}
+              </select>
             </div>
 
             <button
@@ -239,34 +218,12 @@ export default function DoseEditor({
               ×
             </button>
 
-            {/* The impossible-date warning is its own component because the
-                RULE is the engine's: `dateEntryWarning` calls the very same
-                predicates the engine grades with. */}
+            {/* The date warning is its own component because the RULE is the
+                engine's: `dateEntryWarning` calls the very same predicates the
+                engine grades with — including, since 2026-11-27, what a dose
+                with no date means (a PCV is not counted, a PPSV23 is). */}
             <DoseDateProblem dose={dose} ageMonths={ageMonths} today={today} dob={dob} />
 
-            {isOtherwiseEmpty(dose) && (
-              <label className="dose-row-unknown">
-                <input
-                  type="checkbox"
-                  className="risk-checkbox"
-                  checked={!!dose.detailsUnknown}
-                  onChange={(e) => updateDose(i, 'detailsUnknown', e.target.checked)}
-                />
-                <span>
-                  {/* P4-4 item 6 (2026-10-16): a PPSV23 row's product is
-                      never unknown — it is `kind: 'fixed'` and shown, greyed
-                      out, right beside this tick. Saying "and product" there
-                      told the clinician something untrue. Only a
-                      select-product row (PCV) can have an unknown product. */}
-                  {productIsFixed
-                    ? 'A dose was given, but the date is unknown.'
-                    : 'A dose was given, but the date and product are unknown.'}
-                  <span className="dose-row-unknown-hint">
-                    Tick this to keep the dose on the record. {unknownHint}
-                  </span>
-                </span>
-              </label>
-            )}
           </div>
         ))}
       </div>

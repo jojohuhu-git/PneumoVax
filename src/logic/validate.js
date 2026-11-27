@@ -60,7 +60,7 @@ import { evaluateDoseInterval, lastPpsv23HoldingAConjugate, pcvRepeatAfterUnderA
 // P1-3 (2026-10-12): a row the clinician added and never typed in is not a
 // dose. Dropped HERE, at the walk, so that no caller can count one by
 // forgetting to filter — the UI sweeps them too, but only for tidiness.
-import { dropBlankDoseRows } from './doseIdentity.js';
+import { dropBlankDoseRows, isBlankDoseRow } from './doseIdentity.js';
 
 // PCV21 product gate is 18y (216mo) — the PRODUCT minimum age per mm7336a3.
 // This is intentionally distinct from the ADULT_SCHED_MIN_M (228mo / 19y);
@@ -335,7 +335,22 @@ function sameDayDifferentBrandNote(dose, kept) {
 // Returns null when the row is fine (including an undated row — there is no
 // date to be wrong), so the caller can render nothing.
 export function dateEntryWarning(dose, { ageMonths, today, dob } = {}) {
-  if (!dose?.date) return null;
+  // OWNER DECISION 2026-11-27: with the details-unknown tick gone, the row
+  // itself says what a missing date means, where the date is missing (as
+  // MeningoVax has since STOP C, 2026-11-15). The same rule the engine grades
+  // with: a PCV with no date is not counted (§A-UNDATED); a PPSV23 still is,
+  // because CDC's dated-records rule names PPSV23 as its exception.
+  if (!dose?.date) {
+    if (isBlankDoseRow(dose)) return null;
+    if (dose.product !== PPSV23_PRODUCT.key) {
+      return { kind: 'no-date', text: 'With no date, this dose is not counted: only written, dated records count as evidence of vaccination. Add the date if a record shows it.' };
+    }
+    // The same age test the grader applies to an undated PPSV23 (below).
+    if (ageMonths != null && ageMonths < PPSV23_PRODUCT.minAgeM) {
+      return { kind: 'no-date', text: `With no date, this PPSV23 is not counted: the patient is below the ${fmtMinAgeAdj(PPSV23_PRODUCT.minAgeM)} minimum age for PPSV23.` };
+    }
+    return { kind: 'no-date', counts: true, text: 'With no date, this PPSV23 still counts: CDC accepts an undated PPSV23 record. Its age and interval are not checked until a date is added.' };
+  }
   const ref = todayISO(today);
   if (futureDated(dose, ref)) {
     return {

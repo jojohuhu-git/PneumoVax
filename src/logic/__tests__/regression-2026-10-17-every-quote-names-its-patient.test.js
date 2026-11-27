@@ -144,12 +144,18 @@ describe('the field itself', () => {
       // 2026-10-25 from the Supplementary Report PDF, page 10.
       'cdcPcv20Children2023CompleteWithPcv20',
       'cdcPcv20Children2023CompleteWithoutPcv20',
+      // Rulebook reorganization (OWNER DECISION 2026-11-27). CDC General Best
+      // Practices, read live 2026-11-27: "Doses of any vaccine administered ≥5
+      // days earlier than the minimum interval or age should not be counted".
+      // "Any vaccine", no age, no risk — all five groups is transcription. It
+      // is shown on the Rulebook only; no card quotes it.
+      'gbpFiveDaysEarlyNotCounted',
       // §A-UNDATED (OWNER DECISION 2026-11-15). CDC General Best Practices,
       // read live 2026-11-15: "providers should only accept written, dated
       // records as evidence of vaccination". It names no age and no risk —
       // every patient with a record — so all five groups is transcription.
       'gbpWrittenDatedRecords',
-      'immPCV7',                  // "older teen or adult ... at increased risk"
+      'immPCV7',                // "older teen or adult ... at increased risk"
       // C8, document 2's CITEs (2026-10-17). Both are FOOTNOTES printed on all
       // four pages of the Adult Timing Job Aid — against every "None*" row and
       // every "PPSV23\u00b6" cell respectively — so they speak to every adult the

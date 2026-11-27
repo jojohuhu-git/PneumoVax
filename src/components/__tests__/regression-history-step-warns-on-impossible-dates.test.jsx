@@ -162,12 +162,30 @@ describe('the warning and the verdict cannot drift apart', () => {
       const verdict = analyzeBoth({
         pcvDoses: [row], ppsv23Doses: [], ageMonths: 81, today: TODAY, dob: DOB, riskIds: [],
       }).pcv.perDose[0];
-      const engineKind = verdict?.recordProblem ?? null;
+      // Since 2026-11-27 (owner decision, the details-unknown tick removed) an
+      // undated row says what its missing date means; the engine's own
+      // verdict is what it must agree with.
+      const engineKind = verdict?.recordProblem ?? (!row.date && verdict?.doesNotCount ? 'no-date' : null);
       expect(
         warning?.kind ?? null,
         `the step and the engine disagree about ${JSON.stringify(row)}`
       ).toBe(engineKind);
     }
+  });
+
+  it('an undated PPSV23 row says it still counts, and the engine counts it', () => {
+    // CDC's dated-records rule names PPSV23 as its exception (§A-UNDATED).
+    const row = { date: '', product: 'PPSV23' };
+    const warning = dateEntryWarning(row, { ageMonths: 81, today: TODAY, dob: DOB });
+    expect(warning.kind).toBe('no-date');
+    expect(warning.text).toMatch(/still counts/);
+    expect(warning.counts).toBe(true);   // drawn as a grey note, not a red problem
+    const verdict = analyzeBoth({ pcvDoses: [], ppsv23Doses: [row], ageMonths: 81, today: TODAY, dob: DOB, riskIds: [] }).ppsv23.perDose[0];
+    expect(verdict.doesNotCount).toBeFalsy();
+    // Under 2, the same row is not counted (below PPSV23's minimum age), and says so.
+    const young = dateEntryWarning(row, { ageMonths: 18, today: TODAY });
+    expect(young.text).toMatch(/is not counted: the patient is below the 2-year minimum age for PPSV23/);
+    expect(analyzeBoth({ pcvDoses: [], ppsv23Doses: [row], ageMonths: 18, today: TODAY, riskIds: [] }).ppsv23.perDose[0].doesNotCount).toBe(true);
   });
 
   it('the short warning and the full explanation name the same two causes', () => {

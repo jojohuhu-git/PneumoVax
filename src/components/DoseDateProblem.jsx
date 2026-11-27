@@ -29,13 +29,17 @@ import React from 'react';
  * that the kind shown here equals the `recordProblem` the engine reports for
  * the same row.
  *
- * Renders nothing when the row is fine, including an undated row.
+ * Renders nothing when the row is fine or empty. Since 2026-11-27 (owner
+ * decision, the details-unknown tick removed) a row with a product and no
+ * date says what that means: a PCV is not counted, a PPSV23 still is.
  */
 export default function DoseDateProblem({ dose, ageMonths, today, dob }) {
   const warning = dateEntryWarning(dose, { ageMonths, today, dob });
   if (!warning) return null;
   return (
-    <div className="dose-row-date-problem" role="status" data-problem={warning.kind}>
+    // A dose that still counts (an undated PPSV23) is a note, not a problem:
+    // red means something is wrong (2026-11-27).
+    <div className={warning.counts ? 'dose-row-date-problem dose-row-date-note' : 'dose-row-date-problem'} role="status" data-problem={warning.kind}>
       {warning.text}
     </div>
   );

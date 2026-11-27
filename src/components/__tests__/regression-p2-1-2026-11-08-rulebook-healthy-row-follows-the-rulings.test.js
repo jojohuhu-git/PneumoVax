@@ -15,20 +15,24 @@
 // sentence the card carries. This file checks both halves: the page's words
 // name every clause, and each clause's patient really gets that card.
 import { describe, it, expect } from 'vitest';
-import { CHILD_LANES, WORKED_PATIENTS, sourcesFor } from '../../data/rulebook.js';
+import { CHILD_GROUPS, WORKED_PATIENTS, sourcesFor } from '../../data/rulebook.js';
 import { recommend } from '../../logic/recommend.js';
 
-const healthy = CHILD_LANES.find((l) => l.group === 'Healthy');
-const note = healthy.result.note;
+// 2026-11-27 reorganization: the healthy row is now a group-table row, and
+// its note is the owner's E8 rewrite (mock-up, 2026-11-27). The clauses are
+// the same rulings; the "under 5, once complete" clause was folded into "The
+// card adds a re-evaluation age", which healthy4done's card still proves.
+const healthy = CHILD_GROUPS.find((l) => l.group === 'Healthy');
+const note = `${healthy.after} ${healthy.afterNote}`;
 const noteText = (r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`);
 const run = (key) => recommend(WORKED_PATIENTS[key].input).recs.map(noteText).join(' \n ');
 
 describe('P2-1: the Rulebook healthy row says what the cards say', () => {
   it('names every clause the cards follow', () => {
-    expect(note).toMatch(/Re-evaluate at 50 years/);
-    expect(note).toMatch(/under 5 years, once the series is complete/);
-    expect(note).toMatch(/smoking or alcohol use disorder selected: at 19 years instead/);
-    expect(note).toMatch(/Neither, if the series includes PCV20, or PCV15 and PPSV23/);
+    expect(note).toMatch(/Not indicated from 5 years/);
+    expect(note).toMatch(/The card adds a re-evaluation age: 50 years/);
+    expect(note).toMatch(/or 19 years if smoking or alcohol use disorder is selected/);
+    expect(note).toMatch(/Not added if the series includes PCV20, or PCV15 and PPSV23/);
     // The old wording, which a PCV15 + PPSV23 child contradicted.
     expect(note).not.toMatch(/unless a PCV20 has been given/);
   });
