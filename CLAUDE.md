@@ -673,6 +673,13 @@ Each row declares **`rulebook`** (child / adult / any — which schedule states 
 
 Since S6-4 a test enforces this: `regression-s6-4-avg-days-per-month-one-home.test.js` compares the two files comment-stripped and fails on any code divergence. It is **skipped, not failed**, when the sibling repo is not checked out, because CI clones only this repo — so a local run is what catches drift. Note the two apps *use* the shared file differently and that is fine: PneumoVax calls only `DAYS.weeks`, while MeningoVax uses `DAYS.months` (17×) and `DAYS.years` (12×). PneumoVax deliberately moved its month/year comparisons onto the calendar-exact helpers.
 
+### ageEntry.js Is Mirror-Synced Too
+`src/logic/ageEntry.js` (which ages the Age step refuses, and the message it shows) is the same
+code in both apps, comments aside — owner E2, 2026-11-26: *"Both apps"*. Change its wording in
+both repos or neither. Guard: `regression-2026-11-27-ageentry-mirrors-meningovax.test.js`
+(PNEUMO-AGEENTRY-GUARD), code-only comparison like S6-4's, **skipped** when MeningoVax is not
+checked out.
+
 ## Testing Expectations
 
 - When changing a rule: update `CLINICAL_SPEC.md`, the engine, and the test.
