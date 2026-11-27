@@ -21,10 +21,10 @@ MeningoVax #170) are both merged.
 - The CDSI-checks plan has **nothing left in PneumoVax**.
 
 ## Not done / open
-1. Review and merge this PR (owner).
-2. Carried over, MeningoVax only: `DoseEditor.jsx` still says "Date (optional)". Ask whether it
-   takes PneumoVax's wording; note that PneumoVax #165 also took the 2026-11-27 undated-dose
-   commits ("remove the details-unknown tick"), so check those before porting.
+1. Review and merge this PR (#166) and the two label PRs (PneumoVax #167, MeningoVax #171) (owner).
+2. ANSWERED later the same day: the owner removed every "(optional)" field label from both apps.
+   PneumoVax #167 ("Months"), MeningoVax #171 ("Months", "Brand"), both open, both suites green
+   (2,568 and 2,773). MeningoVax's "Date (optional)" had already gone on 2026-11-20.
 3. Optional, MeningoVax: its test-patient script is still a measurement, not a required test. The
    same pattern as `cdsi-test-patients.test.js` would make it one. Not asked for yet.
 4. Minor, no action needed: `brands.js`'s `counts:` flag feeds only the Rulebook table, while
