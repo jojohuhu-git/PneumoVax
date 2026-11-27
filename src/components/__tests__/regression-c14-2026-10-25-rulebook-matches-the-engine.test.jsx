@@ -244,7 +244,9 @@ describe('C14 — every list on the page is the engine\'s own list', () => {
     const quotes = sourcesFor(ADULT_HISTORY[0].ex).map((q) => q.quote);
     expect(quotes.length).toBeGreaterThan(0);
     const out = recommend(ADULT_HISTORY[0].ex[0].input);
-    const cited = out.recs.flatMap((r) => r.noteCites ?? []).map((c) => c.quote).filter(Boolean);
+    // The card's note and, since 2026-11-27, the lines under its recorded doses.
+    const doseLines = Object.values(out.perDose ?? {}).flat().flatMap((d) => d?.reasonCites ?? []);
+    const cited = [...out.recs.flatMap((r) => r.noteCites ?? []), ...doseLines].map((c) => c.quote).filter(Boolean);
     expect(quotes.slice().sort()).toEqual([...new Set(cited)].sort());
   });
 });

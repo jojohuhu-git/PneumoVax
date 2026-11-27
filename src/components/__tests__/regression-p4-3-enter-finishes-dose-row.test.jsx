@@ -85,12 +85,14 @@ describe('P4-3 — Enter in a dose row gives you the next row, not the next step
     expect(document.activeElement).toBe(dateInputs()[1]);
   });
 
-  it('Enter on the remove button or the details-unknown checkbox is not intercepted', () => {
+  it('Enter on the remove button is not intercepted', () => {
+    // The details-unknown checkbox this test also covered was removed
+    // 2026-11-27 (owner decision, both apps); the remove button is still here.
     toHistoryStep();
 
     fireEvent.click(screen.getByText('+ Add PCV dose'));
-    const checkbox = document.querySelector('.dose-row input[type="checkbox"]');
-    enterOn(checkbox);
+    expect(document.querySelector('.dose-row input[type="checkbox"]')).toBeNull();
+    enterOn(document.querySelector('.dose-row .dose-remove'));
 
     // Not this fix's concern either way: still one row, nothing added.
     expect(document.querySelectorAll('.dose-row').length).toBe(1);

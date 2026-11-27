@@ -244,26 +244,8 @@ body {
   display: flex; gap: var(--sp-12); align-items: flex-end; padding: var(--sp-12);
   background: var(--gy6); border-radius: var(--rads); flex-wrap: wrap;
 }
-/* P1-3 (2026-10-12): the "a dose was given, details unknown" tick, shown only
-   while a dose row is otherwise empty. Ported from MeningoVax K1 — design
-   changes flow MeningoVax -> PneumoVax. `flex-basis: 100%` puts it on its own
-   line below the date and product fields of the wrapping .dose-row. The
-   .dose-row here sits on --gy6 already, so the tick uses --wh to separate
-   itself from the row rather than MeningoVax's --gy6 on white. */
-.dose-row-unknown {
-  flex-basis: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sp-8);
-  margin-top: var(--sp-8);
-  padding: var(--sp-8) var(--sp-12);
-  border-radius: var(--rads);
-  background: var(--wh);
-  font-size: var(--fs-base);
-  color: var(--gy2);
-  cursor: pointer;
-}
-.dose-row-unknown-hint { display: block; color: var(--gy3); }
+/* The P1-3 "details unknown" tick and its styles were removed 2026-11-27
+   (owner decision, both apps): a dose is kept by choosing its product. */
 
 /* An impossible dose date, said under the row as it is typed (owner decision,
    2026-10-12: warn, do not trap). Deliberately the SAME presentation as
@@ -273,7 +255,7 @@ body {
    one kind of message is how a palette stops meaning anything.
 
    `flex-basis: 100%` puts it on its own line under the date and product fields
-   of the wrapping .dose-row, the same way .dose-row-unknown above does. */
+   of the wrapping .dose-row. */
 /* PARITY-1 (2026-10-12): declaration-for-declaration the same rule as
    MeningoVax's `.dose-row-problem`, which says the identical thing about the
    identical field. It used to be bare `--r` text, which sat on the dose row's
@@ -622,7 +604,6 @@ body {
    the same structure from the shared `DoseEditor`, so the density is one class
    on the LIST and the gap stays the flex `gap` it already was elsewhere. */
 .dose-list-compact { gap: var(--sp-4); }
-.dose-field-disabled { background: var(--gy6); color: var(--gy3); }
 .history-edit-summary {
   cursor: pointer;
   font-size: var(--fs-base);

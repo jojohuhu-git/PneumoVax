@@ -655,7 +655,7 @@ const P = {
   // §A-UNDATED (OWNER DECISION 2026-11-15): only an undated PPSV23 is still
   // counted; an undated PCV is "Not counted — no date" (Ruth, below).
   dateUnknown: ex('Healthy 70-year-old, PPSV23 on record with no date',
-    { ageMonths: 840, riskIds: [], pcvDoses: [], ppsv23Doses: [{ product: 'PPSV23', date: '', detailsUnknown: true }] },
+    { ageMonths: 840, riskIds: [], pcvDoses: [], ppsv23Doses: [{ product: 'PPSV23', date: '' }] },
     { chip: ['ppsv23', 0, 'Counted — date not recorded'] }),
   noDate: ex('Healthy 65-year-old, PCV20 on record with no date',
     { ageMonths: 780, riskIds: [], pcvDoses: [{ product: 'PCV20', date: '' }], ppsv23Doses: [] },
@@ -943,6 +943,14 @@ export const NOT_COUNTED = {
   general: [
     { text: 'Repeat that dose only. Do not restart the series.', ex: [P.infantShort, P.toddler] },
     { text: 'The next dose is given at least the minimum interval after the dose that did not count.', ex: [P.infantShort] },
+    // OWNER DECISION 2026-11-27: a general rule here, with the PPSV23
+    // exception said in the same place ("state the exceptions such as PPSV23
+    // if applicable"). The label key below says it per label too.
+    {
+      text: 'A dose with no date stays on the record but does not count: only written, dated records are accepted. Exception: a PPSV23 with no date counts, because CDC names PPSV23 as the exception. Its age and interval are not checked until a date is added.',
+      cite: ['gbpWrittenDatedRecords'],
+      ex: [P.noDate, P.dateUnknown],
+    },
   ],
   special: [
     { dose: `PPSV23 given before ${yrs(AGE.m24)}`, action: `PCV20, ≥${W8} after it. A repeat PPSV23 waits ≥${Y5} after it.`, decision: 'invalidPpsvTiming', cite: ['pedsRiskPcv20orPpsv23'], ex: [P.toddler] },
@@ -1326,7 +1334,7 @@ for (const d of [...SOURCES].sort((a, b) => b.quotes - a.quotes || a.name.locale
 // ── The worked patient behind a row, run through the app ─────────────────
 /**
  * The "Source" button's content: the CDC/ACIP sentences the app's own cards
- * cite for a row's worked patients. Generated, never transcribed: change the
+ * cite for a row's worked patients, in the note or on a recorded dose's line. Generated, never transcribed: change the
  * card's citation and this changes with it.
  *
  * With `keys` (a row's `cite`), only those sentences, in that order — and
@@ -1339,7 +1347,11 @@ export function sourcesFor(examples = [], keys = null) {
   const seen = new Map();
   for (const e of examples) {
     const out = recommend(e.input);
-    for (const c of (out.recs ?? []).flatMap((r) => r.noteCites ?? [])) {
+    // The card's note AND the lines under its recorded doses: both are what the
+    // app's own card shows (MeningoVax's Rulebook reads both too). Added
+    // 2026-11-27 for the undated-dose rule, whose sentence is on the dose line.
+    const doseLines = Object.values(out.perDose ?? {}).flat().flatMap((d) => d?.reasonCites ?? []);
+    for (const c of [...(out.recs ?? []).flatMap((r) => r.noteCites ?? []), ...doseLines]) {
       if (!c?.quote || (keys && !keys.includes(c.key))) continue;
       const ref = REFS[c?.key];
       const id = keys ? c.key : c.quote;

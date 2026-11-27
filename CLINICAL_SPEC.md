@@ -417,6 +417,15 @@ to count an undated PCV, with or without the error).
 3. **The "card on the day of a dose" look-back** (§C-P1-3) is no longer blocked by an undated PCV —
    only by an undated PPSV23, which still counts and still cannot be placed in time.
 
+**How a dose with no date is entered (OWNER DECISION 2026-11-27).** The "a dose was given, but
+the date is unknown" tick is removed from both apps. A dose is kept on the record by **choosing its
+product** with the date left blank; a row with neither is empty and dropped. The PPSV23 row now
+chooses its product like the PCV row (her words: *"If a PPSV product was chosen without a date
+should be left in the record like PCV"*), and the row says what the missing date means: a PCV is not
+counted, a PPSV23 still is (not counted below PPSV23's minimum age). Shown a 70-year-old with PCV15
+and an undated PPSV23, she kept the PPSV23 exception. The Rulebook states this once as a general
+rule under "A dose that does not count", the PPSV23 exception beside it.
+
 **Unchanged:** an undated PCV the patient is **too young today** to have had validly (rejected, "repeat
 with any approved product"), and an undated PCV21 under 18 (rejected, another product). The
 DoseEditor's "dose given, date and product unknown" tick on the PCV side now gives "not counted",

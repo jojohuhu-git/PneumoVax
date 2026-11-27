@@ -212,6 +212,18 @@ export const PCV_HISTORY_PRODUCTS = [
   { key: '', label: 'Unknown PCV product' },
 ];
 
+// OWNER DECISION 2026-11-27: the "date unknown" tick is gone from both apps,
+// and a dose is kept on the record by CHOOSING its product. Until then a
+// PPSV23 row was born with its one product stamped on, so a row with no date
+// could only be told from an empty one by the tick. Her words: "If a PPSV
+// product was chosen without a date should be left in the record like PCV."
+// So the PPSV23 row chooses too. Its blank option means "nothing chosen",
+// not "unknown product" — PPSV23 has only one.
+export const PPSV23_HISTORY_PRODUCTS = [
+  { key: '', label: 'Choose product' },
+  { key: PPSV23_PRODUCT.key, label: PPSV23_PRODUCT.label },
+];
+
 // Recommendation-facing brand option strings ----------------------------
 // Engine emits these as `brands` arrays. PCV21 only when adult.
 export function pcvRecBrands({ adult, includePCV21 = true } = {}) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { recommend } from '../logic/recommend.js';
 import { fmtAgeMonths, ageGroup } from '../logic/format.js';
 import { RISK_FACTORS } from '../data/riskFactors.js';
-import { PPSV23_PRODUCT, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
+import { PPSV23_HISTORY_PRODUCTS, PCV_HISTORY_PRODUCTS } from '../data/brands.js';
 import RecCard from './RecCard.jsx';
 import Disclaimer from './Disclaimer.jsx';
 import HowThisWasWorkedOut from './HowThisWasWorkedOut.jsx';
@@ -251,7 +251,6 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
     today,
     dob,
     listClassName: 'dose-list-compact',
-    unknownHint: 'An empty row is removed when you close this panel.',
   };
 
   return (
@@ -346,7 +345,7 @@ export default function Results({ state, onReset, onChange, onBack, today }) {
                 {...doseEditorShared}
                 doses={ppsv23Doses}
                 onChange={(next) => onChange?.({ ppsv23Doses: next })}
-                product={{ kind: 'fixed', key: PPSV23_PRODUCT.key, label: PPSV23_PRODUCT.label }}
+                product={{ kind: 'select', options: PPSV23_HISTORY_PRODUCTS }}
                 addDoseLabel="+ Add PPSV23 dose"
                 removeLabel={(i) => `Remove PPSV23 dose ${i + 1}`}
                 emptyMessage="No PPSV23 doses recorded."

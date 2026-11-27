@@ -5,10 +5,10 @@
 // The engine half is in `src/logic/__tests__/regression-p1-3-blank-row-is-
 // not-a-dose.test.js`. This file covers what the engine cannot see:
 //
-//   • the tick exists, and appears only while a row is otherwise empty —
-//     that is the only case where "I have not typed yet" and "a dose was
-//     given, details unknown" are different claims;
-//   • ticking it keeps the dose on the record;
+//   • a dose with no date is kept by CHOOSING ITS PRODUCT (OWNER DECISION
+//     2026-11-27: the details-unknown tick this file was written for is gone
+//     from both apps), and the row says what the missing date means — a PCV is
+//     not counted, a PPSV23 still is;
 //   • "Recorded doses (N)" counts doses, not rows, so the button cannot say
 //     "(1)" above a card showing none;
 //   • untouched rows are swept when the clinician LEAVES the panel, never
@@ -21,6 +21,7 @@
 //   • the `STAMPED_AT_CREATION` exception removed, so a new PPSV23 row looks
 //     filled in because the app stamped its product on
 //       → 1 of 22 fails — the one test written for exactly that half.
+//     (That exception is itself gone since 2026-11-27: nothing is stamped.)
 //   • `analyzeBoth` stops dropping blank rows (the single filter point)
 //       → 4 of 22 fail.
 //   • the Results panel sweeps while it is still OPEN, so a row vanishes
@@ -68,64 +69,54 @@ function HistoryHarness({ initial = { pcvDoses: [], ppsv23Doses: [] } }) {
   );
 }
 
-const unknownTicks = () =>
-  screen.queryAllByRole('checkbox', { name: /a dose was given, but the date and product are unknown/i });
-// P4-4 item 6 (2026-10-16): PPSV23's tick wording dropped "and product" —
-// its product is never unknown, it is fixed and shown beside the tick.
-const unknownTicksPpsv23 = () =>
-  screen.queryAllByRole('checkbox', { name: /a dose was given, but the date is unknown/i });
+const anyTick = () => screen.queryAllByRole('checkbox');
+const selects = (c) => [...c.querySelectorAll('select')];
 
 describe('P1-3 UI — the history step', () => {
-  it('a new, untouched row offers the tick', () => {
+  it('no row offers a details-unknown tick any more (OWNER DECISION 2026-11-27)', () => {
     render(<HistoryHarness />);
-    expect(unknownTicks()).toHaveLength(0);
     fireEvent.click(screen.getByText('+ Add PCV dose'));
-    expect(unknownTicks()).toHaveLength(1);
-  });
-
-  it('the tick disappears once the row says anything', () => {
-    // Only an otherwise-empty row is ambiguous. Once a date or a product is
-    // there, the row is a dose and the question does not arise.
-    const { container } = render(<HistoryHarness />);
-    fireEvent.click(screen.getByText('+ Add PCV dose'));
-    // The "Date (optional)" <label> is not associated with its input — an
-    // existing accessibility gap, S11's territory, not this item's. Selected
-    // by type so this test is not blocked on it.
-    const dateInput = container.querySelector('input[type="date"]');
-    fireEvent.change(dateInput, { target: { value: '2025-03-01' } });
-    expect(unknownTicks()).toHaveLength(0);
-  });
-
-  it('an untouched PPSV23 row offers it too', () => {
-    // The PPSV23 row is born carrying `product: 'PPSV23'` so the card can
-    // print it. That stamp must not make the row look filled in — this is the
-    // half of P1-3 that a naive "is every field empty?" check would miss.
-    render(<HistoryHarness />);
     fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
-    expect(unknownTicksPpsv23()).toHaveLength(1);
+    expect(anyTick()).toHaveLength(0);
+    expect(screen.queryByText(/date is unknown|date and product are unknown/i)).toBeNull();
   });
 
-  it('ticking it records the dose', () => {
+  it('a PPSV23 row is born empty and CHOOSES its product, like a PCV row', () => {
+    // Until 2026-11-27 it was born carrying `product: 'PPSV23'`, which is why
+    // only the tick could tell an undated PPSV23 from an untouched row.
     let latest = null;
     function Spy() {
       const [state, setState] = useState({ pcvDoses: [], ppsv23Doses: [] });
       latest = state;
       return (
-        <StepHistory
-          historyAnswered={true}
-          ageMonths={24}
-          pcvDoses={state.pcvDoses}
-          ppsv23Doses={state.ppsv23Doses}
+        <StepHistory historyAnswered={true} ageMonths={24} pcvDoses={state.pcvDoses} ppsv23Doses={state.ppsv23Doses}
           onChangePcv={(pcvDoses) => setState((s) => ({ ...s, pcvDoses }))}
-          onChangePpsv={(ppsv23Doses) => setState((s) => ({ ...s, ppsv23Doses }))}
-          today={TODAY}
-        />
+          onChangePpsv={(ppsv23Doses) => setState((s) => ({ ...s, ppsv23Doses }))} today={TODAY} />
       );
     }
-    render(<Spy />);
+    const { container } = render(<Spy />);
+    fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
+    expect(latest.ppsv23Doses[0].product).toBe('');
+    const [ppsvSelect] = selects(container);
+    expect([...ppsvSelect.options].map((o) => o.textContent)).toEqual(['Choose product', 'PPSV23 (Pneumovax 23)']);
+    // Typing a date chooses the only product, so the card never says "product unknown".
+    fireEvent.change(container.querySelector('input[type="date"]'), { target: { value: '2025-03-01' } });
+    expect(latest.ppsv23Doses[0].product).toBe('PPSV23');
+  });
+
+  it('a PCV chosen with no date is kept, and its row says it is not counted', () => {
+    const { container } = render(<HistoryHarness />);
     fireEvent.click(screen.getByText('+ Add PCV dose'));
-    fireEvent.click(unknownTicks()[0]);
-    expect(latest.pcvDoses[0].detailsUnknown).toBe(true);
+    expect(container.querySelector('[data-problem="no-date"]')).toBeNull();   // untouched: says nothing
+    fireEvent.change(selects(container)[0], { target: { value: 'PCV20' } });
+    expect(container.querySelector('[data-problem="no-date"]').textContent).toMatch(/^With no date, this dose is not counted/);
+  });
+
+  it('a PPSV23 chosen with no date is kept, and its row says it still counts', () => {
+    const { container } = render(<HistoryHarness />);
+    fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
+    fireEvent.change(selects(container)[0], { target: { value: 'PPSV23' } });
+    expect(container.querySelector('[data-problem="no-date"]').textContent).toMatch(/^With no date, this PPSV23 still counts: CDC accepts an undated PPSV23 record/);
   });
 });
 
@@ -150,12 +141,14 @@ describe('P1-3 UI — the Results "Recorded doses" panel', () => {
     expect(dosesButton().textContent).toBe('Recorded doses');
   });
 
-  it('a ticked row IS counted', () => {
-    render(<ResultsHarness initial={ADULT} />);
+  it('a row with a product and no date IS on the record', () => {
+    const { container } = render(<ResultsHarness initial={ADULT} />);
     fireEvent.click(dosesButton());
-    fireEvent.click(screen.getByText('+ Add PCV dose'));
-    fireEvent.click(unknownTicks()[0]);
+    fireEvent.click(screen.getByText('+ Add PPSV23 dose'));
+    const panel = screen.getByTestId('recorded-doses-panel');
+    fireEvent.change(panel.querySelectorAll('select')[0], { target: { value: 'PPSV23' } });
     expect(dosesButton().textContent).toBe('Recorded doses (1)');
+    expect(container.querySelector('[data-problem="no-date"]')).not.toBeNull();
   });
 
   it('an untouched row survives while the panel is OPEN', () => {

@@ -29,7 +29,9 @@ import React from 'react';
  * that the kind shown here equals the `recordProblem` the engine reports for
  * the same row.
  *
- * Renders nothing when the row is fine, including an undated row.
+ * Renders nothing when the row is fine or empty. Since 2026-11-27 (owner
+ * decision, the details-unknown tick removed) a row with a product and no
+ * date says what that means: a PCV is not counted, a PPSV23 still is.
  */
 export default function DoseDateProblem({ dose, ageMonths, today, dob }) {
   const warning = dateEntryWarning(dose, { ageMonths, today, dob });

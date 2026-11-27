@@ -102,7 +102,7 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
     }
   });
 
-  it('the page shows 55 sentences in all — pinned, so a new one is a choice, not drift (was 239)', () => {
+  it('the page shows 56 sentences in all — pinned, so a new one is a choice, not drift (was 239)', () => {
     // 42 -> 43, P2-1 (2026-11-08): the healthy row's smoking/alcohol clause
     // (cdcAdultRiskFactorList, §B-ADULTRISK19).
     // 43 -> 55, the 2026-11-27 reorganization (owner mock-up). Every sentence
@@ -111,8 +111,11 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
     // way to the four adult group rows (7): +5. New: the "doses in all" table
     // (+4), the PCV-after-PCV table's two catch-up cells (+2), and the grace
     // sentence (+1, Rulebook only).
+    // 55 -> 56 (owner, 2026-11-27, later): the general rule "A dose with no
+    // date stays on the record but does not count", with its PPSV23
+    // exception, cites CDC's dated-records sentence from the undated dose's line.
     const total = ROWS.reduce((n, [, row]) => n + (row.cite?.length ?? 0), 0);
-    expect(total).toBe(55);
+    expect(total).toBe(56);
   });
 
   it('p2016 appears only where no CDC sentence on that card states the claim', () => {

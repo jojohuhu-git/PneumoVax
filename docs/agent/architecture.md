@@ -48,10 +48,11 @@ src/
                          drifted to different field orders and three separate items
                          (S6-2, P1-3, S11) each had to be fixed twice. Shared: the field
                          set and ORDER (Date then Product), label-to-box association, the
-                         remove button, the impossible-date warning, and when the
-                         details-unknown tick shows. Per-surface via props: heading,
-                         button wording, empty-list message, list density, and the hint's
-                         last line. `onChange` is handed the COMPLETE next array, which is
+                         remove button, and the date warning (including, since
+                         2026-11-27, what a missing date means). Per-surface via props:
+                         heading, button wording, empty-list message and list density.
+                         Both streams CHOOSE their product (PPSV23 too, since the
+                         details-unknown tick was removed 2026-11-27, owner decision). `onChange` is handed the COMPLETE next array, which is
                          what lets the wizard (a setter per stream) and Results (a patch
                          to app state) store it differently. It knows NO pneumococcal
                          rules — it is handed `PCV_HISTORY_PRODUCTS` from brands.js, which
@@ -135,9 +136,9 @@ src/
                          sentences and stay hand-typed.
     doseIdentity.js      newDoseRow / isBlankDoseRow / dropBlankDoseRows (P1-3). What
                          makes a row of the history a recorded DOSE. A row the
-                         clinician added and never typed in is not one; a row they
-                         ticked "a dose was given, date and product unknown"
-                         (`detailsUnknown`) is. Blanks are dropped in exactly ONE
+                         clinician added and never typed in is not one; a row with a
+                         date OR a chosen product is (the details-unknown tick was
+                         removed 2026-11-27, owner decision). Blanks are dropped in exactly ONE
                          place — analyzeBoth's walk — plus the UI's own tidy-up on
                          leaving a step; do not add a second filter. NOT mirror-
                          synced: it is a sibling of MeningoVax's module, and the
