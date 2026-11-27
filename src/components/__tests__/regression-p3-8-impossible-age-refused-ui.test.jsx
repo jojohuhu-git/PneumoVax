@@ -95,7 +95,7 @@ describe('P3-8 — StepAge refuses an impossible Years / Months entry', () => {
   it('refuses 12 or more in the Months box and points at the Years box', () => {
     const { seen } = renderStepAge();
     switchToYearsMonths();
-    fireEvent.change(screen.getByLabelText('Months (optional)'), {
+    fireEvent.change(screen.getByLabelText('Months'), {
       target: { value: '12' },
     });
     expect(screen.getByText(/Years box/)).toBeTruthy();
@@ -113,7 +113,7 @@ describe('P3-8 — StepAge refuses an impossible Years / Months entry', () => {
   it('accepts a 2-month-old (0 years, 2 months)', () => {
     const { seen } = renderStepAge();
     switchToYearsMonths();
-    fireEvent.change(screen.getByLabelText('Months (optional)'), {
+    fireEvent.change(screen.getByLabelText('Months'), {
       target: { value: '2' },
     });
     expect(screen.queryByText(/cannot be more than/i)).toBeNull();

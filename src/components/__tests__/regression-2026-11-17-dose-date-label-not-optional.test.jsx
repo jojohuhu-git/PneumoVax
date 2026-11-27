@@ -19,8 +19,9 @@
 // So the box is not made required, and this test does not assert that.
 //
 // One label for both rows, because both rows come from the one shared
-// `DoseEditor.jsx` (S9). The age box's "Months (optional)" is a different
-// field and is untouched.
+// `DoseEditor.jsx` (S9). The age box's "Months (optional)" was a different
+// field and was left alone that day; it lost its "(optional)" on 2026-11-27
+// (owner, both apps — see regression-2026-11-27-no-optional-field-labels).
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
