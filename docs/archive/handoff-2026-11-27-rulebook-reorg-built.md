@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-27** by `handoff-2026-11-27-cdsi-checks-required.md`. Both PRs it lists (PneumoVax #165, MeningoVax #170) are MERGED; #165 also took two later undated-dose commits this file does not mention. Do not resume from this file.
+
 # PneumoVax — Handoff after building the Rulebook reorganization (2026-11-27)
 
 Repo `/Users/joannehuang/Downloads/PneumoVax` (client-side React app, pneumococcal decision
