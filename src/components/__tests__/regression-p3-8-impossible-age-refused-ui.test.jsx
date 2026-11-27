@@ -46,7 +46,7 @@ describe('P3-8 — StepAge refuses an impossible date of birth', () => {
   // as '' and fires no event at all (probed 2026-10-10 — onChange was never
   // called). A real browser does NOT do this: checked live on the running app,
   // the value is kept ('2027-01-01'), validity.rangeOverflow is true, and the
-  // guard renders "That date of birth is in the future. Check the year — if it
+  // guard renders "That date of birth is in the future. Check the year. If it
   // is a typo, correct it." So the message is real and it is covered — by
   // ageEntryProblem in regression-p3-8-impossible-age-refused.test.js, plus
   // that live check. Asserting it here would only test happy-dom.
