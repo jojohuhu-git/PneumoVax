@@ -2,7 +2,7 @@
 
 **Status (updated 2026-11-08, later the same day): two measurements done in PneumoVax — the ages-and-gaps
 comparison and CDC's 140 pneumococcal test patients (117 agree, 23 differ, 0 unexplained; report:
-`report-2026-11-08-cdsi-test-patients.md`). Nothing built as a required test yet. The owner's three CDC
+`report-2026-11-08-cdsi-test-patients.md`). **Update 2026-11-27: P-CDSI-2 is now a required test** (`src/logic/__tests__/cdsi-test-patients.test.js`; 140 patients, 122 agree, the 18 that differ named and pinned, 0 new). **P-CDSI-1 is a required test too** (`src/logic/__tests__/cdsi-rule-comparison.test.js`): CDC's file read directly, 35 comparisons, 28 agree, 7 named differences — the four below, approved by the owner 2026-11-27 ("Yes, keep all 4"), plus PCV7, a PCV21 given at 18, and dose 3 after a dose at 7–11 months, each resting on an earlier ruling or CDC wording. **Both PneumoVax items are now built; nothing is left in PneumoVax on this plan.** The owner's three CDC
 files are downloaded and now kept in each repo (`scripts/cdsi/cdc-files/`).**
 Owner's request (2026-11-08): *"set up monthly scheduled check for both pneumovax and meningovax.
 Add both CDSI comparison test and CDC's CDSI test patients to meningovax and pneumovax. Run the
