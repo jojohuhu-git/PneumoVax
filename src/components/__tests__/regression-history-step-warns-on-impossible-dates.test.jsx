@@ -8,7 +8,7 @@
 //
 // Meanwhile the AGE step already stops you dead on the same mistake — type 2030
 // into Date of Birth and it says "That date of birth is in the future. Check the
-// year — if it is a typo, correct it," and the Next button goes nowhere. The two
+// year. If it is a typo, correct it," and the Next button goes nowhere. The two
 // date fields disagreed about the same slip.
 //
 // The owner chose the middle option deliberately: warn under the row at the

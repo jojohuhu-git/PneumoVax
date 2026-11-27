@@ -73,6 +73,13 @@ describe('P3-8 — the Date of Birth door', () => {
     expect(msg).toMatch(/future/i);
   });
 
+  // MeningoVax Tier 3 (owner 2026-11-26, "Both apps"): no em dash in these two
+  // messages. ageEntry.js is the same code in both apps, so both say this.
+  it('words both messages without an em dash, as MeningoVax does', () => {
+    expect(dob('2027-01-01')).toBe('That date of birth is in the future. Check the year. If it is a typo, correct it.');
+    expect(dob('0026-10-10')).toBe(`That date of birth would make the patient over ${MAX_PLAUSIBLE_AGE_YEARS} years old. Check the year: a two-digit year such as 26 is read as the year 26, not 2026.`);
+  });
+
   it('accepts ordinary dates of birth, including today (a newborn)', () => {
     expect(dob('2026-10-10')).toBeNull(); // born today
     expect(dob('2026-02-10')).toBeNull(); // 8 months
