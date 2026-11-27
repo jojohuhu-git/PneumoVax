@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-11-27** by `handoff-2026-11-27-rulebook-reorg-planned.md`. PR #159 is merged; the one item
+> carried forward (MeningoVax "Date (optional)" wording) is listed there. Do not resume from this file.
+
 # PneumoVax — Handoff after removing the dead undated-PCV code (2026-11-17)
 
 Repo `/Users/joannehuang/Downloads/PneumoVax`. Branch `chore/2026-11-17-remove-dead-undated-code`,

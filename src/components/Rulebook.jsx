@@ -1,74 +1,66 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Rulebook.jsx — the "Rulebook" view.
 //
-// 2026-11-01 redesign, built from the owner's five-board design canvas, then
-// re-ordered the same day (her second review) to follow the app's own logic:
-// the transplant stop, the vaccines, who the patient is, what children and
-// adults are given, how a recorded dose is checked, then the PneumoVax
-// decisions and the sources. It is a view of the same tab, switched from the
-// header ("Patient | Rulebook", as in PediVax's schedule builder); App.jsx
-// keeps the patient form mounted but hidden, so a half-entered patient is
-// still there on the way back.
+// 2026-11-27 reorganization, from the owner's mock-up
+// (docs/archive/mockup-2026-11-27-pneumovax-rulebook-v1.html), into
+// MeningoVax's layout: "How PneumoVax decides" is one fold of five steps;
+// each step is its own fold and holds its section. Below them, under
+// "Reference", PneumoVax decisions and Sources. Every fold is closed when the
+// screen opens; "Show all" beside the "How PneumoVax decides" bar opens every
+// one and then reads "Hide all". Her words: "use the same show and show all
+// buttons as meningovax" — so FoldButton, Fold, Step, the Show all wiring and
+// the group table are MeningoVax's own (its src/components/Rulebook.jsx), and
+// so is their CSS.
+//
+// It is a view of the same tab, switched from the header ("Patient |
+// Rulebook"); App.jsx keeps the patient form mounted but hidden, so a
+// half-entered patient is still there on the way back.
 //
 // This file renders and decides nothing. Every sentence, age and interval
 // comes from src/data/rulebook.js, which draws its numbers from the engine's
 // constants and pairs each claim with a worked patient; the C14 guard runs
 // every one of those patients through recommend().
 // ─────────────────────────────────────────────────────────────────────────
-import React, { useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
-  ROUTINE_INFANT, CHILD_LANES, AT_NINETEEN, ADULT_BANDS, ADULT_OPTIONS, CHILD_EXCEPTIONS, INVALID_EXAMPLE,
-  ADULT_HISTORY, TRANSPLANT_STOP, AGE_LINES, RISK_COLUMNS, RISK_RANKING, VACCINE_ROWS,
-  SERIES_PATTERNS, CHIP_LEGEND, GRACE, PCV_AFTER_PCV, PCV_AND_PPSV23,
-  INVALID_ACTIONS, ADULT_INTERVALS, SOURCE_GROUPS, HEADINGS, DECISIONS, DECISION, DECISION_USES,
-  decisionsOf, sourcesFor,
+  HEADINGS, INTRO, PATH_STEPS, TRANSPLANT_STOP, VACCINES, VACCINE_ROWS, CHIP_LEGEND, NOT_COUNTED,
+  INVALID_EXAMPLE, CHILD_GROUPS, ROUTINE_INFANT, DOSES_BY_AGE, FROM_NINETEEN, CHILD_RANKING,
+  ADULT_GROUPS, ADULT_OPTIONS, ADULT_HISTORY, ADULT_RANKING, GRACE, PCV_AFTER_PCV, PCV_AND_PPSV23,
+  ADULT_INTERVALS, DECISIONS, DECISION, DECISION_USES, SOURCE_TYPES, decisionsOf, sourcesFor,
 } from '../data/rulebook.js';
+import { FOOTER_TEXT, FOOTER_EMAIL, lastUpdatedWords } from '../data/rulebookFooter.js';
 
-const SECTIONS = [
-  ['rb-vaccines', HEADINGS.vaccines],
-  ['rb-who', HEADINGS.who],
-  ['rb-kids', HEADINGS.kids],
-  ['rb-adults', HEADINGS.adults],
-  ['rb-spacing', HEADINGS.spacing],
-  ['rb-decisions', HEADINGS.decisions],
-  ['rb-sources', HEADINGS.sources],
-];
+/** Every fold on the page, in order: the path, its five steps, the Reference folds. */
+const ALL_FOLDS = ['path', ...PATH_STEPS.map((s) => s.key), 'decisions', 'sources'];
 
 /**
- * What a decision says: the same three labelled lines for every decision, in
- * the same order — the problem, what CDC and ACIP say or leave out, what
- * PneumoVax does (owner, 2026-11-01, second review: no "Why" at the end).
- * Shared by the chip and part 6, so the two can never differ.
+ * "Show all" / "Hide all" reaches the folds the page does not hold itself
+ * (the decisions list's own folds): each press bumps n, and says open or not.
  */
+const ShowAll = createContext({ n: 0, open: false });
+
+/** A decision's three labelled lines, shared by the chip and the decisions part. */
 function DecisionText({ d }) {
   return (
     <>
       <span className="rb-dec-line"><strong>Problem:</strong> {d.problem}</span>
-      <span className="rb-dec-line"><strong>CDC and ACIP:</strong> {d.cdc}</span>
+      <span className="rb-dec-line"><strong>CDC and ACIP say:</strong> {d.cdc}</span>
       <span className="rb-dec-line"><strong>PneumoVax decision:</strong> {d.does}</span>
     </>
   );
 }
 
-/**
- * A part that starts closed on a phone (owner, 2026-11-01: "Trying to
- * decrease amount of scrolling needed ... Can these risk groups be
- * expandable rather than everything open?"). The bar names the part and
- * gives a one-line summary; on a computer the bar is hidden and everything
- * is open, as before. The CSS does the hiding (`.rb-fold`), so the content
- * is always in the page, only not shown.
- */
+/** A part that starts closed on a phone (owner, 2026-11-01), and that Show all opens. */
 function useFold() {
-  const [open, setOpen] = useState(false);
+  const all = useContext(ShowAll);
+  const [open, setOpen] = useState(all.n > 0 && all.open);
+  useEffect(() => { if (all.n > 0) setOpen(all.open); }, [all]);
   return [open ? ' rb-fold rb-open' : ' rb-fold', open, () => setOpen((v) => !v)];
 }
-function FoldBar({ name, summary, open, toggle }) {
+function FoldBar({ name, open, toggle }) {
   return (
     <button type="button" className="rb-fold-btn" aria-expanded={open} onClick={toggle}>
-      <span className="rb-fold-text">
-        <strong className="rb-fold-name">{name}</strong>
-        {summary && <span className="rb-fold-sum">{summary}</span>}
-      </span>
+      <span className="rb-fold-text"><strong className="rb-fold-name">{name}</strong></span>
       <span className="rb-fold-mark">{open ? 'Hide' : 'Show'}</span>
     </button>
   );
@@ -76,13 +68,8 @@ function FoldBar({ name, summary, open, toggle }) {
 
 /**
  * "PneumoVax decision: <its name>" — a button that opens that decision's
- * reason in place (owner, 2026-11-01: "it should be clear to the user they can
- * click to expand. I don't want an unelegant sentence below the chip"). It is
- * styled as a link-coloured, underlined button like "Source", which is how it
- * reads as clickable without an instruction or an icon. It carries the
- * decision's NAME, not a number (owner, same day: "The numbering ... is a bit
- * confusing") — chips appeared out of order (2, 3, 5) and a number told the
- * reader nothing until they found part 6.
+ * reason in place (owner, 2026-11-01: no "click to expand" sentence; a name,
+ * not a number).
  */
 function DecisionChip({ k }) {
   const [open, setOpen] = useState(false);
@@ -100,8 +87,6 @@ function DecisionChip({ k }) {
     </span>
   );
 }
-
-/** A row's decision chips, if it has any. */
 function Decisions({ row }) {
   return decisionsOf(row).map((k) => <React.Fragment key={k}> <DecisionChip k={k} /></React.Fragment>);
 }
@@ -135,232 +120,222 @@ function Source({ row }) {
   );
 }
 
-function DoseBox({ children, ppsv, done, old, struck }) {
-  const cls = ['rb-dose', ppsv && 'rb-dose-ppsv', done && 'rb-dose-done', old && 'rb-dose-old', struck && 'rb-dose-struck']
-    .filter(Boolean).join(' ');
+function DoseBox({ children, ppsv, done }) {
+  const cls = ['rb-dose', ppsv && 'rb-dose-ppsv', done && 'rb-dose-done'].filter(Boolean).join(' ');
   return <span className={cls}>{children}</span>;
-}
-
-/** "PCV20 or PPSV23" with the PPSV23 half in the polysaccharide colour. */
-function OrDose({ text }) {
-  const parts = text.split(' or ');
-  return parts.map((p, i) => (
-    <React.Fragment key={p}>
-      {i > 0 && <span className="rb-or"> or </span>}
-      <span className={/PPSV23/.test(p) ? 'rb-ppsv-text' : undefined}>{p}</span>
-    </React.Fragment>
-  ));
 }
 
 function Card({ id, title, children, tone }) {
   return (
     <section className={`rb-card${tone ? ` rb-card-${tone}` : ''}`} aria-labelledby={id}>
-      <h3 id={id} className="rb-h3">{title}</h3>
+      <h4 id={id} className="rb-h3">{title}</h4>
       {children}
     </section>
   );
 }
 
-// ── The stop: the first thing the app checks ─────────────────────────────
+const CHIP_CLASS = { valid: 'dose-val-valid', invalid: 'dose-val-invalid', extra: 'dose-val-offwindow', unknown: 'dose-val-unknown' };
+const Chip = ({ tone, children }) => <span className={`dose-val-chip ${CHIP_CLASS[tone]}`}>{children}</span>;
+
+// ── Group table, MeningoVax's: Details under the group name opens its
+// conditions and its Source; one row open at a time.
+function GroupTable({ rows, cols, label, cells }) {
+  const [openKey, setOpenKey] = useState(null);
+  return (
+    <table className="rb-table rb-fixed rb-groups-table" aria-label={label}>
+      <colgroup>{cols.map((c, i) => <col key={i} className={c} />)}</colgroup>
+      <thead><tr><th>Group</th>{cells.map(([h]) => <th key={h}>{h}</th>)}</tr></thead>
+      <tbody>
+        {rows.map((r) => {
+          const open = openKey === r.key;
+          return (
+            <React.Fragment key={r.key}>
+              <tr className={open ? 'rb-g-on' : undefined}>
+                <th scope="row" className="rb-g-name">
+                  {r.group}
+                  <button type="button" className="rb-g-details" aria-expanded={open} onClick={() => setOpenKey(open ? null : r.key)}>
+                    {open ? 'Close' : 'Details'}
+                  </button>
+                </th>
+                {cells.map(([h, cell]) => <td key={h}>{cell(r)}</td>)}
+              </tr>
+              {open && (
+                <tr className="rb-g-det">
+                  <td colSpan={cells.length + 1}>
+                    <div className="rb-g-detin">
+                      {r.conditions.length > 0 && <ul className="rb-bullets">{r.conditions.map((d) => <li key={d}>{d}</li>)}</ul>}
+                      <p className="rb-cell-note"><Decisions row={r} /><Source row={r} /></p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+/** "More than one condition" (L4: once in each schedule). */
+function Ranking({ id, r }) {
+  return (
+    <Card id={id} title="More than one condition">
+      <p className="rb-small">{r.lead}</p>
+      <ol className="rb-rank">{r.steps.map((s) => <li key={s.name}><strong>{s.name}</strong></li>)}</ol>
+      {r.note && <p className="rb-small rb-muted">{r.note.text}<Source row={r.note} /></p>}
+    </Card>
+  );
+}
+
+// ═════ Step 1: Stop check ════════════════════════════════════════════════
 function Stop() {
   return (
-    <Card id="rb-stop" title={TRANSPLANT_STOP.title} tone="stop">
+    <Card id="rb-stop-card" title={TRANSPLANT_STOP.title} tone="stop">
       <p className="rb-body">{TRANSPLANT_STOP.text}<Decisions row={TRANSPLANT_STOP} /></p>
     </Card>
   );
 }
 
-// ── 1. The vaccines ──────────────────────────────────────────────────────
-function Vaccines() {
+// ═════ Step 2: Read the record ═══════════════════════════════════════════
+function Use({ p }) {
+  if (p.both) return p.both;
   return (
     <>
-      <p className="rb-lead">Two vaccine types. Conjugate vaccines (PCV, green) form every series. The polysaccharide vaccine (PPSV23, blue) is added only for at-risk patients, after a PCV.</p>
-      {/* The table scrolls in its own unpadded box: a pinned column in a
-          padded one lets the scrolled cells show through the padding. */}
-      <div className="rb-card"><div className="rb-scroll">
-        <table className="rb-table rb-fixed rb-freeze rb-freeze-wide">
-          <colgroup><col className="rb-w18" /><col className="rb-w12" /><col className="rb-w8" /><col /><col /></colgroup>
-          <thead><tr><th className="rb-freeze-col">Vaccine</th><th>Minimum age</th><th>Counts?</th><th>Use in children</th><th>Use in adults</th></tr></thead>
+      {p.child && <span className="rb-use"><strong>Children:</strong> {p.child}</span>}
+      {p.adult && <span className="rb-use"><strong>Adults:</strong> {p.adult}</span>}
+    </>
+  );
+}
+
+function Record() {
+  return (
+    <>
+      <Card id="rb-vaccines-card" title="The vaccines">
+        <p className="rb-small">{VACCINES.lead}</p>
+        <table className="rb-table rb-fixed" aria-label="The vaccines">
+          <colgroup><col className="rb-w24" /><col className="rb-w18" /><col /></colgroup>
+          <thead><tr><th>Vaccine</th><th>Minimum age</th><th>Use</th></tr></thead>
           <tbody>
             {VACCINE_ROWS.map((g) => (
               <React.Fragment key={g.kind}>
-                <tr className="rb-grp"><td colSpan={5}><span className="rb-grp-label">{g.name}</span></td></tr>
+                {g.name && <tr className="rb-grp"><td colSpan={3}><span className="rb-grp-label">{g.name}</span></td></tr>}
                 {g.rows.map((p) => (
                   <tr key={p.key}>
-                    <td className="rb-freeze-col"><DoseBox ppsv={p.ppsv} old={p.old}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
+                    <td><DoseBox ppsv={p.ppsv}>{p.name}</DoseBox><span className="rb-cell-note">{p.brand}</span></td>
                     <td>{p.minAge}</td>
-                    <td>{p.valid ? 'Yes' : <strong className="rb-invalid-text">No</strong>}</td>
-                    {p.both
-                      ? <td colSpan={2}>{p.both}</td>
-                      : (
-                        <>
-                          {/* An at-risk child gets a line of its own under the
-                              healthy one (owner, 2026-11-01), inside the cell so
-                              the table can stack on a phone. */}
-                          <td>
-                            {p.atRisk && <span className="rb-who">Healthy</span>}{p.child}
-                            {p.atRisk && <span className="rb-atrisk"><span className="rb-who">At risk</span>{p.atRisk}</span>}
-                          </td>
-                          <td>{p.adult}</td>
-                        </>
-                      )}
+                    <td><Use p={p} /></td>
                   </tr>
                 ))}
               </React.Fragment>
             ))}
           </tbody>
         </table>
-      </div></div>
-
-      <Card id="rb-patterns" title="Common series patterns">
-        <p className="rb-small">A quick reference. Intervals are with each rule in the children&rsquo;s, adults&rsquo; and doses-on-the-record parts.</p>
-        {SERIES_PATTERNS.map((pt) => (
-          <div key={pt.name} className="rb-pattern">
-            <strong className="rb-pattern-name">{pt.name}</strong>
-            <div className="rb-pattern-doses">
-              {pt.doses.map((d, i) => (
-                <React.Fragment key={d.text}>
-                  {i > 0 && <span className="rb-arrow" aria-hidden="true">&rarr;</span>}
-                  <DoseBox ppsv={d.ppsv} old={d.old} struck={d.struck}>{d.text}</DoseBox>
-                </React.Fragment>
-              ))}
-              <span className="rb-arrow" aria-hidden="true">&rarr;</span>
-              {pt.end ? <span className="rb-small">{pt.end}</span> : <DoseBox done>Complete</DoseBox>}
-            </div>
-            {pt.note && <p className="rb-pattern-note">{pt.note}<Decisions row={pt} /></p>}
-          </div>
-        ))}
       </Card>
-    </>
-  );
-}
 
-// ── 2. Age and risk group ────────────────────────────────────────────────
-function RiskGroup({ c }) {
-  const [cls, open, toggle] = useFold();
-  const n = c.conditions.length;
-  return (
-    <div className={`rb-group${cls}`}>
-      <FoldBar name={c.name} summary={`${n} condition${n === 1 ? '' : 's'}`} open={open} toggle={toggle} />
-      <strong className="rb-group-name rb-fold-title">{c.name}</strong>
-      <ul>{c.conditions.map((x) => <li key={x}>{x}</li>)}</ul>
-      {c.note && <span className="rb-cell-note">{c.note}<Source row={c} /></span>}
-    </div>
-  );
-}
-
-function Who() {
-  return (
-    <>
-      <Card id="rb-ages" title="Age lines">
-        <div className="rb-agelines">
-          {AGE_LINES.map((a) => (
-            <div key={a.age} className="rb-ageline">
-              <strong>{a.age}</strong>
-              <span className="rb-small">{a.text}</span>
+      <Card id="rb-labels" title="What the label on a dose means">
+        <div className="rb-legend">
+          {CHIP_LEGEND.map((c) => (
+            <div key={(c.chips ?? [c.chip]).join() + c.text} className="rb-legend-item">
+              <span className="rb-chips">{(c.chips ?? [c.chip]).map((x) => <Chip key={x} tone={c.tone}>{x}</Chip>)}</span>
+              <span className="rb-small">{c.text}</span>
             </div>
           ))}
         </div>
       </Card>
 
-      <Card id="rb-groups" title="Risk groups">
-        <p className="rb-small">What each group is given is in the children&rsquo;s and adults&rsquo; parts that follow.</p>
-        <div className="rb-groups">
-          {RISK_COLUMNS.map((c) => <RiskGroup key={c.key} c={c} />)}
-        </div>
-      </Card>
-
-      <Card id="rb-multi" title="When a patient has more than one condition">
-        <p className="rb-small">{RISK_RANKING.lead}</p>
-        <ol className="rb-rank">
-          {RISK_RANKING.steps.map((s) => <li key={s.name}><strong>{s.name}</strong></li>)}
+      <Card id="rb-not-counted" title="A dose that does not count">
+        <h5 className="rb-h4">General rules</h5>
+        <ul className="rb-bullets">
+          {NOT_COUNTED.general.map((r) => <li key={r.text}>{r.text}<Decisions row={r} /><Source row={r} /></li>)}
+        </ul>
+        <p className="rb-label">{INVALID_EXAMPLE.lead}</p>
+        <ol className="rb-timeline-list">
+          {INVALID_EXAMPLE.steps.map((st) => (
+            <li key={st.chip + st.example} className="rb-tl-item">
+              <span className="rb-tl-when">{st.example}</span>
+              <Chip tone={st.tone}>{st.chip}</Chip>
+              {st.text && <span className="rb-small">{st.text}</span>}
+            </li>
+          ))}
         </ol>
+        <h5 className="rb-h4">Special cases</h5>
+        <table className="rb-table rb-fixed" aria-label="Special cases">
+          <colgroup><col className="rb-w40" /><col /></colgroup>
+          <thead><tr><th>Dose that did not count</th><th>What to give</th></tr></thead>
+          <tbody>
+            {NOT_COUNTED.special.map((r) => (
+              <tr key={r.dose}><td>{r.dose}</td><td>{r.action}<Decisions row={r} /><Source row={r} /></td></tr>
+            ))}
+          </tbody>
+        </table>
       </Card>
     </>
   );
 }
 
-// ── 3. Children ──────────────────────────────────────────────────────────
-/**
- * One risk group's row. A step the group does not get is left blank (owner,
- * 2026-11-01: "if there are blank steps should they even be there?"): an
- * empty cell on a computer, so Result stays under its column, and nothing at
- * all on a phone. The phone bar's summary is the row's doses, in order.
- */
-function Lane({ lane }) {
-  const [cls, open, toggle] = useFold();
-  const doses = lane.steps.filter((s) => s.kind !== 'none').map((s) => s.text.replace(/ \(above\)$/, ''));
-  return (
-    <div className={`rb-lanes-row${cls}`} role="row">
-      <FoldBar name={lane.group} summary={[...doses, lane.result.text].join(' → ')} open={open} toggle={toggle} />
-      <span className="rb-lane-name rb-fold-title" role="rowheader">{lane.group}</span>
-      {lane.steps.map((s, i) => (s.kind === 'none'
-        ? <span key={i} className="rb-lane-cell rb-lane-blank" role="cell" />
-        : (
-          <span key={i} className="rb-lane-cell" role="cell" data-label={`Step ${i + 1}`}>
-            <DoseBox><OrDose text={s.text} /></DoseBox>
-            {s.note && <span className="rb-cell-note">{s.note}</span>}
-          </span>
-        )))}
-      <span className="rb-lane-cell" role="cell" data-label="Result">
-        <DoseBox done>{lane.result.text}</DoseBox>
-        {lane.result.note && <span className="rb-cell-note">{lane.result.note}</span>}
-        <span className="rb-cell-note"><Source row={lane} /></span>
-      </span>
-    </div>
-  );
-}
-
+// ═════ Step 3: Children's schedule ═══════════════════════════════════════
 function Children() {
   return (
-    <div className="rb-card">
-      <div>
-        <p className="rb-label">Routine PCV series, all children ({ROUTINE_INFANT.products})<Source row={ROUTINE_INFANT} /></p>
-        <div className="rb-timeline">
-          {ROUTINE_INFANT.ages.map((age, i) => (
-            <div key={age} className="rb-tick-col">
-              <DoseBox>PCV dose {i + 1}{i === ROUTINE_INFANT.ages.length - 1 ? ' (booster)' : ''}</DoseBox>
-              <span className="rb-tick" aria-hidden="true" />
-              <span className="rb-tick-age">{age}</span>
-            </div>
-          ))}
-        </div>
-        <div className="rb-rail" aria-hidden="true" />
-        <p className="rb-small">
-          {ROUTINE_INFANT.total} doses if started on time. Children who start late need fewer doses,
-          based on age at dose 1.
-        </p>
+    <>
+      <div className="rb-card">
+        <GroupTable
+          rows={CHILD_GROUPS}
+          label="Children's groups"
+          cols={['rb-w30', 'rb-w32', '']}
+          cells={[
+            ['PCV doses', (r) => r.doses],
+            ['After the PCV series', (r) => <>{r.after}{r.afterNote && <span className="rb-cell-note">{r.afterNote}</span>}</>],
+          ]}
+        />
       </div>
 
-      <div>
-        <p className="rb-label">{HEADINGS.lanes}</p>
-        <div className="rb-lanes" role="table" aria-label={HEADINGS.lanes}>
-          <div className="rb-lanes-row rb-lanes-head" role="row">
-            {['Risk group', 'Step 1', 'Step 2', 'Step 3', 'Result'].map((h) => <span key={h} role="columnheader">{h}</span>)}
-          </div>
-          {CHILD_LANES.map((lane) => <Lane key={lane.group} lane={lane} />)}
-        </div>
-        <p className="rb-small rb-handover">{AT_NINETEEN}</p>
-      </div>
-    </div>
+      <Card id="rb-routine" title={ROUTINE_INFANT.title}>
+        <table className="rb-table rb-fixed rb-sched" aria-label={ROUTINE_INFANT.title}>
+          <colgroup><col className="rb-w20" /><col className="rb-w26" /><col /></colgroup>
+          <thead><tr><th>Dose</th><th>Routine</th><th className="rb-min">Minimum interval</th></tr></thead>
+          <tbody>
+            {ROUTINE_INFANT.rows.map((r) => (
+              <tr key={r.dose}><th scope="row" className="rb-strong-wrap">{r.dose}</th><td>{r.routine}</td><td className="rb-min">{r.min}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="rb-cell-note"><Source row={ROUTINE_INFANT} /></p>
+
+        <h5 className="rb-h4">{DOSES_BY_AGE.title}</h5>
+        <table className="rb-table rb-fixed" aria-label={DOSES_BY_AGE.title}>
+          <colgroup><col className="rb-w50" /><col /></colgroup>
+          <thead><tr><th>Age at dose 1</th><th>PCV doses in all</th></tr></thead>
+          <tbody>
+            {DOSES_BY_AGE.rows.map((r) => <tr key={r.age}><td>{r.age}</td><td>{r.total}</td></tr>)}
+          </tbody>
+        </table>
+        <p className="rb-small">{DOSES_BY_AGE.note}<Source row={DOSES_BY_AGE} /></p>
+      </Card>
+
+      <Card id="rb-from-19" title={FROM_NINETEEN.title}>
+        <p className="rb-small">{FROM_NINETEEN.text}<Decisions row={FROM_NINETEEN} /></p>
+      </Card>
+
+      <Ranking id="rb-multi-kids" r={CHILD_RANKING} />
+    </>
   );
 }
 
-// ── 4. Adults ────────────────────────────────────────────────────────────
+// ═════ Step 4: Adults' schedule ══════════════════════════════════════════
 function Adults() {
   return (
-    <div className="rb-card">
-      <div className="rb-agebar">
-        {ADULT_BANDS.map((b, i) => (
-          <div key={b.label} className={`rb-agebar-seg rb-agebar-${i}`}>
-            <strong>{b.label}</strong>
-            <span>{b.sub}<Source row={b} /></span>
-          </div>
-        ))}
+    <>
+      <div className="rb-card">
+        <GroupTable
+          rows={ADULT_GROUPS}
+          label="Adults' groups"
+          cols={['rb-w44', '']}
+          cells={[['Recommended', (r) => r.recommended]]}
+        />
       </div>
 
-      <div>
-        <p className="rb-label">{ADULT_OPTIONS.lead}</p>
+      <Card id="rb-adult-options" title={ADULT_OPTIONS.title}>
         <div className="rb-path">
           <span className="rb-path-name">Option A</span>
           <DoseBox>{ADULT_OPTIONS.a.doses[0]}</DoseBox>
@@ -375,161 +350,91 @@ function Adults() {
           <span className="rb-arrow" aria-hidden="true">&rarr;</span>
           <DoseBox done>Complete</DoseBox>
         </div>
-        <p className="rb-small rb-indent">{ADULT_OPTIONS.note}<Source row={ADULT_OPTIONS} /></p>
-      </div>
+        <p className="rb-cell-note"><Source row={ADULT_OPTIONS} /></p>
+      </Card>
 
-      <div>
-        <p className="rb-label">Prior pneumococcal vaccines</p>
-        <div className="rb-scroll">
-          <table className="rb-table rb-history rb-freeze">
-            <thead><tr><th className="rb-w24 rb-freeze-col">Vaccine history</th><th className="rb-w30">Risk group</th><th>Next step</th></tr></thead>
-            <tbody>
-              {ADULT_HISTORY.map((h) => h.splits.map((s, i) => (
-                <tr key={h.history + i} className={i === 0 ? 'rb-hist-first' : 'rb-hist-more'}>
-                  {i === 0 && <td rowSpan={h.splits.length} className="rb-strong-wrap rb-freeze-col">{h.history}</td>}
-                  <td className={s.risk ? undefined : 'rb-any'}>{s.risk ?? 'Any'}</td>
-                  <td>
-                    {s.complete ? <strong className="rb-complete">{s.next}</strong> : s.next}
-                    <Decisions row={s} />
-                    <Source row={s} />
-                  </td>
-                </tr>
-              )))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <Card id="rb-adult-history" title="Prior pneumococcal vaccines">
+        <table className="rb-table rb-fixed rb-history" aria-label="Prior pneumococcal vaccines">
+          <colgroup><col className="rb-w44" /><col /></colgroup>
+          <thead><tr><th>Vaccine history</th><th>Next dose</th></tr></thead>
+          <tbody>
+            {ADULT_HISTORY.map((h) => (
+              <tr key={h.history}>
+                <td>{h.history}</td>
+                <td>
+                  {h.complete ? <strong className="rb-complete">{h.next}</strong> : h.next}
+                  <Decisions row={h} />
+                  <Source row={h} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
+      <Ranking id="rb-multi-adults" r={ADULT_RANKING} />
+    </>
   );
 }
 
-// ── 5. Doses on the record ───────────────────────────────────────────────
-const CHIP_CLASS = { valid: 'dose-val-valid', invalid: 'dose-val-invalid', extra: 'dose-val-offwindow', unknown: 'dose-val-unknown' };
-const Chip = ({ tone, children }) => <span className={`dose-val-chip ${CHIP_CLASS[tone]}`}>{children}</span>;
+// ═════ Step 5: Time between doses ════════════════════════════════════════
+function SoonerTable({ t, label, gapHead }) {
+  return (
+    <table className="rb-table rb-fixed" aria-label={label}>
+      <colgroup><col className="rb-w36" /><col className="rb-w30" /><col /></colgroup>
+      <thead><tr><th>Doses</th><th className="rb-min">{gapHead}</th><th>If given sooner</th></tr></thead>
+      <tbody>
+        {t.rows.map((r) => (
+          <tr key={r.doses}>
+            <td>{r.doses}</td>
+            <td className="rb-min">{r.gap}</td>
+            <td>{r.sooner}<Decisions row={r} /><Source row={r} /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 function Spacing() {
   return (
     <>
-      <p className="rb-lead">Each dose on the record is checked against the dose before it, and the label on the dose shows the result. Children's intervals below are minimums: a dose given sooner does not count. Adults' are recommendations: a dose given sooner still counts. Either way, the result card advises the routine date, which can be later than the minimum.</p>
+      <Card id="rb-kid-gaps" title={GRACE.title}>
+        <p className="rb-band rb-band-green">{GRACE.text}<Source row={GRACE} /></p>
 
-      <Card id="rb-labels" title="What the label on a dose means">
-        <div className="rb-legend">
-          {CHIP_LEGEND.map((c) => (
-            <div key={(c.chips ?? [c.chip]).join() + c.text} className="rb-legend-item">
-              <span className="rb-chips">{(c.chips ?? [c.chip]).map((x) => <Chip key={x} tone={c.tone}>{x}</Chip>)}</span>
-              <span className="rb-small">{c.text}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card id="rb-kid-gaps" title="Children: a dose given before the minimum interval does not count, with three exceptions">
-        <p className="rb-band rb-band-green"><strong>{GRACE.title}</strong> {GRACE.text} <Chip tone="invalid">{INVALID_EXAMPLE.steps[1].chip}</Chip></p>
-        <div>
-          <h4 className="rb-h4">The dose still counts when</h4>
-          <ul className="rb-bullets">
-            {CHILD_EXCEPTIONS.map((x) => <li key={x.text}>{x.text}<Decisions row={x} /></li>)}
-          </ul>
-        </div>
-
-        <h4 className="rb-h4">PCV after PCV (CDC catch-up schedule)</h4>
-        <div className="rb-scroll">
-          <table className="rb-table">
-            <thead><tr><th className="rb-w18">Doses</th><th>When</th><th className="rb-w18">Minimum interval</th></tr></thead>
-            <tbody>
-              {PCV_AFTER_PCV.rows.map((r, i) => (
-                <tr key={r.when}>
-                  {(i === 0 || PCV_AFTER_PCV.rows[i - 1].doses !== r.doses) && (
-                    <td className="rb-strong" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length} data-label="Doses">{r.doses}</td>
-                  )}
-                  <td>{r.when}</td>
-                  <td className="rb-strong">{r.gap}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <h4 className="rb-h4">PCV and PPSV23</h4>
-        <div className="rb-scroll">
-          <table className="rb-table">
-            <thead><tr><th className="rb-w30">Doses</th><th>Minimum interval</th></tr></thead>
-            <tbody>
-              {PCV_AND_PPSV23.map((r) => (
-                <tr key={r.doses}>
-                  <td>{r.doses}</td>
-                  <td>
-                    <strong>{r.gap}</strong><Decisions row={r} />
-                    {r.text && <span className="rb-cell-text">{r.text}</span>}
-                    {r.sub && <span className="rb-cell-note">{r.sub} <Chip tone="extra">{r.subChip}</Chip></span>}
-                    <Source row={r} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="rb-invalid-box">
-          <h4 className="rb-h4">A dose that does not count</h4>
-          <p className="rb-label">{INVALID_EXAMPLE.lead}</p>
-          <ol className="rb-steps">
-            {INVALID_EXAMPLE.steps.map((st) => (
-              <li key={st.chip + st.example} className="rb-step">
-                <span className="rb-step-when">{st.example}</span>
-                <Chip tone={st.tone}>{st.chip}</Chip>
-                <span className="rb-small">{st.text}</span>
-              </li>
+        <h5 className="rb-h4">{PCV_AFTER_PCV.title}</h5>
+        <table className="rb-table rb-fixed" aria-label={PCV_AFTER_PCV.title}>
+          <colgroup><col className="rb-w22" /><col /><col className="rb-w30" /></colgroup>
+          <thead><tr><th>Doses</th><th>When</th><th className="rb-min">Minimum interval</th></tr></thead>
+          <tbody>
+            {PCV_AFTER_PCV.rows.map((r, i) => (
+              <tr key={r.when}>
+                {(i === 0 || PCV_AFTER_PCV.rows[i - 1].doses !== r.doses) && (
+                  <td className="rb-strong" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length}>{r.doses}</td>
+                )}
+                <td>{r.when}</td>
+                <td className="rb-min">{r.gap}</td>
+              </tr>
             ))}
-          </ol>
-          <div className="rb-scroll">
-            <table className="rb-table">
-              <thead><tr><th className="rb-w40">Invalid dose</th><th>What to do</th></tr></thead>
-              <tbody>
-                {INVALID_ACTIONS.rows.map((r) => (
-                  <tr key={r.dose}>
-                    <td>{r.dose}</td>
-                    <td>
-                      {r.strong ? <>{r.action.split(r.strong)[0]}<strong>{r.strong}</strong>{r.action.split(r.strong)[1]}</> : r.action}
-                      <Decisions row={r} />
-                      <Source row={r} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="rb-small">{INVALID_ACTIONS.timing}</p>
-        </div>
+          </tbody>
+        </table>
+        <p className="rb-cell-note"><Source row={PCV_AFTER_PCV} /></p>
+
+        <h5 className="rb-h4">{PCV_AND_PPSV23.title}</h5>
+        <SoonerTable t={PCV_AND_PPSV23} label={PCV_AND_PPSV23.title} gapHead="Minimum interval" />
+        <p className="rb-small">{PCV_AND_PPSV23.note.text}</p>
       </Card>
 
-      <Card id="rb-adult-gaps" title="Adults: a dose given before the recommended interval still counts">
-        <p className="rb-band rb-band-blue">{ADULT_INTERVALS.lead}</p>
-        <div className="rb-scroll">
-          <table className="rb-table">
-            <thead><tr><th className="rb-w40">Doses</th><th>Recommended interval</th></tr></thead>
-            <tbody>
-              {ADULT_INTERVALS.rows.map((r) => (
-                <tr key={r.doses}>
-                  <td>{r.doses}</td>
-                  <td>
-                    {r.gap && <strong>{r.gap}</strong>}
-                    {r.gap && r.text ? ' ' : ''}
-                    {r.text}
-                    <Decisions row={r} />
-                    <Source row={r} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <Card id="rb-adult-gaps" title={ADULT_INTERVALS.title}>
+        <p className="rb-small"><Decisions row={ADULT_INTERVALS} /></p>
+        <SoonerTable t={ADULT_INTERVALS} label={ADULT_INTERVALS.title} gapHead="Recommended interval" />
+        <p className="rb-small">{ADULT_INTERVALS.note.text}</p>
       </Card>
     </>
   );
 }
 
-// ── 6. PneumoVax decisions ───────────────────────────────────────────────
+// ═════ Reference: PneumoVax decisions, Sources ═══════════════════════════
 function DecisionItem({ d }) {
   const [cls, open, toggle] = useFold();
   return (
@@ -537,89 +442,151 @@ function DecisionItem({ d }) {
       <FoldBar name={d.short} open={open} toggle={toggle} />
       <h4 className="rb-h4 rb-fold-title">{d.short}</h4>
       <span className="rb-dec-body"><DecisionText d={d} /></span>
-      <span className="rb-cell-note">Applies in: {DECISION_USES[d.key].join('; ')}</span>
+      <span className="rb-cell-note">Applies in: {DECISION_USES[d.key].join(' · ')}</span>
+    </li>
+  );
+}
+function DecisionList() {
+  return (
+    <>
+      <p className="rb-lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is listed once and marked wherever it applies.</p>
+      <div className="rb-card">
+        <ol className="rb-declist">{DECISIONS.map((d) => <DecisionItem key={d.key} d={d} />)}</ol>
+      </div>
+    </>
+  );
+}
+
+// E16: grouped by type, with no count of quoted sentences and no read date.
+function Sources() {
+  return (
+    <div className="rb-card">
+      {SOURCE_TYPES.filter((g) => g.docs.length).map((g) => (
+        <div key={g.name} className="rb-src-group">
+          <h4 className="rb-h4">{g.name}</h4>
+          {g.docs.map((d) => (
+            <div key={d.url} className="rb-doc">
+              <a href={d.url} target="_blank" rel="noopener noreferrer">{d.name}</a>
+              {d.describes && <span className="rb-cell-note">{d.describes}</span>}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Each step's section (L1: each section sits under its step). */
+const STEP_BODY = { stop: Stop, record: Record, kids: Children, adults: Adults, spacing: Spacing };
+
+/** The words on a fold's bar: its name, and a summary line for a step. */
+function FoldButton({ id, name, sum, open, toggle, className }) {
+  return (
+    <button type="button" className={className} aria-expanded={open} aria-controls={`${id}-body`} onClick={toggle}>
+      <span className="rb-fold-words">
+        <span className="rb-fold-label">{name}</span>
+        {sum && <span className="rb-step-sum">{sum}</span>}
+      </span>
+      <span className="rb-fold-mark">{open ? 'Hide' : 'Show'}</span>
+    </button>
+  );
+}
+
+/** A Reference fold: a heading that is a button, and the body once it is open. */
+function Fold({ id, name, open, toggle, children }) {
+  return (
+    <section id={id} className="rb-section rb-part" aria-labelledby={`${id}-h`}>
+      <h2 id={`${id}-h`} className="rb-h2">
+        <FoldButton id={id} name={name} open={open} toggle={toggle} className="rb-full-btn" />
+      </h2>
+      {open && <div id={`${id}-body`} className="rb-part-body">{children}</div>}
+    </section>
+  );
+}
+
+/** One step: its number, a bar that opens it, and its section. */
+function Step({ step, open, toggle }) {
+  const id = `rb-${step.key}`;
+  const Body = STEP_BODY[step.key];
+  return (
+    <li className="rb-step">
+      <span className="rb-step-num" aria-hidden="true">{step.n}</span>
+      <section id={id} className="rb-step-body" aria-labelledby={`${id}-h`}>
+        <h3 id={`${id}-h`} className="rb-h3 rb-step-h">
+          <FoldButton id={id} name={step.title} sum={step.sum} open={open} toggle={toggle} className="rb-full-btn rb-step-btn" />
+        </h3>
+        {open && <div id={`${id}-body`} className="rb-part-body"><Body /></div>}
+      </section>
     </li>
   );
 }
 
-function DecisionList() {
-  return (
-    <>
-      <p className="rb-lead">Where CDC and ACIP give no answer, PneumoVax chose one. Each is listed here once, and its name marks it wherever it applies on this page.</p>
-      <div className="rb-card">
-        <ol className="rb-declist">
-          {DECISIONS.map((d) => <DecisionItem key={d.key} d={d} />)}
-        </ol>
-      </div>
-    </>
-  );
-}
-
-// ── 7. Sources ───────────────────────────────────────────────────────────
-const SOURCE_HEADINGS = { child: 'Children', adult: 'Adults', any: 'Children and adults' };
-function Sources() {
-  return (
-    <>
-      <p className="rb-lead">Grouped by patient population. CDC and ACIP documents are listed first. A document&rsquo;s count is how many distinct passages of it the app quotes on result cards.</p>
-      <div className="rb-card rb-src-grid">
-        {SOURCE_GROUPS.map((g) => (
-          <div key={g.book} className="rb-src-col">
-            <h3 className="rb-h3">{SOURCE_HEADINGS[g.book]}</h3>
-            {g.docs.map((d) => (
-              <div key={d.name} className="rb-doc">
-                <a href={d.url} target="_blank" rel="noopener noreferrer">{d.label}</a>
-                {d.describes && <span className="rb-cell-note">{d.describes}</span>}
-                <span className="rb-cell-note">
-                  {d.publisher}
-                  {d.quotes ? ` · ${d.quotes} sentence${d.quotes === 1 ? '' : 's'} quoted` : ' · listed, not quoted'}
-                  {d.lastVerified ? ` · read ${d.lastVerified}` : ''}
-                </span>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-const BODY = {
-  'rb-vaccines': Vaccines, 'rb-who': Who, 'rb-kids': Children, 'rb-adults': Adults,
-  'rb-spacing': Spacing, 'rb-decisions': DecisionList, 'rb-sources': Sources,
-};
+const KEY_CLASS = { source: 'rb-key-src', decision: 'rb-key-dec' };
 
 export default function Rulebook() {
+  // Every fold closed when the screen opens (L1).
+  const [open, setOpen] = useState(() => new Set());
+  const [all, setAll] = useState({ n: 0, open: false });
+  const toggle = (key) => setOpen((s) => {
+    const next = new Set(s);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
+  // E18: Show all opens every fold, Decisions and Sources included; once all
+  // are open it says "Hide all".
+  const allOpen = ALL_FOLDS.every((k) => open.has(k));
+  const showAll = () => {
+    const next = !allOpen;
+    setOpen(next ? new Set(ALL_FOLDS) : new Set());
+    setAll((a) => ({ n: a.n + 1, open: next }));
+  };
+
   return (
-    <div className="rb">
-      <div className="rb-top">
-        <h1 className="rb-title">Rulebook</h1>
-        <p className="rb-intro">
-          Recommendations are based on age, risk conditions and dated vaccine history. The parts
-          below follow the order the app decides in. Source shows the CDC or ACIP sentence a rule
-          rests on; a PneumoVax decision marks a rule they do not state, and opens to show the problem, what CDC and ACIP say, and what PneumoVax does.
+    <ShowAll.Provider value={all}>
+      <div className="rb">
+        <div className="rb-top">
+          <h1 className="rb-title">Rulebook</h1>
+          <p className="rb-intro">{INTRO.text}</p>
+          <ul className="rb-key" aria-label="Key">
+            {INTRO.key.map((k) => (
+              <li key={k.kind}><span className={KEY_CLASS[k.kind]}>{k.tag}</span> {k.text}</li>
+            ))}
+          </ul>
+        </div>
+
+        <section id="rb-how" className="rb-section rb-part" aria-labelledby="rb-how-h">
+          <div className="rb-how-head">
+            <h2 id="rb-how-h" className="rb-h2">
+              <FoldButton id="rb-how" name={HEADINGS.how} open={open.has('path')} toggle={() => toggle('path')} className="rb-full-btn" />
+            </h2>
+            <button type="button" className="rb-tap rb-show-all" onClick={showAll}>{allOpen ? 'Hide all' : 'Show all'}</button>
+          </div>
+          {open.has('path') && (
+            <div id="rb-how-body" className="rb-part-body">
+              <p className="rb-small">Five steps, always in this order.</p>
+              <ol className="rb-steps">
+                {PATH_STEPS.map((s) => (
+                  <Step key={s.key} step={s} open={open.has(s.key)} toggle={() => toggle(s.key)} />
+                ))}
+              </ol>
+            </div>
+          )}
+        </section>
+
+        <p className="rb-ref-label">Reference</p>
+        <Fold id="rb-decisions" name={HEADINGS.decisions} open={open.has('decisions')} toggle={() => toggle('decisions')}>
+          <DecisionList />
+        </Fold>
+        <Fold id="rb-sources" name={HEADINGS.sources} open={open.has('sources')} toggle={() => toggle('sources')}>
+          <Sources />
+        </Fold>
+
+        {/* The same footer as MeningoVax's (owner, 2026-11-27). */}
+        <p className="rb-foot">
+          {FOOTER_TEXT} <a href={`mailto:${FOOTER_EMAIL}`}>{FOOTER_EMAIL}</a>.
+          {lastUpdatedWords() && <span className="rb-updated">{lastUpdatedWords()}</span>}
         </p>
       </div>
-
-      <nav aria-label="On this page" className="rb-nav">
-        {SECTIONS.map(([id, name], i) => <a key={id} href={`#${id}`}>{i + 1}. {name}</a>)}
-      </nav>
-
-      <Stop />
-
-      {SECTIONS.map(([id, name], i) => {
-        const Body = BODY[id];
-        return (
-          <section key={id} className="rb-section" aria-labelledby={id}>
-            <h2 id={id} className="rb-h2">{i + 1}. {name}</h2>
-            <Body />
-          </section>
-        );
-      })}
-
-      <p className="rb-foot">
-        This page is a guide to the app&rsquo;s reasoning, not a clinical reference. Where it and a
-        CDC or ACIP document disagree, the document is right and this is a bug. Please report it.
-      </p>
-    </div>
+    </ShowAll.Provider>
   );
 }

@@ -601,8 +601,10 @@ through `atNineteen()`: *"If PPSV23 is chosen, at 19 the adult schedule gives 1 
 PCV21, at least 5 years after the last pneumococcal dose."* It cites the adult row
 (`adultIc1949BothPcv13Ppsv`, or `adultPpsvOnly1949` when an earlier conjugate's product is not
 recorded) with `aboutAnotherGroup` — an adult source on a child card, the fifth declared place.
-`noteFold.js` keeps it in view. The Rulebook's chronic / cochlear / CSF-leak row says the same
-in its step note.
+`noteFold.js` keeps it in view. The Rulebook's chronic / cochlear / CSF-leak row said the same
+in its step note until the 2026-11-27 reorganization (owner mock-up, E7): the children's group
+table no longer repeats it, and step 3's "From 19 years" points to the adult schedule, which
+states the answer. The card is unchanged.
 
 **Limits, each measured or reasoned, none put to her:**
 - **Immunocompromised children: no line.** CDC's row makes their Option B owe *"then ≥5 years

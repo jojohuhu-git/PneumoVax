@@ -54,7 +54,7 @@ for (const p of allPatients()) {
   const lastAny = [lastOf(pcv), lastOf(ppsv)].filter(Boolean).sort().at(-1);
   const maxT = (d) => (d && d > input.today ? d : input.today);
 
-  // Expected, from the Rulebook's own words (rulebook.js ADULT_BANDS / ADULT_OPTIONS / ADULT_HISTORY).
+  // Expected, from the Rulebook's own words (rulebook.js ADULT_GROUPS / ADULT_OPTIONS / ADULT_HISTORY).
   const exp = (() => {
     const eligible = band === '50+' || risk !== 'none';
     if (!eligible) return { nothing: true, why: 'Risk condition required at 19-49' };
