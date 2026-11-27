@@ -1,9 +1,9 @@
 # PneumoVax — Handoff after building the Rulebook reorganization (2026-11-27)
 
 Repo `/Users/joannehuang/Downloads/PneumoVax` (client-side React app, pneumococcal decision
-support). Branch `feat/2026-11-27-rulebook-reorg`, off `main` at `28f7257`. **Nothing is
-committed or pushed yet** — the owner ships with `/ship` (it must be typed by her; agents
-cannot start it). Supersedes `handoff-2026-11-27-rulebook-reorg-planned.md`.
+support). Branch `feat/2026-11-27-rulebook-reorg`, off `main` at `28f7257`. **Committed,
+pushed, PR jojohuhu-git/PneumoVax#165 open** (the owner squash-merges). Supersedes
+`handoff-2026-11-27-rulebook-reorg-planned.md`.
 
 **Tests.** Baseline on `28f7257`: 2,551 tests, 2,550 passed (the known 2-second speed test
 failed under load). Last full run on this branch: **2,570 tests in 232 files, 2,569 passed,
@@ -36,7 +36,7 @@ nothing else changed after the full run. **Prose diff** (`node scripts/proseDiff
 - Docs: `CLINICAL_SPEC.md` (the chronic row no longer repeats the card's "at 19" line),
   `MAP.md` (new footer file), two `scripts/wordingAudit/` comments.
 
-## MeningoVax (separate repo, separate PR) — built, NOT committed
+## MeningoVax (separate repo) — PR jojohuhu-git/MeningoVax#170 open
 
 Worktree `~/Downloads/MeningoVax-main/.claude/worktrees/time-between-doses`, branch
 `feat/2026-11-27-time-between-doses-and-footer` off its `origin/main` `0011dde` (the main
@@ -45,8 +45,8 @@ checkout is on `phase9/close` with open PR #169 — untouched). Changes: step 5 
 date, `docs/agent/testing.md`. Full suite there: **2,770 of 2,770 passed, 239 files.**
 
 ## What's NOT done
-1. **Commit, push, PR — both repos.** Owner types `/ship` in each. PR-body draft, with the
-   judgement calls listed for her audit: `docs/archive/pr-draft-2026-11-27-rulebook-reorg.md`. Commit the mock-up and both 2026-11-27 handoffs with the PneumoVax PR.
+1. **Review and merge both PRs** (PneumoVax #165, MeningoVax #170). Her audit list of
+   judgement calls is in #165's body (`docs/archive/pr-draft-2026-11-27-rulebook-reorg.md`).
 2. Carried over: MeningoVax `DoseEditor.jsx` still says "Date (optional)" — ask whether it
    takes PneumoVax's 2026-11-17 wording.
 
@@ -60,5 +60,5 @@ catch-up cells are ever quoted on a card.
 ## Resuming
 1. `cd ~/Downloads/PneumoVax && git checkout feat/2026-11-27-rulebook-reorg`; run
    `npx vitest run --exclude '.claude/**'` alone — expect **2,570 passing**.
-2. No owner questions open. Ship each repo with `/ship` (branch → PR → she squash-merges).
+2. No owner questions open. Both PRs are open; she squash-merges.
 3. After both merge, PneumoVax's footer-parity test starts comparing the two files for real.
