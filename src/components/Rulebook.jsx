@@ -139,6 +139,14 @@ const Chip = ({ tone, children }) => <span className={`dose-val-chip ${CHIP_CLAS
 
 // ── Group table, MeningoVax's: Details under the group name opens its
 // conditions and its Source; one row open at a time.
+/** A cell's text: a list is one line per instruction (owner, 2026-11-27). */
+function Lines({ text }) {
+  if (!Array.isArray(text)) return text;
+  return text.map((t, i) => <span key={i} className="rb-cell-line">{t}</span>);
+}
+/** A list's text as one string, for keys and labels. */
+const flat = (t) => [].concat(t).join(' ');
+
 function GroupTable({ rows, cols, label, cells }) {
   const [openKey, setOpenKey] = useState(null);
   return (
@@ -199,11 +207,11 @@ function Stop() {
 
 // ═════ Step 2: Read the record ═══════════════════════════════════════════
 function Use({ p }) {
-  if (p.both) return p.both;
+  if (p.both) return <Lines text={p.both} />;
   return (
     <>
-      {p.child && <span className="rb-use"><strong>Children:</strong> {p.child}</span>}
-      {p.adult && <span className="rb-use"><strong>Adults:</strong> {p.adult}</span>}
+      {p.child && <span className="rb-use"><strong>Children:</strong> <Lines text={p.child} /></span>}
+      {p.adult && <span className="rb-use"><strong>Adults:</strong> <Lines text={p.adult} /></span>}
     </>
   );
 }
@@ -265,7 +273,7 @@ function Record() {
           <thead><tr><th>Dose that did not count</th><th>What to give</th></tr></thead>
           <tbody>
             {NOT_COUNTED.special.map((r) => (
-              <tr key={r.dose}><td>{r.dose}</td><td>{r.action}<Decisions row={r} /><Source row={r} /></td></tr>
+              <tr key={r.dose}><td>{r.dose}</td><td><Lines text={r.action} /><Decisions row={r} /><Source row={r} /></td></tr>
             ))}
           </tbody>
         </table>
@@ -278,25 +286,13 @@ function Record() {
 function Children() {
   return (
     <>
-      <div className="rb-card">
-        <GroupTable
-          rows={CHILD_GROUPS}
-          label="Children's groups"
-          cols={['rb-w30', 'rb-w32', '']}
-          cells={[
-            ['PCV doses', (r) => r.doses],
-            ['After the PCV series', (r) => <>{r.after}{r.afterNote && <span className="rb-cell-note">{r.afterNote}</span>}</>],
-          ]}
-        />
-      </div>
-
       <Card id="rb-routine" title={ROUTINE_INFANT.title}>
         <table className="rb-table rb-fixed rb-sched" aria-label={ROUTINE_INFANT.title}>
           <colgroup><col className="rb-w20" /><col className="rb-w26" /><col /></colgroup>
           <thead><tr><th>Dose</th><th>Routine</th><th className="rb-min">Minimum interval</th></tr></thead>
           <tbody>
             {ROUTINE_INFANT.rows.map((r) => (
-              <tr key={r.dose}><th scope="row" className="rb-strong-wrap">{r.dose}</th><td>{r.routine}</td><td className="rb-min">{r.min}</td></tr>
+              <tr key={r.dose}><th scope="row" className="rb-strong-wrap">{r.dose}</th><td>{r.routine}</td><td className="rb-min"><Lines text={r.min} /></td></tr>
             ))}
           </tbody>
         </table>
@@ -312,6 +308,18 @@ function Children() {
         </table>
         <p className="rb-small">{DOSES_BY_AGE.note}<Source row={DOSES_BY_AGE} /></p>
       </Card>
+
+      <div className="rb-card">
+        <GroupTable
+          rows={CHILD_GROUPS}
+          label="Children's groups"
+          cols={['rb-w30', 'rb-w32', '']}
+          cells={[
+            ['PCV doses', (r) => <Lines text={r.doses} />],
+            ['After the PCV series', (r) => <><Lines text={r.after} />{r.afterNote && <span className="rb-cell-note">{r.afterNote}</span>}</>],
+          ]}
+        />
+      </div>
 
       <Card id="rb-from-19" title={FROM_NINETEEN.title}>
         <p className="rb-small">{FROM_NINETEEN.text}<Decisions row={FROM_NINETEEN} /></p>
@@ -331,7 +339,7 @@ function Adults() {
           rows={ADULT_GROUPS}
           label="Adults' groups"
           cols={['rb-w44', '']}
-          cells={[['Recommended', (r) => r.recommended]]}
+          cells={[['Recommended', (r) => <Lines text={r.recommended} />]]}
         />
       </div>
 
@@ -359,10 +367,10 @@ function Adults() {
           <thead><tr><th>Vaccine history</th><th>Next dose</th></tr></thead>
           <tbody>
             {ADULT_HISTORY.map((h) => (
-              <tr key={h.history}>
-                <td>{h.history}</td>
+              <tr key={flat(h.history)}>
+                <td><Lines text={h.history} /></td>
                 <td>
-                  {h.complete ? <strong className="rb-complete">{h.next}</strong> : h.next}
+                  {h.complete ? <strong className="rb-complete">{h.next}</strong> : <Lines text={h.next} />}
                   <Decisions row={h} />
                   <Source row={h} />
                 </td>
@@ -387,8 +395,8 @@ function SoonerTable({ t, label, gapHead }) {
         {t.rows.map((r) => (
           <tr key={r.doses}>
             <td>{r.doses}</td>
-            <td className="rb-min">{r.gap}</td>
-            <td>{r.sooner}<Decisions row={r} /><Source row={r} /></td>
+            <td className="rb-min"><Lines text={r.gap} /></td>
+            <td><Lines text={r.sooner} /><Decisions row={r} /><Source row={r} /></td>
           </tr>
         ))}
       </tbody>
@@ -408,12 +416,12 @@ function Spacing() {
           <thead><tr><th>Doses</th><th>When</th><th className="rb-min">Minimum interval</th></tr></thead>
           <tbody>
             {PCV_AFTER_PCV.rows.map((r, i) => (
-              <tr key={r.when}>
+              <tr key={flat(r.when)}>
                 {(i === 0 || PCV_AFTER_PCV.rows[i - 1].doses !== r.doses) && (
                   <td className="rb-strong" rowSpan={PCV_AFTER_PCV.rows.filter((x) => x.doses === r.doses).length}>{r.doses}</td>
                 )}
-                <td>{r.when}</td>
-                <td className="rb-min">{r.gap}</td>
+                <td><Lines text={r.when} /></td>
+                <td className="rb-min"><Lines text={r.gap} /></td>
               </tr>
             ))}
           </tbody>

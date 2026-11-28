@@ -138,7 +138,8 @@ describe('L3 — the parts that repeated another part are gone', () => {
     const { container } = render(<Rulebook />);
     fireEvent.click(showAllBtn());
     const details = [...container.querySelectorAll('.rb-g-details')];
-    expect(details.length).toBe(8);
+    // 8 -> 9 (owner edit, 2026-11-27): the 6-18 row split in two.
+    expect(details.length).toBe(9);
     const ic = details.find((b) => b.parentElement.textContent.startsWith('Immunocompromising'));
     fireEvent.click(ic);
     expect(ic.textContent).toBe('Close');

@@ -130,12 +130,21 @@ describe('C14 — no age or interval on the page is typed by hand', () => {
     // `field: '...'` inside a row, AND `const NAME = '...'` — a sentence shared
     // by several rows is a constant, and was invisible to the first form
     // until 2026-11-01.
-    for (const m of page.matchAll(/(\w+)(?::|\s*=)\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g)) {
+    // 2026-11-27: a cell may be a LIST of lines (one per recommendation). Only
+    // a list's first item follows "field: [", so every string inside a list is
+    // scanned too, under the list's field name.
+    // A list of objects is skipped: each object's fields are scanned above.
+    // `cite` / `ruleIds` lists hold source and rule NAMES, not page text.
+    const items = [...page.matchAll(/(\w+):\s*\[(?!\s*\{)([^\]]*)\]/g)]
+      .filter(([, field]) => field !== 'cite' && field !== 'ruleIds')
+      .flatMap(([, field, body]) =>
+      [...body.matchAll(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)].map((m) => [m[0], field, m[1], m[2]]));
+    for (const m of [...page.matchAll(/(\w+)(?::|\s*=)\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g), ...items]) {
       const [, field, , raw] = m;
       // A chip's words are asserted equal to doseChipLabel() above; an
       // `example` is a patient's facts, run as a patient.
       // EX_TODAY is the worked patients' "today" — a patient fact, like `example`.
-      if (field === 'chip' || field === 'example' || field === 'EX_TODAY') continue;
+      if (field === 'chip' || field === 'chips' || field === 'example' || field === 'EX_TODAY') continue;
       const text = raw
         .replace(/\$\{[^}]*\}/g, ' ')                              // interpolated: from a constant
         .replace(/\bP?[CP]C?S?V-?\d+\b/g, 'the vaccine')           // product names: PCV13, PPSV23
