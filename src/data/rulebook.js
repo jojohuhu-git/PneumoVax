@@ -766,13 +766,11 @@ export const HEADINGS = {
   sources: 'Sources',
 };
 
-// ── E1: the intro and its two-item key ───────────────────────────────────
+// ── E1: the intro. Its two-item key (Source / PneumoVax decision) was taken
+// off by the owner, 2026-11-27: "remove the source and pneumovax decision at
+// the top of the rulebook".
 export const INTRO = {
   text: 'Recommendations are based on age, risk conditions and dated vaccine history.',
-  key: [
-    { kind: 'source', tag: 'Source', text: 'CDC or ACIP text the rule rests on' },
-    { kind: 'decision', tag: 'PneumoVax decision', text: 'a rule CDC and ACIP do not state' },
-  ],
 };
 
 // ── PneumoVax decisions (E14, E15): written once, named, opened in place ──

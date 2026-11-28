@@ -529,7 +529,6 @@ function Step({ step, open, toggle }) {
   );
 }
 
-const KEY_CLASS = { source: 'rb-key-src', decision: 'rb-key-dec' };
 
 export default function Rulebook() {
   // Every fold closed when the screen opens (L1).
@@ -555,11 +554,6 @@ export default function Rulebook() {
         <div className="rb-top">
           <h1 className="rb-title">Rulebook</h1>
           <p className="rb-intro">{INTRO.text}</p>
-          <ul className="rb-key" aria-label="Key">
-            {INTRO.key.map((k) => (
-              <li key={k.kind}><span className={KEY_CLASS[k.kind]}>{k.tag}</span> {k.text}</li>
-            ))}
-          </ul>
         </div>
 
         <section id="rb-how" className="rb-section rb-part" aria-labelledby="rb-how-h">
