@@ -34,7 +34,7 @@ describe('Sam, 19: one PPSV23 thrown out at 18 — PCV20 or PCV21 only', () => {
     expect(brandsOf(card)).toEqual(['PCV20', 'PCV21']);
     expect(card.dueToday).toBe(true);
     expect(all(card)).toContain('No further PPSV23: 1 PPSV23 dose has been given and it did not count.');
-    expect(all(card)).toContain('— a second PPSV23 shot.');
+    expect(all(card)).toContain('(a second PPSV23 shot).');
     expect((all(card).match(/\[c\]/g) ?? []).length).toBe(card.noteCites.length);
   });
 
@@ -49,7 +49,7 @@ describe('Sam, 19: one PPSV23 thrown out at 18 — PCV20 or PCV21 only', () => {
   it('if a PCV15 was already given, PCV20 or PCV21 takes the PPSV23\'s place a year later (Ivy\'s card)', () => {
     const out = recommend({ ...SAM, today: '2026-10-11', pcvDoses: [...SAM.pcvDoses, { product: 'PCV15', date: '2026-10-11' }] });
     const card = out.recs[0];
-    expect(card.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 — completes the series');
+    expect(card.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 (completes the series)');
     expect(card.earliestNextDate).toBe('2027-10-11');
     expect(all(card)).toContain('A PPSV23 is not given: it would be a second PPSV23 shot.');
   });

@@ -73,7 +73,7 @@ const noteOf = (rec) => (typeof rec.note === 'string'
  * the conjugate series before age 6 with no PCV20, and the two "complete"
  * cards that cite the same row because that row's dose has been given.
  */
-const IS_ROWS_4_5 = /completed (the PCV series|PCV13\/15) before age 6|Option [AB] —|completed the PCV series and has received PPSV23/;
+const IS_ROWS_4_5 = /completed (the PCV series|PCV13\/15) before age 6|Option [AB]:|completed the PCV series and has received PPSV23/;
 
 describe('FINDING N — the quoted row matches the child\'s age band', () => {
   it('both Age 6-18 entries exist, quote CDC verbatim, and name one risk class each', () => {

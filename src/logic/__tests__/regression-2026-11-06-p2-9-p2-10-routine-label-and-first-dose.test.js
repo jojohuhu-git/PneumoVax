@@ -94,7 +94,7 @@ describe('P2-10: no dose on record, nothing to measure from', () => {
     expect(allText(r)).not.toMatch(/most recent/);
     expect(allText(r)).not.toMatch(/previously given/);
     // The gap that remains is real: PCV15, then PPSV23.
-    expect(r.recs[1].note.lead).toContain('Option B — 1 dose of PCV15, then ≥8 weeks later 1 dose of PPSV23');
+    expect(r.recs[1].note.lead).toContain('Option B: 1 dose of PCV15, then ≥8 weeks later 1 dose of PPSV23');
   });
 
   it('an untouched row in the form is not a dose', () => {

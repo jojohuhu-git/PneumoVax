@@ -53,7 +53,7 @@ describe('§C-P2-ONE — Leah', () => {
     const cards = live(out);
     expect(cards).toHaveLength(1);
     expect(cards[0].vaccine).toBe('PCV');
-    expect(cards[0].doseLabel).toBe('1 dose PCV20 (≥8 weeks) — completes the series');
+    expect(cards[0].doseLabel).toBe('1 dose PCV20 (≥8 weeks; completes the series)');
     expect(cards[0].dueToday).toBe(false);
     expect(cards[0].earliestNextDate).toBe('2026-12-16');
     expect(String(cards[0].note.lead ?? cards[0].note)).toContain('It can be given today if needed');
@@ -109,7 +109,7 @@ describe('§C-P2-ONE — the same family at other ages and risk classes', () => 
       });
       expect(out.perDose.ppsv23[0].intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
       const cards = live(out);
-      expect(cards.map((c) => c.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+      expect(cards.map((c) => c.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
       // PCV13 baby series: the before-6 row names no product, so no bridge.
       expect(cards[0].note.detail).toBe('A PPSV23 is not offered: it would be a second PPSV23 shot.');
     });
@@ -120,7 +120,7 @@ describe('§C-P2-ONE — what it does NOT touch', () => {
   it('a PPSV23 that counted: the ordinary card, unchanged', () => {
     const out = leah({ ppsv23Doses: [{ product: 'PPSV23', date: '2026-10-26' }] }); // 56 days
     expect(out.perDose.ppsv23[0].status).toBe('valid');
-    expect(live(out).some((c) => c.doseLabel === '1 dose PCV20 (≥8 weeks) — completes the series')).toBe(false);
+    expect(live(out).some((c) => c.doseLabel === '1 dose PCV20 (≥8 weeks; completes the series)')).toBe(false);
   });
 
   it('no PPSV23 yet: the Option A / Option B pair, unchanged', () => {
@@ -152,7 +152,7 @@ describe('§C-P2-ONE — what it does NOT touch', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2016-02-20' }],
     });
     expect(out.perDose.ppsv23[0].intervalRuleId).toBe('CHILD-PPSV23-AFTER-PCV');
-    expect(live(out).map((c) => c.doseLabel)).toEqual(['PCV20 or PCV21 ≥1 year after PCV13 — completes the series']);
+    expect(live(out).map((c) => c.doseLabel)).toEqual(['PCV20 or PCV21 ≥1 year after PCV13 (completes the series)']);
   });
 
   it('TWO thrown-out shots on the at/after-6 card: parked, unchanged', () => {

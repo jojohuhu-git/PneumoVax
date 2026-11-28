@@ -140,6 +140,6 @@ describe('"How this was worked out" agrees with the label under the dose', () =>
   // reading "it isn't counted".
   it('Ava on time: 1 of 2 counted, the other an extra dose', () => {
     const step = recommend(AVA_ON_TIME).path.find((p) => p.step === 'Doses already given');
-    expect(step.took).toBe('4 of 4 PCV doses counted. 1 of 2 PPSV23 doses counted — 1 an extra dose, not needed, with the reason on the dose itself');
+    expect(step.took).toBe('4 of 4 PCV doses counted. 1 of 2 PPSV23 doses counted (1 an extra dose, not needed, with the reason on the dose itself)');
   });
 });

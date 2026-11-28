@@ -230,7 +230,7 @@ describe('statement #7 — no dose now, review at 50', () => {
       pcvDoses: [{ date: '2015-01-10', product: 'PCV13' }],
       ppsv23Doses: [{ date: '2016-01-10' }],
     }),
-    're-evaluate at age 50',
+    'Re-evaluate at age 50',
   );
 
   it('the lead quotes page 4, the only page whose row has no Option A', () => {

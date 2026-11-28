@@ -661,6 +661,12 @@ the record of the reversal — do not delete it.
 under her approved style rules (§M-L3); explanations go under "Why this". **Never add a label outside the
 list, or put the label's words back into the line.** The §M sweep fails on either, over every test patient.
 
+### No Em Dash In A Sentence The Clinician Reads
+**OWNER DECISIONS 2026-11-27 (PNEUMO-EM-DASH), matching MeningoVax's Tier 3.** Sentences use a period,
+colon or comma; card headers put the tail in brackets ("… (completes the series)"); the closed dose
+labels ("Not counted — repeat" …) keep their dash. Quotes, source titles, the transplant row and a
+"—" empty table cell are left alone. Guard: `regression-2026-11-27-no-em-dash-in-sentences.test.jsx`.
+
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
 

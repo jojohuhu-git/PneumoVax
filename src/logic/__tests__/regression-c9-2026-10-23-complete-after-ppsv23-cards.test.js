@@ -69,9 +69,9 @@ const chipShorts = (rec) => (rec.citations ?? []).map((c) => c.short || c.label)
 
 /** The three families, by the words only each of them uses. */
 const FAMILIES = {
-  case1: /at\/after age 6 who has received PPSV23 — no further doses/,
+  case1: /at\/after age 6 who has received PPSV23: no further doses/,
   case2catchup: /24–71 months who has received the age-appropriate at-risk PCV catch-up/,
-  case2series: /child who completed the PCV series and has received PPSV23 — complete/,
+  case2series: /child who completed the PCV series and has received PPSV23: complete/,
 };
 
 /** Every (case, rec) pair the real-patient grid produces, bucketed by family. */

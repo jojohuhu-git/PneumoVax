@@ -38,7 +38,7 @@ function child({ pcv, ppsv = [], riskIds = [], today = TODAY, dob = DOB }) {
 const ZOE = { pcv: pcvOf('PCV15', INFANT), ppsv: ['2026-08-07'] };
 const CONTROL = { pcv: pcvOf('PCV13', INFANT), ppsv: ['2026-08-07'] };
 const card = (out) => out.recs.find((r) => r.doseLabel === 'PCV series complete');
-const LEAD = 'Healthy child 24–59 months whose age-appropriate PCV schedule is complete — no additional doses needed [c] [c]. (A series that includes PCV20 also needs no PPSV23.)';
+const LEAD = 'Healthy child 24–59 months whose age-appropriate PCV schedule is complete: no additional doses needed [c] [c]. (A series that includes PCV20 also needs no PPSV23.)';
 
 describe('Zoe: the toddler card drops "age 50" when the adult card at 50 would read Complete', () => {
   it('the premise: her PPSV23 is extra today, and at 50 she reads Complete (PCV15 + PPSV23)', () => {

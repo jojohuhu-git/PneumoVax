@@ -14,7 +14,7 @@ import { recommend } from '../recommend.js';
 
 const TODAY = '2026-11-01';
 const card = (p) => recommend({ today: TODAY, ...p }).recs[0];
-const LINE = 'This patient turns 50 on Nov 29, 2026, before that date. From age 50, ACIP advises ≥1 year after the PCV15, with 8 weeks an option that may be considered [c] — so the date above stays an option, and from that birthday the card shows the 1-year date.';
+const LINE = 'This patient turns 50 on Nov 29, 2026, before that date. From age 50, ACIP advises ≥1 year after the PCV15, with 8 weeks an option that may be considered [c], so the date above stays an option, and from that birthday the card shows the 1-year date.';
 
 const G31 = { dob: '1976-11-29', riskIds: ['hiv'], pcvDoses: [{ product: 'PCV15', date: '2026-10-11' }], ppsv23Doses: [] };
 

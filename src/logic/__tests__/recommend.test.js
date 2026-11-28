@@ -310,7 +310,7 @@ describe('§G Adults 19–49 with risk', () => {
       pcvDoses: [{ product: 'PCV13', date: '2015-01-01' }],
       ppsv23Doses: [{ product: 'PPSV23', date: '2016-01-01' }] });
     expect(pcv(r).status).toBe('no-dose-now'); // P1-2, owner ruling 2026-11-06
-    expect(pcv(r).doseLabel).toMatch(/review at age 50/);
+    expect(pcv(r).doseLabel).toMatch(/Review at age 50/);
   });
 
   it('already PCV20 → complete', () => {

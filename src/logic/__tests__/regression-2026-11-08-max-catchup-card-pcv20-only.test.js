@@ -31,7 +31,7 @@ describe('Max, 5: one PPSV23 thrown out for coming too soon after a PCV — PCV2
     const card = out.recs[0];
     expect(card.dueToday).toBe(true);
     expect(text(card)).toContain('Give 2 doses of PCV20, ≥8 weeks after the most recent pneumococcal dose and ≥8 weeks apart [c] [c].');
-    expect(text(card)).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] — a second PPSV23 shot.');
+    expect(text(card)).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] (a second PPSV23 shot).');
     expect(text(card)).not.toMatch(/PCV15 is used/);
     expect(text(card)).not.toContain('that PPSV23 is followed by one further dose');
     expect(markers(card)).toBe(card.noteCites.length);
@@ -46,7 +46,7 @@ describe('Max, 5: one PPSV23 thrown out for coming too soon after a PCV — PCV2
   it('his twin with a cochlear implant reads the same', () => {
     const out = recommend({ ...MAX, riskIds: ['cochlear_implant'] });
     expect(out.recs.map((r) => r.brands)).toEqual([['PCV20 (Prevnar 20)']]);
-    expect(text(out.recs[0])).toContain('— a second PPSV23 shot.');
+    expect(text(out.recs[0])).toContain('(a second PPSV23 shot).');
   });
 
   it('given the PCV20, he is complete — no extra shot', () => {

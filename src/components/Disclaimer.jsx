@@ -33,11 +33,11 @@ export default function Disclaimer() {
       </button>
       {open && (
       <span className="disclaimer-more" data-testid="disclaimer-more">
-      This app tracks the patient's <em>current</em> risk status only — it does not record
+      This app tracks the patient's <em>current</em> risk status only. It does not record
       when a risk factor started or ended. One case worth knowing: PPSV23 between ages 2 and
       5 is only <em>indicated</em> for a child with a risk condition, but a PPSV23 already
       given to a then-healthy three-year-old is still counted as a valid dose if that child
-      later becomes at-risk. That is correct — it was a real vaccine given at a valid age —
+      later becomes at-risk. That is correct (it was a real vaccine given at a valid age),
       but the app will not query it, so check the record if it matters.
       </span>
       )}

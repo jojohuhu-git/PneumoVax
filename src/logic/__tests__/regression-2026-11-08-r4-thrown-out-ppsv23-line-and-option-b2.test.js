@@ -65,7 +65,7 @@ describe('R4 shape 1: the line under a thrown-out PPSV23 names no date the cards
 
   it("Ana's card itself is unchanged: PCV20 or PCV21 today, no PPSV23 after it", () => {
     const [card] = run(ANA).recs;
-    expect(card.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after the PPSV23 — completes the series');
+    expect(card.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after the PPSV23 (completes the series)');
     expect(card.dueToday).toBe(true);
     expect(text(card)).toContain('No PPSV23 is needed after it.');
   });

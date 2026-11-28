@@ -102,7 +102,7 @@ const LOSES = {
 const KEEPS = {
   pcv13AndPpsv: 'PCV13 and PPSV23 already given',
   pcv13Only: 'PCV13 was given previously',
-  reEvaluateAt50: 'No additional pneumococcal dose now — re-evaluate at age 50',
+  reEvaluateAt50: 'No additional pneumococcal dose now. Re-evaluate at age 50',
   routineAt50: 'Routine pneumococcal vaccination begins at age 50',
   noHistory: 'A PCV7-only history counts as no PCV history',
   // Restored 2026-10-18 — see the note above.

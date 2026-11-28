@@ -5,7 +5,7 @@
 // Her second shot is not a "repeat after an invalid first" (it came 7 months
 // later, so the repeat rule passed; it failed on age), so the no-third-shot
 // rule built on Sam, Max, Kai and Noah did not fire and her card still
-// offered Option B — a third PPSV23 shot. Asked, with the trade-off that a
+// offered Option B (a third PPSV23 shot). Asked, with the trade-off that a
 // PPSV23 today would be her first one that counts: "PCV20 only".
 //
 // So the trigger is now "two or more PPSV23 shots given, none counted",
@@ -24,7 +24,7 @@ const IVY = {
   ppsv23Doses: d('PPSV23', ['2024-02-01', '2024-09-01']),
 };
 const labels = (p) => recommend(p).recs.map((r) => r.doseLabel);
-const PCV20_ONLY = ['1 dose PCV20 (≥8 weeks) — completes the series'];
+const PCV20_ONLY = ['1 dose PCV20 (≥8 weeks; completes the series)'];
 const PAIR = ['Option A: 1 dose PCV20 (≥8 weeks)', 'Option B: 1 dose PPSV23 (≥8 weeks)'];
 
 describe('Ivy', () => {
@@ -48,7 +48,7 @@ describe('Ivy', () => {
   // — the chip under the repeat drops its promise of a further PPSV23.
   it('the chip under her second shot says it is not repeated — no "repeat this dose only"', () => {
     expect(out.perDose.ppsv23[1].reasons).toEqual([
-      'Given at about 20 months — below the 2-year minimum age for PPSV23[c].',
+      'Given at about 20 months: below the 2-year minimum age for PPSV23[c].',
     ]);
     // §M-L3 (2026-11-08): the label now says "Not counted — do not repeat", so the line no longer does.
     expect(out.perDose.ppsv23[1].disposition).toBe('no-repeat');
@@ -100,6 +100,6 @@ describe('within her earlier rulings — listed in the PR, not asked', () => {
   it('Ivy with no conjugate on record: the catch-up card offers PCV20 only and says why (Kai)', () => {
     const [card] = recommend({ ...IVY, pcvDoses: [] }).recs;
     expect(card.brands).toEqual(['PCV20 (Prevnar 20)']);
-    expect(card.note.detail).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot.');
+    expect(card.note.detail).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] (a third PPSV23 shot).');
   });
 });

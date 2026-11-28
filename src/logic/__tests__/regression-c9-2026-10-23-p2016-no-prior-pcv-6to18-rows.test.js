@@ -63,7 +63,7 @@ describe('p2016 Table 4 rows 6 and 7 — Option A', () => {
   for (const [name, riskIds] of [['non-IC (chronic lung disease)', ['chronic_lung']], ['IC (asplenia)', ['asplenia']]]) {
     it(`credits the Option A cell for a ${name} 10-year-old`, () => {
       const res = recommend(teen(riskIds));
-      const card = (res.recs ?? []).find((r) => /with no prior PCV: Option A/.test(noteOf(r)));
+      const card = (res.recs ?? []).find((r) => /with no prior PCV\. Option A:/.test(noteOf(r)));
       expect(card, 'no Option A card for this child').toBeTruthy();
       const cites = citesOf(card);
       expect(cites).toHaveLength(2);
@@ -81,7 +81,7 @@ describe('p2016 Table 4 rows 6 and 7 — Option A', () => {
 describe('p2016 Table 4 rows 6 and 7 — Option B, one cell across two cards', () => {
   it('the PCV15 card and the PPSV23 step quote the same cell, for one patient', () => {
     const res = recommend(teen(['asplenia']));
-    const pcv15 = (res.recs ?? []).find((r) => /Option B — 1 dose of PCV15/.test(noteOf(r)));
+    const pcv15 = (res.recs ?? []).find((r) => /Option B: 1 dose of PCV15/.test(noteOf(r)));
     const ppsv = (res.recs ?? []).find((r) => /Second step of Option B/.test(noteOf(r)));
     expect(pcv15, 'no Option B PCV15 card').toBeTruthy();
     expect(ppsv, 'no Option B PPSV23 step card').toBeTruthy();
@@ -98,7 +98,7 @@ describe('p2016 Table 4 rows 6 and 7 — Option B, one cell across two cards', (
     // instruction. Quoting only the first sentence would leave it sourced by
     // nothing while appearing to be covered.
     const res = recommend(teen(['chronic_lung']));
-    const pcv15 = (res.recs ?? []).find((r) => /Option B — 1 dose of PCV15/.test(noteOf(r)));
+    const pcv15 = (res.recs ?? []).find((r) => /Option B: 1 dose of PCV15/.test(noteOf(r)));
     const q = citesOf(pcv15).find((c) => c.doc === 'immunize.org p2016').quote;
     expect(q).toContain('1 dose of PCV15 at least 8 weeks after most recent pneumococcal vaccination.');
     expect(q).toContain('At least 8 weeks later, give 1 dose of PPSV23, if PPSV23 not previously given.');
@@ -118,8 +118,8 @@ describe('every no-prior-PCV 6-18 card in the grid is balanced and credited', ()
       if (res.excluded) continue;
       for (const rec of res.recs ?? []) {
         const t = noteOf(rec);
-        const which = /with no prior PCV: Option A/.test(t) ? 'optionA'
-          : /Option B — 1 dose of PCV15/.test(t) ? 'optionB'
+        const which = /with no prior PCV\. Option A:/.test(t) ? 'optionA'
+          : /Option B: 1 dose of PCV15/.test(t) ? 'optionB'
             : /Second step of Option B/.test(t) ? 'ppsvStep' : null;
         if (!which) continue;
         counts[which] += 1;

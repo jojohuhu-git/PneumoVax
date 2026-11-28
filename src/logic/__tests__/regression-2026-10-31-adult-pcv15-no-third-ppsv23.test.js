@@ -37,7 +37,7 @@ describe('Ivy at 20 with a PCV15 — the patient she was shown', () => {
     expect(recs).toHaveLength(1);
     const [r] = recs;
     expect(r.vaccine).toBe('PCV');
-    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥8 weeks after PCV15 — completes the series');
+    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥8 weeks after PCV15 (completes the series)');
     expect(r.brands).toEqual(['PCV20 (Prevnar 20)', 'PCV21 (Capvaxive)']);
     expect(r.note.lead).toBe('**Give 1 dose of PCV20 or PCV21** ≥8 weeks after the PCV15 dose, in place of the PPSV23 [c] [c], to complete the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
     expect(r.note.detail).toBe('The timing is the PPSV23\'s: ACIP gives the PPSV23 ≥8 weeks after a PCV15 [c], and no document states a separate timing for the PCV20 or PCV21 that replaces it. A PPSV23 is not given: it would be a third PPSV23 shot.');
@@ -73,7 +73,7 @@ describe('Ivy at 20 with a PCV15 — the patient she was shown', () => {
 describe('her ruling, at every adult age', () => {
   it('19–49 with a chronic condition only: a year after the PCV15', () => {
     const [r] = run({ ...IVY_20, riskIds: ['diabetes'] }).recs;
-    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 — completes the series');
+    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 (completes the series)');
     expect([r.dueToday, r.earliestNextDate]).toEqual([false, '2027-09-20']);
     // 2026-11-07: the 19-49 copy of CDC's sentence, so the number opens Special situations.
     expect(r.noteCites.map((c) => c.key)).toContain('adultPcv15ThenPpsv1949');
@@ -82,14 +82,14 @@ describe('her ruling, at every adult age', () => {
 
   it('55, no risk condition: a year, due now once it has passed', () => {
     const [r] = run({ ...ADULT_55, pcvDoses: d('PCV15', ['2025-06-01']) }).recs;
-    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 — completes the series');
+    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 (completes the series)');
     expect([r.status, r.dueToday]).toEqual(['due', true]);
     expect(text(r)).not.toContain('minimum interval of 8 weeks');
   });
 
   it('55 with no spleen: a year, with ACIP\'s 8-week option kept', () => {
     const [r] = run({ ...ADULT_55, riskIds: ['asplenia'] }).recs;
-    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 — completes the series');
+    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥1 year after PCV15 (completes the series)');
     expect(text(r)).toContain('A minimum interval of 8 weeks may be considered');
     expect(r.noteCites.map((c) => c.key)).toContain('jobAidEightWeekOptionAt50');
     expect(r.noteCites).toHaveLength(markers(r));
@@ -98,7 +98,7 @@ describe('her ruling, at every adult age', () => {
   it('adult Sam (repeat 5 weeks after a too-young dose): the grey-area note comes too', () => {
     const p = { ...IVY_20, ppsv23Doses: d('PPSV23', ['2007-12-01', '2008-01-05']) };
     const [r] = run(p).recs;
-    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥8 weeks after PCV15 — completes the series');
+    expect(r.doseLabel).toBe('1 dose PCV (PCV20 or PCV21) ≥8 weeks after PCV15 (completes the series)');
     expect(r.note.detail).toContain('Grey area:');
     expect(r.noteCites.map((c) => c.key)).toEqual(expect.arrayContaining(['cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days']));
     expect(r.noteCites).toHaveLength(markers(r));
@@ -108,11 +108,11 @@ describe('her ruling, at every adult age', () => {
 describe('limits', () => {
   it('ONE thrown-out PPSV23: the PPSV23 is still owed (it is only the second shot)', () => {
     const [r] = run({ ...IVY_20, ppsv23Doses: d('PPSV23', ['2007-02-01']) }).recs;
-    expect(r.doseLabel).toBe('PPSV23 (≥8 weeks after PCV15) — completes the series');
+    expect(r.doseLabel).toBe('PPSV23 (≥8 weeks after PCV15; completes the series)');
   });
 
   it('no PPSV23 on record at all: unchanged', () => {
     const [r] = run({ ...IVY_20, ppsv23Doses: [] }).recs;
-    expect(r.doseLabel).toBe('PPSV23 (≥8 weeks after PCV15) — completes the series');
+    expect(r.doseLabel).toBe('PPSV23 (≥8 weeks after PCV15; completes the series)');
   });
 });
