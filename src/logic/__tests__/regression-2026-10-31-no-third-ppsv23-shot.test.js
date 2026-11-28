@@ -37,7 +37,7 @@ const GREY_HEAD = 'Grey area: CDC says a dose given under the minimum age is rep
 const withCites = (s) => s
   .replace('on or after that age,', 'on or after that age [c],')
   .replace('not live.', 'not live [c].');
-const ONE_PCV20 = '1 dose PCV20 (≥8 weeks) — completes the series';
+const ONE_PCV20 = '1 dose PCV20 (≥8 weeks; completes the series)';
 const SAM_LEAD = '**Give 1 dose of PCV20**, ≥8 weeks after the most recent PCV [c], to complete the series [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.';
 
 describe('Max — Sam\'s twin, cochlear implant, not immunocompromised', () => {
@@ -157,7 +157,7 @@ describe('Kai — 8, no spleen, never a PCV: the 6-18 three-option card', () => 
 
   it('the card says why, then the grey area, ending in what is true for him', () => {
     expect(out.recs[0].note.lead).toBe('**Give 1 dose of PCV20**, ≥8 weeks after the most recent pneumococcal vaccine [c] [c]. No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
-    expect(out.recs[0].note.detail).toBe(`PCV15 is not offered: after it a PPSV23 would be owed — a third PPSV23 shot. ${withCites(greyHead('Jan 5, 2019'))}${TAIL}`);
+    expect(out.recs[0].note.detail).toBe(`PCV15 is not offered: after it a PPSV23 would be owed (a third PPSV23 shot). ${withCites(greyHead('Jan 5, 2019'))}${TAIL}`);
     expect(out.recs[0].noteCites.map((c) => c.key)).toEqual([
       'pedsIc6to18NoPcv', 'p2016NoPriorPcv6to18OptionA',
       'cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days',
@@ -189,7 +189,7 @@ describe('Kai at 2 — the at-risk catch-up card', () => {
   });
 
   it('"Why this" swaps the PCV15 sentence for why it is not offered, then the grey area', () => {
-    expect(out.recs[0].note.detail).toBe(`This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot. ${withCites(greyHead('Jan 5, 2025'))}`);
+    expect(out.recs[0].note.detail).toBe(`This is the at-risk catch-up for a child 24–71 months with fewer than 3 PCV doses by 24 months. These doses are additional to any infant doses. PCV15 is not offered: it would need a PPSV23 after it [c] (a third PPSV23 shot). ${withCites(greyHead('Jan 5, 2025'))}`);
     expect(out.recs[0].noteCites.map((c) => c.key)).toEqual([
       'pedsRiskIncompleteCatchup', 'p2016AtRiskCatchup24to71Incomplete', 'p2016Pcv15NeedsFurtherDoses',
       'cdcGbpRepeatUnderMinAge', 'cdcGbpLiveVaccine28Days',
@@ -207,7 +207,7 @@ describe('Kai at 2 — the at-risk catch-up card', () => {
     const r = recommend({ ...SAM, pcvDoses: d('PCV13', ['2023-03-01', '2023-05-01', '2023-07-01']) }).recs;
     expect(r.map((x) => [x.doseLabel, x.brands])).toEqual([['1 dose PCV (at-risk catch-up)', ['PCV20 (Prevnar 20)']]]);
     expect(r[0].note.lead).toBe('Give 1 dose of PCV20, ≥8 weeks after the most recent PCV [c] [c].');
-    expect(r[0].note.detail).toBe(`This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot. ${withCites(greyHead('Jan 5, 2025'))}`);
+    expect(r[0].note.detail).toBe(`This is the at-risk catch-up for a child 24–71 months who had 3 PCV doses, all before 12 months. PCV15 is not offered: it would need a PPSV23 after it [c] (a third PPSV23 shot). ${withCites(greyHead('Jan 5, 2025'))}`);
   });
 
   it('a repeat thrown out for SPACING on this card: PCV20 only, no grey area (a judgement)', () => {
@@ -215,7 +215,7 @@ describe('Kai at 2 — the at-risk catch-up card', () => {
       ppsv23Doses: d('PPSV23', ['2025-02-15', '2025-04-05']) });
     expect(r.perDose.ppsv23[1].intervalRuleId).toBe('CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
     expect(r.recs.map((x) => x.brands)).toEqual([['PCV20 (Prevnar 20)']]);
-    expect(r.recs[0].note.detail).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] — a third PPSV23 shot.');
+    expect(r.recs[0].note.detail).toContain('PCV15 is not offered: it would need a PPSV23 after it [c] (a third PPSV23 shot).');
     expect(JSON.stringify(r)).not.toContain('Grey area');
   });
 });

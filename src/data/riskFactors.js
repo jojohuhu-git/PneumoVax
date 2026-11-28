@@ -145,14 +145,14 @@ export const RISK_FACTORS = [
   {
     id: 'cochlear_implant',
     label: 'Cochlear implant',
-    sublabel: 'treated as immunocompromising for the adult PCV15→PPSV23 interval — ≥8 weeks at 19–49, ≥1 year at 50+ (mm7401a1)',
+    sublabel: 'treated as immunocompromising for the adult PCV15→PPSV23 interval: ≥8 weeks at 19–49, ≥1 year at 50+ (mm7401a1)',
     class: 'special', group: 'special',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },
   {
     id: 'csf_leak',
     label: 'Cerebrospinal fluid (CSF) leak',
-    sublabel: 'treated as immunocompromising for the adult PCV15→PPSV23 interval — ≥8 weeks at 19–49, ≥1 year at 50+ (mm7401a1)',
+    sublabel: 'treated as immunocompromising for the adult PCV15→PPSV23 interval: ≥8 weeks at 19–49, ≥1 year at 50+ (mm7401a1)',
     class: 'special', group: 'special',
     refs: ['cdcChildPneumo', 'cdcAdultPneumo'],
   },

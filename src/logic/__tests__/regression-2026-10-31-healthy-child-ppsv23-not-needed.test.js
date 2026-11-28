@@ -35,7 +35,7 @@ describe('Zoe — PPSV23 at 12 months, too young', () => {
 
   it('stays thrown out for age, and the chip says it is not needed instead of "repeat"', () => {
     expect(dose.status).toBe('invalid');
-    expect(dose.reasons[0]).toMatch(/^Given at about 12 months — below the 2-year minimum age for PPSV23/);
+    expect(dose.reasons[0]).toMatch(/^Given at about 12 months: below the 2-year minimum age for PPSV23/);
     expect(dose.reasons).toContain(NOT_NEEDED);
     expect(dose.reasons.join(' ')).not.toMatch(/repeat this dose/);
   });

@@ -355,7 +355,7 @@ export function dateEntryWarning(dose, { ageMonths, today, dob } = {}) {
   if (futureDated(dose, ref)) {
     return {
       kind: 'future',
-      text: `This date is in the future — today is ${fmtDate(ref)}. Check the year; a dose cannot have been given yet.`,
+      text: `This date is in the future. Today is ${fmtDate(ref)}. Check the year; a dose cannot have been given yet.`,
     };
   }
   const ageAtDose = ageAtDoseFromDate(dose, ageMonths, ref, dob);
@@ -766,7 +766,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     if (ageMonths < minAgeM) {
       // Dateless and below the minimum TODAY, so still too young by definition.
       return repeatWithAnyApprovedProduct(invalid(
-        [withMarker(`Recorded without a date, but the patient is currently only ${about(fmtAgeM(ageMonths))} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
+        [withMarker(`Recorded without a date, but the patient is currently only ${about(fmtAgeM(ageMonths))}: below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}. A past dose cannot have been given later than today, so it could not have been given at a valid age. This dose does not count.`, ageCites)],
         `Current age: ${about(fmtAgeM(ageMonths))}. Minimum: ${fmtMinAge(minAgeM)}.`,
         ageCites
       ), minAgeM, true);
@@ -803,7 +803,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
     // The dose was below the minimum WHEN GIVEN; whether the patient is still
     // below it today is a separate question, and the one the wording turns on.
     return repeatWithAnyApprovedProduct(invalid(
-      [withMarker(`Given at ${about(fmtAgeM(ageAtDose))} — below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
+      [withMarker(`Given at ${about(fmtAgeM(ageAtDose))}: below the ${fmtMinAge(minAgeM)} minimum age for ${prod?.label || key || 'this product'}.`, ageCites)],
       `Age at administration: ${about(fmtAgeM(ageAtDose))}. Minimum: ${fmtMinAge(minAgeM)} (doses up to 4 days early still count, per CDC).`,
       ageCites
     ), minAgeM, ageMonths < minAgeM);
@@ -844,7 +844,7 @@ function validateOnePCV(dose, ageMonths, today, dob, prev, ctxParts) {
       });
       return {
         ...invalid(
-          [withMarker(`Given at ${givenAt} — below the ${weeks} minimum age for a ${ordinal} PCV dose.`, cites)],
+          [withMarker(`Given at ${givenAt}: below the ${weeks} minimum age for a ${ordinal} PCV dose.`, cites)],
           `Age at administration: ${givenAt}. Minimum for PCV dose ${doseNumber}: ${weeks} (doses up to 4 days early still count, per ACIP).`,
           cites
         ),
@@ -906,7 +906,7 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!dose.date) {
     if (ageMonths < minAgeM) {
       return invalid(
-        [`Recorded without a date, but the patient is currently only ${about(fmtAgeM(ageMonths))} — below the ${minAgeAdj} minimum age for PPSV23[c]. This dose does not count.`],
+        [`Recorded without a date, but the patient is currently only ${about(fmtAgeM(ageMonths))}: below the ${minAgeAdj} minimum age for PPSV23[c]. This dose does not count.`],
         `Current age: ${about(fmtAgeM(ageMonths))}. Minimum: ${minAgeNoun}.`,
         ageCites
       );
@@ -919,7 +919,7 @@ function validateOnePPSV23(dose, ageMonths, today, dob, prev, ctxParts) {
   if (!ageMeetsMinimum(ageAtDose, minAgeM, { doseDate: dose.date, ageMonths, today, dob })) {
     return {
       ...invalid(
-        [`Given at ${about(fmtAgeM(ageAtDose))} — below the ${minAgeAdj} minimum age for PPSV23[c].`],
+        [`Given at ${about(fmtAgeM(ageAtDose))}: below the ${minAgeAdj} minimum age for PPSV23[c].`],
         `Age at administration: ${about(fmtAgeM(ageAtDose))}. Minimum: ${minAgeNoun} (doses up to 4 days early still count, per CDC).`,
         ageCites
       ),
@@ -1169,7 +1169,7 @@ function stepStream(vaccine, dose, st, otherKept, ageMonths, today, dob, riskIds
         ? st.prev.date : null;
       const alt = result.recordProblem ? null : result.conjugateAlternative;
       const alternativeSentence = alt
-        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} — at least 1 year after this dose — because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
+        ? `**A repeat PPSV23 should wait at least 5 years after this dose, because ACIP requires at least 5 years between PPSV23 doses. Alternatively, 1 dose of ${alt.owedProducts.join(' or ')} may be considered from ${fmtDate(alt.dueDate)} (at least 1 year after this dose), because ACIP schedules any conjugate at least 1 year after the last PPSV23.**`
         : null;
       // §C-P2-HEALTHY: a thrown-out PPSV23 in a healthy child STAYS thrown
       // out — so it still holds off nothing (ANCHOR-1, re-confirmed on Rosa) —

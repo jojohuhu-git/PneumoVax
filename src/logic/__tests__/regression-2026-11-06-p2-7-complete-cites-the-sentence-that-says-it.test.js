@@ -27,14 +27,14 @@ describe('P2-7: each marker sits on the claim its document states', () => {
   it('a 40-year-old: the sequence cites the Adult Notes, "complete" cites the risk page', () => {
     const c = card(patient(480, ['diabetes']));
     expect(c.status).toBe('complete');
-    expect(c.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].');
+    expect(c.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series: no further doses needed [c].');
     // 2026-11-07: same words, the 19-49 copy (it opens Special situations; the 60-year-old's opens Routine).
     expect(keys(c)).toEqual(['adultPcv15ThenPpsv1949', 'adultPcv15PpsvComplete1949']);
   });
 
   it('a 60-year-old: same sentence, and "complete" cites the job aid, not the risk page', () => {
     const c = card(patient(720, []));
-    expect(c.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].');
+    expect(c.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series: no further doses needed [c].');
     expect(keys(c)).toEqual(['adultPcv15ThenPpsv', 'jobAidSeriesCompleteAt50']);
   });
 

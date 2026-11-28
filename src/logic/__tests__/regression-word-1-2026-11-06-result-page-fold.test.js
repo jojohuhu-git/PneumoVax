@@ -251,6 +251,9 @@ describe('WORD-1 — visible words cannot creep back up', () => {
     // the words their new labels now say. A FALL; a rise still needs a reason.
     // 155 → 154 worst, 2026-11-08 (§WORD-TIDY): the reason after "It can be given
     // today if needed" on a thrown-out-PPSV23 card moved under "Why this".
-    expect({ p90, worst }).toEqual({ p90: 56, worst: 154 });
+    // 154 → 151 worst, 2026-11-27 (PNEUMO-EM-DASH): a bare "—" was counted as a
+    // word, and the em dashes became punctuation. No word left or came into view
+    // (prose diff: 21,125 lines changed, 0 with any word or field change). A FALL.
+    expect({ p90, worst }).toEqual({ p90: 56, worst: 151 });
   });
 });

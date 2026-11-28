@@ -70,7 +70,7 @@ describe('Noah — REVERSED 2026-10-31: his repeat no longer counts', () => {
 
   it('his card is PCV20 only — never a third PPSV23 (as before, for a new reason)', () => {
     const recs = recsOf(NOAH);
-    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
     expect(recs.map((r) => r.doseLabel).join(' ')).not.toContain('Option B: 1 dose PPSV23');
     expect(allText(recs)).not.toContain('neither PCV20 nor PPSV23');
   });
@@ -81,7 +81,7 @@ describe('Noah — REVERSED 2026-10-31: his repeat no longer counts', () => {
   // This used to pin "Option A PCV20 / Option B PPSV23".
   it('without the repeat he is still owed a dose: PCV20 only — §C-P2-ONE', () => {
     const labels = recsOf(NOAH_NO_REPEAT).map((r) => r.doseLabel);
-    expect(labels).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+    expect(labels).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
   });
 });
 
@@ -92,7 +92,7 @@ describe('the repeat is spaced from the rejected dose — RULING D still holds, 
     expect(repeat.status).toBe('invalid');
     expect(repeat.intervalRuleId).toBe('CHILD-PPSV23-REPEAT-AFTER-INVALID-FIRST');
     expect(repeat.reasons[0]).toBe(
-      'Given 42 days after the PPSV23 dose of Apr 29, 2023, which did not count — a PPSV23 after another PPSV23 is given at least 5 years after it, whether or not that dose counted.',
+      'Given 42 days after the PPSV23 dose of Apr 29, 2023, which did not count: a PPSV23 after another PPSV23 is given at least 5 years after it, whether or not that dose counted.',
     );
     // 2023-06-10 + 5 years, no grace (owner ruling 2026-10-24).
     expect(repeat.repeatDueDate).toBe('2028-06-10');

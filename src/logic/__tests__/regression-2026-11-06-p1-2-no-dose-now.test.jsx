@@ -102,7 +102,7 @@ describe('Ola: a dose is recommended at 50, on the adult schedule she is already
   it('reads "No dose now", with her heading unchanged', () => {
     const card = only(ola);
     expect(card.status).toBe('no-dose-now');
-    expect(card.doseLabel).toBe('No dose now — review at age 50');
+    expect(card.doseLabel).toBe('No dose now. Review at age 50');
   });
 
   it('says what is recommended at 50 in the part that shows', () => {
@@ -190,7 +190,7 @@ describe('the whole patient list', () => {
 
   it('no "Complete" card still names a dose on the schedule the patient is on', () => {
     const wrong = cards.filter(({ card }) => card.status === 'complete'
-      && (card.doseLabel === 'No dose now — review at age 50' || /falls? due (at age 2|from the 2nd birthday)/.test(text(card))));
+      && (card.doseLabel === 'No dose now. Review at age 50' || /falls? due (at age 2|from the 2nd birthday)/.test(text(card))));
     expect(wrong.map((w) => w.key)).toEqual([]);
   });
 
@@ -199,6 +199,6 @@ describe('the whole patient list', () => {
     for (const { card } of cards) {
       if (card.status === 'no-dose-now') labels[card.doseLabel] = (labels[card.doseLabel] ?? 0) + 1;
     }
-    expect(labels).toEqual({ 'No dose now — review at age 50': 369 });
+    expect(labels).toEqual({ 'No dose now. Review at age 50': 369 });
   });
 });

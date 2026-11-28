@@ -532,7 +532,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'Measured from the dose given, not the dose that counted: ACIP General Best Practices, "The repeat '
       + 'dose should be spaced after the invalid dose by the recommended minimum interval" (RULING D, 2026-10-23).',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given less than ${min.words} after the previous PPSV23 dose — a second PPSV23 is given at least ${min.words} after the first.`],
+      reasons: [`Given less than ${min.words} after the previous PPSV23 dose: a second PPSV23 is given at least ${min.words} after the first.`],
       detail: `Previous PPSV23: ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
     }),
   },
@@ -582,7 +582,7 @@ export const DOSE_INTERVAL_RULES = [
       + 'PPSV23". Neither says which interval governs a repeat of a thrown-out FIRST PPSV23 — the 8 weeks '
       + 'after a PCV or the 5 years after a PPSV23 — so the choice is hers. See CLINICAL_SPEC.md §C-P2-FIVE.',
     message: (ctx, anchor, min) => ({
-      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)}, which did not count — a PPSV23 after another PPSV23 is given at least ${min.words} after it, whether or not that dose counted.`],
+      reasons: [`Given ${fmtSinceDays(anchor.date, ctx.doseDate)} the PPSV23 dose of ${fmtDate(anchor.date)}, which did not count: a PPSV23 after another PPSV23 is given at least ${min.words} after it, whether or not that dose counted.`],
       detail: `Previous PPSV23 (did not count): ${fmtDate(anchor.date)}. Minimum: ${min.words} later (doses up to 4 days early still count, per CDC).`,
     }),
   },

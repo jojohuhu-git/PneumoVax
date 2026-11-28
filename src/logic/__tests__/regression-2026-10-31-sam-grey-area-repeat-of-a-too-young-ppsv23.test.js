@@ -38,7 +38,7 @@ describe('Sam', () => {
 
   it('his card offers PCV20 only — no Option B, which would be his third PPSV23', () => {
     expect(out.recs.map((r) => [r.vaccine, r.doseLabel])).toEqual([
-      ['PCV', '1 dose PCV20 (≥8 weeks) — completes the series'],
+      ['PCV', '1 dose PCV20 (≥8 weeks; completes the series)'],
     ]);
     expect(out.recs[0].dueToday).toBe(true);
     expect(out.recs[0].note.lead).toBe(
@@ -69,7 +69,7 @@ describe('limits — only the card she was shown', () => {
   it('the same history at 10 years old reads the same way, with the 6-18 row', () => {
     const at10 = { ...SAM, ageMonths: 120, today: addCalendarMonths(SAM.dob, 120) };
     const recs = recommend(at10).recs;
-    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
     expect(recs[0].noteCites[0].key).toBe('pedsIcBefore6NoPcv20At6to18');
   });
 
@@ -77,7 +77,7 @@ describe('limits — only the card she was shown', () => {
   // stood until she was shown him. Kept, inverted, as the record of it.
   it('a child who is NOT immunocompromised — REVERSED 2026-10-31: PCV20 only too (Max)', () => {
     const recs = recommend({ ...SAM, riskIds: ['cochlear_implant'] }).recs;
-    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+    expect(recs.map((r) => r.doseLabel)).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
   });
 
   it('a child still owed catch-up conjugates keeps her catch-up card', () => {

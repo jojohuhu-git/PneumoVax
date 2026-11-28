@@ -661,6 +661,12 @@ the record of the reversal — do not delete it.
 under her approved style rules (§M-L3); explanations go under "Why this". **Never add a label outside the
 list, or put the label's words back into the line.** The §M sweep fails on either, over every test patient.
 
+### No Em Dash In A Sentence The Clinician Reads
+**OWNER DECISIONS 2026-11-27 (PNEUMO-EM-DASH), matching MeningoVax's Tier 3.** Sentences use a period,
+colon or comma; card headers put the tail in brackets ("… (completes the series)"); the closed dose
+labels ("Not counted — repeat" …) keep their dash. Quotes, source titles, the transplant row and a
+"—" empty table cell are left alone. Guard: `regression-2026-11-27-no-em-dash-in-sentences.test.jsx`.
+
 ### Every Interval Rule Lives In One Table
 `src/logic/doseIntervalRules.js` holds every gap-between-recorded-doses rule. `validate.js` calls `evaluateDoseInterval()` once per dose and owns **no** interval logic.
 
@@ -672,6 +678,13 @@ Each row declares **`rulebook`** (child / adult / any — which schedule states 
 `dateUtils.js` is identical across PneumoVax and MeningoVax **apart from the `L2 MIRROR NOTE` comment, which exists only in PneumoVax's copy** (measured 2026-10-13: that comment is the only difference; zero lines of code differ). If you change it here, apply the same change to MeningoVax.
 
 Since S6-4 a test enforces this: `regression-s6-4-avg-days-per-month-one-home.test.js` compares the two files comment-stripped and fails on any code divergence. It is **skipped, not failed**, when the sibling repo is not checked out, because CI clones only this repo — so a local run is what catches drift. Note the two apps *use* the shared file differently and that is fine: PneumoVax calls only `DAYS.weeks`, while MeningoVax uses `DAYS.months` (17×) and `DAYS.years` (12×). PneumoVax deliberately moved its month/year comparisons onto the calendar-exact helpers.
+
+### ageEntry.js Is Mirror-Synced Too
+`src/logic/ageEntry.js` (which ages the Age step refuses, and the message it shows) is the same
+code in both apps, comments aside — owner E2, 2026-11-26: *"Both apps"*. Change its wording in
+both repos or neither. Guard: `regression-2026-11-27-ageentry-mirrors-meningovax.test.js`
+(PNEUMO-AGEENTRY-GUARD), code-only comparison like S6-4's, **skipped** when MeningoVax is not
+checked out.
 
 ## Testing Expectations
 

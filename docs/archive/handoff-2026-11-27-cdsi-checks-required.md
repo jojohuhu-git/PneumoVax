@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-27** by `handoff-2026-11-27-ageentry-guard-and-em-dash.md`. Its PRs (#166, #167) are merged; do not resume from this file.
+
 # PneumoVax — Handoff: both CDC CDSI checks are required tests (2026-11-27)
 
 Repo `/Users/joannehuang/Downloads/PneumoVax`. Branch `feat/2026-11-27-cdsi-test-patients-required`,

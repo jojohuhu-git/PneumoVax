@@ -65,7 +65,7 @@ describe('Noah — his repeat 10 weeks later no longer counts; PCV20 only', () =
   });
 
   it('his card is PCV20 only — a PPSV23 would be his third', () => {
-    expect(labels(out)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+    expect(labels(out)).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
     expect(out.recs[0].note.lead).toContain('No further PPSV23: 2 PPSV23 doses have been given and neither counted.');
   });
 });
@@ -75,7 +75,7 @@ describe('Sam — verdict unchanged, the grey note states the 5 years', () => {
 
   it('both PPSV23 doses stay thrown out and the card is PCV20 only', () => {
     expect(out.perDose.ppsv23.map((x) => x.status)).toEqual(['invalid', 'invalid']);
-    expect(labels(out)).toEqual(['1 dose PCV20 (≥8 weeks) — completes the series']);
+    expect(labels(out)).toEqual(['1 dose PCV20 (≥8 weeks; completes the series)']);
   });
 
   it('the note names 5 years, never the old 8 weeks', () => {

@@ -30,9 +30,9 @@ const LINES = {
 };
 // What the ADULT card says at 19 for each line — its dose label and its source.
 const AT_19 = {
-  dose: ['PCV20 or PCV21 ≥5 years after last pneumococcal dose — completes the series', 'adultIc1949BothPcv13Ppsv'],
-  none: ['No dose now — review at age 50', 'adultChronicOnlyReviewAt50'],
-  twoPpsv: ['Review at age 50 — or PCV20 or PCV21 ≥5 years after the last pneumococcal dose', 'mmwrIc1949TwoPpsv'],
+  dose: ['PCV20 or PCV21 ≥5 years after last pneumococcal dose (completes the series)', 'adultIc1949BothPcv13Ppsv'],
+  none: ['No dose now. Review at age 50', 'adultChronicOnlyReviewAt50'],
+  twoPpsv: ['Review at age 50 (or PCV20 or PCV21 ≥5 years after the last pneumococcal dose)', 'mmwrIc1949TwoPpsv'],
   unrecorded: ['PCV (PCV15, PCV20, or PCV21) ≥1 year after PPSV23', 'adultPpsvOnly1949'],
 };
 const GROUP_B = new Set([
@@ -138,7 +138,7 @@ describe('Maya, word for word', () => {
       ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-11' }],
     }).recs[0];
     expect(card.note).toBe(
-      'Non-immunocompromising at-risk child with PCV13 at/after age 6 who has received PPSV23 — no further doses of any PCV or PPSV23 are indicated [c]. ' + LINES.dose,
+      'Non-immunocompromising at-risk child with PCV13 at/after age 6 who has received PPSV23: no further doses of any PCV or PPSV23 are indicated [c]. ' + LINES.dose,
     );
     expect(card.noteCites.map((x) => x.key)).toEqual(['pedsRiskDone', 'adultIc1949BothPcv13Ppsv']);
   });

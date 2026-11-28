@@ -148,7 +148,7 @@ const CARD_MOVES = [
   [228, /^cards: /, 'the child rulebook ends and the adult rulebook begins at 19'],
   // R2: the day before 19 shows the adult card dated that birthday; on it, due.
   [228, /^card PCV \(PCV15, PCV20, or PCV21\) ≥1 year after PPSV23: (dueToday false → true|dated true → false)$/, 'a date set to the 19th birthday falls due on it'],
-  [600, /^cards: (No dose now|Not indicated \(no risk|Review at age 50|PPSV23 \(≥8 weeks after PCV15\))/, 'routine adult vaccination begins at 50 (mm7401a1)'],
+  [600, /^cards: (No dose now|Not indicated \(no risk|Review at age 50|PPSV23 \(≥8 weeks after PCV15; completes the series\))/, 'routine adult vaccination begins at 50 (mm7401a1)'],
   [600, /^card 1 dose PCV \(PCV20, PCV15, or PCV21\): status risk-based → due$/, 'the same dose becomes routine rather than risk-based at 50'],
   [780, /→ PCV20 or PCV21 ≥5 years \(shared clinical decision-making\)$/, 'a PPSV23 at 65 or over makes a further PCV a shared decision (mm7401a1)'],
 ];

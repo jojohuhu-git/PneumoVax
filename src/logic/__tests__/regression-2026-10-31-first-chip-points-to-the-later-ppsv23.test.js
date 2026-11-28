@@ -38,7 +38,7 @@ const TOO_YOUNG_REPEAT = 'Do not restart the series.';
 describe('the patients she was shown', () => {
   it('Sam: his first PPSV23 points to his Jan 5 repeat, and no longer orders one', () => {
     expect(firstChip(SAM)).toEqual([
-      'Given at about 23 months — below the 2-year minimum age for PPSV23[c].',
+      'Given at about 23 months: below the 2-year minimum age for PPSV23[c].',
       'Repeated on Jan 5, 2025. See that dose.',
     ]);
   });

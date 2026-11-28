@@ -30,7 +30,7 @@ const G05 = { ...G04, dob: '1971-10-27', riskIds: [] };
 // CONTROL: the usual order.
 const PCV15_FIRST = { ...G04, pcvDoses: d('PCV15', ['2024-10-27']), ppsv23Doses: d('PPSV23', ['2025-10-27']) };
 
-const PPSV_FIRST_NOTE = 'PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended — the series is complete [c]';
+const PPSV_FIRST_NOTE = 'PPSV23 was given first and PCV15 after it. When PCV15 follows a PPSV23, no additional PPSV23 doses are recommended, so the series is complete [c]';
 
 describe('P1-3: an adult who had PPSV23 first is told so, with the row she followed', () => {
   it('G04 (19-49, diabetes)', () => {
@@ -61,7 +61,7 @@ describe('P1-3: an adult who had PPSV23 first is told so, with the row she follo
   it('CONTROL: PCV15 first, PPSV23 after — wording and source unchanged', () => {
     const r = card(PCV15_FIRST);
     // P2-7 (2026-11-06): the word "complete" now cites the sentence that says it.
-    expect(r.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series — no further doses needed [c].');
+    expect(r.note).toBe('PCV15 followed by PPSV23 [c] is a complete pneumococcal series: no further doses needed [c].');
     // 2026-11-07: same words, now the 19-49 copy, so the number opens Special situations.
     expect(keys(r)).toEqual(['adultPcv15ThenPpsv1949', 'adultPcv15PpsvComplete1949']);
   });

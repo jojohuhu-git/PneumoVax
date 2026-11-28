@@ -262,7 +262,7 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
       try { out = recommend(c.input); } catch { continue; }
       if (out.excluded) continue;
       for (const r of out.recs ?? []) {
-        if (!noteText(r).includes('Re-evaluate at age 50')) continue;
+        if (!noteText(r).includes('Re-evaluate at age 50, when routine')) continue;
         byCard.set(r.doseLabel, (byCard.get(r.doseLabel) ?? 0) + 1);
       }
     }
@@ -317,7 +317,7 @@ describe('C12: the note goes on the two cards where 50 is really the next event'
       ppsv23Doses: [{ product: 'PPSV23', date: '2021-10-11' }],
     }));
     expect(maya.doseLabel).toBe('Complete (PCV13 + PPSV23 at/after age 6)');
-    expect(noteText(maya)).not.toContain('Re-evaluate at age 50');
+    expect(noteText(maya)).not.toContain('Re-evaluate at age 50, when routine');
     expect(noteText(maya)).toContain('At 19, the adult schedule gives 1 dose of PCV20 or PCV21');
 
     // And the reason it is parked rather than ignored: one year later the app
@@ -410,7 +410,7 @@ describe('C12: the guards bite', () => {
     // If `notIndicated` ever stops matching, every sweep above passes over an
     // empty set and asserts nothing.
     const card = notIndicated(nora());
-    expect(card.note.lead).toContain('healthy children 5–18 years are not routinely caught up');
+    expect(card.note.lead).toContain('Healthy children 5–18 years are not routinely caught up');
     expect(renderedChips(card).every((s) => typeof s.n === 'number')).toBe(true);
     expect(buildCases().length).toBeGreaterThan(10000);
   });
