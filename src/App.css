@@ -698,6 +698,9 @@ body {
 .rb-dose-done { background: var(--glt); border-color: var(--gmd); color: var(--g); }
 .rb-table td .rb-dose { padding: 2px 6px; font-size: var(--fs-sm); }
 .rb-arrow { color: var(--gy3); font-size: var(--fs-sm); text-align: center; white-space: nowrap; }
+.rb-cell-line { display: block; }
+/* After a "Children:" / "Adults:" label, the first line stays beside it. */
+.rb-use .rb-cell-line:first-of-type { display: inline; }
 .rb-cell-note { display: block; font-size: var(--fs-xs); color: var(--gy2); line-height: 1.45; margin-top: 2px; }
 .rb-use { display: block; }
 .rb-use + .rb-use { margin-top: var(--sp-4); }

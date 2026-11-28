@@ -102,7 +102,7 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
     }
   });
 
-  it('the page shows 56 sentences in all — pinned, so a new one is a choice, not drift (was 239)', () => {
+  it('the page shows 57 sentences in all — pinned, so a new one is a choice, not drift (was 239)', () => {
     // 42 -> 43, P2-1 (2026-11-08): the healthy row's smoking/alcohol clause
     // (cdcAdultRiskFactorList, §B-ADULTRISK19).
     // 43 -> 55, the 2026-11-27 reorganization (owner mock-up). Every sentence
@@ -114,8 +114,12 @@ describe('one source sentence per claim, and only sentences the app uses', () =>
     // 55 -> 56 (owner, 2026-11-27, later): the general rule "A dose with no
     // date stays on the record but does not count", with its PPSV23
     // exception, cites CDC's dated-records sentence from the undated dose's line.
+    // 56 -> 57 (owner edit, 2026-11-27): the 6-18 "no PCV before 6" row split
+    // in two ("should have its own line"); both halves end in the same
+    // immunocompromised 5-year sentence, so pedsSecondPpsv5y is on each.
+    // Nothing removed: the four sentences the one row carried are all still shown.
     const total = ROWS.reduce((n, [, row]) => n + (row.cite?.length ?? 0), 0);
-    expect(total).toBe(56);
+    expect(total).toBe(57);
   });
 
   it('p2016 appears only where no CDC sentence on that card states the claim', () => {
@@ -206,7 +210,9 @@ describe('a children\'s row names a later dose only when the app gives one', () 
   const notesOf = (e) => recommend(e.input).recs
     .map((r) => (typeof r.note === 'string' ? r.note : `${r.note?.lead ?? ''} ${r.note?.detail ?? ''}`))
     .map((n) => n.replace(atNineteen, '$1'));
-  const saysLater = (g) => new RegExp(`≥${Y5} later`).test(g.after);
+  // 2026-11-27 (owner edit): "≥5 years later" became "≥5 years after the PPSV23" ("after what?"),
+  // and a cell may be a list of lines.
+  const saysLater = (g) => new RegExp(`≥${Y5} (later|after the PPSV23)`).test([].concat(g.after).join(' '));
 
   it(`no worked patient on a row naming no dose ${Y5} later is given one`, () => {
     for (const g of CHILD_GROUPS.filter((x) => !saysLater(x))) {
